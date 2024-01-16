@@ -2,38 +2,48 @@ import { User } from 'firebase/auth';
 import moment from 'moment';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { Exercise } from '@/types/Exercise';
+import { Haiku } from '@/types/Haiku';
 import { listToMap, mapToList, mapToSearchParams, uuid } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from "./alert";
 
-type ExerciseMap = { [key: string]: Exercise | undefined; };
+type HaikuMap = { [key: string]: Haiku | undefined; };
 type StatusMap = { [key: string]: boolean };
 
-const useExercises: any = create(devtools((set: any, get: any) => ({
+const useHaikus: any = create(devtools((set: any, get: any) => ({
 
   // access via get(id) or find(query?)
-  _exercises: <ExerciseMap>{},
+  _haikus: <HaikuMap>{},
 
   // to smooth out UX when deleting,
   _deleted: <StatusMap>{},
 
   // access via loaded(queryOrId?),
   // stored as id->bool or query->bool, 
-  // where id refers to the loaded exercise 
+  // where id refers to the loaded haiku 
   // and query is stringyfied json from loaded
-  // list of exercises
+  // list of haikus
   _loaded: <StatusMap>{},
 
   get: (id: string) => {
-    return get()._exercises[id];
+    return get()._haikus[id];
+  },
+
+  getRandom: () => {
+    const { _haikus } = get();
+    console.log(">> hooks.haiku.getRandom", { _haikus });
+    const haikus = mapToList(_haikus);
+    const haiku = haikus[Math.floor(Math.random() * haikus.length)];
+    console.log(">> hooks.haiku.getRandom", { haiku });
+
+    return haiku;
   },
 
   find: (query?: object) => {
-    const { _exercises, _deleted } = get();
+    const { _haikus, _deleted } = get();
     const [k, v] = Object.entries(query || {})[0] || [];
 
-    return mapToList(_exercises)
+    return mapToList(_haikus)
       .filter(Boolean)
       .filter((e: any) => !_deleted[e?.id])
       .filter((e: any) => !k || !v && !e[k] || v && e[k] == v);
@@ -99,50 +109,50 @@ const useExercises: any = create(devtools((set: any, get: any) => ({
     const { setLoaded } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    // console.log(">> hooks.exercise.load", { id, query });
+    // console.log(">> hooks.haiku.load", { id, query });
 
     if (id) {
-      fetch(`/api/exercises/${id}`).then(async (res) => {
-        const { _exercises } = get();
+      fetch(`/api/haikus/${id}`).then(async (res) => {
+        const { _haikus } = get();
         setLoaded(id);
 
         if (res.status != 200) {
-          useAlert.getState().error(`Error fetching exercise ${id}: ${res.status} (${res.statusText})`);
+          useAlert.getState().error(`Error fetching haiku ${id}: ${res.status} (${res.statusText})`);
           return;
         }
 
         const data = await res.json();
-        const exercise = data.exercise;
+        const haiku = data.haiku;
 
         set({
-          _exercises: { _exercises, [exercise.id]: exercise },
+          _haikus: { _haikus, [haiku.id]: haiku },
         });
       });
     } else {
       const params = query && mapToSearchParams(query);
-      fetch(`/api/exercises${params ? `?${params}` : ""}`).then(async (res) => {
-        const { _exercises } = get();
+      fetch(`/api/haikus${params ? `?${params}` : ""}`).then(async (res) => {
+        const { _haikus } = get();
         setLoaded(query);
 
         if (res.status != 200) {
-          useAlert.getState().error(`Error fetching exercises: ${res.status} (${res.statusText})`);
+          useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);
           return;
         }
 
         const data = await res.json();
-        const exercises = data.exercises;
+        const haikus = data.haikus;
 
-        setLoaded(exercises);
+        setLoaded(haikus);
         set({
-          _exercises: { ..._exercises, ...listToMap(exercises) }
+          _haikus: { ..._haikus, ...listToMap(haikus) }
         });
       });
     }
   },
 
   create: async (user: User, name: string) => {
-    // console.log(">> hooks.exercise.create", { name });
-    const { _exercises, setLoaded } = get();
+    // console.log(">> hooks.haiku.create", { name });
+    const { _haikus, setLoaded } = get();
 
     // optimistic
     const creating = {
@@ -156,28 +166,28 @@ const useExercises: any = create(devtools((set: any, get: any) => ({
 
     setLoaded(creating.id);
     set({
-      _exercises: { ..._exercises, [creating.id]: creating },
+      _haikus: { ..._haikus, [creating.id]: creating },
     });
 
     return new Promise((resolve, reject) => {
-      fetch('/api/exercises', {
+      fetch('/api/haikus', {
         method: "POST",
         body: JSON.stringify({ name }),
       }).then(async (res) => {
-        const { _exercises } = get();
+        const { _haikus } = get();
 
         if (res.status != 200) {
-          useAlert.getState().error(`Error adding exercise: ${res.status} (${res.statusText})`);
+          useAlert.getState().error(`Error adding haiku: ${res.status} (${res.statusText})`);
           set({
-            _exercises: { ..._exercises, [creating.id]: undefined },
+            _haikus: { ..._haikus, [creating.id]: undefined },
           });
           return reject(res.statusText);
         }
 
         const data = await res.json();
-        const created = data.exercise;
+        const created = data.haiku;
 
-        trackEvent("exercise-created", {
+        trackEvent("haiku-created", {
           id: created.id,
           name: created.name,
           createdBy: created.createdBy,
@@ -187,90 +197,90 @@ const useExercises: any = create(devtools((set: any, get: any) => ({
         setLoaded(creating.id, false);
         setLoaded(created.id);
         set({
-          _exercises: { ..._exercises, [creating.id]: undefined, [created.id]: created },
+          _haikus: { ..._haikus, [creating.id]: undefined, [created.id]: created },
         });
         return resolve(created);
       });
     });
   },
 
-  save: async (user: User, exercise: Exercise) => {
-    // console.log(">> hooks.exercise.save", { exercise });
-    const { _exercises } = get();
+  save: async (user: User, haiku: Haiku) => {
+    // console.log(">> hooks.haiku.save", { haiku });
+    const { _haikus } = get();
 
     // optimistic
     const saving = {
-      ...exercise,
+      ...haiku,
       status: "saving",
     };
 
     set({
-      _exercises: { ..._exercises, [exercise.id || ""]: saving }, // TODO: update type to make id mandatory
+      _haikus: { ..._haikus, [haiku.id || ""]: saving }, // TODO: update type to make id mandatory
     });
 
     return new Promise((resolve, reject) => {
-      fetch(`/api/exercises/${exercise.id}`, {
+      fetch(`/api/haikus/${haiku.id}`, {
         method: "PUT",
-        body: JSON.stringify({ exercise }),
+        body: JSON.stringify({ haiku }),
       }).then(async (res) => {
-        const { _exercises } = get();
+        const { _haikus } = get();
 
         if (res.status != 200) {
-          useAlert.getState().error(`Error saving exercise: ${res.status} (${res.statusText})`);
+          useAlert.getState().error(`Error saving haiku: ${res.status} (${res.statusText})`);
           // revert
           set({
-            _exercises: { ..._exercises, [exercise.id || ""]: exercise }, // TODO: update type to make id mandatory
+            _haikus: { ..._haikus, [haiku.id || ""]: haiku }, // TODO: update type to make id mandatory
           });
           return reject(res.statusText);
         }
 
         const data = await res.json();
-        const saved = data.exercise;
+        const saved = data.haiku;
 
         set({
-          _exercises: { ..._exercises, [saved.id || ""]: saved },
+          _haikus: { ..._haikus, [saved.id || ""]: saved },
         });
         return resolve(saved);
       });
     });
   },
 
-  generate: async (user: User, exercise: Exercise) => {
-    // console.log(">> hooks.exercise.generate", { exercise });
-    const { _exercises } = get();
+  generate: async (user: User, haiku: Haiku) => {
+    // console.log(">> hooks.haiku.generate", { haiku });
+    const { _haikus } = get();
 
     // optimistic
     const generating = {
-      id: exercise.id,
-      name: exercise.name,
-      createdBy: exercise.createdBy,
+      id: haiku.id,
+      name: haiku.name,
+      createdBy: haiku.createdBy,
       status: "generating",
     };
 
     set({
-      _exercises: { ..._exercises, [exercise.id || ""]: generating },
+      _haikus: { ..._haikus, [haiku.id || ""]: generating },
     });
 
     return new Promise((resolve, reject) => {
-      fetch(`/api/exercises/${exercise.id}/generate`, {
+      fetch(`/api/haikus/${haiku.id}/generate`, {
         method: "POST",
-        body: JSON.stringify({ exercise }),
+        body: JSON.stringify({ haiku }),
       }).then(async (res) => {
-        const { _exercises } = get();
+        const { _haikus } = get();
 
         if (res.status != 200) {
-          useAlert.getState().error(`Error generating exercise: ${res.status} (${res.statusText})`);
+          useAlert.getState().error(`Error generating haiku: ${res.status} (${res.statusText})`);
           // revert
           set({
-            _exercises: { ..._exercises, [exercise.id || ""]: exercise },
+            _haikus: { ..._haikus, [haiku.id || ""]: haiku },
           });
           return reject(res.statusText);
         }
 
         const data = await res.json();
-        const generated = data.exercise;
+        const generated = data.haiku;
 
-        trackEvent("exercise-generated", {
+        trackEvent("haiku-generated", {
           id: generated.id,
           name: generated.name,
           createdBy: generated.createdBy,
@@ -278,7 +288,7 @@ const useExercises: any = create(devtools((set: any, get: any) => ({
 
         // replace optimistic 
         set({
-          _exercises: { ..._exercises, [generated.id || ""]: generated },
+          _haikus: { ..._haikus, [generated.id || ""]: generated },
         });
         return resolve(generated);
       });
@@ -286,34 +296,34 @@ const useExercises: any = create(devtools((set: any, get: any) => ({
   },
 
   delete: async (id: string) => {
-    // console.log(">> hooks.exercise.delete id:", id);
+    // console.log(">> hooks.haiku.delete id:", id);
 
     if (!id) {
-      throw `Cannot delete exercise with null id`;
+      throw `Cannot delete haiku with null id`;
     }
 
-    const { _exercises, _deleted, get: _get } = get();
+    const { _haikus, _deleted, get: _get } = get();
     const deleting = _get(id);
 
     if (!deleting) {
-      throw `Exercise not found: ${id}`;
+      throw `Haiku not found: ${id}`;
     }
 
     // optimistic
     set({
-      _exercises: { ..._exercises, [id]: undefined },
+      _haikus: { ..._haikus, [id]: undefined },
       _deleted: { ..._deleted, [id]: true },
     });
 
-    fetch(`/api/exercises/${id}`, {
+    fetch(`/api/haikus/${id}`, {
       method: "DELETE",
     }).then(async (res) => {
       if (res.status != 200) {
-        const { _exercises, _deleted } = get();
-        useAlert.getState().error(`Error deleting exercises ${id}: ${res.status} (${res.statusText})`);
+        const { _haikus, _deleted } = get();
+        useAlert.getState().error(`Error deleting haikus ${id}: ${res.status} (${res.statusText})`);
         // revert
         set({
-          _exercises: { ..._exercises, [id]: deleting },
+          _haikus: { ..._haikus, [id]: deleting },
           _deleted: { ..._deleted, [id]: false },
         });
         return;
@@ -322,4 +332,4 @@ const useExercises: any = create(devtools((set: any, get: any) => ({
   },
 })));
 
-export default useExercises;
+export default useHaikus;

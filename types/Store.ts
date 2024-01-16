@@ -1,5 +1,4 @@
-import { Exercise } from "./Exercise"
-import { Workout, WorkoutSession } from "./Workout";
+import { Haiku } from "./Haiku";
 
 export interface GenericStore<T> {
   get: (id: string) => Promise<T | undefined>,
@@ -10,7 +9,5 @@ export interface GenericStore<T> {
 }
 
 export type Store = {
-  exercises: GenericStore<Exercise>,
-  workouts: GenericStore<Workout>,
-  workoutSessions: GenericStore<WorkoutSession>;
+  haikus: GenericStore<Haiku>,
 }

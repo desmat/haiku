@@ -20,6 +20,7 @@ import { Exercise } from '@/types/Exercise';
 import { Workout, WorkoutSession, WorkoutSet } from '@/types/Workout';
 import { uuid } from "@/utils/misc";
 import { GenericStore, Store } from "@/types/Store";
+import { Haiku } from "@/types/Haiku";
 
 const jsonNotDeletedExpression = "(@.deletedAt > 0) == false";
 const jsonEqualsExpression = (key: string, val: string) => {
@@ -198,8 +199,6 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
 export function create(): Store {
   return {
-    exercises: new RedisStore<Exercise>("exercise"),
-    workouts: new RedisStore<Workout>("workout"),
-    workoutSessions: new RedisStore<WorkoutSession>("workout-session"),
+    haikus: new RedisStore<Haiku>("haiku"),
   }
 }

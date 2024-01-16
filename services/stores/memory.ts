@@ -1,188 +1,215 @@
-import moment from 'moment';
-import { Exercise } from "@/types/Exercise";
-import { sampleExercises, sampleWorkouts } from './samples';
-import { Workout, WorkoutSession } from '@/types/Workout';
 
+import moment from "moment";
+import { mapToList, uuid } from "@/utils/misc";
+import { Haiku } from "@/types/Haiku";
+import { GenericStore, Store } from "@/types/Store";
 
-const memoryStore = {
-  exercises: sampleExercises as Exercise[],
-  workouts: sampleWorkouts as Workout[],
-  sessions: [{ "id": "603ae73a-c6ee-4162-9523-f47b1ee8b37e", "createdBy": "eDcD0gwTvFeJJQNlqHQv9vFV45i1", "createdAt": 1702592281111, "status": "started", "workout": { "id": "0adba0e4-d5cd-4f29-bb62-1cceb10929bd", "createdBy": "eDcD0gwTvFeJJQNlqHQv9vFV45i1", "createdAt": 1702585437125, "status": "created", "name": "Test 1", "exercises": [{ "id": "0eea0e09-de1c-41db-b8e1-863be341658e", "createdBy": "eDcD0gwTvFeJJQNlqHQv9vFV45i1", "createdAt": 1702585437126, "status": "created", "name": "Pull ups" }, { "id": "c1977455-36e8-4dc8-86c1-76f65e730fc2", "createdBy": "eDcD0gwTvFeJJQNlqHQv9vFV45i1", "createdAt": 1702585437126, "status": "created", "name": "Push ups" }, { "id": "ba3883f5-e7fd-4b47-ac64-c3cd18f89420", "createdBy": "eDcD0gwTvFeJJQNlqHQv9vFV45i1", "createdAt": 1702585437126, "status": "created", "name": "sit ups" }] }, "sets": [{ "id": "73cc6639-74d4-4b3c-8bf1-1d68c47c5c4b", "createdBy": "eDcD0gwTvFeJJQNlqHQv9vFV45i1", "createdAt": 1702592283278, "startedAt": 1702592283278, "status": "started", "exercise": { "id": "0eea0e09-de1c-41db-b8e1-863be341658e", "name": "Pull ups" } }] }] as WorkoutSession[],
-};
-
-type MemoryStoreEntry = {
+type MenoryStoreEntry = {
   id?: string,
+  name?: string,
+  createdBy?: string,
+  createdAt?: number,
+  updatedAt?: number,
+  updatedBy?: string,
+  deletedAt?: number,
+  deletedBy?: string,
 }
 
-class MemoryStore<T extends MemoryStoreEntry> {
-  store: T[] = [];
+class MemoryStore<T extends MenoryStoreEntry> implements GenericStore<T> {
+  key: string;
+  valueKey: (id: string) => string;
+  listKey: () => string;
 
-  constructor(defaultStore?: T[]) {
-    if (defaultStore) {
-      this.store = defaultStore;
-    }
+  store = {
+    "1": {
+      id: "1",
+      theme: "sunset",
+      bgImage: "/backgrounds/DALL·E 2024-01-09 18.43.26 - An extremely muted, almost monochromatic painting in the Japanese style, featuring a sunset. The artwork captures the serene beauty of a sunset, with .png",
+      color: "rgb(32, 31, 27)",
+      bgColor: "rgb(131, 127, 111)",
+      poem: [
+        "Fiery sunset fades,",
+        "Day's last light kisses the sea,",
+        "Evening's embrace.",
+      ],
+    },
+    "2": {
+      id: "2",
+      theme: "cherry blossoms",
+      bgImage: "/backgrounds/DALL·E 2024-01-09 18.45.07 - An extremely muted, almost monochromatic painting in the Japanese style, featuring cherry blossoms. The artwork captures the delicate beauty of cherry.png",
+      color: "rgb(38, 35, 32)",
+      bgColor: "rgb(153, 143, 128)",
+      poem: [
+        "Cherry blossoms fall,",
+        "A gentle rain of petals,",
+        "Spring's fleeting beauty."
+      ],
+    },
+    "3": {
+      id: "3",
+      theme: "winter",
+      bgImage: "/backgrounds/DALL·E 2024-01-15 17.55.09 - An extremely muted, almost monochromatic painting in the Japanese style, featuring a winter snow scene. The artwork captures the quiet beauty of a sno.png",
+      color: "rgb(44, 44, 42)",
+      bgColor: "rgb(176, 178, 168)",
+      poem: [
+        "Snow blankets the field,",
+        "Silence in the winter air,",
+        "Nature's hush descends.",
+      ],
+    },
+    "4": {
+      id: "4",
+      theme: "Desert at dusk.",
+      bgImage: "/backgrounds/DALL·E 2024-01-16 13.26.56 - An extremely muted, almost monochromatic painting in the Japanese style, depicting a desert at dusk. The artwork captures the tranquil and vast expans.png",
+      color: "rgb(23, 21, 21)",
+      bgColor: "rgb(92, 87, 84)",
+      poem: [
+        "Desert sands at dusk,",
+        "Shadows stretch, the sun retreats,",
+        "Silent, endless peace.",
+      ],
+    },
+    "5": {
+      id: "5",
+      theme: "Mountain peaks",
+      bgImage: "/backgrounds/DALL·E 2024-01-16 13.32.57 - An extremely muted, almost monochromatic painting in the Japanese style, featuring mountain peaks. The artwork captures the majestic and rugged beauty.png",
+      color: "rgb(32, 31, 28)",
+      bgColor: "rgb(128, 126, 114)",
+      poem: [
+        "Mountain peaks in mist,",
+        "Ancient guardians of stone,",
+        "Whispers of old earth.",
+      ],
+    },
+    "6": {
+      id: "6",
+      theme: "fishing in the ocean",
+      bgImage: "/backgrounds/DALL·E 2024-01-16 13.37.57 - An extremely muted, almost monochromatic painting in the Japanese style, depicting a scene of fishing in the ocean. The artwork captures a tranquil oc.png",
+      color: "rgb(36, 37, 29)",
+      bgColor: "rgb(147, 149, 118)",
+      poem: [
+        "Ocean's depth beckons,",
+        "Lines cast into the blue vast,",
+        "Patience meets the tide.",
+      ],
+    },
+  };
+
+  constructor(key: string, listKey?: string) {
+    this.key = key;
+    this.valueKey = (id: string) => `${key}:${id}`;
+    this.listKey = () => `${listKey || key + "s"}`;
   }
 
   async get(id: string): Promise<T | undefined> {
-    console.log(`>> services.stores.memory.MemoryStore.get`, { id });
+    console.log(`>> services.stores.memory.MemoryStore<${this.key}>.get`, { id });
 
-    return this.store.filter((p) => p.id == id)[0];
+    throw "Not implemented";
+
+    // const response = await kv.json.get(this.valueKey(id), "$");
+
+    // // console.log(`>> services.stores.memory.MemoryStore<${this.key}>.get`, { response });
+
+    // let value: T | undefined;
+    // if (response) {
+    //   value = response[0] as T;
+    // }
+
+    // return value;
   }
 
   async find(query?: any): Promise<T[]> {
-    console.log(`>> services.stores.memory.MemoryStore.find`, { query });
+    console.log(`>> services.stores.memory.MemoryStore<${this.key}>.find`, { query });
 
-    let response;
-    if (query) {
-      if (query.ids) {
-        response = this.store.filter((value: T) => query.ids.includes(value.id));
-      } else {
-        throw `Unknown query type: ${JSON.stringify(query)}`;
-      }
-    } else {
-      response = this.store;
-    }
-
-    return response;
+    return mapToList(this.store);
   }
 
   async create(userId: string, value: T): Promise<T> {
-    console.log(`>> services.stores.memory.MemoryStore.create`, { value });
+    console.log(`>> services.stores.memory.MemoryStore<${this.key}>.create`, { userId, value });
 
-    if (!value.id) {
-      throw `Cannot save add with null id`;
-    }
+    throw "Not implemented";
 
-    this.store.push(value);
-    return value;
+    // if (!value.id) {
+    //   throw `Cannot save add with null id`;
+    // }
+
+    // const createdListValue = {
+    //   id: value.id || uuid(),
+    //   createdAt: moment().valueOf(),
+    //   createdBy: userId,
+    //   name: value.name,
+    // };
+
+    // const createdValue = {
+    //   ...value,
+    //   ...createdListValue,
+    // };
+
+    // await checkKey(this.listKey());
+    // const responses = await Promise.all([
+    //   kv.json.arrappend(this.listKey(), "$", createdListValue),
+    //   kv.json.set(this.valueKey(value.id), "$", createdValue),
+    // ]);
+
+    // // console.log(`>> services.stores.memory.MemoryStore<${this.key}>.create`, { responses });
+
+    // return new Promise((resolve) => resolve(value));
   }
 
   async update(userId: string, value: T): Promise<T> {
-    console.log(`>> services.stores.memory.MemoryStore.update`, { value });
+    console.log(`>> services.stores.memory.MemoryStore<${this.key}>.update`, { value });
 
-    if (!value.id) {
-      throw `Cannot update entry: null id`;
-    }
+    throw "Not implemented";
 
-    if (!this.get(value.id)) {
-      throw `Cannot update entry: does not exist: ${value.id}`;
-    }
-  
-    const exercises = this.store.filter((p: T) => p.id != value.id);
-    exercises.push(value);
-    this.store = exercises;
-    return value;
+    // if (!value.id) {
+    //   throw `Cannot update ${this.key}: null id`;
+    // }
+
+    // if (!this.get(value.id)) {
+    //   throw `Cannot update ${this.key}: does not exist: ${value.id}`;
+    // }
+
+    // const updatedValue = { ...value, updatedAt: moment().valueOf(), updatedBy: userId }
+    // const response = await Promise.all([
+    //   kv.json.set(this.listKey(), `${jsonGetBy("id", value.id)}.updatedAt`, updatedValue.updatedAt),
+    //   kv.json.set(this.listKey(), `${jsonGetBy("id", value.id)}.updatedBy`, `"${updatedValue.updatedBy}"`),
+    //   kv.json.set(this.valueKey(value.id), "$", updatedValue),
+    // ]);
+
+    // // console.log(`>> services.stores.memory.MemoryStore<${this.key}>.update`, { response });
+
+    // return new Promise((resolve) => resolve(updatedValue));
   }
 
   async delete(userId: string, id: string): Promise<T> {
-    console.log(`>> services.stores.memory.MemoryStore.delete`, { id });
+    console.log(`>> services.stores.memory.MemoryStore<${this.key}>.delete`, { id });
 
-    if (!id) {
-      throw `Cannot delete entry: null id`;
-    }
+    throw "Not implemented";
 
-    const value = await this.get(id)
-    if (!value) {
-      throw `Cannot update entry: does not exist: ${id}`;
-    }
+    // if (!id) {
+    //   throw `Cannot delete ${this.key}: null id`;
+    // }
 
-    const values = this.store.filter((p: T) => p.id != id);
-    this.store = values;
-    return value;
+    // const value = await this.get(id)
+    // if (!value) {
+    //   throw `Cannot update ${this.key}: does not exist: ${id}`;
+    // }
+
+    // value.deletedAt = moment().valueOf();
+    // const response = await Promise.all([
+    //   kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedAt`, value.deletedAt),
+    //   kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedBy`, `"${userId}"`),
+    //   kv.json.del(this.valueKey(id), "$")
+    // ]);
+
+    // // console.log(`>> services.stores.memory.MemoryStore<${this.key}>.delete`, { response });
+
+    // return new Promise((resolve) => resolve(value));
   }
 }
 
-
-const exercises = new MemoryStore<Exercise>();
-const workouts = new MemoryStore<Workout>();
-const workoutSessions = new MemoryStore<WorkoutSession>();
-
-
-//
-// Exercises 
-//
-
-export async function getExercises(query?: any): Promise<Exercise[]> {
-  console.log('>> services.stores.memory.getExercises()', { query });
-  return exercises.find(query);
-}
-
-export async function getExercise(id: string): Promise<Exercise | undefined> {
-  console.log(`>> services.stores.memory.getExercise(${id})`, { id });
-  return exercises.get(id);
-}
-
-export async function addExercise(userId: string, exercise: Exercise): Promise<Exercise> {
-  console.log(">> services.stores.memory.addExercise", { exercise });
-  return exercises.create(userId, exercise);
-}
-
-export async function saveExercise(userId: string, exercise: Exercise): Promise<Exercise> {
-  console.log(">> services.stores.memory.saveExercise", { exercise });
-  return exercises.update(userId, exercise);
-}
-
-export async function deleteExercise(userId: string, id: string): Promise<Exercise> {
-  console.log(">> services.stores.memory.deleteExercise", { id });
-  return exercises.delete(userId, id);
-}
-
-
-//
-// Workouts
-//
-
-export async function getWorkouts(): Promise<Workout[]> {
-  console.log('>> services.stores.memory.getWorkouts()');
-  return workouts.find();
-}
-
-export async function getWorkout(id: string): Promise<Workout | undefined> {
-  console.log(`>> services.stores.memory.getWorkout(${id})`, { id });
-  return workouts.get(id);
-}
-
-export async function addWorkout(userId: string, workout: Workout): Promise<Workout> {
-  console.log(">> services.stores.memory.addWorkout", { workout });
-  return workouts.create(userId, workout);
-}
-
-export async function saveWorkout(userId: string, workout: Workout): Promise<Workout | undefined> {
-  console.log(">> services.stores.memory.saveWorkout", { workout });
-  return workouts.update(userId, workout);
-}
-
-export async function deleteWorkout(userId: string, id: string): Promise<Workout> {
-  console.log(">> services.stores.memory.deleteWorkout", { id });
-  return workouts.delete(userId, id);
-}
-
-
-//
-// Workout Sessions
-//
-
-export async function getWorkoutSessions(): Promise<WorkoutSession[]> {
-  console.log('>> services.stores.memory.getSessions()');
-  return workoutSessions.find();
-}
-
-export async function getWorkoutSession(id: string): Promise<WorkoutSession | undefined> {
-  console.log(`>> services.stores.memory.getSession(${id})`, { id });
-  return workoutSessions.get(id);
-}
-
-export async function addWorkoutSession(userId: string, session: WorkoutSession): Promise<WorkoutSession> {
-  console.log(">> services.stores.memory.addSession", { session });
-  return workoutSessions.create(userId, session);
-}
-
-export async function saveWorkoutSession(userId: string, session: WorkoutSession): Promise<WorkoutSession | undefined> {
-  console.log(">> services.stores.memory.saveWorkoutSession", { session });
-  return workoutSessions.update(userId, session);
-}
-
-export async function deleteWorkoutSession(userId: string, id: string): Promise<WorkoutSession> {
-  console.log(">> services.stores.memory.deleteSession", { id });
-  return workoutSessions.delete(userId, id);
+export function create(): Store {
+  return {
+    haikus: new MemoryStore<Haiku>("haiku"),
+  }
 }

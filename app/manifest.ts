@@ -2,13 +2,13 @@ import { MetadataRoute } from 'next'
  
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Workout: AI-powered workout app',
-    short_name: 'Workout',
-    description: 'Workout: AI-powered workout app',
+    name: 'hAIku: AI-powered haiku game',
+    short_name: 'hAIku',
+    description: 'AI-powered haiku game',
     start_url: '/',
     display: 'standalone',
-    background_color: '#d6dbdc',
-    theme_color: '#7b90aa',
+    background_color: 'rgb(32, 31, 27)',
+    theme_color: 'rgb(32, 31, 27)',
     icons: [
       {
         src: 'favicon.ico',

@@ -14,8 +14,8 @@ import * as font from './font';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Workout',
-  description: 'AI-Powered Personal Trainer',
+  title: 'hAIku',
+  description: 'AI-Powered haiku game',
 }
 
 export default function RootLayout({
