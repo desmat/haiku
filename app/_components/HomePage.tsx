@@ -5,7 +5,7 @@
 import { useRouter } from 'next/navigation'
 import useAlert from "@/app/_hooks/alert";
 import useUser from '@/app/_hooks/user';
-import useWorkouts from "@/app/_hooks/workouts";
+// import useWorkouts from "@/app/_hooks/workouts";
 import { handleGenerateWorkout } from "@/app/_utils/handlers";
 import Link from "./Link";
 
@@ -22,7 +22,7 @@ export function GenerateLink({
 }) {
   // console.log('>> components.Nav.GenerateLink()', { isActive });
   const [user] = useUser((state: any) => [state.user]);
-  const [generateWorkout] = useWorkouts((state: any) => [state.generate]);
+  // const [generateWorkout] = useWorkouts((state: any) => [state.generate]);
   const router = useRouter();
   const [info, success] = useAlert((state: any) => [state.info, state.success]);
 
@@ -33,12 +33,12 @@ export function GenerateLink({
       style={style}
       title={title}
       target={target}
-      onClick={() => {
-        if (user) {
-          handleGenerateWorkout(generateWorkout, router, user, info, success)
-          router.push("/workouts");
-        }
-      }}
+      // onClick={() => {
+      //   if (user) {
+      //     handleGenerateWorkout(generateWorkout, router, user, info, success)
+      //     router.push("/workouts");
+      //   }
+      // }}
     >
       {children}
     </Link>

@@ -75,7 +75,7 @@ export default async function Component() {
           backgroundImage: 'url("/backgrounds/DALL·E 2024-01-15 18.26.51 - An extremely muted, almost monochromatic painting in the Japanese style, depicting New York City in the fall. The artwork captures the essence of New .png")',
           backgroundPosition: "center",
           backgroundSize: "cover",
-          backgroundColor: `rgb(${rgb})`,
+          // backgroundColor: `rgb(${rgb})`,
           filter: "brightness(1.2)",
         }}
       />

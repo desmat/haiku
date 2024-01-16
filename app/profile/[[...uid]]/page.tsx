@@ -7,7 +7,7 @@ import Link from "@/app/_components/Link";
 import Page from "@/app/_components/Page";
 import useUser from "@/app/_hooks/user";
 import useExercises from "@/app/_hooks/exercises";
-import useWorkouts from "@/app/_hooks/workouts";
+// import useWorkouts from "@/app/_hooks/workouts";
 import * as users from "@/services/users";
 import { Exercise } from "@/types/Exercise";
 import { Workout } from "@/types/Workout";
@@ -44,15 +44,15 @@ export default function Component({ params }: { params: { uid?: string } }) {
     state.load,
   ]);
 
-  const [
-    myWorkouts,
-    workoutsLoaded,
-    loadWorkouts
-  ] = useWorkouts((state: any) => [
-    state.find(query),
-    state.loaded(query),
-    state.load
-  ]);
+  // const [
+  //   myWorkouts,
+  //   workoutsLoaded,
+  //   loadWorkouts
+  // ] = useWorkouts((state: any) => [
+  //   state.find(query),
+  //   state.loaded(query),
+  //   state.load
+  // ]);
 
   // console.log('>> app.profile.page.render()', { uid: params.uid, user, userLoaded, userLoading });
 
@@ -60,7 +60,7 @@ export default function Component({ params }: { params: { uid?: string } }) {
     // console.log("** app.profile.page.useEffect", { uid: params.uid, user });
     if (!userLoaded) loadUser();
     if (!exercisesLoaded) loadExercises(query);
-    if (!workoutsLoaded) loadWorkouts();
+    // if (!workoutsLoaded) loadWorkouts();
   }, [params.uid]);
 
   function doSigninWithGoogle(e: any) {
@@ -149,7 +149,7 @@ export default function Component({ params }: { params: { uid?: string } }) {
                 <td>{users.getProviderType(user)}</td>
               </tr>
             }
-            {user && myWorkouts.length > 0 &&
+            {/* {user && myWorkouts.length > 0 &&
               <tr>
                 <td className="text-right pr-2 opacity-40 font-semibold">Workouts</td>
                 <td>
@@ -161,7 +161,7 @@ export default function Component({ params }: { params: { uid?: string } }) {
                   </Link>
                 </td>
               </tr>
-            }
+            } */}
             {user && myExercises.length > 0 &&
               <tr className={myExercises.length == 0 ? "cursor-pointer hover:underline" : ""}>
                 <td className="text-right pr-2 opacity-40 font-semibold">Exercises</td>
@@ -180,11 +180,11 @@ export default function Component({ params }: { params: { uid?: string } }) {
       }
       {false && !params.uid &&
         <div className="flex flex-col lg:flex-row lg:space-x-4 items-center justify-center mt-4">
-          {user && myWorkouts?.length > 0 &&
+          {/* {user && myWorkouts?.length > 0 &&
             <div className="text-dark-2">
               <Link href={`/workouts?uid=${user.uid}`}>Workouts ({myWorkouts.length})</Link>
             </div>
-          }
+          } */}
           {user && myExercises?.length > 0 &&
             <div className="text-dark-2">
               <Link href={`/exercises?uid=${user.uid}`}>Exercises ({myExercises.length})</Link>

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Suspense } from 'react';
 import { FaRegUserCircle } from 'react-icons/fa';
-import { NavProfileLink, NavLinks as ClientNavLinks } from "./clientComponents";
+import { NavProfileLink /*, NavLinks as ClientNavLinks*/ } from "./clientComponents";
 import { menuItems } from "./menuItems";
 
 export default async function Nav() {
@@ -15,7 +15,7 @@ export default async function Nav() {
       <Suspense
         fallback={<NavLinks />}
       >
-        <ClientNavLinks />
+        {/* <ClientNavLinks /> */}
       </Suspense>
       <div className="flex flex-col p-2 -mr-1 lg:mr-0 lg:-mb-1">
         <Suspense
