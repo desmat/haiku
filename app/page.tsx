@@ -87,7 +87,7 @@ export default async function Component() {
           opacity: 0.4,
         }}
       />
-      <div className={`${font.architects_daughter.className} text-overlay poem-overlay _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-max z-20`}>
+      <div className={`${font.architects_daughter.className} text-overlay poem-overlay md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[calc(100vw-2rem)] z-20`}>
         <div>{haiku[0]}</div>
         <div>{haiku[1]}</div>
         <div>{haiku[2]}</div>

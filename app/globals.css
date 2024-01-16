@@ -133,7 +133,7 @@ ul {
 
 .poem-overlay {
   width: max-content;
-  font-size: 22pt;
+  /* font-size: 22pt; */
   /* font-family: fantasy;
   font-weight: bolder; */
   /* font-family: var(--font-roboto-mono); */
