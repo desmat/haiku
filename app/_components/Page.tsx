@@ -19,7 +19,7 @@ export default function Page({
   loading?: boolean,
 }) {
   return (
-    <main className={`relative flex flex-col items-left _lg: max-w-4xl _lg: mx-auto _px-4 _min-h-[calc(100dvh-2.5rem)] _lg: min-h-[calc(100dvh+0rem)] _lg: _pb-4${className ? " " + className : ""}`}>
+    <main className={`relative flex flex-col items-left _lg: max-w-4xl _lg: _mx-auto _px-4 _min-h-[calc(100dvh-2.5rem)] _lg: min-h-[calc(100dvh+0rem)] h-full _lg: _pb-4 ${className ? " " + className : ""}`}>
       {loading &&
         <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 italic text-dark-2 opacity-5 animate-pulse'>Loading...</div>
       }
@@ -49,7 +49,7 @@ export default function Page({
         </div>
       }
       {(bottomLinks || links) &&
-        <div className={`text-overlay flex flex-grow items-end justify-center h-full mt-4`}>
+        <div className={`text-overlay fixed bottom-3 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center`}>
           <PageLinks loading={loading}>
             {bottomLinks || links}
           </PageLinks>
@@ -69,7 +69,7 @@ export function PageLinks({
   loading?: boolean,
 }) {
   return (
-    <div className="_bg-yellow-100 relative flex flex-row gap-3 items-center justify-center font-bold">
+    <div className="_bg-yellow-100 relative flex flex-row gap-3 items-center justify-center font-semibold">
       {/* {loading &&
         <div className="_bg-pink-100 absolute left-0 top-0 w-full h-full z-10 cursor-not-allowed opacity-50" />
       } */}
