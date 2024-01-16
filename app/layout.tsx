@@ -28,13 +28,12 @@ export default function RootLayout({
       <body className={inter.className}>
         <div className="flex flex-col lg:flex-row">
           {/* <Nav /> */}
-          <Link useClient={true} href="/" className={`${font.architects_daughter.className} title-overlay text-overlay fixed top-2 left-3 z-20`}>
-            hAIku
+          {/* <Link useClient={true} href="/" className={`${font.architects_daughter.className} title-overlay text-overlay fixed top-2 left-3 z-20`}>
+            <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-2px] pr-[3px] pl-[1px] text-[16pt]`}>AI</span>ku</span>
           </Link>
           <div className=" text-overlay text-overlay fixed top-4 right-3 z-20">
-            <NavProfileLink href="/profile" className="_bg-orange-600 title-overlay text-overlay _hover: _text-purple-100" />
-            
-          </div>
+            <NavProfileLink href="/profile" className="_bg-orange-600 title-overlay text-overlay _hover: _text-purple-100" />            
+          </div> */}
           <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
             {children}
           </div>
