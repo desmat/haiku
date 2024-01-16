@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import useAlert from "@/app/_hooks/alert";
 import useUser from '@/app/_hooks/user';
 // import useWorkouts from "@/app/_hooks/workouts";
-import { handleGenerateWorkout } from "@/app/_utils/handlers";
+// import { handleGenerateWorkout } from "@/app/_utils/handlers";
 import Link from "./Link";
 
 export function GenerateLink({

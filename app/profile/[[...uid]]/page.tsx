@@ -6,7 +6,7 @@ import { useCopyToClipboard } from 'usehooks-ts'
 import Link from "@/app/_components/Link";
 import Page from "@/app/_components/Page";
 import useUser from "@/app/_hooks/user";
-import useExercises from "@/app/_hooks/exercises";
+// import useExercises from "@/app/_hooks/exercises";
 // import useWorkouts from "@/app/_hooks/workouts";
 import * as users from "@/services/users";
 import { Exercise } from "@/types/Exercise";
@@ -34,15 +34,15 @@ export default function Component({ params }: { params: { uid?: string } }) {
 
   const query = user && { createdBy: user.uid }
 
-  const [
-    myExercises,
-    exercisesLoaded,
-    loadExercises,
-  ] = useExercises((state: any) => [
-    state.find(query),
-    state.loaded(query),
-    state.load,
-  ]);
+  // const [
+  //   myExercises,
+  //   exercisesLoaded,
+  //   loadExercises,
+  // ] = useExercises((state: any) => [
+  //   state.find(query),
+  //   state.loaded(query),
+  //   state.load,
+  // ]);
 
   // const [
   //   myWorkouts,
@@ -59,7 +59,7 @@ export default function Component({ params }: { params: { uid?: string } }) {
   useEffect(() => {
     // console.log("** app.profile.page.useEffect", { uid: params.uid, user });
     if (!userLoaded) loadUser();
-    if (!exercisesLoaded) loadExercises(query);
+    // if (!exercisesLoaded) loadExercises(query);
     // if (!workoutsLoaded) loadWorkouts();
   }, [params.uid]);
 
@@ -162,7 +162,7 @@ export default function Component({ params }: { params: { uid?: string } }) {
                 </td>
               </tr>
             } */}
-            {user && myExercises.length > 0 &&
+            {/* {user && myExercises.length > 0 &&
               <tr className={myExercises.length == 0 ? "cursor-pointer hover:underline" : ""}>
                 <td className="text-right pr-2 opacity-40 font-semibold">Exercises</td>
                 <td>
@@ -174,7 +174,7 @@ export default function Component({ params }: { params: { uid?: string } }) {
                   </Link>
                 </td>
               </tr>
-            }
+            } */}
           </tbody>
         </table>
       }

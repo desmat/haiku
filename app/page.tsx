@@ -15,7 +15,7 @@ export default function Component() {
   // console.log('>> app.page.render()');
   // const token = cookies().get("session")?.value;
   // const user = token && (await users.getUserFromToken(token))?.user;
-  const id = "3d";
+  const id = "3";
   const [loaded, load, haikus, haiku] = useHaikus((state: any) => [state.loaded(), state.load, state.find(), state.get(id)]);
   const [alertError] = useAlert((state: any) => [state.error]);
   // const haiku = haikus[Math.floor(Math.random() * haikus.length)];

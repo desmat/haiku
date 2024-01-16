@@ -3,7 +3,7 @@ import { BsFillPlusCircleFill } from "react-icons/bs"
 import { FaRunning } from 'react-icons/fa';
 import { FaWandMagicSparkles } from "react-icons/fa6";
 import { LuDumbbell } from "react-icons/lu";
-import { handleCreateWorkout, handleGenerateWorkout } from "@/app/_utils/handlers";
+// import { handleCreateWorkout, handleGenerateWorkout } from "@/app/_utils/handlers";
 
 function isActive(pathname: string, href: string): boolean {
   return (href && (href == "/" && pathname == "/") || (href && href != "/" && pathname.startsWith(href))) as boolean;
@@ -40,8 +40,8 @@ export function menuItems({ pathname, user, router, createWorkout, generateWorko
       className: user ? "" : "cursor-not-allowed",
       onClick: () => {
         if (user) {
-          handleGenerateWorkout(generateWorkout, router, user, info, success);
-          router.push(`/workouts?uid=${user.uid || ""}`);
+          // handleGenerateWorkout(generateWorkout, router, user, info, success);
+          // router.push(`/workouts?uid=${user.uid || ""}`);
         }
       }
     },
