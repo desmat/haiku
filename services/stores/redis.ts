@@ -16,8 +16,8 @@
 
 import moment from "moment";
 import { kv } from "@vercel/kv";
-import { Exercise } from '@/types/Exercise';
-import { Workout, WorkoutSession, WorkoutSet } from '@/types/Workout';
+// import { Exercise } from '@/types/Exercise';
+// import { Workout, WorkoutSession, WorkoutSet } from '@/types/Workout';
 import { uuid } from "@/utils/misc";
 import { GenericStore, Store } from "@/types/Store";
 import { Haiku } from "@/types/Haiku";

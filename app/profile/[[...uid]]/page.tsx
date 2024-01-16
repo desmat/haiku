@@ -9,8 +9,8 @@ import useUser from "@/app/_hooks/user";
 // import useExercises from "@/app/_hooks/exercises";
 // import useWorkouts from "@/app/_hooks/workouts";
 import * as users from "@/services/users";
-import { Exercise } from "@/types/Exercise";
-import { Workout } from "@/types/Workout";
+// import { Exercise } from "@/types/Exercise";
+// import { Workout } from "@/types/Workout";
 
 export default function Component({ params }: { params: { uid?: string } }) {
   // console.log('>> app.profile.page.render()', params.uid);
@@ -185,11 +185,11 @@ export default function Component({ params }: { params: { uid?: string } }) {
               <Link href={`/workouts?uid=${user.uid}`}>Workouts ({myWorkouts.length})</Link>
             </div>
           } */}
-          {user && myExercises?.length > 0 &&
+          {/* {user && myExercises?.length > 0 &&
             <div className="text-dark-2">
               <Link href={`/exercises?uid=${user.uid}`}>Exercises ({myExercises.length})</Link>
             </div>
-          }
+          } */}
           {user && user.isAnonymous &&
             <div className="text-dark-2">
               <Link href="/auth?method=login-email">Login</Link>

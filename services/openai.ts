@@ -1,5 +1,4 @@
 import OpenAI from 'openai';
-import { sampleExercises } from './stores/samples';
 import delay from '@/utils/delay';
 
 let store: any;

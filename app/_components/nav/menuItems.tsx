@@ -28,8 +28,8 @@ export function menuItems({ pathname, user, router, createWorkout, generateWorko
       className: user ? "" : "cursor-not-allowed",
       onClick: async () => {
         if (user) {
-          handleCreateWorkout(createWorkout, router, user);
-          router.push(`/workouts?uid=${user.uid || ""}`);
+          // handleCreateWorkout(createWorkout, router, user);
+          // router.push(`/workouts?uid=${user.uid || ""}`);
         }
       }
     },

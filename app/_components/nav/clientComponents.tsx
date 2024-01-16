@@ -8,10 +8,8 @@ import { Menu, Transition } from '@headlessui/react'
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid'
 import useAlert from "@/app/_hooks/alert";
 import useUser from '@/app/_hooks/user'; 
-// import useWorkouts from "@/app/_hooks/workouts";
 import classNames from '@/utils/classNames'
 import { menuItems } from "./menuItems";
-import { handleGenerateWorkout } from '@/app/_utils/handlers';
 import Link from '../Link';
 
 // export function NavLinks() {
