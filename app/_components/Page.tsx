@@ -49,7 +49,7 @@ export default function Page({
         </div>
       }
       {(bottomLinks || links) &&
-        <div className={`flex flex-grow items-end justify-center h-full mt-4`}>
+        <div className={`text-overlay flex flex-grow items-end justify-center h-full mt-4`}>
           <PageLinks loading={loading}>
             {bottomLinks || links}
           </PageLinks>

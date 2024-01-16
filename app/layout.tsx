@@ -27,13 +27,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <div className="flex flex-col lg:flex-row">
           {/* <Nav /> */}
-          <div className="title-overlay text-overlay absolute top-2 right-2 z-10">
-            <NavProfileLink href="/profile" className="_bg-orange-600 title-overlay text-overlay _hover:text-purple-100" />
+          <div className=" text-overlay text-overlay absolute top-4 right-3 z-10">
+            <NavProfileLink href="/profile" className="_bg-orange-600 title-overlay text-overlay _hover: _text-purple-100" />
           </div>
-          <Link useClient={true} href="/" className="title-overlay text-overlay absolute top-2 left-2 z-10">
-            Haikudle
+          <Link useClient={true} href="/" className="title-overlay text-overlay absolute top-4 left-4 z-10">
+            hAIku
           </Link>
-          <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2.5rem)] lg:min-h-screen">
+          <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
             {children}
           </div>
         </div>
