@@ -7,7 +7,7 @@ import Page from "@/app/_components/Page";
 import * as users from "@/services/users";
 import * as font from "./font";
 import shuffleArray from "@/utils/shuffleArray";
-import { Haiku } from "@/types/haiku";
+import { Haiku } from "@/types/Haiku";
 import { NavProfileLink } from "./_components/nav/clientComponents";
 
 export default async function Component() {
@@ -171,7 +171,7 @@ export default async function Component() {
         className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-20`}
         style={textStyle}
       >
-        {haiku.poem.map((s: string) => <div>{s}</div>)}
+        {haiku.poem.map((s: string, i: number) => <div key={i}>{s}</div>)}
       </div>
     </Page>
   )
