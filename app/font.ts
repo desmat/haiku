@@ -75,10 +75,10 @@ export const calligraffitti = Calligraffitti({
   // style: "italic",
 });
 
-export const cardo = Cardo({
-  subsets: ['latin'],
-  display: 'swap',
-  weight: "700",
-  style: "italic",
-});
+// export const cardo = Cardo({
+//   subsets: ['latin'],
+//   display: 'swap',
+//   weight: "700",
+//   style: "italic",
+// });
 
