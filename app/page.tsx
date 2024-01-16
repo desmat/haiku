@@ -143,9 +143,9 @@ export default async function Component() {
       // subtitle="Perfect workout plans, just for you!"
       bottomLinks={links}
     >
-      <div style={textStyle} className={`${font.architects_daughter.className} fixed top-2 left-3 z-20 text-[22pt]`}>
+      <div style={textStyle} className={`${font.architects_daughter.className} fixed top-2 left-3 z-20 text-[26pt] md:text-[32pt]`}>
         <Link useClient={true} href="/">
-          <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-2px] pr-[3px] pl-[1px] text-[16pt]`}>AI</span>ku</span>
+          <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-2px] pr-[3px] pl-[1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>ku</span>
         </Link>
       </div>
       <div className="fixed top-4 right-3 z-20" style={textStyle}>

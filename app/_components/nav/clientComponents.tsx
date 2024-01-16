@@ -181,8 +181,8 @@ export function NavProfileLink({
       title={user ? user.isAnonymous ? "(Anonymous)" : user.displayName as string : "(Not logged in)"}
       className={(isActive ? "_text-slate-100" : "text-slate-300") + " flex flex-auto ellipsis whitespace-nowrap lg:whitespace-normal space-x-2 h-full lg:h-fit -my-0.5 lg:my-0 mx-1 lg:mx-auto _hover:text-slate-100 align-middle text-ellipsis " + className}
     >
-      {!photoURL && <FaUserCircle className="my-auto h-7 w-7 lg:h-12 lg:w-12 " />}
-      {user && photoURL && <img className="rounded-full h-7 w-7 lg:h-12 lg:w-12" src={photoURL}></img>}
+      {!photoURL && <FaUserCircle className="my-auto h-8 w-8 md:h-12 md:w-12 " />}
+      {user && photoURL && <img className="rounded-full h-8 w-8 md:h-12 md:w-12" src={photoURL}></img>}
     </ReactLink>
   )
 }
