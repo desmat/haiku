@@ -7,9 +7,9 @@ export default function User() {
   // console.log(`>> components.User.render()`);
   const [userLoaded, loadUser] = useUser((state: any) => [state.loaded, state.load]);
 
-  useEffect(() => {
-    if (!userLoaded) loadUser();
-  }, []);  
+  // useEffect(() => {
+  //   if (!userLoaded) loadUser();
+  // }, []);  
 
   return null;
 }

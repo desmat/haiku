@@ -40,7 +40,7 @@ export async function createHaiku(user: User, name: string): Promise<Haiku> {
   return store.haikus.create(user.uid, haiku);
 }
 
-export async function generateHaiku(user: User, subject?: string): Promise<Haiku> {
+export async function generateHaiku(user: any, subject?: string): Promise<Haiku> {
   console.log(">> services.haiku.generateHaiku", { subject, user });
 
   

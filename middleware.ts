@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
   const url = request.nextUrl.pathname;
 
   // console.log("*** middleware", { url, method });
-
+/*
   if (url == "/api/user" && ["POST", "DELETE"].includes(method)) {
     // console.log("*** middleware PUBLIC USER PATH");
     return NextResponse.next();
@@ -29,6 +29,9 @@ export async function middleware(request: NextRequest) {
     { success: false, message: 'authorization failed' },
     { status: 403 }
   );
+  */
+
+  return NextResponse.next();
 }
 
 // guard all api calls (logic will only look at mutating methods)
