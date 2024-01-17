@@ -83,9 +83,9 @@ export default function Component() {
           <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-2px] pr-[3px] pl-[1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>ku</span>
         </Link>
       </div>
-      <div className="fixed top-4 right-3 z-20">
+      {/* <div className="fixed top-4 right-3 z-20">
         <NavProfileLink href="/profile" className="_bg-orange-600 _hover: text-purple-100" style={textStyle} />
-      </div>
+      </div> */}
     </div>
   );
 
