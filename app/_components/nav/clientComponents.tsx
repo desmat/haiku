@@ -161,10 +161,11 @@ function NavLink({
 }
 
 export function NavProfileLink({
-  href, className,
+  href, className, style
 }: {
   href: string,
   className?: string,
+  style?: any
 }) {
   // console.log('>> components.PostNaProfileNavLinkvLink.render()');
   const pathname = usePathname();
@@ -178,9 +179,10 @@ export function NavProfileLink({
       href={href}
       title={user ? user.isAnonymous ? "(Anonymous)" : user.displayName as string : "(Not logged in)"}
       className={(isActive ? "_text-slate-100" : "text-slate-300") + " flex flex-auto ellipsis whitespace-nowrap lg:whitespace-normal space-x-2 h-full lg:h-fit -my-0.5 lg:my-0 mx-1 lg:mx-auto _hover:text-slate-100 align-middle text-ellipsis " + className}
+      style={style || {}}
     >
       {!photoURL && <FaUserCircle className="my-auto h-8 w-8 md:h-12 md:w-12 " />}
-      {user && photoURL && <img className="rounded-full h-8 w-8 md:h-12 md:w-12" src={photoURL}></img>}
+      {user && photoURL && <img className="rounded-full h-8 w-8 md:h-12 md:w-12" style={style} src={photoURL}></img>}
     </ReactLink>
   )
 }

@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import delay from '@/utils/delay';
+import * as samples from "@/services/stores/samples";
 
 let store: any;
 import(`@/services/stores/${process.env.STORE_TYPE}`).then((importedStore) => {
@@ -13,133 +14,79 @@ const openai = new OpenAI({
 // const model = "gpt-3.5-turbo"; // seems good and fast enough for now
 const model = "gpt-4";
 
-export async function generateExercise(name: string): Promise<any> {
-  console.log(`>> services.openai.generateExercise`, { name });
-  const prompt = `Requested exercise: ${name}`;
+export async function generateBackgroundImage(subject?: string): Promise<any> {
+  console.log(`>> services.openai.generateBackgroundImage`, { subject });
+  const prompt = `An extremely muted, almost monochromatic colors paintings in a japanese style, 
+    on the subject of ${subject || "landscape"}.
+    Please respond with a painting of the style above, and in addition please provide the predominant color in RGB, as well as another RGB representing 75% darker than the predominant color, both in JSON format.
+    The response should only contain JSON.
+    `
 
-  // // for testing
-  // // return new Promise((resolve, reject) => resolve(  {
-  // //   "name": name,
-  // //   "description": "DESCRIPTION",
-  // //   "instructions": "1. STEP 1\n2. STEP 2",
-  // // },));
+  // const res = {
+  //   "created":1705515146,
+  //   "data":[
+  //     {
+  //       "revised_prompt":"Create an image that uses extremely muted, almost monochromatic colors. Make the style similar to traditional Japanese artwork, with the subject matter focused on various aspects of nature. Ensure the colors used are slightly varied but maintain a consistent, subdued aesthetic.",
+  //       "url":"https://oaidalleapiprodscus.blob.core.windows.net/private/org-2MGbI0LLfEavnqcGsIgw6J4L/user-KM4FaAIbSJ6GtgT2mO363LEE/img-tUNo4j0M1jMhWGXPU3NPEjOr.png?st=2024-01-17T17%3A12%3A26Z&se=2024-01-17T19%3A12%3A26Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-01-17T15%3A32%3A39Z&ske=2024-01-18T15%3A32%3A39Z&sks=b&skv=2021-08-06&sig=1RguiOApu5ikmdcFkgM0tbH7N5PkJCCfei6AtyZH2U0%3D"
+  //     }
+  //   ]
+  // }
 
-  await delay(1000);
+  // return {
+  //   prompt: (res.data[0]["revised_prompt"] || prompt),
+  //   url: res.data[0].url
+  // };  
 
-  return {
-    name,
+  const response = await openai.images.generate({
+    model: "dall-e-3",
     prompt,
-    response: {"name":"Rowing","category":"Cardiovascular training","description":"Rowing is an intensive full-body workout that enhances your cardiovascular fitness, strengthens the muscles, and improves flexibility. It involves using a rowing machine or 'ergometer.'","instructions":["Set your feet on the footplates ensuring they're secure.","Reach forward to grab the handles with an overhand grip.","Keep your back straight and unlock your knees until your shins are vertical.","Drive off using your legs and lean back slightly, pulling the handles towards your chest.","Return to the starting position in reverse sequence: arms, hips, then knees.","Repeat for the desired number of reps."],"duration":[600000,1800000],"sets":[1,3],"reps":[10,20],"variations":[{"name":"Fast Rowing","level":"Intermediate","description":"Fast Rowing is a more challenging variation that focuses on increasing speed while maintaining form.","instructions":["Setup as if for regular rowing.","Increase your rowing speed while ensuring high-quality pulls.","Maintain the faster pace for the duration of the set."],"duration":[600000,2400000],"sets":[1,2]},{"name":"Interval Rowing","level":"Advanced","description":"Interval Rowing involves alternating periods of intense rowing with periods of moderate rowing or rest for recovery.","instructions":["Setup as if for regular rowing.","Begin with a five-minute warm-up at moderate intensity.","Row at high intensity for two minutes, followed by two minutes of moderate intensity or rest.","Repeat the high and low intensity periods for the entire duration of the set."],"duration":[1200000,2400000],"sets":[1,2]}]}
-  };
-
-  const completion = await openai.chat.completions.create({
-    model,
-    messages: [
-      {
-        role: 'system',
-        content: `You are an assistant that, for the requested exercise, will generate a short description, a category (very short), detailed instructions (newline separated), recommended duration (in milliseconds, when appropriate), recommended range of sets (as number, when appropriate) and reps (as numbers, when appropriate), and also provide a few of variations indicating difficulty level.
-Provide the answer in JSON using the following keys: name, category, description, instructions, duration (an array with min and max number values, include only when appropriate),  sets (an array with min and max number values, when appropriate), reps (an array with min and max number values, when appropriate), and variations.
-The variations should have the following keys: name, level, description, instructions, duration (an array with min and max number values, include only when appropriate), sets (an array with min and max number values, include only when appropriate), reps (an array with min and max number values, include only when appropriate)`
-      },
-      {
-        role: 'user',
-        content: prompt,
-      }
-    ],
+    n: 1,
+    size: "1024x1024",
   });
+  // image_url = response.data.data[0].url;  
 
-  let response;
   try {
-    // console.log(">> services.openai.generateExercise RESULTS FROM API", completion);
-    response = JSON.parse(completion.choices[0].message.content || "{}");
     console.log(">> services.openai.generateExercise RESULTS FROM API", { response });
-    console.log(">> services.openai.generateExercise RESULTS FROM API (as json)", JSON.stringify(response));
-    return { name, prompt, response };
+    console.log(">> services.openai.generateExercise RESULTS FROM API (as json)", JSON.stringify(response));    
+    return {
+      prompt: (response.data[0]["revised_prompt"] || prompt),
+      url: response.data[0].url
+    };  
   } catch (error) {
-    console.error("Error reading results", { error, response, completion });
+    console.error("Error reading results", { error, response });
   }
 }
 
-export async function generateWorkout(parameters: any[]): Promise<any> {
-  console.log(`>> services.openai.generateWorkout`, { parameters });
+export async function generateHaiku(subject?: string): Promise<any> {
+  console.log(`>> services.openai.generateHaiku`, { subject });
   // const prompt = "age: 46; gender: male; difficulty: beginner; total length: about 45 minutes; maybe involving the following equiments or just the floor: rowing machine. " // parameters.map(([name, value]: any) => `${name}: ${value}`).join("; ");
-  const prompt = parameters.map(([name, value]) => `${name}: ${value}`).join("; ");
+  const prompt = `Subject: ${subject || "any"}`;
 
-  console.log(`>> services.openai.generateWorkout`, { prompt });
+  console.log(`>> services.openai.generateHaiku`, { prompt });
 
   // // for testing
 
-  await delay(3000);
+  // await delay(3000);
 
-  return {
-    prompt,
-    response: [
-      {
-        "exercise": "Dumbbell Goblet Squats",
-        "equipment": "Dumbbells",
-        "sets": 3,
-        "reps": 12,
-        "difficulty": "Intermediate",
-        "description": "Hold a dumbbell close to your chest and perform squats."
-      },
-      {
-        "exercise": "Push-Ups",
-        "equipment": "None",
-        "sets": 3,
-        "reps": 15,
-        "difficulty": "Intermediate",
-        "description": "Perform standard push-ups for chest and triceps."
-      },
-      {
-        "exercise": "Dumbbell Rows",
-        "equipment": "Dumbbells",
-        "sets": 3,
-        "reps": 12,
-        "difficulty": "Intermediate",
-        "description": "Bend forward and row dumbbells to work your back."
-      },
-      {
-        "exercise": "Treadmill Jogging",
-        "equipment": "Treadmill",
-        "sets": 1,
-        "time": 900000,  // 15 minutes in milliseconds
-        "difficulty": "Intermediate",
-        "description": "Moderate-paced jogging on the treadmill for cardio."
-      },
-      {
-        "exercise": "Rowing Machine",
-        "equipment": "Rowing Machine",
-        "sets": 1,
-        "time": 600000,  // 10 minutes in milliseconds
-        "difficulty": "Intermediate",
-        "description": "Row with proper form for a full-body workout."
-      },
-      {
-        "exercise": "Plank",
-        "equipment": "None",
-        "sets": 3,
-        "time": 30000,  // 30 seconds in milliseconds
-        "difficulty": "Intermediate",
-        "description": "Hold a plank position to strengthen your core."
-      },
-      {
-        "exercise": "Dumbbell Bicep Curls",
-        "equipment": "Dumbbells",
-        "sets": 3,
-        "reps": 12,
-        "difficulty": "Intermediate",
-        "description": "Perform bicep curls for arm strength."
-      }
-    ]
-  };
+  // return {
+  //   response: {
+  //     prompt,
+  //     haiku: [
+  //       "line one,",
+  //       "line two,",
+  //       "line three.",
+  //     ],
+  //     subject: "Nature",
+  //   }
+  // };
 
   const completion = await openai.chat.completions.create({
     model,
     messages: [
       {
         role: 'system',
-        content: `You are an assistant that, for the provided parameters, will provide a list of exercises. 
-Return only the list of exercise names, required equipment, suggested number of sets, suggested time or reps. and that's it. Answer in JSON format with the following keys: exercise, equipment, sets (as a number, if appropriate), reps (as a number, is appropriate), time (as a number of milliseconds, if appropriate), difficulty, description.`
+        content: `Given a topic (or "any") generate a haiku and respond in JSON where each response is an array of 3 strings.
+          Also include in the response, in fewest number of words, what was the subject of the haiku. Please only include keys "haiku" and "subject"`
       },
       {
         role: 'user',

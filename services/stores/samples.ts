@@ -1,4 +1,18 @@
+import { Haiku } from "@/types/Haiku";
+
 export const haikus = {
+  "-1": {
+    id: "-1",
+    theme: "not finding what you wanted",
+    bgImage: "/backgrounds/DALL·E 2024-01-17 11.32.41 - An extremely muted, almost monochromatic painting in the Japanese style, depicting the concept of emptiness. The artwork captures a minimalist landsca.png",
+    color: "rgb(43, 44, 41))",
+    bgColor: "rgb(174, 177, 164)",
+    poem: [
+      "Searched through endless rows,",
+      "Hope fades like the setting sun,",
+      "Desired, yet unfound.",
+    ],
+  },
   "1": {
     id: "1",
     theme: "sunset",
@@ -69,6 +83,29 @@ export const haikus = {
       "Ocean's depth beckons,",
       "Lines cast into the blue vast,",
       "Patience meets the tide.",
+    ],
+  },
+  "7": {
+    id: "7",
+    theme: "fishing in the ocean",
+    bgImage: "/backgrounds/working the rice fields.png",
+    color: "#555555",
+    bgColor: "lightgrey",
+    poem: [
+      "Green fields stretch far wide,",
+      "Bent backs greet the rising sun,",
+      "Harvest's toil begins.",
+    ],
+  }, "8": {
+    id: "8",
+    theme: "summer in paris",
+    bgImage: "/backgrounds/img-CTZdNCy7NnbBiZNiYFX4lZBv.png",
+    color: "#555555",
+    bgColor: "lightgrey",
+    poem: [
+      "Parisian summer,",
+      "Cafés alive with chatter,",
+      "Sun kisses the Seine.",
     ],
   },
 };

@@ -3,6 +3,7 @@ import moment from 'moment';
 import { Haiku } from "@/types/Haiku";
 import { Store } from "@/types/Store";
 import { uuid } from '@/utils/misc';
+import * as openai from './openai';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -38,10 +39,31 @@ export async function createHaiku(user: User, name: string): Promise<Haiku> {
   return store.haikus.create(user.uid, haiku);
 }
 
-export async function generateHaiku(user: User, haiku: Haiku): Promise<Haiku> {
-  console.log(">> services.haiku.generateHaiku", { haiku, user });
+export async function generateHaiku(user: User, subject?: string): Promise<Haiku> {
+  console.log(">> services.haiku.generateHaiku", { subject, user });
 
-  throw 'Not implemented';
+  
+  const { response: { haiku: poem, subject: generatedSubject } } = await openai.generateHaiku(subject);
+  // console.log(">> services.haiku.generateHaiku", { ret });
+  console.log(">> services.haiku.generateHaiku", { poem, generatedSubject });
+
+  const { url } = await openai.generateBackgroundImage(generatedSubject);
+
+  // TODO upload image to storage
+
+  let haiku = {
+    id: uuid(),
+    createdBy: user.uid,
+    createdAt: moment().valueOf(),
+    status: "created",
+    theme: generatedSubject,
+    bgImage: url, // bgImage: "/backgrounds/DALL·E 2024-01-17 11.32.41 - An extremely muted, almost monochromatic painting in the Japanese style, depicting the concept of emptiness. The artwork captures a minimalist landsca.png",
+    // color: "rgb(43, 44, 41))",
+    // bgColor: "rgb(174, 177, 164)",
+    poem,      
+  } as Haiku;
+
+  return store.haikus.create(user.uid, haiku);
 
 //   haiku = {
 //     status: "generating",

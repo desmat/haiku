@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react';
 import { BsGithub } from "react-icons/bs";
 import Link from "@/app/_components/Link"
 import Page from "@/app/_components/Page";
@@ -10,36 +11,78 @@ import { Haiku } from "@/types/Haiku";
 import { NavProfileLink } from "./_components/nav/clientComponents";
 import useHaikus from "./_hooks/haikus";
 import useAlert from './_hooks/alert';
+import * as samples from "@/services/stores/samples";
 
 export default function Component() {
   // console.log('>> app.page.render()');
   // const token = cookies().get("session")?.value;
   // const user = token && (await users.getUserFromToken(token))?.user;
-  const id = "3";
-  const [loaded, load, haikus, haiku] = useHaikus((state: any) => [state.loaded(), state.load, state.find(), state.get(id)]);
-  const [alertError] = useAlert((state: any) => [state.error]);
+  const router = useRouter();
+  const params = useSearchParams();
+
+  const [id, setId] = useState(params.get("id"));
+
+  const [
+    haikusLoaded,
+    loadHaikus,
+    findHaikus,
+    getHaiku,
+    generateHaiku,
+  ] = useHaikus((state: any) => [
+    state.loaded,
+    state.load,
+    state.find,
+    state.get,
+    state.generate
+  ]);
+
+  const loaded = id && haikusLoaded(id) || haikusLoaded();
+  const haikus = !id && findHaikus();
+  const haiku = id && (getHaiku(id) || samples.haikus["-1"]) || haikus[Math.floor(Math.random() * haikus.length)];
+
+  // id = id || `${loaded && haikus && haikus.length > 0 && Math.floor(Math.random() * haikus.length) || -1}`;
+  // const haiku = id && (getHaiku(id) || samples.haikus["-1"]) || ;
   // const haiku = haikus[Math.floor(Math.random() * haikus.length)];
 
-  console.log('>> app.page.render()', { haikus, haiku });
+  console.log('>> app.page.render()', { haikus, haiku, loaded, id });
+
+  if (loaded && haiku?.id == "-1") {
+    console.error("NOT FOUND", { id });
+  }
 
   useEffect(() => {
-    if (!loaded) load();
-  }, []);
+    if (!loaded) {
+      id && loadHaikus(id) || loadHaikus();
+    }
+  }, [id]);
+
+  const handleGenerate = async () => {
+    const ret = await generateHaiku({ uuid: "ASDF" }, { ...haiku, id: "ASDF" });
+    console.log('>> app.page.handleGenerate()', { ret });
+
+    if (ret?.id) {
+      // router.push(`/?id=${ret.id}`);
+      setId(ret.id);
+    }
+  }
 
   const textStyle = {
-    color: haiku?.color,
-    filter: `drop-shadow(0px 0px 8px ${haiku?.bgColor})`,
+    color: haiku?.color || "#555555",
+    filter: `drop-shadow(0px 0px 8px ${haiku?.bgColor || "lightgrey"})`,
   }
 
   const header = (
     <div>
       <div style={textStyle} className={`${font.architects_daughter.className} fixed top-2 left-3 z-20 text-[26pt] md:text-[32pt]`}>
-        <Link useClient={true} href="/">
+        <Link
+          onClick={handleGenerate}
+          style="plain"
+        >
           <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-2px] pr-[3px] pl-[1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>ku</span>
         </Link>
       </div>
-      <div className="fixed top-4 right-3 z-20" style={textStyle}>
-        <NavProfileLink href="/profile" className="_bg-orange-600 title-overlay text-overlay _hover: _text-purple-100" />
+      <div className="fixed top-4 right-3 z-20">
+        <NavProfileLink href="/profile" className="_bg-orange-600 _hover: text-purple-100" style={textStyle} />
       </div>
     </div>
   );
@@ -81,7 +124,7 @@ export default function Component() {
 
     return (
       <Page
-        title="Haiku not found"
+        title="Not found"
         subtitle={id}
         bottomLinks={links}
       >
@@ -114,8 +157,12 @@ export default function Component() {
         }}
       />
       <div
-        className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-20`}
-        style={textStyle}
+        className={`${font.architects_daughter.className} text-overlay md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-20`}
+        style={{
+          ...textStyle,
+
+
+        }}
       >
         {haiku.poem.map((s: string, i: number) => <div key={i}>{s}</div>)}
       </div>

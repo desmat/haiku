@@ -246,20 +246,20 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   generate: async (user: User, haiku: Haiku) => {
-    // console.log(">> hooks.haiku.generate", { haiku });
+    console.log(">> hooks.haiku.generate", { haiku });
     const { _haikus } = get();
 
     // optimistic
-    const generating = {
-      id: haiku.id,
-      name: haiku.name,
-      createdBy: haiku.createdBy,
-      status: "generating",
-    };
+    // const generating = {
+    //   // id: haiku.id,
+    //   // name: haiku.name,
+    //   // createdBy: haiku.createdBy,
+    //   status: "generating",
+    // };
 
-    set({
-      _haikus: { ..._haikus, [haiku.id || ""]: generating },
-    });
+    // set({
+    //   _haikus: { ..._haikus, [haiku.id || ""]: generating },
+    // });
 
     return new Promise((resolve, reject) => {
       fetch(`/api/haikus/${haiku.id}/generate`, {

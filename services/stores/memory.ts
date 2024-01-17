@@ -32,7 +32,8 @@ class MemoryStore<T extends MenoryStoreEntry> implements GenericStore<T> {
   async get(id: string): Promise<T | undefined> {
     console.log(`>> services.stores.memory.MemoryStore<${this.key}>.get`, { id });
 
-    throw "Not implemented";
+    // @ts-ignore
+    return this.store[id];
 
     // const response = await kv.json.get(this.valueKey(id), "$");
 
@@ -55,7 +56,12 @@ class MemoryStore<T extends MenoryStoreEntry> implements GenericStore<T> {
   async create(userId: string, value: T): Promise<T> {
     console.log(`>> services.stores.memory.MemoryStore<${this.key}>.create`, { userId, value });
 
-    throw "Not implemented";
+    // @ts-ignore
+    this.store[value.id] = value;
+
+    console.log(`>> services.stores.memory.MemoryStore<${this.key}>.create`, { value, store: this.store });
+
+    return value;
 
     // if (!value.id) {
     //   throw `Cannot save add with null id`;

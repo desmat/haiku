@@ -116,10 +116,10 @@ ul {
   /* color: rgb(32, 31, 27); */
   /* color: rgb(44, 44, 42); */
   /* color: rgb(26, 27, 26); */
-  color: rgb(32, 31, 27);
+  /* color: rgb(32, 31, 27); */
   
   
-  /* -webkit-text-stroke: 0.2px rgb(32, 31, 27); */
+  -webkit-text-stroke: 0.6px rgb(32, 31, 27);
   /* text-shadow: 0px 1px 4px #23430C; */
   /* text-shadow: 0px 0px 12px white; */
   
@@ -127,7 +127,7 @@ ul {
   /* filter: drop-shadow(0px 0px 8px rgb(131, 127, 111)); */
   /* filter: drop-shadow(0px 0px 8px rgb(176, 178, 168)); */
   /* filter: drop-shadow(0px 0px 8px rgb(107, 109, 107)); */
-  filter: drop-shadow(0px 0px 8px rgb(131, 127, 111));
+  /* filter: drop-shadow(0px 0px 8px rgb(131, 127, 111)); */
   
 }
 

@@ -8,7 +8,7 @@ export async function POST(
     request: Request,
     { params }: { params: { id: string } }
 ) {
-    console.log('>> app.api.haiku.[id].generate.GET', { params });
+    console.log('>> app.api.haiku.[id].generate.POST', { params });
 
     const { user } = await validateUserSession(request)
     if (!user) {
@@ -18,10 +18,12 @@ export async function POST(
       );
     } 
 
-    const haiku = await getHaiku(params.id);
-    if (!haiku) {
-        return NextResponse.json({ haiku: {} }, { status: 404 });
-    }
+    // const haiku = await getHaiku(params.id);
+    // if (!haiku) {
+    //     return NextResponse.json({ haiku: {} }, { status: 404 });
+    // }
+
+    const haiku = undefined
 
     const updatedHaiku = await generateHaiku(user, haiku);
     
