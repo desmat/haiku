@@ -19,7 +19,7 @@ export default function Page({
   loading?: boolean,
 }) {
   return (
-    <main className={`relative flex flex-col items-left _lg: max-w-4xl _lg: _mx-auto _px-4 _min-h-[calc(100dvh-2.5rem)] _lg: min-h-[calc(100dvh+0rem)] h-full _lg: _pb-4 ${className ? " " + className : ""}`}>
+    <main className={`_bg-pink-200 relative flex flex-col items-left _max-w-4xl min-h-[calc(100dvh+0rem)] h-full ${className ? " " + className : ""}`}>
       {loading &&
         <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 italic text-dark-2 opacity-5 animate-pulse'>Loading...</div>
       }
