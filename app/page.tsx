@@ -19,8 +19,8 @@ export default function Component() {
   // const user = token && (await users.getUserFromToken(token))?.user;
   const router = useRouter();
   const params = useSearchParams();
-
   const [id, setId] = useState(params.get("id"));
+  const [generating, setGenerating] = useState(false);
 
   const [
     haikusLoaded,
@@ -57,12 +57,14 @@ export default function Component() {
   }, [id]);
 
   const handleGenerate = async () => {
+    setGenerating(true);
     const ret = await generateHaiku({ uuid: "ASDF" }, { ...haiku, id: "ASDF" });
     console.log('>> app.page.handleGenerate()', { ret });
 
     if (ret?.id) {
       // router.push(`/?id=${ret.id}`);
       setId(ret.id);
+      setGenerating(false);
     }
   }
 
@@ -108,7 +110,7 @@ export default function Component() {
     </div>,
   ];
 
-  if (!loaded) {
+  if (!loaded || generating) {
     return (
       <Page
         loading={true}
