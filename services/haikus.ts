@@ -1,5 +1,6 @@
 import { User } from 'firebase/auth';
 import moment from 'moment';
+import { put } from '@vercel/blob';
 import { Haiku } from "@/types/Haiku";
 import { Store } from "@/types/Store";
 import { uuid } from '@/utils/misc';
@@ -47,9 +48,18 @@ export async function generateHaiku(user: User, subject?: string): Promise<Haiku
   // console.log(">> services.haiku.generateHaiku", { ret });
   console.log(">> services.haiku.generateHaiku", { poem, generatedSubject });
 
-  const { url } = await openai.generateBackgroundImage(generatedSubject);
+  const { url: openaiUrl } = await openai.generateBackgroundImage(generatedSubject);
 
-  // TODO upload image to storage
+  const imageRet = await fetch(openaiUrl);
+  // console.log(">> services.haiku.generateHaiku", { imageRet });
+
+  const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+  // console.log(">> services.haiku.generateHaiku", { imageBuffer });
+
+  const blob = await put(`${uuid()}.png`, imageBuffer, {
+    access: 'public',
+  });
+  // console.log(">> services.haiku.generateHaiku", { blob });
 
   let haiku = {
     id: uuid(),
@@ -57,37 +67,13 @@ export async function generateHaiku(user: User, subject?: string): Promise<Haiku
     createdAt: moment().valueOf(),
     status: "created",
     theme: generatedSubject,
-    bgImage: url, // bgImage: "/backgrounds/DALL·E 2024-01-17 11.32.41 - An extremely muted, almost monochromatic painting in the Japanese style, depicting the concept of emptiness. The artwork captures a minimalist landsca.png",
+    bgImage: blob.url, // bgImage: "/backgrounds/DALL·E 2024-01-17 11.32.41 - An extremely muted, almost monochromatic painting in the Japanese style, depicting the concept of emptiness. The artwork captures a minimalist landsca.png",
     // color: "rgb(43, 44, 41))",
     // bgColor: "rgb(174, 177, 164)",
     poem,      
   } as Haiku;
 
   return store.haikus.create(user.uid, haiku);
-
-//   haiku = {
-//     status: "generating",
-//     createdAt: haiku.createdAt,
-//     createdBy: haiku.createdBy,
-//     updatedAt: moment().valueOf(),
-//     updatedBy: user.uid,
-//   };
-//   store.haikus.update(user.uid, haiku);
-
-//   const res = await openai.generateHaiku(haiku.name);
-//   const generatedHaiku = parseGeneratedHaiku(res);
-//   console.log(">> services.haiku.createHaiku (fixed instructions)", { generatedHaiku });
-
-//   haiku = {
-//     ...haiku,
-//     ...generatedHaiku,
-//     name: haiku.name,
-//     status: "created",
-//     updatedAt: moment().valueOf(),
-//     updatedBy: user.uid,
-//   };
-
-//   return store.haikus.update(user.uid, haiku);
 }
 
 export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
