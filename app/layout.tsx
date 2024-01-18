@@ -39,8 +39,8 @@ export default function RootLayout({
           </div>
         </div>
       </body>
-      <Auth />
-      <User />
+      {/* <Auth /> */}
+      {/* <User /> */}
       <Analytics />
       <Alert />
       <Prefetch />

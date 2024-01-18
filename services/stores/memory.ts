@@ -21,7 +21,7 @@ class MemoryStore<T extends MenoryStoreEntry> implements GenericStore<T> {
   valueKey: (id: string) => string;
   listKey: () => string;
 
-  store = samples.haikus;
+  store = {};
 
   constructor(key: string, listKey?: string) {
     this.key = key;

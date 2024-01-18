@@ -26,6 +26,6 @@ export async function POST(request: Request) {
   }
 
   const data: any = await request.json();
-  const haiku = await createHaiku(user, data.name);
+  const haiku = await createHaiku(user);
   return NextResponse.json({ haiku });
 }
