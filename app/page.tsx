@@ -169,7 +169,7 @@ export default function Component() {
       >
         {haiku.poem.map((s: string, i: number) => <div key={i}>{s}</div>)}
       </div>
-      <div className="bg-pink-200 flex flex-row fixed bottom-10 left-1/2 transform -translate-x-1/2">
+      {/* <div className="_bg-pink-200 flex flex-row fixed bottom-10 left-1/2 transform -translate-x-1/2">
         {haiku.colorPalette?.map((c: string, i: number) => {
           return (
             <div
@@ -185,12 +185,10 @@ export default function Component() {
                 back: Math.floor(Math.random() * haiku?.colorPalette?.length),
               })}
             >
-              {/* {i == colorOffsets.front && "F"}
-              {i == colorOffsets.back && "B"} */}
             </div>
           )
         })}
-      </div>
+      </div> */}
     </Page>
   )
 }
