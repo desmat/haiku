@@ -12,66 +12,24 @@ import { Haiku } from "@/types/Haiku";
 import { NavProfileLink } from "./_components/nav/clientComponents";
 import useHaikus from "./_hooks/haikus";
 import useAlert from './_hooks/alert';
-import NotFound from './not-found';
+import * as samples from "@/services/stores/samples";
 
-export default function Component() {
+export default function NotFound() {
   // console.log('>> app.page.render()');
   // const token = cookies().get("session")?.value;
   // const user = token && (await users.getUserFromToken(token))?.user;
-  const router = useRouter();
-  const params = useSearchParams();
-  const [id, setId] = useState(params.get("id"));
-  const [generating, setGenerating] = useState(false);
 
-  const [
-    haikusLoaded,
-    loadHaikus,
-    findHaikus,
-    getHaiku,
-    generateHaiku,
-  ] = useHaikus((state: any) => [
-    state.loaded,
-    state.load,
-    state.find,
-    state.get,
-    state.generate
-  ]);
-
-  const loaded = id && haikusLoaded(id) || haikusLoaded();
-  const haikus = !id && findHaikus();
-  const haiku = id && getHaiku(id) || haikus[Math.floor(Math.random() * haikus.length)];
-  const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
+  const haiku = samples.notFoundHaiku;
 
   // id = id || `${loaded && haikus && haikus.length > 0 && Math.floor(Math.random() * haikus.length) || -1}`;
   // const haiku = id && (getHaiku(id) || samples.haikus["-1"]) || ;
   // const haiku = haikus[Math.floor(Math.random() * haikus.length)];
 
-  console.log('>> app.page.render()', { haikus, haiku, loaded, id });
+  // console.log('>> app.page.render()', { haikus, haiku, loaded, id });
 
-  if (loaded && haiku?.id == "-1") {
-    console.error("NOT FOUND", { id });
-  }
 
-  useEffect(() => {
-    if (!loaded) {
-      id && loadHaikus(id) || loadHaikus();
-    }
-  }, [id]);
-
-  const handleGenerate = async () => {
-    setGenerating(true);
-    const ret = await generateHaiku({ uuid: "ASDF" }, { ...haiku, id: "ASDF" });
-    console.log('>> app.page.handleGenerate()', { ret });
-
-    if (ret?.id) {
-      // router.push(`/?id=${ret.id}`);
-      setId(ret.id);
-      setGenerating(false);
-    }
-  }
-
-  const fontColor = haiku?.colorPalette && colorOffsets.front >=0 && haiku.colorPalette[colorOffsets.front] || haiku?.color || "#555555";
-  const bgColor = haiku?.colorPalette && colorOffsets.back >= 0 && haiku?.colorPalette[colorOffsets.back] || haiku?.bgColor || "lightgrey";
+  const fontColor = haiku?.color || "#555555";
+  const bgColor = haiku?.bgColor || "lightgrey";
   const textStyle = {
     color: fontColor,
     filter: `drop-shadow(0px 0px 8px ${bgColor})`,
@@ -82,11 +40,10 @@ export default function Component() {
     <div>
       <div className={`${font.architects_daughter.className} fixed top-2 left-3 z-20 text-[26pt] md:text-[32pt]`}>
         <Link
-          onClick={handleGenerate}
-          href="/"
+          // onClick={handleGenerate}
+          href="#"
           className="hover:no-underline"
           style={textStyle}
-
         >
           <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-2px] pr-[3px] pl-[1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>ku</span>
         </Link>
@@ -111,22 +68,6 @@ export default function Component() {
       desmat
     </Link>,
   ];
-
-  if (!loaded || generating) {
-    return (
-      <Page
-        loading={true}
-        bottomLinks={links}
-      >
-        {header}
-      </Page>
-    )
-  }
-
-  if (!haiku) {
-    // alertError(`Haiku not found: ${id}`);
-    return NotFound();
-  }
 
   return (
     <Page
