@@ -50,7 +50,9 @@ class MemoryStore<T extends MenoryStoreEntry> implements GenericStore<T> {
   async find(query?: any): Promise<T[]> {
     console.log(`>> services.stores.memory.MemoryStore<${this.key}>.find`, { query });
 
-    return mapToList(this.store);
+    return mapToList(this.store)
+      .filter((h) => Object.entries(query)
+        .reduce((a, [k, v]) => a && h[k] == v, true));
   }
 
   async create(userId: string, value: T): Promise<T> {

@@ -22,11 +22,14 @@ export async function POST(
     // if (!haiku) {
     //     return NextResponse.json({ haiku: {} }, { status: 404 });
     // }
+    const data: any = await request.json();
+    const haiku = data.haiku;
+    console.log('>> app.api.haiku.[id].generate.POST', { haiku });
 
+  
     const user = { uid: "ASDF" }
-    const haiku = undefined
-
-    const updatedHaiku = await generateHaiku(user, haiku);
+    
+    const updatedHaiku = await generateHaiku(user, undefined, haiku.lang);
     
     return NextResponse.json({ haiku: updatedHaiku });
 }

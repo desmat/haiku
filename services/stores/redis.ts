@@ -69,6 +69,7 @@ type RedisStoreEntry = {
   updatedBy?: string,
   deletedAt?: number,
   deletedBy?: string,
+  lang?: string,
 }
 
 class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
@@ -131,6 +132,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       createdAt: moment().valueOf(),
       createdBy: userId,
       name: value.name,
+      lang: value.lang,
     };
 
     const createdValue = {

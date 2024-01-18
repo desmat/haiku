@@ -8,8 +8,7 @@ import * as samples from '@/services/stores/samples';
 import * as openai from './openai';
 import { create } from 'domain';
 import chroma from 'chroma-js';
-
-
+import { LanguageType, supportedLanguages } from '@/types/Languages';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -51,11 +50,12 @@ export async function createHaiku(user: User): Promise<Haiku> {
   return store.haikus.create(user.uid, haiku);
 }
 
-export async function generateHaiku(user: any, subject?: string): Promise<Haiku> {
-  console.log(">> services.haiku.generateHaiku", { subject, user });
+export async function generateHaiku(user: any, subject?: string, lang?: LanguageType): Promise<Haiku> {
+  console.log(">> services.haiku.generateHaiku", { subject, user, lang });
 
+  const language = supportedLanguages[lang || "en"].name;
 
-  const { response: { haiku: poem, subject: generatedSubject } } = await openai.generateHaiku(subject);
+  const { response: { haiku: poem, subject: generatedSubject } } = await openai.generateHaiku(subject, language);
   // console.log(">> services.haiku.generateHaiku", { ret });
   console.log(">> services.haiku.generateHaiku", { poem, generatedSubject });
 
@@ -82,11 +82,12 @@ export async function generateHaiku(user: any, subject?: string): Promise<Haiku>
 
   let haiku = {
     id: uuid(),
+    lang: lang || "en",
     createdBy: user.uid,
     createdAt: moment().valueOf(),
     status: "created",
     theme: generatedSubject,
-    bgImage: blob.url,  // TODO revert
+    bgImage: blob.url,
     color: sortedColors[0].darker(0.5).hex(),
     bgColor: sortedColors[sortedColors.length - 1].hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),

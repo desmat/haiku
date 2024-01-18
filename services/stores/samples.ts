@@ -1,18 +1,19 @@
 import { Haiku } from "@/types/Haiku";
 
+export const notFoundHaiku = {
+  id: "-1",
+  theme: "not finding what you wanted",
+  bgImage: "/backgrounds/DALL·E 2024-01-17 11.32.41 - An extremely muted, almost monochromatic painting in the Japanese style, depicting the concept of emptiness. The artwork captures a minimalist landsca.png",
+  color: "rgb(43, 44, 41))",
+  bgColor: "rgb(174, 177, 164)",
+  poem: [
+    "Quest ends in silence,",
+    "'404 Not Found' echoes,",
+    "Lost in digital.",
+  ],
+}
+
 export const haikus = {
-  "-1": {
-    id: "-1",
-    theme: "not finding what you wanted",
-    bgImage: "/backgrounds/DALL·E 2024-01-17 11.32.41 - An extremely muted, almost monochromatic painting in the Japanese style, depicting the concept of emptiness. The artwork captures a minimalist landsca.png",
-    color: "rgb(43, 44, 41))",
-    bgColor: "rgb(174, 177, 164)",
-    poem: [
-      "Searched through endless rows,",
-      "Hope fades like the setting sun,",
-      "Desired, yet unfound.",
-    ],
-  },
   "1": {
     id: "1",
     theme: "sunset",

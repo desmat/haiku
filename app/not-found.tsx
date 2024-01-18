@@ -13,20 +13,14 @@ import { NavProfileLink } from "./_components/nav/clientComponents";
 import useHaikus from "./_hooks/haikus";
 import useAlert from './_hooks/alert';
 import * as samples from "@/services/stores/samples";
+import { LanguageType, supportedLanguages } from '@/types/Languages';
 
-export default function NotFound() {
+export default function NotFound({ lang }: { lang?: undefined | LanguageType }) {
   // console.log('>> app.page.render()');
   // const token = cookies().get("session")?.value;
   // const user = token && (await users.getUserFromToken(token))?.user;
 
   const haiku = samples.notFoundHaiku;
-
-  // id = id || `${loaded && haikus && haikus.length > 0 && Math.floor(Math.random() * haikus.length) || -1}`;
-  // const haiku = id && (getHaiku(id) || samples.haikus["-1"]) || ;
-  // const haiku = haikus[Math.floor(Math.random() * haikus.length)];
-
-  // console.log('>> app.page.render()', { haikus, haiku, loaded, id });
-
 
   const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
@@ -38,10 +32,9 @@ export default function NotFound() {
 
   const header = (
     <div>
-      <div className={`${font.architects_daughter.className} fixed top-2 left-3 z-20 text-[26pt] md:text-[32pt]`}>
+      <div className={`${font.architects_daughter.className} fixed top-1 left-4 z-20 text-[26pt] md:text-[32pt]`}>
         <Link
-          // onClick={handleGenerate}
-          href="#"
+          href={`/${lang || ""}`}
           className="hover:no-underline"
           style={textStyle}
         >
@@ -51,21 +44,65 @@ export default function NotFound() {
       {/* <div className="fixed top-4 right-3 z-20">
         <NavProfileLink href="/profile" className="_bg-orange-600 _hover: text-purple-100" style={textStyle} />
       </div> */}
+      {/* <Link href="#" onClick={handleGenerate} className="fixed top-4 right-4 z-20">
+        <IoSparkles
+          className="_bg-orange-600 _hover: _text-purple-100 h-8 w-8 md:h-10 md:w-10" style={textStyle}
+        />
+      </Link> */}
     </div>
   );
 
   const links = [
-    <Link key="web" style={textStyle} href="https://www.desmat.ca" target="_blank" className="_bg-yellow-200 flex flex-row gap-0.5 items-center">
-      {/* <MdHome className=" _mt-[0.1rem] _mr-[-0.2rem] text-xl" /> */}
-      www.desmat.ca
-    </Link>,
-    <Link key="email" style={textStyle} href="mailto:haiku@desmat.ca" target="_blank" className="_bg-yellow-200 flex flex-row gap-1 items-center">
-      {/* <MdMail className="_mt-[0.05rem] _mr-[-0.25rem] text-xl" /> */}
-      @desmat.ca
-    </Link>,
-    <Link key="github" style={textStyle} href="https://github.com/desmat/haiku" target="_blank" className="_bg-yellow-200 flex flex-row gap-0.5 items-center">
+    // <Link key="web"
+    //   style={{ ...textStyle, WebkitTextStroke: undefined }}
+    //   href="https://www.desmat.ca"
+    //   target="_blank"
+    //   className="_bg-yellow-200 flex flex-row gap-0.5 items-center"
+    // >
+    //   {/* <MdHome className=" _mt-[0.1rem] _mr-[-0.2rem] text-xl" /> */}
+    //   www.desmat.ca
+    // </Link>,
+    // <Link key="email" style={{...textStyle, WebkitTextStroke: undefined }} href="mailto:haiku@desmat.ca" target="_blank" className="_bg-yellow-200 flex flex-row gap-1 items-center">
+    //   {/* <MdMail className="_mt-[0.05rem] _mr-[-0.25rem] text-xl" /> */}
+    //   @desmat.ca
+    // </Link>,
+    <Link
+      key="github"
+      style={{ ...textStyle, WebkitTextStroke: undefined }}
+      href="https://github.com/desmat"
+      target="_blank"
+      className="_bg-yellow-200 flex flex-row gap-0.5 items-center"
+    >
       <BsGithub className="mt-[0.1rem] text-md" />
       desmat
+    </Link>,
+    lang && lang != "en" && <Link
+      key="en"
+      style={{ ...textStyle, WebkitTextStroke: undefined }}
+      href="/"
+    >
+      {supportedLanguages["en"]?.nativeName}
+    </Link>,
+    lang != "de" && <Link
+      key="de"
+      style={{ ...textStyle, WebkitTextStroke: undefined }}
+      href="/de"
+    >
+      {supportedLanguages["de"]?.nativeName}
+    </Link>,
+    lang != "es" && <Link
+      key="es"
+      style={{ ...textStyle, WebkitTextStroke: undefined }}
+      href="/es"
+    >
+      {supportedLanguages["es"]?.nativeName}
+    </Link>,
+    lang != "fr" && <Link
+      key="fr"
+      style={{ ...textStyle, WebkitTextStroke: undefined }}
+      href="/fr"
+    >
+      {supportedLanguages["fr"]?.nativeName}
     </Link>,
   ];
 
