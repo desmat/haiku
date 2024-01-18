@@ -22,7 +22,6 @@ export default function Component() {
   const params = useSearchParams();
   const [id, setId] = useState(params.get("id"));
   const [generating, setGenerating] = useState(false);
-  const [colorOffsets, setColorOffsets] = useState({ front: 0, back: 1 });
 
   const [
     haikusLoaded,
@@ -41,6 +40,7 @@ export default function Component() {
   const loaded = id && haikusLoaded(id) || haikusLoaded();
   const haikus = !id && findHaikus();
   const haiku = id && (getHaiku(id) || samples.haikus["-1"]) || haikus[Math.floor(Math.random() * haikus.length)];
+  const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
 
   // id = id || `${loaded && haikus && haikus.length > 0 && Math.floor(Math.random() * haikus.length) || -1}`;
   // const haiku = id && (getHaiku(id) || samples.haikus["-1"]) || ;
@@ -70,8 +70,8 @@ export default function Component() {
     }
   }
 
-  const fontColor = haiku?.colorPalette && haiku.colorPalette[colorOffsets.front] || haiku?.color || "#555555";
-  const bgColor = haiku?.colorPalette && haiku?.colorPalette[colorOffsets.back] || haiku?.bgColor || "lightgrey";
+  const fontColor = haiku?.colorPalette && colorOffsets.front >=0 && haiku.colorPalette[colorOffsets.front] || haiku?.color || "#555555";
+  const bgColor = haiku?.colorPalette && colorOffsets.back >= 0 && haiku?.colorPalette[colorOffsets.back] || haiku?.bgColor || "lightgrey";
   const textStyle = {
     color: fontColor,
     filter: `drop-shadow(0px 0px 8px ${bgColor})`,
@@ -85,6 +85,7 @@ export default function Component() {
           onClick={handleGenerate}
           href="#"
           className="hover:no-underline"
+          style={textStyle}
 
         >
           <span style={textStyle} className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-2px] pr-[3px] pl-[1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>ku</span>

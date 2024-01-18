@@ -7,6 +7,9 @@ import { listToMap, mapToList, uuid } from '@/utils/misc';
 import * as samples from '@/services/stores/samples';
 import * as openai from './openai';
 import { create } from 'domain';
+import chroma from 'chroma-js';
+
+
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -69,6 +72,9 @@ export async function generateHaiku(user: any, subject?: string): Promise<Haiku>
   const colors = await getColors(imageBuffer, 'image/png');
   console.log(">> services.haiku.generateHaiku", { colors });
 
+  // sort by darkness and pick darkest for foreground, lightest for background
+  const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
+
   // const blob = await put(`${uuid()}.png`, imageBuffer, {
   //   access: 'public',
   // });
@@ -81,9 +87,9 @@ export async function generateHaiku(user: any, subject?: string): Promise<Haiku>
     status: "created",
     theme: generatedSubject,
     bgImage: openaiUrl, //blob.url,  // TODO revert
-    // color: `rgb(${colors[0].rgb().join(",")})`,
-    // bgColor: `rgb(${colors[1].rgb().join(",")})`,
-    colorPalette: colors.map((c: any) => c.hex()),
+    color: sortedColors[0].darker(0.5).hex(),
+    bgColor: sortedColors[sortedColors.length - 1].hex(),
+    colorPalette: sortedColors.map((c: any) => c.hex()),
     poem,
   } as Haiku;
 
