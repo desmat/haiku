@@ -75,7 +75,7 @@ export default function Component() {
   const textStyle = {
     color: fontColor,
     filter: `drop-shadow(0px 0px 8px ${bgColor})`,
-    // WebkitTextStroke: `0.6px ${bgColor}`,
+    WebkitTextStroke: `1px ${fontColor}`,
   }
 
   const header = (
@@ -88,7 +88,7 @@ export default function Component() {
           style={textStyle}
 
         >
-          <span style={textStyle} className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-2px] pr-[3px] pl-[1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>ku</span>
+          <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-2px] pr-[3px] pl-[1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>ku</span>
         </Link>
       </div>
       {/* <div className="fixed top-4 right-3 z-20">
