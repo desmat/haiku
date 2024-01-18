@@ -75,9 +75,9 @@ export async function generateHaiku(user: any, subject?: string): Promise<Haiku>
   // sort by darkness and pick darkest for foreground, lightest for background
   const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
 
-  // const blob = await put(`${uuid()}.png`, imageBuffer, {
-  //   access: 'public',
-  // });
+  const blob = await put(`${uuid()}.png`, imageBuffer, {
+    access: 'public',
+  });
   // console.log(">> services.haiku.generateHaiku", { blob });
 
   let haiku = {
@@ -86,7 +86,7 @@ export async function generateHaiku(user: any, subject?: string): Promise<Haiku>
     createdAt: moment().valueOf(),
     status: "created",
     theme: generatedSubject,
-    bgImage: openaiUrl, //blob.url,  // TODO revert
+    bgImage: blob.url,  // TODO revert
     color: sortedColors[0].darker(0.5).hex(),
     bgColor: sortedColors[sortedColors.length - 1].hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),
