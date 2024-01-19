@@ -10,6 +10,7 @@ export async function encodeJWT(payload: any) {
   console.log(">> utils.jwt.encode", { payload, privateKeyStr: privateKeyStr.substring(0, 16) });
 
   const privateKey = await importPKCS8(privateKeyStr, algorithm)
+  console.log(">> utils.jwt.encode after importPKCS8")
 
   const token = await new SignJWT(payload)
     .setProtectedHeader({
@@ -23,6 +24,7 @@ export async function encodeJWT(payload: any) {
     .setIssuedAt()
     .sign(privateKey);
   // console.log(token);
+  console.log(">> utils.jwt.encode after new SignJWT")
 
   return token;
 }
