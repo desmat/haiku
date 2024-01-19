@@ -1,14 +1,10 @@
-import BackLink from "@/app/_components/BackLink";
-import Page from "@/app/_components/Page";
-// import { title, subtitle } from "./page";
+import { Loading, NavOverlay } from "./_components/nav/Nav";
 
-export default async function Loading() {
+export default async function Page() {
   return (
-    <Page
-      // links={[<BackLink key="0" />]}
-      // title={title}
-      // subtitle={subtitle}
-      loading={true}
-    />
+    <div>
+      <NavOverlay />
+      <Loading />
+    </div>
   )
 }
