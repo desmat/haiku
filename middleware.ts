@@ -4,11 +4,17 @@ import { NextResponse } from "next/server";
 import { userSession } from "./services/users";
 
 export async function middleware(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith("/api/")) {
+  const path = request.nextUrl.pathname;
+  const thing = request.nextUrl.toString();
+  console.log("*** middleware", { path, thing });
+
+  if (path.startsWith("/api/")) {
     const session = await userSession(request);
-    // console.log("*** middleware", { user });
+    console.log("*** middleware", { session });
 
     if (!session?.user) {
+      console.log("*** middleware NOPE", { session });
+
       return NextResponse.json(
         { success: false, message: 'authorization failed' },
         { status: 403 }
