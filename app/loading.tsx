@@ -1,4 +1,4 @@
-import { Loading, NavOverlay } from "./_components/nav/Nav";
+import { Loading, NavOverlay } from "./_components/Nav";
 
 export default async function Page() {
   return (

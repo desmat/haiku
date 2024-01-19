@@ -1,5 +1,5 @@
 import HaikuPage from '@/app/_components/HaikuPage';
-import { NavOverlay } from '@/app/_components/nav/Nav';
+import { NavOverlay } from '@/app/_components/Nav';
 import { notFoundHaiku } from "@/services/stores/samples";
 import { LanguageType } from '@/types/Languages';
 

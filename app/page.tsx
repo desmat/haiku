@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react';
 import { Haiku } from "@/types/Haiku";
-import { Loading, NavOverlay } from '@/app/_components/nav/Nav';
+import { Loading, NavOverlay } from '@/app/_components/Nav';
 import HaikuPage from '@/app/_components/HaikuPage';
 import useHaikus from "@/app/_hooks/haikus";
 import NotFound from '@/app/not-found';

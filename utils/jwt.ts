@@ -3,13 +3,13 @@
 import { SignJWT, decodeJwt, importPKCS8 } from "jose";
 
 const algorithm = "RS256"
-const privateKeyStr = process.env.AUTH_PRIVATE_KEY;
-const publicKeyStr = process.env.AUTH_PUBLIC_KEY;
+const privateKeyStr = process.env.AUTH_PRIVATE_KEY || "NO_KEY";
+const publicKeyStr = process.env.AUTH_PUBLIC_KEY || "NO_KEY";
 
 export async function encodeJWT(payload: any) {
-  // console.log(">> utils.jwt.encode", { secret });
+  // console.log(">> utils.jwt.encode", { payload, privateKeyStr });
 
-  const privateKey = await importPKCS8(publicKeyStr || "NO_KEY", algorithm)
+  const privateKey = await importPKCS8(privateKeyStr, algorithm)
 
   const token = await new SignJWT(payload)
     .setProtectedHeader({
