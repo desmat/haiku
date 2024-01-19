@@ -3,8 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react';
 import Alert from '@/app/_components/Alert';
-import User from '@/app/_components/User'
-import Prefetch from './_components/Prefetch';
+
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,10 +26,8 @@ export default function RootLayout({
           </div>
         </div>
       </body>
-      <User />
       <Analytics />
       <Alert />
-      <Prefetch />
     </html>
   )
 }
