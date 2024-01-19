@@ -6,8 +6,6 @@ import { User } from '@/types/User';
 import { listToMap, mapToList, mapToSearchParams, uuid } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from "./alert";
-import * as jwt from '@/utils/jwt';
-import { useLocalStorage } from 'usehooks-ts';
 import useUser from './user';
 
 async function fetchOpts() {

@@ -7,10 +7,9 @@ const privateKeyStr = process.env.AUTH_PRIVATE_KEY || "NO_KEY";
 const publicKeyStr = process.env.AUTH_PUBLIC_KEY || "NO_KEY";
 
 export async function encodeJWT(payload: any) {
-  console.log(">> utils.jwt.encode", { payload, privateKeyStr: privateKeyStr.substring(0, 16) });
+  // console.log(">> utils.jwt.encode", { payload, privateKeyStr: privateKeyStr.substring(0, 16) });
 
   const privateKey = await importPKCS8(privateKeyStr, algorithm)
-  console.log(">> utils.jwt.encode after importPKCS8")
 
   const token = await new SignJWT(payload)
     .setProtectedHeader({
