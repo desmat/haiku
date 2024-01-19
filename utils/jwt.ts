@@ -7,7 +7,7 @@ const privateKeyStr = process.env.AUTH_PRIVATE_KEY || "NO_KEY";
 const publicKeyStr = process.env.AUTH_PUBLIC_KEY || "NO_KEY";
 
 export async function encodeJWT(payload: any) {
-  // console.log(">> utils.jwt.encode", { payload, privateKeyStr });
+  console.log(">> utils.jwt.encode", { payload });
 
   const privateKey = await importPKCS8(privateKeyStr, algorithm)
 

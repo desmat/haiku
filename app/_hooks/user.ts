@@ -46,9 +46,16 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     } else {
       console.log('>> hooks.user.load() creating session', {});
       user = { id: uuid(), isAnonymous: true, preferences: {} };
-      token = await encodeJWT({ user })
+      
       try {
-        window?.localStorage && window.localStorage.setItem("session", token);
+        token = await encodeJWT({ user });
+      } catch (error) {
+        console.error("Error encoding jwt", { error });
+      }
+    
+      
+      try {
+        window?.localStorage && window.localStorage.setItem("session", token || "");
       } catch (error) {
         console.error("Error saving to localstorage", { error });
       }
