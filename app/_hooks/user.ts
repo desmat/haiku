@@ -38,16 +38,20 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
   load: async () => {
     let user;
-    let token = window.localStorage.getItem("session");
-    // console.log(">> hooks.user.load()", { token });    
+    let token = window?.localStorage && window.localStorage.getItem("session");
+    console.log(">> hooks.user.load()", { token });
 
     if (token) {
       user = (await decodeJWT(token)).user;
     } else {
-      // console.log('>> hooks.user.load() creating session', { });
+      console.log('>> hooks.user.load() creating session', {});
       user = { id: uuid(), isAnonymous: true, preferences: {} };
       token = await encodeJWT({ user })
-      window.localStorage.setItem("session", token);
+      try {
+        window?.localStorage && window.localStorage.setItem("session", token);
+      } catch (error) {
+        console.error("Error saving to localstorage", { error });
+      }
     }
 
     set({ user, token, loaded: true });
