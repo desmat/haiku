@@ -1,35 +1,18 @@
 // middleware.ts
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { validateUserSession } from "./services/users";
+import { userSession } from "./services/users";
 
 export async function middleware(request: NextRequest) {
-  const method = request.method;
-  const url = request.nextUrl.pathname;
+  const session = await userSession(request);
+  // console.log("*** middleware", { user });
 
-  // console.log("*** middleware", { url, method });
-/*
-  if (url == "/api/user" && ["POST", "DELETE"].includes(method)) {
-    // console.log("*** middleware PUBLIC USER PATH");
-    return NextResponse.next();
+  if (!session?.user) {
+    return NextResponse.json(
+      { success: false, message: 'authorization failed' },
+      { status: 403 }
+    );
   }
-
-  if (!["POST", "PUT", "DELETE"].includes(method)) {
-    // console.log("*** middleware PUBLIC NON-MUTATING PATH");
-    return NextResponse.next();
-  }
-
-  const { user } = await validateUserSession(request);
-
-  if (user) {
-    return NextResponse.next();
-  }
-
-  return NextResponse.json(
-    { success: false, message: 'authorization failed' },
-    { status: 403 }
-  );
-  */
 
   return NextResponse.next();
 }

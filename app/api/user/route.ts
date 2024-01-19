@@ -10,7 +10,7 @@ import * as users from "@/services/users"; // import just to make sure Firebase 
 
 export async function GET(request: Request) {
   // console.log('>> app.api.user.GET', request);  
-  const { user, error } = await users.validateUserSession(request) as any;
+  const { user, error } = await users.userSession(request) as any;
 
   // console.log('>> app.api.user.GET', { user, error});
 
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { user: _user, refreshToken } = await users.authenticateUser(request) as any;
+  const { user: _user, refreshToken } = await users.userSession(request) as any;
   const isAdmin = _user && (process.env.ADMIN_USERS?.split(/\s*\,\s*/) || []).includes(_user.email);
 
   console.log('>> app.api.user.POST', { _user, isAdmin });
@@ -44,7 +44,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const user = await users.setCustomUserClaims(_user.uid, { admin: isAdmin });
+  // const user = await users.setCustomUserClaims(_user.id, { admin: isAdmin });
+  const user = _user
 
   //Generate auth token cookie
   const expiresIn = 60 * 60 * 24 * 5 * 1000;

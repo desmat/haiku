@@ -1,15 +1,21 @@
 'use client'
 
 import { useEffect } from 'react';
-import useUser from '@/app/_hooks/user';
+import { uuid } from '@/utils/misc';
+import { useLocalStorage } from 'usehooks-ts';
+import { encodeJWT } from '@/utils/jwt';
 
 export default function User() {
-  // console.log(`>> components.User.render()`);
-  const [userLoaded, loadUser] = useUser((state: any) => [state.loaded, state.load]);
+  const [session, setSession] = useLocalStorage<string | undefined>("session", undefined);
+  // console.log('>> app.page.render()', { session });
 
   useEffect(() => {
-    if (!userLoaded) loadUser();
-  }, []);  
+    if (!session) {
+      encodeJWT({ user: { id: uuid(), isAnonymous: true, preferences: {} } })
+        .then((jwt: string) => setSession(jwt));
+    }
+
+  }, []);
 
   return null;
 }

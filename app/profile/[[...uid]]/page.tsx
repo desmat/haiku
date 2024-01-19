@@ -12,8 +12,8 @@ import * as users from "@/services/users";
 // import { Exercise } from "@/types/Exercise";
 // import { Workout } from "@/types/Workout";
 
-export default function Component({ params }: { params: { uid?: string } }) {
-  // console.log('>> app.profile.page.render()', params.uid);
+export default function Component({ params }: { params: { id?: string } }) {
+  // console.log('>> app.profile.page.render()', params.id);
   const [copiedValue, copy] = useCopyToClipboard();
 
   const [
@@ -32,7 +32,7 @@ export default function Component({ params }: { params: { uid?: string } }) {
     state.logout
   ]);
 
-  const query = user && { createdBy: user.uid }
+  const query = user && { createdBy: user.id }
 
   // const [
   //   myExercises,
@@ -54,14 +54,14 @@ export default function Component({ params }: { params: { uid?: string } }) {
   //   state.load
   // ]);
 
-  // console.log('>> app.profile.page.render()', { uid: params.uid, user, userLoaded, userLoading });
+  // console.log('>> app.profile.page.render()', { uid: params.id, user, userLoaded, userLoading });
 
   useEffect(() => {
-    // console.log("** app.profile.page.useEffect", { uid: params.uid, user });
+    // console.log("** app.profile.page.useEffect", { uid: params.id, user });
     if (!userLoaded) loadUser();
     // if (!exercisesLoaded) loadExercises(query);
     // if (!workoutsLoaded) loadWorkouts();
-  }, [params.uid]);
+  }, [params.id]);
 
   function doSigninWithGoogle(e: any) {
     // console.log("** app.profile.page.doSigninWithGoogle");
@@ -112,8 +112,8 @@ export default function Component({ params }: { params: { uid?: string } }) {
       className="flex flex-col items-center"
       title={<>
         {!userLoaded || !user || user?.isAnonymous ? "Profile" : users.getUserName(user)}
-        {params.uid &&
-          <span>: {params.uid}</span>
+        {params.id &&
+          <span>: {params.id}</span>
         }
       </>}
       subtitle={!userLoaded || !user || user?.isAnonymous ? "Pick a sign-in method below" : undefined}
@@ -125,10 +125,10 @@ export default function Component({ params }: { params: { uid?: string } }) {
             <tr>
               <td width="50%" className="text-right pr-2 opacity-40 font-semibold">ID</td>
               <td width="50%">
-                <Link onClick={() => copy(user.uid)} style="parent secondary" className="flex flex-row">
-                  <div title={user.id} className="max-w-[10rem] truncate text-ellipsis">{user.uid}</div>
+                <Link onClick={() => copy(user.id)} style="parent secondary" className="flex flex-row">
+                  <div title={user.id} className="max-w-[10rem] truncate text-ellipsis">{user.id}</div>
                   <span className="relative px-0">
-                    <Link style="child light" className="absolute left-0.5">{copiedValue == user?.uid ? "Copied" : "Copy"}</Link>
+                    <Link style="child light" className="absolute left-0.5">{copiedValue == user?.id ? "Copied" : "Copy"}</Link>
                   </span>
                 </Link>
               </td>
@@ -153,7 +153,7 @@ export default function Component({ params }: { params: { uid?: string } }) {
               <tr>
                 <td className="text-right pr-2 opacity-40 font-semibold">Workouts</td>
                 <td>
-                  <Link href={`/workouts?uid=${user.uid}`} style="parent secondary" className="flex flex-row">
+                  <Link href={`/workouts?uid=${user.id}`} style="parent secondary" className="flex flex-row">
                     <div>{myWorkouts.length}</div>
                     <span className="relative px-0">
                       <Link style="child light" className="absolute left-2">View</Link>
@@ -166,7 +166,7 @@ export default function Component({ params }: { params: { uid?: string } }) {
               <tr className={myExercises.length == 0 ? "cursor-pointer hover:underline" : ""}>
                 <td className="text-right pr-2 opacity-40 font-semibold">Exercises</td>
                 <td>
-                  <Link href={`/exercises?uid=${user.uid}`} style="parent secondary" className="flex flex-row">
+                  <Link href={`/exercises?uid=${user.id}`} style="parent secondary" className="flex flex-row">
                     <div>{myExercises.length}</div>
                     <span className="relative px-0">
                       <Link style="child light" className="absolute left-2">View</Link>
@@ -178,16 +178,16 @@ export default function Component({ params }: { params: { uid?: string } }) {
           </tbody>
         </table>
       }
-      {false && !params.uid &&
+      {false && !params.id &&
         <div className="flex flex-col lg:flex-row lg:space-x-4 items-center justify-center mt-4">
           {/* {user && myWorkouts?.length > 0 &&
             <div className="text-dark-2">
-              <Link href={`/workouts?uid=${user.uid}`}>Workouts ({myWorkouts.length})</Link>
+              <Link href={`/workouts?uid=${user.id}`}>Workouts ({myWorkouts.length})</Link>
             </div>
           } */}
           {/* {user && myExercises?.length > 0 &&
             <div className="text-dark-2">
-              <Link href={`/exercises?uid=${user.uid}`}>Exercises ({myExercises.length})</Link>
+              <Link href={`/exercises?uid=${user.id}`}>Exercises ({myExercises.length})</Link>
             </div>
           } */}
           {user && user.isAnonymous &&
@@ -215,11 +215,11 @@ export default function Component({ params }: { params: { uid?: string } }) {
               <Link href="/" onClick={doLogout}>Logout</Link>
             </div>
           }
-          {/* {user && user.isAnonymous && // TODO CRIPPLE
+          {true && //user && user.isAnonymous && // TODO CRIPPLE
             <div className="text-dark-2 hover:text-light-2">
-              <Link href="/" onClick={(e) => doLogout(e, logout)}>Logout</Link>
+              <Link href="/" onClick={doLogout}>Logout</Link>
             </div>
-          } */}
+          }
         </div>
       }
     </Page>

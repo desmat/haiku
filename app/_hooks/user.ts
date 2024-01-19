@@ -1,4 +1,3 @@
-import { User } from "firebase/auth";
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { init as doInit, logout as doLogout, signin as doSignin, signInAnonymously as doSignInAnonymously } from "@/services/auth";
@@ -6,6 +5,7 @@ import { SigninMethod } from "@/types/SigninMethod";
 import { getProviderType, getUserName } from "@/services/users";
 import trackEvent from "@/utils/trackEvent";
 import useAlert from "./alert";
+import { User } from '@/types/User';
 
 const useUser: any = create(devtools((set: any, get: any) => ({
   user: undefined,
@@ -23,14 +23,14 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       if (user) {
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
-        if (!fetching && (user.uid != savedUser?.uid || !loaded)) {
+        if (!fetching && (user.id != savedUser?.id || !loaded)) {
           // console.log('>> hooks.User.useUser.onAuthStateChanged fetching user', { loading, fetching, loaded, user });
           set({ fetching: true });
           fetch('/api/user', {
             method: "GET"
           }).then(async (response: any) => {
             if (response.status != 200) {
-              useAlert.getState().error(`Error fetching user ${user.uid}: ${response.status} (${response.statusText})`);
+              useAlert.getState().error(`Error fetching user ${user.id}: ${response.status} (${response.statusText})`);
               set({ loaded: true, loading: false, fetching: false });
               return;
             }
@@ -62,7 +62,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
             fetch('/api/user', {
               method: "POST",
-              body: JSON.stringify({ uid: user.uid }),
+              body: JSON.stringify({ uid: user.id }),
               headers: {
                 Authorization: `Bearer ${authToken}`,
               },
@@ -105,7 +105,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
           fetch('/api/user', {
             method: "POST",
-            body: JSON.stringify({ uid: user.uid, authToken }),
+            body: JSON.stringify({ uid: user.id, authToken }),
             headers: {
               Authorization: `Bearer ${authToken}`,
             },
@@ -114,7 +114,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
             // console.log('>> hooks.User.signin', { updatedUser });
 
             trackEvent("user-signedin", {
-              id: updatedUser.uid,
+              id: updatedUser.id,
               name: getUserName(updatedUser),
               email: updatedUser.email,
               isAnonymous: updatedUser.isAnonymous,

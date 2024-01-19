@@ -7,9 +7,9 @@ import { FaUserCircle } from 'react-icons/fa';
 import { Menu, Transition } from '@headlessui/react'
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid'
 import useAlert from "@/app/_hooks/alert";
-import useUser from '@/app/_hooks/user'; 
+// import useUser from '@/app/_hooks/user'; 
 import classNames from '@/utils/classNames'
-import { menuItems } from "./menuItems";
+// import { menuItems } from "./menuItems";
 import Link from '../Link';
 
 // export function NavLinks() {
@@ -126,66 +126,66 @@ import Link from '../Link';
 //   )
 // }
 
-function NavLink({
-  children, href, className, title, isMenu, isActive, onClick,
-}: {
-  children: React.ReactNode,
-  href?: string,
-  className?: string,
-  title?: string
-  isMenu?: boolean,
-  isActive?: boolean
-  onClick?: () => void,
-}) {
-  // console.log('>> components.NavLink.render()', { isActive });
+// function NavLink({
+//   children, href, className, title, isMenu, isActive, onClick,
+// }: {
+//   children: React.ReactNode,
+//   href?: string,
+//   className?: string,
+//   title?: string
+//   isMenu?: boolean,
+//   isActive?: boolean
+//   onClick?: () => void,
+// }) {
+//   // console.log('>> components.NavLink.render()', { isActive });
 
-  return (
-    <div className="flex w-max" title={title}
-      onClick={() => onClick && onClick()}
-    >
-      <ReactLink
-        href={href || "#"}
-        className={(
-          isActive
-            ? (isMenu ? "text-dark-1" : "text-slate-100")
-            : (isMenu ? "text-dark-2" : "text-slate-300")
-        ) + (isMenu
-          ? ""
-          : " _hover:text-slate-100"
-          ) + " flex flex-row ellipsis whitespace-nowrap lg:whitespace-normal space-x-2 h-full lg:h-fit my-0 lg:my-1 mx-1 lg:mx-0 align-middle " + className}
-      >
-        {children}
-      </ReactLink>
-    </div>
-  )
-}
+//   return (
+//     <div className="flex w-max" title={title}
+//       onClick={() => onClick && onClick()}
+//     >
+//       <ReactLink
+//         href={href || "#"}
+//         className={(
+//           isActive
+//             ? (isMenu ? "text-dark-1" : "text-slate-100")
+//             : (isMenu ? "text-dark-2" : "text-slate-300")
+//         ) + (isMenu
+//           ? ""
+//           : " _hover:text-slate-100"
+//           ) + " flex flex-row ellipsis whitespace-nowrap lg:whitespace-normal space-x-2 h-full lg:h-fit my-0 lg:my-1 mx-1 lg:mx-0 align-middle " + className}
+//       >
+//         {children}
+//       </ReactLink>
+//     </div>
+//   )
+// }
 
-export function NavProfileLink({
-  href, className, style
-}: {
-  href: string,
-  className?: string,
-  style?: any
-}) {
-  // console.log('>> components.PostNaProfileNavLinkvLink.render()');
-  const pathname = usePathname();
-  const [user] = useUser((state: any) => [state.user]);
-  const isActive = href && (href == "/" && pathname == "/") || (href && href != "/" && pathname.startsWith(href));
-  const isLoggedIn = user && user.uid && !user.isAnonymous;
-  const photoURL = isLoggedIn && user?.photoURL || "";
+// export function NavProfileLink({
+//   href, className, style
+// }: {
+//   href: string,
+//   className?: string,
+//   style?: any
+// }) {
+//   // console.log('>> components.PostNaProfileNavLinkvLink.render()');
+//   const pathname = usePathname();
+//   const [user] = useUser((state: any) => [state.user]);
+//   const isActive = href && (href == "/" && pathname == "/") || (href && href != "/" && pathname.startsWith(href));
+//   const isLoggedIn = user && user.id && !user.isAnonymous;
+//   const photoURL = isLoggedIn && user?.photoURL || "";
 
-  return (
-    <ReactLink
-      href={href}
-      title={user ? user.isAnonymous ? "(Anonymous)" : user.displayName as string : "(Not logged in)"}
-      className={(isActive ? "_text-slate-100" : "text-slate-300") + " flex flex-auto ellipsis whitespace-nowrap lg:whitespace-normal space-x-2 h-full lg:h-fit -my-0.5 lg:my-0 mx-1 lg:mx-auto _hover:text-slate-100 align-middle text-ellipsis " + className}
-      style={style || {}}
-    >
-      {!photoURL && <FaUserCircle className="my-auto h-8 w-8 md:h-12 md:w-12 " />}
-      {user && photoURL && <img className="rounded-full h-8 w-8 md:h-12 md:w-12" style={style} src={photoURL}></img>}
-    </ReactLink>
-  )
-}
+//   return (
+//     <ReactLink
+//       href={href}
+//       title={user ? user.isAnonymous ? "(Anonymous)" : user.displayName as string : "(Not logged in)"}
+//       className={(isActive ? "_text-slate-100" : "text-slate-300") + " flex flex-auto ellipsis whitespace-nowrap lg:whitespace-normal space-x-2 h-full lg:h-fit -my-0.5 lg:my-0 mx-1 lg:mx-auto _hover:text-slate-100 align-middle text-ellipsis " + className}
+//       style={style || {}}
+//     >
+//       {!photoURL && <FaUserCircle className="my-auto h-8 w-8 md:h-12 md:w-12 " />}
+//       {user && photoURL && <img className="rounded-full h-8 w-8 md:h-12 md:w-12" style={style} src={photoURL}></img>}
+//     </ReactLink>
+//   )
+// }
 
 
 // export function GenerateLink({
@@ -215,7 +215,7 @@ export function NavProfileLink({
 //       onClick={() => {
 //         if (user) {
 //           handleGenerateWorkout(generateWorkout, router, user, info, success)
-//           router.push(`/workouts?uid=${user?.uid || ""}`);
+//           router.push(`/workouts?uid=${user?.id || ""}`);
 //         }
 //       }}
 //     >
