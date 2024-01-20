@@ -1,159 +1,57 @@
-import { User } from "firebase/auth";
+import { decodeJWT, encodeJWT } from '@/utils/jwt';
+import { uuid } from '@/utils/misc';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { init as doInit, logout as doLogout, signin as doSignin, signInAnonymously as doSignInAnonymously } from "@/services/auth";
-import { SigninMethod } from "@/types/SigninMethod";
-import { getProviderType, getUserName } from "@/services/users";
-import trackEvent from "@/utils/trackEvent";
-import useAlert from "./alert";
+
+async function getSession() {
+  const session = window?.localStorage && window.localStorage.getItem("session");
+  const decoded = session && await decodeJWT(session);
+
+  // @ts-ignore
+  return { token: session, session: decoded, user: decoded?.user };
+}
 
 const useUser: any = create(devtools((set: any, get: any) => ({
-  user: undefined,
+  user: undefined, //(await getSession()).user,
+  // session: undefined,
+  token: undefined,
   loaded: false,
-  loading: false, // guard against signin in many times anonymously
-  fetching: false, // guard against fetching many times
+  // loading: false, // guard against signin in many times anonymously
+
+  getUser: async () => {
+    const { loaded, user, load } = get();
+    if (!loaded) {
+      return (await load()).user;
+    }
+
+    return user;
+  },
+
+  getToken: async () => {
+    const { loaded, token, load } = get();
+    if (!loaded) {
+      return (await load()).token;
+    }
+
+    return token;
+  },
 
   load: async () => {
-    // console.log(">> hooks.user.load", {});
+    let user;
+    let token = window?.localStorage && window.localStorage.getItem("session");
+    // console.log(">> hooks.user.load()", { token });
 
-    const onAuthStateChanged = async function (user: User) {
-      const { user: savedUser, loaded, loading, fetching } = get();
-      // console.log('>> hooks.User.useUser.onAuthStateChanged', { loading, fetching, loaded, user, savedUser });
+    if (token) {
+      user = (await decodeJWT(token)).user;
+    } else {
+      // console.log('>> hooks.user.load() creating session', {});
+      user = { id: uuid(), isAnonymous: true, preferences: {} };
+      token = await encodeJWT({ user });
+      window?.localStorage && window.localStorage.setItem("session", token || "");
+    }
 
-      if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-        if (!fetching && (user.uid != savedUser?.uid || !loaded)) {
-          // console.log('>> hooks.User.useUser.onAuthStateChanged fetching user', { loading, fetching, loaded, user });
-          set({ fetching: true });
-          fetch('/api/user', {
-            method: "GET"
-          }).then(async (response: any) => {
-            if (response.status != 200) {
-              useAlert.getState().error(`Error fetching user ${user.uid}: ${response.status} (${response.statusText})`);
-              set({ loaded: true, loading: false, fetching: false });
-              return;
-            }
-
-            const updatedUser = await response.json();
-            // console.log('>> hooks.User.useUser.onAuthStateChanged fetched user', { user, updatedUser });
-            set({ user: { ...user, admin: updatedUser.customClaims?.admin }, loaded: true, loading: false, fetching: false });
-          });
-        }
-      } else {
-        // User is signed out
-        // console.log('>> hooks.User.useUser.onAuthStateChanged signed out', { loading, loaded });
-        // set({ user: undefined, loaded: true });
-        set({ user: undefined });
-
-        // // cripple to test not logged in scenarios
-        // set({ loaded: true, loading: false });
-        // return;
-
-        // when not signed in or logged out sign in anonymously
-        if (!loaded && !loading) {
-          set({ loaded: false, loading: true });
-          // console.log('>> hooks.User.useUser.onAuthStateChanged doSignInAnonymously', { loading, loaded });
-
-          doSignInAnonymously().then(async (auth: any) => {
-            const user = auth.user;
-            const authToken = await user.getIdToken();
-            // console.log('>> hooks.User.useUser.onAuthStateChanged doSignInAnonymously completed', { loading, loaded, user, authToken });
-
-            fetch('/api/user', {
-              method: "POST",
-              body: JSON.stringify({ uid: user.uid }),
-              headers: {
-                Authorization: `Bearer ${authToken}`,
-              },
-            }).then(async (response: any) => {
-              const updatedUser = await response.json();
-              // console.log('>> hooks.User.useUser.onAuthStateChanged doSignInAnonymously fetch user completed', { updatedUser });
-              set({ user: { ...user, admin: updatedUser.customClaims?.admin }, loaded: true, loading: false });
-            });
-          });
-        }
-      }
-    };
-
-    return doInit({ onAuthStateChanged }).then((ret: any) => {
-      // console.log('>> hooks.User.useUser.doInit', { ret });
-      // set({ user, loaded: true });
-    });
-  },
-
-  signin: async (method: SigninMethod, params?: any) => {
-    // console.log(">> hooks.User.signin", { method, params });
-
-    const signinFn = async () => {
-      if (method == "anonymous") {
-        const ret = (await doSignInAnonymously()) as any;
-        return ret?.user;
-      } else {
-        return doSignin(method, params);
-      }
-    };
-
-    return new Promise((resolve, reject) => {
-      set({ /* user: undefined, */ loaded: false, loading: true });
-      signinFn()
-        .then(async (user: any) => {
-          // console.log(">> hooks.User.signin", { user });
-
-          const authToken = await user.getIdToken();
-          // console.log(">> hooks.User.signin", { authToken });
-
-          fetch('/api/user', {
-            method: "POST",
-            body: JSON.stringify({ uid: user.uid, authToken }),
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-          }).then(async (response: any) => {
-            const updatedUser = await response.json();
-            // console.log('>> hooks.User.signin', { updatedUser });
-
-            trackEvent("user-signedin", {
-              id: updatedUser.uid,
-              name: getUserName(updatedUser),
-              email: updatedUser.email,
-              isAnonymous: updatedUser.isAnonymous,
-              provider: getProviderType(updatedUser),
-            });
-
-            set({ user: { ...user, admin: updatedUser.customClaims?.admin }, loaded: true, loading: false });
-            resolve(user);
-          });
-        }).catch((error) => {
-          useAlert.getState().error(`Error signing in: ${error}`);
-          set({ /* user: undefined, */ loaded: true, loading: false, fetching: false });
-          reject(error);
-        });
-    });
-  },
-
-
-  logout: async () => {
-    // console.log(">> hooks.User.logout");
-
-    return new Promise((resolve, reject) => {
-      if (get().user) {
-        set({ /* user: undefined, */ loaded: false, loading: false });
-        doLogout().then(() => {
-          // console.log(">> hooks.User.logout then");
-          set({ user: undefined, loaded: false, loading: false });
-          fetch('/api/user', {
-            method: "DELETE",
-          }).then(() => {
-            // console.log(">> hooks.User.logout success");
-            resolve(true);
-          }).catch((error) => {
-            useAlert.getState().error(`Error logging out: ${error}`);
-            reject(error);
-          })
-        });
-      }
-    });
+    set({ user, token, loaded: true });
+    return { user, token };
   },
 })));
 

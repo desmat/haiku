@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getHaiku, deleteHaiku, saveHaiku } from '@/services/haikus';
-import { validateUserSession } from '@/services/users';
+import { userSession } from '@/services/users';
 
 export const maxDuration = 300;
 
@@ -24,15 +24,9 @@ export async function PUT(
 ) {
   console.log('>> app.api.haiku.[id].PUT', { params });
 
-  const { user } = await validateUserSession(request)
-  if (!user) {
-    return NextResponse.json(
-      { success: false, message: 'authentication failed' },
-      { status: 401 }
-    );
-  }
-
+  const { user } = await userSession(request)
   const haiku = await getHaiku(params.id);
+
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
@@ -46,14 +40,9 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   console.log('>> app.api.haiku.DELETE', { params });
-  const { user } = await validateUserSession(request)
-  if (!user) {
-    return NextResponse.json(
-      { success: false, message: 'authentication failed' },
-      { status: 401 }
-    );
-  }
-
+  
+  const { user } = await userSession(request)
+  
   if (!params.id) {
     throw `Cannot delete haiku with null id`;
   }

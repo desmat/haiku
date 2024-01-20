@@ -1,12 +1,11 @@
-import { User } from 'firebase/auth';
 import moment from 'moment';
 import { put } from '@vercel/blob';
 import { Haiku } from "@/types/Haiku";
 import { Store } from "@/types/Store";
-import { listToMap, mapToList, uuid } from '@/utils/misc';
+import { User } from '@/types/User';
+import { mapToList, uuid } from '@/utils/misc';
 import * as samples from '@/services/stores/samples';
 import * as openai from './openai';
-import { create } from 'domain';
 import chroma from 'chroma-js';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 
@@ -42,12 +41,12 @@ export async function createHaiku(user: User): Promise<Haiku> {
 
   let haiku = {
     id: uuid(),
-    createdBy: user.uid,
+    createdBy: user.id,
     createdAt: moment().valueOf(),
     status: "created",
   } as Haiku;
 
-  return store.haikus.create(user.uid, haiku);
+  return store.haikus.create(user.id, haiku);
 }
 
 export async function generateHaiku(user: any, subject?: string, lang?: LanguageType): Promise<Haiku> {
@@ -83,18 +82,19 @@ export async function generateHaiku(user: any, subject?: string, lang?: Language
   let haiku = {
     id: uuid(),
     lang: lang || "en",
-    createdBy: user.uid,
+    createdBy: user.id,
     createdAt: moment().valueOf(),
     status: "created",
     theme: generatedSubject,
-    bgImage: blob.url,
+    bgImage: blob.url,  // TODO REVERT
+    // bgImage: openaiUrl,   // TODO REVERT
     color: sortedColors[0].darker(0.5).hex(),
     bgColor: sortedColors[sortedColors.length - 1].hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),
     poem,
   } as Haiku;
 
-  return store.haikus.create(user.uid, haiku);
+  return store.haikus.create(user.id, haiku);
 }
 
 export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
@@ -109,19 +109,19 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
     throw `Haiku not found: ${id}`;
   }
 
-  if (!(haiku.createdBy == user.uid || user.customClaims?.admin)) {
+  if (!(haiku.createdBy == user.id || user.customClaims?.admin)) {
     throw `Unauthorized`;
   }
 
-  return store.haikus.delete(user.uid, id);
+  return store.haikus.delete(user.id, id);
 }
 
 export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
   console.log(">> services.haiku.deleteHaiku", { haiku, user });
 
-  if (!(haiku.createdBy == user.uid || user.customClaims?.admin)) {
+  if (!(haiku.createdBy == user.id || user.customClaims?.admin)) {
     throw `Unauthorized`;
   }
 
-  return store.haikus.update(user.uid, haiku);
+  return store.haikus.update(user.id, haiku);
 }

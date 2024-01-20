@@ -6,21 +6,25 @@ export const supportedLanguages = {
     name: "English",
     nativeName: "English",
   },
-  "fr": {
-    name: "French",
-    nativeName: "Français",
+  "de": {
+    name: "German",
+    nativeName: "Deutsch",
   },
   "es": {
     name: "Spanish",
     nativeName: "Español",
   },
-  "de": {
-    name: "German",
-    nativeName: "Deutsch",
+  // "pt": {
+  //   name: "Portuguese",
+  //   nativeName: "Português",
+  // },
+  "fr": {
+    name: "French",
+    nativeName: "Français",
   },
 };
 
 export const isSupportedLanguage = (lang: any): boolean => {
-  console.log("** types.Languages.isSupportedLanguage", { lang });
+  // console.log("** types.Languages.isSupportedLanguage", { lang });
   return Object.keys(supportedLanguages).includes(lang);
 };

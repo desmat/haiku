@@ -1,11 +1,19 @@
-import { User } from 'firebase/auth';
 import moment from 'moment';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { Haiku } from '@/types/Haiku';
+import { User } from '@/types/User';
 import { listToMap, mapToList, mapToSearchParams, uuid } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from "./alert";
+import useUser from './user';
+
+async function fetchOpts() {
+  const token = await useUser.getState().getToken();
+  // console.log(">> hooks.haiku.fetchOpts", { token });
+  return token && { headers: { Authorization: `Bearer ${token}` } } || {};
+}  
+
 
 type HaikuMap = { [key: string]: Haiku | undefined; };
 type StatusMap = { [key: string]: boolean };
@@ -112,7 +120,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     // console.log(">> hooks.haiku.load", { id, query });
 
     if (id) {
-      fetch(`/api/haikus/${id}`).then(async (res) => {
+      fetch(`/api/haikus/${id}`, await fetchOpts()).then(async (res) => {
         const { _haikus } = get();
         setLoaded(id);
 
@@ -130,7 +138,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       });
     } else {
       const params = query && mapToSearchParams(query);
-      fetch(`/api/haikus${params ? `?${params}` : ""}`).then(async (res) => {
+      fetch(`/api/haikus${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
         const { _haikus } = get();
         setLoaded(query);
 
@@ -157,7 +165,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     // optimistic
     const creating = {
       id: `interim-${uuid()}`,
-      createdBy: user.uid,
+      createdBy: user.id,
       createdAt: moment().valueOf(),
       status: "creating",
       name,
@@ -169,8 +177,9 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       _haikus: { ..._haikus, [creating.id]: creating },
     });
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       fetch('/api/haikus', {
+        ...await fetchOpts(),
         method: "POST",
         body: JSON.stringify({ name }),
       }).then(async (res) => {
@@ -218,8 +227,9 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       _haikus: { ..._haikus, [haiku.id || ""]: saving }, // TODO: update type to make id mandatory
     });
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       fetch(`/api/haikus/${haiku.id}`, {
+        ...await fetchOpts(),
         method: "PUT",
         body: JSON.stringify({ haiku }),
       }).then(async (res) => {
@@ -261,8 +271,9 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     //   _haikus: { ..._haikus, [haiku.id || ""]: generating },
     // });
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       fetch(`/api/haikus/${haiku.id}/generate`, {
+        ...await fetchOpts(),
         method: "POST",
         body: JSON.stringify({ haiku }),
       }).then(async (res) => {
@@ -316,6 +327,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     });
 
     fetch(`/api/haikus/${id}`, {
+      ...await fetchOpts(),
       method: "DELETE",
     }).then(async (res) => {
       if (res.status != 200) {
