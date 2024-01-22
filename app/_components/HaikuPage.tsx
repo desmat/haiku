@@ -3,6 +3,7 @@
 // import { useEffect, useState } from 'react';
 import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
+// import { useState } from "react";
 
 export default function HaikuPage({ haiku }: { haiku?: Haiku }) {
   // console.log('>> app._components.HaikuPage.render()', { lang });

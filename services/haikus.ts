@@ -88,8 +88,8 @@ export async function generateHaiku(user: any, subject?: string, lang?: Language
     theme: generatedSubject,
     bgImage: blob.url,  // TODO REVERT
     // bgImage: openaiUrl,   // TODO REVERT
-    color: sortedColors[0].darker(0.5).hex(),
-    bgColor: sortedColors[sortedColors.length - 1].hex(),
+    color: sortedColors[0].darken(0.5).hex(),
+    bgColor: sortedColors[sortedColors.length - 1].brighten(3).hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),
     poem,
   } as Haiku;
