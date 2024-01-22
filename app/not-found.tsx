@@ -11,16 +11,23 @@ export default function NotFound({ lang, onClickGenerate }: { lang?: undefined |
   // const bgColor = haiku?.colorPalette && colorOffsets.back >= 0 && haiku?.colorPalette[colorOffsets.back] || haiku?.bgColor || "lightgrey";
   const bgColor = notFoundHaiku?.bgColor || "lightgrey";
 
-  const textStyle = {
-    color: fontColor,
-    filter: `drop-shadow(0px 0px 8px ${bgColor})`,
-    WebkitTextStroke: `1px ${fontColor}`,
-  };
+  const textStyles = [
+    {
+      color: fontColor,
+      filter: `drop-shadow(0px 0px 8px ${bgColor})`,
+      WebkitTextStroke: `1.5px ${fontColor}`,
+      fontWeight: 300,
+    },
+    {
+      color: fontColor,
+      filter: `drop-shadow(0px 0px 2px ${bgColor})`,
+    }
+  ];
 
   return (
     <div>
-      <NavOverlay textStyle={textStyle} onClickGenerate={onClickGenerate} />
-      <HaikuPage haiku={notFoundHaiku} />
+      <NavOverlay styles={textStyles} onClickGenerate={onClickGenerate} />
+      <HaikuPage haiku={notFoundHaiku} styles={textStyles} />
     </div>
   )
 }

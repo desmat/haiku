@@ -35,7 +35,7 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
   const haiku = _haiku || id && getHaiku(id) || haikus[Math.floor(Math.random() * haikus.length)] || samples.notFoundHaiku;
   const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
 
-  // console.log('>> app.page.render()', { haikus, haiku, loaded, id });
+  // console.log('>> app.page.render()', { id });
 
   useEffect(() => {
     if (!loaded) {
@@ -78,17 +78,24 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
 
   const bgColor = haiku?.colorPalette && colorOffsets.back >= 0 && haiku?.colorPalette[colorOffsets.back] || haiku?.bgColor || "lightgrey";
 
-  const textStyle = {
-    color: fontColor,
-    filter: `drop-shadow(0px 0px 8px ${bgColor})`,
-    WebkitTextStroke: `1px ${fontColor}`,
-  }
+  const textStyles = [
+    {
+      color: fontColor,
+      filter: `drop-shadow(0px 0px 8px ${bgColor})`,
+      WebkitTextStroke: `1.5px ${fontColor}`,
+      fontWeight: 300,
+    },
+    {
+      color: fontColor,
+      filter: `drop-shadow(0px 0px 2px ${bgColor})`,
+    }
+  ];
 
   if (!loaded || generating) {
     // TODO kill the Page component and build good loading component
     return (
       <div>
-        <NavOverlay />
+        <NavOverlay styles={textStyles}/>
         <Loading />
       </div>
     )
@@ -100,8 +107,8 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
 
   return (
     <div>
-      <NavOverlay textStyle={textStyle} lang={lang} onClickLogo={handleRefresh} onClickGenerate={handleGenerate} />
-      <HaikuPage haiku={haiku} />
+      <NavOverlay styles={textStyles} lang={lang} onClickLogo={handleRefresh} onClickGenerate={handleGenerate} />
+      <HaikuPage haiku={haiku} styles={textStyles} />
     </div>
   )
 }

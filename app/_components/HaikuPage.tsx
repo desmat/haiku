@@ -3,24 +3,19 @@
 // import { useEffect, useState } from 'react';
 import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
+import { StyledLayers } from "./StyledLayers";
 // import { useState } from "react";
 
-export default function HaikuPage({ haiku }: { haiku?: Haiku }) {
+export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: any[] }) {
   // console.log('>> app._components.HaikuPage.render()', { lang });
-    
+
   // const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
 
   // const fontColor = haiku?.colorPalette && colorOffsets.front >= 0 && haiku.colorPalette[colorOffsets.front] || haiku?.color || "#555555";
   const fontColor = haiku?.color || "#555555";
-  
+
   // const bgColor = haiku?.colorPalette && colorOffsets.back >= 0 && haiku?.colorPalette[colorOffsets.back] || haiku?.bgColor || "lightgrey";
   const bgColor = haiku?.bgColor || "lightgrey";
-  
-  const textStyle = {
-    color: fontColor,
-    filter: `drop-shadow(0px 0px 8px ${bgColor})`,
-    WebkitTextStroke: `1px ${fontColor}`,
-  }
 
   return (
     <div>
@@ -36,12 +31,10 @@ export default function HaikuPage({ haiku }: { haiku?: Haiku }) {
 
       <div
         className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
-        style={{
-          ...textStyle,
-
-        }}
       >
-        {haiku.poem.map((s: string, i: number) => <div key={i}>{s}</div>)}
+        <StyledLayers styles={styles}>
+          {haiku.poem.map((s: string, i: number) => <div key={i}>{s}</div>)}
+        </StyledLayers>
       </div>
 
       {/* <div className="_bg-pink-200 flex flex-row fixed bottom-10 left-1/2 transform -translate-x-1/2">
