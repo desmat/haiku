@@ -47,15 +47,18 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
     // console.log('>> app.page.handleGenerate()');
     e.preventDefault();
 
-    setGenerating(true);
-    // TODO cleanup generateHaiku function params
-    const ret = await generateHaiku({ uuid: "ASDF" }, { ...haiku, id: "ASDF", lang });
-    // console.log('>> app.page.handleGenerate()', { ret });
+    const subject = prompt("Subject? (For example 'nature', 'sunset', or leave blank)");
+    if (typeof (subject) == "string") {
+      setGenerating(true);
+      // TODO cleanup generateHaiku function params
+      const ret = await generateHaiku({ uuid: "ASDF" }, { ...haiku, id: "ASDF", lang, subject });
+      // console.log('>> app.page.handleGenerate()', { ret });
 
-    if (ret?.id) {
-      // router.push(`/?id=${ret.id}`);
-      setId(ret.id);
-      setGenerating(false);
+      if (ret?.id) {
+        // router.push(`/?id=${ret.id}`);
+        setId(ret.id);
+        setGenerating(false);
+      }
     }
   }
 
