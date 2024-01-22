@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { IoSparkles } from 'react-icons/io5';
+import { MdMail, MdHome } from "react-icons/md";
 import * as font from "@/app/font";
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { BsGithub } from 'react-icons/bs';
@@ -38,15 +39,34 @@ export function BottomLinks({ lang }: { lang?: LanguageType | undefined }) {
     <div
       className="_bg-yellow-100 relative flex flex-row gap-3 items-center justify-center _font-semibold"
     >
-      <Link
-        key="github"
-        href="https://github.com/desmat"
-        target="_blank"
-        className="_bg-yellow-200 flex flex-row gap-0.5 items-center"
+      <div
+        className="relative flex flex-row gap-2 items-center justify-center _font-semibold"
       >
-        <BsGithub className="mt-[0.1rem] text-md" />
-        desmat
-      </Link>
+        <Link
+          key="github"
+          href="https://github.com/desmat/haiku"
+          target="_blank"
+          className="flex flex-row gap-0.5 items-center"
+        >
+          <BsGithub className="text-lg" />
+        </Link>
+        <Link
+          key="web"
+          href="https://www.desmat.ca"
+          target="_blank"
+          className="flex flex-row gap-0.5 items-center"
+        >
+          <MdHome className="text-2xl" />
+        </Link>
+        <Link
+          key="email"
+          href="mailto:haiku@desmat.ca"
+          target="_blank"
+          className="_bg-yellow-200 flex flex-row gap-1 items-center"
+        >
+          <MdMail className="text-xl" />
+        </Link>
+      </div>
       {Object.entries(supportedLanguages)
         .filter((e: any) => (!lang && e[0] != "en") || (lang && lang != e[0]))
         .map(([k, v]: any) => (
