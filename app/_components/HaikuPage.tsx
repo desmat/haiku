@@ -19,6 +19,11 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
   console.log('>> app._components.HaikuPage.render()', { inProgress });
 
+  const upperCaseFirstLetter = (s: string) => {
+    if (!s || s.length == 0) return "";
+    return s.substring(0, 1).toUpperCase() + s.substring(1);
+  }
+
   const countSyllables = () => {
     // @ts-ignore
     const r = inProgress.map((line: string) => {
@@ -94,13 +99,12 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
         className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
         onClick={resetInProgress}
       >
-
         {/* {inProgress.map((s: string, i: number) => ( */}
         {haiku.poem.map((s: string, i: number) => (
           <StyledLayers styles={[styles[0]]}>
             <div
               key={i}
-              className={`_bg-purple-200 capitalize-first-letter relative my-1 px-1 min-h-[2.8rem] h-fit w-fit ${i == 1 ? "min-w-[20rem]" : "min-w-[16rem]"}`}
+              className={`_bg-purple-200 capitalize-first-letter relative flex flex-row items-center justify-start my-1 px-2 min-h-[2.4rem] md:min-h-[3.2rem] h-fit w-fit ${i == 1 ? "min-w-[20rem] md:min-w-[36rem]" : "min-w-[16rem] md:min-w-[28rem]"}`}
               style={{
                 backgroundColor: haiku?.bgColor || "lightgrey",
                 // borderColor: haiku?.color || "#555555",
@@ -109,7 +113,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                 // borderWidth: "1px",
               }}
             >
-              {inProgress[i]}
+              {upperCaseFirstLetter(inProgress[i])}
               {/* {s} */}
               <div className="absolute left-[-2rem] top-0">
                 {countSyllables()[i]}
@@ -134,11 +138,11 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                   setInProgress([
                     inProgress[0],
                     syllableCounts[1] + syllableCount <= 7
-                      ? inProgress[1] + " " + lw + (syllableCounts[1] + syllableCount >= 7 || left.length == 0 ? "," : "")
+                      ? inProgress[1] + (inProgress[1] ? " "  : "") + lw + (syllableCounts[1] + syllableCount >= 7 || left.length == 0 ? "," : "")
                       : inProgress[1],
                     syllableCounts[1] + syllableCount <= 7
                       ? inProgress[2]
-                      : inProgress[2] + " " + lw + (left.length == 0 ? "." : ""),
+                      : inProgress[2] + (inProgress[2] ? " "  : "") + lw + (left.length == 0 ? "." : ""),
                   ]);
                   setLeft(left);
                 }}

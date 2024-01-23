@@ -147,7 +147,3 @@ ul {
   /* font-family: fantasy; */
   /* font-weight: bolder; */
 }
-
-.capitalize-first-letter:first-letter {
-  text-transform: uppercase;
-}
