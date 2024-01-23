@@ -104,7 +104,11 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
               }}
             >
               {inProgress[i].map((word: string, j: number) => (
-                <span key={j} onClick={() => remove(i, j)}>
+                <span
+                  key={j}
+                  className={i > 0 ? "cursor-pointer" : ""}
+                  onClick={() => i > 0 ? remove(i, j) : undefined}
+                >
                   <>
                     {j == 0 &&
                       upperCaseFirstLetter(word)
@@ -130,7 +134,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
             <StyledLayers key={i} styles={[styles[0]]}>
               <div
                 style={{ backgroundColor: haiku?.bgColor || "lightgrey" }}
-                className={`${font.architects_daughter.className} p-1 md:text-[26pt] sm:text-[22pt] text-[16pt]`}
+                className={`${font.architects_daughter.className} cursor-pointer p-1 md:text-[26pt] sm:text-[22pt] text-[16pt]`}
                 onClick={() => pick(i)}
               >
                 {w}
