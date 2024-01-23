@@ -7,6 +7,7 @@ import { Haiku } from "@/types/Haiku";
 import { StyledLayers } from "./StyledLayers";
 import { useEffect, useState } from "react";
 import shuffleArray from "@/utils/shuffleArray";
+import useHaikudle from '../_hooks/haikudle';
 // import { useState } from "react";
 
 
@@ -14,8 +15,20 @@ import shuffleArray from "@/utils/shuffleArray";
 export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: any[] }) {
   console.log('>> app._components.HaikuPage.render()', { poem: haiku.poem, id: haiku.id });
 
-  const [inProgress, setInProgress] = useState(["", "", ""]);
-  const [left, setLeft] = useState<string[]>([]);
+  // const [inProgress, setInProgress] = useState(["", "", ""]);
+  // const [left, setLeft] = useState<string[]>([]);
+
+  const [
+    inProgress, 
+    left, 
+    init, 
+    pick,
+  ] = useHaikudle((state: any) => [
+    state.inProgress, 
+    state.left, 
+    state.init, 
+    state.pick,
+  ])
 
   console.log('>> app._components.HaikuPage.render()', { inProgress });
 
@@ -43,25 +56,25 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     return r;
   }
 
-  const resetInProgress = () => {
-    setInProgress([
-      haiku.poem[0],
-      "",
-      ""
-    ]);
+  // const resetInProgress = () => {
+  //   setInProgress([
+  //     haiku.poem[0],
+  //     "",
+  //     ""
+  //   ]);
 
-    setLeft(
-      // shuffleArray(
-      [haiku.poem[1], haiku.poem[2]]
-        .join(" ")
-        .split(/\s/)
-        .map((w: string) => w.toLowerCase().replace(/[.,]/, ""))
-      // )
-    );
-  };
+  //   setLeft(
+  //     // shuffleArray(
+  //     [haiku.poem[1], haiku.poem[2]]
+  //       .join(" ")
+  //       .split(/\s/)
+  //       .map((w: string) => w.toLowerCase().replace(/[.,]/, ""))
+  //     // )
+  //   );
+  // };
 
   useEffect(() => {
-    resetInProgress();
+    init(haiku);
   }, [haiku.id]);
 
   console.log('>> app._components.HaikuPage.render()', { left });
@@ -97,11 +110,11 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
       <div
         className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
-        onClick={resetInProgress}
+        onClick={() => init(haiku)}
       >
         {/* {inProgress.map((s: string, i: number) => ( */}
         {haiku.poem.map((s: string, i: number) => (
-          <StyledLayers styles={[styles[0]]}>
+          <StyledLayers key={i} styles={[styles[0]]}>
             <div
               key={i}
               className={`_bg-purple-200 capitalize-first-letter relative flex flex-row items-center justify-start my-1 px-2 min-h-[2.4rem] md:min-h-[3.2rem] h-fit w-fit ${i == 1 ? "min-w-[20rem] md:min-w-[36rem]" : "min-w-[16rem] md:min-w-[28rem]"}`}
@@ -127,25 +140,11 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
         {left?.map((w: string, i: number) => {
           let lw = w.toLowerCase();
           return (
-            <StyledLayers styles={[styles[0]]}>
+            <StyledLayers key={i} styles={[styles[0]]}>
               <div
                 style={{ backgroundColor: haiku?.bgColor || "lightgrey" }}
                 className={`${font.architects_daughter.className} p-1 md:text-[26pt] sm:text-[22pt] text-[16pt]`}
-                onClick={() => {
-                  const r = left.splice(i, 1);
-                  const syllableCounts = countSyllables();
-                  const syllableCount = syllable(lw);
-                  setInProgress([
-                    inProgress[0],
-                    syllableCounts[1] + syllableCount <= 7
-                      ? inProgress[1] + (inProgress[1] ? " "  : "") + lw + (syllableCounts[1] + syllableCount >= 7 || left.length == 0 ? "," : "")
-                      : inProgress[1],
-                    syllableCounts[1] + syllableCount <= 7
-                      ? inProgress[2]
-                      : inProgress[2] + (inProgress[2] ? " "  : "") + lw + (left.length == 0 ? "." : ""),
-                  ]);
-                  setLeft(left);
-                }}
+                onClick={() => pick(i)}
               >
                 {w}
               </div>
