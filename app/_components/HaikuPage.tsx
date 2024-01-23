@@ -15,19 +15,18 @@ import useHaikudle from '../_hooks/haikudle';
 export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: any[] }) {
   console.log('>> app._components.HaikuPage.render()', { poem: haiku.poem, id: haiku.id });
 
-  // const [inProgress, setInProgress] = useState(["", "", ""]);
-  // const [left, setLeft] = useState<string[]>([]);
-
   const [
-    inProgress, 
-    left, 
-    init, 
+    inProgress,
+    left,
+    init,
     pick,
+    remove,
   ] = useHaikudle((state: any) => [
-    state.inProgress, 
-    state.left, 
-    state.init, 
+    state.inProgress,
+    state.left,
+    state.init,
     state.pick,
+    state.remove,
   ])
 
   console.log('>> app._components.HaikuPage.render()', { inProgress });
@@ -37,41 +36,20 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     return s.substring(0, 1).toUpperCase() + s.substring(1);
   }
 
-  const countSyllables = () => {
+  const countSyllables = (s: string) => {
     // @ts-ignore
-    const r = inProgress.map((line: string) => {
-      console.log('>> app._components.HaikuPage.countSyllables()', { line });
+    const r = s.split(/\s+/).reduce((total: number, v: string) => {
       // @ts-ignore
-      return line.split(/\s+/).reduce((total: number, v: string) => {
-        // @ts-ignore
-        const v2 = v.toLowerCase().replace(/[,.]/, "");
-        // @ts-ignore
-        console.log('>> app._components.HaikuPage.countSyllables()', { v, v2, c: syllable(v2) });
-        // @ts-ignore
-        return total + (syllable(v2) || 0);
-      }, 0);
-    });
+      const v2 = v.toLowerCase().replace(/[,.]/, "");
+      // @ts-ignore
+      // console.log('>> app._components.HaikuPage.countSyllables()', { v, v2, c: syllable(v2) });
+      // @ts-ignore
+      return total + (syllable(v2) || 0);
+    }, 0);
 
-    console.log('>> app._components.HaikuPage.countSyllables()', { r });
+    // console.log('>> app._components.HaikuPage.countSyllables()', { r });
     return r;
   }
-
-  // const resetInProgress = () => {
-  //   setInProgress([
-  //     haiku.poem[0],
-  //     "",
-  //     ""
-  //   ]);
-
-  //   setLeft(
-  //     // shuffleArray(
-  //     [haiku.poem[1], haiku.poem[2]]
-  //       .join(" ")
-  //       .split(/\s/)
-  //       .map((w: string) => w.toLowerCase().replace(/[.,]/, ""))
-  //     // )
-  //   );
-  // };
 
   useEffect(() => {
     init(haiku);
@@ -110,9 +88,8 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
       <div
         className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
-        onClick={() => init(haiku)}
+      // onClick={() => init(haiku)}
       >
-        {/* {inProgress.map((s: string, i: number) => ( */}
         {haiku.poem.map((s: string, i: number) => (
           <StyledLayers key={i} styles={[styles[0]]}>
             <div
@@ -126,10 +103,20 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                 // borderWidth: "1px",
               }}
             >
-              {upperCaseFirstLetter(inProgress[i])}
-              {/* {s} */}
+              {inProgress[i].map((word: string, j: number) => (
+                <span key={j} onClick={() => remove(i, j)}>
+                  <>
+                    {j == 0 &&
+                      upperCaseFirstLetter(word)
+                    }
+                    {j != 0 &&
+                      <>&nbsp;{word}</>
+                    }
+                  </>
+                </span>
+              ))}
               <div className="absolute left-[-2rem] top-0">
-                {countSyllables()[i]}
+                {countSyllables(inProgress[i].join(" "))}
               </div>
             </div>
           </StyledLayers>

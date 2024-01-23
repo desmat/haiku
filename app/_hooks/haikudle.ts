@@ -10,12 +10,12 @@ import useUser from './user';
 import { syllable } from 'syllable'
 import shuffleArray from "@/utils/shuffleArray";
 
-const countSyllables = (inProgress: any) => {
+const countSyllables = (lines: string[][]) => {
   // @ts-ignore
-  const r = inProgress.map((line: string) => {
+  const r = lines.map((line: string[]) => {
     console.log('>> app._components.HaikuPage.countSyllables()', { line });
     // @ts-ignore
-    return line.split(/\s+/).reduce((total: number, v: string) => {
+    return line.reduce((total: number, v: string) => {
       // @ts-ignore
       const v2 = v.toLowerCase().replace(/[,.]/, "");
       // @ts-ignore
@@ -33,26 +33,29 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   // access via get(id) or find(query?)
   haiku: undefined,
-  inProgress: ["", "", ""],
+  inProgress: [[], [], []],
   left: [],
+
 
   init: (haiku: Haiku) => {
     console.log(">> hooks.haikudle.init", { haiku });
 
     set({
       haiku,
+
       inProgress: [
-        haiku.poem[0],
-        "",
-        ""
+        haiku.poem[0].split(/\s/),
+        [],
+        [],
       ],
-      left: 
-        shuffleArray(
+
+      left:
+        // shuffleArray(
           [haiku.poem[1], haiku.poem[2]]
             .join(" ")
             .split(/\s/)
             .map((w: string) => w.toLowerCase().replace(/[.,]/, ""))
-        )
+        // )
     });
   },
 
@@ -71,21 +74,27 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       inProgress: [
         inProgress[0],
         syllableCounts[1] + syllableCount <= 7
-          ? inProgress[1] + (inProgress[1] ? " " : "") + lw + (syllableCounts[1] + syllableCount >= 7 || left.length == 0 ? "," : "")
+          ? [...inProgress[1], lw + (syllableCounts[1] + syllableCount >= 7 || left.length == 0 ? "," : "")]
           : inProgress[1],
         syllableCounts[1] + syllableCount <= 7
           ? inProgress[2]
-          : inProgress[2] + (inProgress[2] ? " " : "") + lw + (left.length == 0 ? "." : "")
+          : [...inProgress[2], lw + (left.length == 0 ? "." : "")]
       ],
 
       left: left,
     });
   },
 
-  remove: (offset: number) => {
-    console.log(">> hooks.haikudle.remove", { offset });
+  remove: (lineNum: number, wordNum: number) => {
+    const { haiku, inProgress, left } = get();
+    console.log(">> hooks.haikudle.remove", { lineNum, wordNum });
+    
+    const w = inProgress[lineNum].splice(wordNum, 1);
 
-    // TODO
+    set({
+      left: [...left, ...w],
+      inProgress,
+    })
   },
 
 })));
