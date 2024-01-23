@@ -1,6 +1,6 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react';
 import { Haiku } from "@/types/Haiku";
 import { Loading, NavOverlay } from '@/app/_components/Nav';
@@ -15,6 +15,7 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
   const searchParams = useSearchParams();
   const [id, setId] = useState(searchParams.get("id"));
   const [generating, setGenerating] = useState(false);
+  const router = useRouter();
 
   const [
     haikusLoaded,
@@ -65,6 +66,10 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
   const handleRefresh = (e: any) => {
     // console.log('>> app.page.handleRefresh()');
     e.preventDefault();
+
+    if (searchParams.get("id")) {
+      return router.push("/");
+    }
 
     if (!(haikus?.length > 1)) {
       return;

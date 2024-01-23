@@ -1,7 +1,7 @@
 
 
 export function StyledLayers({ styles, children }: { styles: any[], children?: any }) {
-  console.log("StyledLayers", { styles });
+  // console.log("StyledLayers", { styles });
   return (
     <div style={styles[0]}>
       {styles.length > 0 &&

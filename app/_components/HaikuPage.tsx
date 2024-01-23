@@ -1,13 +1,65 @@
-// 'use client'
+'use client'
 
 // import { useEffect, useState } from 'react';
+import { syllable } from 'syllable'
 import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
 import { StyledLayers } from "./StyledLayers";
+import { useEffect, useState } from "react";
+import shuffleArray from "@/utils/shuffleArray";
 // import { useState } from "react";
 
+
+
 export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: any[] }) {
-  // console.log('>> app._components.HaikuPage.render()', { lang });
+  console.log('>> app._components.HaikuPage.render()', { poem: haiku.poem, id: haiku.id });
+
+  const [inProgress, setInProgress] = useState(["", "", ""]);
+  const [left, setLeft] = useState<string[]>([]);
+
+  console.log('>> app._components.HaikuPage.render()', { inProgress });
+
+  const countSyllables = () => {
+    // @ts-ignore
+    const r = inProgress.map((line: string) => {
+      console.log('>> app._components.HaikuPage.countSyllables()', { line });
+      // @ts-ignore
+      return line.split(/\s+/).reduce((total: number, v: string) => {
+        // @ts-ignore
+        const v2 = v.toLowerCase().replace(/[,.]/, "");
+        // @ts-ignore
+        console.log('>> app._components.HaikuPage.countSyllables()', { v, v2, c: syllable(v2) });
+        // @ts-ignore
+        return total + (syllable(v2) || 0);
+      }, 0);
+    });
+
+    console.log('>> app._components.HaikuPage.countSyllables()', { r });
+    return r;
+  }
+
+  const resetInProgress = () => {
+    setInProgress([
+      haiku.poem[0],
+      "",
+      ""
+    ]);
+
+    setLeft(
+      // shuffleArray(
+      [haiku.poem[1], haiku.poem[2]]
+        .join(" ")
+        .split(/\s/)
+        .map((w: string) => w.toLowerCase().replace(/[.,]/, ""))
+      // )
+    );
+  };
+
+  useEffect(() => {
+    resetInProgress();
+  }, [haiku.id]);
+
+  console.log('>> app._components.HaikuPage.render()', { left });
 
   // const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
 
@@ -29,12 +81,73 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
         }}
       />
 
-      <div
-        className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
+      {/* cheater */}
+      {/* <div
+        className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
       >
         <StyledLayers styles={styles}>
           {haiku.poem.map((s: string, i: number) => <div key={i}>{s}</div>)}
         </StyledLayers>
+      </div> */}
+
+      <div
+        className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
+        onClick={resetInProgress}
+      >
+
+        {/* {inProgress.map((s: string, i: number) => ( */}
+        {haiku.poem.map((s: string, i: number) => (
+          <StyledLayers styles={[styles[0]]}>
+            <div
+              key={i}
+              className={`_bg-purple-200 capitalize-first-letter relative my-1 px-1 min-h-[2.8rem] h-fit w-fit ${i == 1 ? "min-w-[20rem]" : "min-w-[16rem]"}`}
+              style={{
+                backgroundColor: haiku?.bgColor || "lightgrey",
+                // borderColor: haiku?.color || "#555555",
+                // borderColor: haiku?.bgColor || "lightgrey",
+                // borderStyle: "solid",
+                // borderWidth: "1px",
+              }}
+            >
+              {inProgress[i]}
+              {/* {s} */}
+              <div className="absolute left-[-2rem] top-0">
+                {countSyllables()[i]}
+              </div>
+            </div>
+          </StyledLayers>
+        ))}
+      </div>
+
+      <div className="_bg-pink-200 fixed bottom-12 left-1/2 transform -translate-x-1/2 w-[calc(100vw-3rem)] h-fit flex flex-row gap-2 justify-center flex-wrap">
+        {left?.map((w: string, i: number) => {
+          let lw = w.toLowerCase();
+          return (
+            <StyledLayers styles={[styles[0]]}>
+              <div
+                style={{ backgroundColor: haiku?.bgColor || "lightgrey" }}
+                className={`${font.architects_daughter.className} p-1 md:text-[26pt] sm:text-[22pt] text-[16pt]`}
+                onClick={() => {
+                  const r = left.splice(i, 1);
+                  const syllableCounts = countSyllables();
+                  const syllableCount = syllable(lw);
+                  setInProgress([
+                    inProgress[0],
+                    syllableCounts[1] + syllableCount <= 7
+                      ? inProgress[1] + " " + lw + (syllableCounts[1] + syllableCount >= 7 || left.length == 0 ? "," : "")
+                      : inProgress[1],
+                    syllableCounts[1] + syllableCount <= 7
+                      ? inProgress[2]
+                      : inProgress[2] + " " + lw + (left.length == 0 ? "." : ""),
+                  ]);
+                  setLeft(left);
+                }}
+              >
+                {w}
+              </div>
+            </StyledLayers>
+          )
+        })}
       </div>
 
       {/* <div className="_bg-pink-200 flex flex-row fixed bottom-10 left-1/2 transform -translate-x-1/2">
