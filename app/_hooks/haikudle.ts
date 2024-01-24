@@ -30,7 +30,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   haiku: undefined,
   inProgress: [[], [], []],
   words: [],
-
+  solved: false,
 
   init: (haiku: Haiku) => {
     console.log(">> hooks.haikudle.init", { haiku });
@@ -60,6 +60,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         }
       }),
 
+      solved: false,
     });
   },
 
@@ -87,6 +88,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       ],
 
       words,
+      solved: !words.find((w: any) => !w.picked)
     });
   },
 

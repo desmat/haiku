@@ -18,12 +18,14 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
   const [
     inProgress,
     words,
+    solved,
     init,
     pick,
     remove,
   ] = useHaikudle((state: any) => [
     state.inProgress,
     state.words,
+    state.solved,
     state.init,
     state.pick,
     state.remove,
@@ -79,7 +81,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
       {/* cheater */}
       {/* <div
-        className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
+        className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
       >
         <StyledLayers styles={styles}>
           {haiku.poem.map((s: string, i: number) => <div key={i}>{s}</div>)}
@@ -91,12 +93,12 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
       // onClick={() => init(haiku)}
       >
         {haiku.poem.map((s: string, i: number) => (
-          <StyledLayers key={i} styles={[styles[0]]}>
+          <StyledLayers key={i} styles={solved ? styles : [styles[0]]}>
             <div
               key={i}
-                className={`_bg-purple-200 capitalize-first-letter relative flex flex-row items-center justify-start my-1 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[28rem] md:min-w-[36rem] min-w-[22rem]" : "sm:min-w-[22rem] md:min-w-[28rem] min-w-[16rem]"}`}
+              className={`_bg-purple-200 capitalize-first-letter relative flex flex-row items-center justify-start my-1 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[24rem] md:min-w-[28rem] min-w-[18rem]" : "sm:min-w-[22rem] md:min-w-[24rem] min-w-[16rem]"}`}
               style={{
-                backgroundColor: haiku?.bgColor || "lightgrey",
+                backgroundColor: solved ? undefined : haiku?.bgColor || "lightgrey",
                 // borderColor: haiku?.color || "#555555",
                 // borderColor: haiku?.bgColor || "lightgrey",
                 // borderStyle: "solid",
@@ -119,16 +121,18 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                   </>
                 </span>
               ))}
-              <div className="absolute left-[-2rem] top-0">
-                {countSyllables(inProgress[i].join(" "))}
-              </div>
+              {!solved &&
+                <div className="absolute left-[-2rem] top-0">
+                  {countSyllables(inProgress[i].join(" "))}
+                </div>
+              }
             </div>
           </StyledLayers>
         ))}
       </div>
 
       <div className="_bg-pink-200 fixed bottom-16 left-1/2 transform -translate-x-1/2 w-[calc(100vw-3rem)] h-fit flex flex-row gap-2 justify-center flex-wrap">
-        {words?.map((w: any, i: number) => {          
+        {words?.map((w: any, i: number) => {
           return (
             <StyledLayers key={i} styles={[styles[0]]}>
               <div
