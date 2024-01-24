@@ -1,4 +1,4 @@
-# Haiku: AI-Powered Haiku
+# Haikudle: AI-Powered Haiku Game
 
 A simple Haiku generator powered by OpenAI's ChatGPT.
 
