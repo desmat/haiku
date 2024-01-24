@@ -99,9 +99,10 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
             key={i}
             className={`_bg-purple-200 capitalize-first-letter relative flex flex-row items-center justify-start my-1 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[24rem] md:min-w-[28rem] min-w-[18rem]" : "sm:min-w-[22rem] md:min-w-[24rem] min-w-[16rem]"}`}
             style={{
+              // ...styles[0],
               backgroundColor: solved || someCorrect
                 ? undefined
-                : haiku?.bgColor || "lightgrey"
+                : haiku?.bgColor || "lightgrey",
               // borderColor: haiku?.color || "#555555",
               // borderColor: haiku?.bgColor || "lightgrey",
               // borderStyle: "solid",
@@ -145,15 +146,21 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
       <div className="_bg-pink-200 fixed bottom-16 left-1/2 transform -translate-x-1/2 w-[calc(100vw-3rem)] h-fit flex flex-row gap-2 justify-center flex-wrap">
         {words?.map((w: any, i: number) => {
           return (
-            <StyledLayers key={i} styles={[styles[0]]}>
+            // <StyledLayers key={i} styles={w.picked ? [] : [styles[0]]}>
               <div
-                style={{ backgroundColor: haiku?.bgColor || "lightgrey" }}
+                style={{ 
+                  color: styles[0].color,
+                  // filter: `drop-shadow(0px 0px 8px ${bgColor})`,
+                  WebkitTextStroke: styles[0].WebkitTextStroke,
+                  fontWeight: styles[0].fontWeight,
+                  backgroundColor: haiku?.bgColor || "lightgrey" 
+                }}
                 className={`${font.architects_daughter.className} ${w.picked ? "invisible" : "cursor-pointer"} p-1 md:text-[26pt] sm:text-[22pt] text-[16pt]`}
                 onClick={() => !w.picked && pick(w.offset)}
               >
                 {w.word}
               </div>
-            </StyledLayers>
+            // </StyledLayers>
           )
         })}
       </div>

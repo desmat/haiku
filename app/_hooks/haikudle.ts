@@ -89,16 +89,16 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           .map((w: string) => w.toLowerCase().replace(/[]/, ""))),
 
       words:
-        // shuffleArray(
-        words.map((w: string, i: number) => {
-          return {
-            offset: i,
-            word: w,
-            picked: false,
-            correct: false,
-          }
-        })
-      // )
+        shuffleArray(
+          words.map((w: string, i: number) => {
+            return {
+              offset: i,
+              word: w,
+              picked: false,
+              correct: false,
+            }
+          })
+        )
       ,
       solved: false,
     });
