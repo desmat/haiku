@@ -39,9 +39,13 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
   // console.log('>> app.page.render()', { id });
 
   useEffect(() => {
-    if (!loaded) {
-      id && loadHaikus({ id }) || loadHaikus({ lang: lang || "en" });
-    }
+    // if (!loaded) {
+      if (id) {
+         loadHaikus({ id });
+      }
+
+      loadHaikus({ lang: lang || "en" });
+    // }
   }, [id, lang]);
 
   const handleGenerate = async (e: any) => {
@@ -68,7 +72,7 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
     e.preventDefault();
 
     if (searchParams.get("id")) {
-      return router.push("/");
+      router.push("/");
     }
 
     if (!(haikus?.length > 1)) {

@@ -148,6 +148,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
           return (
             // <StyledLayers key={i} styles={w.picked ? [] : [styles[0]]}>
               <div
+                key={i}
                 style={{ 
                   color: styles[0].color,
                   // filter: `drop-shadow(0px 0px 8px ${bgColor})`,
