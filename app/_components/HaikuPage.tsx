@@ -29,9 +29,11 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     state.init,
     state.pick,
     state.remove,
-  ])
+  ]);
 
-  console.log('>> app._components.HaikuPage.render()', { inProgress });
+  const someCorrect = inProgress.flat().reduce((a: boolean, m: any, i: number) => a || m.correct, false);
+
+  console.log('>> app._components.HaikuPage.render()', { inProgress, solved });
 
   const upperCaseFirstLetter = (s: string) => {
     if (!s || s.length == 0) return "";
@@ -93,41 +95,50 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
       // onClick={() => init(haiku)}
       >
         {haiku.poem.map((s: string, i: number) => (
-          <StyledLayers key={i} styles={solved ? styles : [styles[0]]}>
-            <div
-              key={i}
-              className={`_bg-purple-200 capitalize-first-letter relative flex flex-row items-center justify-start my-1 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[24rem] md:min-w-[28rem] min-w-[18rem]" : "sm:min-w-[22rem] md:min-w-[24rem] min-w-[16rem]"}`}
-              style={{
-                backgroundColor: solved ? undefined : haiku?.bgColor || "lightgrey",
-                // borderColor: haiku?.color || "#555555",
-                // borderColor: haiku?.bgColor || "lightgrey",
-                // borderStyle: "solid",
-                // borderWidth: "1px",
-              }}
-            >
-              {inProgress[i].map((word: string, j: number) => (
-                <span
-                  key={j}
-                  className={i > 0 ? "cursor-pointer" : ""}
-                  onClick={() => i > 0 ? remove(i, j) : undefined}
-                >
-                  <>
+          <div
+            key={i}
+            className={`_bg-purple-200 capitalize-first-letter relative flex flex-row items-center justify-start my-1 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[24rem] md:min-w-[28rem] min-w-[18rem]" : "sm:min-w-[22rem] md:min-w-[24rem] min-w-[16rem]"}`}
+            style={{
+              backgroundColor: solved || someCorrect
+                ? undefined
+                : haiku?.bgColor || "lightgrey"
+              // borderColor: haiku?.color || "#555555",
+              // borderColor: haiku?.bgColor || "lightgrey",
+              // borderStyle: "solid",
+              // borderWidth: "1px",
+            }}
+          >
+            {inProgress[i].map((w: any, j: number) => (
+              <span
+                key={j}
+                className={!solved && i > 0 ? "cursor-pointer" : ""}
+                onClick={() => !solved && i > 0 ? remove(i, j, w) : undefined}
+              >
+                <StyledLayers key={i} styles={solved || w.correct ? styles : [styles[0]]}>
+                  <div
+                    className="px-1"
+                    style={{
+                      backgroundColor: solved || w.correct
+                        ? undefined
+                        : haiku?.bgColor || "lightgrey"
+                    }}
+                  >
                     {j == 0 &&
-                      upperCaseFirstLetter(word)
+                      upperCaseFirstLetter(w.word)
                     }
                     {j != 0 &&
-                      <>&nbsp;{word}</>
+                      w.word
                     }
-                  </>
-                </span>
-              ))}
-              {!solved &&
-                <div className="absolute left-[-2rem] top-0">
-                  {countSyllables(inProgress[i].join(" "))}
-                </div>
-              }
-            </div>
-          </StyledLayers>
+                  </div>
+                </StyledLayers>
+              </span>
+            ))}
+            {!solved &&
+              <div className="absolute left-[-2rem] top-0">
+                {countSyllables(inProgress[i].map((w: any) => w.word).join(" "))}
+              </div>
+            }
+          </div>
         ))}
       </div>
 
