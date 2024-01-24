@@ -17,13 +17,13 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
   const [
     inProgress,
-    left,
+    words,
     init,
     pick,
     remove,
   ] = useHaikudle((state: any) => [
     state.inProgress,
-    state.left,
+    state.words,
     state.init,
     state.pick,
     state.remove,
@@ -55,7 +55,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     init(haiku);
   }, [haiku.id]);
 
-  console.log('>> app._components.HaikuPage.render()', { left });
+  // console.log('>> app._components.HaikuPage.render()', { words });
 
   // const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
 
@@ -94,7 +94,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
           <StyledLayers key={i} styles={[styles[0]]}>
             <div
               key={i}
-              className={`_bg-purple-200 capitalize-first-letter relative flex flex-row items-center justify-start my-1 px-2 min-h-[2.4rem] md:min-h-[3.2rem] h-fit w-fit ${i == 1 ? "min-w-[20rem] md:min-w-[36rem]" : "min-w-[16rem] md:min-w-[28rem]"}`}
+                className={`_bg-purple-200 capitalize-first-letter relative flex flex-row items-center justify-start my-1 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[28rem] md:min-w-[36rem] min-w-[22rem]" : "sm:min-w-[22rem] md:min-w-[28rem] min-w-[16rem]"}`}
               style={{
                 backgroundColor: haiku?.bgColor || "lightgrey",
                 // borderColor: haiku?.color || "#555555",
@@ -127,17 +127,16 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
         ))}
       </div>
 
-      <div className="_bg-pink-200 fixed bottom-12 left-1/2 transform -translate-x-1/2 w-[calc(100vw-3rem)] h-fit flex flex-row gap-2 justify-center flex-wrap">
-        {left?.map((w: string, i: number) => {
-          let lw = w.toLowerCase();
+      <div className="_bg-pink-200 fixed bottom-16 left-1/2 transform -translate-x-1/2 w-[calc(100vw-3rem)] h-fit flex flex-row gap-2 justify-center flex-wrap">
+        {words?.map((w: any, i: number) => {          
           return (
             <StyledLayers key={i} styles={[styles[0]]}>
               <div
                 style={{ backgroundColor: haiku?.bgColor || "lightgrey" }}
-                className={`${font.architects_daughter.className} cursor-pointer p-1 md:text-[26pt] sm:text-[22pt] text-[16pt]`}
-                onClick={() => pick(i)}
+                className={`${font.architects_daughter.className} ${w.picked ? "invisible" : "cursor-pointer"} p-1 md:text-[26pt] sm:text-[22pt] text-[16pt]`}
+                onClick={() => !w.picked && pick(w.offset)}
               >
-                {w}
+                {w.word}
               </div>
             </StyledLayers>
           )
