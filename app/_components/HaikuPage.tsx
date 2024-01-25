@@ -187,8 +187,8 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className={!solved && !w.correct && i > 0 ? "cursor-pointer" : ""}
-                                // onClick={() => !solved && !w.correct && i > 0 ? remove(i, j) : undefined}
+                                  // className={!solved && !w.correct  ? "cursor-pointer" : ""}
+                                onClick={() => !solved && !w.correct ? pick(w, i, j) : undefined}
                                 // onClick={() => handleClickInProgress(i, j)}
                                 >
                                   <StyledLayers key={i} styles={solved || w.correct ? styles : [styles[0]]}>
