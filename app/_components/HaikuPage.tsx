@@ -179,6 +179,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                             draggableId={w.id}
                             index={j}
                             isDragDisabled={w.correct}
+                            shouldRespectForcePress={false}
                           >
                             {(provided, snapshot) => {
                               return (
