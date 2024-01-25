@@ -197,7 +197,10 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                                       style={{
                                         backgroundColor: solved || w.correct
                                           ? undefined
-                                          : haiku?.bgColor || "lightgrey"
+                                          : haiku?.bgColor || "lightgrey",
+                                        filter: solved || w.correct
+                                        ? undefined
+                                        : `drop-shadow(1px 1px 1px rgb(0 0 0 / 0.2))`
                                       }}
                                     >
                                       {j == 0 &&

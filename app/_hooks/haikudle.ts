@@ -86,85 +86,24 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
     const numWords = words.length;
 
+    const solution = haiku.poem
+      .map((line: string) => line
+        .split(/\s/)
+        .map((w: string) => w.toLowerCase().replace(/[]/, "")));
+
+    const inProgress = [
+      words.slice(0, (numWords / 3)),
+      words.slice((numWords / 3), (2 * numWords / 3)),
+      words.slice((2 * numWords / 3)),
+    ];
+
+    checkCorrect(inProgress, solution);
+
     set({
       haiku,
-      inProgress: [
-        words.slice(0, (numWords / 3)),
-        words.slice((numWords / 3), (2 * numWords / 3)),
-        words.slice((2 * numWords / 3)),
-        // haiku.poem[0].split(/\s/)
-        //   .map((word: string, offset: number) => {
-        //     return {
-        //       word: word.toLowerCase(),
-        //       offset,
-        //       correct: false,
-        //       id: uuid(),
-        //     }
-        //   }),
-        // haiku.poem[1].split(/\s/)
-        //   .map((word: string, offset: number) => {
-        //     return {
-        //       word: word.toLowerCase(),
-        //       offset,
-        //       correct: false,
-        //       id: uuid(),
-        //     }
-        //   }),
-        // haiku.poem[2].split(/\s/)
-        //   .map((word: string, offset: number) => {
-        //     return {
-        //       word: word.toLowerCase(),
-        //       offset,
-        //       correct: false,
-        //       id: uuid(),
-        //     }
-        //   }),
-        // Array(7)
-        //   .fill({
-        //     word: "placeholder",
-        //     placeholder: true,
-        //   })
-        //   .map((e: any, i: number) => {
-        //     return {
-        //       ...e,
-        //       line: 1,
-        //       offset: i,
-        //     }
-        //   }),
-        [],
-        // Array(5)
-        //   .fill({
-        //     word: "placeholder",
-        //     placeholder: true,
-        //   })
-        //   .map((e: any, i: number) => {
-        //     return {
-        //       ...e,
-        //       line: 2,
-        //       offset: i,
-        //     }
-        //   }),
-        [],
-
-      ],
-      solution: haiku.poem
-        .map((line: string) => line
-          .split(/\s/)
-          .map((w: string) => w.toLowerCase().replace(/[]/, ""))),
-
-      words:
-        shuffleArray(
-          words.map((w: string, i: number) => {
-            return {
-              offset: i,
-              word: w,
-              syllables: syllable(w),
-              picked: false,
-              correct: false,
-            }
-          })
-        )
-      ,
+      inProgress: inProgress,
+      solution,
+      words: [],
       solved: false,
     });
   },
