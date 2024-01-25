@@ -47,6 +47,8 @@ body {
     )
     rgb(var(--background-start-rgb));
   background-attachment: fixed;     */
+
+  touch-action: manipulation;
 }
 
 /* kill safari bounce */
