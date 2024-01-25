@@ -113,7 +113,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           .map((w: string) => w.toLowerCase().replace(/[]/, ""))),
 
       words:
-        // shuffleArray(
+        shuffleArray(
         words.map((w: string, i: number) => {
           return {
             offset: i,
@@ -123,7 +123,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
             correct: false,
           }
         })
-      // )
+      )
       ,
       solved: false,
     });
