@@ -29,6 +29,7 @@
     "openai": "^4.24.7",
     "postcss": "8.4.26",
     "react": "18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "18.2.0",
     "react-icons": "^4.10.1",
     "syllable": "^5.0.1",
@@ -40,6 +41,7 @@
   },
   "devDependencies": {
     "@types/chroma-js": "^2.4.3",
+    "@types/react-beautiful-dnd": "^13.1.8",
     "@types/uuid": "^9.0.7",
     "encoding": "^0.1.13"
   }
