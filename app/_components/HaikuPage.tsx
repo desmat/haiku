@@ -1,17 +1,17 @@
 'use client'
 
 // import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { FaMagic } from "react-icons/fa";
 import { syllable } from 'syllable'
 import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
 import { StyledLayers } from "./StyledLayers";
-import { useEffect, useState } from "react";
 import shuffleArray from "@/utils/shuffleArray";
 import useHaikudle from '../_hooks/haikudle';
 import { GenerateIcon } from './Nav';
-import { FaMagic } from "react-icons/fa";
 // import { useState } from "react";
-
 
 
 export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: any[] }) {
@@ -25,6 +25,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     pick,
     remove,
     solve,
+    move,
   ] = useHaikudle((state: any) => [
     state.inProgress,
     state.words,
@@ -33,6 +34,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     state.pick,
     state.remove,
     state.solve,
+    state.move,
   ]);
 
   const someCorrect = inProgress.flat().reduce((a: boolean, m: any, i: number) => a || m.correct, false);
@@ -57,6 +59,15 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
     // console.log('>> app._components.HaikuPage.countSyllables()', { r });
     return r;
+  }
+
+  const onDragEnd = (result: any) => {
+    move(
+      inProgress.flat().find((w: any) => w.id == result.draggableId), 
+      Number(result.source.droppableId), 
+      result.source.index, 
+      Number(result.destination.droppableId),
+      result.destination.index)
   }
 
   // const handleClickInProgress = (line: number, slot: number) => {
@@ -121,151 +132,97 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
   return (
     <div>
-      <div
-        className="fixed top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0 opacity-100"
-        style={{
-          backgroundImage: `url("${haiku.bgImage}")`,
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-          filter: "brightness(1.2)",
-        }}
-      />
-
-      {/* cheater */}
-      {/* <div
-        className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
+      <DragDropContext
+        onDragEnd={onDragEnd}
       >
-        <StyledLayers styles={styles}>
-          {haiku.poem.map((s: string, i: number) => <div key={i}>{s}</div>)}
-        </StyledLayers>
-      </div> */}
+        <div
+          className="fixed top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0 opacity-100"
+          style={{
+            backgroundImage: `url("${haiku.bgImage}")`,
+            backgroundPosition: "center",
+            backgroundSize: "cover",
+            filter: "brightness(1.2)",
+          }}
+        />
 
-      <div
-        className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
-      // onClick={() => init(haiku)}
-      >
-        {haiku.poem.map((s: string, i: number) => (
-          <div
-            key={i}
-            className={`_bg-purple-200 capitalize-first-letter relative flex flex-row items-center justify-start my-1 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[24rem] md:min-w-[28rem] min-w-[18rem]" : "sm:min-w-[22rem] md:min-w-[24rem] min-w-[16rem]"}`}
-            style={{
-              // ...styles[0],
-              backgroundColor: solved || someCorrect
-                ? undefined
-                : haiku?.bgColor || "lightgrey",
-              // borderColor: haiku?.color || "#555555",
-              // borderColor: haiku?.bgColor || "lightgrey",
-              // borderStyle: "solid",
-              // borderWidth: "1px",
-            }}
-          >
-            {inProgress[i].map((w: any, j: number) => {
-              // const k: number = e[0];
-              // const w: any = e[1];
-
-              if (w.placeholder) {
-                return (
-                  <div
-                    key={j}
-                    className="_bg-orange-400 w-[2rem] _cursor-pointer"
-                  // className={!solved && i > 0 ? "cursor-pointer" : ""}
-                  // onClick={() => handleClickInProgress(i, j)}
-                  >
-                    {/* {w.offset} */}
-                  </div>
-                )
-              }
-
-              return (
-                <span
-                  key={j}
-                  className={!solved && !w.correct && i > 0 ? "cursor-pointer" : ""}
-                  onClick={() => !solved && !w.correct && i > 0 ? remove(i, j) : undefined}
-                // onClick={() => handleClickInProgress(i, j)}
-                >
-                  <StyledLayers key={i} styles={solved || w.correct ? styles : [styles[0]]}>
+        <div
+          // className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
+          // className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+          className="fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-10"
+        >
+          {haiku.poem.map((s: string, i: number) => {
+            return (
+              <Droppable
+                key={`${i}`}
+                droppableId={`${i}`}
+                direction="horizontal"
+              >
+                {(provided, snapshot) => {
+                  return (
                     <div
-                      className="px-1"
-                      style={{
-                        backgroundColor: solved || w.correct
-                          ? undefined
-                          : haiku?.bgColor || "lightgrey"
-                      }}
+                      // key={`line-${i}`}
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      className={`_bg-purple-200 capitalize-first-letter _relative flex flex-row items-center justify-start my-0 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[24rem] md:min-w-[28rem] min-w-[18rem]" : "sm:min-w-[22rem] md:min-w-[24rem] min-w-[16rem]"}`}
+                      // style={{
+                      //   backgroundColor: solved || someCorrect
+                      //     ? undefined
+                      //     : haiku?.bgColor || "lightgrey",
+                      // }}
                     >
-                      {j == 0 &&
-                        upperCaseFirstLetter(w.word)
-                      }
-                      {j != 0 &&
-                        w.word
-                      }
-                      {/* {w.syllables} */}
+                      {inProgress[i].map((w: any, j: number) => {
+                        return (
+                          <Draggable
+                            // key={`word-${i}-${j}`}
+                            key={w.id}
+                            // draggableId={`word-${i}-${j}`}
+                            draggableId={w.id}
+                            index={j}
+                            isDragDisabled={w.correct}
+                          >
+                            {(provided, snapshot) => {
+                              return (
+                                <span
+                                  // key={j}
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className={!solved && !w.correct && i > 0 ? "cursor-pointer" : ""}
+                                // onClick={() => !solved && !w.correct && i > 0 ? remove(i, j) : undefined}
+                                // onClick={() => handleClickInProgress(i, j)}
+                                >
+                                  <StyledLayers key={i} styles={solved || w.correct ? styles : [styles[0]]}>
+                                    <div
+                                      className={`px-1 ${w.correct ? "" : "m-1"}`}
+                                      style={{
+                                        backgroundColor: solved || w.correct
+                                          ? undefined
+                                          : haiku?.bgColor || "lightgrey"
+                                      }}
+                                    >
+                                      {j == 0 &&
+                                        upperCaseFirstLetter(w.word)
+                                      }
+                                      {j != 0 &&
+                                        w.word
+                                      }
+                                    </div>
+                                  </StyledLayers>
+                                </span>
+                              )
+                            }}
+                          </Draggable>
+                        )
+                      })}
+                      {provided.placeholder}
                     </div>
-                  </StyledLayers>
-                </span>
-              )
-            }
-            )}
-            {!solved &&
-              <div className="absolute left-[-2rem] top-0">
-                <StyledLayers styles={styles}>
-                  {inProgress[i].reduce((t: any, w: any) => t + (w.syllables || 0), 0)}
-                  {/* {inProgress[i][0]?.syllables} */}
-                </StyledLayers>
-              </div>
-            }
-          </div>
-        ))}
-      </div>
-
-      <div className="_bg-pink-200 fixed bottom-16 left-1/2 transform -translate-x-1/2 w-[calc(100vw-3rem)] h-fit flex flex-row gap-2 justify-center flex-wrap">
-        {words?.map((w: any, i: number) => {
-          return (
-            // <StyledLayers key={i} styles={w.picked ? [] : [styles[0]]}>
-            <div
-              key={i}
-              style={{
-                color: styles[0].color,
-                // filter: `drop-shadow(0px 0px 8px ${bgColor})`,
-                WebkitTextStroke: styles[0].WebkitTextStroke,
-                fontWeight: styles[0].fontWeight,
-                backgroundColor: haiku?.bgColor || "lightgrey"
-              }}
-              className={`${font.architects_daughter.className} ${w.picked ? "invisible" : "cursor-pointer"} p-1 md:text-[26pt] sm:text-[22pt] text-[16pt]`}
-              onClick={() => !w.picked && pick(w.offset)}
-            >
-              {w.word}
-            </div>
-            // </StyledLayers>
-          )
-        })}
-      </div>
-
-      <div className="fixed top-20 right-4 z-20">
-        <StyledLayers styles={styles}>
-          <FaMagic onClick={() => solve()} className="cursor-pointer _bg-orange-600 _hover: _text-purple-100 h-8 w-8 md:h-10 md:w-10" />
-        </StyledLayers>
-      </div>
-
-      {/* <div className="_bg-pink-200 flex flex-row fixed bottom-10 left-1/2 transform -translate-x-1/2">
-        {haiku.colorPalette?.map((c: string, i: number) => {
-          return (
-            <div
-              key={i}
-              className="w-8 h-8 text-center"
-              style={{
-                backgroundColor: c,
-                boxSizing: "border-box",
-                border: i == colorOffsets.front || i == colorOffsets.back ? "black 2px solid" : ""
-              }}
-              onClick={() => setColorOffsets({
-                front: i,
-                back: Math.floor(Math.random() * haiku?.colorPalette?.length),
-              })}
-            >
-            </div>
-          )
-        })}
-      </div> */}
+                  )
+                }}
+              </Droppable>
+            )
+          })}
+        </div>
+      </DragDropContext>
     </div>
   )
 }

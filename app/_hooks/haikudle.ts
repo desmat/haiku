@@ -65,46 +65,86 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   init: (haiku: Haiku) => {
     console.log(">> hooks.haikudle.init", { haiku });
-    const words = [haiku.poem[1], haiku.poem[2]]
-      .join(" ")
-      .split(/\s/)
-      .map((w: string) => w.toLowerCase().replace(/[]/, ""))
+    const words =
+      shuffleArray(
+        haiku.poem
+          .join(" ")
+          .split(/\s/)
+          .map((w: string, i: number) => {
+            const word = w.toLowerCase().replace(/[]/, "")
+            return {
+              id: uuid(),
+              offset: i,
+              word: word,
+              syllables: syllable(word),
+              picked: false,
+              correct: false,
+            }
+          })
+      )
+      ;
+
+    const numWords = words.length;
 
     set({
       haiku,
       inProgress: [
-        haiku.poem[0].split(/\s/)
-          .map((word: string, offset: number) => {
-            return {
-              word: word.toLowerCase(),
-              offset,
-              correct: false,
-            }
-          }),
-        Array(7)
-          .fill({
-            word: "placeholder",
-            placeholder: true,
-          })
-          .map((e: any, i: number) => {
-            return {
-              ...e,
-              line: 1,
-              offset: i,
-            }
-          }),
-        Array(5)
-          .fill({
-            word: "placeholder",
-            placeholder: true,
-          })
-          .map((e: any, i: number) => {
-            return {
-              ...e,
-              line: 2,
-              offset: i,
-            }
-          }),
+        words.slice(0, (numWords / 3)),
+        words.slice((numWords / 3), (2 * numWords / 3)),
+        words.slice((2 * numWords / 3)),
+        // haiku.poem[0].split(/\s/)
+        //   .map((word: string, offset: number) => {
+        //     return {
+        //       word: word.toLowerCase(),
+        //       offset,
+        //       correct: false,
+        //       id: uuid(),
+        //     }
+        //   }),
+        // haiku.poem[1].split(/\s/)
+        //   .map((word: string, offset: number) => {
+        //     return {
+        //       word: word.toLowerCase(),
+        //       offset,
+        //       correct: false,
+        //       id: uuid(),
+        //     }
+        //   }),
+        // haiku.poem[2].split(/\s/)
+        //   .map((word: string, offset: number) => {
+        //     return {
+        //       word: word.toLowerCase(),
+        //       offset,
+        //       correct: false,
+        //       id: uuid(),
+        //     }
+        //   }),
+        // Array(7)
+        //   .fill({
+        //     word: "placeholder",
+        //     placeholder: true,
+        //   })
+        //   .map((e: any, i: number) => {
+        //     return {
+        //       ...e,
+        //       line: 1,
+        //       offset: i,
+        //     }
+        //   }),
+        [],
+        // Array(5)
+        //   .fill({
+        //     word: "placeholder",
+        //     placeholder: true,
+        //   })
+        //   .map((e: any, i: number) => {
+        //     return {
+        //       ...e,
+        //       line: 2,
+        //       offset: i,
+        //     }
+        //   }),
+        [],
 
       ],
       solution: haiku.poem
@@ -114,16 +154,16 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
       words:
         shuffleArray(
-        words.map((w: string, i: number) => {
-          return {
-            offset: i,
-            word: w,
-            syllables: syllable(w),
-            picked: false,
-            correct: false,
-          }
-        })
-      )
+          words.map((w: string, i: number) => {
+            return {
+              offset: i,
+              word: w,
+              syllables: syllable(w),
+              picked: false,
+              correct: false,
+            }
+          })
+        )
       ,
       solved: false,
     });
@@ -293,6 +333,24 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       solved: true
     });
   },
+
+
+
+  move: (word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
+    console.log(">> hooks.haikudle.move", { word, fromLine, fromOffset, toLine, toOffset });
+    const { haiku, inProgress, words, solution } = get();
+
+    const [spliced] = inProgress[fromLine].splice(fromOffset, 1);
+    inProgress[toLine].splice(toOffset, 0, spliced);
+
+    checkCorrect(inProgress, solution); // side effects yuk!
+
+    set({
+      inProgress,
+      solved: isSolved(words, inProgress, solution),
+    });
+  },
+
 
 })));
 
