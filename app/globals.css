@@ -49,6 +49,11 @@ body {
   background-attachment: fixed;     */
 }
 
+/* kill safari bounce */
+html body {
+  overflow: hidden;
+}
+
 main {
   @apply px-2 py-3
 }

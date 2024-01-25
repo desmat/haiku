@@ -10,7 +10,6 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'hAIku',
   description: 'AI-Powered haiku game',
-  viewport: 'content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=3'
 }
 
 export default function RootLayout({
@@ -20,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=3"/>
+      <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=3, user-scalable=no"/>
       <body className={inter.className}>
         <div className="flex flex-col lg:flex-row">
           <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
