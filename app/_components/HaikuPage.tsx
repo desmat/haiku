@@ -8,6 +8,8 @@ import { StyledLayers } from "./StyledLayers";
 import { useEffect, useState } from "react";
 import shuffleArray from "@/utils/shuffleArray";
 import useHaikudle from '../_hooks/haikudle';
+import { GenerateIcon } from './Nav';
+import { FaMagic } from "react-icons/fa";
 // import { useState } from "react";
 
 
@@ -22,6 +24,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     init,
     pick,
     remove,
+    solve,
   ] = useHaikudle((state: any) => [
     state.inProgress,
     state.words,
@@ -29,11 +32,12 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     state.init,
     state.pick,
     state.remove,
+    state.solve,
   ]);
 
   const someCorrect = inProgress.flat().reduce((a: boolean, m: any, i: number) => a || m.correct, false);
 
-  console.log('>> app._components.HaikuPage.render()', { inProgress, solved });
+  console.log('>> app._components.HaikuPage.render()', { inProgress: JSON.stringify(inProgress), words: JSON.stringify(words) });
 
   const upperCaseFirstLetter = (s: string) => {
     if (!s || s.length == 0) return "";
@@ -54,6 +58,52 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     // console.log('>> app._components.HaikuPage.countSyllables()', { r });
     return r;
   }
+
+  // const handleClickInProgress = (line: number, slot: number) => {
+  //   const prev = inProgress[line][slot];
+  //   const word = {
+  //     "word": "onetwo",
+  //     "offset": 2,
+  //     syllables: 2,
+  //     "correct": true
+  //   };
+  //   const placeholder = {
+  //     "word": "placeholder",
+  //     offset: slot,
+  //     placeholder: true,
+  //   };
+
+  //   //@ts-ignore
+  //   if (prev?.placeholder) {
+  //     // here we either replace placeholders, or push non-placeholders
+  //     inProgress[line].splice(slot, 0, word);
+  //     // eat up following placeholders
+  //     //@ts-ignore
+  //     for (let i = 0; inProgress[line][slot + 1]?.placeholder && i < word.syllables; i++) {
+  //       inProgress[line].splice(slot + 1, 1);
+  //     }
+  //   } else {
+  //     // here we want to fill the removed slot with placeholders, 
+  //     // but not exceeding poem's structure (slot is a syllable)
+  //     const maxSyllables = line == 1 ? 7 : 5;
+  //     console.log("*** ", { inProgress });
+
+  //     const totalSyllables = inProgress[line].reduce((t: any, w: any) => {
+  //       return t + (w.placeholder ? 1 : w.syllables || 0);
+  //     }, 0) - (inProgress[line][slot]?.syllables || 0); // we're about to remove that last one
+  //     const syllables = word.syllables || 0;
+  //     const numPlaceholders = Math.max(0, Math.min(syllables, maxSyllables - totalSyllables))
+  //     // console.log("*** ", { inProgress, maxSyllables, slot, totalSyllables, syllables, numPlaceholders });
+
+  //     inProgress[line] = [
+  //       ...inProgress[line].slice(0, slot),
+  //       ...Array(numPlaceholders).fill(placeholder),
+  //       ...inProgress[line].slice(slot + 1),
+  //     ];
+  //   }
+
+  //   setInProgress(inProgress);
+  // }
 
   useEffect(() => {
     init(haiku);
@@ -109,34 +159,58 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
               // borderWidth: "1px",
             }}
           >
-            {inProgress[i].map((w: any, j: number) => (
-              <span
-                key={j}
-                className={!solved && i > 0 ? "cursor-pointer" : ""}
-                onClick={() => !solved && i > 0 ? remove(i, j, w) : undefined}
-              >
-                <StyledLayers key={i} styles={solved || w.correct ? styles : [styles[0]]}>
+            {inProgress[i].map((w: any, j: number) => {
+              // const k: number = e[0];
+              // const w: any = e[1];
+
+              if (w.placeholder) {
+                return (
                   <div
-                    className="px-1"
-                    style={{
-                      backgroundColor: solved || w.correct
-                        ? undefined
-                        : haiku?.bgColor || "lightgrey"
-                    }}
+                    key={j}
+                    className="_bg-orange-400 w-[2rem] _cursor-pointer"
+                  // className={!solved && i > 0 ? "cursor-pointer" : ""}
+                  // onClick={() => handleClickInProgress(i, j)}
                   >
-                    {j == 0 &&
-                      upperCaseFirstLetter(w.word)
-                    }
-                    {j != 0 &&
-                      w.word
-                    }
+                    {/* {w.offset} */}
                   </div>
-                </StyledLayers>
-              </span>
-            ))}
+                )
+              }
+
+              return (
+                <span
+                  key={j}
+                  className={!solved && !w.correct && i > 0 ? "cursor-pointer" : ""}
+                  onClick={() => !solved && !w.correct && i > 0 ? remove(i, j) : undefined}
+                // onClick={() => handleClickInProgress(i, j)}
+                >
+                  <StyledLayers key={i} styles={solved || w.correct ? styles : [styles[0]]}>
+                    <div
+                      className="px-1"
+                      style={{
+                        backgroundColor: solved || w.correct
+                          ? undefined
+                          : haiku?.bgColor || "lightgrey"
+                      }}
+                    >
+                      {j == 0 &&
+                        upperCaseFirstLetter(w.word)
+                      }
+                      {j != 0 &&
+                        w.word
+                      }
+                      {/* {w.syllables} */}
+                    </div>
+                  </StyledLayers>
+                </span>
+              )
+            }
+            )}
             {!solved &&
               <div className="absolute left-[-2rem] top-0">
-                {countSyllables(inProgress[i].map((w: any) => w.word).join(" "))}
+                <StyledLayers styles={styles}>
+                  {inProgress[i].reduce((t: any, w: any) => t + (w.syllables || 0), 0)}
+                  {/* {inProgress[i][0]?.syllables} */}
+                </StyledLayers>
               </div>
             }
           </div>
@@ -147,23 +221,29 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
         {words?.map((w: any, i: number) => {
           return (
             // <StyledLayers key={i} styles={w.picked ? [] : [styles[0]]}>
-              <div
-                key={i}
-                style={{ 
-                  color: styles[0].color,
-                  // filter: `drop-shadow(0px 0px 8px ${bgColor})`,
-                  WebkitTextStroke: styles[0].WebkitTextStroke,
-                  fontWeight: styles[0].fontWeight,
-                  backgroundColor: haiku?.bgColor || "lightgrey" 
-                }}
-                className={`${font.architects_daughter.className} ${w.picked ? "invisible" : "cursor-pointer"} p-1 md:text-[26pt] sm:text-[22pt] text-[16pt]`}
-                onClick={() => !w.picked && pick(w.offset)}
-              >
-                {w.word}
-              </div>
+            <div
+              key={i}
+              style={{
+                color: styles[0].color,
+                // filter: `drop-shadow(0px 0px 8px ${bgColor})`,
+                WebkitTextStroke: styles[0].WebkitTextStroke,
+                fontWeight: styles[0].fontWeight,
+                backgroundColor: haiku?.bgColor || "lightgrey"
+              }}
+              className={`${font.architects_daughter.className} ${w.picked ? "invisible" : "cursor-pointer"} p-1 md:text-[26pt] sm:text-[22pt] text-[16pt]`}
+              onClick={() => !w.picked && pick(w.offset)}
+            >
+              {w.word}
+            </div>
             // </StyledLayers>
           )
         })}
+      </div>
+
+      <div className="fixed top-20 right-4 z-20">
+        <StyledLayers styles={styles}>
+          <FaMagic onClick={() => solve()} className="cursor-pointer _bg-orange-600 _hover: _text-purple-100 h-8 w-8 md:h-10 md:w-10" />
+        </StyledLayers>
       </div>
 
       {/* <div className="_bg-pink-200 flex flex-row fixed bottom-10 left-1/2 transform -translate-x-1/2">

@@ -41,11 +41,12 @@ const checkCorrect = (inProgress: any, solution: any) => {
   return inProgress;
 }
 
-const isSolved = (inProgress: any, solution: any) => {
+const isSolved = (words: any, inProgress: any, solution: any) => {
   const wordsInProcess = inProgress.flat().map((w: any) => w.word).join(" ").split(/\s/);
   // console.log("*** isSolved", { wordsInProcess, solution });
 
-  if (wordsInProcess.length == solution.flat().length) {
+  // if (wordsInProcess.filter((w: any) => !w.placeholder).length == solution.flat().length) {
+  if (!words.find((w: any) => !w.picked)) {
     checkCorrect(inProgress, solution); // side effects yuk!
     return inProgress.flat().reduce((a: boolean, m: any, i: number) => a && m.correct, true);
   }
@@ -80,8 +81,31 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
               correct: false,
             }
           }),
-        [],
-        [],
+        Array(7)
+          .fill({
+            word: "placeholder",
+            placeholder: true,
+          })
+          .map((e: any, i: number) => {
+            return {
+              ...e,
+              line: 1,
+              offset: i,
+            }
+          }),
+        Array(5)
+          .fill({
+            word: "placeholder",
+            placeholder: true,
+          })
+          .map((e: any, i: number) => {
+            return {
+              ...e,
+              line: 2,
+              offset: i,
+            }
+          }),
+
       ],
       solution: haiku.poem
         .map((line: string) => line
@@ -89,16 +113,17 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           .map((w: string) => w.toLowerCase().replace(/[]/, ""))),
 
       words:
-        shuffleArray(
-          words.map((w: string, i: number) => {
-            return {
-              offset: i,
-              word: w,
-              picked: false,
-              correct: false,
-            }
-          })
-        )
+        // shuffleArray(
+        words.map((w: string, i: number) => {
+          return {
+            offset: i,
+            word: w,
+            syllables: syllable(w),
+            picked: false,
+            correct: false,
+          }
+        })
+      // )
       ,
       solved: false,
     });
@@ -108,50 +133,165 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     console.log(">> hooks.haikudle.pick", { offset });
 
     const { haiku, inProgress, solution, words } = get();
-    const w = words.find((w: any) => w.offset == offset);
+    const word = words.find((w: any) => w.offset == offset);
+    console.log(">> hooks.haikudle.pick", { word });
     // const lw = w.toLowerCase();
-    w.picked = true;
+    word.picked = true;
 
     const syllableCounts = countSyllables(inProgress);
-    const syllableCount = syllable(w.word);
+    const syllableCount = syllable(word.word);
 
-    const updatedInProgress = [
-      inProgress[0],
-      syllableCounts[1] + syllableCount <= 7
-        ? [...inProgress[1], w /* + (syllableCounts[1] + syllableCount >= 7 || left.length == 0 ? "," : "") */]
-        : inProgress[1],
-      syllableCounts[1] + syllableCount <= 7
-        ? inProgress[2]
-        : [...inProgress[2], w /* + (left.length == 0 ? "." : "") */]
-    ];
+    // const updatedInProgress = [
+    //   inProgress[0],
+    //   syllableCounts[1] + syllableCount <= 7
+    //     ? [...inProgress[1], w /* + (syllableCounts[1] + syllableCount >= 7 || left.length == 0 ? "," : "") */]
+    //     : inProgress[1],
+    //   syllableCounts[1] + syllableCount <= 7
+    //     ? inProgress[2]
+    //     : [...inProgress[2], w /* + (left.length == 0 ? "." : "") */]
+    // ];
 
-    set({
-      inProgress: updatedInProgress, //checkCorrect(updatedInProgress, solution),
-      words,
-      solved: isSolved(updatedInProgress, solution),
-    });
-  },
+    // find a placeholder and replace
 
-  remove: (lineNum: number, wordNum: number, word: any) => {
-    const { haiku, inProgress, words, solution } = get();
-    console.log(">> hooks.haikudle.remove", { lineNum, wordNum, word });
+    console.log(">> hooks.haikudle.pick", { inProgress });
 
-    const [spliced] = inProgress[lineNum].splice(wordNum, 1);
-    console.log(">> hooks.haikudle.remove", { spliced });
+    const placeholders = inProgress
+      .flat()
+      .filter((w: any) => w.placeholder)
+      .sort((a: any, b: any) => (a.line * 7 + a.offset) - (b.line * 7 + b.offset))
 
-    // const w = words.find((w: any) => w.picked && w.word == spliced)
-    // console.log(">> hooks.haikudle.remove", { w, words });
 
-    if (spliced) {
-      spliced.picked = false;
-      spliced.correct = false;
+    console.log(">> hooks.haikudle.pick", { placeholders });
+
+    const placeholder = placeholders[0];
+
+    if (!placeholder) {
+      throw 'no more placeholder?!'
+    }
+
+    console.log(">> hooks.haikudle.pick", { placeholder });
+
+    const { line } = placeholder;
+    const placeholderOffset = inProgress[line].indexOf(placeholder);
+    console.log(">> hooks.haikudle.pick", { placeholderOffset });
+
+    // here we either replace placeholders, or push non-placeholders
+    const [sliced] = inProgress[line].splice(placeholderOffset, 0, word);
+    console.log(">> hooks.haikudle.pick", { sliced });
+    // eat up following placeholders
+    for (let i = 0; inProgress[line][placeholderOffset + 1]?.placeholder && i < word.syllables; i++) {
+      inProgress[line].splice(placeholderOffset + 1, 1);
     }
 
     set({
+      inProgress, //checkCorrect(updatedInProgress, solution),
       words,
+      solved: isSolved(words, inProgress, solution),
+    });
+  },
+
+  remove: (lineNum: number, wordNum: number) => {
+    const { haiku, inProgress, words, solution } = get();
+    console.log(">> hooks.haikudle.remove", { lineNum, wordNum });
+
+    // const [spliced] = inProgress[lineNum].splice(wordNum, 1);
+    // console.log(">> hooks.haikudle.remove", { spliced });
+
+    // if (spliced) {
+    //   spliced.picked = false;
+    //   spliced.correct = false;
+    // }
+
+    const word = inProgress[lineNum][wordNum];
+    console.log(">> hooks.haikudle.remove", { word });
+
+    if (word) {
+      word.picked = false;
+      word.correct = false;
+    }
+
+    const updatedWords = words.map((w: any) => w.offset == word.offset ? word : w);
+
+    // here we want to fill the removed slot with placeholders, 
+    // but not exceeding poem's structure (slot is a syllable)
+    const maxSyllables = lineNum == 1 ? 7 : 5;
+    // console.log("*** ", { inProgress });
+
+    const totalSyllables = inProgress[lineNum].reduce((t: any, w: any) => {
+      return t + (w.placeholder ? 1 : w.syllables || 0);
+    }, 0) - (inProgress[lineNum][wordNum]?.syllables || 0); // we're about to remove that last one
+    const syllables = word.syllables || 0;
+    const numPlaceholders = Math.max(0, Math.min(syllables, maxSyllables - totalSyllables))
+    console.log("*** ", { inProgress, maxSyllables, wordNum, totalSyllables, syllables, numPlaceholders });
+
+    const placeholders = Array(numPlaceholders)
+      .fill({
+        word: "placeholder",
+        // offset: slot,
+        placeholder: true,
+        line: lineNum,
+        offset: wordNum,
+      }).map((p: any, i: number) => {
+        return {
+          ...p,
+          offset: wordNum + i,
+        }
+      });
+
+    inProgress[lineNum] = [
+      ...inProgress[lineNum].slice(0, wordNum),
+      ...placeholders,
+      ...inProgress[lineNum].slice(wordNum + 1),
+    ];
+
+    set({
+      words: updatedWords,
       inProgress,
-      solved: isSolved(inProgress, solution),
+      solved: isSolved(words, inProgress, solution),
     })
+  },
+
+  solve: () => {
+    const { haiku, inProgress, words, solution } = get();
+    console.log(">> hooks.haikudle.solve", { words, solution, inProgress });
+
+    const solvedInProgress = [
+      solution[0].map((w: string) => {
+        return {
+          word: w,
+          picked: true,
+          correct: true,
+        }
+      }),
+      solution[1].map((w: string) => {
+        return {
+          word: w,
+          picked: true,
+          correct: true,
+        }
+      }),
+      solution[2].map((w: string) => {
+        return {
+          word: w,
+          picked: true,
+          correct: true,
+        }
+      }),
+    ];
+
+    const solvedWords = words.map((w: any) => {
+      return {
+        ...w,
+        picked: true,
+        correct: true,
+      }
+    });
+
+    set({
+      inProgress: solvedInProgress,
+      words: solvedWords,
+      solved: true
+    });
   },
 
 })));
