@@ -204,8 +204,8 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                                         filter: (solved || w.correct)
                                           ? undefined
                                           : snapshot.isDragging
-                                            ? `drop-shadow(1px 1px 3px rgb(0 0 0 / 0.6))`
-                                            : `drop-shadow(1px 1px 1px rgb(0 0 0 / 0.2))`,
+                                            ? `drop-shadow(0px 1px 3px rgb(0 0 0 / 0.8))`
+                                            : `drop-shadow(0px 1px 1px rgb(0 0 0 / 0.2))`,
                                       }}
                                     >
                                       {j == 0 &&
