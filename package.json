@@ -29,7 +29,7 @@
     "openai": "^4.24.7",
     "postcss": "8.4.26",
     "react": "18.2.0",
-    "react-beautiful-dnd": "git+https://github.com/desmat/next-firebase-auth-edge.git",
+    "react-beautiful-dnd": "git+https://github.com/desmat/react-beautiful-dnd.git",
     "react-dom": "18.2.0",
     "react-icons": "^4.10.1",
     "syllable": "^5.0.1",
