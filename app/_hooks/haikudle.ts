@@ -168,7 +168,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     if (solved) {
       trackEvent("haikudle-solved", {
         haikuId: haiku.id,
-        solvedBy: (await useUser.getState()).user.id,
+        userId: (await useUser.getState()).user.id,
       })
     }
 
