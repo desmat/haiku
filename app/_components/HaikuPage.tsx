@@ -63,9 +63,9 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
   const onDragEnd = (result: any) => {
     move(
-      inProgress.flat().find((w: any) => w.id == result.draggableId), 
-      Number(result.source.droppableId), 
-      result.source.index, 
+      inProgress.flat().find((w: any) => w.id == result.draggableId),
+      Number(result.source.droppableId),
+      result.source.index,
       Number(result.destination.droppableId),
       result.destination.index)
   }
@@ -164,11 +164,11 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                       {...provided.droppableProps}
                       ref={provided.innerRef}
                       className={`_bg-purple-200 capitalize-first-letter _relative flex flex-row items-center justify-start my-0 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[24rem] md:min-w-[28rem] min-w-[18rem]" : "sm:min-w-[22rem] md:min-w-[24rem] min-w-[16rem]"}`}
-                      // style={{
-                      //   backgroundColor: solved || someCorrect
-                      //     ? undefined
-                      //     : haiku?.bgColor || "lightgrey",
-                      // }}
+                    // style={{
+                    //   backgroundColor: solved || someCorrect
+                    //     ? undefined
+                    //     : haiku?.bgColor || "lightgrey",
+                    // }}
                     >
                       {inProgress[i].map((w: any, j: number) => {
                         return (
@@ -180,7 +180,8 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                             index={j}
                             isDragDisabled={w.correct}
                             shouldRespectForcePress={true}
-                            // timeForLongPress={0}
+                          // timeForLongPress={0}
+
                           >
                             {(provided, snapshot) => {
                               return (
@@ -190,19 +191,21 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
                                   // className={!solved && !w.correct  ? "cursor-pointer" : ""}
-                                onClick={() => !solved && !w.correct ? pick(w, i, j) : undefined}
+                                  onClick={() => !solved && !w.correct ? pick(w, i, j) : undefined}
                                 // onClick={() => handleClickInProgress(i, j)}
                                 >
                                   <StyledLayers key={i} styles={solved || w.correct ? styles : [styles[0]]}>
                                     <div
-                                      className={`px-1 ${w.correct ? "" : "m-1"}`}
+                                      className={`px-1 ${w.correct ? "" : "m-1"} transition-all ${!solved && !w.correct && "draggable-notsure-why-cant-inline"}`}
                                       style={{
-                                        backgroundColor: solved || w.correct
+                                        backgroundColor: (solved || w.correct)
                                           ? undefined
                                           : haiku?.bgColor || "lightgrey",
-                                        filter: solved || w.correct
-                                        ? undefined
-                                        : `drop-shadow(1px 1px 1px rgb(0 0 0 / 0.2))`
+                                        filter: (solved || w.correct)
+                                          ? undefined
+                                          : snapshot.isDragging
+                                            ? `drop-shadow(1px 1px 3px rgb(0 0 0 / 0.6))`
+                                            : `drop-shadow(1px 1px 1px rgb(0 0 0 / 0.2))`,
                                       }}
                                     >
                                       {j == 0 &&

@@ -154,3 +154,9 @@ ul {
   /* font-family: fantasy; */
   /* font-weight: bolder; */
 }
+
+/* .draggable-notsure-why-cant-inline:hover, */
+.draggable-notsure-why-cant-inline.draggable-notsure-why-cant-inline:active {
+  filter: drop-shadow(1px 1px 3px rgb(0 0 0 / 0.6)) !important;
+  /* border: red solid 1px; */
+}
