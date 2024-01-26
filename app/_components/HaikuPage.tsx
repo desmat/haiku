@@ -1,139 +1,93 @@
 'use client'
 
-// import { useEffect, useState } from 'react';
-import { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { FaMagic } from "react-icons/fa";
-import { syllable } from 'syllable'
+import { useEffect, useState } from "react";
 import * as font from "@/app/font";
+import useHaikudle from '@/app/_hooks/haikudle';
 import { Haiku } from "@/types/Haiku";
 import { StyledLayers } from "./StyledLayers";
-import shuffleArray from "@/utils/shuffleArray";
-import useHaikudle from '../_hooks/haikudle';
-import { GenerateIcon } from './Nav';
-// import { useState } from "react";
-
 
 export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: any[] }) {
   console.log('>> app._components.HaikuPage.render()', { poem: haiku.poem, id: haiku.id });
 
   const [
     inProgress,
-    words,
     solved,
     init,
-    pick,
-    remove,
-    solve,
     move,
+    swap,
   ] = useHaikudle((state: any) => [
     state.inProgress,
-    state.words,
     state.solved,
     state.init,
-    state.pick,
-    state.remove,
-    state.solve,
     state.move,
+    state.swap,
   ]);
 
+  const [selectedWord, setSelectedWord] = useState<any>();
   const someCorrect = inProgress.flat().reduce((a: boolean, m: any, i: number) => a || m.correct, false);
 
-  console.log('>> app._components.HaikuPage.render()', { inProgress: JSON.stringify(inProgress), words: JSON.stringify(words) });
+  console.log('>> app._components.HaikuPage.render()', { inProgress: JSON.stringify(inProgress) });
 
   const upperCaseFirstLetter = (s: string) => {
     if (!s || s.length == 0) return "";
     return s.substring(0, 1).toUpperCase() + s.substring(1);
   }
 
-  const countSyllables = (s: string) => {
-    // @ts-ignore
-    const r = s.split(/\s+/).reduce((total: number, v: string) => {
-      // @ts-ignore
-      const v2 = v.toLowerCase().replace(/[,.]/, "");
-      // @ts-ignore
-      // console.log('>> app._components.HaikuPage.countSyllables()', { v, v2, c: syllable(v2) });
-      // @ts-ignore
-      return total + (syllable(v2) || 0);
-    }, 0);
+  const handleDragStart = (result: any) => {
+    console.log('>> app._components.HaikuPage.handleDragStart()', { result });
 
-    // console.log('>> app._components.HaikuPage.countSyllables()', { r });
-    return r;
+    setSelectedWord({
+      word: inProgress.flat().find((w: any) => w.id == result.draggableId),
+      lineNumber: Number(result.source.droppableId),
+      wordNumber: result.source.index,
+    });
   }
 
-  const onDragEnd = (result: any) => {
+  const handleDragEnd = (result: any) => {
+    console.log('>> app._components.HaikuPage.handleDragEnd()', { result });
+
     move(
       inProgress.flat().find((w: any) => w.id == result.draggableId),
       Number(result.source.droppableId),
       result.source.index,
       Number(result.destination.droppableId),
-      result.destination.index)
+      result.destination.index
+    );
+    setSelectedWord(undefined);
   }
 
-  // const handleClickInProgress = (line: number, slot: number) => {
-  //   const prev = inProgress[line][slot];
-  //   const word = {
-  //     "word": "onetwo",
-  //     "offset": 2,
-  //     syllables: 2,
-  //     "correct": true
-  //   };
-  //   const placeholder = {
-  //     "word": "placeholder",
-  //     offset: slot,
-  //     placeholder: true,
-  //   };
-
-  //   //@ts-ignore
-  //   if (prev?.placeholder) {
-  //     // here we either replace placeholders, or push non-placeholders
-  //     inProgress[line].splice(slot, 0, word);
-  //     // eat up following placeholders
-  //     //@ts-ignore
-  //     for (let i = 0; inProgress[line][slot + 1]?.placeholder && i < word.syllables; i++) {
-  //       inProgress[line].splice(slot + 1, 1);
-  //     }
-  //   } else {
-  //     // here we want to fill the removed slot with placeholders, 
-  //     // but not exceeding poem's structure (slot is a syllable)
-  //     const maxSyllables = line == 1 ? 7 : 5;
-  //     console.log("*** ", { inProgress });
-
-  //     const totalSyllables = inProgress[line].reduce((t: any, w: any) => {
-  //       return t + (w.placeholder ? 1 : w.syllables || 0);
-  //     }, 0) - (inProgress[line][slot]?.syllables || 0); // we're about to remove that last one
-  //     const syllables = word.syllables || 0;
-  //     const numPlaceholders = Math.max(0, Math.min(syllables, maxSyllables - totalSyllables))
-  //     // console.log("*** ", { inProgress, maxSyllables, slot, totalSyllables, syllables, numPlaceholders });
-
-  //     inProgress[line] = [
-  //       ...inProgress[line].slice(0, slot),
-  //       ...Array(numPlaceholders).fill(placeholder),
-  //       ...inProgress[line].slice(slot + 1),
-  //     ];
-  //   }
-
-  //   setInProgress(inProgress);
-  // }
+  const handleClickWord = (word: any, lineNumber: number, wordNumber: number) => {
+    console.log('>> app._components.HaikuPage.handleClickWord()', { word, lineNumber, wordNumber });
+    if (word.id == selectedWord?.word?.id) {
+      setSelectedWord(undefined);
+    } else if (selectedWord) {
+      swap(
+        selectedWord.word,
+        selectedWord.lineNumber,
+        selectedWord.wordNumber,
+        lineNumber,
+        wordNumber,
+      );
+      setSelectedWord(undefined);
+    } else {
+      setSelectedWord({
+        word,
+        lineNumber,
+        wordNumber,
+      });
+    }
+  }
 
   useEffect(() => {
     init(haiku);
   }, [haiku.id]);
 
-  // console.log('>> app._components.HaikuPage.render()', { words });
-
-  // const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
-
-  // const fontColor = haiku?.colorPalette && colorOffsets.front >= 0 && haiku.colorPalette[colorOffsets.front] || haiku?.color || "#555555";
-  const fontColor = haiku?.color || "#555555";
-
-  // const bgColor = haiku?.colorPalette && colorOffsets.back >= 0 && haiku?.colorPalette[colorOffsets.back] || haiku?.bgColor || "lightgrey";
-  const bgColor = haiku?.bgColor || "lightgrey";
-
   return (
     <div>
       <DragDropContext
-        onDragEnd={onDragEnd}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
       >
         <div
           className="fixed top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0 opacity-100"
@@ -189,8 +143,9 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
                                   // className={!solved && !w.correct  ? "cursor-pointer" : ""}
-                                  onClick={() => !solved && !w.correct ? pick(w, i, j) : undefined}
-                                // onClick={() => handleClickInProgress(i, j)}
+                                  // onClick={() => !solved && !w.correct ? pick(w, i, j) : undefined}
+                                  // onClick={() => handleClickInProgress(i, j)}
+                                  onMouseDown={() => !w.correct && handleClickWord(w, i, j)}
                                 >
                                   <StyledLayers key={i} styles={solved || w.correct ? styles : [styles[0]]}>
                                     <div
@@ -202,14 +157,18 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                                         filter: (solved || w.correct)
                                           ? undefined
                                           : snapshot.isDragging
-                                            ? `drop-shadow(0px 1px 3px rgb(0 0 0 / 0.8))`
-                                            : `drop-shadow(0px 1px 1px rgb(0 0 0 / 0.2))`,
+                                            ? `drop-shadow(0px 1px 3px rgb(0 0 0 / 0.9))`
+                                            : selectedWord?.word?.id == w.id
+                                              ? `drop-shadow(0px 1px 2px rgb(0 0 0 / 0.9))`
+                                              : selectedWord
+                                                ? `drop-shadow(0px 1px 1px rgb(0 0 0 / 0.5))`
+                                                : `drop-shadow(0px 1px 1px rgb(0 0 0 / 0.2))`,
                                       }}
                                     >
-                                      {j == 0 && w.correct && 
+                                      {j == 0 && w.correct &&
                                         upperCaseFirstLetter(w.word)
                                       }
-                                      {!(j == 0 && w.correct) && 
+                                      {!(j == 0 && w.correct) &&
                                         w.word
                                       }
                                     </div>
