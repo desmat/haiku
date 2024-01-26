@@ -1,5 +1,6 @@
 export type TrackingEventType =
-  "error"
-  | "user-signedin"
-  | "haiku-created"
-  | "haiku-generated"
+  "error" |
+  "user-signedin" |
+  "haiku-created" |
+  "haiku-generated" |
+  "haikudle-solved"

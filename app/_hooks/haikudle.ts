@@ -275,7 +275,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
 
 
-  move: (word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
+  move: async (word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
     console.log(">> hooks.haikudle.move", { word, fromLine, fromOffset, toLine, toOffset });
     const { haiku, inProgress, words, solution } = get();
 
@@ -283,23 +283,31 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     inProgress[toLine].splice(toOffset, 0, spliced);
 
     checkCorrect(inProgress, solution); // side effects yuk!
+    const solved = isSolved(words, inProgress, solution);
+    
+    if (solved) {
+      trackEvent("haikudle-solved", {
+        id: haiku.id,
+        solvedBy: (await useUser.getState()).user.id,
+      })
+    }
 
     set({
       inProgress,
-      solved: isSolved(words, inProgress, solution),
+      solved,
     });
   },
 
-   pick: (word: any, fromLine: number, fromOffset: number) => {
+  pick: async (word: any, fromLine: number, fromOffset: number) => {
     console.log(">> hooks.haikudle.pick", { word, fromLine, fromOffset });
-    const { haiku, inProgress, words, solution, move } = get();
-    
+    const { haiku, inProgress, words, solution, move, } = get();
+
     let toLine = -1, toOffset = -1;
     const done = () => {
       return toLine >= 0 && toOffset >= 0 && (toLine != fromLine || toOffset != fromOffset);
     }
-    
-    for (let i = 0; !done()  && i < inProgress.length; i++) {
+
+    for (let i = 0; !done() && i < inProgress.length; i++) {
       for (let j = 0; !done() && j < inProgress[i].length; j++) {
         console.log(">> hooks.haikudle.pick", { i, j, pick: inProgress[i][j] });
         if (!inProgress[i][j]?.correct) {
@@ -315,16 +323,24 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       // move(word, fromLine, fromOffset, toLine, toOffset);
       const [spliced] = inProgress[toLine].splice(toOffset, 1, word);
       inProgress[fromLine].splice(fromOffset, 1, spliced);
-  
+
       checkCorrect(inProgress, solution); // side effects yuk!
-  
+      const solved = isSolved(words, inProgress, solution);
+      
+      if (solved) {
+        trackEvent("haikudle-solved", {
+          id: haiku.id,
+          solvedBy: (await useUser.getState()).user.id,
+        })
+      }
+
       set({
         inProgress,
-        solved: isSolved(words, inProgress, solution),
+        solved,
       });
-  
+
     }
-   },
+  },
 
 
 })));
