@@ -36,17 +36,17 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
   const haiku = _haiku || id && getHaiku(id) || haikus[Math.floor(Math.random() * haikus.length)] || samples.notFoundHaiku;
   const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
 
-  // console.log('>> app.page.render()', { id });
+  console.log('>> app.page.render()', { id });
 
   useEffect(() => {
     // if (!loaded) {
-      if (id) {
-         loadHaikus({ id });
-      }
+      // if (id) {
+      //    loadHaikus({ id });
+      // }
 
       loadHaikus({ lang: lang || "en" });
     // }
-  }, [id, lang]);
+  }, [lang]);
 
   const handleGenerate = async (e: any) => {
     // console.log('>> app.page.handleGenerate()');
