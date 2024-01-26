@@ -19,7 +19,7 @@ export function Logo({ href, onClick }: { href?: string, onClick?: any }) {
       href={href || "#"}
       className="hover:no-underline"
     >
-      <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-2px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>kudle</span>
+      <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>kudle</span>
     </Link>
   )
 }
