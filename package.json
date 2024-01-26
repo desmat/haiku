@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
+    "@hello-pangea/dnd": "^16.5.0",
     "@heroicons/react": "^2.0.18",
     "@types/node": "20.4.2",
     "@types/react": "18.2.15",
@@ -29,7 +30,6 @@
     "openai": "^4.24.7",
     "postcss": "8.4.26",
     "react": "18.2.0",
-    "react-beautiful-dnd": "git+https://github.com/desmat/react-beautiful-dnd.git",
     "react-dom": "18.2.0",
     "react-icons": "^4.10.1",
     "syllable": "^5.0.1",

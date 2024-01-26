@@ -2,7 +2,7 @@
 
 // import { useEffect, useState } from 'react';
 import { useEffect, useState } from "react";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { FaMagic } from "react-icons/fa";
 import { syllable } from 'syllable'
 import * as font from "@/app/font";
@@ -180,6 +180,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                             index={j}
                             isDragDisabled={w.correct}
                             shouldRespectForcePress={false}
+                            // timeForLongPress={0}
                           >
                             {(provided, snapshot) => {
                               return (
