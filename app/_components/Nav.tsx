@@ -19,7 +19,7 @@ export function Logo({ href, onClick }: { href?: string, onClick?: any }) {
       href={href || "#"}
       className="hover:no-underline"
     >
-      <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-2px] pr-[3px] pl-[1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>kudle</span>
+      <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-2px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>kudle</span>
     </Link>
   )
 }
@@ -28,7 +28,7 @@ export function GenerateIcon({ onClick }: { onClick?: any }) {
 
   return (
     <Link href="#" onClick={onClick}>
-      <IoSparkles className="_bg-orange-600 _hover: _text-purple-100 h-8 w-8 md:h-10 md:w-10" />
+      <IoSparkles className="_bg-orange-600 _hover: _text-purple-100 h-6 w-6 md:h-8 md:w-8" />
     </Link>
   )
 }
@@ -85,7 +85,7 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
 
   return (
     <div className="_bg-pink-200">
-      <div className={`${font.architects_daughter.className} fixed top-1 left-4 z-20 text-[26pt] md:text-[32pt]`}>
+      <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20 text-[26pt] md:text-[32pt]`}>
         <StyledLayers styles={styles}>
           <Logo href={`/${lang || ""}`} onClick={onClickLogo} />
         </StyledLayers>
@@ -95,7 +95,7 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
         <NavProfileLink href="/profile" className="_bg-orange-600 _hover: text-purple-100" style={textStyle} />
       </div> */}
       {onClickGenerate &&
-        <div className="fixed top-4 right-4 z-20">
+        <div className="fixed top-2.5 right-2.5 z-20">
           <StyledLayers styles={styles}>
             <GenerateIcon onClick={onClickGenerate} />
           </StyledLayers>
@@ -110,7 +110,7 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
         }}
       />
 
-      <div className={`fixed bottom-3 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
+      <div className={`fixed bottom-1.5 md:bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
         <StyledLayers styles={styles}>
           <BottomLinks lang={lang} />
         </StyledLayers>
