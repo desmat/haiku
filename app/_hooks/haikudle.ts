@@ -2,9 +2,10 @@ import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { syllable } from 'syllable'
 import useUser from './user';
-import shuffleArray from "@/utils/shuffleArray";
+import { uuid } from '@/utils/misc';
 import { Haiku } from '@/types/Haiku';
 import trackEvent from '@/utils/trackEvent';
+import shuffleArray from "@/utils/shuffleArray";
 
 const normalizeWord = (word: string) => {
   return word && word.replace(/[.,]/, "").toLowerCase();
