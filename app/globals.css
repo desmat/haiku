@@ -155,9 +155,9 @@ ul {
   /* font-weight: bolder; */
 }
 
-.draggable-notsure-why-cant-inline:hover {
+/* .draggable-notsure-why-cant-inline:hover {
   filter: drop-shadow(0px 1px 1px rgb(0 0 0 / 0.6)) !important;
-}
+} */
 
 .draggable-notsure-why-cant-inline:active {
   filter: drop-shadow(0px 1px 3px rgb(0 0 0 / 0.8)) !important;
