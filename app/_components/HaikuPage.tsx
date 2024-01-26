@@ -146,9 +146,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
         />
 
         <div
-          // className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] _bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-max max-w-[calc(100vw-2rem)] z-10`}
-          // className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-          className="fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-10"
+          className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-10`}
         >
           {haiku.poem.map((s: string, i: number) => {
             return (
@@ -163,7 +161,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                       // key={`line-${i}`}
                       {...provided.droppableProps}
                       ref={provided.innerRef}
-                      className={`_bg-purple-200 capitalize-first-letter _relative flex flex-row items-center justify-start my-0 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[24rem] md:min-w-[28rem] min-w-[18rem]" : "sm:min-w-[22rem] md:min-w-[24rem] min-w-[16rem]"}`}
+                      className={`_bg-purple-200 flex flex-row items-center justify-start my-0 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[24rem] md:min-w-[28rem] min-w-[18rem]" : "sm:min-w-[22rem] md:min-w-[24rem] min-w-[16rem]"}`}
                     // style={{
                     //   backgroundColor: solved || someCorrect
                     //     ? undefined
@@ -208,10 +206,10 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
                                             : `drop-shadow(0px 1px 1px rgb(0 0 0 / 0.2))`,
                                       }}
                                     >
-                                      {j == 0 &&
+                                      {j == 0 && w.correct && 
                                         upperCaseFirstLetter(w.word)
                                       }
-                                      {j != 0 &&
+                                      {!(j == 0 && w.correct) && 
                                         w.word
                                       }
                                     </div>
