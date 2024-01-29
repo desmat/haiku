@@ -53,6 +53,11 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     set({ user, token, loaded: true });
     return { user, token };
   },
+
+  save: async (user: any) => {
+    const token = await encodeJWT({ user });
+    window?.localStorage && window.localStorage.setItem("session", token || "");
+  },  
 })));
 
 export default useUser;

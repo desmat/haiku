@@ -1,10 +1,16 @@
 'use client'
 
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import * as font from "@/app/font";
+import { MdDelete } from "react-icons/md";
+import useAlert from "@/app/_hooks/alert";
+import useHaikus from "@/app/_hooks/haikus";
 import useHaikudle from '@/app/_hooks/haikudle';
+import useUser from "@/app/_hooks/user";
+import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
+import { GenerateIcon } from "./Nav";
 import { StyledLayers } from "./StyledLayers";
 
 export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: any[] }) {
@@ -24,10 +30,18 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     state.swap,
   ]);
 
+  const [
+    deleteHaiku,
+  ] = useHaikus((state: any) => [
+    state.delete,
+  ])
+
   const [selectedWord, setSelectedWord] = useState<any>();
+  const [user, saveUser] = useUser((state: any) => [state.user, state.save]);
+  const plainAlert = useAlert((state: any) => state.plain);
   const someCorrect = inProgress.flat().reduce((a: boolean, m: any, i: number) => a || m.correct, false);
 
-  console.log('>> app._components.HaikuPage.render()', { inProgress: JSON.stringify(inProgress) });
+  console.log('>> app._components.HaikuPage.render()', { inProgress, user });
 
   const upperCaseFirstLetter = (s: string) => {
     if (!s || s.length == 0) return "";
@@ -81,10 +95,28 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
   useEffect(() => {
     init(haiku);
+
+    if (!user?.preferences?.onboarded) {
+      plainAlert(
+        `<div style="display: flex; flex-direction: column; gap: 0.4rem">
+          <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with five syllables in the first line, seven in the second, and five in the third.</div>
+          <div><b>Wordle</b>: a word game with a single daily solution, with all players attempting to guess the same word.</div>
+          <div>Drag-and-drop the scrabbled words to solve today's AI-generated <b>Haikudle</b>!</div>
+          </div>`,
+        () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }));
+    }
   }, [haiku.id]);
 
   return (
     <div>
+      {/* <div className="fixed top-12 right-2.5 z-20">
+        <StyledLayers styles={styles}>
+          <div className="cursor-pointer" onClick={(e) => { e.preventDefault(); deleteHaiku(haiku.id); }}>
+            <MdDelete className="_bg-orange-600 _hover: _text-purple-100 h-6 w-6 md:h-8 md:w-8" />
+          </div>
+        </StyledLayers>
+      </div> */}
+
       <DragDropContext
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -188,6 +220,6 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
           })}
         </div>
       </DragDropContext>
-    </div>
+    </div >
   )
 }

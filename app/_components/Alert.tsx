@@ -3,6 +3,8 @@
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { CheckCircleIcon, ExclamationTriangleIcon, InformationCircleIcon, XMarkIcon, ExclamationCircleIcon } from '@heroicons/react/20/solid'
+import { MdCelebration } from "react-icons/md";
+import { MdOutlineCelebration } from "react-icons/md";
 import useAlert from '@/app/_hooks/alert';
 import { AlertType } from '@/types/Alert';
 
@@ -30,9 +32,9 @@ function TypedAlert({
         'bg-red-50',
         'hover:bg-red-100',
         'active:bg-red-200',
-        'text-red-800', 
+        'text-red-800',
         'text-red-500',
-        'border-red-100',
+        // 'border-red-100',
       ];
       break;
     case "warning":
@@ -41,47 +43,58 @@ function TypedAlert({
         'bg-yellow-50',
         'hover:bg-yellow-100',
         'active:bg-yellow-200',
-        'text-yellow-800', 
+        'text-yellow-800',
         'text-yellow-500',
-        'border-yellow-200',
+        // 'border-yellow-200',
       ];
       break;
     case "success":
-      icon = <CheckCircleIcon className={`h-5 w-5 text-green-400`} aria-hidden="true" />
+      icon = <MdCelebration className={`h-5 w-5 text-[#6d6d6d]`} aria-hidden="true" />
       colorClasses = [
-        'bg-green-50',
-        'hover:bg-green-100',
-        'active:bg-green-200',
-        'text-green-800', 
-        'text-green-500',
-        'border-green-100',
+        'bg-[#f8f8f8]',
+        'hover:bg-black-100',
+        'active:bg-black-200',
+        'text-[#6d6d6d]',
+        'text-[#6d6d6d]',
+        // 'border-green-100',
       ];
       break;
-    default: //case "info":
+    case "info":
       icon = <InformationCircleIcon className={`h-5 w-5 text-blue-400`} aria-hidden="true" />
       colorClasses = [
         'bg-blue-50',
         'hover:bg-blue-100',
         'active:bg-blue-200',
-        'text-blue-800', 
+        'text-blue-800',
         'text-blue-500',
-        'border-blue-100'
+        // 'border-blue-100'
+      ];
+      break;
+    default: //case "info":
+      icon = undefined;
+      colorClasses = [
+        'bg-[#f8f8f8]',
+        'hover:text-black',
+        'active:text-black',
+        'text-[#6d6d6d]',
+        'text-[#6d6d6d]',
+        // 'border-blue-100'
       ];
       break;
   }
 
   return (
-      <div className={`border-[1px] ${colorClasses[5]} border-solid fixed bottom-3 left-3 md:left-[calc(50vw-(700px/2))] lg:left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-20"}`}>
+    <div className={`_border-[1px] ${colorClasses[5]} border-solid fixed bottom-3 left-3 md:left-[calc(50vw-(700px/2))] lg:left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-20"}`}>
       <div className={`${closed ? "opacity-0" : "opacity-100"} transition-all rounded-md ${colorClasses[0]} p-4 w-[calc(100vw-1.5rem)] md:w-[700px] shadow-md hover:shadow-lg`}>
         <div className="flex items-center ">
           <div className="flex-shrink-0">
             {icon}
           </div>
-          <div className="ml-3">
-            <p className={`text-sm font-medium ${colorClasses[3]}`}>{message}</p>
+          <div className={`${icon ? "ml-3" : ""}`}>
+            <p className={`text-sm font-medium ${colorClasses[3]}`} dangerouslySetInnerHTML={{ __html: message }} />
           </div>
           <div className="ml-auto pl-3">
-            <div className="-mx-1.5 -my-1.5">
+            <div className="absolute top-0 right-0">
               <button
                 type="button"
                 className={`inline-flex rounded-md ${colorClasses[0]} p-1.5 ${colorClasses[4]} ${colorClasses[1]} focus:outline-none ${colorClasses[2]} focus:ring-offset-2`}
@@ -102,10 +115,12 @@ function TypedAlert({
 function AnimatedAlert({
   message,
   type,
+  onDissmiss,
   timestamp,
 }: {
   message: string,
   type: AlertType,
+  onDissmiss?: () => void,
   timestamp: number
 }) {
   const [setError] = useAlert((state: any) => [state.error]);
@@ -137,6 +152,7 @@ function AnimatedAlert({
 
   const handleClose = () => {
     setDismissedAt(timestamp);
+    onDissmiss && onDissmiss();
     setTimeout(() => {
       setError(undefined);
     }, 50);
@@ -158,11 +174,11 @@ export default function Alert({
   message?: string | undefined,
   type?: AlertType | undefined
 }) {
-  const [_message, _type] = useAlert((state: any) => [state.message, state.type]);
+  const [_message, _type, _onDissmiss] = useAlert((state: any) => [state.message, state.type, state.onDissmiss]);
 
   // console.log('>> app._components.Alert.Error.render()', { message, _message });
 
   return (
-    <AnimatedAlert message={message || _message} type={type || _type || "info"} timestamp={moment().valueOf()} />
+    <AnimatedAlert message={message || _message} type={type || _type || "info"} onDissmiss={_onDissmiss} timestamp={moment().valueOf()} />
   )
 }

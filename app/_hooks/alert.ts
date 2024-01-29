@@ -5,28 +5,34 @@ import trackEvent from '@/utils/trackEvent';
 
 const useAlert: any = create(devtools((set: any, get: any) => ({
   message: undefined as string | undefined,
-  type: undefined as AlertType | undefined,
+  type: "plain" as AlertType | undefined,
+  onDissmiss: () => undefined,
 
-  error: async (message?: string) => {
+  error: async (message?: string, onDissmiss?: () => undefined) => {
     // console.log(">> hooks.alert.error", { message });
     trackEvent("error", { message })
-    set({ message, type: message && "error" });
+    set({ message, type: message && "error", onDissmiss });
   },
 
-  warning: async (message?: string) => {
+  warning: async (message?: string, onDissmiss?: () => undefined) => {
     // console.log(">> hooks.alert.warning", { message });
-    set({ message, type: message && "warning" });
+    set({ message, type: message && "warning", onDissmiss });
   },
 
-  info: async (message?: string) => {
+  info: async (message?: string, onDissmiss?: () => undefined) => {
     // console.log(">> hooks.alert.info", { message });
-    set({ message, type: message && "info" });
+    set({ message, type: message && "info", onDissmiss });
   },
 
-  success: async (message?: string) => {
+  success: async (message?: string, onDissmiss?: () => undefined) => {
     // console.log(">> hooks.alert.success", { message });
-    set({ message, type: message && "success" });
+    set({ message, type: message && "success", onDissmiss });
   },
+
+  plain: async (message?: string, onDissmiss?: () => undefined) => {
+    // console.log(">> hooks.alert.success", { message });
+    set({ message, type: message && "plain", onDissmiss });
+  },  
 })));
 
 export default useAlert;

@@ -110,7 +110,7 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
         }}
       />
 
-      <div className={`fixed bottom-1.5 md:bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
+      <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
         <StyledLayers styles={styles}>
           <BottomLinks lang={lang} />
         </StyledLayers>
