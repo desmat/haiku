@@ -40,9 +40,9 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
 
   useEffect(() => {
     // if (!loaded) {
-      // if (id) {
-      //    loadHaikus({ id });
-      // }
+      if (id) {
+         loadHaikus({ id });
+      }
 
       loadHaikus({ lang: lang || "en" });
     // }
