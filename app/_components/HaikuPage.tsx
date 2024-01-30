@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { MdDelete } from "react-icons/md";
 import useAlert from "@/app/_hooks/alert";
-import useHaikus from "@/app/_hooks/haikus";
+// import useHaikus from "@/app/_hooks/haikus";
 import useHaikudle from '@/app/_hooks/haikudle';
 import useUser from "@/app/_hooks/user";
 import * as font from "@/app/font";
@@ -145,11 +145,11 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     state.move,
   ]);
 
-  const [
-    deleteHaiku,
-  ] = useHaikus((state: any) => [
-    state.delete,
-  ])
+  // const [
+  //   deleteHaiku,
+  // ] = useHaikus((state: any) => [
+  //   state.delete,
+  // ])
 
   const [selectedWord, setSelectedWord] = useState<any>();
   const [user, saveUser] = useUser((state: any) => [state.user, state.save]);
@@ -198,7 +198,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
   return (
     <div>
-      {user.isAdmin &&
+      {/* {user.isAdmin &&
         <div className="fixed top-12 right-2.5 z-20">
           <StyledLayers styles={styles}>
             <div className="cursor-pointer" onClick={(e) => { e.preventDefault(); deleteHaiku(haiku.id); }}>
@@ -206,7 +206,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
             </div>
           </StyledLayers>
         </div>
-      }
+      } */}
 
       <DragDropContext
         onDragStart={handleDragStart}
