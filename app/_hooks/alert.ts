@@ -5,7 +5,7 @@ import trackEvent from '@/utils/trackEvent';
 
 const useAlert: any = create(devtools((set: any, get: any) => ({
   message: undefined as string | undefined,
-  type: "plain" as AlertType | undefined,
+  type: undefined as AlertType | undefined,
   onDissmiss: () => undefined,
 
   error: async (message?: string, onDissmiss?: () => undefined) => {

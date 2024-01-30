@@ -30,5 +30,12 @@ export async function userSession(request: any) {
   }
 
   const decodedToken = token && await decodeJWT(token);
+  // console.log(">> services.users.userSession", { decodedToken, adminUserIds: process.env.ADMIN_USER_IDS });
+  
+  // @ts-ignore
+  if ((process.env.ADMIN_USER_IDS || []).split(",").includes(decodedToken.user.id)) {
+    decodedToken.isUser = true;
+  }
+
   return decodedToken;
 }

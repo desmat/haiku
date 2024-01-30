@@ -1,7 +1,8 @@
-import { decodeJWT, encodeJWT } from '@/utils/jwt';
-import { uuid } from '@/utils/misc';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import { User } from '@/types/User';
+import { decodeJWT, encodeJWT } from '@/utils/jwt';
+import { uuid } from '@/utils/misc';
 
 async function getSession() {
   const session = window?.localStorage && window.localStorage.getItem("session");
@@ -42,10 +43,14 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     // console.log(">> hooks.user.load()", { token });
 
     if (token) {
-      user = (await decodeJWT(token)).user;
+      user = (await decodeJWT(token)).user as User;
+      // @ts-ignore
+      if ((process.env.ADMIN_USER_IDS || []).split(",").includes(user.id)) {
+        user.isAdmin = true;
+      }
     } else {
       // console.log('>> hooks.user.load() creating session', {});
-      user = { id: uuid(), isAnonymous: true, preferences: {} };
+      user = { id: uuid(), isAnonymous: true, isAdmin: false, preferences: {} };
       token = await encodeJWT({ user });
       window?.localStorage && window.localStorage.setItem("session", token || "");
     }

@@ -109,17 +109,17 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
     throw `Haiku not found: ${id}`;
   }
 
-  if (!(haiku.createdBy == user.id || user.customClaims?.admin)) {
+  if (!(haiku.createdBy == user.id || user.isAdmin)) {
     throw `Unauthorized`;
   }
 
-  return store.haikus.delete(user.id, id);
+  // return store.haikus.delete(user.id, id);
 }
 
 export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
   console.log(">> services.haiku.deleteHaiku", { haiku, user });
 
-  if (!(haiku.createdBy == user.id || user.customClaims?.admin)) {
+  if (!(haiku.createdBy == user.id || user.isAdmin)) {
     throw `Unauthorized`;
   }
 

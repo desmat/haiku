@@ -109,13 +109,15 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
   return (
     <div>
-      {/* <div className="fixed top-12 right-2.5 z-20">
-        <StyledLayers styles={styles}>
-          <div className="cursor-pointer" onClick={(e) => { e.preventDefault(); deleteHaiku(haiku.id); }}>
-            <MdDelete className="_bg-orange-600 _hover: _text-purple-100 h-6 w-6 md:h-8 md:w-8" />
-          </div>
-        </StyledLayers>
-      </div> */}
+      {user.isAdmin &&
+        <div className="fixed top-12 right-2.5 z-20">
+          <StyledLayers styles={styles}>
+            <div className="cursor-pointer" onClick={(e) => { e.preventDefault(); deleteHaiku(haiku.id); }}>
+              <MdDelete className="_bg-orange-600 _hover: _text-purple-100 h-6 w-6 md:h-8 md:w-8" />
+            </div>
+          </StyledLayers>
+        </div>
+      }
 
       <DragDropContext
         onDragStart={handleDragStart}
