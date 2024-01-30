@@ -91,7 +91,7 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
                             >
                               <StyledLayers key={i} styles={!isHaikudleMode || solved || w.correct ? styles : [styles[0]]}>
                                 <div
-                                  className={`px-1 ${w.correct ? "" : "m-1"} transition-all ${!solved && !w.correct && "draggable-notsure-why-cant-inline"}`}
+                                  className={`px-1 ${!isHaikudleMode || solved || w.correct ? "" : "m-1"} transition-all ${!solved && !w.correct && "draggable-notsure-why-cant-inline"}`}
                                   style={{
                                     backgroundColor: (!isHaikudleMode || solved || w.correct)
                                       ? undefined
