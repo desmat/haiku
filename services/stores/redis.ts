@@ -190,7 +190,8 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     const response = await Promise.all([
       kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedAt`, value.deletedAt),
       kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedBy`, `"${userId}"`),
-      kv.json.del(this.valueKey(id), "$")
+      // kv.json.del(this.valueKey(id), "$")
+      kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf()}),
     ]);
 
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { response });
