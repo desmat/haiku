@@ -13,13 +13,15 @@ export function Loading() {
 }
 
 export function Logo({ href, onClick }: { href?: string, onClick?: any }) {
+  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+
   return (
     <Link
       onClick={onClick}
       href={href || "#"}
       className="hover:no-underline"
     >
-      <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>kudle</span>
+      <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>{isHaikudleMode ? "kudle" : "hu"}</span>
     </Link>
   )
 }

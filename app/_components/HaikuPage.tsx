@@ -185,7 +185,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
   useEffect(() => {
     init(haiku, !isHaikudleMode);
 
-    if (!user?.preferences?.onboarded) {
+    if (isHaikudleMode && !user?.preferences?.onboarded) {
       plainAlert(
         `<div style="display: flex; flex-direction: column; gap: 0.4rem">
           <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with five syllables in the first line, seven in the second, and five in the third.</div>
