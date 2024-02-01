@@ -4,7 +4,7 @@ import { mapToList, uuid } from "@/utils/misc";
 import { Haiku } from "@/types/Haiku";
 import { GenericStore, Store } from "@/types/Store";
 import * as samples from "./samples";
-import { Haikudle } from "@/types/Haikudle";
+import { Haikudle, UserHaikudle } from "@/types/Haikudle";
 
 type MenoryStoreEntry = {
   id?: string,
@@ -149,5 +149,6 @@ export function create(): Store {
   return {
     haikus: new MemoryStore<Haiku>("haiku"),
     haikudles: new MemoryStore<Haikudle>("haikudle"),
+    userHaikudles: new MemoryStore<UserHaikudle>("user-haikudle"),
   }
 }

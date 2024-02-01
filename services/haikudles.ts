@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { put } from '@vercel/blob';
-import { Haikudle } from "@/types/Haikudle";
+import { Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { Store } from "@/types/Store";
 import { User } from '@/types/User';
 import { mapToList, uuid } from '@/utils/misc';
@@ -36,20 +36,21 @@ export async function getHaikudle(id: string): Promise<Haikudle | undefined> {
   return new Promise((resolve, reject) => resolve(haikudle));
 }
 
-export async function createHaikudle(user: User, haikuId: string, haikudleId: string): Promise<Haikudle> {
-  console.log(">> services.haikudle.createHaikudle", { user, haikuId, haikudleId });
+export async function createHaikudle(user: User, haikudle: Haikudle): Promise<Haikudle> {
+  console.log(">> services.haikudle.createHaikudle", { user, haikudle });
 
-  let haikudle = {
-    id: haikudleId,
+  let newHaikudle = {
+    id: haikudle.id,
     createdBy: user.id,
     createdAt: moment().valueOf(),
     status: "created",
-    haikuId,
+    haikuId: haikudle.haikuId,
+    inProgress: haikudle.inProgress,
   } as Haikudle;
 
   // TODO
 
-  return store.haikudles.create(user.id, haikudle);
+  return store.haikudles.create(user.id, newHaikudle);
 }
 
 export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
@@ -72,11 +73,42 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
 }
 
 export async function saveHaikudle(user: any, haikudle: Haikudle): Promise<Haikudle> {
-  console.log(">> services.haikudle.deleteHaikudle", { haikudle, user });
+  console.log(">> services.haikudle.saveHaikudle", { haikudle, user });
 
   if (!(haikudle.createdBy == user.id || user.isAdmin)) {
     throw `Unauthorized`;
   }
 
   return store.haikudles.update(user.id, haikudle);
+}
+
+export async function getUserHaikudle(userHaikudleId: string): Promise<UserHaikudle | undefined> {
+  console.log(`>> services.haikudle.getUserHaikudle`, { userHaikudleId });
+
+  const userHaikudle = await store.userHaikudles.get(userHaikudleId);
+  console.log(`>> services.haikudle.getUserHaikudle`, { userHaikudleId, userHaikudle });
+  return new Promise((resolve, reject) => resolve(userHaikudle));
+}
+
+export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<Haikudle> {
+  console.log(">> services.haikudle.saveUserHaikudle", { haikudle, user });
+
+  if (!user) {
+    throw `Unauthorized`;
+  }
+
+  const userHaikudleId = `${haikudle.id}-${user.id}`;
+  let userHaikudle = await store.userHaikudles.get(userHaikudleId);
+
+  if (userHaikudle) {
+    return store.userHaikudles.update(userHaikudleId, { ...userHaikudle, haikudle });
+  }
+
+  userHaikudle = {
+    id: userHaikudleId,
+    userId: user.id,
+    haikudle,
+  }
+
+  return store.userHaikudles.create(userHaikudleId, userHaikudle);
 }

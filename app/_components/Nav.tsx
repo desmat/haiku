@@ -99,20 +99,26 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
     haikudles,
     haiku,
     createHaikudle,
+    haikudleInProgress,
   ] = useHaikudle((state: any) => [
     state.loaded,
     state.load,
     state._haikudles,
     state.haiku,
     state.create,
+    state.inProgress,
   ]);
-  
+
   const onSaveHaikudle = () => {
     // console.log('>> app._components.NavOverlay.onSaveHaikudle()', {});
 
     const ret = prompt("YYYYMMDD?", moment().format("YYYYMMDD"));
     if (ret) {
-      createHaikudle(user, haiku?.id, ret);
+      createHaikudle(user, {
+        id: ret,
+        haikuId: haiku?.id,
+        inProgress: haikudleInProgress,
+      });
     }
   }
 

@@ -13,10 +13,12 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
     inProgress,
     solved,
     swap,
+    haikudleId,
   ] = useHaikudle((state: any) => [
     state.inProgress,
     state.solved,
     state.swap,
+    state.haikudleId,
   ]);
 
   const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
@@ -32,6 +34,7 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
       setSelectedWord(undefined);
     } else if (selectedWord) {
       swap(
+        haikudleId,
         selectedWord.word,
         selectedWord.lineNumber,
         selectedWord.wordNumber,
@@ -137,6 +140,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     init,
     move,
     _haiku,
+    haikudleId,
   ] = useHaikudle((state: any) => [
     state.loaded, 
     state.load,
@@ -144,6 +148,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     state.init,
     state.move,
     state.haiku,
+    state.haikudleId,
   ]);
 
   // const [
@@ -171,6 +176,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     // console.log('>> app._components.HaikuPage.handleDragEnd()', { result });
 
     move(
+      haikudleId,
       inProgress.flat().find((w: any) => w.id == result.draggableId),
       Number(result.source.droppableId),
       result.source.index,

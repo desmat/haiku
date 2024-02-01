@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getHaikudle, deleteHaikudle, saveHaikudle } from '@/services/haikudles';
+import { getHaikudle, deleteHaikudle, saveHaikudle, saveUserHaikudle } from '@/services/haikudles';
 import { userSession } from '@/services/users';
 import { getHaiku } from '@/services/haikus';
 
@@ -44,8 +44,10 @@ export async function PUT(
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
 
-  const savedHaikudle = await saveHaikudle(user, haikudle);
-  return NextResponse.json({ haikudle: savedHaikudle });
+  const data: any = await request.json();
+  
+  const savedUserHaikudle = await saveUserHaikudle(user, { ...haikudle, ...data.haikudle });
+  return NextResponse.json({ haikudle: savedUserHaikudle.haikudle });
 }
 
 export async function DELETE(

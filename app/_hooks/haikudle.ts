@@ -49,6 +49,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   // access via get(id) or find(query?)
   haiku: undefined,
+  haikudleId: undefined,
   solution: [[], [], []],
   inProgress: [[], [], []],
   solved: false,
@@ -107,6 +108,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
     set({
       haiku,
+      haikudleId: haikudle.id,
       inProgress,
       solution,
       solved: false,
@@ -161,8 +163,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     });
   },
 
-  move: async (word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
-    console.log(">> hooks.haikudle.move", { word, fromLine, fromOffset, toLine, toOffset });
+  move: async (haikudleId: string, word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
+    // console.log(">> hooks.haikudle.move", { haikudleId, word, fromLine, fromOffset, toLine, toOffset });
     const { haiku, inProgress, words, solution } = get();
 
     const [spliced] = inProgress[fromLine].splice(fromOffset, 1);
@@ -183,11 +185,28 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       solved,
     });
 
-    console.log(">> hooks.haikudle.move", { inProgress: JSON.stringify(inProgress) });
+    // console.log(">> hooks.haikudle.move", { inProgress: JSON.stringify(inProgress) });
+
+    fetch(`/api/haikudles/${haikudleId}`, {
+        ...await fetchOpts(),
+        method: "PUT",
+        body: JSON.stringify({ haikudle: {
+          id: haikudleId, 
+          haikudId: haiku.id,
+          inProgress,
+        } }),
+      }).then(async (res) => {
+        if (res.status != 200) {
+          useAlert.getState().error(`Error saving haikudle: ${res.status} (${res.statusText})`);
+          return;
+        }
+
+        // console.log(">> hooks.haikudle.move", { res });
+      });
   },
 
-  swap: async (word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
-    console.log(">> hooks.haikudle.swap", { fromLine, fromOffset, toLine, toOffset });
+  swap: async (haikudleId: string, word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
+    // console.log(">> hooks.haikudle.swap", { fromLine, fromOffset, toLine, toOffset });
     const { haiku, inProgress, words, solution } = get();
 
     // move(word, fromLine, fromOffset, toLine, toOffset);
@@ -208,6 +227,23 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       inProgress,
       solved,
     });
+
+    fetch(`/api/haikudles/${haikudleId}`, {
+      ...await fetchOpts(),
+      method: "PUT",
+      body: JSON.stringify({ haikudle: {
+        id: haikudleId, 
+        haikudId: haiku.id,
+        inProgress,
+      } }),
+    }).then(async (res) => {
+      if (res.status != 200) {
+        useAlert.getState().error(`Error saving haikudle: ${res.status} (${res.statusText})`);
+        return;
+      }
+
+      // console.log(">> hooks.haikudle.swap", { res });
+    });    
   },
 
   // 
@@ -293,7 +329,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           _haikudles: { ..._haikudles, [haikudle.id]: haikudle },
         });
 
-        await get().init(haikudle?.haiku);
+        await get().init(haikudle?.haiku, haikudle);
         setLoaded([haikudle]);
       });
     } else {
@@ -317,24 +353,23 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         });
 
         // TODO bleh
-        await get().init(haikudles[0]?.haiku);
+        await get().init(haikudles[0]?.haiku, haikudles[0]);
         setLoaded(haikudles);
       });
     }
   },
 
-  create: async (user: User, haikuId: string, haikudleId: string) => {
-    console.log(">> hooks.haiku.create", { user, haikuId, haikudleId });
+  create: async (user: User, haikudle: Haikudle) => {
+    console.log(">> hooks.haiku.create", { user, haikudle });
     const { _haikudles, setLoaded } = get();
 
     // optimistic
     const creating = {
-      id: haikudleId,
+      ...haikudle,
       createdBy: user.id,
       createdAt: moment().valueOf(),
       status: "creating",
       optimistic: true,
-      haikuId,
     }
 
     setLoaded(creating.id);

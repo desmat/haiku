@@ -1,7 +1,7 @@
 import { Haiku } from "@/types/Haiku";
 
 export const notFoundHaiku = {
-  id: "-1",
+  id: "404notfound",
   theme: "not finding what you wanted",
   bgImage: "/backgrounds/DALL·E 2024-01-17 11.32.41 - An extremely muted, almost monochromatic painting in the Japanese style, depicting the concept of emptiness. The artwork captures a minimalist landsca.png",
   color: "#4a5247",
@@ -15,7 +15,7 @@ export const notFoundHaiku = {
 }
 
 export const notFoundHaikudle = {
-  id: "-1",
+  id: "404notfound",
   haiku: notFoundHaiku,
   inProgress: [
     [

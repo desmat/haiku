@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikudles, createHaikudle, getHaikudle } from '@/services/haikudles';
+import { getHaikudles, createHaikudle, getHaikudle, getUserHaikudle } from '@/services/haikudles';
 import { userSession } from '@/services/users';
 import { searchParamsToMap, uuid } from '@/utils/misc';
 import moment from 'moment';
@@ -15,14 +15,14 @@ export async function GET(request: NextRequest, params?: any) {
 
   // TODO lock down to admins
 
-  // const haikudles = await getHaikudles(query);
-  // return NextResponse.json({ haikudles });
+  const { user } = await userSession(request);
+  // TODO reject?
 
   const todaysDateCode = moment().format("YYYYMMDD");
-  const haikudle = await getHaikudle(todaysDateCode);
-  console.log('>> app.api.haikudles.GET', { todaysDateCode, haikudle });
+  const userHaikudle = await getUserHaikudle(`${todaysDateCode}-${user?.id}`);  
+  const haikudle = userHaikudle?.haikudle || (await getHaikudle(todaysDateCode));
+  console.log('>> app.api.haikudles.GET', { todaysDateCode, userHaikudle, haikudle });
 
-  // const _haikudle = await getHaikudle("83fc071d");
   const haiku = haikudle && await getHaiku(haikudle.haikuId);
 
   const ret = {
@@ -45,9 +45,12 @@ export async function POST(request: Request) {
   // TODO lock down to admins
 
   const data: any = await request.json();
+  const haikudle = data.haikudle;
+
+  console.log('>> app.api.haikus.POST', { haikudle });
   
   // TODO figure out how to create the haikudle
   
-  const haikudle = await createHaikudle(user, data.haikudle.haikuId, data.haikudle.id);
-  return NextResponse.json({ haikudle });
+  const created = await createHaikudle(user, data.haikudle);
+  return NextResponse.json({ haikudle: created });
 }
