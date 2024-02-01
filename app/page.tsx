@@ -5,10 +5,12 @@ import { useEffect, useState } from 'react';
 import { Haiku } from "@/types/Haiku";
 import { Loading, NavOverlay } from '@/app/_components/Nav';
 import HaikuPage from '@/app/_components/HaikuPage';
+import useAlert from '@/app/_hooks/alert';
 import useHaikus from "@/app/_hooks/haikus";
+import useHaikudle from '@/app/_hooks/haikudle';
+import useUser from '@/app/_hooks/user';
 import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
-import * as samples from "@/services/stores/samples";
 
 export default function Component({ lang, _haiku }: { lang?: undefined | LanguageType, _haiku?: Haiku }) {
   // console.log('>> app.page.render()', { lang });
@@ -16,6 +18,9 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
   const [id, setId] = useState(searchParams.get("id"));
   const [generating, setGenerating] = useState(false);
   const router = useRouter();
+  const [user, saveUser] = useUser((state: any) => [state.user, state.save]);
+  const plainAlert = useAlert((state: any) => state.plain);
+  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 
   const [
     haikusLoaded,
@@ -31,22 +36,51 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
     state.generate
   ]);
 
-  const loaded = _haiku || id && haikusLoaded(JSON.stringify({ id })) || haikusLoaded(JSON.stringify({ lang: lang || "en" }));
+  const [
+    haikudleLoaded,
+    loadHaikudle,
+    haikudles,
+    haiku,
+  ] = useHaikudle((state: any) => [
+    state.loaded,
+    state.load,
+    state._haikudles,
+    state.haiku,
+  ]);
+
+  // const loaded = _haiku || id && haikusLoaded(JSON.stringify({ id })) || haikusLoaded(JSON.stringify({ lang: lang || "en" }));
   const haikus = findHaikus({ lang: lang || "en" });
-  const haiku = _haiku || id && getHaiku(id) || haikus[Math.floor(Math.random() * haikus.length)] || samples.notFoundHaiku;
+  // const haiku = _haiku || id && getHaiku(id) || haikus[Math.floor(Math.random() * haikus.length)] || samples.notFoundHaiku;
+
+  const loaded = haikudleLoaded(id); // TODO check id?
+  // const haiku = haikudles[0]?.haiku;
   const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
 
-  console.log('>> app.page.render()', { id });
+  // console.log('>> app.page.render()', { id, haiku, loaded, user });
 
   useEffect(() => {
     // if (!loaded) {
-      if (id) {
-         loadHaikus({ id });
-      }
-
-      loadHaikus({ lang: lang || "en" });
+    // if (id) {
+    //    loadHaikus({ id });
     // }
-  }, [lang]);
+
+    loadHaikus({ lang: lang || "en" });
+    // }
+
+    loadHaikudle(id);
+
+    if (isHaikudleMode && user && !user?.preferences?.onboarded) {
+      plainAlert(
+        `<div style="display: flex; flex-direction: column; gap: 0.4rem">
+          <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with five syllables in the first line, seven in the second, and five in the third.</div>
+          <div><b>Wordle</b>: a word game with a single daily solution, with all players attempting to guess the same word.</div>
+          <div>Drag-and-drop the scrabbled words to solve today's AI-generated <b>Haikudle</b>!</div>
+        </div>`,
+        () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }), 
+        "Got it!");
+    }
+
+  }, [id, lang, user]);
 
   const handleGenerate = async (e: any) => {
     // console.log('>> app.page.handleGenerate()');
@@ -68,6 +102,10 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
   }
 
   const handleRefresh = (e: any) => {
+    if (isHaikudleMode && !user.isAdmin) {
+      return;
+    }
+
     // console.log('>> app.page.handleRefresh()');
     e.preventDefault();
 
@@ -104,7 +142,7 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
     // TODO kill the Page component and build good loading component
     return (
       <div>
-        <NavOverlay styles={textStyles}/>
+        <NavOverlay styles={textStyles} />
         <Loading />
       </div>
     )

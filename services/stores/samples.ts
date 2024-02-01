@@ -4,8 +4,9 @@ export const notFoundHaiku = {
   id: "-1",
   theme: "not finding what you wanted",
   bgImage: "/backgrounds/DALL·E 2024-01-17 11.32.41 - An extremely muted, almost monochromatic painting in the Japanese style, depicting the concept of emptiness. The artwork captures a minimalist landsca.png",
-  color: "rgb(43, 44, 41))",
-  bgColor: "rgb(174, 177, 164)",
+  color: "#4a5247",
+  bgColor: "#ffffff",
+  colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
   poem: [
     "Quest ends in silence,",
     "'404 Not Found' echoes,",

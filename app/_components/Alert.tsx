@@ -15,11 +15,13 @@ function TypedAlert({
   type,
   closed,
   handleClose,
+  closeLabel,
 }: {
   message: string,
   type: AlertType,
   closed: boolean,
   handleClose: any,
+  closeLabel?: string,
 }) {
   // console.log('>> app._components.Alert.Alert.render()', { message, type, closed });
   let icon;
@@ -27,13 +29,13 @@ function TypedAlert({
 
   switch (type) {
     case 'error':
-      icon = <ExclamationTriangleIcon className={`h-5 w-5 text-red-400`} aria-hidden="true" />
+      icon = undefined //<ExclamationTriangleIcon className={`h-5 w-5 text-red-400`} aria-hidden="true" />
       colorClasses = [
         'bg-red-50',
         'hover:bg-red-100',
         'active:bg-red-200',
         'text-red-800',
-        'text-red-500',
+        'text-red-800',
         // 'border-red-100',
       ];
       break;
@@ -95,7 +97,7 @@ function TypedAlert({
               <p className={`text-sm font-medium ${colorClasses[3]}`} dangerouslySetInnerHTML={{ __html: message }} />
             </div>
             <div className="ml-auto pl-3">
-              <div className="absolute top-0.5 right-[-0px] opacity-40 hover:opacity-100">
+              <div className="absolute top-1 right-[-0px] opacity-40 hover:opacity-100">
                 <button
                   type="button"
                   className={`inline-flex rounded-md ${colorClasses[0]} p-0 ${colorClasses[4]} ${colorClasses[1]} focus:outline-none ${colorClasses[2]} focus:ring-offset-2`}
@@ -111,7 +113,9 @@ function TypedAlert({
             className={`_bg-pink-100 text-center`}
             onClick={handleClose}
           >
-              <div className={`_bg-pink-200 w-fit m-auto px-2 font-bold cursor-pointer hover:underline text-sm ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>Got it!</div>
+            <div className={`_bg-pink-200 w-fit m-auto px-2 font-bold cursor-pointer hover:underline text-sm ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>
+              {closeLabel || "Close"}
+            </div>
           </div>
         </div>
       </div>
@@ -124,11 +128,13 @@ function AnimatedAlert({
   message,
   type,
   onDissmiss,
+  closeLabel,
   timestamp,
 }: {
   message: string,
   type: AlertType,
   onDissmiss?: () => void,
+  closeLabel?: string,
   timestamp: number
 }) {
   const [setError] = useAlert((state: any) => [state.error]);
@@ -170,7 +176,7 @@ function AnimatedAlert({
 
   if (message) {
     return (
-      <TypedAlert message={message} type={type} closed={!!dismissedAt} handleClose={handleClose} />
+      <TypedAlert message={message} type={type} closed={!!dismissedAt} handleClose={handleClose} closeLabel={closeLabel} />
     )
   }
 }
@@ -182,11 +188,11 @@ export default function Alert({
   message?: string | undefined,
   type?: AlertType | undefined
 }) {
-  const [_message, _type, _onDissmiss] = useAlert((state: any) => [state.message, state.type, state.onDissmiss]);
+  const [_message, _type, _onDissmiss, _closeLabel] = useAlert((state: any) => [state.message, state.type, state.onDissmiss, state.closeLabel]);
 
   // console.log('>> app._components.Alert.Error.render()', { message, _message });
 
   return (
-    <AnimatedAlert message={message || _message} type={type || _type || "info"} onDissmiss={_onDissmiss} timestamp={moment().valueOf()} />
+    <AnimatedAlert message={message || _message} type={type || _type || "info"} onDissmiss={_onDissmiss} timestamp={moment().valueOf()} closeLabel={_closeLabel} />
   )
 }

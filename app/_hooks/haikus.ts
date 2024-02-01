@@ -14,7 +14,6 @@ async function fetchOpts() {
   return token && { headers: { Authorization: `Bearer ${token}` } } || {};
 }  
 
-
 type HaikuMap = { [key: string]: Haiku | undefined; };
 type StatusMap = { [key: string]: boolean };
 

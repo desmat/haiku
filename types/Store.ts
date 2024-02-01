@@ -1,4 +1,5 @@
 import { Haiku } from "./Haiku";
+import { Haikudle } from "./Haikudle";
 
 export interface GenericStore<T> {
   get: (id: string) => Promise<T | undefined>,
@@ -10,4 +11,5 @@ export interface GenericStore<T> {
 
 export type Store = {
   haikus: GenericStore<Haiku>,
+  haikudles: GenericStore<Haikudle>,
 }

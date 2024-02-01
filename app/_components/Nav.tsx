@@ -1,10 +1,16 @@
+'use client'
+
+import moment from 'moment';
 import Link from 'next/link'
 import { IoSparkles } from 'react-icons/io5';
 import { MdMail, MdHome } from "react-icons/md";
+import { IoAddCircle } from "react-icons/io5";
 import * as font from "@/app/font";
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { BsGithub } from 'react-icons/bs';
 import { StyledLayers } from './StyledLayers';
+import useUser from '@/app/_hooks/user';
+import useHaikudle from '@/app/_hooks/haikudle';
 
 export function Loading() {
   return (
@@ -84,6 +90,31 @@ export function BottomLinks({ lang }: { lang?: LanguageType | undefined }) {
 }
 
 export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { styles: any[], lang?: LanguageType | undefined, onClickLogo?: any, onClickGenerate?: any }) {
+  const [user] = useUser((state: any) => [state.user, state.save]);
+  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+
+  const [
+    haikudleLoaded,
+    loadHaikudle,
+    haikudles,
+    haiku,
+    createHaikudle,
+  ] = useHaikudle((state: any) => [
+    state.loaded,
+    state.load,
+    state._haikudles,
+    state.haiku,
+    state.create,
+  ]);
+  
+  const onSaveHaikudle = () => {
+    // console.log('>> app._components.NavOverlay.onSaveHaikudle()', {});
+
+    const ret = prompt("YYYYMMDD?", moment().format("YYYYMMDD"));
+    if (ret) {
+      createHaikudle(user, haiku?.id, ret);
+    }
+  }
 
   return (
     <div className="_bg-pink-200">
@@ -100,6 +131,14 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
         <div className="fixed top-2.5 right-2.5 z-20">
           <StyledLayers styles={styles}>
             <GenerateIcon onClick={onClickGenerate} />
+          </StyledLayers>
+        </div>
+      }
+
+      {user?.isAdmin && onClickGenerate &&
+        <div className="fixed top-12 right-3 z-20 text-2xl cursor-pointer">
+          <StyledLayers styles={styles}>
+            <IoAddCircle onClick={onSaveHaikudle} />
           </StyledLayers>
         </div>
       }

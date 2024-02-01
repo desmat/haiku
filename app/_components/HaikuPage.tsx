@@ -1,13 +1,8 @@
 'use client'
 
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { MdDelete } from "react-icons/md";
-import useAlert from "@/app/_hooks/alert";
-// import useHaikus from "@/app/_hooks/haikus";
+import { useState } from "react";
 import useHaikudle from '@/app/_hooks/haikudle';
-import useUser from "@/app/_hooks/user";
 import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
 import { GenerateIcon } from "./Nav";
@@ -32,7 +27,7 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
   }
 
   const handleClickWord = (word: any, lineNumber: number, wordNumber: number) => {
-    console.log('>> app._components.HaikuPage.handleClickWord()', { word, lineNumber, wordNumber });
+    // console.log('>> app._components.HaikuPage.handleClickWord()', { word, lineNumber, wordNumber });
     if (word.id == selectedWord?.word?.id) {
       setSelectedWord(undefined);
     } else if (selectedWord) {
@@ -133,16 +128,22 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
 }
 
 export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: any[] }) {
-  console.log('>> app._components.HaikuPage.render()', { poem: haiku.poem, id: haiku.id });
+  // console.log('>> app._components.HaikuPage.render()', { haiku, id: haiku.id });
 
   const [
+    loaded, 
+    load,
     inProgress,
     init,
     move,
+    _haiku,
   ] = useHaikudle((state: any) => [
+    state.loaded, 
+    state.load,
     state.inProgress,
     state.init,
     state.move,
+    state.haiku,
   ]);
 
   // const [
@@ -151,16 +152,13 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
   //   state.delete,
   // ])
 
+  // TODO move to hook store
   const [selectedWord, setSelectedWord] = useState<any>();
-  const [user, saveUser] = useUser((state: any) => [state.user, state.save]);
-  const plainAlert = useAlert((state: any) => state.plain);
-  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 
-
-  console.log('>> app._components.HaikuPage.render()', { inProgress, user });
+  // console.log('>> app._components.HaikuPage.render()', { inProgress });
 
   const handleDragStart = (result: any) => {
-    console.log('>> app._components.HaikuPage.handleDragStart()', { result });
+    // console.log('>> app._components.HaikuPage.handleDragStart()', { result });
 
     setSelectedWord({
       word: inProgress.flat().find((w: any) => w.id == result.draggableId),
@@ -170,7 +168,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
   }
 
   const handleDragEnd = (result: any) => {
-    console.log('>> app._components.HaikuPage.handleDragEnd()', { result });
+    // console.log('>> app._components.HaikuPage.handleDragEnd()', { result });
 
     move(
       inProgress.flat().find((w: any) => w.id == result.draggableId),
@@ -181,20 +179,6 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     );
     setSelectedWord(undefined);
   }
-
-  useEffect(() => {
-    init(haiku, !isHaikudleMode);
-
-    if (isHaikudleMode && !user?.preferences?.onboarded) {
-      plainAlert(
-        `<div style="display: flex; flex-direction: column; gap: 0.4rem">
-          <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with five syllables in the first line, seven in the second, and five in the third.</div>
-          <div><b>Wordle</b>: a word game with a single daily solution, with all players attempting to guess the same word.</div>
-          <div>Drag-and-drop the scrabbled words to solve today's AI-generated <b>Haikudle</b>!</div>
-          </div>`,
-        () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }));
-    }
-  }, [haiku.id]);
 
   return (
     <div>
@@ -215,7 +199,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
         <div
           className="fixed top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0 opacity-100"
           style={{
-            backgroundImage: `url("${haiku.bgImage}")`,
+            backgroundImage: `url("${_haiku?.bgImage}")`,
             backgroundPosition: "center",
             backgroundSize: "cover",
             filter: "brightness(1.2)",
@@ -225,7 +209,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
         <div
           className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-10`}
         >
-          <HaikuPoem haiku={haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord}/>
+          <HaikuPoem haiku={_haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord}/>
         </div>
       </DragDropContext>
     </div >

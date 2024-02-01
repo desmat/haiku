@@ -2,10 +2,21 @@ import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { syllable } from 'syllable'
 import useUser from './user';
-import { uuid } from '@/utils/misc';
+import { listToMap, mapToSearchParams, uuid } from '@/utils/misc';
 import { Haiku } from '@/types/Haiku';
 import trackEvent from '@/utils/trackEvent';
 import shuffleArray from "@/utils/shuffleArray";
+import { Haikudle } from '@/types/Haikudle';
+import useAlert from './alert';
+import moment from 'moment';
+import { User } from '@/types/User';
+import { notFoundHaiku } from "@/services/stores/samples";
+
+async function fetchOpts() {
+  const token = await useUser.getState().getToken();
+  // console.log(">> hooks.haiku.fetchOpts", { token });
+  return token && { headers: { Authorization: `Bearer ${token}` } } || {};
+}  
 
 const normalizeWord = (word: string) => {
   return word && word.replace(/[.,]/, "").toLowerCase();
@@ -31,6 +42,9 @@ const isSolved = (words: any, inProgress: any, solution: any) => {
   return inProgress.flat().reduce((a: boolean, m: any, i: number) => a && m.correct, true);
 }
 
+type HaikudleMap = { [key: string]: Haikudle | undefined; };
+type StatusMap = { [key: string]: boolean };
+
 const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   // access via get(id) or find(query?)
@@ -38,6 +52,23 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   solution: [[], [], []],
   inProgress: [[], [], []],
   solved: false,
+
+  // 
+  // regular crud stuff
+
+  // access via get(id) or find(query?)
+  _haikudles: <HaikudleMap>{},
+
+  // TODO maybe remove this 
+  // to smooth out UX when deleting,
+  _deleted: <StatusMap>{},
+
+  // access via loaded(queryOrId?),
+  // stored as id->bool or query->bool, 
+  // where id refers to the loaded haiku 
+  // and query is stringyfied json from loaded
+  // list of haikus
+  _loaded: <StatusMap>{},
 
   init: async (haiku: Haiku, cheat = false) => {
     console.log(">> hooks.haikudle.init", { haiku, cheat });
@@ -56,7 +87,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         }
       });
 
-    if (!cheat) {
+    if (!cheat && process.env.EXPERIENCE_MODE == "haikudle") {
       words = shuffleArray(words);
     }
 
@@ -175,6 +206,174 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     set({
       inProgress,
       solved,
+    });
+  },
+
+  // 
+  // regular crud stuff below
+
+  loaded: (idOrQuery?: object | string) => {
+    const { _loaded } = get();
+
+    if (!idOrQuery) {
+      return _loaded[JSON.stringify({})];
+    }
+
+    if (typeof (idOrQuery) == "string") {
+      return _loaded[idOrQuery];
+    }
+
+    if (typeof (idOrQuery) == "object") {
+      return _loaded[JSON.stringify(idOrQuery || {})];
+    }
+  },
+
+  setLoaded: (entitiesOrQueryOrId: any, loaded: boolean = true) => {
+    const { _loaded } = get();
+
+    if (!entitiesOrQueryOrId) {
+      return set({
+        _loaded: {
+          ..._loaded,
+          [JSON.stringify({})]: loaded
+        }
+      });
+    }
+
+    if (Array.isArray(entitiesOrQueryOrId)) {
+      return set({
+        _loaded: {
+          ..._loaded,
+          ...listToMap(entitiesOrQueryOrId, { valFn: () => true })
+        }
+      });
+    }
+
+    if (typeof (entitiesOrQueryOrId) == "string") {
+      return set({
+        _loaded: {
+          ..._loaded,
+          [entitiesOrQueryOrId]: loaded,
+        }
+      });
+    }
+
+    if (typeof (entitiesOrQueryOrId) == "object") {
+      return set({
+        _loaded: {
+          ..._loaded,
+          [JSON.stringify(entitiesOrQueryOrId)]: loaded
+        }
+      });
+    }
+  },
+
+  load: async (queryOrId?: string) => {
+    const { setLoaded } = get();
+    const query = typeof (queryOrId) == "object" && queryOrId;
+    const id = typeof (queryOrId) == "string" && queryOrId;
+    console.log(">> hooks.haikudle.load", { id, query });
+
+    if (id) {
+      fetch(`/api/haikudles/${id}`, await fetchOpts()).then(async (res) => {
+        const { _haikudles } = get();
+        setLoaded(id);
+
+        if (res.status != 200) {
+          useAlert.getState().error(`Error fetching haikudle ${id}: ${res.status} (${res.statusText})`);
+          await get().init(notFoundHaiku);
+          return;
+        }
+
+        const data = await res.json();
+        const haikudle = data.haikudle;
+
+        set({
+          _haikudles: { ..._haikudles, [haikudle.id]: haikudle },
+        });
+
+        await get().init(haikudle?.haiku);
+        setLoaded([haikudle]);
+      });
+    } else {
+      const params = query && mapToSearchParams(query);
+      fetch(`/api/haikudles${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
+        const { _haikudles } = get();
+        setLoaded(query);
+
+        if (res.status != 200) {
+          useAlert.getState().error(`Error fetching haikudles: ${res.status} (${res.statusText})`);
+          await get().init(notFoundHaiku);
+          return;
+        }
+
+        const data = await res.json();
+        // const haikus = data.haikus;
+        const haikudles = data.haikudles; // TODO fix this junk
+
+        set({
+          _haikudles: { ..._haikudles, ...listToMap(haikudles) }
+        });
+
+        // TODO bleh
+        await get().init(haikudles[0]?.haiku);
+        setLoaded(haikudles);
+      });
+    }
+  },
+
+  create: async (user: User, haikuId: string, haikudleId: string) => {
+    console.log(">> hooks.haiku.create", { user, haikuId, haikudleId });
+    const { _haikudles, setLoaded } = get();
+
+    // optimistic
+    const creating = {
+      id: haikudleId,
+      createdBy: user.id,
+      createdAt: moment().valueOf(),
+      status: "creating",
+      optimistic: true,
+      haikuId,
+    }
+
+    setLoaded(creating.id);
+    set({
+      _haikudles: { ..._haikudles, [creating.id]: creating },
+    });
+
+    return new Promise(async (resolve, reject) => {
+      fetch('/api/haikudles', {
+        ...await fetchOpts(),
+        method: "POST",
+        body: JSON.stringify({ haikudle: creating }),
+      }).then(async (res) => {
+        const { _haikudles } = get();
+
+        if (res.status != 200) {
+          useAlert.getState().error(`Error adding haikudle: ${res.status} (${res.statusText})`);
+          set({
+            _haikudles: { ..._haikudles, [creating.id]: undefined },
+          });
+          return reject(res.statusText);
+        }
+
+        const data = await res.json();
+        const created = data.haikudle;
+
+        trackEvent("haikudle-created", {
+          id: created.id,
+          name: created.name,
+          createdBy: created.createdBy,
+        });
+
+        // replace optimistic 
+        setLoaded(creating.id, false);
+        setLoaded(created.id);
+        set({
+          _haikudles: { ..._haikudles, [creating.id]: undefined, [created.id]: created },
+        });
+        return resolve(created);
+      });
     });
   },
 

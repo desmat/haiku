@@ -21,6 +21,7 @@ import { kv } from "@vercel/kv";
 import { uuid } from "@/utils/misc";
 import { GenericStore, Store } from "@/types/Store";
 import { Haiku } from "@/types/Haiku";
+import { Haikudle } from "@/types/Haikudle";
 
 const jsonNotDeletedExpression = "(@.deletedAt > 0) == false";
 const jsonEqualsExpression = (key: string, val: string) => {
@@ -203,5 +204,6 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 export function create(): Store {
   return {
     haikus: new RedisStore<Haiku>("haiku"),
+    haikudles: new RedisStore<Haikudle>("haikudle"),
   }
 }
