@@ -14,6 +14,107 @@ export const notFoundHaiku = {
   ],
 }
 
+export const notFoundHaikudle = {
+  id: "-1",
+  haiku: notFoundHaiku,
+  inProgress: [
+    [
+      {
+        "id": "e2ce6319",
+        "offset": 0,
+        "word": "lost",
+        "syllables": 1,
+        "picked": false,
+        "correct": false
+      },
+      {
+        "id": "46bd7984",
+        "offset": 1,
+        "word": "quest",
+        "syllables": 1,
+        "picked": false,
+        "correct": false
+      },
+      {
+        "id": "8b4f46e1",
+        "offset": 2,
+        "word": "ends",
+        "syllables": 1,
+        "picked": false,
+        "correct": false
+      },
+      {
+        "id": "f3d8a0c3",
+        "offset": 3,
+        "word": "in",
+        "syllables": 1,
+        "picked": false,
+        "correct": false
+      },
+      {
+        "id": "8d9cbc0e",
+        "offset": 4,
+        "word": "echoes,",
+        "syllables": 2,
+        "picked": false,
+        "correct": false
+      }
+    ],
+    [
+      {
+        "id": "b0dc6cbd",
+        "offset": 5,
+        "word": "'404",
+        "syllables": 0,
+        "picked": false,
+        "correct": true
+      },
+      {
+        "id": "d565a833",
+        "offset": 6,
+        "word": "not",
+        "syllables": 1,
+        "picked": false,
+        "correct": true
+      },
+      {
+        "id": "1233c602",
+        "offset": 7,
+        "word": "found'",
+        "syllables": 1,
+        "picked": false,
+        "correct": true
+      }
+    ],
+    [
+      {
+        "id": "40ccf23f",
+        "offset": 8,
+        "word": "in",
+        "syllables": 1,
+        "picked": false,
+        "correct": false
+      },
+      {
+        "id": "8a0c7e4e",
+        "offset": 9,
+        "word": "digital.",
+        "syllables": 3,
+        "picked": false,
+        "correct": false
+      },
+      {
+        "id": "7ba3e9ab",
+        "offset": 10,
+        "word": "silence,",
+        "syllables": 2,
+        "picked": false,
+        "correct": false
+      }
+    ]
+  ],
+}
+
 export const haikus = {
   "1": {
     id: "1",

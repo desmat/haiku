@@ -56,7 +56,7 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
   // const haiku = haikudles[0]?.haiku;
   const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
 
-  // console.log('>> app.page.render()', { id, haiku, loaded, user });
+  // console.log('>> app.page.render()', { id, haiku, loaded, haikudleLoaded, user });
 
   useEffect(() => {
     // if (!loaded) {
@@ -64,10 +64,13 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
     //    loadHaikus({ id });
     // }
 
-    loadHaikus({ lang: lang || "en" });
-    // }
+    if (user?.isAdmin) {
+      loadHaikus({ lang: lang || "en" });
+    }
 
-    loadHaikudle(id);
+    if (!loaded) {
+      loadHaikudle(id);
+    }
 
     if (isHaikudleMode && user && !user?.preferences?.onboarded) {
       plainAlert(
@@ -76,7 +79,7 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
           <div><b>Wordle</b>: a word game with a single daily solution, with all players attempting to guess the same word.</div>
           <div>Drag-and-drop the scrabbled words to solve today's AI-generated <b>Haikudle</b>!</div>
         </div>`,
-        () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }), 
+        () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
         "Got it!");
     }
 

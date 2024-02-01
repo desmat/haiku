@@ -10,13 +10,13 @@ import { Haikudle } from '@/types/Haikudle';
 import useAlert from './alert';
 import moment from 'moment';
 import { User } from '@/types/User';
-import { notFoundHaiku } from "@/services/stores/samples";
+import { notFoundHaiku, notFoundHaikudle } from "@/services/stores/samples";
 
 async function fetchOpts() {
   const token = await useUser.getState().getToken();
   // console.log(">> hooks.haiku.fetchOpts", { token });
   return token && { headers: { Authorization: `Bearer ${token}` } } || {};
-}  
+}
 
 const normalizeWord = (word: string) => {
   return word && word.replace(/[.,]/, "").toLowerCase();
@@ -70,16 +70,15 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   // list of haikus
   _loaded: <StatusMap>{},
 
-  init: async (haiku: Haiku, cheat = false) => {
-    console.log(">> hooks.haikudle.init", { haiku, cheat });
-    let words = haiku.poem
+  init: async (haiku: Haiku, haikudle: Haikudle, cheat = false) => {
+    // console.log(">> hooks.haikudle.init", { haiku, haikudle, cheat });
+    let words = haikudle?.inProgress || haiku.poem
       .join(" ")
       .split(/\s/)
       .map((w: string, i: number) => {
         const word = w.toLowerCase().replace(/[]/, "")
         return {
           id: uuid(),
-          offset: i,
           word: word,
           syllables: syllable(word),
           picked: false,
@@ -87,7 +86,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         }
       });
 
-    if (!cheat && process.env.EXPERIENCE_MODE == "haikudle") {
+    if (!cheat && process.env.EXPERIENCE_MODE == "haikudle" && !haikudle?.inProgress) {
       words = shuffleArray(words);
     }
 
@@ -98,7 +97,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         .split(/\s/)
         .map((w: string) => w.toLowerCase().replace(/[]/, "")));
 
-    const inProgress = [
+    const inProgress = haikudle?.inProgress || [
       words.slice(0, (numWords / 3)),
       words.slice((numWords / 3), (2 * numWords / 3)),
       words.slice((2 * numWords / 3)),
@@ -183,6 +182,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       inProgress,
       solved,
     });
+
+    console.log(">> hooks.haikudle.move", { inProgress: JSON.stringify(inProgress) });
   },
 
   swap: async (word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
@@ -281,7 +282,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
         if (res.status != 200) {
           useAlert.getState().error(`Error fetching haikudle ${id}: ${res.status} (${res.statusText})`);
-          await get().init(notFoundHaiku);
+          await get().init(notFoundHaiku, notFoundHaikudle);
           return;
         }
 
@@ -303,7 +304,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
         if (res.status != 200) {
           useAlert.getState().error(`Error fetching haikudles: ${res.status} (${res.statusText})`);
-          await get().init(notFoundHaiku);
+          await get().init(notFoundHaiku, notFoundHaikudle);
           return;
         }
 
