@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getHaikudle, deleteHaikudle, saveHaikudle, saveUserHaikudle } from '@/services/haikudles';
+import { getHaikudle, deleteHaikudle, saveHaikudle, saveUserHaikudle, getUserHaikudle } from '@/services/haikudles';
 import { userSession } from '@/services/users';
 import { getHaiku } from '@/services/haikus';
 
@@ -12,20 +12,33 @@ export async function GET(
 ) {
   console.log('>> app.api.haikudle.[id].GET', { params });
 
-  // TODO check user history
+  const { user } = await userSession(request);
+  // TODO reject?
 
-  // const haikudle = await getHaikudle(params.id);
-  const haiku = await getHaiku(params.id);
-  const haikudle = haiku && {
-    id: haiku.id,
-    haiku,
-  }
+  const haikudle = await getHaikudle(params.id);
+  // console.log('>> app.api.haikudles.GET', { haikudle });
 
   if (!haikudle) {
     return NextResponse.json({ haikudle: {} }, { status: 404 });
   }
 
-  return NextResponse.json({ haikudle });
+  const userHaikudle = await getUserHaikudle(`${haikudle.haikuId}-${user?.id}`);
+  // console.log('>> app.api.haikudles.GET', { userHaikudle, haikudle });
+
+  const haiku = await getHaiku(haikudle?.haikuId);
+  // console.log('>> app.api.haikudles.GET', { haiku });
+
+  if (!haiku) {
+    return NextResponse.json({ haiku: {} }, { status: 404 });
+  }
+
+  const ret = {
+    ...haikudle,
+    ...userHaikudle?.haikudle,
+    haiku,
+  };
+
+  return NextResponse.json({ haikudle: ret });
 }
 
 export async function PUT(
@@ -45,7 +58,7 @@ export async function PUT(
   }
 
   const data: any = await request.json();
-  
+
   const savedUserHaikudle = await saveUserHaikudle(user, { ...haikudle, ...data.haikudle });
   return NextResponse.json({ haikudle: savedUserHaikudle.haikudle });
 }
@@ -55,9 +68,9 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   console.log('>> app.api.haikudle.DELETE', { params });
-  
+
   const { user } = await userSession(request)
-  
+
   if (!params.id) {
     throw `Cannot delete haiku with null id`;
   }

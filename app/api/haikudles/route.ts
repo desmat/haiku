@@ -19,19 +19,30 @@ export async function GET(request: NextRequest, params?: any) {
   // TODO reject?
 
   const todaysDateCode = moment().format("YYYYMMDD");
-  const userHaikudle = await getUserHaikudle(`${todaysDateCode}-${user?.id}`);  
-  const haikudle = userHaikudle?.haikudle || (await getHaikudle(todaysDateCode));
-  console.log('>> app.api.haikudles.GET', { todaysDateCode, userHaikudle, haikudle });
+  const todaysHaikudle = await getHaikudle(todaysDateCode);
+  
+  console.log('>> app.api.haikudles.GET', { todaysDateCode, todaysHaikudle });
 
-  const haiku = haikudle && await getHaiku(haikudle.haikuId);
+  if (!todaysHaikudle) {
+    return NextResponse.json({ haiku: {} }, { status: 404 });
+  }
+  
+  const haiku = todaysHaikudle && await getHaiku(todaysHaikudle.haikuId);
 
-  const ret = {
-    ...haikudle,
-    haiku,
+  console.log('>> app.api.haikudles.GET', { haiku });
+
+  if (!haiku) {
+    return NextResponse.json({ haiku: {} }, { status: 404 });
   }
 
-  if (!haikudle) {
-    return NextResponse.json({ haiku: {} }, { status: 404 });
+  const userHaikudle = await getUserHaikudle(`${todaysHaikudle.haikuId}-${user?.id}`);  
+  const haikudle = userHaikudle?.haikudle;
+  console.log('>> app.api.haikudles.GET', { userHaikudle, haikudle });
+
+  const ret = {
+    ...todaysHaikudle,
+    ...haikudle,
+    haiku,
   }
 
   return NextResponse.json({ haikudles: [ret] });

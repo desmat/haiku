@@ -36,10 +36,12 @@ const checkCorrect = (inProgress: any, solution: any) => {
 }
 
 const isSolved = (words: any, inProgress: any, solution: any) => {
-  // console.log("*** isSolved", { wordsInProcess, solution });
+  // console.log("*** isSolved", { inProgress });
 
   checkCorrect(inProgress, solution); // side effects yuk!
-  return inProgress.flat().reduce((a: boolean, m: any, i: number) => a && m.correct, true);
+  const ret = inProgress.flat().reduce((a: boolean, m: any, i: number) => a && m.correct, true);
+  // console.log("*** isSolved", { ret });
+  return ret;
 }
 
 type HaikudleMap = { [key: string]: Haikudle | undefined; };
@@ -53,6 +55,12 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   solution: [[], [], []],
   inProgress: [[], [], []],
   solved: false,
+  moves: 0,
+  onSolved: (id: string, moves: number) => useAlert.getState().plain(`
+    <div style="display: flex; flex-direction: column; gap: 0.4rem">
+      <div>Solved in ${moves} move${moves > 1 ? "s" : ""}! <b><a href="http://localhost:3000?id=${id}" target="_blank">Share</a></b> on your social networks and come back tomorrow for a new Haiku puzzle.</div>
+      <div>Until try the generate button on the top-right: provide any theme and see what you get!</div>
+    </div>`),
 
   // 
   // regular crud stuff
@@ -72,7 +80,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   _loaded: <StatusMap>{},
 
   init: async (haiku: Haiku, haikudle: Haikudle, cheat = false) => {
-    // console.log(">> hooks.haikudle.init", { haiku, haikudle, cheat });
+    console.log(">> hooks.haikudle.init", { haiku, haikudle, cheat });
     let words = haikudle?.inProgress || haiku.poem
       .join(" ")
       .split(/\s/)
@@ -105,19 +113,22 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     ];
 
     checkCorrect(inProgress, solution);
+    const solved = isSolved(words, inProgress, solution);
 
     set({
       haiku,
       haikudleId: haikudle.id,
       inProgress,
       solution,
-      solved: false,
+      solved,
     });
 
     trackEvent("haikudle-started", {
       id: haiku.id,
       userId: (await useUser.getState()).user.id,
     });
+
+    // get().onSolved(haikudle.id, 42);
   },
 
   solve: () => {
@@ -165,7 +176,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   move: async (haikudleId: string, word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
     // console.log(">> hooks.haikudle.move", { haikudleId, word, fromLine, fromOffset, toLine, toOffset });
-    const { haiku, inProgress, words, solution } = get();
+    const { haiku, inProgress, words, solution, onSolved, moves } = get();
 
     const [spliced] = inProgress[fromLine].splice(fromOffset, 1);
     inProgress[toLine].splice(toOffset, 0, spliced);
@@ -174,6 +185,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     const solved = isSolved(words, inProgress, solution);
 
     if (solved) {
+      onSolved(haikudleId, moves + 1);
+
       trackEvent("haikudle-solved", {
         haikuId: haiku.id,
         userId: (await useUser.getState()).user.id,
@@ -183,6 +196,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     set({
       inProgress,
       solved,
+      moves: moves + 1,
     });
 
     // console.log(">> hooks.haikudle.move", { inProgress: JSON.stringify(inProgress) });
@@ -192,7 +206,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         method: "PUT",
         body: JSON.stringify({ haikudle: {
           id: haikudleId, 
-          haikudId: haiku.id,
+          haikuId: haiku.id,
           inProgress,
         } }),
       }).then(async (res) => {
@@ -207,7 +221,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   swap: async (haikudleId: string, word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
     // console.log(">> hooks.haikudle.swap", { fromLine, fromOffset, toLine, toOffset });
-    const { haiku, inProgress, words, solution } = get();
+    const { haiku, inProgress, words, solution, onSolved, moves } = get();
 
     // move(word, fromLine, fromOffset, toLine, toOffset);
     const [spliced] = inProgress[toLine].splice(toOffset, 1, word);
@@ -217,6 +231,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     const solved = isSolved(words, inProgress, solution);
 
     if (solved) {
+      onSolved(haikudleId, moves + 1);
+
       trackEvent("haikudle-solved", {
         haikuId: haiku.id,
         userId: (await useUser.getState()).user.id,
@@ -226,6 +242,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     set({
       inProgress,
       solved,
+      moves: moves + 1,
     });
 
     fetch(`/api/haikudles/${haikudleId}`, {
@@ -233,7 +250,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       method: "PUT",
       body: JSON.stringify({ haikudle: {
         id: haikudleId, 
-        haikudId: haiku.id,
+        haikuId: haiku.id,
         inProgress,
       } }),
     }).then(async (res) => {
@@ -305,7 +322,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     }
   },
 
-  load: async (queryOrId?: string) => {
+  load: async (queryOrId?: string, onSolved = () => undefined) => {
     const { setLoaded } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
@@ -325,12 +342,12 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         const data = await res.json();
         const haikudle = data.haikudle;
 
+        setLoaded([haikudle]);
         set({
           _haikudles: { ..._haikudles, [haikudle.id]: haikudle },
         });
 
         await get().init(haikudle?.haiku, haikudle);
-        setLoaded([haikudle]);
       });
     } else {
       const params = query && mapToSearchParams(query);
@@ -348,13 +365,13 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         // const haikus = data.haikus;
         const haikudles = data.haikudles; // TODO fix this junk
 
+        setLoaded(haikudles);
         set({
           _haikudles: { ..._haikudles, ...listToMap(haikudles) }
         });
 
         // TODO bleh
         await get().init(haikudles[0]?.haiku, haikudles[0]);
-        setLoaded(haikudles);
       });
     }
   },

@@ -97,7 +97,7 @@ export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<H
     throw `Unauthorized`;
   }
 
-  const userHaikudleId = `${haikudle.id}-${user.id}`;
+  const userHaikudleId = `${haikudle.haikuId}-${user.id}`;
   let userHaikudle = await store.userHaikudles.get(userHaikudleId);
 
   if (userHaikudle) {

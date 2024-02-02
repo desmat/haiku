@@ -56,9 +56,10 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
   // const haiku = haikudles[0]?.haiku;
   const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
 
-  // console.log('>> app.page.render()', { id, haiku, loaded, haikudleLoaded, user });
+  console.log('>> app.page.render()', { id, haiku, loaded, haikudleLoaded, user });
 
   useEffect(() => {
+
     // if (!loaded) {
     // if (id) {
     //    loadHaikus({ id });
@@ -82,7 +83,6 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
         () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
         "Got it!");
     }
-
   }, [id, lang, user]);
 
   const handleGenerate = async (e: any) => {
