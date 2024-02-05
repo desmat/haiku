@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { put } from '@vercel/blob';
-import { Haikudle, UserHaikudle } from "@/types/Haikudle";
+import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { Store } from "@/types/Store";
 import { User } from '@/types/User';
 import { mapToList, uuid } from '@/utils/misc';
@@ -111,4 +111,32 @@ export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<H
   }
 
   return store.userHaikudles.create(userHaikudleId, userHaikudle);
+}
+
+export async function getDailyHaikudle(id: string): Promise<DailyHaikudle | undefined> {
+  console.log(`>> services.haikudle.getDailyHaikudle`, { id });
+
+  const dailyHaikudle = await store.dailyHaikudles.get(id);
+  console.log(`>> services.haikudle.getDailyHaikudle`, { id, dailyHaikudle });
+  return new Promise((resolve, reject) => resolve(dailyHaikudle));
+}
+
+export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: string, haikudleId: string): Promise<DailyHaikudle> {
+  console.log(">> services.haikudle.saveDailyHaikudle", { user, dateCode, haikuId, haikudleId });
+
+  if (!user) {
+    throw `Unauthorized`;
+  }
+
+  let dailyhaikudle = await store.dailyHaikudles.get(dateCode);
+
+  if (dailyhaikudle) {
+    return store.dailyHaikudles.update(dateCode, { id: dateCode, haikuId, haikudleId });
+  }
+
+  return store.dailyHaikudles.create(dateCode, {
+    id: dateCode,
+    haikuId,
+    haikudleId,
+  });
 }

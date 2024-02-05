@@ -115,7 +115,8 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
     const ret = prompt("YYYYMMDD?", moment().format("YYYYMMDD"));
     if (ret) {
       createHaikudle(user, {
-        id: ret,
+        id: haiku?.id,
+        dateCode: ret,
         haikuId: haiku?.id,
         inProgress: haikudleInProgress,
       });

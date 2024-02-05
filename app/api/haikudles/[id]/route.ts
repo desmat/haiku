@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getHaikudle, deleteHaikudle, saveHaikudle, saveUserHaikudle, getUserHaikudle } from '@/services/haikudles';
+import { getHaikudle, deleteHaikudle, saveHaikudle, saveUserHaikudle, getUserHaikudle, createHaikudle } from '@/services/haikudles';
 import { userSession } from '@/services/users';
 import { getHaiku } from '@/services/haikus';
 
@@ -12,25 +12,32 @@ export async function GET(
 ) {
   console.log('>> app.api.haikudle.[id].GET', { params });
 
+  // TODO pull Haikudle and User Haikudle and figure out the rest
+  // also, if haikudle was created before today, share as solved?
+
   const { user } = await userSession(request);
   // TODO reject?
 
-  const haikudle = await getHaikudle(params.id);
-  // console.log('>> app.api.haikudles.GET', { haikudle });
-
-  if (!haikudle) {
-    return NextResponse.json({ haikudle: {} }, { status: 404 });
-  }
-
-  const userHaikudle = await getUserHaikudle(`${haikudle.haikuId}-${user?.id}`);
-  // console.log('>> app.api.haikudles.GET', { userHaikudle, haikudle });
-
-  const haiku = await getHaiku(haikudle?.haikuId);
-  // console.log('>> app.api.haikudles.GET', { haiku });
+  let [haiku, haikudle] = await Promise.all([
+    await getHaiku(params.id),
+    await getHaikudle(params.id),
+  ]);
+  // console.log('>> app.api.haikudles.GET', { haiku, haikudle });
 
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
+
+  if (!haikudle) {    
+    haikudle = await createHaikudle(user, {
+      id: params.id,
+      haikuId: params.id,
+      // inProgress: haikudle.inProgress,
+    });
+  }
+
+  const userHaikudle = await getUserHaikudle(`${haikudle.haikuId}-${user?.id}`);
+  // console.log('>> app.api.haikudles.GET', { userHaikudle, haikudle });
 
   const ret = {
     ...haikudle,
@@ -49,7 +56,7 @@ export async function PUT(
 
   const { user } = await userSession(request);
 
-  // TODO check user and shit
+  // TODO pull Haikudle and User Haikudle and figure out the rest
 
   const haikudle = await getHaikudle(params.id);
 
@@ -75,7 +82,7 @@ export async function DELETE(
     throw `Cannot delete haiku with null id`;
   }
 
-  // TODO check user and shit
+  // TODO LOCK DOWN THIS API
 
   const haikudle = await deleteHaikudle(user, params.id);
   return NextResponse.json({ haikudle });

@@ -59,7 +59,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   onSolved: (id: string, moves: number) => useAlert.getState().plain(`
     <div style="display: flex; flex-direction: column; gap: 0.4rem">
       <div>Solved in ${moves} move${moves > 1 ? "s" : ""}! <b><a href="http://localhost:3000?id=${id}" target="_blank">Share</a></b> on your social networks and come back tomorrow for a new Haiku puzzle.</div>
-      <div>Until try the generate button on the top-right: provide any theme and see what you get!</div>
+      <div>Until then try the generate button above: provide any theme and see what you get!</div>
     </div>`),
 
   // 
@@ -95,7 +95,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         }
       });
 
-    if (!cheat && process.env.EXPERIENCE_MODE == "haikudle" && !haikudle?.inProgress) {
+    if (!cheat && process.env.EXPERIENCE_MODE == "haikudle" && !haikudle?.inProgress) {      
       words = shuffleArray(words);
     }
 
@@ -377,7 +377,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   },
 
   create: async (user: User, haikudle: Haikudle) => {
-    console.log(">> hooks.haiku.create", { user, haikudle });
+    // console.log(">> hooks.haikudle.create", { user, haikudle });
     const { _haikudles, setLoaded } = get();
 
     // optimistic

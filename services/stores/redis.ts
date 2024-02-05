@@ -21,7 +21,7 @@ import { kv } from "@vercel/kv";
 import { uuid } from "@/utils/misc";
 import { GenericStore, Store } from "@/types/Store";
 import { Haiku } from "@/types/Haiku";
-import { Haikudle, UserHaikudle } from "@/types/Haikudle";
+import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 
 const jsonNotDeletedExpression = "(@.deletedAt > 0) == false";
 const jsonEqualsExpression = (key: string, val: string) => {
@@ -125,7 +125,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { userId, value });
 
     if (!value.id) {
-      throw `Cannot save add with null id`;
+      throw `Cannot save with null id`;
     }
 
     const createdListValue = {
@@ -206,5 +206,6 @@ export function create(): Store {
     haikus: new RedisStore<Haiku>("haiku"),
     haikudles: new RedisStore<Haikudle>("haikudle"),
     userHaikudles: new RedisStore<UserHaikudle>("userhaikudle"),
+    dailyHaikudles: new RedisStore<DailyHaikudle>("dailyhaikudle"),
   }
 }

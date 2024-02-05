@@ -9,6 +9,8 @@ import { GenerateIcon } from "./Nav";
 import { StyledLayers } from "./StyledLayers";
 
 function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Haiku, styles: any[], selectedWord: any, setSelectedWord: any }) {
+  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { haiku });
+
   const [
     inProgress,
     solved,
@@ -22,6 +24,9 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
   ]);
 
   const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+  const poem = isHaikudleMode ? inProgress : haiku.poem.map((line: string) => line.split(/\s+/).map((w: string) => { return { word: w } }));
+
+  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem });
 
   const upperCaseFirstLetter = (s: string) => {
     if (!s || s.length == 0) return "";
@@ -53,7 +58,7 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
 
   return (
     <>
-      {inProgress.map((s: string, i: number) => {
+      {poem.map((s: string, i: number) => {
         return (
           <Droppable
             key={`${i}`}
@@ -67,7 +72,7 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
                   ref={provided.innerRef}
                   className={`_bg-purple-200 flex flex-row items-center justify-start my-0 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[24rem] md:min-w-[28rem] min-w-[18rem]" : "sm:min-w-[22rem] md:min-w-[24rem] min-w-[16rem]"}`}
                 >
-                  {inProgress[i].map((w: any, j: number) => {
+                  {poem[i].map((w: any, j: number) => {
                     return (
                       <Draggable
                         key={`word-${i}-${j}`}
@@ -77,7 +82,7 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
                         index={j}
                         isDragDisabled={!isHaikudleMode || w.correct}
                         shouldRespectForcePress={true}
-                        // timeForLongPress={0}
+                      // timeForLongPress={0}
                       >
                         {(provided, snapshot) => {
                           return (
@@ -133,8 +138,10 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
 export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: any[] }) {
   // console.log('>> app._components.HaikuPage.render()', { haiku, id: haiku.id });
 
+  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+
   const [
-    loaded, 
+    loaded,
     load,
     inProgress,
     init,
@@ -142,12 +149,12 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     _haiku,
     haikudleId,
   ] = useHaikudle((state: any) => [
-    state.loaded, 
+    state.loaded,
     state.load,
     state.inProgress,
     state.init,
     state.move,
-    state.haiku,
+    isHaikudleMode ? state.haiku : haiku,
     state.haikudleId,
   ]);
 
@@ -215,7 +222,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
         <div
           className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-10`}
         >
-          <HaikuPoem haiku={_haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord}/>
+          <HaikuPoem haiku={_haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord} />
         </div>
       </DragDropContext>
     </div >
