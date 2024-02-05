@@ -75,7 +75,7 @@ export function BottomLinks({ lang }: { lang?: LanguageType | undefined }) {
           <MdMail className="text-xl" />
         </Link>
       </div>
-      {Object.entries(supportedLanguages)
+      {/* {Object.entries(supportedLanguages)
         .filter((e: any) => (!lang && e[0] != "en") || (lang && lang != e[0]))
         .map(([k, v]: any) => (
           <Link
@@ -84,7 +84,7 @@ export function BottomLinks({ lang }: { lang?: LanguageType | undefined }) {
           >
             {v.nativeName}
           </Link>
-        ))}
+        ))} */}
     </div>
   )
 }
