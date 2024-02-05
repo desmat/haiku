@@ -86,7 +86,7 @@ function TypedAlert({
   }
 
   return (
-    <div className={`_border-[1px] ${colorClasses[5]} border-solid fixed bottom-3 left-3 md:left-[calc(50vw-(700px/2))] lg:left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-20"}`}>
+    <div className={`_border-[1px] ${colorClasses[5]} border-solid fixed bottom-3 left-3 md:left-[calc(50vw-(700px/2))] _lg:_left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-20"}`}>
       <div className={`${closed ? "opacity-0" : "opacity-100"} transition-all rounded-sm ${colorClasses[0]} px-2 py-1 w-[calc(100vw-1.5rem)] md:w-[700px] shadow-md hover:shadow-lg`}>
         <div className="flex flex-col">
           <div className="flex items-center">
