@@ -34,6 +34,7 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
 
   const handleClickWord = (word: any, lineNumber: number, wordNumber: number) => {
     // console.log('>> app._components.HaikuPage.handleClickWord()', { word, lineNumber, wordNumber });
+
     if (word.id == selectedWord?.word?.id) {
       setSelectedWord(undefined);
     } else if (selectedWord) {
@@ -75,11 +76,11 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
                     return (
                       <Draggable
                         key={`word-${i}-${j}`}
-                        // key={w.id}
+                        // key={w?.id}
                         draggableId={`word-${i}-${j}`}
-                        // draggableId={w.id}
+                        // draggableId={w?.id}
                         index={j}
-                        isDragDisabled={!isHaikudleMode || w.correct}
+                        isDragDisabled={!isHaikudleMode || w?.correct}
                         shouldRespectForcePress={true}
                       // timeForLongPress={0}
                       >
@@ -89,31 +90,31 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              onMouseDown={() => isHaikudleMode && !w.correct && handleClickWord(w, i, j)}
+                              onMouseDown={() => isHaikudleMode && !w?.correct && handleClickWord(w, i, j)}
                             >
-                              <StyledLayers key={i} styles={!isHaikudleMode || solved || w.correct ? styles : [styles[0]]}>
+                              <StyledLayers key={i} styles={!isHaikudleMode || solved || w?.correct ? styles : [styles[0]]}>
                                 <div
-                                  className={`px-1 ${!isHaikudleMode || solved || w.correct ? "" : "m-1"} transition-all ${!solved && !w.correct && "draggable-notsure-why-cant-inline"}`}
+                                  className={`px-1 ${!isHaikudleMode || solved || w?.correct ? "" : "m-1"} transition-all ${!solved && !w?.correct && "draggable-notsure-why-cant-inline"}`}
                                   style={{
-                                    backgroundColor: (!isHaikudleMode || solved || w.correct)
+                                    backgroundColor: (!isHaikudleMode || solved || w?.correct)
                                       ? undefined
                                       : haiku?.bgColor || "lightgrey",
-                                    filter: (!isHaikudleMode || solved || w.correct)
+                                    filter: (!isHaikudleMode || solved || w?.correct)
                                       ? undefined
                                       : snapshot.isDragging
                                         ? `drop-shadow(0px 1px 3px rgb(0 0 0 / 0.9))`
-                                        : selectedWord?.word?.id == w.id
+                                        : selectedWord?.word?.id == w?.id
                                           ? `drop-shadow(0px 1px 2px rgb(0 0 0 / 0.9))`
                                           : selectedWord
                                             ? `drop-shadow(0px 1px 1px rgb(0 0 0 / 0.5))`
                                             : `drop-shadow(0px 1px 1px rgb(0 0 0 / 0.2))`,
                                   }}
                                 >
-                                  {j == 0 && w.correct &&
-                                    upperCaseFirstLetter(w.word)
+                                  {j == 0 && w?.correct &&
+                                    upperCaseFirstLetter(w?.word)
                                   }
-                                  {!(j == 0 && w.correct) &&
-                                    w.word
+                                  {!(j == 0 && w?.correct) &&
+                                    w?.word
                                   }
                                 </div>
                               </StyledLayers>
@@ -182,7 +183,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     // console.log('>> app._components.HaikuPage.handleDragStart()', { result });
 
     setSelectedWord({
-      word: inProgress.flat().find((w: any) => w.id == result.draggableId),
+      word: inProgress.flat().find((w: any) => w?.id == result.draggableId),
       lineNumber: Number(result.source.droppableId),
       wordNumber: result.source.index,
     });
@@ -191,15 +192,18 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
   const handleDragEnd = (result: any) => {
     // console.log('>> app._components.HaikuPage.handleDragEnd()', { result });
 
-    move(
-      haikudleId,
-      inProgress.flat().find((w: any) => w.id == result.draggableId),
-      Number(result.source.droppableId),
-      result.source.index,
-      Number(result.destination.droppableId),
-      result.destination.index
-    );
     setSelectedWord(undefined);
+
+    if (result.destination) {
+      move(
+        haikudleId,
+        inProgress.flat().find((w: any) => w?.id == result.draggableId),
+        Number(result.source.droppableId),
+        result.source.index,
+        Number(result.destination.droppableId),
+        result.destination.index
+      );
+    }
   }
 
   return (

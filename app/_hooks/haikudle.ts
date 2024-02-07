@@ -27,7 +27,9 @@ const checkCorrect = (inProgress: any, solution: any) => {
   inProgress
     .forEach((line: any[], lineNum: number) => line
       .forEach((w: any, wordNum: number) => {
-        w.correct = normalizeWord(w.word) == normalizeWord(solution[lineNum][wordNum]);
+        if (w) {
+          w.correct = normalizeWord(w.word) == normalizeWord(solution[lineNum][wordNum]);
+        }
       }));
 
 
@@ -95,7 +97,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         }
       });
 
-    if (!cheat && process.env.EXPERIENCE_MODE == "haikudle" && !haikudle?.inProgress) {      
+    if (!cheat && process.env.EXPERIENCE_MODE == "haikudle" && !haikudle?.inProgress) {
       words = shuffleArray(words);
     }
 
@@ -202,21 +204,23 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     // console.log(">> hooks.haikudle.move", { inProgress: JSON.stringify(inProgress) });
 
     fetch(`/api/haikudles/${haikudleId}`, {
-        ...await fetchOpts(),
-        method: "PUT",
-        body: JSON.stringify({ haikudle: {
-          id: haikudleId, 
+      ...await fetchOpts(),
+      method: "PUT",
+      body: JSON.stringify({
+        haikudle: {
+          id: haikudleId,
           haikuId: haiku.id,
           inProgress,
-        } }),
-      }).then(async (res) => {
-        if (res.status != 200) {
-          useAlert.getState().error(`Error saving haikudle: ${res.status} (${res.statusText})`);
-          return;
         }
+      }),
+    }).then(async (res) => {
+      if (res.status != 200) {
+        useAlert.getState().error(`Error saving haikudle: ${res.status} (${res.statusText})`);
+        return;
+      }
 
-        // console.log(">> hooks.haikudle.move", { res });
-      });
+      // console.log(">> hooks.haikudle.move", { res });
+    });
   },
 
   swap: async (haikudleId: string, word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
@@ -248,11 +252,13 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     fetch(`/api/haikudles/${haikudleId}`, {
       ...await fetchOpts(),
       method: "PUT",
-      body: JSON.stringify({ haikudle: {
-        id: haikudleId, 
-        haikuId: haiku.id,
-        inProgress,
-      } }),
+      body: JSON.stringify({
+        haikudle: {
+          id: haikudleId,
+          haikuId: haiku.id,
+          inProgress,
+        }
+      }),
     }).then(async (res) => {
       if (res.status != 200) {
         useAlert.getState().error(`Error saving haikudle: ${res.status} (${res.statusText})`);
@@ -260,7 +266,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       }
 
       // console.log(">> hooks.haikudle.swap", { res });
-    });    
+    });
   },
 
   // 
