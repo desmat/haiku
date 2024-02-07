@@ -1,11 +1,10 @@
 'use client'
 
+import { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { useState } from "react";
 import useHaikudle from '@/app/_hooks/haikudle';
 import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
-import { GenerateIcon } from "./Nav";
 import { StyledLayers } from "./StyledLayers";
 
 function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Haiku, styles: any[], selectedWord: any, setSelectedWord: any }) {
@@ -148,6 +147,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     move,
     _haiku,
     haikudleId,
+    haikudleSolved,
   ] = useHaikudle((state: any) => [
     state.loaded,
     state.load,
@@ -156,6 +156,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     state.move,
     isHaikudleMode ? state.haiku : haiku,
     state.haikudleId,
+    state.solved,
   ]);
 
   // const [
@@ -166,8 +167,16 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
   // TODO move to hook store
   const [selectedWord, setSelectedWord] = useState<any>();
+  const [pop, setPop] = useState(false);
 
   // console.log('>> app._components.HaikuPage.render()', { inProgress });
+
+  useEffect(() => {
+    if (haikudleSolved) {
+      setPop(true);
+      setTimeout(() => setPop(false), 100);
+    }    
+  }, [haikudleSolved]);
 
   const handleDragStart = (result: any) => {
     // console.log('>> app._components.HaikuPage.handleDragStart()', { result });
@@ -220,7 +229,10 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
         />
 
         <div
-          className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-10`}
+          className={`${font.architects_daughter.className} md:text-[26pt] sm:text-[22pt] text-[16pt] fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-10 transition-all `}
+          style={{
+            filter: `${pop ? `drop-shadow(0px 0px 32px ${_haiku?.bgColor})` : ""}`,
+          }}
         >
           <HaikuPoem haiku={_haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord} />
         </div>
