@@ -13,7 +13,7 @@ import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
 import { notFoundHaiku } from '@/services/stores/samples';
 
-export default function Component({ lang, _haiku }: { lang?: undefined | LanguageType, _haiku?: Haiku }) {
+export default function Component({ lang }: { lang?: undefined | LanguageType }) {
   // console.log('>> app.page.render()', { lang });
   const searchParams = useSearchParams();
   const [id, setId] = useState(searchParams.get("id"));
@@ -41,7 +41,7 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
     haikudleLoaded,
     loadHaikudle,
     haikudles,
-    haiku,
+    _haiku,
   ] = useHaikudle((state: any) => [
     state.loaded,
     state.load,
@@ -51,7 +51,7 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
 
   // const loaded = _haiku || id && haikusLoaded(JSON.stringify({ id })) || haikusLoaded(JSON.stringify({ lang: lang || "en" }));
   const haikus = findHaikus({ lang: lang || "en" });
-  // const haiku = _haiku || id && getHaiku(id) || haikus[Math.floor(Math.random() * haikus.length)] || notFoundHaiku;
+  const haiku = isHaikudleMode ? _haiku : id && getHaiku(id) || haikus[Math.floor(Math.random() * haikus.length)] || notFoundHaiku;
 
   const loaded = isHaikudleMode ? haikudleLoaded(id) : haikusLoaded(id); //; // TODO check id?
   // const haiku = haikudles[0]?.haiku;
@@ -60,12 +60,6 @@ export default function Component({ lang, _haiku }: { lang?: undefined | Languag
   console.log('>> app.page.render()', { id, haiku, loaded, haikudleLoaded, user });
 
   useEffect(() => {
-
-    // if (!loaded) {
-    // if (id) {
-      //  loadHaikus(id);
-    // }
-
     if (user?.isAdmin) {
       loadHaikus({ lang: lang || "en" });
     }
