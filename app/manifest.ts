@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next'
  
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'hAIku: AI-powered haiku game',
-    short_name: 'hAIku',
-    description: 'AI-powered haiku game',
+    name: 'hAIkudle: AI-Powered daily Haiku puzzles',
+    short_name: 'hAIkudle',
+    description: 'AI-Powered daily Haiku puzzles',
     start_url: '/',
     display: 'standalone',
     background_color: 'rgb(32, 31, 27)',

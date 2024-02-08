@@ -8,8 +8,8 @@ import type { Viewport } from 'next'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'hAIku',
-  description: 'AI-Powered haiku game',
+  title: 'hAIkudle',
+  description: 'AI-Powered daily Haiku puzzles',
 }
 
 export const viewport: Viewport = {

@@ -1,14 +1,23 @@
-# Haikudle: AI-Powered Haiku Game
+# Haikudle: AI-Powered Daily Haiku Puzzles
 
-A simple Haiku generator powered by OpenAI's ChatGPT.
+Simple Haiku puzzles generator powered by OpenAI's ChatGPT.
 
 ### Functionality
 
-TODO
+- **AI-generated Haikus** based on any given themes.
+- **AI-generated background image** matching the generated Haiku.
+- **Daily puzzles** with drag-and-drop UX
+
+### Screenshots:
+<p align="center">
+  <img height="300" alt="Screen Shot 1" src="https://github.com/desmat/workout/assets/3298837/99c2f9ff-f724-4198-8b6e-a62f91ee3205">  
+  <img height="300" alt="Screen Shot 2" src="https://github.com/desmat/workout/assets/3298837/d73453a3-0f45-47c5-a673-39f2c299334b">
+  <img height="300" alt="Screen Shot 3" src="https://github.com/desmat/workout/assets/3298837/1533212c-7238-4fcd-a7a2-360f8e1e3d09">
+</p>
 
 ## Demo
 
-[haiku.desmat.ca](https://haiku.desmat.ca)
+[haikudle.desmat.ca](https://haikudle.desmat.ca)
 
 
 ## Tech
@@ -17,7 +26,6 @@ TODO
 - React/Next.js (v14 with App Router and React Server Components)
 - Zustand
 - Tailwind CSS/UI
-- Firebase Authentication
 - Redis
 - Vercel
 - OpenAI
