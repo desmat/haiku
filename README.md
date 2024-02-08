@@ -10,9 +10,9 @@ Simple Haiku puzzles generator powered by OpenAI's ChatGPT.
 
 ### Screenshots:
 <p align="center">
-  <img height="300" alt="Screen Shot 1" src="https://github.com/desmat/workout/assets/3298837/99c2f9ff-f724-4198-8b6e-a62f91ee3205">  
-  <img height="300" alt="Screen Shot 2" src="https://github.com/desmat/workout/assets/3298837/d73453a3-0f45-47c5-a673-39f2c299334b">
-  <img height="300" alt="Screen Shot 3" src="https://github.com/desmat/workout/assets/3298837/1533212c-7238-4fcd-a7a2-360f8e1e3d09">
+  <img height="400" alt="image" src="https://github.com/desmat/haiku/assets/3298837/d3063391-bc90-47e7-b034-d7fc2814c271">
+  <img height="400" alt="303480583-caa70e55-248b-48bc-a083-4e247c69cfd9" src="https://github.com/desmat/haiku/assets/3298837/c364d8e1-fef5-4505-978f-09f15afe9123">
+  <img height="400" alt="image" src="https://github.com/desmat/haiku/assets/3298837/6bc7ba2b-8552-42da-ac61-98a3d38e9b19">
 </p>
 
 ## Demo
