@@ -6,14 +6,14 @@ import { userSession } from "./services/users";
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const thing = request.nextUrl.toString();
-  console.log("*** middleware", { path, thing });
+  // console.log("*** middleware", { path, thing });
 
   if (path.startsWith("/api/")) {
     const session = await userSession(request);
-    console.log("*** middleware", { session });
+    // console.log("*** middleware", { session });
 
     if (!session?.user) {
-      console.log("*** middleware NOPE", { session });
+      // console.log("*** middleware NOPE", { session });
 
       return NextResponse.json(
         { success: false, message: 'authorization failed' },

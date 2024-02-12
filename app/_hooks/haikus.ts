@@ -279,7 +279,12 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         const { _haikus } = get();
 
         if (res.status != 200) {
-          useAlert.getState().error(`Error generating haiku: ${res.status} (${res.statusText})`);
+          if  (res.status == 429) {
+            useAlert.getState().error(`Exceeded daily limit: try again later.`);
+          } else {
+            useAlert.getState().error(`Error generating haiku: ${res.status} (${res.statusText})`);
+          }
+
           // revert
           set({
             _haikus: { ..._haikus, [haiku.id || ""]: haiku },
