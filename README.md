@@ -12,8 +12,9 @@ Simple Haiku puzzles generator powered by OpenAI's ChatGPT.
   <img height="400" alt="image" src="https://github.com/desmat/haiku/assets/3298837/6bc7ba2b-8552-42da-ac61-98a3d38e9b19">
 </p>
 
-[haikudle.desmat.ca](https://haikudle.desmat.ca)
+### Live Demo
 
+[haikudle.desmat.ca](https://haikudle.desmat.ca)
 
 ## Tech
 
