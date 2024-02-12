@@ -194,7 +194,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
     setSelectedWord(undefined);
 
-    if (result.destination) {
+    if (result.destination && !(result.source.droppableId == result.destination.droppableId && result.source.index == result.destination.index)) {
       move(
         haikudleId,
         inProgress.flat().find((w: any) => w?.id == result.draggableId),
