@@ -62,6 +62,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   save: async (user: any) => {
     const token = await encodeJWT({ user });
     window?.localStorage && window.localStorage.setItem("session", token || "");
+    set({ user });
   },  
 })));
 
