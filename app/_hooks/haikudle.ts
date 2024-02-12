@@ -58,11 +58,15 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   inProgress: [[], [], []],
   solved: false,
   moves: 0,
-  onSolved: (id: string, moves: number) => useAlert.getState().plain(`
-    <div style="display: flex; flex-direction: column; gap: 0.4rem">
-      <div>Solved in ${moves} move${moves > 1 ? "s" : ""}! <b><a href="https://haikudle.desmat.ca?id=${id}" target="_blank">Share</a></b> on your social networks and come back tomorrow for a new Haiku puzzle.</div>
-      <div>Until then try the generate button above: provide any theme and see what you get!</div>
-    </div>`),
+  onSolved: (id: string, moves: number) => {
+    setTimeout(() => {
+      useAlert.getState().plain(`
+        <div style="display: flex; flex-direction: column; gap: 0.4rem">
+          <div>Solved in ${moves} move${moves > 1 ? "s" : ""}! <b><a href="https://haikudle.desmat.ca?id=${id}" target="_blank">Share</a></b> on your social networks and come back tomorrow for a new Haiku puzzle.</div>
+          <div>Until then try the generate button above: provide any theme and see what you get!</div>
+        </div>`);
+    }, 250);
+  },
 
   // 
   // regular crud stuff
