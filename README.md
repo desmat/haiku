@@ -21,13 +21,12 @@ Haiku puzzles powered by OpenAI's ChatGPT.
 ## Tech
 
 - JavaScript/TypeScript
-- React/Next.js (v14 with App Router and React Server Components)
+- React/Next.js
 - Zustand
 - Tailwind CSS/UI
 - Redis
 - Vercel
 - OpenAI
-
 
 ## Getting Started
 
