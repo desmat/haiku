@@ -1,10 +1,12 @@
 # Haikudle: AI-Powered Daily Haiku Puzzles
 
-Simple Haiku puzzles powered by OpenAI's ChatGPT.
+Haiku puzzles powered by OpenAI's ChatGPT.
 
 - **AI-generated Haikus** based on any given themes.
 - **AI-generated background image** matching the generated Haiku.
 - **Daily puzzles** with drag-and-drop UX
+
+### Screenshots
 
 <p align="center">
   <img height="400" alt="image" src="https://github.com/desmat/haiku/assets/3298837/d3063391-bc90-47e7-b034-d7fc2814c271">
@@ -12,7 +14,7 @@ Simple Haiku puzzles powered by OpenAI's ChatGPT.
   <img height="400" alt="image" src="https://github.com/desmat/haiku/assets/3298837/6bc7ba2b-8552-42da-ac61-98a3d38e9b19">
 </p>
 
-### Live Demo
+## Live Demo
 
 [haikudle.desmat.ca](https://haikudle.desmat.ca)
 
