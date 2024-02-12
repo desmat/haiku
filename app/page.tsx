@@ -84,7 +84,10 @@ export default function Component({ lang }: { lang?: undefined | LanguageType })
     // console.log('>> app.page.handleGenerate()');
     e.preventDefault();
 
-    const subject = prompt("Subject? (For example 'nature', 'sunset', or leave blank)");
+    const subject = user?.isAdmin
+      ? prompt("Subject? (For example 'nature', 'sunset', or leave blank)")
+      : "";
+      
     if (typeof (subject) == "string") {
       setGenerating(true);
       // TODO cleanup generateHaiku function params
