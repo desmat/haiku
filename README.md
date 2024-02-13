@@ -1,10 +1,10 @@
 # Haikudle: AI-Powered Daily Haiku Puzzles
 
-Haiku puzzles powered by OpenAI's ChatGPT.
+Haiku puzzles powered by OpenAI's ChatGPT:
 
-- **AI-generated Haikus** based on any given themes.
-- **AI-generated background image** matching the generated Haiku.
-- **Daily puzzles** with drag-and-drop UX
+- **AI-generated Haikus** based on any given themes;
+- **AI-generated background image** matching the generated Haiku;
+- **Daily puzzles** with drag-and-drop UX.
 
 ### Screenshots
 
