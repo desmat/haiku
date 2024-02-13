@@ -254,8 +254,8 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     });
   },
 
-  generate: async (user: User, haiku: Haiku) => {
-    console.log(">> hooks.haiku.generate", { haiku });
+  generate: async (user: User, request: any) => {
+    console.log(">> hooks.haiku.generate", { request });
     const { _haikus } = get();
 
     // optimistic
@@ -271,10 +271,10 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     // });
 
     return new Promise(async (resolve, reject) => {
-      fetch(`/api/haikus/${haiku.id}/generate`, {
+      fetch(`/api/haikus`, {
         ...await fetchOpts(),
         method: "POST",
-        body: JSON.stringify({ haiku }),
+        body: JSON.stringify({ request }),
       }).then(async (res) => {
         const { _haikus } = get();
 
@@ -285,10 +285,6 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
             useAlert.getState().error(`Error generating haiku: ${res.status} (${res.statusText})`);
           }
 
-          // revert
-          set({
-            _haikus: { ..._haikus, [haiku.id || ""]: haiku },
-          });
           return reject(res.statusText);
         }
 
