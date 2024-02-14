@@ -9,11 +9,11 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    template: '(3)hAIku',
+    template: 'hAIku - AI-powered Haiku poems',
     default:
-      '(1)AI-powered Haiku poems',
+      'hAIku - AI-powered Haiku poems',
   },
-  description: "(2)AI-powered Haiku poems",
+  description: "hAIku - AI-powered Haiku poems",
 }
 
 export const viewport: Viewport = {
@@ -33,7 +33,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <meta property="og:title" content="(1)hAIku" />
+        <meta property="og:title" content="hAIku - AI-powered Haiku poems" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://haiku.desmat.ca/" />
         <meta property="og:image" content="https://haiku.desmat.ca/social_img.png" />        

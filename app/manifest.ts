@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
  
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'hAIku: AI-powered Haiku poems',
+    name: 'hAIku - AI-powered Haiku poems',
     short_name: 'hAIku',
     description: 'AI-powered Haiku poems',
     start_url: '/',
