@@ -8,8 +8,12 @@ import type { Viewport } from 'next'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'hAIkudle',
-  description: 'AI-Powered daily Haiku puzzles',
+  title: {
+    template: 'hAIku',
+    default:
+      '(1)AI-powered Haiku poems',
+  },
+  description: "(2)AI-powered Haiku poems",
 }
 
 export const viewport: Viewport = {
@@ -27,6 +31,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
       <body className={inter.className}>
         <div className="flex flex-col lg:flex-row">
           <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
