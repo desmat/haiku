@@ -91,7 +91,7 @@ export default function Component({ lang }: { lang?: undefined | LanguageType })
     if (typeof (subject) == "string") {
       setGenerating(true);
       // TODO cleanup generateHaiku function params
-      const ret = await generateHaiku({ uuid: "ASDF" }, { ...haiku, id: "ASDF", lang, subject });
+      const ret = await generateHaiku(user, { lang, subject });
       // console.log('>> app.page.handleGenerate()', { ret });
 
       if (ret?.id) {
