@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { syllable } from 'syllable'
 import useUser from './user';
-import { listToMap, mapToSearchParams, uuid } from '@/utils/misc';
+import { hashCode, listToMap, mapToSearchParams, normalizeWord, uuid } from '@/utils/misc';
 import { Haiku } from '@/types/Haiku';
 import trackEvent from '@/utils/trackEvent';
 import shuffleArray from "@/utils/shuffleArray";
@@ -18,17 +18,13 @@ async function fetchOpts() {
   return token && { headers: { Authorization: `Bearer ${token}` } } || {};
 }
 
-const normalizeWord = (word: string) => {
-  return word && word.replace(/[.,]/, "").toLowerCase();
-}
-
 const checkCorrect = (inProgress: any, solution: any) => {
   // console.log("*** checkCorrect", { inProgress, solution });
   inProgress
     .forEach((line: any[], lineNum: number) => line
       .forEach((w: any, wordNum: number) => {
         if (w) {
-          w.correct = normalizeWord(w.word) == normalizeWord(solution[lineNum][wordNum]);
+          w.correct = hashCode(normalizeWord(w.word)) == solution[lineNum][wordNum];
         }
       }));
 
@@ -107,10 +103,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
     const numWords = words.length;
 
-    const solution = haiku.poem
-      .map((line: string) => line
-        .split(/\s/)
-        .map((w: string) => w.toLowerCase().replace(/[]/, "")));
+    const solution = haiku.poem;
 
     const inProgress = haikudle?.inProgress || [
       words.slice(0, (numWords / 3)),

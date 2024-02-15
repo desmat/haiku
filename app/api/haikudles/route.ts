@@ -13,10 +13,7 @@ export async function GET(request: NextRequest, params?: any) {
   const query = searchParamsToMap(request.nextUrl.searchParams.toString());
   console.log('>> app.api.haikudles.GET', { query, searchParams: request.nextUrl.searchParams.toString() });
 
-  // TODO pull daily haikudle from YYYYMMDD id, then pull haikudle, then haiku
-
   const { user } = await userSession(request);
-  // TODO reject?
 
   const todaysDateCode = moment().format("YYYYMMDD");
   const todaysHaikudle = await getDailyHaikudle(todaysDateCode);
@@ -28,7 +25,7 @@ export async function GET(request: NextRequest, params?: any) {
   }
   
   const [haiku, haikudle, userHaikudle] = await Promise.all([
-    getHaiku(todaysHaikudle.haikuId),
+    getHaiku(todaysHaikudle.haikuId, true),
     getHaikudle(todaysHaikudle.haikuId),
     getUserHaikudle(`${todaysHaikudle.haikuId}-${user?.id}`),
   ]);

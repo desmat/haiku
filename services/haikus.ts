@@ -3,7 +3,7 @@ import { put } from '@vercel/blob';
 import { Haiku } from "@/types/Haiku";
 import { Store } from "@/types/Store";
 import { User } from '@/types/User';
-import { mapToList, uuid } from '@/utils/misc';
+import { hashCode, mapToList, normalizeWord, uuid } from '@/utils/misc';
 import * as samples from '@/services/stores/samples';
 import * as openai from './openai';
 import chroma from 'chroma-js';
@@ -28,10 +28,20 @@ export async function getHaikus(query?: any): Promise<Haiku[]> {
   return new Promise((resolve, reject) => resolve(haikus.filter(Boolean)));
 }
 
-export async function getHaiku(id: string): Promise<Haiku | undefined> {
+export async function getHaiku(id: string, hashPoem?: boolean): Promise<Haiku | undefined> {
   console.log(`>> services.haiku.getHaiku`, { id });
 
-  const haiku = await store.haikus.get(id);
+  let haiku = await store.haikus.get(id);
+
+  if (hashPoem) {
+    haiku = {
+      ...haiku,
+      poem: haiku.poem
+        .map((line: string) => line.split(/\s+/)
+          .map((word: string) => hashCode(normalizeWord(word)))),
+    }
+  }
+
   console.log(`>> services.haiku.getHaiku`, { id, haiku });
   return new Promise((resolve, reject) => resolve(haiku));
 }
