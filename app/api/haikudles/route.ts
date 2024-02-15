@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikudles, createHaikudle, getHaikudle, getUserHaikudle, getDailyHaikudle, saveDailyHaikudle } from '@/services/haikudles';
+import { getHaikudles, createHaikudle, getHaikudle, getUserHaikudle, getDailyHaikudle, saveDailyHaikudle, getDailyHaikudles } from '@/services/haikudles';
 import { userSession } from '@/services/users';
 import { searchParamsToMap, uuid } from '@/utils/misc';
 import moment from 'moment';
-import { getHaiku } from '@/services/haikus';
+import { getHaiku, getHaikus } from '@/services/haikus';
+import { DailyHaikudle, Haikudle } from '@/types/Haikudle';
+import shuffleArray from '@/utils/shuffleArray';
+import { Haiku } from '@/types/Haiku';
 
 // TODO I don't think we need this let's remove
 // export const maxDuration = 300;
@@ -16,14 +19,28 @@ export async function GET(request: NextRequest, params?: any) {
   const { user } = await userSession(request);
 
   const todaysDateCode = moment().format("YYYYMMDD");
-  const todaysHaikudle = await getDailyHaikudle(todaysDateCode);
-  
+  let todaysHaikudle = await getDailyHaikudle(todaysDateCode);
+
   console.log('>> app.api.haikudles.GET', { todaysDateCode, todaysHaikudle });
 
   if (!todaysHaikudle) {
-    return NextResponse.json({ haiku: {} }, { status: 404 });
+    // create a new haikudle and dailyhaikudle combo
+
+    const [previousDailyHaikudles, haikudles, haikus] = await Promise.all([
+      getDailyHaikudles(),
+      getHaikudles(),
+      getHaikus(),
+    ]);
+    const previousDailyHaikuIds = previousDailyHaikudles.map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
+    const nonDailyhaikus = haikus.filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
+    const randomHaikuId = shuffleArray(nonDailyhaikus)[0].id;
+    const randomHaikudle = await createHaikudle(user, { id: randomHaikuId, haikuId: randomHaikuId });
+
+    console.log('>> app.api.haikudles.GET', { randomHaikuId, randomHaikudle, previousDailyHaikudles, haikudles });
+
+    todaysHaikudle = await saveDailyHaikudle(user, todaysDateCode, randomHaikudle.haikuId, randomHaikudle.id);
   }
-  
+
   const [haiku, haikudle, userHaikudle] = await Promise.all([
     getHaiku(todaysHaikudle.haikuId, true),
     getHaikudle(todaysHaikudle.haikuId),
@@ -60,13 +77,13 @@ export async function POST(request: Request) {
   const haikudle = data.haikudle;
 
   console.log('>> app.api.haikus.POST', { haikudle });
-  
+
   // TODO create haikudle with same ID as the haiku, and the daily haikudle with id YYYYMMDD
-  
+
   const [createdHaikudle, createdDailyHaikudle] = await Promise.all([
     await createHaikudle(user, haikudle),
     await saveDailyHaikudle(user, haikudle.dateCode, haikudle.haikuId, haikudle.id),
   ]);
-  
+
   return NextResponse.json({ haikudle: createdHaikudle });
 }
