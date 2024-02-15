@@ -120,6 +120,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       inProgress,
       solution,
       solved,
+      moves: haikudle?.moves || 0,
     });
 
     trackEvent("haikudle-started", {
@@ -207,6 +208,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         haikudle: {
           id: haikudleId,
           haikuId: haiku.id,
+          solved, 
+          moves: moves + 1,
           inProgress,
         }
       }),
