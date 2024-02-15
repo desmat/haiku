@@ -19,7 +19,7 @@ export async function GET(
   // TODO reject?
 
   let [haiku, haikudle] = await Promise.all([
-    await getHaiku(params.id),
+    await getHaiku(params.id, true),
     await getHaikudle(params.id),
   ]);
   // console.log('>> app.api.haikudles.GET', { haiku, haikudle });

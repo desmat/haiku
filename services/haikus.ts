@@ -16,13 +16,24 @@ import(`@/services/stores/${process.env.STORE_TYPE}`)
     store = new s.create();
   });
 
-export async function getHaikus(query?: any): Promise<Haiku[]> {
+export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[]> {
   let haikus = await store.haikus.find(query);
+
   if (!haikus?.length && (!query || JSON.stringify(query) == "{}")) {
     // empty db, populate with samples
     haikus = await Promise.all(
       mapToList(samples.haikus)
         .map((h: Haiku) => store.haikus.create("(system)", h)));
+  }
+
+  if (hashPoem) {
+    haikus = haikus
+      .map((haiku: Haiku) => haiku = {
+        ...haiku,
+        poem: haiku.poem
+          .map((line: string) => line.split(/\s+/)
+            .map((word: string) => hashCode(normalizeWord(word))))
+      })
   }
 
   return new Promise((resolve, reject) => resolve(haikus.filter(Boolean)));

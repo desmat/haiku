@@ -10,7 +10,7 @@ export async function GET(
 ) {
   console.log('>> app.api.haiku.[id].GET', { params });
 
-  const haiku = await getHaiku(params.id);
+  const haiku = await getHaiku(params.id, process.env.EXPERIENCE_MODE == "haikudle");
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
