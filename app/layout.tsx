@@ -7,14 +7,12 @@ import type { Viewport } from 'next'
 import moment from 'moment';
  
 const inter = Inter({ subsets: ['latin'] })
+const appName = process.env.EXPERIENCE_MODE == "haiku" ? "hAIku" : "hAIkudle";
+const appDescription = process.env.EXPERIENCE_MODE == "haiku" ? "AI-generated art and haiku poems" : "AI-powered daily haiku puzzles";
 
 export const metadata: Metadata = {
-  title: {
-    template: 'hAIku - AI-generated art and haiku poems',
-    default:
-      'hAIku - AI-generated art and haiku poems',
-  },
-  description: "AI-generated art and haiku poems",
+  title: `${appName} - ${appDescription}`,
+  description: appDescription,
 }
 
 export const viewport: Viewport = {
@@ -36,13 +34,13 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <meta property="og:title" content={isHaikudleMode ? "hAIkudle" : "hAIku"} />
+        <meta property="og:title" content={appName} />
         <meta property="og:type" content="website" />
-        <meta property="og:description" content={isHaikudleMode ? "AI-powered haiku puzzles" : "AI-generated art and haiku poems"} />
+        <meta property="og:description" content={appDescription} />
         <meta property="og:url" content={isHaikudleMode ? "https://haikudle.art/" : "https://haiku.desmat.ca/"} />
         <meta property="og:image" content={isHaikudleMode ? "https://haikudle.art/social_img/" + moment().format("YYYYMMDD") + ".png" : "https://haiku.desmat.ca/social_img_haiku.png" } />        
         <meta property="og:image" content={isHaikudleMode ? "https://haikudle.art/social_img_haikudle.png" : "https://haiku.desmat.ca/social_img_haiku.png" } />        
-        <meta property="fb:app_id" content="3752891174930405" />
+        <meta property="fb:app_id" content={process.env.FB_APP_ID} />
       </head>
       <body className={inter.className}>
         <div className="flex flex-col lg:flex-row">
