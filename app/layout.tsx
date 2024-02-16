@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     default:
       'hAIku - AI-generated art and haiku poems',
   },
-  description: "AI-generated art and haiku poems",
+  // description: "AI-generated art and haiku poems",
 }
 
 export const viewport: Viewport = {
