@@ -155,7 +155,7 @@ export default function Component({ lang }: { lang?: undefined | LanguageType })
 
   return (
     <div>
-      <NavOverlay styles={textStyles} lang={lang} haikuId={haiku.id} onClickLogo={handleRefresh} onClickGenerate={handleGenerate} />
+      <NavOverlay styles={textStyles} lang={lang} onClickLogo={handleRefresh} onClickGenerate={handleGenerate} />
       <HaikuPage haiku={haiku} styles={textStyles} />
     </div>
   )

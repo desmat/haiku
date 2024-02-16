@@ -4,8 +4,9 @@ import moment from 'moment';
 import Link from 'next/link'
 import { BsGithub } from 'react-icons/bs';
 import { IoSparkles, IoAddCircle, IoLinkSharp } from 'react-icons/io5';
-import { MdMail, MdHome } from "react-icons/md";
+import { MdMail, MdHome, MdDelete } from "react-icons/md";
 import * as font from "@/app/font";
+import useHaikus from '@/app/_hooks/haikus';
 import useHaikudle from '@/app/_hooks/haikudle';
 import useUser from '@/app/_hooks/user';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
@@ -41,9 +42,45 @@ export function GenerateIcon({ onClick }: { onClick?: any }) {
   )
 }
 
-export function BottomLinks({ haikuId, lang, onSaveHaikudle }: { haikuId?: string, lang?: LanguageType, onSaveHaikudle?: any }) {
-  const [user] = useUser((state: any) => [state.user]);
+export function BottomLinks({ lang }: { lang?: LanguageType }) {
   // console.log("BottomLinks", { lang })
+
+  const [user] = useUser((state: any) => [state.user]);
+
+  const [
+    deleteHaiku,
+  ] = useHaikus((state: any) => [
+    state.delete,
+  ]);
+
+  const [
+    haiku,
+    createHaikudle,
+    haikudleInProgress,
+  ] = useHaikudle((state: any) => [
+    state.haiku,
+    state.create,
+    state.inProgress,
+  ]);
+
+  const handleSaveHaikudle = () => {
+    // console.log('>> app._components.NavOverlay.onSaveHaikudle()', {});
+
+    const ret = prompt("YYYYMMDD?", moment().format("YYYYMMDD"));
+    if (ret) {
+      createHaikudle(user, {
+        id: haiku?.id,
+        dateCode: ret,
+        haikuId: haiku?.id,
+        inProgress: haikudleInProgress,
+      });
+    }
+  }
+  const handleDeleteHaiku = () => {
+    if (confirm("Delete this Haiku?")) {
+      deleteHaiku(haiku?.id);
+    }
+  }
 
   return (
     <div
@@ -76,24 +113,34 @@ export function BottomLinks({ haikuId, lang, onSaveHaikudle }: { haikuId?: strin
         >
           <MdMail className="text-xl" />
         </Link>
-        {haikuId && user?.isAdmin &&
+        {haiku?.id && user?.isAdmin &&
           <Link
             key="link"
-            href={`?id=${haikuId}`}
+            href={`?id=${haiku.id}`}
             target="_blank"
             className="_bg-yellow-200 flex flex-row gap-1 items-center"
           >
             <IoLinkSharp className="text-xl" />
           </Link>
         }
-        {process.env.EXPERIENCE_MODE != "social-img" && user?.isAdmin && onSaveHaikudle &&
+        {process.env.EXPERIENCE_MODE != "social-img" && user?.isAdmin &&
           <Link
             key="saveHaikudle"
             href="#"
             className="_bg-yellow-200 flex flex-row gap-1 items-center"
-            onClick={onSaveHaikudle}
+            onClick={handleSaveHaikudle}
           >
             <IoAddCircle className="text-xl" />
+          </Link>
+        }
+        {user?.isAdmin && haiku?.id &&
+          <Link
+            key="deleteHaiku"
+            href="#"
+            className="_bg-yellow-200 flex flex-row gap-1 items-center"
+            onClick={handleDeleteHaiku}
+          >
+            <MdDelete className="text-xl" />
           </Link>
         }
       </div>
@@ -112,39 +159,7 @@ export function BottomLinks({ haikuId, lang, onSaveHaikudle }: { haikuId?: strin
   )
 }
 
-export function NavOverlay({ styles, lang, haikuId, onClickLogo, onClickGenerate }: { styles: any[], lang?: LanguageType, haikuId?: string, onClickLogo?: any, onClickGenerate?: any }) {
-  const [user] = useUser((state: any) => [state.user, state.save]);
-  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
-
-  const [
-    haikudleLoaded,
-    loadHaikudle,
-    haikudles,
-    haiku,
-    createHaikudle,
-    haikudleInProgress,
-  ] = useHaikudle((state: any) => [
-    state.loaded,
-    state.load,
-    state._haikudles,
-    state.haiku,
-    state.create,
-    state.inProgress,
-  ]);
-
-  const onSaveHaikudle = () => {
-    // console.log('>> app._components.NavOverlay.onSaveHaikudle()', {});
-
-    const ret = prompt("YYYYMMDD?", moment().format("YYYYMMDD"));
-    if (ret) {
-      createHaikudle(user, {
-        id: haiku?.id,
-        dateCode: ret,
-        haikuId: haiku?.id,
-        inProgress: haikudleInProgress,
-      });
-    }
-  }
+export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { styles: any[], lang?: LanguageType, onClickLogo?: any, onClickGenerate?: any }) {
 
   return (
     <div className="_bg-pink-200">
@@ -163,9 +178,6 @@ export function NavOverlay({ styles, lang, haikuId, onClickLogo, onClickGenerate
         </div>
       }
 
-      {/* <div className="fixed top-4 right-3 z-20">
-        <NavProfileLink href="/profile" className="_bg-orange-600 _hover: text-purple-100" style={textStyle} />
-      </div> */}
       {process.env.EXPERIENCE_MODE != "social-img" && onClickGenerate &&
         <div className="fixed top-2.5 right-2.5 z-20">
           <StyledLayers styles={styles}>
@@ -185,7 +197,7 @@ export function NavOverlay({ styles, lang, haikuId, onClickLogo, onClickGenerate
       {process.env.EXPERIENCE_MODE != "social-img" &&
         <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
           <StyledLayers styles={styles}>
-            <BottomLinks lang={lang} haikuId={haikuId} onSaveHaikudle={onSaveHaikudle} />
+            <BottomLinks lang={lang} />
           </StyledLayers>
         </div>
       }
