@@ -2,15 +2,14 @@
 
 import moment from 'moment';
 import Link from 'next/link'
-import { IoSparkles } from 'react-icons/io5';
-import { MdMail, MdHome } from "react-icons/md";
-import { IoAddCircle } from "react-icons/io5";
-import * as font from "@/app/font";
-import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { BsGithub } from 'react-icons/bs';
-import { StyledLayers } from './StyledLayers';
-import useUser from '@/app/_hooks/user';
+import { IoSparkles, IoAddCircle, IoLinkSharp } from 'react-icons/io5';
+import { MdMail, MdHome } from "react-icons/md";
+import * as font from "@/app/font";
 import useHaikudle from '@/app/_hooks/haikudle';
+import useUser from '@/app/_hooks/user';
+import { LanguageType, supportedLanguages } from '@/types/Languages';
+import { StyledLayers } from './StyledLayers';
 
 export function Loading() {
   return (
@@ -42,8 +41,10 @@ export function GenerateIcon({ onClick }: { onClick?: any }) {
   )
 }
 
-export function BottomLinks({ lang }: { lang?: LanguageType | undefined }) {
+export function BottomLinks({ haikuId, lang, onSaveHaikudle }: { haikuId?: string, lang?: LanguageType, onSaveHaikudle?: any }) {
+  const [user] = useUser((state: any) => [state.user]);
   // console.log("BottomLinks", { lang })
+
   return (
     <div
       className="_bg-yellow-100 relative flex flex-row gap-3 items-center justify-center _font-semibold"
@@ -75,6 +76,26 @@ export function BottomLinks({ lang }: { lang?: LanguageType | undefined }) {
         >
           <MdMail className="text-xl" />
         </Link>
+        {haikuId && user?.isAdmin &&
+          <Link
+            key="link"
+            href={`?id=${haikuId}`}
+            target="_blank"
+            className="_bg-yellow-200 flex flex-row gap-1 items-center"
+          >
+            <IoLinkSharp className="text-xl" />
+          </Link>
+        }
+        {process.env.EXPERIENCE_MODE != "social-img" && user?.isAdmin && onSaveHaikudle &&
+          <Link
+            key="saveHaikudle"
+            href="#"
+            className="_bg-yellow-200 flex flex-row gap-1 items-center"
+            onClick={onSaveHaikudle}
+          >
+            <IoAddCircle className="text-xl" />
+          </Link>
+        }
       </div>
       {process.env.EXPERIENCE_MODE == "haiku" &&
         Object.entries(supportedLanguages)
@@ -91,7 +112,7 @@ export function BottomLinks({ lang }: { lang?: LanguageType | undefined }) {
   )
 }
 
-export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { styles: any[], lang?: LanguageType | undefined, onClickLogo?: any, onClickGenerate?: any }) {
+export function NavOverlay({ styles, lang, haikuId, onClickLogo, onClickGenerate }: { styles: any[], lang?: LanguageType, haikuId?: string, onClickLogo?: any, onClickGenerate?: any }) {
   const [user] = useUser((state: any) => [state.user, state.save]);
   const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 
@@ -153,14 +174,6 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
         </div>
       }
 
-      {process.env.EXPERIENCE_MODE != "social-img" && user?.isAdmin && onClickGenerate &&
-        <div className="fixed top-12 right-3 z-20 text-2xl cursor-pointer">
-          <StyledLayers styles={styles}>
-            <IoAddCircle onClick={onSaveHaikudle} />
-          </StyledLayers>
-        </div>
-      }
-
       <div
         className={`fixed top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0`}
         style={{
@@ -172,7 +185,7 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
       {process.env.EXPERIENCE_MODE != "social-img" &&
         <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
           <StyledLayers styles={styles}>
-            <BottomLinks lang={lang} />
+            <BottomLinks lang={lang} haikuId={haikuId} onSaveHaikudle={onSaveHaikudle} />
           </StyledLayers>
         </div>
       }
