@@ -176,7 +176,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     if (haikudleSolved) {
       setPop(true);
       setTimeout(() => setPop(false), 100);
-    }    
+    }
   }, [haikudleSolved]);
 
   const handleDragStart = (result: any) => {
@@ -237,7 +237,9 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
             filter: `${pop ? `drop-shadow(0px 0px 32px ${_haiku?.bgColor})` : ""}`,
           }}
         >
-          <HaikuPoem haiku={_haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord} />
+          {process.env.EXPERIENCE_MODE != "social-img" &&
+            <HaikuPoem haiku={_haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord} />
+          }
         </div>
       </DragDropContext>
     </div >

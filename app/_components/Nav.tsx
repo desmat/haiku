@@ -20,14 +20,15 @@ export function Loading() {
 
 export function Logo({ href, onClick }: { href?: string, onClick?: any }) {
   const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+  const isSocialImgMode = process.env.EXPERIENCE_MODE == "social-img";
 
   return (
     <Link
       onClick={onClick}
       href={href || "#"}
-      className="hover:no-underline"
+      className={`hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
     >
-      <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>{isHaikudleMode ? "kudle" : "ku"}</span>
+      <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-1px] ${isSocialImgMode ? "text-[80pt]" : "text-[18pt] md:text-[24pt]"} font-semibold`}>AI</span>{isHaikudleMode || isSocialImgMode ? "kudle" : "ku"}</span>
     </Link>
   )
 }
@@ -75,7 +76,7 @@ export function BottomLinks({ lang }: { lang?: LanguageType | undefined }) {
           <MdMail className="text-xl" />
         </Link>
       </div>
-      {process.env.EXPERIENCE_MODE != "haikudle" &&
+      {process.env.EXPERIENCE_MODE == "haiku" &&
         Object.entries(supportedLanguages)
           .filter((e: any) => (!lang && e[0] != "en") || (lang && lang != e[0]))
           .map(([k, v]: any) => (
@@ -126,16 +127,25 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
 
   return (
     <div className="_bg-pink-200">
-      <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20 text-[26pt] md:text-[32pt]`}>
-        <StyledLayers styles={styles}>
-          <Logo href={`/${lang || ""}`} onClick={onClickLogo} />
-        </StyledLayers>
-      </div>
+      {process.env.EXPERIENCE_MODE != "social-img" &&
+        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
+          <StyledLayers styles={styles}>
+            <Logo href={`/${lang || ""}`} onClick={onClickLogo} />
+          </StyledLayers>
+        </div>
+      }
+      {process.env.EXPERIENCE_MODE == "social-img" &&
+        <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-20`}>
+          <StyledLayers styles={styles}>
+            <Logo href={`/${lang || ""}`} onClick={onClickLogo} />
+          </StyledLayers>
+        </div>
+      }
 
       {/* <div className="fixed top-4 right-3 z-20">
         <NavProfileLink href="/profile" className="_bg-orange-600 _hover: text-purple-100" style={textStyle} />
       </div> */}
-      {onClickGenerate &&
+      {process.env.EXPERIENCE_MODE != "social-img" && onClickGenerate &&
         <div className="fixed top-2.5 right-2.5 z-20">
           <StyledLayers styles={styles}>
             <GenerateIcon onClick={onClickGenerate} />
@@ -143,7 +153,7 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
         </div>
       }
 
-      {user?.isAdmin && onClickGenerate &&
+      {process.env.EXPERIENCE_MODE != "social-img" && user?.isAdmin && onClickGenerate &&
         <div className="fixed top-12 right-3 z-20 text-2xl cursor-pointer">
           <StyledLayers styles={styles}>
             <IoAddCircle onClick={onSaveHaikudle} />
@@ -159,11 +169,13 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
         }}
       />
 
-      <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
-        <StyledLayers styles={styles}>
-          <BottomLinks lang={lang} />
-        </StyledLayers>
-      </div>
+      {process.env.EXPERIENCE_MODE != "social-img" &&
+        <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
+          <StyledLayers styles={styles}>
+            <BottomLinks lang={lang} />
+          </StyledLayers>
+        </div>
+      }
     </div>
   );
 }

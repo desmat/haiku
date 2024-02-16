@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react';
 import Alert from '@/app/_components/Alert';
 import type { Viewport } from 'next'
+import moment from 'moment';
  
 const inter = Inter({ subsets: ['latin'] })
 
@@ -40,6 +41,7 @@ export default function RootLayout({
         <meta property="og:description" content={isHaikudleMode ? "AI-powered haiku puzzles" : "AI-generated art and haiku poems"} />
         <meta property="og:url" content={isHaikudleMode ? "https://haikudle.art/" : "https://haiku.desmat.ca/"} />
         <meta property="og:image" content={isHaikudleMode ? "https://haikudle.art/social_img_haikudle.png" : "https://haiku.desmat.ca/social_img_haiku.png" } />        
+        <meta property="og:image" content={isHaikudleMode ? "https://haikudle.art/social_img/" + moment().format("YYYYMMDD") : "https://haiku.desmat.ca/social_img_haiku.png" } />        
         <meta property="fb:app_id" content="3752891174930405" />
       </head>
       <body className={inter.className}>
