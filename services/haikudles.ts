@@ -70,7 +70,7 @@ export async function getHaikudle(id: string): Promise<Haikudle | undefined> {
   let haikudle = await store.haikudles.get(id);
   console.log(`>> services.haikudle.getHaikudle`, { id, haikudle });
 
-  if (!haikudle.inProgress) {
+  if (haikudle && !haikudle.inProgress) {
     haikudle = await createInProgress(haikudle);
   }
 
