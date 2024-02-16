@@ -47,11 +47,12 @@ export function BottomLinks({ lang }: { lang?: LanguageType }) {
 
   const [user] = useUser((state: any) => [state.user]);
 
-  const [
-    deleteHaiku,
-  ] = useHaikus((state: any) => [
-    state.delete,
-  ]);
+  // WTF this breaks downstream; circular dependency perhaps?
+  // const [
+  //   deleteHaiku,
+  // ] = useHaikus((state: any) => [
+  //   state.delete,
+  // ]);
 
   const [
     haiku,
@@ -76,11 +77,12 @@ export function BottomLinks({ lang }: { lang?: LanguageType }) {
       });
     }
   }
-  const handleDeleteHaiku = () => {
-    if (confirm("Delete this Haiku?")) {
-      deleteHaiku(haiku?.id);
-    }
-  }
+
+  // const handleDeleteHaiku = () => {
+  //   if (confirm("Delete this Haiku?")) {
+  //     deleteHaiku(haiku?.id);
+  //   }
+  // }
 
   return (
     <div
@@ -133,7 +135,7 @@ export function BottomLinks({ lang }: { lang?: LanguageType }) {
             <IoAddCircle className="text-xl" />
           </Link>
         }
-        {user?.isAdmin && haiku?.id &&
+        {/* {user?.isAdmin && haiku?.id &&
           <Link
             key="deleteHaiku"
             href="#"
@@ -142,7 +144,7 @@ export function BottomLinks({ lang }: { lang?: LanguageType }) {
           >
             <MdDelete className="text-xl" />
           </Link>
-        }
+        } */}
       </div>
       {process.env.EXPERIENCE_MODE == "haiku" &&
         Object.entries(supportedLanguages)
