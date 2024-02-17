@@ -70,7 +70,7 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
                 <div
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  className={`_bg-purple-200 flex flex-row items-center justify-start my-0 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit ${i == 1 ? "sm:min-w-[24rem] md:min-w-[28rem] min-w-[18rem]" : "sm:min-w-[22rem] md:min-w-[24rem] min-w-[16rem]"}`}
+                  className={`_bg-purple-200 flex flex-row items-center justify-start my-0 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit `}
                 >
                   {poem[i].map((w: any, j: number) => {
                     return (
@@ -160,12 +160,6 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     state.solved,
   ]);
 
-  // const [
-  //   deleteHaiku,
-  // ] = useHaikus((state: any) => [
-  //   state.delete,
-  // ])
-
   // TODO move to hook store
   const [selectedWord, setSelectedWord] = useState<any>();
   const [pop, setPop] = useState(false);
@@ -176,7 +170,7 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     if (haikudleSolved) {
       setPop(true);
       setTimeout(() => setPop(false), 100);
-    }    
+    }
   }, [haikudleSolved]);
 
   const handleDragStart = (result: any) => {
@@ -197,7 +191,6 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
     if (result.destination && !(result.source.droppableId == result.destination.droppableId && result.source.index == result.destination.index)) {
       move(
         haikudleId,
-        inProgress.flat().find((w: any) => w?.id == result.draggableId),
         Number(result.source.droppableId),
         result.source.index,
         Number(result.destination.droppableId),
@@ -208,16 +201,6 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
 
   return (
     <div>
-      {/* {user.isAdmin &&
-        <div className="fixed top-12 right-2.5 z-20">
-          <StyledLayers styles={styles}>
-            <div className="cursor-pointer" onClick={(e) => { e.preventDefault(); deleteHaiku(haiku.id); }}>
-              <MdDelete className="_bg-orange-600 _hover: _text-purple-100 h-6 w-6 md:h-8 md:w-8" />
-            </div>
-          </StyledLayers>
-        </div>
-      } */}
-
       <DragDropContext
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -238,7 +221,9 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
             filter: `${pop ? `drop-shadow(0px 0px 32px ${_haiku?.bgColor})` : ""}`,
           }}
         >
-          <HaikuPoem haiku={_haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord} />
+          {process.env.EXPERIENCE_MODE != "social-img" &&
+            <HaikuPoem haiku={_haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord} />
+          }
         </div>
       </DragDropContext>
     </div >

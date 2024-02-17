@@ -12,7 +12,14 @@ export async function GET(request: NextRequest, params?: any) {
   const query = searchParamsToMap(request.nextUrl.searchParams.toString());
   console.log('>> app.api.haikus.GET', { query, searchParams: request.nextUrl.searchParams.toString() });
 
-  const haikus = await getHaikus(query);
+  // @ts-ignore
+  if (query.random) {
+    const haikus = await getHaikus(undefined, process.env.EXPERIENCE_MODE == "haikudle");
+    const random = haikus[Math.floor(Math.random() * haikus.length)];
+    return NextResponse.json({ haikus: [random] });
+  }
+
+  const haikus = await getHaikus(query, process.env.EXPERIENCE_MODE == "haikudle");
   return NextResponse.json({ haikus });
 }
 

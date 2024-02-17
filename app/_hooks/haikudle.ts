@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { syllable } from 'syllable'
 import useUser from './user';
-import { listToMap, mapToSearchParams, uuid } from '@/utils/misc';
+import { hashCode, listToMap, mapToSearchParams, normalizeWord, uuid } from '@/utils/misc';
 import { Haiku } from '@/types/Haiku';
 import trackEvent from '@/utils/trackEvent';
 import shuffleArray from "@/utils/shuffleArray";
@@ -18,17 +18,13 @@ async function fetchOpts() {
   return token && { headers: { Authorization: `Bearer ${token}` } } || {};
 }
 
-const normalizeWord = (word: string) => {
-  return word && word.replace(/[.,]/, "").toLowerCase();
-}
-
 const checkCorrect = (inProgress: any, solution: any) => {
   // console.log("*** checkCorrect", { inProgress, solution });
   inProgress
     .forEach((line: any[], lineNum: number) => line
       .forEach((w: any, wordNum: number) => {
         if (w) {
-          w.correct = normalizeWord(w.word) == normalizeWord(solution[lineNum][wordNum]);
+          w.correct = hashCode(normalizeWord(w.word)) == solution[lineNum][wordNum];
         }
       }));
 
@@ -37,7 +33,7 @@ const checkCorrect = (inProgress: any, solution: any) => {
   return inProgress;
 }
 
-const isSolved = (words: any, inProgress: any, solution: any) => {
+const isSolved = (inProgress: any, solution: any) => {
   // console.log("*** isSolved", { inProgress });
 
   checkCorrect(inProgress, solution); // side effects yuk!
@@ -62,8 +58,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     setTimeout(() => {
       useAlert.getState().plain(`
         <div style="display: flex; flex-direction: column; gap: 0.4rem">
-          <div>Solved in ${moves} move${moves > 1 ? "s" : ""}! <b><a href="https://haikudle.desmat.ca?id=${id}" target="_blank">Share</a></b> on your social networks and come back tomorrow for a new Haiku puzzle.</div>
-          <div>Until then try the generate button above: provide any theme and see what you get!</div>
+          <div>Solved in ${moves} move${moves > 1 ? "s" : ""}! <b><a href="https://haikudle.art/${id}" target="_blank">Share</a></b> on your social networks and come back tomorrow for a new Haiku puzzle.</div>
+          <div>Until then try the generate button above and see what AI comes up with!</div>
         </div>`);
     }, 250);
   },
@@ -86,40 +82,14 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   _loaded: <StatusMap>{},
 
   init: async (haiku: Haiku, haikudle: Haikudle, cheat = false) => {
-    console.log(">> hooks.haikudle.init", { haiku, haikudle, cheat });
-    let words = haikudle?.inProgress || haiku.poem
-      .join(" ")
-      .split(/\s/)
-      .map((w: string, i: number) => {
-        const word = w.toLowerCase().replace(/[]/, "")
-        return {
-          id: uuid(),
-          word: word,
-          syllables: syllable(word),
-          picked: false,
-          correct: false,
-        }
-      });
+    // console.log(">> hooks.haikudle.init", { haiku, haikudle, cheat });
+    
+    const solution = haiku.poem;
 
-    if (!cheat && process.env.EXPERIENCE_MODE == "haikudle" && !haikudle?.inProgress) {
-      words = shuffleArray(words);
-    }
-
-    const numWords = words.length;
-
-    const solution = haiku.poem
-      .map((line: string) => line
-        .split(/\s/)
-        .map((w: string) => w.toLowerCase().replace(/[]/, "")));
-
-    const inProgress = haikudle?.inProgress || [
-      words.slice(0, (numWords / 3)),
-      words.slice((numWords / 3), (2 * numWords / 3)),
-      words.slice((2 * numWords / 3)),
-    ];
+    const inProgress = haikudle?.inProgress
 
     checkCorrect(inProgress, solution);
-    const solved = isSolved(words, inProgress, solution);
+    const solved = isSolved(inProgress, solution);
 
     set({
       haiku,
@@ -127,6 +97,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       inProgress,
       solution,
       solved,
+      moves: haikudle?.moves || 0,
     });
 
     trackEvent("haikudle-started", {
@@ -180,15 +151,15 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     });
   },
 
-  move: async (haikudleId: string, word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
+  move: async (haikudleId: string, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
     // console.log(">> hooks.haikudle.move", { haikudleId, word, fromLine, fromOffset, toLine, toOffset });
-    const { haiku, inProgress, words, solution, onSolved, moves } = get();
+    const { haiku, inProgress, solution, onSolved, moves } = get();
 
     const [spliced] = inProgress[fromLine].splice(fromOffset, 1);
     inProgress[toLine].splice(toOffset, 0, spliced);
 
     checkCorrect(inProgress, solution); // side effects yuk!
-    const solved = isSolved(words, inProgress, solution);
+    const solved = isSolved(inProgress, solution);
 
     if (solved) {
       onSolved(haikudleId, moves + 1);
@@ -214,6 +185,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         haikudle: {
           id: haikudleId,
           haikuId: haiku.id,
+          solved, 
+          moves: moves + 1,
           inProgress,
         }
       }),
@@ -229,14 +202,14 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   swap: async (haikudleId: string, word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
     // console.log(">> hooks.haikudle.swap", { fromLine, fromOffset, toLine, toOffset });
-    const { haiku, inProgress, words, solution, onSolved, moves } = get();
+    const { haiku, inProgress, solution, onSolved, moves } = get();
 
     // move(word, fromLine, fromOffset, toLine, toOffset);
     const [spliced] = inProgress[toLine].splice(toOffset, 1, word);
     inProgress[fromLine].splice(fromOffset, 1, spliced);
 
     checkCorrect(inProgress, solution); // side effects yuk!
-    const solved = isSolved(words, inProgress, solution);
+    const solved = isSolved(inProgress, solution);
 
     if (solved) {
       onSolved(haikudleId, moves + 1);
@@ -336,7 +309,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     const { setLoaded } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    console.log(">> hooks.haikudle.load", { id, query });
+    // console.log(">> hooks.haikudle.load", { id, query });
 
     if (id) {
       fetch(`/api/haikudles/${id}`, await fetchOpts()).then(async (res) => {

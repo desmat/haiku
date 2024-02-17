@@ -21,7 +21,7 @@ export async function generateBackgroundImage(subject?: string): Promise<any> {
     on the subject of ${subject || "landscape"}.
     `
 
-  // // for testing
+  // for testing
   // const sampleHaikus = mapToList(samples.haikus)
   // const res = {
   //   "created": 1705515146,

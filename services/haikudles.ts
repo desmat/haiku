@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { syllable } from 'syllable';
 import { put } from '@vercel/blob';
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { Store } from "@/types/Store";
@@ -8,6 +9,8 @@ import * as samples from '@/services/stores/samples';
 import * as openai from './openai';
 import chroma from 'chroma-js';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
+import shuffleArray from '@/utils/shuffleArray';
+import { getHaiku } from './haikus';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -28,11 +31,51 @@ export async function getHaikudles(query?: any): Promise<Haikudle[]> {
   return new Promise((resolve, reject) => resolve(haikudles.filter(Boolean)));
 }
 
+async function createInProgress(haikudle: Haikudle): Promise<Haikudle> {
+  const haiku = await getHaiku(haikudle.haikuId);
+  console.log(`>> services.haikudle.createInProgress`, { haiku });
+
+  const words = shuffleArray(haiku.poem
+    .join(" ")
+    .split(/\s/)
+    .map((w: string, i: number) => {
+      const word = w.toLowerCase().replace(/[]/, "")
+      return {
+        id: uuid(),
+        word: word,
+        syllables: syllable(word),
+        picked: false,
+        correct: false,
+      }
+    }));
+
+  const numWords = words.length;
+  const inProgress = haikudle?.inProgress || [
+    words.slice(0, (numWords / 3)),
+    words.slice((numWords / 3), (2 * numWords / 3)),
+    words.slice((2 * numWords / 3)),
+  ];
+
+  haikudle = {
+    ...haikudle,
+    inProgress,
+  }
+
+  return haikudle;
+}
+
 export async function getHaikudle(id: string): Promise<Haikudle | undefined> {
   console.log(`>> services.haikudle.getHaikudle`, { id });
 
-  const haikudle = await store.haikudles.get(id);
+  let haikudle = await store.haikudles.get(id);
   console.log(`>> services.haikudle.getHaikudle`, { id, haikudle });
+
+  if (haikudle && !haikudle.inProgress) {
+    haikudle = await createInProgress(haikudle);
+  }
+
+  console.log(`>> services.haikudle.getHaikudle`, { haikudle });
+
   return new Promise((resolve, reject) => resolve(haikudle));
 }
 
@@ -48,7 +91,9 @@ export async function createHaikudle(user: User, haikudle: Haikudle): Promise<Ha
     inProgress: haikudle.inProgress,
   } as Haikudle;
 
-  // TODO
+  if (!haikudle.inProgress) {
+    newHaikudle = await createInProgress(newHaikudle);
+  }
 
   return store.haikudles.create(user.id, newHaikudle);
 }
@@ -119,6 +164,11 @@ export async function getDailyHaikudle(id: string): Promise<DailyHaikudle | unde
   const dailyHaikudle = await store.dailyHaikudles.get(id);
   console.log(`>> services.haikudle.getDailyHaikudle`, { id, dailyHaikudle });
   return new Promise((resolve, reject) => resolve(dailyHaikudle));
+}
+
+export async function getDailyHaikudles(query?: any): Promise<Haikudle[]> {
+  let haikudles = await store.dailyHaikudles.find(query);
+  return new Promise((resolve, reject) => resolve(haikudles.filter(Boolean)));
 }
 
 export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: string, haikudleId: string): Promise<DailyHaikudle> {

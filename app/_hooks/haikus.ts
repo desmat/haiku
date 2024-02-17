@@ -12,7 +12,7 @@ async function fetchOpts() {
   const token = await useUser.getState().getToken();
   // console.log(">> hooks.haiku.fetchOpts", { token });
   return token && { headers: { Authorization: `Bearer ${token}` } } || {};
-}  
+}
 
 type HaikuMap = { [key: string]: Haiku | undefined; };
 type StatusMap = { [key: string]: boolean };
@@ -112,49 +112,64 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     }
   },
 
-  load: async (queryOrId?: object | string) => {
+  load: async (queryOrId?: object | string): Promise<Haiku | Haiku[]> => {
     const { setLoaded } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
     // console.log(">> hooks.haiku.load", { id, query });
 
-    if (id) {
-      fetch(`/api/haikus/${id}`, await fetchOpts()).then(async (res) => {
-        const { _haikus } = get();
-        setLoaded(id);
+    return new Promise(async (resolve) => {
+      if (id) {
+        fetch(`/api/haikus/${id}`, await fetchOpts()).then(async (res) => {
+          const { _haikus } = get();
+          setLoaded(id);
 
-        if (res.status != 200) {
-          useAlert.getState().error(`Error fetching haiku ${id}: ${res.status} (${res.statusText})`);
-          return;
-        }
+          if (res.status != 200) {
+            useAlert.getState().error(`Error fetching haiku ${id}: ${res.status} (${res.statusText})`);
+            return;
+          }
 
-        const data = await res.json();
-        const haiku = data.haiku;
+          const data = await res.json();
+          const haiku = data.haiku;
 
-        set({
-          _haikus: { _haikus, [haiku.id]: haiku },
+          set({
+            _haikus: { _haikus, [haiku.id]: haiku },
+          });
+
+          resolve(haiku);
         });
-      });
-    } else {
-      const params = query && mapToSearchParams(query);
-      fetch(`/api/haikus${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
-        const { _haikus } = get();
-        setLoaded(query);
+      } else {
+        const params = query && mapToSearchParams(query);
+        fetch(`/api/haikus${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
+          const { _haikus } = get();
+          setLoaded(query);
 
-        if (res.status != 200) {
-          useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);
-          return;
-        }
+          if (res.status != 200) {
+            useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);
+            return;
+          }
 
-        const data = await res.json();
-        const haikus = data.haikus;
+          const data = await res.json();
+          const haikus = data.haikus;
 
-        setLoaded(haikus);
-        set({
-          _haikus: { ..._haikus, ...listToMap(haikus) }
+          setLoaded(haikus);
+
+          // special case for random fetch: only keep the last one
+          // @ts-ignore
+          if (query.random) {
+            set({
+              _haikus: listToMap(haikus)
+            });
+          } else {
+            set({
+              _haikus: { ..._haikus, ...listToMap(haikus) }
+            });
+          }
+
+          resolve(haikus);
         });
-      });
-    }
+      }
+    });
   },
 
   create: async (user: User, name: string) => {
@@ -279,7 +294,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         const { _haikus } = get();
 
         if (res.status != 200) {
-          if  (res.status == 429) {
+          if (res.status == 429) {
             useAlert.getState().error(`Exceeded daily limit: try again later.`);
           } else {
             useAlert.getState().error(`Error generating haiku: ${res.status} (${res.statusText})`);

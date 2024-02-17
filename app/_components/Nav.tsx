@@ -2,15 +2,15 @@
 
 import moment from 'moment';
 import Link from 'next/link'
-import { IoSparkles } from 'react-icons/io5';
-import { MdMail, MdHome } from "react-icons/md";
-import { IoAddCircle } from "react-icons/io5";
-import * as font from "@/app/font";
-import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { BsGithub } from 'react-icons/bs';
-import { StyledLayers } from './StyledLayers';
-import useUser from '@/app/_hooks/user';
+import { IoSparkles, IoAddCircle, IoLinkSharp } from 'react-icons/io5';
+import { MdMail, MdHome, MdDelete } from "react-icons/md";
+import * as font from "@/app/font";
+import useHaikus from '@/app/_hooks/haikus';
 import useHaikudle from '@/app/_hooks/haikudle';
+import useUser from '@/app/_hooks/user';
+import { LanguageType, supportedLanguages } from '@/types/Languages';
+import { StyledLayers } from './StyledLayers';
 
 export function Loading() {
   return (
@@ -20,14 +20,15 @@ export function Loading() {
 
 export function Logo({ href, onClick }: { href?: string, onClick?: any }) {
   const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+  const isSocialImgMode = process.env.EXPERIENCE_MODE == "social-img";
 
   return (
     <Link
       onClick={onClick}
       href={href || "#"}
-      className="hover:no-underline"
+      className={`hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
     >
-      <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-1px] text-[18pt] md:text-[24pt] font-semibold`}>AI</span>{isHaikudleMode ? "kudle" : "ku"}</span>
+      <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-1px] ${isSocialImgMode ? "text-[80pt]" : "text-[18pt] md:text-[24pt]"} font-semibold`}>AI</span>{isHaikudleMode || isSocialImgMode ? "kudle" : "ku"}</span>
     </Link>
   )
 }
@@ -41,8 +42,48 @@ export function GenerateIcon({ onClick }: { onClick?: any }) {
   )
 }
 
-export function BottomLinks({ lang }: { lang?: LanguageType | undefined }) {
+export function BottomLinks({ lang }: { lang?: LanguageType }) {
   // console.log("BottomLinks", { lang })
+
+  const [user] = useUser((state: any) => [state.user]);
+
+  // WTF this breaks downstream; circular dependency perhaps?
+  // const [
+  //   deleteHaiku,
+  // ] = useHaikus((state: any) => [
+  //   state.delete,
+  // ]);
+
+  const [
+    haiku,
+    createHaikudle,
+    haikudleInProgress,
+  ] = useHaikudle((state: any) => [
+    state.haiku,
+    state.create,
+    state.inProgress,
+  ]);
+
+  const handleSaveHaikudle = () => {
+    // console.log('>> app._components.NavOverlay.onSaveHaikudle()', {});
+
+    const ret = prompt("YYYYMMDD?", moment().format("YYYYMMDD"));
+    if (ret) {
+      createHaikudle(user, {
+        id: haiku?.id,
+        dateCode: ret,
+        haikuId: haiku?.id,
+        inProgress: haikudleInProgress,
+      });
+    }
+  }
+
+  // const handleDeleteHaiku = () => {
+  //   if (confirm("Delete this Haiku?")) {
+  //     deleteHaiku(haiku?.id);
+  //   }
+  // }
+
   return (
     <div
       className="_bg-yellow-100 relative flex flex-row gap-3 items-center justify-center _font-semibold"
@@ -74,14 +115,44 @@ export function BottomLinks({ lang }: { lang?: LanguageType | undefined }) {
         >
           <MdMail className="text-xl" />
         </Link>
+        {haiku?.id && user?.isAdmin &&
+          <Link
+            key="link"
+            href={`/${haiku.id}`}
+            // target="_blank"
+            className="_bg-yellow-200 flex flex-row gap-1 items-center"
+          >
+            <IoLinkSharp className="text-xl" />
+          </Link>
+        }
+        {process.env.EXPERIENCE_MODE != "social-img" && user?.isAdmin &&
+          <Link
+            key="saveHaikudle"
+            href="#"
+            className="_bg-yellow-200 flex flex-row gap-1 items-center"
+            onClick={handleSaveHaikudle}
+          >
+            <IoAddCircle className="text-xl" />
+          </Link>
+        }
+        {/* {user?.isAdmin && haiku?.id &&
+          <Link
+            key="deleteHaiku"
+            href="#"
+            className="_bg-yellow-200 flex flex-row gap-1 items-center"
+            onClick={handleDeleteHaiku}
+          >
+            <MdDelete className="text-xl" />
+          </Link>
+        } */}
       </div>
-      {process.env.EXPERIENCE_MODE != "haikudle" &&
+      {process.env.EXPERIENCE_MODE == "haiku" &&
         Object.entries(supportedLanguages)
           .filter((e: any) => (!lang && e[0] != "en") || (lang && lang != e[0]))
           .map(([k, v]: any) => (
             <Link
               key={k}
-              href={`/${k != "en" ? k : ""}`}
+              href={`/${k != "en" ? `?lang=${k}` : ""}`}
             >
               {v.nativeName}
             </Link>
@@ -90,63 +161,29 @@ export function BottomLinks({ lang }: { lang?: LanguageType | undefined }) {
   )
 }
 
-export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { styles: any[], lang?: LanguageType | undefined, onClickLogo?: any, onClickGenerate?: any }) {
-  const [user] = useUser((state: any) => [state.user, state.save]);
-  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
-
-  const [
-    haikudleLoaded,
-    loadHaikudle,
-    haikudles,
-    haiku,
-    createHaikudle,
-    haikudleInProgress,
-  ] = useHaikudle((state: any) => [
-    state.loaded,
-    state.load,
-    state._haikudles,
-    state.haiku,
-    state.create,
-    state.inProgress,
-  ]);
-
-  const onSaveHaikudle = () => {
-    // console.log('>> app._components.NavOverlay.onSaveHaikudle()', {});
-
-    const ret = prompt("YYYYMMDD?", moment().format("YYYYMMDD"));
-    if (ret) {
-      createHaikudle(user, {
-        id: haiku?.id,
-        dateCode: ret,
-        haikuId: haiku?.id,
-        inProgress: haikudleInProgress,
-      });
-    }
-  }
+export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { styles: any[], lang?: LanguageType, onClickLogo?: any, onClickGenerate?: any }) {
 
   return (
     <div className="_bg-pink-200">
-      <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20 text-[26pt] md:text-[32pt]`}>
-        <StyledLayers styles={styles}>
-          <Logo href={`/${lang || ""}`} onClick={onClickLogo} />
-        </StyledLayers>
-      </div>
-
-      {/* <div className="fixed top-4 right-3 z-20">
-        <NavProfileLink href="/profile" className="_bg-orange-600 _hover: text-purple-100" style={textStyle} />
-      </div> */}
-      {onClickGenerate &&
-        <div className="fixed top-2.5 right-2.5 z-20">
+      {process.env.EXPERIENCE_MODE != "social-img" &&
+        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
           <StyledLayers styles={styles}>
-            <GenerateIcon onClick={onClickGenerate} />
+            <Logo href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
+          </StyledLayers>
+        </div>
+      }
+      {process.env.EXPERIENCE_MODE == "social-img" &&
+        <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-20`}>
+          <StyledLayers styles={styles}>
+            <Logo href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
           </StyledLayers>
         </div>
       }
 
-      {user?.isAdmin && onClickGenerate &&
-        <div className="fixed top-12 right-3 z-20 text-2xl cursor-pointer">
+      {process.env.EXPERIENCE_MODE != "social-img" && onClickGenerate &&
+        <div className="fixed top-2.5 right-2.5 z-20">
           <StyledLayers styles={styles}>
-            <IoAddCircle onClick={onSaveHaikudle} />
+            <GenerateIcon onClick={onClickGenerate} />
           </StyledLayers>
         </div>
       }
@@ -159,11 +196,13 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
         }}
       />
 
-      <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
-        <StyledLayers styles={styles}>
-          <BottomLinks lang={lang} />
-        </StyledLayers>
-      </div>
+      {process.env.EXPERIENCE_MODE != "social-img" &&
+        <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
+          <StyledLayers styles={styles}>
+            <BottomLinks lang={lang} />
+          </StyledLayers>
+        </div>
+      }
     </div>
   );
 }
