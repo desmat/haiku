@@ -46,8 +46,9 @@ export default function MainPage({ id, lang }: { id?: string, lang?: undefined |
     state.haiku,
   ]);
 
-  const haiku = isHaikudleMode ? haikudleHaiku : haikuId && getHaiku(haikuId) || haikus[0];
+  const [loading, setLoading] = useState(false);
   const loaded = isHaikudleMode ? haikudleLoaded : haikusLoaded;
+  const haiku = isHaikudleMode ? haikudleHaiku : haikuId && getHaiku(haikuId) || haikus[0];
 
   const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
@@ -64,24 +65,34 @@ export default function MainPage({ id, lang }: { id?: string, lang?: undefined |
     }
   ];
 
-  // console.log('>> app.page.render()', { haikuId, haiku, loaded, user, haikus });
+  // console.log('>> app.page.render()', { haikuId, haiku, loaded, loading, user });
 
   useEffect(() => {
-    if (!loaded) {
-      isHaikudleMode ? loadHaikudle(haikuId) : loadHaikus(haikuId || { random: true });
-    }
+    // console.log('>> app.page useEffect', { haikuId, haiku, loaded, loading, user });
 
+    if (!loaded) {
+      isHaikudleMode
+        ? loadHaikudle(haikuId)
+        : loadHaikus(haikuId || { random: true })
+          .then((haikus: Haiku[]) => {
+            setHaikuId(haikus[0].id);
+          })
+    }
+  }, [haikuId, lang]);
+
+  useEffect(() => {
     if (isHaikudleMode && user && !user?.preferences?.onboarded) {
-      plainAlert(
+      setTimeout(() => plainAlert(
         `<div style="display: flex; flex-direction: column; gap: 0.4rem">
           <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with five syllables in the first line, seven in the second, and five in the third.</div>
           <div><b>Wordle</b>: a word game with a single daily solution, with all players attempting to guess the same word.</div>
           <div>Drag-and-drop the scrabbled words to solve today's AI-generated <b>Haikudle</b>!</div>
         </div>`,
         () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
-        "Got it!");
+        "Got it!"),
+        2000);
     }
-  }, [haikuId, lang, user]);
+  }, [user]);
 
   const handleGenerate = async (e: any) => {
     // console.log('>> app.page.handleGenerate()');
@@ -115,15 +126,18 @@ export default function MainPage({ id, lang }: { id?: string, lang?: undefined |
       router.push("/");
     }
 
+    setLoading(true);
     loadHaikus({ random: true })
       .then((haikus: Haiku[]) => {
         if (isHaikudleMode && haikus?.length > 0) {
           loadHaikudle(haikus[0]?.id);
+          setHaikuId(haikus[0].id);
+          setLoading(false);
         }
       });
   }
 
-  if (!loaded || generating) {
+  if (!loaded || loading || generating) {
     return (
       <div>
         <NavOverlay styles={textStyles} />

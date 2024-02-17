@@ -82,7 +82,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   _loaded: <StatusMap>{},
 
   init: async (haiku: Haiku, haikudle: Haikudle, cheat = false) => {
-    console.log(">> hooks.haikudle.init", { haiku, haikudle, cheat });
+    // console.log(">> hooks.haikudle.init", { haiku, haikudle, cheat });
     
     const solution = haiku.poem;
 
@@ -309,7 +309,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     const { setLoaded } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    console.log(">> hooks.haikudle.load", { id, query });
+    // console.log(">> hooks.haikudle.load", { id, query });
 
     if (id) {
       fetch(`/api/haikudles/${id}`, await fetchOpts()).then(async (res) => {
