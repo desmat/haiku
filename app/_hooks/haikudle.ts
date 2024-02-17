@@ -58,7 +58,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     setTimeout(() => {
       useAlert.getState().plain(`
         <div style="display: flex; flex-direction: column; gap: 0.4rem">
-          <div>Solved in ${moves} move${moves > 1 ? "s" : ""}! <b><a href="https://haikudle.desmat.ca?id=${id}" target="_blank">Share</a></b> on your social networks and come back tomorrow for a new Haiku puzzle.</div>
+          <div>Solved in ${moves} move${moves > 1 ? "s" : ""}! <b><a href="https://haikudle.art/${id}" target="_blank">Share</a></b> on your social networks and come back tomorrow for a new Haiku puzzle.</div>
           <div>Until then try the generate button above and see what AI comes up with!</div>
         </div>`);
     }, 250);
