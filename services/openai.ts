@@ -21,25 +21,25 @@ export async function generateBackgroundImage(subject?: string): Promise<any> {
     on the subject of ${subject || "landscape"}.
     `
 
-  // // for testing
-  // const sampleHaikus = mapToList(samples.haikus)
-  // const res = {
-  //   "created": 1705515146,
-  //   "data": [
-  //     {
-  //       "revised_prompt": "Create an image that uses extremely muted, almost monochromatic colors. Make the style similar to traditional Japanese artwork, with the subject matter focused on various aspects of nature. Ensure the colors used are slightly varied but maintain a consistent, subdued aesthetic.",
-  //       // "url": "https://haiku.desmat.ca/backgrounds/DALL%C2%B7E%202024-01-15%2017.55.09%20-%20An%20extremely%20muted,%20almost%20monochromatic%20painting%20in%20the%20Japanese%20style,%20featuring%20a%20winter%20snow%20scene.%20The%20artwork%20captures%20the%20quiet%20beauty%20of%20a%20sno.png"
-  //       // "url": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-2MGbI0LLfEavnqcGsIgw6J4L/user-KM4FaAIbSJ6GtgT2mO363LEE/img-xbunXGE7qzyF0Bf2RW2BFiZk.png?st=2024-01-17T21%3A27%3A35Z&se=2024-01-17T23%3A27%3A35Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-01-17T19%3A18%3A49Z&ske=2024-01-18T19%3A18%3A49Z&sks=b&skv=2021-08-06&sig=Iv7zzVZ2zl8CjGxBuVNCa5xBRBQD%2B0cSBG5yf9JjtiQ%3D"
-  //       url: `http://localhost:3000${encodeURI(sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].bgImage)}`,
-  //       // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/45e37365-nmjxiOoeO9WKMUAkgv5tJvxdKGFNkt.png"
-  //     }
-  //   ]
-  // }
+  // for testing
+  const sampleHaikus = mapToList(samples.haikus)
+  const res = {
+    "created": 1705515146,
+    "data": [
+      {
+        "revised_prompt": "Create an image that uses extremely muted, almost monochromatic colors. Make the style similar to traditional Japanese artwork, with the subject matter focused on various aspects of nature. Ensure the colors used are slightly varied but maintain a consistent, subdued aesthetic.",
+        // "url": "https://haiku.desmat.ca/backgrounds/DALL%C2%B7E%202024-01-15%2017.55.09%20-%20An%20extremely%20muted,%20almost%20monochromatic%20painting%20in%20the%20Japanese%20style,%20featuring%20a%20winter%20snow%20scene.%20The%20artwork%20captures%20the%20quiet%20beauty%20of%20a%20sno.png"
+        // "url": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-2MGbI0LLfEavnqcGsIgw6J4L/user-KM4FaAIbSJ6GtgT2mO363LEE/img-xbunXGE7qzyF0Bf2RW2BFiZk.png?st=2024-01-17T21%3A27%3A35Z&se=2024-01-17T23%3A27%3A35Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-01-17T19%3A18%3A49Z&ske=2024-01-18T19%3A18%3A49Z&sks=b&skv=2021-08-06&sig=Iv7zzVZ2zl8CjGxBuVNCa5xBRBQD%2B0cSBG5yf9JjtiQ%3D"
+        url: `http://localhost:3000${encodeURI(sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].bgImage)}`,
+        // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/45e37365-nmjxiOoeO9WKMUAkgv5tJvxdKGFNkt.png"
+      }
+    ]
+  }
 
-  // return {
-  //   prompt: (res.data[0]["revised_prompt"] || prompt),
-  //   url: res.data[0].url
-  // };
+  return {
+    prompt: (res.data[0]["revised_prompt"] || prompt),
+    url: res.data[0].url
+  };
 
   const response = await openai.images.generate({
     model: "dall-e-3",
@@ -72,17 +72,17 @@ export async function generateHaiku(subject?: string, language?: string): Promis
 
   // await delay(3000);
 
-  // return {
-  //   response: {
-  //     prompt,
-  //     haiku: [
-  //       "line one,",
-  //       "line two,",
-  //       "line three.",
-  //     ],
-  //     subject: "Subject",
-  //   }
-  // };
+  return {
+    response: {
+      prompt,
+      haiku: [
+        "line one,",
+        "line two,",
+        "line three.",
+      ],
+      subject: "Subject",
+    }
+  };
 
   const completion = await openai.chat.completions.create({
     model,

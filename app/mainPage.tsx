@@ -13,10 +13,10 @@ import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
 import { notFoundHaiku } from '@/services/stores/samples';
 
-export default function Component({ lang }: { lang?: undefined | LanguageType }) {
-  // console.log('>> app.page.render()', { lang });
-  const searchParams = useSearchParams();
-  const [id, setId] = useState(searchParams.get("id"));
+export default function MainPage({ id, lang }: { id?: string, lang?: undefined | LanguageType }) {
+  // console.log('>> app.mainPage.render()', { id, lang });
+  // const searchParams = useSearchParams();
+  const [haikuId, setHaikuId] = useState(id);
   const [generating, setGenerating] = useState(false);
   const router = useRouter();
   const [user, saveUser] = useUser((state: any) => [state.user, state.save]);
@@ -26,13 +26,13 @@ export default function Component({ lang }: { lang?: undefined | LanguageType })
   const [
     haikusLoaded,
     loadHaikus,
-    findHaikus,
+    haikus,
     getHaiku,
     generateHaiku,
   ] = useHaikus((state: any) => [
     state.loaded,
     state.load,
-    state.find,
+    state.find({ lang: lang || "en" }),
     state.get,
     state.generate
   ]);
@@ -49,23 +49,27 @@ export default function Component({ lang }: { lang?: undefined | LanguageType })
     state.haiku,
   ]);
 
-  // const loaded = _haiku || id && haikusLoaded(JSON.stringify({ id })) || haikusLoaded(JSON.stringify({ lang: lang || "en" }));
-  const haikus = findHaikus({ lang: lang || "en" });
-  const haiku = isHaikudleMode ? _haiku : id && getHaiku(id) || haikus[Math.floor(Math.random() * haikus.length)] || notFoundHaiku;
+  // const loaded = _haiku || haikuId && haikusLoaded(JSON.stringify({ haikuId })) || haikusLoaded(JSON.stringify({ lang: lang || "en" }));
+  // const haikus = findHaikus({ lang: lang || "en" });
+  const haiku = isHaikudleMode ? _haiku : haikuId && getHaiku(haikuId) || haikus[Math.floor(Math.random() * haikus.length)] || notFoundHaiku;
 
-  const loaded = isHaikudleMode ? haikudleLoaded(id) : haikusLoaded(id); //; // TODO check id?
+  const loaded = isHaikudleMode ? haikudleLoaded(haikuId) : haikusLoaded(haikuId); //; // TODO check id?
   // const haiku = haikudles[0]?.haiku;
   const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
 
-  console.log('>> app.page.render()', { id, haiku, loaded, haikudleLoaded, user });
+  // console.log('>> app.page.render()', { haikuId, haiku, loaded, haikudleLoaded, user });
+
+  // console.log('>> app.page.render()', { haikuId, lang, user });
 
   useEffect(() => {
+    // console.log('>> app.page.render() useEffect', { haikuId, lang, user });
+
     if (user?.isAdmin) {
       loadHaikus({ lang: lang || "en" });
     }
 
     if (!loaded) {
-      isHaikudleMode ? loadHaikudle(id) : loadHaikus(id);
+      isHaikudleMode ? loadHaikudle(haikuId) : loadHaikus(haikuId);
     }
 
     if (isHaikudleMode && user && !user?.preferences?.onboarded) {
@@ -78,7 +82,7 @@ export default function Component({ lang }: { lang?: undefined | LanguageType })
         () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
         "Got it!");
     }
-  }, [id, lang, user]);
+  }, [haikuId, lang, user]);
 
   const handleGenerate = async (e: any) => {
     // console.log('>> app.page.handleGenerate()');
@@ -96,7 +100,7 @@ export default function Component({ lang }: { lang?: undefined | LanguageType })
 
       if (ret?.id) {
         // router.push(`/?id=${ret.id}`);
-        setId(ret.id);
+        setHaikuId(ret.id);
         setGenerating(false);
       }
     }
@@ -110,7 +114,7 @@ export default function Component({ lang }: { lang?: undefined | LanguageType })
     // console.log('>> app.page.handleRefresh()');
     e.preventDefault();
 
-    if (searchParams.get("id")) {
+    if (haikuId) {
       router.push("/");
     }
 
@@ -119,7 +123,7 @@ export default function Component({ lang }: { lang?: undefined | LanguageType })
     }
 
     const notCurrentHaikus = haikus.map((h: Haiku) => h.id).filter((id: string) => id != haiku.id);
-    setId(notCurrentHaikus[Math.floor(Math.random() * notCurrentHaikus.length)]);
+    setHaikuId(notCurrentHaikus[Math.floor(Math.random() * notCurrentHaikus.length)]);
   }
 
   const fontColor = haiku?.colorPalette && colorOffsets.front >= 0 && haiku.colorPalette[colorOffsets.front] || haiku?.color || "#555555";

@@ -118,8 +118,8 @@ export function BottomLinks({ lang }: { lang?: LanguageType }) {
         {haiku?.id && user?.isAdmin &&
           <Link
             key="link"
-            href={`?id=${haiku.id}`}
-            target="_blank"
+            href={`/${haiku.id}`}
+            // target="_blank"
             className="_bg-yellow-200 flex flex-row gap-1 items-center"
           >
             <IoLinkSharp className="text-xl" />
@@ -152,7 +152,7 @@ export function BottomLinks({ lang }: { lang?: LanguageType }) {
           .map(([k, v]: any) => (
             <Link
               key={k}
-              href={`/${k != "en" ? k : ""}`}
+              href={`/${k != "en" ? `?lang=${k}` : ""}`}
             >
               {v.nativeName}
             </Link>
