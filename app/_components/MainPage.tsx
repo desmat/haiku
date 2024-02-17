@@ -15,7 +15,6 @@ import { notFoundHaiku } from '@/services/stores/samples';
 
 export default function MainPage({ id, lang }: { id?: string, lang?: undefined | LanguageType }) {
   // console.log('>> app.mainPage.render()', { id, lang });
-  // const searchParams = useSearchParams();
   const [haikuId, setHaikuId] = useState(id);
   const [generating, setGenerating] = useState(false);
   const router = useRouter();
@@ -30,7 +29,7 @@ export default function MainPage({ id, lang }: { id?: string, lang?: undefined |
     getHaiku,
     generateHaiku,
   ] = useHaikus((state: any) => [
-    state.loaded,
+    state.loaded(haikuId || { random: true }),
     state.load,
     state.find({ lang: lang || "en" }),
     state.get,
@@ -40,36 +39,36 @@ export default function MainPage({ id, lang }: { id?: string, lang?: undefined |
   const [
     haikudleLoaded,
     loadHaikudle,
-    haikudles,
-    _haiku,
+    haikudleHaiku,
   ] = useHaikudle((state: any) => [
-    state.loaded,
+    state.loaded(haikuId),
     state.load,
-    state._haikudles,
     state.haiku,
   ]);
 
-  // const loaded = _haiku || haikuId && haikusLoaded(JSON.stringify({ haikuId })) || haikusLoaded(JSON.stringify({ lang: lang || "en" }));
-  // const haikus = findHaikus({ lang: lang || "en" });
-  const haiku = isHaikudleMode ? _haiku : haikuId && getHaiku(haikuId) || haikus[Math.floor(Math.random() * haikus.length)] || notFoundHaiku;
+  const haiku = isHaikudleMode ? haikudleHaiku : haikuId && getHaiku(haikuId) || haikus[0];
+  const loaded = isHaikudleMode ? haikudleLoaded : haikusLoaded;
 
-  const loaded = isHaikudleMode ? haikudleLoaded(haikuId) : haikusLoaded(haikuId); //; // TODO check id?
-  // const haiku = haikudles[0]?.haiku;
-  const [colorOffsets, setColorOffsets] = useState({ front: -1, back: -1 });
+  const fontColor = haiku?.color || "#555555";
+  const bgColor = haiku?.bgColor || "lightgrey";
+  const textStyles = [
+    {
+      color: fontColor,
+      filter: `drop-shadow(0px 0px 8px ${bgColor})`,
+      WebkitTextStroke: `1.5px ${fontColor}`,
+      fontWeight: 300,
+    },
+    {
+      color: fontColor,
+      filter: `drop-shadow(0px 0px 2px ${bgColor})`,
+    }
+  ];
 
-  // console.log('>> app.page.render()', { haikuId, haiku, loaded, haikudleLoaded, user });
-
-  // console.log('>> app.page.render()', { haikuId, lang, user });
+  // console.log('>> app.page.render()', { haikuId, haiku, loaded, user, haikus });
 
   useEffect(() => {
-    // console.log('>> app.page.render() useEffect', { haikuId, lang, user });
-
-    if (user?.isAdmin) {
-      loadHaikus({ lang: lang || "en" });
-    }
-
     if (!loaded) {
-      isHaikudleMode ? loadHaikudle(haikuId) : loadHaikus(haikuId);
+      isHaikudleMode ? loadHaikudle(haikuId) : loadHaikus(haikuId || { random: true });
     }
 
     if (isHaikudleMode && user && !user?.preferences?.onboarded) {
@@ -91,10 +90,9 @@ export default function MainPage({ id, lang }: { id?: string, lang?: undefined |
     const subject = user?.isAdmin
       ? prompt("Subject? (For example 'nature', 'sunset', or leave blank)")
       : "";
-      
+
     if (typeof (subject) == "string") {
       setGenerating(true);
-      // TODO cleanup generateHaiku function params
       const ret = await generateHaiku(user, { lang, subject });
       // console.log('>> app.page.handleGenerate()', { ret });
 
@@ -111,40 +109,21 @@ export default function MainPage({ id, lang }: { id?: string, lang?: undefined |
       return;
     }
 
-    // console.log('>> app.page.handleRefresh()');
     e.preventDefault();
 
     if (haikuId) {
       router.push("/");
     }
 
-    if (!(haikus?.length > 1)) {
-      return;
-    }
-
-    const notCurrentHaikus = haikus.map((h: Haiku) => h.id).filter((id: string) => id != haiku.id);
-    setHaikuId(notCurrentHaikus[Math.floor(Math.random() * notCurrentHaikus.length)]);
+    loadHaikus({ random: true })
+      .then((haikus: Haiku[]) => {
+        if (isHaikudleMode && haikus?.length > 0) {
+          loadHaikudle(haikus[0]?.id);
+        }
+      });
   }
 
-  const fontColor = haiku?.colorPalette && colorOffsets.front >= 0 && haiku.colorPalette[colorOffsets.front] || haiku?.color || "#555555";
-
-  const bgColor = haiku?.colorPalette && colorOffsets.back >= 0 && haiku?.colorPalette[colorOffsets.back] || haiku?.bgColor || "lightgrey";
-
-  const textStyles = [
-    {
-      color: fontColor,
-      filter: `drop-shadow(0px 0px 8px ${bgColor})`,
-      WebkitTextStroke: `1.5px ${fontColor}`,
-      fontWeight: 300,
-    },
-    {
-      color: fontColor,
-      filter: `drop-shadow(0px 0px 2px ${bgColor})`,
-    }
-  ];
-
   if (!loaded || generating) {
-    // TODO kill the Page component and build good loading component
     return (
       <div>
         <NavOverlay styles={textStyles} />

@@ -1,4 +1,4 @@
-import MainPage from '@/app/mainPage';
+import MainPage from '@/app/_components/MainPage';
 import { LanguageType, isSupportedLanguage } from '@/types/Languages';
 import NotFound from '@/app/not-found';
 

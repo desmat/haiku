@@ -168,14 +168,14 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
       {process.env.EXPERIENCE_MODE != "social-img" &&
         <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
           <StyledLayers styles={styles}>
-            <Logo href={`/${lang || ""}`} onClick={onClickLogo} />
+            <Logo href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
           </StyledLayers>
         </div>
       }
       {process.env.EXPERIENCE_MODE == "social-img" &&
         <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-20`}>
           <StyledLayers styles={styles}>
-            <Logo href={`/${lang || ""}`} onClick={onClickLogo} />
+            <Logo href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
           </StyledLayers>
         </div>
       }
