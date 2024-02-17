@@ -118,7 +118,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const id = typeof (queryOrId) == "string" && queryOrId;
     // console.log(">> hooks.haiku.load", { id, query });
 
-    return new Promise(async (resolve) => {
+    return new Promise(async (resolve, reject) => {
       if (id) {
         fetch(`/api/haikus/${id}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();
@@ -126,7 +126,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
           if (res.status != 200) {
             useAlert.getState().error(`Error fetching haiku ${id}: ${res.status} (${res.statusText})`);
-            return;
+            return resolve(res.statusText);
           }
 
           const data = await res.json();
@@ -146,7 +146,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
           if (res.status != 200) {
             useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);
-            return;
+            return resolve(res.statusText);
           }
 
           const data = await res.json();

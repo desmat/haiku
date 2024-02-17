@@ -83,7 +83,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   init: async (haiku: Haiku, haikudle: Haikudle, cheat = false) => {
     // console.log(">> hooks.haikudle.init", { haiku, haikudle, cheat });
-    
+
     const solution = haiku.poem;
 
     const inProgress = haikudle?.inProgress
@@ -187,7 +187,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         haikudle: {
           id: haikudleId,
           haikuId: haiku.id,
-          solved, 
+          solved,
           moves: moves + 1,
           inProgress,
         }
@@ -314,58 +314,62 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     }
   },
 
-  load: async (queryOrId?: string, onSolved = () => undefined) => {
+  load: async (queryOrId?: string, onSolved = () => undefined): Promise<Haikudle> => {
     const { setLoaded } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
     // console.log(">> hooks.haikudle.load", { id, query });
 
-    if (id) {
-      fetch(`/api/haikudles/${id}`, await fetchOpts()).then(async (res) => {
-        const { _haikudles } = get();
-        setLoaded(id);
+    return new Promise(async (resolve, reject) => {
+      if (id) {
+        fetch(`/api/haikudles/${id}`, await fetchOpts()).then(async (res) => {
+          const { _haikudles } = get();
+          setLoaded(id);
 
-        if (res.status != 200) {
-          useAlert.getState().error(`Error fetching haikudle ${id}: ${res.status} (${res.statusText})`);
-          await get().init(notFoundHaiku, notFoundHaikudle);
-          return;
-        }
+          if (res.status != 200) {
+            useAlert.getState().error(`Error fetching haikudle ${id}: ${res.status} (${res.statusText})`);
+            await get().init(notFoundHaiku, notFoundHaikudle);
+            return resolve(res.statusText);
+          }
 
-        const data = await res.json();
-        const haikudle = data.haikudle;
+          const data = await res.json();
+          const haikudle = data.haikudle;
 
-        setLoaded([haikudle]);
-        set({
-          _haikudles: { ..._haikudles, [haikudle.id]: haikudle },
+          setLoaded([haikudle]);
+          set({
+            _haikudles: { ..._haikudles, [haikudle.id]: haikudle },
+          });
+
+          await get().init(haikudle?.haiku, haikudle);
+          resolve(haikudle);
         });
+      } else {
+        const params = query && mapToSearchParams(query);
+        fetch(`/api/haikudles${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
+          const { _haikudles } = get();
+          setLoaded(query);
 
-        await get().init(haikudle?.haiku, haikudle);
-      });
-    } else {
-      const params = query && mapToSearchParams(query);
-      fetch(`/api/haikudles${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
-        const { _haikudles } = get();
-        setLoaded(query);
+          if (res.status != 200) {
+            useAlert.getState().error(`Error fetching haikudles: ${res.status} (${res.statusText})`);
+            await get().init(notFoundHaiku, notFoundHaikudle);
+            return resolve(res.statusText);
+          }
 
-        if (res.status != 200) {
-          useAlert.getState().error(`Error fetching haikudles: ${res.status} (${res.statusText})`);
-          await get().init(notFoundHaiku, notFoundHaikudle);
-          return;
-        }
+          const data = await res.json();
+          // const haikus = data.haikus;
+          const haikudles = data.haikudles; // TODO fix this junk
 
-        const data = await res.json();
-        // const haikus = data.haikus;
-        const haikudles = data.haikudles; // TODO fix this junk
+          setLoaded(haikudles);
+          set({
+            _haikudles: { ..._haikudles, ...listToMap(haikudles) }
+          });
 
-        setLoaded(haikudles);
-        set({
-          _haikudles: { ..._haikudles, ...listToMap(haikudles) }
+          // TODO bleh
+          await get().init(haikudles[0]?.haiku, haikudles[0]);
+          resolve(haikudles[0]);
         });
-
-        // TODO bleh
-        await get().init(haikudles[0]?.haiku, haikudles[0]);
-      });
-    }
+      }
+    });
   },
 
   create: async (user: User, haikudle: Haikudle) => {
