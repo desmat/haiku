@@ -100,11 +100,6 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       moves: haikudle?.moves || 0,
     });
 
-    trackEvent("haikudle-started", {
-      id: haiku.id,
-      userId: (await useUser.getState()).user.id,
-    });
-
     // get().onSolved(haikudle.id, 42);
   },
 
@@ -155,6 +150,13 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     // console.log(">> hooks.haikudle.move", { haikudleId, word, fromLine, fromOffset, toLine, toOffset });
     const { haiku, inProgress, solution, onSolved, moves } = get();
 
+    if (moves == 0) {
+      trackEvent("haikudle-started", {
+        id: haiku.id,
+        userId: (await useUser.getState()).user.id,
+      });
+    }
+
     const [spliced] = inProgress[fromLine].splice(fromOffset, 1);
     inProgress[toLine].splice(toOffset, 0, spliced);
 
@@ -203,6 +205,13 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   swap: async (haikudleId: string, word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
     // console.log(">> hooks.haikudle.swap", { fromLine, fromOffset, toLine, toOffset });
     const { haiku, inProgress, solution, onSolved, moves } = get();
+
+    if (moves == 0) {
+      trackEvent("haikudle-started", {
+        id: haiku.id,
+        userId: (await useUser.getState()).user.id,
+      });
+    }
 
     // move(word, fromLine, fromOffset, toLine, toOffset);
     const [spliced] = inProgress[toLine].splice(toOffset, 1, word);
