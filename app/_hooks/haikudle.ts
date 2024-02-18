@@ -197,6 +197,12 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       }),
     }).then(async (res) => {
       if (res.status != 200) {
+        trackEvent("error", {
+          type: "save-haikudle",
+          code: res.status,
+          id: haikudleId,
+          userId: (await useUser.getState()).user.id,
+        });
         useAlert.getState().error(`Error saving haikudle: ${res.status} (${res.statusText})`);
         return;
       }
@@ -225,7 +231,6 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
     if (solved) {
       onSolved(haikudleId, moves + 1);
-
       trackEvent("haikudle-solved", {
         id: haiku.id,
         userId: (await useUser.getState()).user.id,
@@ -250,6 +255,12 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       }),
     }).then(async (res) => {
       if (res.status != 200) {
+        trackEvent("error", {
+          type: "save-haikudle",
+          code: res.status,
+          id: haikudleId,
+          userId: (await useUser.getState()).user.id,
+        });
         useAlert.getState().error(`Error saving haikudle: ${res.status} (${res.statusText})`);
         return;
       }
@@ -330,15 +341,13 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           setLoaded(id);
 
           if (res.status != 200) {
-            const message = `Error fetching haikudle ${id}: ${res.status} (${res.statusText})`;
             trackEvent("error", {
+              type: "fetch-haikudle",
+              code: res.status,
               id,
               userId: (await useUser.getState()).user.id,
-              type: "fetch-haikudle",
-              code: res.status,              
-              xxx: res.statusText,
-            });    
-            useAlert.getState().error(message);
+            });
+            useAlert.getState().error(`Error fetching haikudle ${id}: ${res.status} (${res.statusText})`);
             await get().init(notFoundHaiku, notFoundHaikudle, true);
             return resolve(res.statusText);
           }
@@ -361,14 +370,13 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           setLoaded(query);
 
           if (res.status != 200) {
-            const message = `Error fetching haikudles: ${res.status} (${res.statusText})`
             trackEvent("error", {
+              type: "fetch-haikudles",
+              code: res.status,
               query: JSON.stringify(query),
               userId: (await useUser.getState()).user.id,
-              type: "fetch-haikudles",
-              message: res.statusText,
-            });    
-            useAlert.getState().error(message);
+            });
+            useAlert.getState().error(`Error fetching haikudles: ${res.status} (${res.statusText})`);
             await get().init(notFoundHaiku, notFoundHaikudle, true);
             return resolve(res.statusText);
           }
@@ -417,6 +425,11 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         const { _haikudles } = get();
 
         if (res.status != 200) {
+          trackEvent("error", {
+            type: "create-haikudle",
+            code: res.status,
+            userId: (await useUser.getState()).user.id,
+          });
           useAlert.getState().error(`Error adding haikudle: ${res.status} (${res.statusText})`);
           set({
             _haikudles: { ..._haikudles, [creating.id]: undefined },

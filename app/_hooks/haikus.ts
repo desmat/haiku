@@ -125,6 +125,12 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           setLoaded(id);
 
           if (res.status != 200) {
+            trackEvent("error", {
+              type: "fetch-haiku",
+              code: res.status,
+              userId: (await useUser.getState()).user.id,
+              id,
+            });  
             useAlert.getState().error(`Error fetching haiku ${id}: ${res.status} (${res.statusText})`);
             return resolve(res.statusText);
           }
@@ -145,6 +151,12 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           setLoaded(query);
 
           if (res.status != 200) {
+            trackEvent("error", {
+              type: "fetch-haikus",
+              code: res.status,
+              userId: (await useUser.getState()).user.id,
+              query: JSON.stringify(query),
+            });
             useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);
             return resolve(res.statusText);
           }
@@ -200,6 +212,11 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         const { _haikus } = get();
 
         if (res.status != 200) {
+          trackEvent("error", {
+            type: "create-haiku",
+            code: res.status,
+            userId: (await useUser.getState()).user.id,
+          });
           useAlert.getState().error(`Error adding haiku: ${res.status} (${res.statusText})`);
           set({
             _haikus: { ..._haikus, [creating.id]: undefined },
@@ -250,6 +267,12 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         const { _haikus } = get();
 
         if (res.status != 200) {
+          trackEvent("error", {
+            type: "save-haiku",
+            code: res.status,
+            userId: (await useUser.getState()).user.id,
+            id: haiku.id,
+          });
           useAlert.getState().error(`Error saving haiku: ${res.status} (${res.statusText})`);
           // revert
           set({
@@ -294,6 +317,12 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         const { _haikus } = get();
 
         if (res.status != 200) {
+          trackEvent("error", {
+            type: "generate-haiku",
+            code: res.status,
+            userId: (await useUser.getState()).user.id,
+          });
+
           if (res.status == 429) {
             useAlert.getState().error(`Exceeded daily limit: try again later.`);
           } else {
@@ -347,6 +376,12 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     }).then(async (res) => {
       if (res.status != 200) {
         const { _haikus, _deleted } = get();
+        trackEvent("error", {
+          type: "delete-haiku",
+          code: res.status,
+          userId: (await useUser.getState()).user.id,
+          id,
+        });
         useAlert.getState().error(`Error deleting haikus ${id}: ${res.status} (${res.statusText})`);
         // revert
         set({
