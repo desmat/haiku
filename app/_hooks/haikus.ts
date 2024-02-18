@@ -213,7 +213,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         trackEvent("haiku-created", {
           id: created.id,
           name: created.name,
-          createdBy: created.createdBy,
+          userId: created.createdBy,
         });
 
         // replace optimistic 
@@ -309,7 +309,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         trackEvent("haiku-generated", {
           id: generated.id,
           name: generated.name,
-          createdBy: generated.createdBy,
+          userId: generated.createdBy,
         });
 
         // replace optimistic 

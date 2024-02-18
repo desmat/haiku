@@ -170,7 +170,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       onSolved(haikudleId, moves + 1);
 
       trackEvent("haikudle-solved", {
-        haikuId: haiku.id,
+        id: haiku.id,
         userId: (await useUser.getState()).user.id,
       });
     }
@@ -227,7 +227,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       onSolved(haikudleId, moves + 1);
 
       trackEvent("haikudle-solved", {
-        haikuId: haiku.id,
+        id: haiku.id,
         userId: (await useUser.getState()).user.id,
       })
     }
@@ -332,9 +332,9 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           if (res.status != 200) {
             const message = `Error fetching haikudle ${id}: ${res.status} (${res.statusText})`;
             trackEvent("error", {
-              haikudleId: id,
-              userId: "XXX", // TODO
-              message,
+              id,
+              userId: (await useUser.getState()).user.id,
+              message: "XXX"
             });    
             useAlert.getState().error(message);
             await get().init(notFoundHaiku, notFoundHaikudle, true);
@@ -362,8 +362,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
             const message = `Error fetching haikudles: ${res.status} (${res.statusText})`
             trackEvent("error", {
               query: JSON.stringify(query),
-              userId: "XXX", // TODO
-              message,
+              userId: (await useUser.getState()).user.id,
+              message: "XXXX,"
             });    
             useAlert.getState().error(message);
             await get().init(notFoundHaiku, notFoundHaikudle, true);
@@ -427,7 +427,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         trackEvent("haikudle-created", {
           id: created.id,
           name: created.name,
-          createdBy: created.createdBy,
+          userId: created.createdBy,
         });
 
         // replace optimistic 
