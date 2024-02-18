@@ -335,7 +335,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
               id,
               userId: (await useUser.getState()).user.id,
               type: "fetch-haikudle",
-              message: res.statusText,
+              code: res.status,              
+              xxx: res.statusText,
             });    
             useAlert.getState().error(message);
             await get().init(notFoundHaiku, notFoundHaikudle, true);
