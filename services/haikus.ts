@@ -44,7 +44,7 @@ export async function getHaiku(id: string, hashPoem?: boolean): Promise<Haiku | 
 
   let haiku = await store.haikus.get(id);
 
-  if (hashPoem) {
+  if (haiku && hashPoem) {
     haiku = {
       ...haiku,
       poem: haiku.poem

@@ -81,10 +81,13 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   // list of haikus
   _loaded: <StatusMap>{},
 
-  init: async (haiku: Haiku, haikudle: Haikudle, cheat = false) => {
+  init: async (haiku: Haiku, haikudle: Haikudle, hashSolution?: boolean) => {
     // console.log(">> hooks.haikudle.init", { haiku, haikudle, cheat });
 
-    const solution = haiku.poem;
+    const solution = hashSolution && haiku.poem
+      .map((line: string) => line.split(/\s+/)
+        .map((word: string) => hashCode(normalizeWord(word))))
+      || haiku.poem;
 
     const inProgress = haikudle?.inProgress
 
@@ -327,8 +330,14 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           setLoaded(id);
 
           if (res.status != 200) {
-            useAlert.getState().error(`Error fetching haikudle ${id}: ${res.status} (${res.statusText})`);
-            await get().init(notFoundHaiku, notFoundHaikudle);
+            const message = `Error fetching haikudle ${id}: ${res.status} (${res.statusText})`;
+            trackEvent("error", {
+              haikudleId: id,
+              userId: "XXX", // TODO
+              message,
+            });    
+            useAlert.getState().error(message);
+            await get().init(notFoundHaiku, notFoundHaikudle, true);
             return resolve(res.statusText);
           }
 
@@ -350,8 +359,14 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           setLoaded(query);
 
           if (res.status != 200) {
-            useAlert.getState().error(`Error fetching haikudles: ${res.status} (${res.statusText})`);
-            await get().init(notFoundHaiku, notFoundHaikudle);
+            const message = `Error fetching haikudles: ${res.status} (${res.statusText})`
+            trackEvent("error", {
+              query: JSON.stringify(query),
+              userId: "XXX", // TODO
+              message,
+            });    
+            useAlert.getState().error(message);
+            await get().init(notFoundHaiku, notFoundHaikudle, true);
             return resolve(res.statusText);
           }
 
