@@ -334,7 +334,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
             trackEvent("error", {
               id,
               userId: (await useUser.getState()).user.id,
-              message: "XXX"
+              type: "fetch-haikudle",
+              message: res.statusText,
             });    
             useAlert.getState().error(message);
             await get().init(notFoundHaiku, notFoundHaikudle, true);
@@ -363,7 +364,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
             trackEvent("error", {
               query: JSON.stringify(query),
               userId: (await useUser.getState()).user.id,
-              message: "XXXX,"
+              type: "fetch-haikudles",
+              message: res.statusText,
             });    
             useAlert.getState().error(message);
             await get().init(notFoundHaiku, notFoundHaikudle, true);
