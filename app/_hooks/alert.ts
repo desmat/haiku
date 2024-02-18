@@ -11,7 +11,6 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
 
   error: async (message?: string, onDissmiss?: () => undefined, closeLabel?: string) => {
     console.log(">> hooks.alert.error", { message });
-    if (message) trackEvent("error", { message })
     set({ message, type: message && "error", onDissmiss, closeLabel });
   },
 
