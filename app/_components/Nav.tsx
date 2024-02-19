@@ -2,15 +2,21 @@
 
 import moment from 'moment';
 import Link from 'next/link'
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation'
 import { BsGithub } from 'react-icons/bs';
 import { IoSparkles, IoAddCircle, IoLinkSharp } from 'react-icons/io5';
 import { MdMail, MdHome, MdDelete } from "react-icons/md";
+import { TbSwitch } from "react-icons/tb";
+import { RiFullscreenLine } from "react-icons/ri";
+import { FaRandom } from "react-icons/fa";
 import * as font from "@/app/font";
 import useHaikus from '@/app/_hooks/haikus';
 import useHaikudle from '@/app/_hooks/haikudle';
 import useUser from '@/app/_hooks/user';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { StyledLayers } from './StyledLayers';
+import { Haiku } from '@/types/Haiku';
 
 export function Loading() {
   return (
@@ -42,7 +48,7 @@ export function GenerateIcon({ onClick }: { onClick?: any }) {
   )
 }
 
-export function BottomLinks({ mode, lang }: { mode: string, lang?: LanguageType }) {
+export function BottomLinks({ mode, haiku, lang, onRefresh }: { mode: string, haiku?: Haiku, lang?: LanguageType, onRefresh: any }) {
   // console.log("BottomLinks", { lang })
 
   const [user] = useUser((state: any) => [state.user]);
@@ -55,11 +61,11 @@ export function BottomLinks({ mode, lang }: { mode: string, lang?: LanguageType 
   // ]);
 
   const [
-    haiku,
+    // haiku,
     createHaikudle,
     haikudleInProgress,
   ] = useHaikudle((state: any) => [
-    state.haiku,
+    // state.haiku,
     state.create,
     state.inProgress,
   ]);
@@ -125,14 +131,46 @@ export function BottomLinks({ mode, lang }: { mode: string, lang?: LanguageType 
             <IoLinkSharp className="text-xl" />
           </Link>
         }
+        {haiku?.id && user?.isAdmin &&
+          <Link
+            key="refresh"
+            href="#"
+            onClick={onRefresh}
+            className="_bg-yellow-200 flex flex-row gap-1 items-center"
+            title="Load random"
+          >
+            <FaRandom className="text-xl" />
+          </Link>
+        }              
         {mode != "social-img" && user?.isAdmin &&
           <Link
             key="saveHaikudle"
             href="#"
             className="_bg-yellow-200 flex flex-row gap-1 items-center"
             onClick={handleSaveHaikudle}
+            title="Save as daily Haikudle"
           >
             <IoAddCircle className="text-xl" />
+          </Link>
+        }
+        {mode != "social-img" && user?.isAdmin &&
+          <Link
+            key="changeMode"
+            href={`/${haiku?.id}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`}
+            className="_bg-yellow-200 flex flex-row gap-1 items-center"
+            title="Switch between Haiku/Haikudle mode"
+          >
+            <TbSwitch className="text-xl" />
+          </Link>
+        }
+        {mode != "social-img" && user?.isAdmin &&
+          <Link
+            key="socialImgMode"
+            href={`/${haiku?.id}?mode=social-img`}
+            className="_bg-yellow-200 flex flex-row gap-1 items-center"
+            title="Switch to fullscreen mode (for social image)"
+          >
+            <RiFullscreenLine className="text-xl" />
           </Link>
         }
         {/* {user?.isAdmin && haiku?.id &&
@@ -161,10 +199,31 @@ export function BottomLinks({ mode, lang }: { mode: string, lang?: LanguageType 
   )
 }
 
-export function NavOverlay({ mode, styles, lang, onClickLogo, onClickGenerate }: { mode: string, styles: any[], lang?: LanguageType, onClickLogo?: any, onClickGenerate?: any }) {
+export function NavOverlay({ mode, styles, haiku, lang, onClickLogo, onClickGenerate }: { mode: string, styles: any[], haiku?: Haiku, lang?: LanguageType, onClickLogo?: any, onClickGenerate?: any }) {
+  const router = useRouter();
+  
+  const handleKeyDown = (e: any) => {
+    // console.log(">> app._component.Nav.handleKeyDown", { e });
+    if (e.key == "Escape" && mode == "social-img") {
+      router.push(`/${haiku ? haiku?.id : ""}`);
+    }
+  }
+
+  useEffect(() => {
+    document.body.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.removeEventListener('keydown', handleKeyDown)
+    }
+  }, []);
 
   return (
-    <div className="_bg-pink-200">
+    <div
+      className="bg-pink-200 z-90"
+      onClick={(e: any) => {
+        console.log(">> app._component.Nav.onKeyDown", { e });
+      }}
+    >
       {mode != "social-img" &&
         <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
           <StyledLayers styles={styles}>
@@ -199,7 +258,7 @@ export function NavOverlay({ mode, styles, lang, onClickLogo, onClickGenerate }:
       {mode != "social-img" &&
         <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
           <StyledLayers styles={styles}>
-            <BottomLinks mode={mode} lang={lang} />
+            <BottomLinks mode={mode} lang={lang} haiku={haiku} onRefresh={onClickLogo} />
           </StyledLayers>
         </div>
       }

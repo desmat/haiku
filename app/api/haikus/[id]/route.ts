@@ -1,16 +1,26 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getHaiku, deleteHaiku, saveHaiku } from '@/services/haikus';
 import { userSession } from '@/services/users';
+import { searchParamsToMap } from '@/utils/misc';
 
 export const maxDuration = 300;
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const query = searchParamsToMap(request.nextUrl.searchParams.toString()) as any;
+  const { user } = await userSession(request);
   console.log('>> app.api.haiku.[id].GET', { params });
 
-  const haiku = await getHaiku(params.id, process.env.EXPERIENCE_MODE == "haikudle");
+  if (query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
+    return NextResponse.json(
+      { success: false, message: 'authorization failed' },
+      { status: 403 }
+    );
+  }
+
+  const haiku = await getHaiku(params.id, query.mode == "haikudle");
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
@@ -40,9 +50,9 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   console.log('>> app.api.haiku.DELETE', { params });
-  
+
   const { user } = await userSession(request)
-  
+
   if (!params.id) {
     throw `Cannot delete haiku with null id`;
   }

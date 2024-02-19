@@ -136,7 +136,7 @@ function HaikuPoem({ mode, haiku, styles, selectedWord, setSelectedWord }: { mod
 }
 
 export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku?: Haiku, styles: any[] }) {
-  // console.log('>> app._components.HaikuPage.render()', { haiku, id: haiku.id });
+  // console.log('>> app._components.HaikuPage.render()', { mode, haiku, id: haiku.id });
 
   const isHaikudleMode = mode == "haikudle";
 

@@ -18,5 +18,5 @@ export default function Page({
     return <NotFound mode={mode} />
   }
 
-  return <MainPage id={id} lang={lang} mode={mode} />
+  return <MainPage mode={mode} id={id} lang={lang} />
 }

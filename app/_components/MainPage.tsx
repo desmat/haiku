@@ -157,7 +157,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
 
   return (
     <div>
-      <NavOverlay mode={mode} lang={lang} styles={textStyles} onClickLogo={handleRefresh} onClickGenerate={handleGenerate} />
+      <NavOverlay mode={mode} lang={lang} haiku={haiku} styles={textStyles} onClickLogo={handleRefresh} onClickGenerate={handleGenerate} />
       <HaikuPage mode={mode} haiku={haiku} styles={textStyles} />
     </div>
   )
