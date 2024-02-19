@@ -9,12 +9,19 @@ export const maxDuration = 300;
 // export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest, params?: any) {
-  const query = searchParamsToMap(request.nextUrl.searchParams.toString());
+  const query = searchParamsToMap(request.nextUrl.searchParams.toString()) as any;
+  const { user } = await userSession(request);
   console.log('>> app.api.haikus.GET', { query, searchParams: request.nextUrl.searchParams.toString() });
 
-  // @ts-ignore
+  if (query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
+    return NextResponse.json(
+      { success: false, message: 'authorization failed' },
+      { status: 403 }
+    );
+  }
+
   if (query.random) {
-    const haikus = await getHaikus(undefined, process.env.EXPERIENCE_MODE == "haikudle");
+    const haikus = await getHaikus(undefined, query.mode == "haikudle");
     const random = haikus[Math.floor(Math.random() * haikus.length)];
     return NextResponse.json({ haikus: [random] });
   }

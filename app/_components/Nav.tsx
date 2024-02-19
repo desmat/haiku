@@ -18,9 +18,9 @@ export function Loading() {
   );
 }
 
-export function Logo({ href, onClick }: { href?: string, onClick?: any }) {
-  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
-  const isSocialImgMode = process.env.EXPERIENCE_MODE == "social-img";
+export function Logo({ mode, href, onClick }: { mode: string, href?: string, onClick?: any }) {
+  const isHaikudleMode = mode == "haikudle";
+  const isSocialImgMode = mode == "social-img";
 
   return (
     <Link
@@ -42,7 +42,7 @@ export function GenerateIcon({ onClick }: { onClick?: any }) {
   )
 }
 
-export function BottomLinks({ lang }: { lang?: LanguageType }) {
+export function BottomLinks({ mode, lang }: { mode: string, lang?: LanguageType }) {
   // console.log("BottomLinks", { lang })
 
   const [user] = useUser((state: any) => [state.user]);
@@ -125,7 +125,7 @@ export function BottomLinks({ lang }: { lang?: LanguageType }) {
             <IoLinkSharp className="text-xl" />
           </Link>
         }
-        {process.env.EXPERIENCE_MODE != "social-img" && user?.isAdmin &&
+        {mode != "social-img" && user?.isAdmin &&
           <Link
             key="saveHaikudle"
             href="#"
@@ -146,7 +146,7 @@ export function BottomLinks({ lang }: { lang?: LanguageType }) {
           </Link>
         } */}
       </div>
-      {process.env.EXPERIENCE_MODE == "haiku" &&
+      {mode == "haiku" &&
         Object.entries(supportedLanguages)
           .filter((e: any) => (!lang && e[0] != "en") || (lang && lang != e[0]))
           .map(([k, v]: any) => (
@@ -161,26 +161,26 @@ export function BottomLinks({ lang }: { lang?: LanguageType }) {
   )
 }
 
-export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { styles: any[], lang?: LanguageType, onClickLogo?: any, onClickGenerate?: any }) {
+export function NavOverlay({ mode, styles, lang, onClickLogo, onClickGenerate }: { mode: string, styles: any[], lang?: LanguageType, onClickLogo?: any, onClickGenerate?: any }) {
 
   return (
     <div className="_bg-pink-200">
-      {process.env.EXPERIENCE_MODE != "social-img" &&
+      {mode != "social-img" &&
         <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
           <StyledLayers styles={styles}>
-            <Logo href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
+            <Logo mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
           </StyledLayers>
         </div>
       }
-      {process.env.EXPERIENCE_MODE == "social-img" &&
+      {mode == "social-img" &&
         <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-20`}>
           <StyledLayers styles={styles}>
-            <Logo href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
+            <Logo mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
           </StyledLayers>
         </div>
       }
 
-      {process.env.EXPERIENCE_MODE != "social-img" && onClickGenerate &&
+      {mode != "social-img" && onClickGenerate &&
         <div className="fixed top-2.5 right-2.5 z-20">
           <StyledLayers styles={styles}>
             <GenerateIcon onClick={onClickGenerate} />
@@ -196,10 +196,10 @@ export function NavOverlay({ styles, lang, onClickLogo, onClickGenerate }: { sty
         }}
       />
 
-      {process.env.EXPERIENCE_MODE != "social-img" &&
+      {mode != "social-img" &&
         <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
           <StyledLayers styles={styles}>
-            <BottomLinks lang={lang} />
+            <BottomLinks mode={mode} lang={lang} />
           </StyledLayers>
         </div>
       }

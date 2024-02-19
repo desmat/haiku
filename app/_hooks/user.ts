@@ -13,7 +13,7 @@ async function getSession() {
 }
 
 const useUser: any = create(devtools((set: any, get: any) => ({
-  user: undefined, //(await getSession()).user,
+  user: undefined as User | undefined,
   // session: undefined,
   token: undefined,
   loaded: false,

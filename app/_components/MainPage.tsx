@@ -11,17 +11,16 @@ import useHaikudle from '@/app/_hooks/haikudle';
 import useUser from '@/app/_hooks/user';
 import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
-import { notFoundHaiku } from '@/services/stores/samples';
 import { Haikudle } from '@/types/Haikudle';
 
-export default function MainPage({ id, lang }: { id?: string, lang?: undefined | LanguageType }) {
-  // console.log('>> app.mainPage.render()', { id, lang });
+export default function MainPage({ mode, id, lang }: { mode: string, id?: string, lang?: undefined | LanguageType }) {
+  // console.log('>> app.mainPage.render()', { mode, id, lang });
   const [haikuId, setHaikuId] = useState(id);
   const [generating, setGenerating] = useState(false);
   const router = useRouter();
   const [user, saveUser] = useUser((state: any) => [state.user, state.save]);
   const plainAlert = useAlert((state: any) => state.plain);
-  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+  const isHaikudleMode = mode == "haikudle";
 
   const [
     haikusLoaded,
@@ -41,10 +40,12 @@ export default function MainPage({ id, lang }: { id?: string, lang?: undefined |
     haikudleLoaded,
     loadHaikudle,
     haikudleHaiku,
+    haikudles,
   ] = useHaikudle((state: any) => [
     state.loaded(haikuId),
     state.load,
     state.haiku,
+    state._haikudles,
   ]);
 
   let [loading, setLoading] = useState(false);
@@ -66,18 +67,17 @@ export default function MainPage({ id, lang }: { id?: string, lang?: undefined |
     }
   ];
 
-  // console.log('>> app.page.render()', { haikuId, haiku, loaded, loading, user });
+  console.log('>> app.page.render()', { haikuId, haiku, loaded, loading, haikus, haikudles, user });
 
   useEffect(() => {
     // console.log('>> app.page useEffect', { haikuId, haiku, loaded, loading, user });
-
     if (!loaded && !loading) {
       setLoading(true);
       loading = true;
       isHaikudleMode
         ? loadHaikudle(haikuId)
           .then((haikudle: Haikudle) => setLoading(false))
-        : loadHaikus(haikuId || { random: true })
+        : loadHaikus(haikuId || { random: true }, mode)
           .then((haikus: Haiku | Haiku[]) => {
             setHaikuId(haikus.id || haikus[0]?.id);
             setLoading(false);
@@ -128,11 +128,11 @@ export default function MainPage({ id, lang }: { id?: string, lang?: undefined |
     e.preventDefault();
 
     if (haikuId) {
-      router.push("/");
+        router.push(`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
     }
 
     setLoading(true);
-    loadHaikus({ random: true })
+    loadHaikus({ random: true }, mode)
       .then((haikus: Haiku[]) => {
         setLoading(false);
         if (isHaikudleMode && haikus?.length > 0) {
@@ -145,20 +145,20 @@ export default function MainPage({ id, lang }: { id?: string, lang?: undefined |
   if (!loaded || loading || generating) {
     return (
       <div>
-        <NavOverlay styles={textStyles} />
+        <NavOverlay mode={mode} styles={textStyles} />
         <Loading />
       </div>
     )
   }
 
   if (loaded && !haiku) {
-    return <NotFound lang={lang} onClickGenerate={handleGenerate} />
+    return <NotFound mode={mode} lang={lang} onClickGenerate={handleGenerate} />
   }
 
   return (
     <div>
-      <NavOverlay styles={textStyles} lang={lang} onClickLogo={handleRefresh} onClickGenerate={handleGenerate} />
-      <HaikuPage haiku={haiku} styles={textStyles} />
+      <NavOverlay mode={mode} lang={lang} styles={textStyles} onClickLogo={handleRefresh} onClickGenerate={handleGenerate} />
+      <HaikuPage mode={mode} haiku={haiku} styles={textStyles} />
     </div>
   )
 }

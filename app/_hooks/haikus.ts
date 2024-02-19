@@ -18,6 +18,7 @@ type HaikuMap = { [key: string]: Haiku | undefined; };
 type StatusMap = { [key: string]: boolean };
 
 const useHaikus: any = create(devtools((set: any, get: any) => ({
+  _mode: "haiku",
 
   // access via get(id) or find(query?)
   _haikus: <HaikuMap>{},
@@ -112,15 +113,15 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     }
   },
 
-  load: async (queryOrId?: object | string): Promise<Haiku | Haiku[]> => {
-    const { setLoaded } = get();
+  load: async (queryOrId?: object | string, mode?: string): Promise<Haiku | Haiku[]> => {
+    const { setLoaded, _mode } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
     // console.log(">> hooks.haiku.load", { id, query });
 
     return new Promise(async (resolve, reject) => {
       if (id) {
-        fetch(`/api/haikus/${id}`, await fetchOpts()).then(async (res) => {
+        fetch(`/api/haikus/${id}?mode=${mode || _mode}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();
           setLoaded(id);
 
@@ -130,7 +131,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
               code: res.status,
               userId: (await useUser.getState()).user.id,
               id,
-            });  
+            });
             useAlert.getState().error(`Error fetching haiku ${id}: ${res.status} (${res.statusText})`);
             return resolve(res.statusText);
           }
@@ -139,6 +140,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           const haiku = data.haiku;
 
           set({
+            mode: mode || _mode,
             _haikus: { _haikus, [haiku.id]: haiku },
           });
 
@@ -146,7 +148,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         });
       } else {
         const params = query && mapToSearchParams(query);
-        fetch(`/api/haikus${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
+        fetch(`/api/haikus${params ? `?${params}${params && "&"}mode=${mode || _mode}` : ""}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();
           setLoaded(query);
 
@@ -170,10 +172,12 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           // @ts-ignore
           if (query.random) {
             set({
+              mode: mode || _mode,
               _haikus: listToMap(haikus)
             });
           } else {
             set({
+              mode: mode || _mode,
               _haikus: { ..._haikus, ...listToMap(haikus) }
             });
           }

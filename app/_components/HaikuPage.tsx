@@ -7,8 +7,8 @@ import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
 import { StyledLayers } from "./StyledLayers";
 
-function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Haiku, styles: any[], selectedWord: any, setSelectedWord: any }) {
-  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { haiku });
+function HaikuPoem({ mode, haiku, styles, selectedWord, setSelectedWord }: { mode: string, haiku: Haiku, styles: any[], selectedWord: any, setSelectedWord: any }) {
+  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { mode, haiku });
 
   const [
     inProgress,
@@ -22,7 +22,7 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
     state.haikudleId,
   ]);
 
-  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+  const isHaikudleMode = mode == "haikudle";
   const poem = isHaikudleMode ? inProgress : haiku.poem.map((line: string) => line.split(/\s+/).map((w: string) => { return { word: w } }));
 
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem });
@@ -135,10 +135,10 @@ function HaikuPoem({ haiku, styles, selectedWord, setSelectedWord }: { haiku: Ha
   )
 }
 
-export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: any[] }) {
+export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku?: Haiku, styles: any[] }) {
   // console.log('>> app._components.HaikuPage.render()', { haiku, id: haiku.id });
 
-  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+  const isHaikudleMode = mode == "haikudle";
 
   const [
     loaded,
@@ -221,8 +221,8 @@ export default function HaikuPage({ haiku, styles }: { haiku?: Haiku, styles: an
             filter: `${pop ? `drop-shadow(0px 0px 32px ${_haiku?.bgColor})` : ""}`,
           }}
         >
-          {process.env.EXPERIENCE_MODE != "social-img" &&
-            <HaikuPoem haiku={_haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord} />
+          {mode != "social-img" &&
+            <HaikuPoem mode={mode} haiku={_haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord} />
           }
         </div>
       </DragDropContext>

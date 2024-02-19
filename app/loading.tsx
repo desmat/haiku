@@ -18,7 +18,7 @@ export default async function Page() {
 
   return (
     <div>
-      <NavOverlay styles={textStyles} />
+      <NavOverlay mode="haiku" styles={textStyles} />
       <Loading />
     </div>
   )
