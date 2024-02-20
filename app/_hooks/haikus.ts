@@ -17,7 +17,7 @@ async function fetchOpts() {
 type HaikuMap = { [key: string]: Haiku | undefined; };
 type StatusMap = { [key: string]: boolean };
 
-const useHaikus: any = create(devtools((set: any, get: any) => ({
+const initialState = {
   _mode: "haiku",
 
   // access via get(id) or find(query?)
@@ -32,6 +32,18 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   // and query is stringyfied json from loaded
   // list of haikus
   _loaded: <StatusMap>{},
+}
+
+const useHaikus: any = create(devtools((set: any, get: any) => ({
+  ...initialState,
+
+  reset: () => {
+    // console.log(">> hooks.haiku.reset", {});
+    return new Promise(async (resolve) => {
+      set(initialState);
+      resolve(true);
+    })
+  },
 
   get: (id: string) => {
     return get()._haikus[id];
@@ -117,7 +129,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const { setLoaded, _mode } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    // console.log(">> hooks.haiku.load", { id, query });
+    // console.log(">> hooks.haiku.load", { id, query, mode });
 
     return new Promise(async (resolve, reject) => {
       if (id) {

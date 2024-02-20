@@ -28,12 +28,14 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     haikus,
     getHaiku,
     generateHaiku,
+    resetHaikus,
   ] = useHaikus((state: any) => [
     state.loaded(haikuId || { random: true }),
     state.load,
     state.find({ lang: lang || "en" }),
     state.get,
-    state.generate
+    state.generate,
+    state.reset,
   ]);
 
   const [
@@ -41,16 +43,18 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     loadHaikudle,
     haikudleHaiku,
     haikudles,
+    resetHaikudles,
   ] = useHaikudle((state: any) => [
     state.loaded(haikuId),
     state.load,
     state.haiku,
     state._haikudles,
+    state.reset,
   ]);
 
   let [loading, setLoading] = useState(false);
   const loaded = isHaikudleMode ? haikudleLoaded : haikusLoaded;
-  const haiku = isHaikudleMode ? haikudleHaiku : haikuId && getHaiku(haikuId) || haikus[0];
+  const haiku = !loading && (isHaikudleMode ? haikudleHaiku : haikuId && getHaiku(haikuId) || haikus[0]);
 
   const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
@@ -67,11 +71,19 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
   ];
 
-  console.log('>> app.page.render()', { haikuId, haiku, loaded, loading, haikus, haikudles, user });
+  // console.log('>> app.page.render()', { haikuId, mode, loaded, loading, user, haiku });
+
+  // useEffect(() => {
+  //   console.log('>> app.page useEffect (initial)', { haikuId, mode, loaded, loading, user, haiku });
+  // }, []);
+
+  // useEffect(() => {
+  //   console.log('>> app.page useEffect (mode)', { haikuId, mode, loaded, loading, user, haiku });
+  // }, [mode]);
 
   useEffect(() => {
-    // console.log('>> app.page useEffect', { haikuId, haiku, loaded, loading, user });
-    if (!loaded && !loading) {
+    console.log('>> app.page useEffect [haikuId, lang, mode]', { haikuId, mode, loaded, loading, user, haiku });
+    if (/* !loaded && */ !loading) {
       setLoading(true);
       loading = true;
       isHaikudleMode
@@ -83,7 +95,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
             setLoading(false);
           })
     }
-  }, [haikuId, lang]);
+  }, [haikuId, lang, mode]);
 
   useEffect(() => {
     if (isHaikudleMode && user && !user?.preferences?.onboarded) {
@@ -128,7 +140,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     e.preventDefault();
 
     if (haikuId) {
-        router.push(`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
+      router.push(`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
     }
 
     setLoading(true);
@@ -141,6 +153,13 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         }
       });
   }
+
+  const handleSwitchMode = async (e: any) => {
+    return Promise.all([
+      resetHaikus(),
+      resetHaikudles()
+    ]);
+  };
 
   if (!loaded || loading || generating) {
     return (
@@ -157,7 +176,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
 
   return (
     <div>
-      <NavOverlay mode={mode} lang={lang} haiku={haiku} styles={textStyles} onClickLogo={handleRefresh} onClickGenerate={handleGenerate} />
+      <NavOverlay mode={mode} lang={lang} haiku={haiku} styles={textStyles} onClickLogo={handleRefresh} onClickGenerate={handleGenerate} onSwitchMode={handleSwitchMode} />
       <HaikuPage mode={mode} haiku={haiku} styles={textStyles} />
     </div>
   )

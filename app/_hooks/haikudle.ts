@@ -45,8 +45,7 @@ const isSolved = (inProgress: any, solution: any) => {
 type HaikudleMap = { [key: string]: Haikudle | undefined; };
 type StatusMap = { [key: string]: boolean };
 
-const useHaikudle: any = create(devtools((set: any, get: any) => ({
-
+const initialState = {
   // access via get(id) or find(query?)
   haiku: undefined,
   haikudleId: undefined,
@@ -80,9 +79,21 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   // and query is stringyfied json from loaded
   // list of haikus
   _loaded: <StatusMap>{},
+};
+
+const useHaikudle: any = create(devtools((set: any, get: any) => ({
+  ...initialState,
+
+  reset: () => {
+    // console.log(">> hooks.haiku.reset", {});
+    return new Promise(async (resolve) => {
+      set(initialState);
+      resolve(true);
+    })
+  },
 
   init: async (haiku: Haiku, haikudle: Haikudle, hashSolution?: boolean) => {
-    // console.log(">> hooks.haikudle.init", { haiku, haikudle, cheat });
+    console.log(">> hooks.haikudle.init", { haiku, haikudle, hashSolution });
 
     const solution = hashSolution && haiku.poem
       .map((line: string) => line.split(/\s+/)

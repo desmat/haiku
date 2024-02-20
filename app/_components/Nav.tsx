@@ -48,10 +48,10 @@ export function GenerateIcon({ onClick }: { onClick?: any }) {
   )
 }
 
-export function BottomLinks({ mode, haiku, lang, onRefresh }: { mode: string, haiku?: Haiku, lang?: LanguageType, onRefresh: any }) {
+export function BottomLinks({ mode, haiku, lang, onRefresh, onSwitchMode }: { mode: string, haiku?: Haiku, lang?: LanguageType, onRefresh: any, onSwitchMode: any }) {
   // console.log("BottomLinks", { lang })
-
-  const [user] = useUser((state: any) => [state.user]);
+  const router = useRouter();
+  const user = useUser((state: any) => state.user);
 
   // WTF this breaks downstream; circular dependency perhaps?
   // const [
@@ -124,7 +124,7 @@ export function BottomLinks({ mode, haiku, lang, onRefresh }: { mode: string, ha
         {haiku?.id && user?.isAdmin &&
           <Link
             key="link"
-            href={`/${haiku.id}`}
+            href={`/${haiku ? haiku.id : ""}`}
             // target="_blank"
             className="_bg-yellow-200 flex flex-row gap-1 items-center"
           >
@@ -156,9 +156,14 @@ export function BottomLinks({ mode, haiku, lang, onRefresh }: { mode: string, ha
         {mode != "social-img" && user?.isAdmin &&
           <Link
             key="changeMode"
-            href={`/${haiku?.id}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`}
+            href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`}
             className="_bg-yellow-200 flex flex-row gap-1 items-center"
             title="Switch between Haiku/Haikudle mode"
+            onClick={async (e: any) => {
+              e.preventDefault();
+              await onSwitchMode();
+              router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
+            }}
           >
             <TbSwitch className="text-xl" />
           </Link>
@@ -166,9 +171,14 @@ export function BottomLinks({ mode, haiku, lang, onRefresh }: { mode: string, ha
         {mode != "social-img" && user?.isAdmin &&
           <Link
             key="socialImgMode"
-            href={`/${haiku?.id}?mode=social-img`}
+            href={`/${haiku ? haiku?.id : ""}?mode=social-img`}
             className="_bg-yellow-200 flex flex-row gap-1 items-center"
             title="Switch to fullscreen mode (for social image)"
+            onClick={async (e: any) => {
+              e.preventDefault();
+              await onSwitchMode();
+              router.push(`/${haiku ? haiku?.id : ""}?mode=social-img`);
+            }}
           >
             <RiFullscreenLine className="text-xl" />
           </Link>
@@ -199,12 +209,14 @@ export function BottomLinks({ mode, haiku, lang, onRefresh }: { mode: string, ha
   )
 }
 
-export function NavOverlay({ mode, styles, haiku, lang, onClickLogo, onClickGenerate }: { mode: string, styles: any[], haiku?: Haiku, lang?: LanguageType, onClickLogo?: any, onClickGenerate?: any }) {
+export function NavOverlay({ mode, styles, haiku, lang, onClickLogo, onClickGenerate, onSwitchMode, }: { mode: string, styles: any[], haiku?: Haiku, lang?: LanguageType, onClickLogo?: any, onClickGenerate?: any, onSwitchMode?: any }) {
   const router = useRouter();
+  // console.log(">> app._component.Nav.render");
   
-  const handleKeyDown = (e: any) => {
+  const handleKeyDown = async (e: any) => {
     // console.log(">> app._component.Nav.handleKeyDown", { e });
     if (e.key == "Escape" && mode == "social-img") {
+      await onSwitchMode();
       router.push(`/${haiku ? haiku?.id : ""}`);
     }
   }
@@ -215,7 +227,7 @@ export function NavOverlay({ mode, styles, haiku, lang, onClickLogo, onClickGene
     return () => {
       document.body.removeEventListener('keydown', handleKeyDown)
     }
-  }, []);
+  }, [mode, haiku]);
 
   return (
     <div
@@ -258,7 +270,7 @@ export function NavOverlay({ mode, styles, haiku, lang, onClickLogo, onClickGene
       {mode != "social-img" &&
         <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
           <StyledLayers styles={styles}>
-            <BottomLinks mode={mode} lang={lang} haiku={haiku} onRefresh={onClickLogo} />
+            <BottomLinks mode={mode} lang={lang} haiku={haiku} onRefresh={onClickLogo} onSwitchMode={onSwitchMode} />
           </StyledLayers>
         </div>
       }
