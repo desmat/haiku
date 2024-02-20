@@ -16,7 +16,7 @@ Haiku puzzles powered by OpenAI's ChatGPT:
 
 ## Live Demo
 
-[haikudle.desmat.ca](https://haikudle.desmat.ca)
+[haikudle.art](https://haikudle.art/)
 
 ## Tech
 
