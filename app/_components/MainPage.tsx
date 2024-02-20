@@ -1,5 +1,6 @@
 'use client'
 
+import moment from 'moment';
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react';
 import { Haiku } from "@/types/Haiku";
@@ -29,6 +30,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     getHaiku,
     generateHaiku,
     resetHaikus,
+    deleteHaiku,
   ] = useHaikus((state: any) => [
     state.loaded(haikuId || { random: true }),
     state.load,
@@ -36,6 +38,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     state.get,
     state.generate,
     state.reset,
+    state.delete,
   ]);
 
   const [
@@ -44,12 +47,16 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     haikudleHaiku,
     haikudles,
     resetHaikudles,
+    createHaikudle,
+    haikudleInProgress,
   ] = useHaikudle((state: any) => [
     state.loaded(haikuId),
     state.load,
     state.haiku,
     state._haikudles,
     state.reset,
+    state.create,
+    state.inProgress,
   ]);
 
   let [loading, setLoading] = useState(false);
@@ -99,17 +106,20 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
 
   useEffect(() => {
     if (isHaikudleMode && user && !user?.preferences?.onboarded) {
-      setTimeout(() => plainAlert(
-        `<div style="display: flex; flex-direction: column; gap: 0.4rem">
+      setTimeout(handleShowAbout, 2000);
+    }
+  }, [user]);
+
+  const handleShowAbout = () => {
+    plainAlert(
+      `<div style="display: flex; flex-direction: column; gap: 0.4rem">
           <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with five syllables in the first line, seven in the second, and five in the third.</div>
           <div><b>Wordle</b>: a word game with a single daily solution, with all players attempting to guess the same word.</div>
           <div>Drag-and-drop the scrabbled words to solve today's AI-generated <b>Haikudle</b>!</div>
         </div>`,
-        () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
-        "Got it!"),
-        2000);
-    }
-  }, [user]);
+      () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
+      "Got it!");
+  }
 
   const handleGenerate = async (e: any) => {
     // console.log('>> app.page.handleGenerate()');
@@ -161,6 +171,25 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     ]);
   };
 
+  const handleDelete = () => {
+    if (confirm("Delete this Haiku?")) {
+      deleteHaiku(haiku?.id);
+    }
+  }
+
+  const handleSaveHaikudle = () => {
+    // console.log('>> app._components.NavOverlay.onSaveHaikudle()', {});
+    const ret = prompt("YYYYMMDD?", moment().format("YYYYMMDD"));
+    if (ret) {
+      createHaikudle(user, {
+        id: haiku?.id,
+        dateCode: ret,
+        haikuId: haiku?.id,
+        inProgress: haikudleInProgress,
+      });
+    }
+  }
+
   if (!loaded || loading || generating) {
     return (
       <div>
@@ -176,8 +205,23 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
 
   return (
     <div>
-      <NavOverlay mode={mode} lang={lang} haiku={haiku} styles={textStyles} onClickLogo={handleRefresh} onClickGenerate={handleGenerate} onSwitchMode={handleSwitchMode} />
-      <HaikuPage mode={mode} haiku={haiku} styles={textStyles} />
+      <NavOverlay
+        mode={mode}
+        lang={lang}
+        haiku={haiku}
+        styles={textStyles}
+        onClickLogo={handleRefresh}
+        onClickGenerate={handleGenerate}
+        onSwitchMode={handleSwitchMode}
+        onDelete={handleDelete}
+        onSaveHaikudle={handleSaveHaikudle}
+        onShowAbout={handleShowAbout}
+      />
+      <HaikuPage
+        mode={mode}
+        haiku={haiku}
+        styles={textStyles}
+      />
     </div>
   )
 }

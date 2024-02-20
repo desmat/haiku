@@ -5,14 +5,12 @@ import Link from 'next/link'
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation'
 import { BsGithub } from 'react-icons/bs';
-import { IoSparkles, IoAddCircle, IoLinkSharp } from 'react-icons/io5';
+import { IoSparkles, IoAddCircle, IoLinkSharp, IoHelpCircle } from 'react-icons/io5';
 import { MdMail, MdHome, MdDelete } from "react-icons/md";
-import { TbSwitch } from "react-icons/tb";
+import { TbSwitchVertical } from "react-icons/tb";
 import { RiFullscreenLine } from "react-icons/ri";
 import { FaRandom } from "react-icons/fa";
 import * as font from "@/app/font";
-import useHaikus from '@/app/_hooks/haikus';
-import useHaikudle from '@/app/_hooks/haikudle';
 import useUser from '@/app/_hooks/user';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { StyledLayers } from './StyledLayers';
@@ -48,47 +46,28 @@ export function GenerateIcon({ onClick }: { onClick?: any }) {
   )
 }
 
-export function BottomLinks({ mode, haiku, lang, onRefresh, onSwitchMode }: { mode: string, haiku?: Haiku, lang?: LanguageType, onRefresh: any, onSwitchMode: any }) {
+export function BottomLinks({
+  mode,
+  haiku,
+  lang,
+  onRefresh,
+  onSwitchMode,
+  onDelete,
+  onSaveHaikudle,
+  onShowAbout,
+}: {
+  mode: string,
+  haiku?: Haiku,
+  lang?: LanguageType,
+  onRefresh: any,
+  onSwitchMode: any,
+  onDelete: any,
+  onSaveHaikudle: any,
+  onShowAbout: any,
+}) {
   // console.log("BottomLinks", { lang })
   const router = useRouter();
   const user = useUser((state: any) => state.user);
-
-  // WTF this breaks downstream; circular dependency perhaps?
-  // const [
-  //   deleteHaiku,
-  // ] = useHaikus((state: any) => [
-  //   state.delete,
-  // ]);
-
-  const [
-    // haiku,
-    createHaikudle,
-    haikudleInProgress,
-  ] = useHaikudle((state: any) => [
-    // state.haiku,
-    state.create,
-    state.inProgress,
-  ]);
-
-  const handleSaveHaikudle = () => {
-    // console.log('>> app._components.NavOverlay.onSaveHaikudle()', {});
-
-    const ret = prompt("YYYYMMDD?", moment().format("YYYYMMDD"));
-    if (ret) {
-      createHaikudle(user, {
-        id: haiku?.id,
-        dateCode: ret,
-        haikuId: haiku?.id,
-        inProgress: haikudleInProgress,
-      });
-    }
-  }
-
-  // const handleDeleteHaiku = () => {
-  //   if (confirm("Delete this Haiku?")) {
-  //     deleteHaiku(haiku?.id);
-  //   }
-  // }
 
   return (
     <div
@@ -101,7 +80,6 @@ export function BottomLinks({ mode, haiku, lang, onRefresh, onSwitchMode }: { mo
           key="github"
           href="https://github.com/desmat/haiku"
           target="_blank"
-          className="flex flex-row gap-0.5 items-center"
         >
           <BsGithub className="text-lg" />
         </Link>
@@ -109,7 +87,6 @@ export function BottomLinks({ mode, haiku, lang, onRefresh, onSwitchMode }: { mo
           key="web"
           href="https://www.desmat.ca"
           target="_blank"
-          className="flex flex-row gap-0.5 items-center"
         >
           <MdHome className="text-2xl" />
         </Link>
@@ -117,16 +94,22 @@ export function BottomLinks({ mode, haiku, lang, onRefresh, onSwitchMode }: { mo
           key="email"
           href="mailto:haiku@desmat.ca"
           target="_blank"
-          className="_bg-yellow-200 flex flex-row gap-1 items-center"
         >
           <MdMail className="text-xl" />
+        </Link>
+        <Link
+          key="about"
+          href="#"
+          title="About"
+          onClick={onShowAbout}
+        >
+          <IoHelpCircle className="text-2xl" />
         </Link>
         {haiku?.id && user?.isAdmin &&
           <Link
             key="link"
             href={`/${haiku ? haiku.id : ""}`}
-            // target="_blank"
-            className="_bg-yellow-200 flex flex-row gap-1 items-center"
+          // target="_blank"
           >
             <IoLinkSharp className="text-xl" />
           </Link>
@@ -136,18 +119,26 @@ export function BottomLinks({ mode, haiku, lang, onRefresh, onSwitchMode }: { mo
             key="refresh"
             href="#"
             onClick={onRefresh}
-            className="_bg-yellow-200 flex flex-row gap-1 items-center"
             title="Load random"
           >
             <FaRandom className="text-xl" />
           </Link>
-        }              
+        }
+        {user?.isAdmin && haiku?.id &&
+          <Link
+            key="deleteHaiku"
+            href="#"
+            onClick={onDelete}
+            title="Delete"
+          >
+            <MdDelete className="text-xl" />
+          </Link>
+        }
         {mode != "social-img" && user?.isAdmin &&
           <Link
             key="saveHaikudle"
             href="#"
-            className="_bg-yellow-200 flex flex-row gap-1 items-center"
-            onClick={handleSaveHaikudle}
+            onClick={onSaveHaikudle}
             title="Save as daily Haikudle"
           >
             <IoAddCircle className="text-xl" />
@@ -157,22 +148,20 @@ export function BottomLinks({ mode, haiku, lang, onRefresh, onSwitchMode }: { mo
           <Link
             key="changeMode"
             href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`}
-            className="_bg-yellow-200 flex flex-row gap-1 items-center"
-            title="Switch between Haiku/Haikudle mode"
+            title="Switch between haiku/haikudle mode"
             onClick={async (e: any) => {
               e.preventDefault();
               await onSwitchMode();
               router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
             }}
           >
-            <TbSwitch className="text-xl" />
+            <TbSwitchVertical className="text-xl" />
           </Link>
         }
         {mode != "social-img" && user?.isAdmin &&
           <Link
             key="socialImgMode"
             href={`/${haiku ? haiku?.id : ""}?mode=social-img`}
-            className="_bg-yellow-200 flex flex-row gap-1 items-center"
             title="Switch to fullscreen mode (for social image)"
             onClick={async (e: any) => {
               e.preventDefault();
@@ -183,16 +172,6 @@ export function BottomLinks({ mode, haiku, lang, onRefresh, onSwitchMode }: { mo
             <RiFullscreenLine className="text-xl" />
           </Link>
         }
-        {/* {user?.isAdmin && haiku?.id &&
-          <Link
-            key="deleteHaiku"
-            href="#"
-            className="_bg-yellow-200 flex flex-row gap-1 items-center"
-            onClick={handleDeleteHaiku}
-          >
-            <MdDelete className="text-xl" />
-          </Link>
-        } */}
       </div>
       {mode == "haiku" &&
         Object.entries(supportedLanguages)
@@ -209,10 +188,32 @@ export function BottomLinks({ mode, haiku, lang, onRefresh, onSwitchMode }: { mo
   )
 }
 
-export function NavOverlay({ mode, styles, haiku, lang, onClickLogo, onClickGenerate, onSwitchMode, }: { mode: string, styles: any[], haiku?: Haiku, lang?: LanguageType, onClickLogo?: any, onClickGenerate?: any, onSwitchMode?: any }) {
+export function NavOverlay({
+  mode,
+  styles,
+  haiku,
+  lang,
+  onClickLogo,
+  onClickGenerate,
+  onSwitchMode,
+  onDelete,
+  onSaveHaikudle,
+  onShowAbout,
+}: {
+  mode: string,
+  styles: any[],
+  haiku?: Haiku,
+  lang?: LanguageType,
+  onClickLogo?: any,
+  onClickGenerate?: any,
+  onSwitchMode?: any,
+  onDelete?: any,
+  onSaveHaikudle?: any,
+  onShowAbout?: any
+}) {
   const router = useRouter();
   // console.log(">> app._component.Nav.render");
-  
+
   const handleKeyDown = async (e: any) => {
     // console.log(">> app._component.Nav.handleKeyDown", { e });
     if (e.key == "Escape" && mode == "social-img") {
@@ -230,12 +231,7 @@ export function NavOverlay({ mode, styles, haiku, lang, onClickLogo, onClickGene
   }, [mode, haiku]);
 
   return (
-    <div
-      className="bg-pink-200 z-90"
-      onClick={(e: any) => {
-        console.log(">> app._component.Nav.onKeyDown", { e });
-      }}
-    >
+    <div className="_bg-pink-200 z-90">
       {mode != "social-img" &&
         <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
           <StyledLayers styles={styles}>
@@ -270,7 +266,16 @@ export function NavOverlay({ mode, styles, haiku, lang, onClickLogo, onClickGene
       {mode != "social-img" &&
         <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
           <StyledLayers styles={styles}>
-            <BottomLinks mode={mode} lang={lang} haiku={haiku} onRefresh={onClickLogo} onSwitchMode={onSwitchMode} />
+            <BottomLinks
+              mode={mode}
+              lang={lang}
+              haiku={haiku}
+              onRefresh={onClickLogo}
+              onSwitchMode={onSwitchMode}
+              onDelete={onDelete}
+              onSaveHaikudle={onSaveHaikudle}
+              onShowAbout={onShowAbout}
+            />
           </StyledLayers>
         </div>
       }
