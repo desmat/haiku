@@ -101,7 +101,10 @@ export function BottomLinks({
           key="about"
           href="#"
           title="About"
-          onClick={onShowAbout}
+          onClick={(e: any) => {
+            e.preventDefault();
+            onShowAbout && onShowAbout();
+          }}
         >
           <IoHelpCircle className="text-2xl" />
         </Link>
