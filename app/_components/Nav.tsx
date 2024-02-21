@@ -27,7 +27,7 @@ export function Logo({ mode, href, onClick, styles, altStyles }: { mode: string,
   const isSocialImgMode = mode == "social-img";
 
   const ai = (
-    <span className={`${font.inter.className} tracking-[-8px] ml-[1px] mr-[2px] ${isSocialImgMode ? "text-[80pt]" : "text-[22pt] md:text-[28pt]"} font-semibold`}>
+    <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode ? "text-[80pt]" : "text-[22pt] md:text-[28pt]"} font-semibold`}>
       AI
     </span>
   );
