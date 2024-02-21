@@ -35,7 +35,7 @@ async function createInProgress(haikudle: Haikudle): Promise<Haikudle> {
   const haiku = await getHaiku(haikudle.haikuId);
   console.log(`>> services.haikudle.createInProgress`, { haiku });
 
-  const words = shuffleArray(haiku.poem
+  let words = haiku.poem
     .join(" ")
     .split(/\s/)
     .map((w: string, i: number) => {
@@ -44,11 +44,21 @@ async function createInProgress(haikudle: Haikudle): Promise<Haikudle> {
         id: uuid(),
         word: word,
         syllables: syllable(word),
-        picked: false,
-        correct: false,
       }
-    }));
+    });
+  
+    // always set first 2 and last words correct
+  let correctWords = [
+    words.splice(0, 2),
+    words.splice(words.length - 1, 1),
+  ];
 
+  words = [
+    ...correctWords[0],
+    ...shuffleArray(words),
+    ...correctWords[1],
+  ];
+  
   const numWords = words.length;
   const inProgress = haikudle?.inProgress || [
     words.slice(0, (numWords / 3)),
