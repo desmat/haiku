@@ -205,7 +205,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   if (!loaded || loading || generating) {
     return (
       <div>
-        <NavOverlay mode={mode} styles={textStyles} />
+        <NavOverlay mode={mode} styles={textStyles} altStyles={altTextStyles} />
         <Loading />
       </div>
     )

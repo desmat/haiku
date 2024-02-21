@@ -7,10 +7,7 @@ export default function NotFound({ mode, lang, onClickGenerate }: { mode: string
   // console.log('>> app.NotFound.render()');
 
   const fontColor = notFoundHaiku?.color || "#555555";
-
-  // const bgColor = haiku?.colorPalette && colorOffsets.back >= 0 && haiku?.colorPalette[colorOffsets.back] || haiku?.bgColor || "lightgrey";
   const bgColor = notFoundHaiku?.bgColor || "lightgrey";
-
   const textStyles = [
     {
       color: fontColor,
@@ -23,10 +20,21 @@ export default function NotFound({ mode, lang, onClickGenerate }: { mode: string
       filter: `drop-shadow(0px 0px 2px ${bgColor})`,
     }
   ];
-
+  const altTextStyles = [
+    {
+      color: bgColor,
+      filter: `drop-shadow(0px 0px 3px ${fontColor})`,
+      WebkitTextStroke: `0.5px ${bgColor}`,
+      fontWeight: 300,
+    },
+    {
+      color: bgColor,
+      filter: `drop-shadow(0px 0px 1px ${fontColor})`,
+    }
+  ];
   return (
     <div>
-      <NavOverlay mode={mode} styles={textStyles} onClickGenerate={onClickGenerate} />
+      <NavOverlay mode={mode} styles={textStyles} altStyles={altTextStyles} onClickGenerate={onClickGenerate} />
       <HaikuPage mode={mode} haiku={notFoundHaiku} styles={textStyles} />
     </div>
   )
