@@ -32,9 +32,9 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     resetHaikus,
     deleteHaiku,
   ] = useHaikus((state: any) => [
-    state.loaded(haikuId || { random: true }),
+    state.loaded(haikuId || { random: true, lang }),
     state.load,
-    state.find({ lang: lang || "en" }),
+    state.find({ lang }),
     state.get,
     state.generate,
     state.reset,
@@ -50,7 +50,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     createHaikudle,
     haikudleInProgress,
   ] = useHaikudle((state: any) => [
-    state.loaded(haikuId),
+    state.loaded(haikuId || { lang }),
     state.load,
     state.haiku,
     state._haikudles,
@@ -106,9 +106,9 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       setLoading(true);
       loading = true;
       isHaikudleMode
-        ? loadHaikudle(haikuId)
+        ? loadHaikudle(haikuId || { lang })
           .then((haikudle: Haikudle) => setLoading(false))
-        : loadHaikus(haikuId || { random: true }, mode)
+        : loadHaikus(haikuId || { random: true, lang }, mode)
           .then((haikus: Haiku | Haiku[]) => {
             setHaikuId(haikus.id || haikus[0]?.id);
             setLoading(false);
@@ -166,11 +166,11 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
 
     setLoading(true);
-    loadHaikus({ random: true }, mode)
+    loadHaikus({ random: true, lang }, mode)
       .then((haikus: Haiku[]) => {
         setLoading(false);
         if (isHaikudleMode && haikus?.length > 0) {
-          loadHaikudle(haikus[0]?.id);
+          loadHaikudle(haikus[0]?.id || { lang });
           setHaikuId(haikus[0].id);
         }
       });

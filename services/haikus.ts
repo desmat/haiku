@@ -95,13 +95,16 @@ export async function generateHaiku(user: any, subject?: string, lang?: Language
   // sort by darkness and pick darkest for foreground, lightest for background
   const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
 
-  const blob = !debugOpenai && await put(`${uuid()}.png`, imageBuffer, {
+  const haikuId = uuid();
+  const filename = `haiku-${haikuId}-${generatedSubject?.replaceAll(/\W/g, "_").toLowerCase()}.png`;
+  const blob = !debugOpenai && await put(filename, imageBuffer, {
     access: 'public',
+    addRandomSuffix: false,
   });
-  // console.log(">> services.haiku.generateHaiku", { blob });
+  // console.log(">> services.haiku.generateHaiku", { subject, filename, blob });
 
   let haiku = {
-    id: uuid(),
+    id: haikuId,
     lang: lang || "en",
     createdBy: user.id,
     createdAt: moment().valueOf(),

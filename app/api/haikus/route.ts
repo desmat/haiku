@@ -21,7 +21,13 @@ export async function GET(request: NextRequest, params?: any) {
   }
 
   if (query.random) {
-    const haikus = await getHaikus(undefined, query.mode == "haikudle");
+    const mode = query.mode;
+    delete query.mode;
+    delete query.random;
+    if (!query.lang) {
+      query.lang = "en";
+    }
+    const haikus = await getHaikus(query, mode == "haikudle");
     const random = haikus[Math.floor(Math.random() * haikus.length)];
     return NextResponse.json({ haikus: [random] });
   }

@@ -18,8 +18,7 @@ const model = "gpt-4";
 export async function generateBackgroundImage(subject?: string): Promise<any> {
   console.log(`>> services.openai.generateBackgroundImage`, { subject });
   const prompt = `Please respond with an extremely muted, almost monochromatic colors paintings in a japanese style, 
-    on the subject of ${subject || "landscape"}.
-    `
+    on the subject of ${subject || "landscape"}.`
 
   // for testing
   if (process.env.OPENAI_API_KEY == "DEBUG") {
@@ -86,7 +85,7 @@ export async function generateHaiku(subject?: string, language?: string): Promis
           "line two,",
           "line three.",
         ],
-        subject: "Subject",
+        subject: "Test subject",
       }
     };
   }
