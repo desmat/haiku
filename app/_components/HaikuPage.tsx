@@ -199,6 +199,13 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
     }
   }
 
+  const blurCurve = [0, 1.5, 2.5, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14, 14, 14, 14, 14, 14];
+  const numWords = inProgress.flat().length;
+  let numCorrectWords = inProgress.flat().filter((word: any) => word.correct).length
+  // if (numCorrectWords > 0) numCorrectWords = numCorrectWords + 1; // make the last transition more impactful
+  const blurValue = process.env.BACKGROUND_BLUR == "progressive" ? blurCurve[numWords - numCorrectWords] : 0;
+  // console.log('>> app._components.HaikuPage.render()', { numWords, numCorrectWords, blurValue });
+
   return (
     <div>
       <DragDropContext
@@ -211,7 +218,8 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
             backgroundImage: `url("${_haiku?.bgImage}")`,
             backgroundPosition: "center",
             backgroundSize: "cover",
-            filter: "brightness(1.2)",
+            filter: `brightness(1.2) blur(${blurValue}px)`,
+            transition: "filter 0.5s ease-out",
           }}
         />
 
