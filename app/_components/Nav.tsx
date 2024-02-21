@@ -22,9 +22,25 @@ export function Loading() {
   );
 }
 
-export function Logo({ mode, href, onClick }: { mode: string, href?: string, onClick?: any }) {
+export function Logo({ mode, href, onClick, styles, altStyles }: { mode: string, href?: string, onClick?: any, styles?: any, altStyles?: any }) {
   const isHaikudleMode = mode == "haikudle";
   const isSocialImgMode = mode == "social-img";
+
+  const ai = (
+    <span className={`${font.inter.className} tracking-[-8px] ml-[1px] mr-[2px] ${isSocialImgMode ? "text-[80pt]" : "text-[22pt] md:text-[28pt]"} font-semibold`}>
+      AI
+    </span>
+  );
+
+  const styledAi = altStyles
+    ? (
+      <StyledLayers styles={altStyles}>
+        {ai}
+      </StyledLayers>
+    )
+    : (
+      <div>{ai}</div>
+    );
 
   return (
     <Link
@@ -32,7 +48,11 @@ export function Logo({ mode, href, onClick }: { mode: string, href?: string, onC
       href={href || "#"}
       className={`hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
     >
-      <span className={font.architects_daughter.className}>h<span className={`${font.inter.className} tracking-[-1px] ${isSocialImgMode ? "text-[80pt]" : "text-[18pt] md:text-[24pt]"} font-semibold`}>AI</span>{isHaikudleMode || isSocialImgMode ? "kudle" : "ku"}</span>
+      <div className={`${font.architects_daughter.className} flex flex-row`}>
+        <StyledLayers styles={styles}>h</StyledLayers>
+        {styledAi}
+        <StyledLayers styles={styles}>{isHaikudleMode || isSocialImgMode ? "kudle" : "ku"}</StyledLayers>
+      </div>
     </Link>
   )
 }
@@ -194,6 +214,7 @@ export function BottomLinks({
 export function NavOverlay({
   mode,
   styles,
+  altStyles,
   haiku,
   lang,
   onClickLogo,
@@ -205,6 +226,7 @@ export function NavOverlay({
 }: {
   mode: string,
   styles: any[],
+  altStyles: any[],
   haiku?: Haiku,
   lang?: LanguageType,
   onClickLogo?: any,
@@ -237,22 +259,18 @@ export function NavOverlay({
     <div className="_bg-pink-200 z-90">
       {mode != "social-img" &&
         <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
-          <StyledLayers styles={styles}>
-            <Logo mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
-          </StyledLayers>
+          <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
         </div>
       }
       {mode == "social-img" &&
         <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-20`}>
-          <StyledLayers styles={styles}>
-            <Logo mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
-          </StyledLayers>
+          <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
         </div>
       }
 
       {mode != "social-img" && onClickGenerate &&
         <div className="fixed top-2.5 right-2.5 z-20">
-          <StyledLayers styles={styles}>
+          <StyledLayers styles={altStyles}>
             <GenerateIcon onClick={onClickGenerate} />
           </StyledLayers>
         </div>

@@ -77,6 +77,18 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       filter: `drop-shadow(0px 0px 2px ${bgColor})`,
     }
   ];
+  const altTextStyles = [
+    {
+      color: bgColor,
+      filter: `drop-shadow(0px 0px 3px ${fontColor})`,
+      WebkitTextStroke: `0.5px ${bgColor}`,
+      fontWeight: 300,
+    },
+    {
+      color: bgColor,
+      filter: `drop-shadow(0px 0px 1px ${fontColor})`,
+    }
+  ];
 
   // console.log('>> app.page.render()', { haikuId, mode, loaded, loading, user, haiku });
 
@@ -210,6 +222,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         lang={lang}
         haiku={haiku}
         styles={textStyles}
+        altStyles={altTextStyles}
         onClickLogo={handleRefresh}
         onClickGenerate={handleGenerate}
         onSwitchMode={handleSwitchMode}
