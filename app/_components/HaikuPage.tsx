@@ -70,7 +70,7 @@ function HaikuPoem({ mode, haiku, styles, selectedWord, setSelectedWord }: { mod
                 <div
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  className={`_bg-purple-200 flex flex-row items-center justify-start my-0 px-2 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit `}
+                  className={`_bg-purple-200 flex flex-row items-center justify-start my-0 px-5 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-fit select-none`}
                 >
                   {poem[i].map((w: any, j: number) => {
                     return (
