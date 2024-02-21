@@ -72,8 +72,8 @@ export async function createHaiku(user: User): Promise<Haiku> {
 
 export async function generateHaiku(user: any, subject?: string, lang?: LanguageType): Promise<Haiku> {
   console.log(">> services.haiku.generateHaiku", { subject, user, lang });
-
   const language = supportedLanguages[lang || "en"].name;
+  const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
 
   const { response: { haiku: poem, subject: generatedSubject } } = await openai.generateHaiku(subject, language);
   // console.log(">> services.haiku.generateHaiku", { ret });
@@ -95,7 +95,7 @@ export async function generateHaiku(user: any, subject?: string, lang?: Language
   // sort by darkness and pick darkest for foreground, lightest for background
   const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
 
-  const blob = await put(`${uuid()}.png`, imageBuffer, {
+  const blob = !debugOpenai && await put(`${uuid()}.png`, imageBuffer, {
     access: 'public',
   });
   // console.log(">> services.haiku.generateHaiku", { blob });
@@ -107,8 +107,8 @@ export async function generateHaiku(user: any, subject?: string, lang?: Language
     createdAt: moment().valueOf(),
     status: "created",
     theme: generatedSubject,
-    bgImage: blob.url,  // TODO REVERT
-    // bgImage: openaiUrl,   // TODO REVERT
+    // @ts-ignore
+    bgImage: debugOpenai ? openaiUrl : blob.url,
     color: sortedColors[0].darken(0.5).hex(),
     bgColor: sortedColors[sortedColors.length - 1].brighten(1).hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),
