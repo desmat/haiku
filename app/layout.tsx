@@ -8,7 +8,7 @@ import moment from 'moment';
  
 const inter = Inter({ subsets: ['latin'] })
 const appName = process.env.EXPERIENCE_MODE == "haiku" ? "hAIku" : "hAIkudle";
-const appDescription = process.env.EXPERIENCE_MODE == "haiku" ? "AI-generated art and haiku poems" : "AI-powered daily haiku puzzles";
+const appDescription = process.env.EXPERIENCE_MODE == "haiku" ? "AI-generated art and haiku poems" : "AI-generated daily art and haiku puzzles";
 
 export const metadata: Metadata = {
   title: `${appName} - ${appDescription}`,
