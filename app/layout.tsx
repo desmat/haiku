@@ -38,7 +38,8 @@ export default function RootLayout({
         <meta property="og:type" content="website" />
         <meta property="og:description" content={appDescription} />
         <meta property="og:url" content={isHaikudleMode ? "https://haikudle.art/" : "https://haiku.desmat.ca/"} />
-        <meta property="og:image" content={isHaikudleMode ? "https://haikudle.art/social_img/" + moment().format("YYYYMMDD") + ".png" : "https://haiku.desmat.ca/social_img_haiku.png" } />        
+        <meta property="og:image" content={isHaikudleMode ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${moment().format("YYYYMMDD")}.png` : "https://haiku.desmat.ca/social_img_haiku.png" } />
+        {/* <meta property="og:image" content={isHaikudleMode ? `https://haikudle.art/social_img/${moment().format("YYYYMMDD")}.png` : "https://haiku.desmat.ca/social_img_haiku.png" } /> */}
         <meta property="og:image" content={isHaikudleMode ? "https://haikudle.art/social_img_haikudle.png" : "https://haiku.desmat.ca/social_img_haiku.png" } />        
         <meta property="fb:app_id" content={process.env.FB_APP_ID} />
       </head>
