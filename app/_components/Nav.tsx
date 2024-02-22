@@ -97,6 +97,17 @@ export function BottomLinks({
         className="relative flex flex-row gap-2 items-center justify-center _font-semibold"
       >
         <Link
+          key="about"
+          href="#"
+          title="About"
+          onClick={(e: any) => {
+            e.preventDefault();
+            onShowAbout && onShowAbout();
+          }}
+        >
+          <IoHelpCircle className="text-2xl" />
+        </Link>
+        <Link
           key="github"
           href="https://github.com/desmat/haiku"
           target="_blank"
@@ -112,27 +123,17 @@ export function BottomLinks({
         </Link>
         <Link
           key="email"
-          href="mailto:haiku@desmat.ca"
+          href={`mailto:haiku${mode == "haikudle" ? "dle" : ""}@desmat.ca`}
           target="_blank"
         >
           <MdMail className="text-xl" />
         </Link>
-        <Link
-          key="about"
-          href="#"
-          title="About"
-          onClick={(e: any) => {
-            e.preventDefault();
-            onShowAbout && onShowAbout();
-          }}
-        >
-          <IoHelpCircle className="text-2xl" />
-        </Link>
-        {haiku?.id && user?.isAdmin &&
+        {haiku?.id && (user?.isAdmin || mode == "haiku") &&
           <Link
             key="link"
             href={`/${haiku ? haiku.id : ""}`}
           // target="_blank"
+            title="Share link"
           >
             <IoLinkSharp className="text-xl" />
           </Link>
