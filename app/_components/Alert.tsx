@@ -141,7 +141,6 @@ function AnimatedAlert({
   const [lastMessage, setLastMessage] = useState<string | undefined>(message);
   let [dismissedAt, setDismissedAt] = useState<number | undefined>();
 
-
   useEffect(() => {
     // console.log('>> app._components.Alert.AnimatedAlert.render() useEffect', { message, lastMessage, timestamp });
 
@@ -162,6 +161,12 @@ function AnimatedAlert({
     }
 
     setLastMessage(message);
+
+    document.body.addEventListener('keydown', handleClose);
+
+    return () => {
+      document.body.removeEventListener('keydown', handleClose)
+    }
   }, [message, timestamp]);
 
   const handleClose = () => {

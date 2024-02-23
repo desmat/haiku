@@ -121,19 +121,19 @@ export function BottomLinks({
         >
           <MdHome className="text-2xl" />
         </Link>
-        <Link
+        {/* <Link
           key="email"
           href={`mailto:haiku${mode == "haikudle" ? "dle" : ""}@desmat.ca`}
           target="_blank"
         >
           <MdMail className="text-xl" />
-        </Link>
-        {haiku?.id && (user?.isAdmin || mode == "haiku") &&
+        </Link> */}
+        {haiku?.id &&
           <Link
             key="link"
             href={`/${haiku ? haiku.id : ""}`}
           // target="_blank"
-            title="Share link"
+            title="Direct link"
           >
             <IoLinkSharp className="text-xl" />
           </Link>
