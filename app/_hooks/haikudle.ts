@@ -55,9 +55,11 @@ const initialState = {
   moves: 0,
   onSolved: (id: string, moves: number) => {
     setTimeout(() => {
+      const shareContent = "Solved today\\'s haiku puzzle in " + moves + " moves! https://haikudle.art/\\n\\n"
+        + "#haiku #haikuoftheday #haikuchallenge #haikudle #puzzle #dailypuzzle #AI #aiart #dalle #dalle3 #chatgpt ";
       useAlert.getState().plain(`
         <div style="display: flex; flex-direction: column; gap: 0.4rem">
-          <div>Solved in ${moves} move${moves > 1 ? "s" : ""}! <b><a href="https://haikudle.art/${id}" target="_blank">Share</a></b> on your social networks and come back tomorrow for a new Haiku puzzle.</div>
+          <div>Solved in ${moves} move${moves > 1 ? "s" : ""}! <b><span class="clickable" style="cursor: copy;" onClick="navigator.clipboard.writeText('${shareContent}');">Copy</span></b> and share your result on your social networks and come back tomorrow for a new haiku puzzle.</div>
           <div>Until then try the generate button above and see what AI comes up with!</div>
         </div>`);
     }, 250);

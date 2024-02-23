@@ -13,6 +13,7 @@ import useUser from '@/app/_hooks/user';
 import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
 import { Haikudle } from '@/types/Haikudle';
+import { syllable } from 'syllable';
 
 export default function MainPage({ mode, id, lang }: { mode: string, id?: string, lang?: undefined | LanguageType }) {
   // console.log('>> app.mainPage.render()', { mode, id, lang });
@@ -20,7 +21,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   const [generating, setGenerating] = useState(false);
   const router = useRouter();
   const [user, saveUser] = useUser((state: any) => [state.user, state.save]);
-  const plainAlert = useAlert((state: any) => state.plain);
+  const [plainAlert, warningAlert, infoAlert] = useAlert((state: any) => [state.plain, state.warning, state.info]);
   const isHaikudleMode = mode == "haikudle";
 
   const [
@@ -102,6 +103,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
 
   useEffect(() => {
     console.log('>> app.page useEffect [haikuId, lang, mode]', { haikuId, mode, loaded, loading, user, haiku });
+
     if (/* !loaded && */ !loading) {
       setLoading(true);
       loading = true;
@@ -115,6 +117,28 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
           })
     }
   }, [haikuId, lang, mode]);
+
+  useEffect(() => {
+    // console.log('>> app.page useEffect [haiku, loading, loaded]', { haikuId, mode, loaded, loading, user, haiku });
+    if (loaded && !loading && haiku && mode == "haiku") {
+      const syllables = haiku.poem
+        .map((line: string) => line.split(/\s/)
+          .map((word: string) => syllable(word))
+          .reduce((a: number, v: number) => a + v, 0))
+      const isCorrect = syllables[0] == 5 && syllables[1] == 7 && syllables[2] == 5
+      // console.log(">> app.page useEffect [haiku, loading, loaded]", { syllables });
+
+      if (user.isAdmin && !isCorrect) {
+        warningAlert(`This haiku doesn't follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`);
+        return;
+      }
+
+      if (user.isAdmin && haiku.dailyHaikudleId) {
+        infoAlert(`This haiku was previously featured as a daily haikudle: ${haiku.dailyHaikudleId}`);
+        return;
+      }
+    }
+  }, [haiku, loaded, loading]);
 
   useEffect(() => {
     if (isHaikudleMode && user && !user?.preferences?.onboarded) {

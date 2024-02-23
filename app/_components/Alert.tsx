@@ -40,7 +40,7 @@ function TypedAlert({
       ];
       break;
     case "warning":
-      icon = <ExclamationCircleIcon className={`h-5 w-5 text-yellow-400`} aria-hidden="true" />
+      icon = undefined //<ExclamationCircleIcon className={`h-5 w-5 text-yellow-400`} aria-hidden="true" />
       colorClasses = [
         'bg-yellow-50',
         'hover:bg-yellow-100',
@@ -51,7 +51,7 @@ function TypedAlert({
       ];
       break;
     case "success":
-      icon = <MdCelebration className={`h-5 w-5 text-[#6d6d6d]`} aria-hidden="true" />
+      icon = undefined //<MdCelebration className={`h-5 w-5 text-[#6d6d6d]`} aria-hidden="true" />
       colorClasses = [
         'bg-[#f8f8f8]',
         'hover:bg-black-100',
@@ -62,7 +62,7 @@ function TypedAlert({
       ];
       break;
     case "info":
-      icon = <InformationCircleIcon className={`h-5 w-5 text-blue-400`} aria-hidden="true" />
+      icon = undefined //<InformationCircleIcon className={`h-5 w-5 text-blue-400`} aria-hidden="true" />
       colorClasses = [
         'bg-blue-50',
         'hover:bg-blue-100',

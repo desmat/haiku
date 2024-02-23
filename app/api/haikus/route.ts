@@ -4,6 +4,8 @@ import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
 import moment from 'moment';
 import { Haiku } from '@/types/Haiku';
+import { getDailyHaikudles } from '@/services/haikudles';
+import { DailyHaikudle } from '@/types/Haikudle';
 
 export const maxDuration = 300;
 // export const dynamic = 'force-dynamic';
@@ -29,6 +31,16 @@ export async function GET(request: NextRequest, params?: any) {
     }
     const haikus = await getHaikus(query, mode == "haikudle");
     const random = haikus[Math.floor(Math.random() * haikus.length)];
+
+    const dailyHaikudles = await getDailyHaikudles();
+    const dailyHaikudle = dailyHaikudles
+      .filter((dailyHaikudles: DailyHaikudle) => dailyHaikudles.haikuId == random.id)[0];
+      // console.log('>> app.api.haikus.GET', { dailyHaikudles, dailyHaikudle });
+
+    if (dailyHaikudle) {
+      random.dailyHaikudleId = dailyHaikudle?.id;
+    }
+
     return NextResponse.json({ haikus: [random] });
   }
 

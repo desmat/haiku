@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getHaiku, deleteHaiku, saveHaiku } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
+import { getDailyHaikudles } from '@/services/haikudles';
+import { DailyHaikudle } from '@/types/Haikudle';
 
 export const maxDuration = 300;
 
@@ -23,6 +25,20 @@ export async function GET(
   const haiku = await getHaiku(params.id, query.mode == "haikudle");
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
+  }
+
+  const dailyHaikudles = await getDailyHaikudles();
+  const dailyHaikudle = dailyHaikudles
+    .filter((dailyHaikudles: DailyHaikudle) => dailyHaikudles.haikuId == haiku.id)[0];
+  // console.log('>> app.api.haikus.GET', { dailyHaikudles, dailyHaikudle });
+
+  if (dailyHaikudle) {
+    haiku.dailyHaikudleId = dailyHaikudle?.id;
+  }
+  // console.log('>> app.api.haikus.GET', { dailyHaikudle });
+
+  if (dailyHaikudle) {
+    haiku.dailyHaikudleId = dailyHaikudle?.id;
   }
 
   return NextResponse.json({ haiku });
