@@ -104,6 +104,7 @@ export async function generateHaiku(subject?: string, language?: string): Promis
       {
         role: 'system',
         content: `Given a topic (or "any") generate a haiku in ${language || "English"} and respond in JSON where each response is an array of 3 strings.
+          Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
           Also include in the response, in fewest number of words, what was the subject of the haiku. Please only include keys "haiku" and "subject"`
       },
       {

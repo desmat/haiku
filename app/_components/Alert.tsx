@@ -162,12 +162,19 @@ function AnimatedAlert({
 
     setLastMessage(message);
 
-    document.body.addEventListener('keydown', handleClose);
+    document.body.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.removeEventListener('keydown', handleClose)
+      document.body.removeEventListener('keydown', handleKeyDown)
     }
   }, [message, timestamp]);
+
+  const handleKeyDown = async (e: any) => {
+    console.log(">> app._components.Alert.AnimatedAlert.handleKeyDown", { e });
+    if (e.key == "Escape") {
+      handleClose();
+    }
+  }
 
   const handleClose = () => {
     setDismissedAt(timestamp);
