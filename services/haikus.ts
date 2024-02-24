@@ -70,16 +70,26 @@ export async function createHaiku(user: User): Promise<Haiku> {
   return store.haikus.create(user.id, haiku);
 }
 
-export async function generateHaiku(user: any, subject?: string, lang?: LanguageType): Promise<Haiku> {
-  console.log(">> services.haiku.generateHaiku", { subject, user, lang });
+export async function generateHaiku(user: any, lang?: LanguageType, subject?: string, mood?: string): Promise<Haiku> {
+  console.log(">> services.haiku.generateHaiku", { lang, subject, mood, user });
   const language = supportedLanguages[lang || "en"].name;
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
 
-  const { response: { haiku: poem, subject: generatedSubject } } = await openai.generateHaiku(subject, language);
+  const {
+    response: {
+      haiku: poem,
+      subject: generatedSubject,
+      mood: generatedMood,
+    }
+  } = await openai.generateHaiku(language, subject, mood);
   // console.log(">> services.haiku.generateHaiku", { ret });
   console.log(">> services.haiku.generateHaiku", { poem, generatedSubject });
 
-  const { url: openaiUrl } = await openai.generateBackgroundImage(generatedSubject);
+  const {
+    url: openaiUrl,
+    prompt: imagePrompt,
+    revisedPrompt: imageRevisedPrompt
+  } = await openai.generateBackgroundImage(subject || generatedSubject, mood || generatedMood);
 
   const imageRet = await fetch(openaiUrl);
   // console.log(">> services.haiku.generateHaiku", { imageRet });
@@ -110,6 +120,8 @@ export async function generateHaiku(user: any, subject?: string, lang?: Language
     createdAt: moment().valueOf(),
     status: "created",
     theme: generatedSubject,
+    imagePrompt,
+    imageRevisedPrompt,
     // @ts-ignore
     bgImage: debugOpenai ? openaiUrl : blob.url,
     color: sortedColors[0].darken(0.5).hex(),

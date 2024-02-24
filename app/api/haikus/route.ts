@@ -52,8 +52,14 @@ export async function POST(request: Request) {
   console.log('>> app.api.haiku.POST', {  });
 
   const data: any = await request.json();
-  const { subject, lang } = data.request;
-  console.log('>> app.api.haiku.POST', { subject, lang });
+  let { subject, lang } = data.request;
+  let mood;
+  if (subject.indexOf(",") > -1) {
+    const split = subject.split(",");
+    subject = split[0];
+    mood = split[1];
+  }
+  console.log('>> app.api.haiku.POST', { lang, subject, mood });
 
   const { user } = await userSession(request);
 
@@ -74,7 +80,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const updatedHaiku = await generateHaiku(user, subject, lang);
+  const updatedHaiku = await generateHaiku(user, lang, subject, mood);
 
   return NextResponse.json({ haiku: updatedHaiku });
 }
