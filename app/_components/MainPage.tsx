@@ -141,9 +141,9 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   }, [haiku, loaded, loading]);
 
   useEffect(() => {
-    if (isHaikudleMode && user && !user?.preferences?.onboarded) {
-      setTimeout(handleShowAbout, 2000);
-    }
+    // if (isHaikudleMode && user && !user?.preferences?.onboarded) {
+      // setTimeout(handleShowAbout, 2000);
+    // }
   }, [user]);
 
   const handleShowAbout = () => {
