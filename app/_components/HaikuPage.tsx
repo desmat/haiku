@@ -199,6 +199,7 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
     }
   }
 
+
   const blurCurve = [0, 3, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
   const numWords = inProgress.flat().length;
   let numCorrectWords = inProgress.flat().filter((word: any) => word.correct).length
