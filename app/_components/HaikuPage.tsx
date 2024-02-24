@@ -199,7 +199,7 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
     }
   }
 
-  const blurCurve = [0, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10];
+  const blurCurve = [0, 3, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
   const numWords = inProgress.flat().length;
   let numCorrectWords = inProgress.flat().filter((word: any) => word.correct).length
   // if (numCorrectWords > 0) numCorrectWords = numCorrectWords + 1; // make the last transition more impactful

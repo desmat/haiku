@@ -258,7 +258,7 @@ export function NavOverlay({
 
   return (
     <div className="_bg-pink-200 z-90">
-      {mode != "social-img" &&
+      {/* {mode != "social-img" &&
         <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
           <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
         </div>
@@ -267,15 +267,15 @@ export function NavOverlay({
         <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-20`}>
           <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
         </div>
-      }
+    */}
 
-      {mode != "social-img" && onClickGenerate &&
+      {/* {mode != "social-img" && onClickGenerate &&
         <div className="fixed top-2.5 right-2.5 z-20">
           <StyledLayers styles={altStyles}>
             <GenerateIcon onClick={onClickGenerate} />
           </StyledLayers>
         </div>
-      }
+      } */}
 
       <div
         className={`fixed top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0`}
