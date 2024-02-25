@@ -131,6 +131,15 @@ function HaikuPoem({ mode, haiku, styles, selectedWord, setSelectedWord }: { mod
           </Droppable>
         )
       })}
+      {solved &&
+        <div className="relative">
+          <div className="px-5 absolute w-max">
+            <StyledLayers styles={styles}>
+              --Jardin D'hiver, Henri Salvador
+            </StyledLayers>
+          </div>
+        </div>
+      }
     </>
   )
 }
@@ -199,14 +208,18 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
     }
   }
 
-
-  const blurCurve = [0, 3, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
+  const blurCurve = [0, 1, 2.5, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
+  const saturateCurve = [1.1, 1.2, 1.25, 1.3, 1.35, 1.45, 1.5, 1.55, 1.6];
   const numWords = inProgress.flat().length;
   let numCorrectWords = inProgress.flat().filter((word: any) => word.correct).length
   // if (numCorrectWords > 0) numCorrectWords = numCorrectWords + 1; // make the last transition more impactful
   let blurValue = process.env.BACKGROUND_BLUR == "progressive" ? blurCurve[numWords - numCorrectWords] : 0;
-  if (typeof(blurValue) != "number") {
+  let saturateValue = process.env.BACKGROUND_BLUR == "progressive" ? saturateCurve[numWords - numCorrectWords] : 0;
+  if (typeof (blurValue) != "number") {
     blurValue = blurCurve[blurCurve.length - 1];
+  }
+  if (typeof (saturateValue) != "number") {
+    saturateValue = saturateCurve[saturateCurve.length - 1];
   }
   // console.log('>> app._components.HaikuPage.render()', { numWords, numCorrectWords, blurValue });
 
@@ -217,12 +230,12 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
         onDragEnd={handleDragEnd}
       >
         <div
-          className="fixed top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0 opacity-100"
+          className="bar fixed top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0 opacity-100"
           style={{
             backgroundImage: `url("${_haiku?.bgImage}")`,
             backgroundPosition: "center",
             backgroundSize: "cover",
-            filter: `brightness(1.2) blur(${blurValue}px)`,
+            filter: `brightness(1.2) blur(${blurValue}px) saturate(${saturateValue}) `,
             transition: "filter 0.5s ease-out",
           }}
         />
