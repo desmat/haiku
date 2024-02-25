@@ -131,15 +131,15 @@ function HaikuPoem({ mode, haiku, styles, selectedWord, setSelectedWord }: { mod
           </Droppable>
         )
       })}
-      {solved &&
+      {/* {solved &&
         <div className="relative">
           <div className="px-5 absolute w-max">
             <StyledLayers styles={styles}>
-              --Jardin D'hiver, Henri Salvador
+              --Jardin D&apos;hiver, Henri Salvador
             </StyledLayers>
           </div>
         </div>
-      }
+      } */}
     </>
   )
 }
