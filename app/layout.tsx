@@ -38,8 +38,8 @@ export default function RootLayout({
         <meta property="og:type" content="website" />
         <meta property="og:description" content={appDescription} />
         <meta property="og:url" content="https://lyricle.desmat.ca/" />
-        <meta property="og:image" content={`https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_lyrics/default.pnghttps://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_lyrics/${moment().format("YYYYMMDD")}.png`} />
-        <meta property="og:image" content="https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_lyrics/default.pnghttps://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_lyrics/default.png" />
+        <meta property="og:image" content={`https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_lyrics/${moment().format("YYYYMMDD")}.png`} />
+        <meta property="og:image" content="https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_lyrics/default.png" />
         <meta property="fb:app_id" content={process.env.FB_APP_ID} />
       </head>
       <body className={inter.className}>
