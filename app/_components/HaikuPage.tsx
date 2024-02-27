@@ -23,7 +23,9 @@ function HaikuPoem({ mode, haiku, styles, selectedWord, setSelectedWord }: { mod
   ]);
 
   const isHaikudleMode = mode == "haikudle";
-  const poem = isHaikudleMode ? inProgress : haiku.poem.map((line: string) => line.split(/\s+/).map((w: string) => { return { word: w } }));
+  const isLyricleMode = mode == "lyricle";
+  const isPuzzleMode = isHaikudleMode || isLyricleMode;
+  const poem = isPuzzleMode ? inProgress : haiku.poem.map((line: string) => line.split(/\s+/).map((w: string) => { return { word: w } }));
 
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem });
 
@@ -80,7 +82,7 @@ function HaikuPoem({ mode, haiku, styles, selectedWord, setSelectedWord }: { mod
                         draggableId={`word-${i}-${j}`}
                         // draggableId={w?.id}
                         index={j}
-                        isDragDisabled={!isHaikudleMode || w?.correct}
+                        isDragDisabled={!isPuzzleMode || w?.correct}
                         shouldRespectForcePress={true}
                       // timeForLongPress={0}
                       >
@@ -90,16 +92,16 @@ function HaikuPoem({ mode, haiku, styles, selectedWord, setSelectedWord }: { mod
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              onMouseDown={() => isHaikudleMode && !w?.correct && handleClickWord(w, i, j)}
+                              onMouseDown={() => isPuzzleMode && !w?.correct && handleClickWord(w, i, j)}
                             >
-                              <StyledLayers key={i} styles={!isHaikudleMode || solved || w?.correct ? styles : [styles[0]]}>
+                              <StyledLayers key={i} styles={!isPuzzleMode || solved || w?.correct ? styles : [styles[0]]}>
                                 <div
-                                  className={`px-1 ${!isHaikudleMode || solved || w?.correct ? "" : "m-1"} transition-all ${!solved && !w?.correct && "draggable-notsure-why-cant-inline"}`}
+                                  className={`px-1 ${!isPuzzleMode || solved || w?.correct ? "" : "m-1"} transition-all ${!solved && !w?.correct && "draggable-notsure-why-cant-inline"}`}
                                   style={{
-                                    backgroundColor: (!isHaikudleMode || solved || w?.correct)
+                                    backgroundColor: (!isPuzzleMode || solved || w?.correct)
                                       ? undefined
                                       : haiku?.bgColor || "lightgrey",
-                                    filter: (!isHaikudleMode || solved || w?.correct)
+                                    filter: (!isPuzzleMode || solved || w?.correct)
                                       ? undefined
                                       : snapshot.isDragging
                                         ? `drop-shadow(0px 1px 3px rgb(0 0 0 / 0.9))`
@@ -148,6 +150,8 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
   // console.log('>> app._components.HaikuPage.render()', { mode, haiku, id: haiku.id });
 
   const isHaikudleMode = mode == "haikudle";
+  const isLyricleMode = mode == "lyricle";
+  const isPuzzleMode = isHaikudleMode || isLyricleMode;
 
   const [
     loaded,
@@ -164,7 +168,7 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
     state.inProgress,
     state.init,
     state.move,
-    isHaikudleMode ? state.haiku : haiku,
+    isPuzzleMode ? state.haiku : haiku,
     state.haikudleId,
     state.solved,
   ]);
@@ -208,13 +212,22 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
     }
   }
 
-  const blurCurve = [0, 1, 2.5, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
-  const saturateCurve = [1.1, 1.2, 1.25, 1.3, 1.35, 1.45, 1.5, 1.55, 1.6];
+  const blurCurve = mode == "lyricle"
+    ? [0, 1, 2.5, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+    : [0, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10];
+  const saturateCurve =  mode == "lyricle"
+  ? [0.8, 1, 1.2, 1.3, 1.35, 1.45, 1.5, 1.55, 1.6]
+  : [1];
   const numWords = inProgress.flat().length;
   let numCorrectWords = inProgress.flat().filter((word: any) => word.correct).length
   // if (numCorrectWords > 0) numCorrectWords = numCorrectWords + 1; // make the last transition more impactful
-  let blurValue = process.env.BACKGROUND_BLUR == "progressive" ? blurCurve[numWords - numCorrectWords] : 0;
-  let saturateValue = process.env.BACKGROUND_BLUR == "progressive" ? saturateCurve[numWords - numCorrectWords] : 0;
+  let blurValue = ["social-img", "social-img-lyricle"].includes(mode)
+    ? blurCurve[blurCurve.length - 1] // blurCurve[Math.floor(blurCurve.length / 1.5)]
+    : process.env.BACKGROUND_BLUR == "progressive" ? blurCurve[numWords - numCorrectWords] : 0;
+  let saturateValue = ["social-img", "social-img-lyricle"].includes(mode)
+    ? saturateCurve[saturateCurve.length - 1] // saturateCurve[Math.floor(saturateCurve.length / 1.5)]
+    : process.env.BACKGROUND_BLUR == "progressive" ? saturateCurve[numWords - numCorrectWords] : 0;
+
   if (typeof (blurValue) != "number") {
     blurValue = blurCurve[blurCurve.length - 1];
   }
@@ -246,7 +259,7 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
             filter: `${pop ? `drop-shadow(0px 0px 32px ${_haiku?.bgColor})` : ""}`,
           }}
         >
-          {mode != "social-img" &&
+          {!["social-img", "social-img-lyricle"].includes(mode) &&
             <HaikuPoem mode={mode} haiku={_haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord} />
           }
         </div>
