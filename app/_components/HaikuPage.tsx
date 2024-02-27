@@ -212,12 +212,12 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
     }
   }
 
-  const blurCurve = mode == "lyricle"
+  const blurCurve = ["lyricle", "social-img-lyricle"].includes(mode)
     ? [0, 1, 2.5, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
     : [0, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10];
-  const saturateCurve =  mode == "lyricle"
-  ? [0.8, 1, 1.2, 1.3, 1.35, 1.45, 1.5, 1.55, 1.6]
-  : [1];
+  const saturateCurve = ["lyricle", "social-img-lyricle"].includes(mode)
+    ? [0.8, 1, 1.2, 1.3, 1.35, 1.45, 1.5, 1.55, 1.6]
+    : [1];
   const numWords = inProgress.flat().length;
   let numCorrectWords = inProgress.flat().filter((word: any) => word.correct).length
   // if (numCorrectWords > 0) numCorrectWords = numCorrectWords + 1; // make the last transition more impactful
