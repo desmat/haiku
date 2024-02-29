@@ -2,7 +2,7 @@
 
 import moment from 'moment';
 import Link from 'next/link'
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'
 import { BsGithub } from 'react-icons/bs';
 import { IoSparkles, IoAddCircle, IoLinkSharp, IoHelpCircle } from 'react-icons/io5';
@@ -122,6 +122,7 @@ export function BottomLinks({
   // console.log("BottomLinks", { lang })
   const router = useRouter();
   const user = useUser((state: any) => state.user);
+  const [pop, setPop] = useState(false);
 
   return (
     <div
@@ -165,9 +166,18 @@ export function BottomLinks({
         {haiku?.id &&
           <Link
             key="link"
-            href={`/${haiku ? haiku.id : ""}`}
-            // target="_blank"
-            title="Direct link"
+            href={haiku.id}
+            title="Copy direct link"
+            className="cursor-copy"
+            style={{
+              filter: `${pop ? `drop-shadow(0px 0px 16px ${haiku?.bgColor})` : ""}`,
+            }}  
+            onClick={(e: any) => {
+              e.preventDefault();
+              setPop(true);
+              setTimeout(() => setPop(false), 100);              
+              navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : mode == "lycicle" ? "https://lyricle.desmat.ca" : "https://haiku.desmat.ca"}/${haiku.id}`);
+            }}
           >
             <IoLinkSharp className="text-xl" />
           </Link>
