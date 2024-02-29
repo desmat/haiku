@@ -13,6 +13,8 @@ import useUser from '@/app/_hooks/user';
 import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
 import { Haikudle } from '@/types/Haikudle';
+import { save as saveImage } from '@/services/image';
+// import { saveImage } from '@/services/haikus';
 import { syllable } from 'syllable';
 
 export default function MainPage({ mode, id, lang }: { mode: string, id?: string, lang?: undefined | LanguageType }) {
@@ -238,6 +240,23 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
   }
 
+  const handleScreenshot = async (filename: string, screenshot: any) => {
+    console.log('>> app._components.NavOverlay.handleScreenshot()', { filename, screenshot, user });
+
+    const token = await useUser.getState().getToken();
+    // console.log(">> hooks.haiku.fetchOpts", { token });
+    // return token && { headers: { Authorization: `Bearer ${token}` } } || {};
+  
+    // saveImage(user, filename, screenshot);
+    const res = await fetch(`/api/images/${encodeURI(filename)}`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+      body: screenshot,
+    });
+
+    console.log('>> app._components.NavOverlay.handleScreenshot()', { res });
+  }
+
   if (!loaded || loading || generating) {
     return (
       <div>
@@ -265,6 +284,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         onDelete={handleDelete}
         onSaveHaikudle={handleSaveHaikudle}
         onShowAbout={handleShowAbout}
+        onScreenshot={handleScreenshot}
       />
       <HaikuPage
         mode={mode}

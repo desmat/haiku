@@ -8,6 +8,7 @@ import * as samples from '@/services/stores/samples';
 import * as openai from './openai';
 import chroma from 'chroma-js';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
+import { dataUriToBuffer } from 'data-uri-to-buffer';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -15,6 +16,21 @@ import(`@/services/stores/${process.env.STORE_TYPE}`)
     console.log(">> services.haikus.init", { s })
     store = new s.create();
   });
+
+
+export async function save(user: User, filename: string, image: any) {
+  console.log(">> services.image.save", { user, filename, image });
+  // const imageBuffer = Buffer.from(await image.arrayBuffer())
+  // const imageBuffer = Buffer.from(image);
+  const imageBuffer = dataUriToBuffer(image).buffer;
+  const blob = await put(`TESTING.png`, imageBuffer, {
+    // token: "vercel_blob_rw_v7ATWtVFLVdZlnNL_ovfMoHhsaPClvRrfaPZB28uZQEAmyM",
+    access: 'public',
+    addRandomSuffix: false,
+  });
+
+  console.log(">> services.image.screenshot", { blob });
+}
 
 export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[]> {
   let haikus = await store.haikus.find(query);
@@ -69,6 +85,19 @@ export async function createHaiku(user: User): Promise<Haiku> {
 
   return store.haikus.create(user.id, haiku);
 }
+
+// export async function saveImage(user: User, filename: string, image: any) {
+//   console.log(">> services.image.save", { user, filename, image });
+//   // const imageBuffer = Buffer.from(await image.arrayBuffer())
+//   const imageBuffer = Buffer.from(image);
+//   const blob = await put(`TESTING.png`, imageBuffer, {
+//     // token: "vercel_blob_rw_v7ATWtVFLVdZlnNL_ovfMoHhsaPClvRrfaPZB28uZQEAmyM",
+//     access: 'public',
+//     addRandomSuffix: false,
+//   });
+
+//   console.log(">> services.image.screenshot", { blob });
+// }
 
 export async function generateHaiku(user: any, lang?: LanguageType, subject?: string, mood?: string): Promise<Haiku> {
   console.log(">> services.haiku.generateHaiku", { lang, subject, mood, user });

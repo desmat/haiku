@@ -2,7 +2,7 @@
 
 import moment from 'moment';
 import Link from 'next/link'
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation'
 import { BsGithub } from 'react-icons/bs';
 import { IoSparkles, IoAddCircle, IoLinkSharp, IoHelpCircle } from 'react-icons/io5';
@@ -15,6 +15,8 @@ import useUser from '@/app/_hooks/user';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { StyledLayers } from './StyledLayers';
 import { Haiku } from '@/types/Haiku';
+import html2canvas from "html2canvas";
+
 
 export function Loading() {
   return (
@@ -258,6 +260,7 @@ export function NavOverlay({
   onDelete,
   onSaveHaikudle,
   onShowAbout,
+  onScreenshot,
 }: {
   mode: string,
   styles: any[],
@@ -269,16 +272,55 @@ export function NavOverlay({
   onSwitchMode?: any,
   onDelete?: any,
   onSaveHaikudle?: any,
-  onShowAbout?: any
+  onShowAbout?: any,
+  onScreenshot?: any,
 }) {
   const router = useRouter();
+  const ref = useRef(null)
+  // const [screenshot, takeScreenshot] = useScreenshot();
   // console.log(">> app._component.Nav.render");
 
   const handleKeyDown = async (e: any) => {
     // console.log(">> app._component.Nav.handleKeyDown", { e });
-    if (e.key == "Escape" && ["social-img", "social-img-lyricle"].includes(mode)) {
-      await onSwitchMode();
-      router.push(`/${haiku ? haiku?.id : ""}`);
+    if (["social-img", "social-img-lyricle"].includes(mode)) {
+      if (e.key == "Escape") {
+        await onSwitchMode();
+        router.push(`/${haiku ? haiku?.id : ""}`);
+      } else if (e.key == "Enter") {
+        // const canvas = await html2canvas(ref.current);
+        // @ts-ignore
+        // var c = ref.current;
+        // console.log(">> app._component.Nav.handleKeyDown", { c });
+        // // @ts-ignore
+        // // var t = c.getContext('2d');
+        // // @ts-ignore
+        // window.open('', ref.current.getDataURL("image/png"));
+
+        // console.log(">> app._component.Nav.handleKeyDown", { t });
+        // canvas.toBlob((blob: any) => {
+        //   onScreenshot(blob);
+        // });
+        // const imageData = canvas.toDataURL("image/png");
+        // onScreenshot(imageData);
+
+
+
+
+        const ret = moment().format("YYYYMMDD") // prompt("YYYYMMDD?", moment().format("YYYYMMDD"));
+        if (ret) {
+          const screenshotTarget = document.body;
+          // @ts-ignore
+          // import('html2canvas')
+            // .then((html2canvas: any) => 
+            html2canvas(screenshotTarget)
+              .then((canvas: any) => {
+                const base64image = canvas.toDataURL("image/png");
+                // window.location.href = base64image;
+                onScreenshot && onScreenshot(ret, base64image); //.split(",")[1]);
+              })
+              // );
+        }
+      }
     }
   }
 
@@ -291,7 +333,7 @@ export function NavOverlay({
   }, [mode, haiku]);
 
   return (
-    <div className="_bg-pink-200 z-90">
+    <div className="_bg-pink-200 z-90 the_canvas_element_id" ref={ref}>
       {["haikudle", "haiku"].includes(mode) &&
         <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
           <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
