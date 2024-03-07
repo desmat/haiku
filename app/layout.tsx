@@ -5,10 +5,43 @@ import { Analytics } from '@vercel/analytics/react';
 import Alert from '@/app/_components/Alert';
 import type { Viewport } from 'next'
 import moment from 'moment';
- 
-const inter = Inter({ subsets: ['latin'] })
-const appName = process.env.EXPERIENCE_MODE == "haiku" ? "hAIku" : "hAIkudle";
-const appDescription = process.env.EXPERIENCE_MODE == "haiku" ? "AI-generated art and haiku poems" : "AI-generated daily art and haiku puzzles";
+
+const isLyricleMode = process.env.EXPERIENCE_MODE == "lyricle";
+const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+const inter = Inter({ subsets: ['latin'] });
+
+const appName = isLyricleMode
+  ? "Lyricle"
+  : isHaikudleMode
+    ? "hAIkudle"
+    : "hAIku";
+
+const appDescription = isLyricleMode
+  ? "Daily lyric puzzles"
+  : isHaikudleMode
+    ? "AI-generated daily art and haiku puzzles"
+    : "AI-generated art and haiku poems";
+
+const metaUrl = isLyricleMode
+  ? "https://lyricle.desmat.ca/"
+  : isHaikudleMode
+    ? "https://haikudle.art/"
+    : "https://haiku.desmat.ca/";
+
+const metaImages = isLyricleMode
+  ? [
+    `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_lyrics/${moment().format("YYYYMMDD")}.png`,
+    "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_lyrics/default.png",
+  ]
+  : isHaikudleMode
+    ? [
+      `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${moment().format("YYYYMMDD")}.png`,
+      `https://haikudle.art/social_img/${moment().format("YYYYMMDD")}.png`,
+      "https://haikudle.art/social_img_haikudle.png",
+    ]
+    : [
+      "https://haiku.desmat.ca/social_img_haiku.png"
+    ];
 
 export const metadata: Metadata = {
   title: `${appName} - ${appDescription}`,
@@ -16,19 +49,18 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  width: "device-width", 
-  initialScale: 1, 
-  minimumScale: 1, 
-  maximumScale: 1, 
+  width: "device-width",
+  initialScale: 1,
+  minimumScale: 1,
+  maximumScale: 1,
   userScalable: false,
 }
- 
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 
   return (
     <html lang="en">
@@ -37,10 +69,10 @@ export default function RootLayout({
         <meta property="og:title" content={appName} />
         <meta property="og:type" content="website" />
         <meta property="og:description" content={appDescription} />
-        <meta property="og:url" content={isHaikudleMode ? "https://haikudle.art/" : "https://haiku.desmat.ca/"} />
-        <meta property="og:image" content={isHaikudleMode ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${moment().format("YYYYMMDD")}.png` : "https://haiku.desmat.ca/social_img_haiku.png" } />
-        <meta property="og:image" content={isHaikudleMode ? `https://haikudle.art/social_img/${moment().format("YYYYMMDD")}.png` : "https://haiku.desmat.ca/social_img_haiku.png" } />
-        <meta property="og:image" content={isHaikudleMode ? "https://haikudle.art/social_img_haikudle.png" : "https://haiku.desmat.ca/social_img_haiku.png" } />        
+        <meta property="og:url" content={metaUrl} />
+        {metaImages.map((image: string, i: number) => (
+          <meta key={i} property="og:image" content={image} />
+        ))}
         <meta property="fb:app_id" content={process.env.FB_APP_ID} />
       </head>
       <body className={inter.className}>

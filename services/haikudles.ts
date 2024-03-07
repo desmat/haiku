@@ -46,8 +46,8 @@ async function createInProgress(haikudle: Haikudle): Promise<Haikudle> {
         syllables: syllable(word),
       }
     });
-  
-    // always set first 2 and last words correct
+
+  // always set first 2 and last words correct
   let correctWords = [
     words.splice(0, 2),
     words.splice(words.length - 1, 1),
@@ -58,13 +58,11 @@ async function createInProgress(haikudle: Haikudle): Promise<Haikudle> {
     ...shuffleArray(words),
     ...correctWords[1],
   ];
-  
+
   const numWords = words.length;
-  const inProgress = haikudle?.inProgress || [
-    words.slice(0, (numWords / 3)),
-    words.slice((numWords / 3), (2 * numWords / 3)),
-    words.slice((2 * numWords / 3)),
-  ];
+  const numLines = haiku.poem.length;
+  const inProgress = haikudle?.inProgress || Array.from(new Array(numLines))
+    .map((e: any, i: number) => words.slice((i * numWords / numLines), ((i + 1) * numWords / numLines)));
 
   haikudle = {
     ...haikudle,

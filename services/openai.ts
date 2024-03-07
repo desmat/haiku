@@ -36,7 +36,7 @@ export async function generateBackgroundImage(subject?: string, mood?: string): 
   // for testing
   if (process.env.OPENAI_API_KEY == "DEBUG") {
     console.warn(`>> services.openai.generateBackgroundImage: DEBUG mode: returning dummy response`);
-    const sampleHaikus = mapToList(samples.haikus)
+    // const sampleHaikus = mapToList(samples.haikus)
     const res = {
       "created": 1705515146,
       "data": [
@@ -47,7 +47,11 @@ export async function generateBackgroundImage(subject?: string, mood?: string): 
           // url: `http://localhost:3000${encodeURI(sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].bgImage)}`,
           // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/haiku-f98a2e55-nature.png",
           // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/45e37365-nmjxiOoeO9WKMUAkgv5tJvxdKGFNkt.png"
-          "url": `http://localhost:3000/backgrounds/${encodeURI("DALL·E 2024-02-23 17.40.14 - An abstract painting in the Japanese style, capturing the essence of transience and vulnerability with large, expressive brush strokes. This artwork s.png")}`,
+          // "url": `http://localhost:3000/backgrounds/${encodeURI("DALL·E 2024-02-23 17.40.14 - An abstract painting in the Japanese style, capturing the essence of transience and vulnerability with large, expressive brush strokes. This artwork s.png")}`,
+          // "url": "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/test/The-story-behind-Fleetwood-Macs-Rumours-cover-art-hb2ZJMukxNLFE8ssP2O1qrbcQneFHi.png",
+          // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/test/michael-jackson-bad-D9MGDmFnp1KmbzhQP8YyaKVmy0kmtU.png",
+          // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/test/michael-jackson-bad%20(1)-meWyGUVGKy0Kej6Og46Pr5HIBtT9gS.png",
+          url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/test/tswift-1989-ONj0U6Xl2uk5BEJU6PsMjGZ4sVRq9G.png",
         }
       ]
     }
@@ -104,13 +108,29 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
         //   "line three.",
         // ],
         haiku: [
-          'Moonlight on the lake',
-          'Soft whispers in the night air',
-          "Nature's lullaby"
+          // 'Moonlight on the lake',
+          // 'Soft whispers in the night air',
+          // "Nature's lullaby"
+
           // "Un cheval s'écroule au milieu d'une allée",
           // "Les feuilles tombent sur lui",
           // "Notre amour frissonne",
           // "Et le soleil aussi.",
+
+          // "Now here you go again",
+          // "You say you want your freedom",
+          // "Well, who am I to keep you down?",
+
+// "I'm gonna make a change",
+// "For once in my life",
+// "It's gonna feel real good",
+// "Gonna make a difference",
+// "Gonna make it right",
+
+"I stay out too late",
+"Got nothing in my brain",
+"That's what people say, mm-mm",
+
         ],
         // subject: "Test subject",
         // subject: "Nature",

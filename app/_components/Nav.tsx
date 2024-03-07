@@ -2,7 +2,7 @@
 
 import moment from 'moment';
 import Link from 'next/link'
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'
 import { BsGithub } from 'react-icons/bs';
 import { IoSparkles, IoAddCircle, IoLinkSharp, IoHelpCircle } from 'react-icons/io5';
@@ -57,6 +57,40 @@ export function Logo({ mode, href, onClick, styles, altStyles }: { mode: string,
   )
 }
 
+export function LyricleLogo({ mode, href, onClick, styles, altStyles }: { mode: string, href?: string, onClick?: any, styles?: any, altStyles?: any }) {
+  const isSocialImgMode = mode == "social-img-lyricle";
+  const isLyricleMode = mode == "lyricle";
+
+  const ai = (
+    <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode ? "text-[80pt]" : "text-[22pt] md:text-[28pt]"} font-semibold`}>
+      le
+    </span>
+  );
+
+  const styledAi = altStyles
+    ? (
+      <StyledLayers styles={altStyles}>
+        {(isLyricleMode || isSocialImgMode) && ai}
+      </StyledLayers>
+    )
+    : (
+      <div>{(isLyricleMode || isSocialImgMode) && ai}</div>
+    );
+
+  return (
+    <Link
+      onClick={onClick}
+      href={href || "#"}
+      className={`hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
+    >
+      <div className={`${font.architects_daughter.className} flex flex-row`}>
+        <StyledLayers styles={styles}>{`Lyric${isLyricleMode || isSocialImgMode ? "" : "s"}`}</StyledLayers>
+        {styledAi}
+      </div>
+    </Link>
+  )
+}
+
 export function GenerateIcon({ onClick }: { onClick?: any }) {
 
   return (
@@ -88,6 +122,7 @@ export function BottomLinks({
   // console.log("BottomLinks", { lang })
   const router = useRouter();
   const user = useUser((state: any) => state.user);
+  const [pop, setPop] = useState(false);
 
   return (
     <div
@@ -131,9 +166,18 @@ export function BottomLinks({
         {haiku?.id &&
           <Link
             key="link"
-            href={`/${haiku ? haiku.id : ""}`}
-          // target="_blank"
-            title="Direct link"
+            href={haiku.id}
+            title="Copy direct link"
+            className="cursor-copy"
+            style={{
+              filter: `${pop ? `drop-shadow(0px 0px 16px ${haiku?.bgColor})` : ""}`,
+            }}  
+            onClick={(e: any) => {
+              e.preventDefault();
+              setPop(true);
+              setTimeout(() => setPop(false), 100);              
+              navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : mode == "lycicle" ? "https://lyricle.desmat.ca" : "https://haiku.desmat.ca"}/${haiku.id}`);
+            }}
           >
             <IoLinkSharp className="text-xl" />
           </Link>
@@ -158,7 +202,7 @@ export function BottomLinks({
             <MdDelete className="text-xl" />
           </Link>
         }
-        {mode != "social-img" && user?.isAdmin &&
+        {["lyricle", "haikudle"].includes(mode) && user?.isAdmin &&
           <Link
             key="saveHaikudle"
             href="#"
@@ -171,26 +215,26 @@ export function BottomLinks({
         {mode != "social-img" && user?.isAdmin &&
           <Link
             key="changeMode"
-            href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`}
+            href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : mode == "haikudle" ? "haiku" : mode == "lyricle" ? "lyrics" : "lyricle"}`}
             title="Switch between haiku/haikudle mode"
             onClick={async (e: any) => {
               e.preventDefault();
               await onSwitchMode();
-              router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
+              router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : mode == "haikudle" ? "haiku" : mode == "lyricle" ? "lyrics" : "lyricle"}`);
             }}
           >
             <TbSwitchVertical className="text-xl" />
           </Link>
         }
-        {mode != "social-img" && user?.isAdmin &&
+        {!["social-img", "social-img-lyricle"].includes(mode) && user?.isAdmin &&
           <Link
             key="socialImgMode"
-            href={`/${haiku ? haiku?.id : ""}?mode=social-img`}
+            href={`/${haiku ? haiku?.id : ""}?mode=social-img${["lyrics", "lyricle"].includes(mode) ? "-lyricle" : ""}`}
             title="Switch to fullscreen mode (for social image)"
             onClick={async (e: any) => {
               e.preventDefault();
               await onSwitchMode();
-              router.push(`/${haiku ? haiku?.id : ""}?mode=social-img`);
+              router.push(`/${haiku ? haiku?.id : ""}?mode=social-img${["lyrics", "lyricle"].includes(mode) ? "-lyricle" : ""}`);
             }}
           >
             <RiFullscreenLine className="text-xl" />
@@ -242,7 +286,7 @@ export function NavOverlay({
 
   const handleKeyDown = async (e: any) => {
     // console.log(">> app._component.Nav.handleKeyDown", { e });
-    if (e.key == "Escape" && mode == "social-img") {
+    if (e.key == "Escape" && ["social-img", "social-img-lyricle"].includes(mode)) {
       await onSwitchMode();
       router.push(`/${haiku ? haiku?.id : ""}`);
     }
@@ -258,7 +302,7 @@ export function NavOverlay({
 
   return (
     <div className="_bg-pink-200 z-90">
-      {mode != "social-img" &&
+      {["haikudle", "haiku"].includes(mode) &&
         <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
           <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
         </div>
@@ -268,8 +312,18 @@ export function NavOverlay({
           <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
         </div>
       }
+      {["lyrics", "lyricle"].includes(mode) &&
+        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
+          <LyricleLogo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
+        </div>
+      }
+      {mode == "social-img-lyricle" &&
+        <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-20`}>
+          <LyricleLogo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
+        </div>
+      }
 
-      {mode != "social-img" && onClickGenerate &&
+      {["lyricle", "haikudle", "haiku"].includes(mode) && onClickGenerate &&
         <div className="fixed top-2.5 right-2.5 z-20">
           <StyledLayers styles={altStyles}>
             <GenerateIcon onClick={onClickGenerate} />
@@ -278,14 +332,14 @@ export function NavOverlay({
       }
 
       <div
-        className={`fixed top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0`}
+        className={`foo fixed top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-10`}
         style={{
-          background: `radial-gradient(circle at center, white, #868686 50%, ${styles[0]?.color || "black"} 85%)`,
-          opacity: 0.6,
+          background: `radial-gradient(circle at center, white, #868686 35%, ${styles[0]?.color || "black"} 70%)`,
+          opacity: 0.2,
         }}
       />
 
-      {mode != "social-img" &&
+      {!["social-img", "social-img-lyricle"].includes(mode) &&
         <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
           <StyledLayers styles={styles}>
             <BottomLinks
