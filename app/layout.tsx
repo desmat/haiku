@@ -35,8 +35,8 @@ const metaImages = isLyricleMode
   ]
   : isHaikudleMode
     ? [
-      // `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${moment().format("YYYYMMDD")}.png`,
-      "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/20240308a.png",
+      "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/20240308a.png", // fix oupsy
+      `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${moment().format("YYYYMMDD")}.png`,
       `https://haikudle.art/social_img/${moment().format("YYYYMMDD")}.png`,
       "https://haikudle.art/social_img_haikudle.png",
     ]

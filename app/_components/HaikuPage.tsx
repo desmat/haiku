@@ -198,7 +198,7 @@ function HaikuPoem({
           </Droppable>
         )
       })}
-      
+
       {/* {solved &&
         <div className="relative">
           <div className="px-5 absolute w-max">
@@ -241,7 +241,7 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
 
   // TODO move to hook store
   const [selectedWord, setSelectedWord] = useState<any>();
-    // console.log('>> app._components.HaikuPage.render()', { inProgress });
+  // console.log('>> app._components.HaikuPage.render()', { inProgress });
 
   const handleDragStart = (result: any) => {
     // console.log('>> app._components.HaikuPage.handleDragStart()', { result });
@@ -278,12 +278,12 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
   const numWords = inProgress.flat().length;
   let numCorrectWords = inProgress.flat().filter((word: any) => word.correct).length
   // if (numCorrectWords > 0) numCorrectWords = numCorrectWords + 1; // make the last transition more impactful
-  let blurValue = ["social-img", "social-img-lyricle"].includes(mode)
-    ? blurCurve[blurCurve.length - 1] // blurCurve[Math.floor(blurCurve.length / 1.5)]
-    : process.env.BACKGROUND_BLUR == "progressive" ? blurCurve[numWords - numCorrectWords] : 0;
-  let saturateValue = ["social-img", "social-img-lyricle"].includes(mode)
-    ? saturateCurve[saturateCurve.length - 1] // saturateCurve[Math.floor(saturateCurve.length / 1.5)]
-    : process.env.BACKGROUND_BLUR == "progressive" ? saturateCurve[numWords - numCorrectWords] : 0;
+  let blurValue = mode == "social-img-lyricle"
+    ? blurCurve[blurCurve.length - 1]
+    : blurCurve[numWords - numCorrectWords];
+  let saturateValue = mode == "social-img-lyricle"
+    ? saturateCurve[saturateCurve.length - 1]
+    : saturateCurve[numWords - numCorrectWords];
 
   if (typeof (blurValue) != "number") {
     blurValue = blurCurve[blurCurve.length - 1];
