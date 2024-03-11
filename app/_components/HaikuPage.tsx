@@ -122,7 +122,7 @@ function HaikuPoem({
           </StyledLayers>
         ))}
         {(solved || !isPuzzleMode) &&
-          <div className="relative md:text-[20pt] sm:text-[16pt] text-[12pt]">
+          <div className="relative md:text-[16pt] sm:text-[12pt] text-[10pt]">
             <div className="absolute w-max">
               <StyledLayers styles={styles}>
               {`—${haikuTitleAndAuthorTag}`}
