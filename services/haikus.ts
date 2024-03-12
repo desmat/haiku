@@ -70,6 +70,31 @@ export async function createHaiku(user: User): Promise<Haiku> {
   return store.haikus.create(user.id, haiku);
 }
 
+export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haiku> {
+  const lang = (haiku.lang || "eng") as LanguageType;
+  const subject = haiku.theme;
+  const mood = undefined; // TODO
+  console.log(">> services.haiku.regenerateHaikuPoem", { lang, subject, mood, user });
+  const language = supportedLanguages[lang].name;
+
+  const {
+    response: {
+      haiku: poem,
+      subject: generatedSubject,
+      mood: generatedMood,
+    }
+  } = await openai.generateHaiku(language, subject, mood);
+  // console.log(">> services.haiku.regenerateHaikuPoem", { ret });
+  console.log(">> services.haiku.regenerateHaikuPoem", { poem, generatedSubject, generatedMood });
+
+  return saveHaiku(user, {
+    ...haiku,
+    poem,
+    theme: generatedSubject,
+    mood: generatedMood,
+  });
+}
+
 export async function generateHaiku(user: any, lang?: LanguageType, subject?: string, mood?: string): Promise<Haiku> {
   console.log(">> services.haiku.generateHaiku", { lang, subject, mood, user });
   const language = supportedLanguages[lang || "en"].name;
@@ -120,6 +145,7 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
     createdAt: moment().valueOf(),
     status: "created",
     theme: generatedSubject,
+    mood: generatedMood,
     imagePrompt,
     imageRevisedPrompt,
     // @ts-ignore
@@ -153,7 +179,7 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
 }
 
 export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
-  console.log(">> services.haiku.deleteHaiku", { haiku, user });
+  console.log(">> services.haiku.saveHaiku", { haiku, user });
 
   if (!(haiku.createdBy == user.id || user.isAdmin)) {
     throw `Unauthorized`;

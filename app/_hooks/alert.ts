@@ -9,6 +9,15 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
   onDissmiss: () => undefined,
   closeLabel: undefined as string | undefined,
 
+  reset: async() => {
+    set({
+      message: undefined,
+      type: undefined,
+      onDismiss: undefined,
+      closeLabel: undefined,
+    });
+  },
+
   error: async (message?: string, onDissmiss?: () => undefined, closeLabel?: string) => {
     console.log(">> hooks.alert.error", { message });
     set({ message, type: message && "error", onDissmiss, closeLabel });

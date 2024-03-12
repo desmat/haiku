@@ -19,9 +19,10 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   // console.log('>> app.mainPage.render()', { mode, id, lang });
   const [haikuId, setHaikuId] = useState(id);
   const [generating, setGenerating] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
   const router = useRouter();
   const [user, saveUser] = useUser((state: any) => [state.user, state.save]);
-  const [plainAlert, warningAlert, infoAlert] = useAlert((state: any) => [state.plain, state.warning, state.info]);
+  const [resetAlert, plainAlert, warningAlert, infoAlert] = useAlert((state: any) => [state.reset, state.plain, state.warning, state.info]);
   const isHaikudleMode = mode == "haikudle";
   const isLyricleMode = mode == "lyricle";
 
@@ -31,6 +32,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     haikus,
     getHaiku,
     generateHaiku,
+    regenerateHaiku,
     resetHaikus,
     deleteHaiku,
   ] = useHaikus((state: any) => [
@@ -39,6 +41,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     state.find({ lang }),
     state.get,
     state.generate,
+    state.regenerate,
     state.reset,
     state.delete,
   ]);
@@ -129,7 +132,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       const isCorrect = syllables[0] == 5 && syllables[1] == 7 && syllables[2] == 5
       // console.log(">> app.page useEffect [haiku, loading, loaded]", { syllables });
 
-      if (user.isAdmin && !isCorrect) {
+      if (user.isAdmin && haiku.status == "created" &&!isCorrect) {
         warningAlert(`This haiku doesn't follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`);
         return;
       }
@@ -178,6 +181,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       : "";
 
     if (typeof (subject) == "string") {
+      resetAlert();
       setGenerating(true);
       const ret = await generateHaiku(user, { lang, subject });
       // console.log('>> app.page.handleGenerate()', { ret });
@@ -187,6 +191,19 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         setHaikuId(ret.id);
         setGenerating(false);
       }
+    }
+  }
+
+  const handleRegenerateHaiku = async (e: any) => {
+    // console.log('>> app.page.handleRegenerateHaiku()');
+    e.preventDefault();
+
+    if (user?.isAdmin /* || TODO: IS MY HAIKU */) {
+      resetAlert();
+      setRegenerating(true);
+      const ret = await regenerateHaiku(user, haiku);
+      // console.log('>> app.page.handleRegenerateHaiku()', { ret });
+      setRegenerating(false);
     }
   }
 
@@ -201,6 +218,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       router.push(`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
     }
 
+    resetAlert();
     setLoading(true);
     loadHaikus({ random: true, lang }, mode)
       .then((haikus: Haiku[]) => {
@@ -270,6 +288,9 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         mode={mode}
         haiku={haiku}
         styles={textStyles}
+        altStyles={altTextStyles}
+        regenerateHaiku={handleRegenerateHaiku}
+        regenerating={regenerating}
       />
     </div>
   )

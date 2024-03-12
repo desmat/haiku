@@ -3,6 +3,7 @@ export type TrackingEventType =
   "user-signedin" |
   "haiku-created" |
   "haiku-generated" |
+  "haiku-regenerated" |
   "haikudle-created" |
   "haikudle-started" |
   "haikudle-solved"

@@ -8,21 +8,26 @@ import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
 import { capitalize } from "@/utils/format";
 import { StyledLayers } from "./StyledLayers";
+import { GenerateIcon, Loading } from "./Nav";
 
 function HaikuPoem({
   mode,
   haiku,
   styles,
+  altStyles,
   selectedWord,
   setSelectedWord,
+  regenerate,
 }: {
   mode: string,
   haiku: Haiku,
   styles: any[],
+  altStyles: any[],
   selectedWord: any,
   setSelectedWord: any,
+  regenerate?: any,
 }) {
-  console.log('>> app._components.HaikuPage.HaikuPoem.render()', { mode, haiku });
+  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { mode, haiku });
 
   const [
     inProgress,
@@ -106,27 +111,45 @@ function HaikuPoem({
 
   if (solved || !isPuzzleMode) {
     return (
-      <div
-        className="_bg-purple-200 flex flex-col cursor-copy transition-all"
-        onClick={handleClickHaiku}
-        title="Copy to clipboard"
-        style={{
-          filter: `${pop ? `drop-shadow(0px 0px 32px ${haiku?.bgColor})` : ""}`,
-        }}
-      >
-        {poem.map((s: string, i: number) => (
-          <StyledLayers key={i} styles={styles}>
-            <div className="m-[0rem] transition-all">
-              {upperCaseFirstLetter(poem[i].map((w: any) => w.word).join(" "))}
-            </div>
-          </StyledLayers>
-        ))}
+      <div>
+        <div
+          className="_bg-purple-200 flex flex-col cursor-copy transition-all"
+          onClick={handleClickHaiku}
+          title="Copy to clipboard"
+          style={{
+            filter: `${pop ? `drop-shadow(0px 0px 32px ${haiku?.bgColor})` : ""}`,
+          }}
+        >
+          {poem.map((s: string, i: number) => (
+            <StyledLayers key={i} styles={styles}>
+              <div className="m-[0rem] transition-all">
+                {upperCaseFirstLetter(poem[i].map((w: any) => w.word).join(" "))}
+              </div>
+            </StyledLayers>
+          ))}
+        </div>
         {(solved || !isPuzzleMode) &&
           <div className="relative md:text-[16pt] sm:text-[12pt] text-[10pt]">
-            <div className="absolute w-max">
-              <StyledLayers styles={styles}>
-              {`—${haikuTitleAndAuthorTag}`}
-              </StyledLayers>
+            <div className="absolute w-max flex flex-row">
+              <div
+                className="cursor-copy transition-all"
+                onClick={handleClickHaiku}
+                title="Copy to clipboard"
+              >
+                <StyledLayers styles={styles}>
+                  {`—${haikuTitleAndAuthorTag}`}
+                </StyledLayers>
+              </div>
+              {regenerate &&
+                <div 
+                  className="md:mt-[0.1rem] md:ml-[0.8rem] sm:mt-[0.2rem] sm:ml-[0.7rem] mt-[0rem] ml-[0.5rem]"
+                  title="Regenerate this haiku with the same theme"
+                >
+                  <StyledLayers styles={altStyles}>
+                    <GenerateIcon onClick={regenerate} sizeOverwrite="h-4 w-4 md:h-6 md:w-6" />
+                  </StyledLayers>
+                </div>
+              }
             </div>
           </div>
         }
@@ -158,7 +181,7 @@ function HaikuPoem({
                         index={j}
                         isDragDisabled={!isPuzzleMode || w?.correct}
                         shouldRespectForcePress={true}
-                        // timeForLongPress={0}
+                      // timeForLongPress={0}
                       >
                         {(provided, snapshot) => {
                           return (
@@ -211,7 +234,21 @@ function HaikuPoem({
   )
 }
 
-export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku?: Haiku, styles: any[] }) {
+export default function HaikuPage({
+  mode,
+  haiku,
+  styles,
+  altStyles,
+  regenerateHaiku,
+  regenerating,
+}: {
+  mode: string,
+  haiku?: Haiku,
+  styles: any[],
+  altStyles: any[],
+  regenerateHaiku?: any,
+  regenerating?: boolean,
+}) {
   // console.log('>> app._components.HaikuPage.render()', { mode, haiku, id: haiku.id });
 
   const isHaikudleMode = mode == "haikudle";
@@ -309,9 +346,29 @@ export default function HaikuPage({ mode, haiku, styles }: { mode: string, haiku
           }}
         />
 
+
         <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-10 transition-all `}>
-          {!["social-img", "social-img-lyricle"].includes(mode) &&
-            <HaikuPoem mode={mode} haiku={_haiku} styles={styles} selectedWord={selectedWord} setSelectedWord={setSelectedWord} />
+          {regenerating &&
+            <div className="relative opacity-30">
+              <StyledLayers styles={styles}>
+                <div className="animate-pulse">
+                  Generating...
+                </div>
+              </StyledLayers>
+            </div>
+          }
+          {!regenerating && !["social-img", "social-img-lyricle"].includes(mode) &&
+            <div className="_bg-pink-200 relative">
+              <HaikuPoem
+                mode={mode}
+                haiku={_haiku}
+                styles={styles}
+                altStyles={altStyles}
+                selectedWord={selectedWord}
+                setSelectedWord={setSelectedWord}
+                regenerate={regenerateHaiku}
+              />
+            </div>
           }
         </div>
       </DragDropContext>

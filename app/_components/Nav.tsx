@@ -91,11 +91,11 @@ export function LyricleLogo({ mode, href, onClick, styles, altStyles }: { mode: 
   )
 }
 
-export function GenerateIcon({ onClick }: { onClick?: any }) {
+export function GenerateIcon({ onClick, sizeOverwrite }: { onClick?: any, sizeOverwrite?: string }) {
 
   return (
     <Link href="#" onClick={onClick}>
-      <IoSparkles className="_bg-orange-600 _hover: _text-purple-100 h-6 w-6 md:h-8 md:w-8" />
+      <IoSparkles className={`_bg-orange-600 _hover: _text-purple-100 ${ sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />
     </Link>
   )
 }

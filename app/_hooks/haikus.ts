@@ -366,6 +366,60 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     });
   },
 
+  regenerate: async (user: User, haiku: Haiku) => {
+    console.log(">> hooks.haiku.regenerate", { haiku });
+    const { _haikus } = get();
+
+    const regenerating = {
+      ...haiku,
+      status: "generating",
+    }
+    set({
+      _haikus: { ..._haikus, [haiku.id || ""]: regenerating },
+    });
+
+    return new Promise(async (resolve, reject) => {
+      fetch(`/api/haikus/${haiku.id}/regenerate`, {
+        ...await fetchOpts(),
+        method: "POST",
+        body: JSON.stringify({ haiku }),
+      }).then(async (res) => {
+        const { _haikus } = get();
+
+        if (res.status != 200) {
+          trackEvent("error", {
+            type: "regenerate-haiku",
+            code: res.status,
+            userId: (await useUser.getState()).user.id,
+          });
+
+          if (res.status == 429) {
+            useAlert.getState().error(`Exceeded daily limit: try again later.`);
+          } else {
+            useAlert.getState().error(`Error regenerating haiku: ${res.status} (${res.statusText})`);
+          }
+
+          return reject(res.statusText);
+        }
+
+        const data = await res.json();
+        const regenerated = data.haiku;
+
+        trackEvent("haiku-regenerated", {
+          id: regenerated.id,
+          name: regenerated.name,
+          userId: regenerated.updatedBy,
+        });
+
+        // replace optimistic 
+        set({
+          _haikus: { ..._haikus, [regenerated.id || ""]: regenerated },
+        });
+        return resolve(regenerated);
+      });
+    });
+  },
+
   delete: async (id: string) => {
     // console.log(">> hooks.haiku.delete id:", id);
 
