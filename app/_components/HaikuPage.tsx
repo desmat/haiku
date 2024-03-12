@@ -22,7 +22,7 @@ function HaikuPoem({
   mode: string,
   haiku: Haiku,
   styles: any[],
-  altStyles: any[],
+  altStyles?: any[],
   selectedWord: any,
   setSelectedWord: any,
   regenerate?: any,
@@ -145,7 +145,7 @@ function HaikuPoem({
                   className="md:mt-[0.1rem] md:ml-[0.8rem] sm:mt-[0.2rem] sm:ml-[0.7rem] mt-[0rem] ml-[0.5rem]"
                   title="Regenerate this haiku with the same theme"
                 >
-                  <StyledLayers styles={altStyles}>
+                  <StyledLayers styles={altStyles || []}>
                     <GenerateIcon onClick={regenerate} sizeOverwrite="h-4 w-4 md:h-6 md:w-6" />
                   </StyledLayers>
                 </div>
@@ -245,7 +245,7 @@ export default function HaikuPage({
   mode: string,
   haiku?: Haiku,
   styles: any[],
-  altStyles: any[],
+  altStyles?: any[],
   regenerateHaiku?: any,
   regenerating?: boolean,
 }) {
