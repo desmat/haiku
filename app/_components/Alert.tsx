@@ -170,7 +170,7 @@ function AnimatedAlert({
   }, [message, timestamp]);
 
   const handleKeyDown = async (e: any) => {
-    console.log(">> app._components.Alert.AnimatedAlert.handleKeyDown", { e });
+    // console.log(">> app._components.Alert.AnimatedAlert.handleKeyDown", { e });
     if (e.key == "Escape") {
       handleClose();
     }

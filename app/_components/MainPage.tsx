@@ -73,6 +73,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   const textStyles = [
     {
       color: fontColor,
+      bgColor,
       filter: `drop-shadow(0px 0px 8px ${bgColor})`,
       WebkitTextStroke: `1.5px ${fontColor}`,
       fontWeight: 300,
@@ -256,6 +257,12 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
   }
 
+  const handleSelectHaiku = (id: string) => {
+    console.log('>> app._components.MainPage.handleSelectHaiku()', { id });
+    setHaikuId(id);
+    // router.push(`/${id}`);
+  }
+
   if (!loaded || loading || generating) {
     return (
       <div>
@@ -275,6 +282,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         mode={mode}
         lang={lang}
         haiku={haiku}
+        // haikus={haikus}
         styles={textStyles}
         altStyles={altTextStyles}
         onClickLogo={handleRefresh}
@@ -283,10 +291,12 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         onDelete={handleDelete}
         onSaveHaikudle={handleSaveHaikudle}
         onShowAbout={handleShowAbout}
+        onSelectHaiku={handleSelectHaiku}
       />
       <HaikuPage
         mode={mode}
         haiku={haiku}
+        // haikus={haikus}
         styles={textStyles}
         altStyles={altTextStyles}
         regenerateHaiku={handleRegenerateHaiku}

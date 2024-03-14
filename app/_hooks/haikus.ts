@@ -23,6 +23,8 @@ const initialState = {
   // access via get(id) or find(query?)
   _haikus: <HaikuMap>{},
 
+  myhaikus: <HaikuMap>{},
+
   // to smooth out UX when deleting,
   _deleted: <StatusMap>{},
 
@@ -129,7 +131,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const { setLoaded, _mode } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    // console.log(">> hooks.haiku.load", { id, query, mode });
+    console.log(">> hooks.haiku.load", { id, query, mode });
 
     return new Promise(async (resolve, reject) => {
       if (id) {
@@ -153,7 +155,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
           set({
             mode: mode || _mode,
-            _haikus: { _haikus, [haiku.id]: haiku },
+            _haikus: { ..._haikus, [haiku.id]: haiku },
           });
 
           resolve(haiku);
@@ -186,6 +188,13 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
             set({
               mode: mode || _mode,
               _haikus: listToMap(haikus)
+            });
+            // @ts-ignore
+          } else if (query.mine) {
+            set({
+              mode: mode || _mode,
+              myHaikus: { ...listToMap(haikus) },
+              _haikus: { ..._haikus, ...listToMap(haikus) },
             });
           } else {
             set({
