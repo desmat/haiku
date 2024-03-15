@@ -4,7 +4,6 @@ import moment from 'moment';
 import Link from 'next/link'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'
-import { BsGithub } from 'react-icons/bs';
 import { IoSparkles, IoAddCircle, IoLinkSharp, IoHelpCircle, IoLogoGithub } from 'react-icons/io5';
 import { MdMail, MdHome, MdDelete } from "react-icons/md";
 import { TbSwitchVertical } from "react-icons/tb";
@@ -13,12 +12,12 @@ import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg } from "react-ico
 import { FaRandom } from "react-icons/fa";
 import * as font from "@/app/font";
 import useUser from '@/app/_hooks/user';
+import useHaikus from '@/app/_hooks/haikus';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
-import { StyledLayers } from './StyledLayers';
 import { Haiku } from '@/types/Haiku';
-import useHaikus from '../_hooks/haikus';
-import { byCreatedAtDesc } from '@/utils/sort';
 import { User } from '@/types/User';
+import { byCreatedAtDesc } from '@/utils/sort';
+import { StyledLayers } from './StyledLayers';
 
 export function Loading() {
   return (
