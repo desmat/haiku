@@ -4,17 +4,20 @@ import moment from 'moment';
 import Link from 'next/link'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'
-import { BsGithub } from 'react-icons/bs';
-import { IoSparkles, IoAddCircle, IoLinkSharp, IoHelpCircle } from 'react-icons/io5';
+import { IoSparkles, IoAddCircle, IoLinkSharp, IoHelpCircle, IoLogoGithub } from 'react-icons/io5';
 import { MdMail, MdHome, MdDelete } from "react-icons/md";
 import { TbSwitchVertical } from "react-icons/tb";
 import { RiFullscreenLine } from "react-icons/ri";
+import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg } from "react-icons/bs";
 import { FaRandom } from "react-icons/fa";
 import * as font from "@/app/font";
 import useUser from '@/app/_hooks/user';
+import useHaikus from '@/app/_hooks/haikus';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
-import { StyledLayers } from './StyledLayers';
 import { Haiku } from '@/types/Haiku';
+import { User } from '@/types/User';
+import { byCreatedAtDesc } from '@/utils/sort';
+import { StyledLayers } from './StyledLayers';
 
 export function Loading() {
   return (
@@ -95,12 +98,12 @@ export function GenerateIcon({ onClick, sizeOverwrite }: { onClick?: any, sizeOv
 
   return (
     <Link href="#" onClick={onClick}>
-      <IoSparkles className={`_bg-orange-600 _hover: _text-purple-100 ${ sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />
+      <IoSparkles className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />
     </Link>
   )
 }
 
-export function BottomLinks({
+function BottomLinks({
   mode,
   haiku,
   lang,
@@ -147,7 +150,7 @@ export function BottomLinks({
           href="https://github.com/desmat/haiku"
           target="_blank"
         >
-          <BsGithub className="text-lg" />
+          <IoLogoGithub className="text-xl" />
         </Link>
         <Link
           key="web"
@@ -171,11 +174,11 @@ export function BottomLinks({
             className="cursor-copy"
             style={{
               filter: `${pop ? `drop-shadow(0px 0px 16px ${haiku?.bgColor})` : ""}`,
-            }}  
+            }}
             onClick={(e: any) => {
               e.preventDefault();
               setPop(true);
-              setTimeout(() => setPop(false), 100);              
+              setTimeout(() => setPop(false), 100);
               navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : mode == "lycicle" ? "https://lyricle.desmat.ca" : "https://haiku.desmat.ca"}/${haiku.id}`);
             }}
           >
@@ -256,11 +259,164 @@ export function BottomLinks({
   )
 }
 
+function SlidingMenu({
+  user,
+  styles,
+  altStyles,
+  haiku,
+  myHaikus,
+  onShowAbout,
+  onSelectHaiku,
+  menuOpened,
+  menuAnimating,
+  toggleMenuOpened,
+}: {
+  user: User,
+  styles: any[],
+  altStyles: any[],
+  haiku?: Haiku,
+  myHaikus?: Haiku[],
+  onShowAbout?: any,
+  onSelectHaiku?: any,
+  menuOpened: boolean,
+  menuAnimating: boolean,
+  toggleMenuOpened: any,
+}) {
+  // TODO: move to shared lib between Nav and Layout
+  const isLyricleMode = process.env.EXPERIENCE_MODE == "lyricle";
+  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+  const appDescription = isLyricleMode
+    ? "Daily lyric puzzles"
+    : isHaikudleMode
+      ? "AI-generated daily art and haiku puzzles"
+      : "AI-generated art and haiku poems";
+  const thingName = isLyricleMode
+    ? "Lyricle"
+    : isHaikudleMode
+      ? "Haikudle"
+      : "Haiku";
+
+  console.log(">> app._component.SlidingMenu.render", { menuOpened, menuAnimating });
+
+  return (
+    <div
+      className={`_bg-pink-200 fixed top-0 h-full w-[30rem] z-20 transition-all _blur-[10px]`}
+      style={{
+        backgroundColor: `${styles[1]?.color ? styles[0]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
+        backdropFilter: "blur(10px)",
+        left: menuOpened ? 0 : "-30rem"
+      }}
+    >
+
+      {/* <div className="absolute top-[2.3rem] left-3">
+            <StyledLayers styles={styles}>
+              {appDescription}
+            </StyledLayers>
+          </div> */}
+      <div className="absolute top-[3.2rem] md:top-[4rem] left-3">
+        <StyledLayers styles={styles}>
+          Your {thingName}s:
+        </StyledLayers>
+      </div>
+      <div
+        className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[32pt] _md:text-[36pt] bold _pl-2 py-5 opacity-40 hover:opacity-100 transition-all"
+        onClick={toggleMenuOpened}
+        style={{
+          filter: `drop-shadow(0px 0px 16px ${haiku?.bgColor})`,
+          marginRight: menuOpened ? "-0.5rem" : "-2.2rem",
+          display: menuAnimating ? "none" : "block",
+          transitionDuration: "80ms",
+        }}
+        title={menuOpened ? "Hide menu" : "Show menu"}
+      >
+        <StyledLayers styles={styles}>
+          <div className="rotate-90 group-hover:hidden">
+            <BsDashLg />
+          </div>
+          <div className="hidden group-hover:block">
+            {menuOpened &&
+              <div className="mr-[0.2rem] _md:mr-[0.3rem]">
+                <BsChevronCompactLeft />
+              </div>
+            }
+            {!menuOpened &&
+              <div className="mr-[-0.2rem] _md:mr-[-0.3rem]">
+                <BsChevronCompactRight />
+              </div>
+            }
+          </div>
+        </StyledLayers>
+      </div>
+      <div className="_bg-orange-200 mt-[5rem] md:mt-[6rem] px-2.5 flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-9.5rem)] overflow-scroll">
+        {myHaikus && Object.values(myHaikus)
+          // .filter((h: Haiku) => h.createdBy == user.id)
+          .sort(byCreatedAtDesc)
+          .map((h: Haiku, i: number) => (
+            <StyledLayers key={i} styles={altStyles}>
+              <Link
+                href={`/${h.id}`}
+                onClick={(e: any) => {
+                  if (onSelectHaiku) {
+                    e.preventDefault();
+                    toggleMenuOpened();
+                    onSelectHaiku(h.id);
+                  }
+                }}
+              >
+                <div style={{ fontWeight: 400 }}>
+                  <span className="capitalize">&quot;{h.theme}&quot;</span> created {moment(h.createdAt).fromNow()}{h.createdBy != user.id && " created by user " + h.createdBy}
+                </div>
+              </Link>
+            </StyledLayers>
+          ))}
+      </div>
+      <div className="_bg-purple-200 flex flex-col justify-center px-2 py-2 h-fit">
+        <StyledLayers styles={styles}>
+          <div className="_bg-purple-200 flex flex-row gap-3 justify-center">
+            <Link
+              key="about"
+              className="flex flex-row py-1"
+              href="#"
+              title="About"
+              onClick={(e: any) => {
+                e.preventDefault();
+                onShowAbout && onShowAbout();
+              }}
+            >
+              <IoHelpCircle className="text-2xl" />
+              About
+            </Link>
+            <Link
+              key="github"
+              className="flex flex-row gap-1 py-1"
+              href="https://github.com/desmat/haiku"
+              target="_blank"
+            >
+              <IoLogoGithub className="text-xl mt-[0.2rem]" />
+              github.com/desmat
+            </Link>
+            <Link
+              key="web"
+              className="flex flex-row gap-1 py-1"
+              href="https://www.desmat.ca"
+              target="_blank"
+            >
+              <MdHome className="text-2xl" />
+              www.desmat.ca
+            </Link>
+          </div>
+        </StyledLayers>
+      </div>
+    </div>
+  )
+}
+
 export function NavOverlay({
   mode,
   styles,
   altStyles,
   haiku,
+  // haikus,
   lang,
   onClickLogo,
   onClickGenerate,
@@ -268,31 +424,57 @@ export function NavOverlay({
   onDelete,
   onSaveHaikudle,
   onShowAbout,
+  onSelectHaiku,
 }: {
   mode: string,
   styles: any[],
   altStyles: any[],
   haiku?: Haiku,
+  // haikus?: Haiku[],
   lang?: LanguageType,
   onClickLogo?: any,
   onClickGenerate?: any,
   onSwitchMode?: any,
   onDelete?: any,
   onSaveHaikudle?: any,
-  onShowAbout?: any
+  onShowAbout?: any,
+  onSelectHaiku?: any
 }) {
   const router = useRouter();
-  // console.log(">> app._component.Nav.render");
+  const [user] = useUser((state: any) => [state.user]);
+  const [menuOpened, setMenuOpened] = useState(false);
+  const [menuAnimating, setMenuAnimating] = useState(false);
+  const [loadHaikus, myHaikus] = useHaikus((state: any) => [state.load, state.myHaikus]);
+
+  // console.log(">> app._component.Nav.render", { menuOpened, menuAnimating });
+
+  const toggleMenuOpened = () => {
+    console.log(">> app._component.Nav.toggleMenuOpened", {});
+    setMenuAnimating(true);
+    setTimeout(() => setMenuAnimating(false), 100);
+    setMenuOpened(!menuOpened);
+  }
 
   const handleKeyDown = async (e: any) => {
-    // console.log(">> app._component.Nav.handleKeyDown", { e });
-    if (e.key == "Escape" && ["social-img", "social-img-lyricle"].includes(mode)) {
-      await onSwitchMode();
-      router.push(`/${haiku ? haiku?.id : ""}`);
+    // console.log(">> app._component.Nav.handleKeyDown", { menuOpened, menuAnimating });
+    if (e.key == "Escape") {
+      if (["social-img", "social-img-lyricle"].includes(mode)) {
+        await onSwitchMode();
+        router.push(`/${haiku ? haiku?.id : ""}`);
+      } else {
+        setMenuOpened(false);
+      }
     }
   }
 
   useEffect(() => {
+    if (user?.id) {
+      loadHaikus({ /* createdBy: user.id */ mine: true }, mode);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    // console.log(">> app._component.Nav.useEffect", { mode, haiku });
     document.body.addEventListener('keydown', handleKeyDown);
 
     return () => {
@@ -301,24 +483,27 @@ export function NavOverlay({
   }, [mode, haiku]);
 
   return (
-    <div className="_bg-pink-200 z-90">
+    <div
+      className="_bg-pink-200 z-90"
+      onClick={() => menuOpened && toggleMenuOpened()}
+    >
       {["haikudle", "haiku"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
+        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-30`}>
           <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
         </div>
       }
       {mode == "social-img" &&
-        <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-20`}>
+        <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}>
           <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
         </div>
       }
       {["lyrics", "lyricle"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-20`}>
+        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-30`}>
           <LyricleLogo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
         </div>
       }
       {mode == "social-img-lyricle" &&
-        <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-20`}>
+        <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}>
           <LyricleLogo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
         </div>
       }
@@ -354,6 +539,21 @@ export function NavOverlay({
             />
           </StyledLayers>
         </div>
+      }
+
+      {user?.isAdmin && !["social-img", "social-img-lyricle"].includes(mode) &&
+        <SlidingMenu
+          user={user}
+          styles={styles}
+          altStyles={altStyles}
+          haiku={haiku}
+          myHaikus={myHaikus}
+          onShowAbout={onShowAbout}
+          onSelectHaiku={onSelectHaiku}
+          menuOpened={menuOpened}
+          menuAnimating={menuAnimating}
+          toggleMenuOpened={toggleMenuOpened}
+        />
       }
     </div>
   );

@@ -1,7 +1,7 @@
 'use client'
 
 import moment from 'moment';
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react';
 import { Haiku } from "@/types/Haiku";
 import { Loading, NavOverlay } from '@/app/_components/Nav';
@@ -73,6 +73,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   const textStyles = [
     {
       color: fontColor,
+      bgColor,
       filter: `drop-shadow(0px 0px 8px ${bgColor})`,
       WebkitTextStroke: `1.5px ${fontColor}`,
       fontWeight: 300,
@@ -132,7 +133,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       const isCorrect = syllables[0] == 5 && syllables[1] == 7 && syllables[2] == 5
       // console.log(">> app.page useEffect [haiku, loading, loaded]", { syllables });
 
-      if (user.isAdmin && haiku.status == "created" &&!isCorrect) {
+      if (user.isAdmin && haiku.status == "created" && !isCorrect) {
         warningAlert(`This haiku doesn't follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`);
         return;
       }
@@ -256,6 +257,12 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
   }
 
+  const handleSelectHaiku = (id: string) => {
+    console.log('>> app._components.MainPage.handleSelectHaiku()', { id });
+    setHaikuId(id);
+    window.history.replaceState(null, '', `/${id}`);
+  }
+
   if (!loaded || loading || generating) {
     return (
       <div>
@@ -275,6 +282,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         mode={mode}
         lang={lang}
         haiku={haiku}
+        // haikus={haikus}
         styles={textStyles}
         altStyles={altTextStyles}
         onClickLogo={handleRefresh}
@@ -283,10 +291,12 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         onDelete={handleDelete}
         onSaveHaikudle={handleSaveHaikudle}
         onShowAbout={handleShowAbout}
+        onSelectHaiku={handleSelectHaiku}
       />
       <HaikuPage
         mode={mode}
         haiku={haiku}
+        // haikus={haikus}
         styles={textStyles}
         altStyles={altTextStyles}
         regenerateHaiku={handleRegenerateHaiku}

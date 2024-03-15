@@ -44,6 +44,12 @@ export async function GET(request: NextRequest, params?: any) {
     return NextResponse.json({ haikus: [random] });
   }
 
+  if (query.mine) {
+    // TODO pull solved puzzles, or all for admins
+    delete query.mine;
+    delete query.mode;
+  }
+
   const haikus = await getHaikus(query, process.env.EXPERIENCE_MODE == "haikudle");
   return NextResponse.json({ haikus });
 }
