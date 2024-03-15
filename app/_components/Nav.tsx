@@ -290,6 +290,7 @@ export function NavOverlay({
 }) {
   const router = useRouter();
   const [menuOpened, setMenuOpened] = useState(true);
+  const [menuAnimating, setMenuAnimating] = useState(true);
   const [user, userLoaded] = useUser((state: any) => [state.user, state.loaded]);
 
   const [
@@ -335,12 +336,14 @@ export function NavOverlay({
         await onSwitchMode();
         router.push(`/${haiku ? haiku?.id : ""}`);
       } else if (menuOpened) {
-        setMenuOpened(false);
+        toggleMenuOpened();
       }
     }
   }
 
   const toggleMenuOpened = () => {
+    setMenuAnimating(true);
+    setTimeout(() => setMenuAnimating(false), 100);
     setMenuOpened(!menuOpened);
   }
 
@@ -360,7 +363,10 @@ export function NavOverlay({
   }, [mode, haiku]);
 
   return (
-    <div className="_bg-pink-200 z-90">
+    <div
+      className="_bg-pink-200 z-90"
+      onClick={() => menuOpened && toggleMenuOpened()}
+    >
       {["haikudle", "haiku"].includes(mode) &&
         <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-30`}>
           <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
@@ -436,21 +442,31 @@ export function NavOverlay({
             </StyledLayers>
           </div>
           <div
-            className="_bg-yellow-200 group absolute right-[-0rem] top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[26pt] md:text-[32pt] bold p-2 hover:opacity-100 transition-none"
+            className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[32pt] _md:text-[36pt] bold _pl-2 py-5 opacity-40 hover:opacity-100 transition-all"
             onClick={toggleMenuOpened}
             style={{
               filter: `drop-shadow(0px 0px 16px ${haiku?.bgColor})`,
-              opacity: menuOpened ? "" : "opacity-50",
+              marginRight: menuOpened ? "-0.5rem" : "-2.2rem",
+              display: menuAnimating ? "none" : "block",
+              transitionDuration: "80ms",
             }}
             title={menuOpened ? "Hide menu" : "Show menu"}
           >
             <StyledLayers styles={styles}>
-              <div className="absolute top-0 left-0 rotate-90 group-hover:hidden">
+              <div className="rotate-90 group-hover:hidden">
                 <BsDashLg />
               </div>
-              <div className="absolute top-0 left-0 invisible group-hover:visible">
-                {menuOpened && <BsChevronCompactLeft />}
-                {!menuOpened && <BsChevronCompactRight />}
+              <div className="hidden group-hover:block">
+                {menuOpened &&
+                  <div className="mr-[0.2rem] _md:mr-[0.3rem]">
+                    <BsChevronCompactLeft />
+                  </div>
+                }
+                {!menuOpened &&
+                  <div className="mr-[-0.2rem] _md:mr-[-0.3rem]">
+                    <BsChevronCompactRight />
+                  </div>
+                }
               </div>
             </StyledLayers>
           </div>
@@ -463,7 +479,13 @@ export function NavOverlay({
                 <StyledLayers key={i} styles={altStyles}>
                   <Link
                     href={`/${h.id}`}
-                    onClick={(e: any) => { e.preventDefault(); onSelectHaiku && onSelectHaiku(h.id); }}
+                    onClick={(e: any) => {
+                      if (onSelectHaiku) {
+                        e.preventDefault();
+                        toggleMenuOpened();
+                        onSelectHaiku(h.id);
+                      }
+                    }}
                   >
                     <div style={{ fontWeight: 400 }}>
                       <span className="capitalize">&quot;{h.theme}&quot;</span> created {moment(h.createdAt).fromNow()}{h.createdBy != user.id && " created by user " + h.createdBy}
