@@ -296,7 +296,7 @@ function SlidingMenu({
       ? "Haikudle"
       : "Haiku";
 
-  console.log(">> app._component.SlidingMenu.render", { menuOpened, menuAnimating });
+  console.log(">> app._component.SlidingMenu.render", { user });
 
   return (
     <div
@@ -364,7 +364,7 @@ function SlidingMenu({
                 }}
               >
                 <div style={{ fontWeight: 400 }}>
-                  <span className="capitalize">&quot;{h.theme}&quot;</span> created {moment(h.createdAt).fromNow()}{h.createdBy != user.id && " created by user " + h.createdBy}
+                  <span className="capitalize">&quot;{h.theme}&quot;</span> generated {moment(h.createdAt).fromNow()}{h.createdBy != user.id && ` by ${user?.isAdmin ? "admin" : "user"} ${h.createdBy}`}
                 </div>
               </Link>
             </StyledLayers>
@@ -442,7 +442,7 @@ export function NavOverlay({
 }) {
   const router = useRouter();
   const [user] = useUser((state: any) => [state.user]);
-  const [menuOpened, setMenuOpened] = useState(false);
+  const [menuOpened, setMenuOpened] = useState(true);
   const [menuAnimating, setMenuAnimating] = useState(false);
   const [loadHaikus, myHaikus] = useHaikus((state: any) => [state.load, state.myHaikus]);
 
