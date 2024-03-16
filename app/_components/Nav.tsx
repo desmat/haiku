@@ -300,21 +300,28 @@ function SlidingMenu({
   // console.log(">> app._component.SlidingMenu.render", { user });
 
   const toggleMenuOpened = () => {
-    // console.log(">> app._component.Nav.toggleMenuOpened", {});
+    // console.log(">> app._component.SlidingMenu.toggleMenuOpened", {});
     setMenuAnimating(true);
     setTimeout(() => setMenuAnimating(false), 100);
     setMenuOpened(!menuOpened);
   }
 
-  function loadMore(e: any) {
+  const loadMore = (e: any) => {
     e.preventDefault();
     setNumPages(numPages * 2);
-  }
+  };
 
   const handleKeyDown = async (e: any) => {
-    // console.log(">> app._component.Nav.handleKeyDown", { menuOpened, menuAnimating });
+    // console.log(">> app._component.SlidingMenu.handleKeyDown", { menuOpened, menuAnimating });
     setMenuOpened(false);
-  }
+  };
+
+  const isUserAdmin = (userId?: string): boolean => {
+    // @ts-ignore
+    const ret = (process.env.ADMIN_USER_IDS || []).split(",").includes(userId);
+    // console.log(">> app._component.SlidingMenu.isUserAdmin", { userId, adminUserIds: process.env.ADMIN_USER_IDS, isUserAdmin: ret });
+    return ret;
+  };
 
   useEffect(() => {
     // console.log(">> app._component.Nav.useEffect", { mode, haiku });
@@ -396,9 +403,7 @@ function SlidingMenu({
                       }
                     }}
                   >
-                    <div style={{ fontWeight: 400 }}>
-                      <span className="capitalize">&quot;{h.theme}&quot;</span> generated {moment(h.createdAt).fromNow()}{h.createdBy != user.id && ` by ${user?.isAdmin ? "admin" : "user"} ${h.createdBy}`}
-                    </div>
+                    <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span> <span className="font-normal">generated {moment(h.createdAt).fromNow()} by {h.createdBy == user.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
                   </Link>
                 </StyledLayers>
               ))}
