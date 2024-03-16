@@ -540,7 +540,7 @@ export function NavOverlay({
         </div>
       }
 
-      {user?.isAdmin && !["social-img", "social-img-lyricle"].includes(mode) && myHaikus?.length > 0 &&
+      {user?.isAdmin && !["social-img", "social-img-lyricle"].includes(mode) && // myHaikus?.length > 0 &&
         <SlidingMenu
           user={user}
           styles={styles}
