@@ -337,7 +337,7 @@ function SlidingMenu({
             </div>
           </StyledLayers>
         </div>
-        <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">          
+        <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">
         </div>
         <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
           <div className="pt-2">
@@ -345,10 +345,11 @@ function SlidingMenu({
               Your {thingName}s
             </StyledLayers>
           </div>
-          {myHaikus && Object.values(myHaikus)
+          {/* note: don't render when not opened to save on resources */}
+          {(menuAnimating || menuOpened) && myHaikus && Object.values(myHaikus)
             // .filter((h: Haiku) => h.createdBy == user.id)
             .sort(byCreatedAtDesc)
-            .slice(0, 50)
+            .slice(0, 100) // more than that and things blow up on safari
             .map((h: Haiku, i: number) => (
               <StyledLayers key={i} styles={altStyles}>
                 <Link
@@ -368,7 +369,7 @@ function SlidingMenu({
               </StyledLayers>
             ))}
         </div>
-        <div className="_bg-purple-400 flex flex-row sm:justify-center justify-start px-2 py-2 h-fit w-full">
+        <div className="_bg-purple-400 flex flex-row sm:justify-center justify-start px-2 pt-4 pb-2 h-fit w-full">
           <StyledLayers styles={styles}>
             <div className="_bg-purple-200 flex sm:flex-row flex-col sm:gap-3 gap-2">
               <Link
