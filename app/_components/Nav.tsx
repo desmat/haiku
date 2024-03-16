@@ -267,9 +267,6 @@ function SlidingMenu({
   myHaikus,
   onShowAbout,
   onSelectHaiku,
-  menuOpened,
-  menuAnimating,
-  toggleMenuOpened,
 }: {
   user: User,
   styles: any[],
@@ -278,10 +275,21 @@ function SlidingMenu({
   myHaikus?: Haiku[],
   onShowAbout?: any,
   onSelectHaiku?: any,
-  menuOpened: boolean,
-  menuAnimating: boolean,
-  toggleMenuOpened: any,
 }) {
+  const [menuOpened, setMenuOpened] = useState(false);
+  const [menuAnimating, setMenuAnimating] = useState(false);
+  const pageSize = 25;
+  const [numPages, setNumPages] = useState(1);
+
+  // console.log(">> app._component.Nav.render", { menuOpened, menuAnimating });
+
+  const toggleMenuOpened = () => {
+    // console.log(">> app._component.Nav.toggleMenuOpened", {});
+    setMenuAnimating(true);
+    setTimeout(() => setMenuAnimating(false), 100);
+    setMenuOpened(!menuOpened);
+  }
+
   // TODO: move to shared lib between Nav and Layout
   const isLyricleMode = process.env.EXPERIENCE_MODE == "lyricle";
   const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
@@ -298,113 +306,150 @@ function SlidingMenu({
 
   // console.log(">> app._component.SlidingMenu.render", { user });
 
+  function loadMore(e: any) {
+    e.preventDefault();
+    setNumPages(numPages + 1);
+  }
+
+  const handleKeyDown = async (e: any) => {
+    // console.log(">> app._component.Nav.handleKeyDown", { menuOpened, menuAnimating });
+    setMenuOpened(false);
+  }
+
+  useEffect(() => {
+    // console.log(">> app._component.Nav.useEffect", { mode, haiku });
+    document.body.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.removeEventListener('keydown', handleKeyDown)
+    }
+  }, []);
+
   return (
-    <div
-      className={`_bg-pink-200 fixed top-0 h-full w-[30rem] max-w-[90vw] z-20 transition-all _blur-[10px]`}
-      style={{
-        backgroundColor: `${styles[1]?.color ? styles[0]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
-        backdropFilter: "blur(10px)",
-        left: menuOpened ? 0 : "-30rem"
-      }}
-    >
-      <div className="_bg-pink-400 flex flex-col h-[100vh]">
+    <div>
+      {menuOpened &&
         <div
-          className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[32pt] _md:text-[36pt] bold _pl-2 py-5 opacity-40 hover:opacity-100 transition-all"
-          onClick={toggleMenuOpened}
-          style={{
-            filter: `drop-shadow(0px 0px 16px ${haiku?.bgColor})`,
-            marginRight: menuOpened ? "-0.5rem" : "-2.2rem",
-            display: menuAnimating ? "none" : "block",
-            transitionDuration: "80ms",
-          }}
-          title={menuOpened ? "Hide menu" : "Show menu"}
-        >
-          <StyledLayers styles={styles}>
-            <div className="rotate-90 group-hover:hidden">
-              <BsDashLg />
-            </div>
-            <div className="hidden group-hover:block">
-              {menuOpened &&
-                <div className="mr-[0.2rem] _md:mr-[0.3rem]">
-                  <BsChevronCompactLeft />
-                </div>
-              }
-              {!menuOpened &&
-                <div className="mr-[-0.2rem] _md:mr-[-0.3rem]">
-                  <BsChevronCompactRight />
-                </div>
-              }
-            </div>
-          </StyledLayers>
+          className="_bg-blue-400 absolute top-0 left-0 w-[100vw] h-[100vh] z-20"
+          onClick={() => menuOpened && toggleMenuOpened()}>
         </div>
-        <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">
-        </div>
-        <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
-          <div className="pt-2">
+      }
+      <div
+        className={`_bg-pink-200 fixed top-0 h-full w-[30rem] max-w-[90vw] z-20 transition-all _blur-[10px]`}
+        style={{
+          backgroundColor: `${styles[1]?.color ? styles[0]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
+          backdropFilter: "blur(10px)",
+          left: menuOpened ? 0 : "-30rem"
+        }}
+      >
+        <div className="_bg-pink-400 flex flex-col h-[100vh]">
+          <div
+            className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[32pt] _md:text-[36pt] bold _pl-2 py-5 opacity-40 hover:opacity-100 transition-all"
+            onClick={toggleMenuOpened}
+            style={{
+              filter: `drop-shadow(0px 0px 16px ${haiku?.bgColor})`,
+              marginRight: menuOpened ? "-0.5rem" : "-2.2rem",
+              display: menuAnimating ? "none" : "block",
+              transitionDuration: "80ms",
+            }}
+            title={menuOpened ? "Hide menu" : "Show menu"}
+          >
             <StyledLayers styles={styles}>
-              Your {thingName}s
+              <div className="rotate-90 group-hover:hidden">
+                <BsDashLg />
+              </div>
+              <div className="hidden group-hover:block">
+                {menuOpened &&
+                  <div className="mr-[0.2rem] _md:mr-[0.3rem]">
+                    <BsChevronCompactLeft />
+                  </div>
+                }
+                {!menuOpened &&
+                  <div className="mr-[-0.2rem] _md:mr-[-0.3rem]">
+                    <BsChevronCompactRight />
+                  </div>
+                }
+              </div>
             </StyledLayers>
           </div>
-          {/* note: don't render when not opened to save on resources */}
-          {(menuAnimating || menuOpened) && myHaikus && Object.values(myHaikus)
-            // .filter((h: Haiku) => h.createdBy == user.id)
-            .sort(byCreatedAtDesc)
-            .slice(0, 100) // more than that and things blow up on safari
-            .map((h: Haiku, i: number) => (
-              <StyledLayers key={i} styles={altStyles}>
+          <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">
+          </div>
+          <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
+            <div className="pt-2">
+              <StyledLayers styles={styles}>
+                Your {thingName}s
+              </StyledLayers>
+            </div>
+            {/* note: don't render when not opened to save on resources */}
+            {(menuAnimating || menuOpened) && myHaikus && myHaikus
+              // .filter((h: Haiku) => h.createdBy == user.id)
+              .sort(byCreatedAtDesc)
+              .slice(0, numPages * pageSize) // more than that and things blow up on safari
+              .map((h: Haiku, i: number) => (
+                <StyledLayers key={i} styles={altStyles}>
+                  <Link
+                    href={`/${h.id}`}
+                    onClick={(e: any) => {
+                      if (onSelectHaiku) {
+                        e.preventDefault();
+                        toggleMenuOpened();
+                        onSelectHaiku(h.id);
+                      }
+                    }}
+                  >
+                    <div style={{ fontWeight: 400 }}>
+                      <span className="capitalize">&quot;{h.theme}&quot;</span> generated {moment(h.createdAt).fromNow()}{h.createdBy != user.id && ` by ${user?.isAdmin ? "admin" : "user"} ${h.createdBy}`}
+                    </div>
+                  </Link>
+                </StyledLayers>
+              ))}
+            {myHaikus && (Object.values(myHaikus).length > numPages * pageSize) &&
+              <div
+                className="py-2 cursor-pointer"
+                onClick={loadMore}
+              >
+                <StyledLayers styles={styles}>
+                  Load more
+                </StyledLayers>
+              </div>
+            }
+          </div>
+          <div className="_bg-purple-400 flex flex-row sm:justify-center justify-start px-2 pt-4 pb-2 h-fit w-full">
+            <StyledLayers styles={styles}>
+              <div className="_bg-purple-200 flex sm:flex-row flex-col sm:gap-3 gap-2">
                 <Link
-                  href={`/${h.id}`}
+                  key="about"
+                  className="flex flex-row"
+                  href="#"
+                  title="About"
                   onClick={(e: any) => {
-                    if (onSelectHaiku) {
-                      e.preventDefault();
-                      toggleMenuOpened();
-                      onSelectHaiku(h.id);
-                    }
+                    e.preventDefault();
+                    onShowAbout && onShowAbout();
                   }}
                 >
-                  <div style={{ fontWeight: 400 }}>
-                    <span className="capitalize">&quot;{h.theme}&quot;</span> generated {moment(h.createdAt).fromNow()}{h.createdBy != user.id && ` by ${user?.isAdmin ? "admin" : "user"} ${h.createdBy}`}
-                  </div>
+                  <IoHelpCircle className="text-2xl" />
+                  About
                 </Link>
-              </StyledLayers>
-            ))}
-        </div>
-        <div className="_bg-purple-400 flex flex-row sm:justify-center justify-start px-2 pt-4 pb-2 h-fit w-full">
-          <StyledLayers styles={styles}>
-            <div className="_bg-purple-200 flex sm:flex-row flex-col sm:gap-3 gap-2">
-              <Link
-                key="about"
-                className="flex flex-row"
-                href="#"
-                title="About"
-                onClick={(e: any) => {
-                  e.preventDefault();
-                  onShowAbout && onShowAbout();
-                }}
-              >
-                <IoHelpCircle className="text-2xl" />
-                About
-              </Link>
-              <Link
-                key="github"
-                className="flex flex-row gap-1"
-                href="https://github.com/desmat/haiku"
-                target="_blank"
-              >
-                <IoLogoGithub className="text-xl mt-[0.2rem]" />
-                github.com/desmat
-              </Link>
-              <Link
-                key="web"
-                className="flex flex-row gap-1"
-                href="https://www.desmat.ca"
-                target="_blank"
-              >
-                <MdHome className="text-2xl" />
-                www.desmat.ca
-              </Link>
-            </div>
-          </StyledLayers>
+                <Link
+                  key="github"
+                  className="flex flex-row gap-1"
+                  href="https://github.com/desmat/haiku"
+                  target="_blank"
+                >
+                  <IoLogoGithub className="text-xl mt-[0.2rem]" />
+                  github.com/desmat
+                </Link>
+                <Link
+                  key="web"
+                  className="flex flex-row gap-1"
+                  href="https://www.desmat.ca"
+                  target="_blank"
+                >
+                  <MdHome className="text-2xl" />
+                  www.desmat.ca
+                </Link>
+              </div>
+            </StyledLayers>
+          </div>
         </div>
       </div>
     </div>
@@ -442,27 +487,16 @@ export function NavOverlay({
 }) {
   const router = useRouter();
   const [user] = useUser((state: any) => [state.user]);
-  const [menuOpened, setMenuOpened] = useState(false);
-  const [menuAnimating, setMenuAnimating] = useState(false);
   const [loadHaikus, myHaikus] = useHaikus((state: any) => [state.load, state.myHaikus]);
 
-  // console.log(">> app._component.Nav.render", { menuOpened, menuAnimating });
-
-  const toggleMenuOpened = () => {
-    // console.log(">> app._component.Nav.toggleMenuOpened", {});
-    setMenuAnimating(true);
-    setTimeout(() => setMenuAnimating(false), 100);
-    setMenuOpened(!menuOpened);
-  }
+  // console.log(">> app._component.Nav.render", {  });
 
   const handleKeyDown = async (e: any) => {
-    // console.log(">> app._component.Nav.handleKeyDown", { menuOpened, menuAnimating });
+    // console.log(">> app._component.Nav.handleKeyDown", {  });
     if (e.key == "Escape") {
       if (["social-img", "social-img-lyricle"].includes(mode)) {
         await onSwitchMode();
         router.push(`/${haiku ? haiku?.id : ""}`);
-      } else {
-        setMenuOpened(false);
       }
     }
   }
@@ -483,10 +517,7 @@ export function NavOverlay({
   }, [mode, haiku]);
 
   return (
-    <div
-      className="_bg-pink-200 z-90"
-      onClick={() => menuOpened && toggleMenuOpened()}
-    >
+    <div className="_bg-pink-200 z-90">
       {["haikudle", "haiku"].includes(mode) &&
         <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-30`}>
           <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
@@ -547,12 +578,9 @@ export function NavOverlay({
           styles={styles}
           altStyles={altStyles}
           haiku={haiku}
-          myHaikus={myHaikus}
+          myHaikus={Object.values(myHaikus)}
           onShowAbout={onShowAbout}
           onSelectHaiku={onSelectHaiku}
-          menuOpened={menuOpened}
-          menuAnimating={menuAnimating}
-          toggleMenuOpened={toggleMenuOpened}
         />
       }
     </div>
