@@ -440,7 +440,7 @@ export function NavOverlay({
 }) {
   const router = useRouter();
   const [user] = useUser((state: any) => [state.user]);
-  const [menuOpened, setMenuOpened] = useState(true);
+  const [menuOpened, setMenuOpened] = useState(false);
   const [menuAnimating, setMenuAnimating] = useState(false);
   const [loadHaikus, myHaikus] = useHaikus((state: any) => [state.load, state.myHaikus]);
 
