@@ -278,17 +278,10 @@ function SlidingMenu({
 }) {
   const [menuOpened, setMenuOpened] = useState(false);
   const [menuAnimating, setMenuAnimating] = useState(false);
-  const pageSize = 25;
+  const pageSize = 20;
   const [numPages, setNumPages] = useState(1);
 
   // console.log(">> app._component.Nav.render", { menuOpened, menuAnimating });
-
-  const toggleMenuOpened = () => {
-    // console.log(">> app._component.Nav.toggleMenuOpened", {});
-    setMenuAnimating(true);
-    setTimeout(() => setMenuAnimating(false), 100);
-    setMenuOpened(!menuOpened);
-  }
 
   // TODO: move to shared lib between Nav and Layout
   const isLyricleMode = process.env.EXPERIENCE_MODE == "lyricle";
@@ -306,9 +299,16 @@ function SlidingMenu({
 
   // console.log(">> app._component.SlidingMenu.render", { user });
 
+  const toggleMenuOpened = () => {
+    // console.log(">> app._component.Nav.toggleMenuOpened", {});
+    setMenuAnimating(true);
+    setTimeout(() => setMenuAnimating(false), 100);
+    setMenuOpened(!menuOpened);
+  }
+
   function loadMore(e: any) {
     e.preventDefault();
-    setNumPages(numPages + 1);
+    setNumPages(numPages * 2);
   }
 
   const handleKeyDown = async (e: any) => {
@@ -376,7 +376,7 @@ function SlidingMenu({
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
             <div className="pt-2">
               <StyledLayers styles={styles}>
-                Your {thingName}s
+                Latest {thingName}s
               </StyledLayers>
             </div>
             {/* note: don't render when not opened to save on resources */}
@@ -578,7 +578,7 @@ export function NavOverlay({
           styles={styles}
           altStyles={altStyles}
           haiku={haiku}
-          myHaikus={Object.values(myHaikus)}
+          myHaikus={myHaikus ? Object.values(myHaikus) : []}
           onShowAbout={onShowAbout}
           onSelectHaiku={onSelectHaiku}
         />
