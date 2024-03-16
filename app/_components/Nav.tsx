@@ -374,7 +374,7 @@ function SlidingMenu({
           <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">
           </div>
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
-            <div className="pt-2">
+            <div className="py-2">
               <StyledLayers styles={styles}>
                 Latest {thingName}s
               </StyledLayers>
