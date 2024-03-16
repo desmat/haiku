@@ -296,116 +296,114 @@ function SlidingMenu({
       ? "Haikudle"
       : "Haiku";
 
-  console.log(">> app._component.SlidingMenu.render", { user });
+  // console.log(">> app._component.SlidingMenu.render", { user });
 
   return (
     <div
-      className={`_bg-pink-200 fixed top-0 h-full w-[30rem] z-20 transition-all _blur-[10px]`}
+      className={`_bg-pink-200 fixed top-0 h-full w-[30rem] max-w-[90vw] z-20 transition-all _blur-[10px]`}
       style={{
         backgroundColor: `${styles[1]?.color ? styles[0]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
         backdropFilter: "blur(10px)",
         left: menuOpened ? 0 : "-30rem"
       }}
     >
-
-      {/* <div className="absolute top-[2.3rem] left-3">
+      <div className="_bg-pink-400 flex flex-col h-[100vh]">
+        <div
+          className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[32pt] _md:text-[36pt] bold _pl-2 py-5 opacity-40 hover:opacity-100 transition-all"
+          onClick={toggleMenuOpened}
+          style={{
+            filter: `drop-shadow(0px 0px 16px ${haiku?.bgColor})`,
+            marginRight: menuOpened ? "-0.5rem" : "-2.2rem",
+            display: menuAnimating ? "none" : "block",
+            transitionDuration: "80ms",
+          }}
+          title={menuOpened ? "Hide menu" : "Show menu"}
+        >
+          <StyledLayers styles={styles}>
+            <div className="rotate-90 group-hover:hidden">
+              <BsDashLg />
+            </div>
+            <div className="hidden group-hover:block">
+              {menuOpened &&
+                <div className="mr-[0.2rem] _md:mr-[0.3rem]">
+                  <BsChevronCompactLeft />
+                </div>
+              }
+              {!menuOpened &&
+                <div className="mr-[-0.2rem] _md:mr-[-0.3rem]">
+                  <BsChevronCompactRight />
+                </div>
+              }
+            </div>
+          </StyledLayers>
+        </div>
+        <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">          
+        </div>
+        <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
+          <div className="pt-2">
             <StyledLayers styles={styles}>
-              {appDescription}
+              Your {thingName}s
             </StyledLayers>
-          </div> */}
-      <div className="absolute top-[3.2rem] md:top-[4rem] left-3">
-        <StyledLayers styles={styles}>
-          Your {thingName}s:
-        </StyledLayers>
-      </div>
-      <div
-        className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[32pt] _md:text-[36pt] bold _pl-2 py-5 opacity-40 hover:opacity-100 transition-all"
-        onClick={toggleMenuOpened}
-        style={{
-          filter: `drop-shadow(0px 0px 16px ${haiku?.bgColor})`,
-          marginRight: menuOpened ? "-0.5rem" : "-2.2rem",
-          display: menuAnimating ? "none" : "block",
-          transitionDuration: "80ms",
-        }}
-        title={menuOpened ? "Hide menu" : "Show menu"}
-      >
-        <StyledLayers styles={styles}>
-          <div className="rotate-90 group-hover:hidden">
-            <BsDashLg />
           </div>
-          <div className="hidden group-hover:block">
-            {menuOpened &&
-              <div className="mr-[0.2rem] _md:mr-[0.3rem]">
-                <BsChevronCompactLeft />
-              </div>
-            }
-            {!menuOpened &&
-              <div className="mr-[-0.2rem] _md:mr-[-0.3rem]">
-                <BsChevronCompactRight />
-              </div>
-            }
-          </div>
-        </StyledLayers>
-      </div>
-      <div className="_bg-orange-200 mt-[5rem] md:mt-[6rem] px-2.5 flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-9.5rem)] overflow-scroll">
-        {myHaikus && Object.values(myHaikus)
-          // .filter((h: Haiku) => h.createdBy == user.id)
-          .sort(byCreatedAtDesc)
-          .map((h: Haiku, i: number) => (
-            <StyledLayers key={i} styles={altStyles}>
+          {myHaikus && Object.values(myHaikus)
+            // .filter((h: Haiku) => h.createdBy == user.id)
+            .sort(byCreatedAtDesc)
+            .map((h: Haiku, i: number) => (
+              <StyledLayers key={i} styles={altStyles}>
+                <Link
+                  href={`/${h.id}`}
+                  onClick={(e: any) => {
+                    if (onSelectHaiku) {
+                      e.preventDefault();
+                      toggleMenuOpened();
+                      onSelectHaiku(h.id);
+                    }
+                  }}
+                >
+                  <div style={{ fontWeight: 400 }}>
+                    <span className="capitalize">&quot;{h.theme}&quot;</span> generated {moment(h.createdAt).fromNow()}{h.createdBy != user.id && ` by ${user?.isAdmin ? "admin" : "user"} ${h.createdBy}`}
+                  </div>
+                </Link>
+              </StyledLayers>
+            ))}
+        </div>
+        <div className="_bg-purple-400 flex flex-row sm:justify-center justify-start px-2 py-2 h-fit w-full">
+          <StyledLayers styles={styles}>
+            <div className="_bg-purple-200 flex sm:flex-row flex-col sm:gap-3 gap-2">
               <Link
-                href={`/${h.id}`}
+                key="about"
+                className="flex flex-row"
+                href="#"
+                title="About"
                 onClick={(e: any) => {
-                  if (onSelectHaiku) {
-                    e.preventDefault();
-                    toggleMenuOpened();
-                    onSelectHaiku(h.id);
-                  }
+                  e.preventDefault();
+                  onShowAbout && onShowAbout();
                 }}
               >
-                <div style={{ fontWeight: 400 }}>
-                  <span className="capitalize">&quot;{h.theme}&quot;</span> generated {moment(h.createdAt).fromNow()}{h.createdBy != user.id && ` by ${user?.isAdmin ? "admin" : "user"} ${h.createdBy}`}
-                </div>
+                <IoHelpCircle className="text-2xl" />
+                About
               </Link>
-            </StyledLayers>
-          ))}
-      </div>
-      <div className="_bg-purple-200 flex flex-col justify-center px-2 py-2 h-fit">
-        <StyledLayers styles={styles}>
-          <div className="_bg-purple-200 flex flex-row gap-3 justify-center">
-            <Link
-              key="about"
-              className="flex flex-row py-1"
-              href="#"
-              title="About"
-              onClick={(e: any) => {
-                e.preventDefault();
-                onShowAbout && onShowAbout();
-              }}
-            >
-              <IoHelpCircle className="text-2xl" />
-              About
-            </Link>
-            <Link
-              key="github"
-              className="flex flex-row gap-1 py-1"
-              href="https://github.com/desmat/haiku"
-              target="_blank"
-            >
-              <IoLogoGithub className="text-xl mt-[0.2rem]" />
-              github.com/desmat
-            </Link>
-            <Link
-              key="web"
-              className="flex flex-row gap-1 py-1"
-              href="https://www.desmat.ca"
-              target="_blank"
-            >
-              <MdHome className="text-2xl" />
-              www.desmat.ca
-            </Link>
-          </div>
-        </StyledLayers>
+              <Link
+                key="github"
+                className="flex flex-row gap-1"
+                href="https://github.com/desmat/haiku"
+                target="_blank"
+              >
+                <IoLogoGithub className="text-xl mt-[0.2rem]" />
+                github.com/desmat
+              </Link>
+              <Link
+                key="web"
+                className="flex flex-row gap-1"
+                href="https://www.desmat.ca"
+                target="_blank"
+              >
+                <MdHome className="text-2xl" />
+                www.desmat.ca
+              </Link>
+            </div>
+          </StyledLayers>
+        </div>
       </div>
     </div>
   )
@@ -449,7 +447,7 @@ export function NavOverlay({
   // console.log(">> app._component.Nav.render", { menuOpened, menuAnimating });
 
   const toggleMenuOpened = () => {
-    console.log(">> app._component.Nav.toggleMenuOpened", {});
+    // console.log(">> app._component.Nav.toggleMenuOpened", {});
     setMenuAnimating(true);
     setTimeout(() => setMenuAnimating(false), 100);
     setMenuOpened(!menuOpened);
