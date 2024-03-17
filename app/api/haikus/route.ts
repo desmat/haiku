@@ -45,6 +45,14 @@ export async function GET(request: NextRequest, params?: any) {
   }
 
   if (query.mine) {
+    // just admins for now
+    if (!user.isAdmin) {
+      return NextResponse.json(
+        { success: false, message: 'authorization failed' },
+        { status: 403 }
+      );      
+    }
+
     // TODO pull solved puzzles, or all for admins
     delete query.mine;
     delete query.mode;

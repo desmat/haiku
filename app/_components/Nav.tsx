@@ -507,7 +507,8 @@ export function NavOverlay({
   }
 
   useEffect(() => {
-    if (user?.id) {
+    // just admins for now
+    if (user?.id && user?.isAdmin) {
       loadHaikus({ /* createdBy: user.id */ mine: true }, mode);
     }
   }, [user?.id]);
