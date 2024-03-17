@@ -8,6 +8,7 @@ import * as samples from '@/services/stores/samples';
 import * as openai from './openai';
 import chroma from 'chroma-js';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
+import { UserHaikudle } from '@/types/Haikudle';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -35,6 +36,45 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
             .map((word: string) => hashCode(normalizeWord(word))))
       })
   }
+
+  return new Promise((resolve, reject) => resolve(haikus.filter(Boolean)));
+}
+
+export async function getUserHaikus(user: User): Promise<Haiku[]> {
+  console.log(`>> services.haiku.getUserHaiku`, { user });
+
+  let haikus = await store.haikus.find();
+  if (!user.isAdmin) {
+    // find all haikus that user solved corresponding haikudle
+    let userHaikudles = await store.userHaikudles.find({
+      createdBy: user.id,
+      // solved: true, // nope, need to filter on haikudle.solved and can't do that
+    });
+    
+    const userHaikudleLookup = new Map(userHaikudles
+      .filter((uh: UserHaikudle) => uh?.haikudle?.solved)
+      .map((uh: UserHaikudle) => [uh.haikudle.haikuId, uh.updatedAt]));
+
+    haikus = haikus
+      .filter((haiku: Haiku) => userHaikudleLookup.get(haiku.id))
+      .map((haiku: Haiku) => {
+        return {
+          ...haiku,
+          solvedAt: userHaikudleLookup.get(haiku.id),
+        }
+      });
+  }
+
+  // strip down to just the basics
+  haikus = haikus.map((haiku: Haiku) => {
+    return {
+      id: haiku.id,
+      createdBy: haiku.createdBy,
+      createdAt: haiku.createdAt,
+      solvedAt: haiku.solvedAt,
+      theme: haiku.theme,
+    };
+  });
 
   return new Promise((resolve, reject) => resolve(haikus.filter(Boolean)));
 }

@@ -259,29 +259,36 @@ function BottomLinks({
   )
 }
 
-function SlidingMenu({
+function SidePanel({
   user,
+  haiku,
+  mode,
   styles,
   altStyles,
-  haiku,
-  myHaikus,
   onShowAbout,
   onSelectHaiku,
 }: {
   user: User,
+  haiku?: Haiku,
+  mode?: string
   styles: any[],
   altStyles: any[],
-  haiku?: Haiku,
-  myHaikus?: Haiku[],
   onShowAbout?: any,
   onSelectHaiku?: any,
 }) {
-  const [menuOpened, setMenuOpened] = useState(false);
-  const [menuAnimating, setMenuAnimating] = useState(false);
+  const [panelOpened, setPanelOpened] = useState(false);
+  const [panelAnimating, setPanelAnimating] = useState(false);
   const pageSize = 20;
   const [numPages, setNumPages] = useState(1);
+  const [
+    loadHaikus,
+    myHaikus
+  ] = useHaikus((state: any) => [
+    state.load,
+    state.myHaikus ? Object.values(state.myHaikus) : [],
+  ]);
 
-  // console.log(">> app._component.Nav.render", { menuOpened, menuAnimating });
+  // console.log(">> app._component.Nav.render", { panelOpened, panelAnimating });
 
   // TODO: move to shared lib between Nav and Layout
   const isLyricleMode = process.env.EXPERIENCE_MODE == "lyricle";
@@ -292,18 +299,18 @@ function SlidingMenu({
       ? "AI-generated daily art and haiku puzzles"
       : "AI-generated art and haiku poems";
   const thingName = isLyricleMode
-    ? "Lyricle"
+    ? "yricle"
     : isHaikudleMode
-      ? "Haikudle"
-      : "Haiku";
+      ? "haikudle"
+      : "haiku";
 
-  // console.log(">> app._component.SlidingMenu.render", { user });
+  // console.log(">> app._component.SidePanel.render", { user });
 
   const toggleMenuOpened = () => {
-    // console.log(">> app._component.SlidingMenu.toggleMenuOpened", {});
-    setMenuAnimating(true);
-    setTimeout(() => setMenuAnimating(false), 100);
-    setMenuOpened(!menuOpened);
+    // console.log(">> app._component.SidePanel.toggleMenuOpened", {});
+    setPanelAnimating(true);
+    setTimeout(() => setPanelAnimating(false), 100);
+    setPanelOpened(!panelOpened);
   }
 
   const loadMore = (e: any) => {
@@ -312,16 +319,25 @@ function SlidingMenu({
   };
 
   const handleKeyDown = async (e: any) => {
-    // console.log(">> app._component.SlidingMenu.handleKeyDown", { menuOpened, menuAnimating });
-    setMenuOpened(false);
+    // console.log(">> app._component.SidePanel.handleKeyDown", { panelOpened, panelAnimating });
+    if (e.key == "Escape") {
+      setPanelOpened(false);
+    }
   };
 
   const isUserAdmin = (userId?: string): boolean => {
     // @ts-ignore
     const ret = (process.env.ADMIN_USER_IDS || []).split(",").includes(userId);
-    // console.log(">> app._component.SlidingMenu.isUserAdmin", { userId, adminUserIds: process.env.ADMIN_USER_IDS, isUserAdmin: ret });
+    // console.log(">> app._component.SidePanel.isUserAdmin", { userId, adminUserIds: process.env.ADMIN_USER_IDS, isUserAdmin: ret });
     return ret;
   };
+
+  useEffect(() => {
+    // just admins for now
+    if (user?.id) {
+      loadHaikus({ /* createdBy: user.id */ mine: true }, mode);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     // console.log(">> app._component.Nav.useEffect", { mode, haiku });
@@ -332,20 +348,24 @@ function SlidingMenu({
     }
   }, []);
 
+  if (!myHaikus.length) {
+    return <></>
+  }
+
   return (
     <div>
-      {menuOpened &&
+      {panelOpened &&
         <div
           className="_bg-blue-400 absolute top-0 left-0 w-[100vw] h-[100vh] z-20"
-          onClick={() => menuOpened && toggleMenuOpened()}>
+          onClick={() => panelOpened && toggleMenuOpened()}>
         </div>
       }
       <div
-        className={`_bg-pink-200 fixed top-0 h-full w-[30rem] max-w-[90vw] z-20 transition-all _blur-[10px]`}
+        className={`_bg-pink-200 fixed top-0 h-full w-[27rem] max-w-[90vw] z-20 transition-all _blur-[10px]`}
         style={{
           backgroundColor: `${styles[1]?.color ? styles[0]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
           backdropFilter: "blur(10px)",
-          left: menuOpened ? 0 : "-30rem"
+          left: panelOpened ? 0 : "-27rem"
         }}
       >
         <div className="_bg-pink-400 flex flex-col h-[100vh]">
@@ -354,23 +374,23 @@ function SlidingMenu({
             onClick={toggleMenuOpened}
             style={{
               filter: `drop-shadow(0px 0px 16px ${haiku?.bgColor})`,
-              marginRight: menuOpened ? "-0.5rem" : "-2.2rem",
-              display: menuAnimating ? "none" : "block",
+              marginRight: panelOpened ? "-0.5rem" : "-2.2rem",
+              display: panelAnimating ? "none" : "block",
               transitionDuration: "80ms",
             }}
-            title={menuOpened ? "Hide menu" : "Show menu"}
+            title={panelOpened ? "Hide side panel" : "Show side panel"}
           >
             <StyledLayers styles={styles}>
               <div className="rotate-90 group-hover:hidden">
                 <BsDashLg />
               </div>
               <div className="hidden group-hover:block">
-                {menuOpened &&
+                {panelOpened &&
                   <div className="mr-[0.2rem] _md:mr-[0.3rem]">
                     <BsChevronCompactLeft />
                   </div>
                 }
-                {!menuOpened &&
+                {!panelOpened &&
                   <div className="mr-[-0.2rem] _md:mr-[-0.3rem]">
                     <BsChevronCompactRight />
                   </div>
@@ -383,11 +403,16 @@ function SlidingMenu({
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
             <div className="py-2">
               <StyledLayers styles={styles}>
-                Latest {thingName}s
+              {user.isAdmin &&
+                  <>Latest {thingName}s</>
+                }
+                {!user.isAdmin &&
+                  <>Your haikus</>
+                }
               </StyledLayers>
             </div>
             {/* note: don't render when not opened to save on resources */}
-            {(menuAnimating || menuOpened) && myHaikus && myHaikus
+            {(panelAnimating || panelOpened) && myHaikus && myHaikus
               // .filter((h: Haiku) => h.createdBy == user.id)
               .sort(byCreatedAtDesc)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
@@ -403,7 +428,13 @@ function SlidingMenu({
                       }
                     }}
                   >
-                    <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span> <span className="font-normal">generated {moment(h.createdAt).fromNow()} by {h.createdBy == user.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
+                    <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>
+                    {user.isAdmin &&
+                      <span className="font-normal"> generated {moment(h.createdAt).fromNow()} by {h.createdBy == user.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
+                    }
+                    {!user.isAdmin &&
+                      <span className="font-normal"> solved {moment(h.createdAt).fromNow()}</span>
+                    }
                   </Link>
                 </StyledLayers>
               ))}
@@ -492,7 +523,6 @@ export function NavOverlay({
 }) {
   const router = useRouter();
   const [user] = useUser((state: any) => [state.user]);
-  const [loadHaikus, myHaikus] = useHaikus((state: any) => [state.load, state.myHaikus]);
 
   // console.log(">> app._component.Nav.render", {  });
 
@@ -505,13 +535,6 @@ export function NavOverlay({
       }
     }
   }
-
-  useEffect(() => {
-    // just admins for now
-    if (user?.id && user?.isAdmin) {
-      loadHaikus({ /* createdBy: user.id */ mine: true }, mode);
-    }
-  }, [user?.id]);
 
   useEffect(() => {
     // console.log(">> app._component.Nav.useEffect", { mode, haiku });
@@ -578,13 +601,13 @@ export function NavOverlay({
         </div>
       }
 
-      {user?.isAdmin && !["social-img", "social-img-lyricle"].includes(mode) && // myHaikus?.length > 0 &&
-        <SlidingMenu
+      {!["social-img", "social-img-lyricle"].includes(mode) &&
+        <SidePanel
           user={user}
+          haiku={haiku}
+          mode={mode}
           styles={styles}
           altStyles={altStyles}
-          haiku={haiku}
-          myHaikus={myHaikus ? Object.values(myHaikus) : []}
           onShowAbout={onShowAbout}
           onSelectHaiku={onSelectHaiku}
         />

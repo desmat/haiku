@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, createHaiku, generateHaiku } from '@/services/haikus';
+import { getHaikus, createHaiku, generateHaiku, getUserHaikus } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
 import moment from 'moment';
@@ -45,17 +45,8 @@ export async function GET(request: NextRequest, params?: any) {
   }
 
   if (query.mine) {
-    // just admins for now
-    if (!user.isAdmin) {
-      return NextResponse.json(
-        { success: false, message: 'authorization failed' },
-        { status: 403 }
-      );      
-    }
-
-    // TODO pull solved puzzles, or all for admins
-    delete query.mine;
-    delete query.mode;
+    const haikus = await getUserHaikus(user);
+    return NextResponse.json({ haikus });  
   }
 
   const haikus = await getHaikus(query, process.env.EXPERIENCE_MODE == "haikudle");
