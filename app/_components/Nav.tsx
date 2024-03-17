@@ -278,6 +278,7 @@ function SidePanel({
 }) {
   const [panelOpened, setPanelOpened] = useState(false);
   const [panelAnimating, setPanelAnimating] = useState(false);
+  const [panelPinned, setPanelPinned] = useState(false);
   const pageSize = 20;
   const [numPages, setNumPages] = useState(1);
   const [
@@ -310,6 +311,8 @@ function SidePanel({
     // console.log(">> app._component.SidePanel.toggleMenuOpened", {});
     setPanelAnimating(true);
     setTimeout(() => setPanelAnimating(false), 100);
+
+    if (panelOpened) setPanelPinned(false);
     setPanelOpened(!panelOpened);
   }
 
@@ -354,10 +357,12 @@ function SidePanel({
 
   return (
     <div>
+      {/* Area behind side panel but in front of main content to allow users to click and close the panel */}
       {panelOpened &&
         <div
           className="_bg-blue-400 absolute top-0 left-0 w-[100vw] h-[100vh] z-20"
-          onClick={() => panelOpened && toggleMenuOpened()}>
+          onClick={() => panelOpened && toggleMenuOpened()}
+        >
         </div>
       }
       <div
@@ -367,43 +372,54 @@ function SidePanel({
           backdropFilter: "blur(10px)",
           left: panelOpened ? 0 : "-27rem"
         }}
+        onMouseLeave={() => panelOpened && !panelPinned && toggleMenuOpened()}
       >
         <div className="_bg-pink-400 flex flex-col h-[100vh]">
+          {/* hotspot to open the side panel on mouse hover */}
           <div
-            className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[32pt] _md:text-[36pt] bold _pl-2 py-5 opacity-40 hover:opacity-100 transition-all"
-            onClick={toggleMenuOpened}
+            className="_bg-red-400 group absolute top-[4rem] right-0 w-[1.5rem] mr-[-1.5rem] h-[calc(100vh-4rem)] z-90"
+            onMouseEnter={() => !panelOpened && !panelAnimating && toggleMenuOpened()}
+          >
+          </div>
+          <div
+            className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[32pt] _md:text-[36pt] bold py-5 opacity-40 hover:opacity-100 transition-all"
+            onClick={() => {
+              !panelOpened && !panelPinned && setPanelPinned(true);
+              toggleMenuOpened();
+            }}
             style={{
               filter: `drop-shadow(0px 0px 16px ${haiku?.bgColor})`,
-              marginRight: panelOpened ? "-0.5rem" : "-2.2rem",
+              marginRight: panelOpened ? "-0.5rem" : "-2.6rem",
               display: panelAnimating ? "none" : "block",
               transitionDuration: "80ms",
             }}
             title={panelOpened ? "Hide side panel" : "Show side panel"}
           >
             <StyledLayers styles={styles}>
-              <div className="rotate-90 group-hover:hidden">
+              <div className="rotate-90 group-hover:hidden ml-[-1rem]">
                 <BsDashLg />
               </div>
               <div className="hidden group-hover:block">
                 {panelOpened &&
-                  <div className="mr-[0.2rem] _md:mr-[0.3rem]">
+                  <div className="mr-[0.1rem] _md:mr-[0.3rem]">
                     <BsChevronCompactLeft />
                   </div>
                 }
                 {!panelOpened &&
-                  <div className="mr-[-0.2rem] _md:mr-[-0.3rem]">
+                  <div className="mr-[-0.2rem] ml-[-0.8rem] _md:mr-[-0.3rem]">
                     <BsChevronCompactRight />
                   </div>
                 }
               </div>
             </StyledLayers>
           </div>
+          {/* Spacer for the logo to punch trough */}
           <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">
           </div>
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
             <div className="py-2">
               <StyledLayers styles={styles}>
-              {user.isAdmin &&
+                {user.isAdmin &&
                   <>Latest {thingName}s</>
                 }
                 {!user.isAdmin &&
@@ -423,7 +439,7 @@ function SidePanel({
                     onClick={(e: any) => {
                       if (onSelectHaiku) {
                         e.preventDefault();
-                        toggleMenuOpened();
+                        /* !panelPinned && */ toggleMenuOpened();
                         onSelectHaiku(h.id);
                       }
                     }}
