@@ -35,7 +35,7 @@ const checkCorrect = (inProgress: any, solution: any) => {
 }
 
 const isSolved = (inProgress: any, solution: any) => {
-  // console.log("*** isSolved", { inProgress });
+  console.log("*** isSolved", { inProgress });
 
   checkCorrect(inProgress, solution); // side effects yuk!
   const ret = inProgress.flat().reduce((a: boolean, m: any, i: number) => a && m.correct, true);
@@ -129,8 +129,6 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       solved,
       moves: haikudle?.moves || 0,
     });
-
-    // get().onSolved(haikudle.id, 42);
   },
 
   solve: () => {
@@ -277,6 +275,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         haikudle: {
           id: haikudleId,
           haikuId: haiku.id,
+          solved,
+          moves: moves + 1,
           inProgress,
         }
       }),
