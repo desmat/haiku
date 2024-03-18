@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getHaiku, deleteHaiku, saveHaiku } from '@/services/haikus';
+import { deleteHaikudle, getDailyHaikudles } from '@/services/haikudles';
 import { userSession } from '@/services/users';
-import { searchParamsToMap } from '@/utils/misc';
-import { getDailyHaikudles } from '@/services/haikudles';
 import { DailyHaikudle } from '@/types/Haikudle';
+import { searchParamsToMap } from '@/utils/misc';
 
 export const maxDuration = 300;
 
@@ -73,6 +73,14 @@ export async function DELETE(
     throw `Cannot delete haiku with null id`;
   }
 
-  const game = await deleteHaiku(user, params.id);
-  return NextResponse.json({ game });
+  // can't do that
+  // const dailyHaikudle = getDailyHaikudles({ haikuId: params.id });
+
+  const [haiku, haikudle] = await Promise.all([
+    deleteHaiku(user, params.id),
+    deleteHaikudle(user, params.id),
+    // dailyHaikudle && deleteDailyHaikudle(user, params.id),
+  ]);
+  
+  return NextResponse.json({ haiku, haikudle });
 }

@@ -92,7 +92,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.get`, { response });
 
     let value: T | undefined;
-    if (response) {
+    if (response && response[0] && !response[0].deletedAt) {
       value = response[0] as T;
     }
 
@@ -111,6 +111,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     }
     
     const keys = list && list
+      .filter((entry: any) => !entry.deletedAt)
       .map((value: T) => value.id && this.valueKey(value.id))
       .filter(Boolean);
 

@@ -180,27 +180,29 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           const data = await res.json();
           const haikus = data.haikus;
 
-          setLoaded(haikus);
-
-          // special case for random fetch: only keep the last one
           // @ts-ignore
-          if (query.random) {
+          if (query.mine) {
+            // special case: these were partially loaded for the side bar: don't setLoaded
             set({
               mode: mode || _mode,
-              _haikus: listToMap(haikus)
-            });
-            // @ts-ignore
-          } else if (query.mine) {
-            set({
-              mode: mode || _mode,
-              myHaikus: { ...listToMap(haikus) },
-              _haikus: { ..._haikus, ...listToMap(haikus) },
+              myHaikus: listToMap(haikus),
             });
           } else {
-            set({
-              mode: mode || _mode,
-              _haikus: { ..._haikus, ...listToMap(haikus) }
-            });
+            setLoaded(haikus);
+
+            // special case for random fetch: only keep the last one
+            // @ts-ignore
+            if (query.random) {
+              set({
+                mode: mode || _mode,
+                _haikus: listToMap(haikus)
+              });
+            } else {
+              set({
+                mode: mode || _mode,
+                _haikus: { ..._haikus, ...listToMap(haikus) }
+              });
+            }
           }
 
           resolve(haikus);
@@ -440,7 +442,8 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const deleting = _get(id);
 
     if (!deleting) {
-      throw `Haiku not found: ${id}`;
+      // throw `Haikudle not found: ${id}`;
+      useAlert.getState().error(`Error deleting haiku ${id}: Haiku not found`);
     }
 
     // optimistic

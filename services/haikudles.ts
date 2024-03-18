@@ -115,14 +115,14 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
 
   const haikudle = await getHaikudle(id);
   if (!haikudle) {
-    throw `Haikudle not found: ${id}`;
+    throw `Haikudle not found: ${id}`;    
   }
 
   if (!(haikudle.createdBy == user.id || user.isAdmin)) {
     throw `Unauthorized`;
   }
 
-  // return store.haikudles.delete(user.id, id);
+  return store.haikudles.delete(user.id, id);
 }
 
 export async function saveHaikudle(user: any, haikudle: Haikudle): Promise<Haikudle> {

@@ -215,7 +215,7 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
     throw `Unauthorized`;
   }
 
-  // return store.haikus.delete(user.id, id);
+  return store.haikus.delete(user.id, id);
 }
 
 export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
