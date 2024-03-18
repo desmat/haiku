@@ -163,7 +163,7 @@ export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<H
     haikudle,
   }
 
-  return store.userHaikudles.create(userHaikudleId, userHaikudle);
+  return store.userHaikudles.create(user.id, userHaikudle);
 }
 
 export async function getDailyHaikudle(id: string): Promise<DailyHaikudle | undefined> {

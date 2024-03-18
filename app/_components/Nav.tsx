@@ -449,7 +449,7 @@ function SidePanel({
                       <span className="font-normal"> generated {moment(h.createdAt).fromNow()} by {h.createdBy == user.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
                     }
                     {!user.isAdmin &&
-                      <span className="font-normal"> solved {moment(h.createdAt).fromNow()}</span>
+                      <span className="font-normal"> solved {moment(h.solvedAt).fromNow()}</span>
                     }
                   </Link>
                 </StyledLayers>

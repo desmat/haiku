@@ -41,7 +41,7 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
 }
 
 export async function getUserHaikus(user: User): Promise<Haiku[]> {
-  console.log(`>> services.haiku.getUserHaiku`, { user });
+  console.log(`>> services.haiku.getUserHaikus`, { user });
 
   let haikus = await store.haikus.find();
   if (!user.isAdmin) {
@@ -53,7 +53,7 @@ export async function getUserHaikus(user: User): Promise<Haiku[]> {
     
     const userHaikudleLookup = new Map(userHaikudles
       .filter((uh: UserHaikudle) => uh?.haikudle?.solved)
-      .map((uh: UserHaikudle) => [uh.haikudle.haikuId, uh.updatedAt]));
+      .map((uh: UserHaikudle) => [uh.haikudle.haikuId, uh.updatedAt || uh.createdAt]));
 
     haikus = haikus
       .filter((haiku: Haiku) => userHaikudleLookup.get(haiku.id))

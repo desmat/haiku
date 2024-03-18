@@ -474,6 +474,16 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       }
     });
   },
+
+  addUserHaiku: async (userHaiku: any) => {
+    // console.log(">> hooks.haiku.addUserHaiku", { userHaiku });
+    const { myHaikus } = get();
+
+    set({
+      myHaikus: { ...myHaikus, [userHaiku.id || ""]: userHaiku },
+    });
+  },
+
 })));
 
 export default useHaikus;

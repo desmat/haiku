@@ -11,6 +11,7 @@ import useAlert from './alert';
 import moment from 'moment';
 import { User } from '@/types/User';
 import { notFoundHaiku, notFoundHaikudle } from "@/services/stores/samples";
+import useHaikus from './haikus';
 
 async function fetchOpts() {
   const token = await useUser.getState().getToken();
@@ -53,7 +54,20 @@ const initialState = {
   inProgress: [[], [], []],
   solved: false,
   moves: 0,
-  onSolved: (id: string, moves: number) => {
+  onSolved: async (id: string, moves: number) => {
+    // race condition
+    // useHaikus.getState().load({ /* createdBy: user.id */ mine: true }, useHaikus.getState().mode);
+    
+    // anticipate instead
+    const currentHaiku = (await useHaikudle.getState()).haiku;
+    (await useHaikus.getState()).addUserHaiku({
+      id: currentHaiku.id,
+      createdBy: currentHaiku.createdBy,
+      createdAt: currentHaiku.createdAt,
+      solvedAt: moment().valueOf(),
+      theme: currentHaiku.theme,
+    });
+
     setTimeout(() => {
       const shareContent = "Solved today\\'s haiku puzzle in " + moves + " moves! https://haikudle.art/\\n\\n"
         + "#haiku #haikuoftheday #haikuchallenge #haikudle #puzzle #dailypuzzle #AI #aiart #dalle #dalle3 #chatgpt ";
