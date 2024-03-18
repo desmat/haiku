@@ -379,6 +379,7 @@ function SidePanel({
           <div
             className="_bg-red-400 group absolute top-[4rem] right-0 w-[1.5rem] mr-[-1.5rem] h-[calc(100vh-4rem)] z-90"
             onMouseEnter={() => !panelOpened && !panelAnimating && toggleMenuOpened()}
+            onClick={() => panelOpened && toggleMenuOpened()}
           >
           </div>
           <div
