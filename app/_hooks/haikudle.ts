@@ -50,6 +50,7 @@ const initialState = {
   // access via get(id) or find(query?)
   haiku: undefined,
   haikudleId: undefined,
+  previousDailyHaikudle: undefined,
   solution: [[], [], []],
   inProgress: [[], [], []],
   solved: false,
@@ -124,6 +125,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     set({
       haiku,
       haikudleId: haikudle.id,
+      previousDailyHaikudleId: haikudle.previousDailyHaikudleId,
       inProgress,
       solution,
       solved,

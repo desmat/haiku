@@ -305,7 +305,7 @@ function SidePanel({
       ? "haikudle"
       : "haiku";
 
-  // console.log(">> app._component.SidePanel.render", { user });
+  // console.log(">> app._component.SidePanel.render", { user, mode });
 
   const toggleMenuOpened = () => {
     // console.log(">> app._component.SidePanel.toggleMenuOpened", {});
@@ -330,15 +330,19 @@ function SidePanel({
 
   const isUserAdmin = (userId?: string): boolean => {
     // @ts-ignore
-    const ret = (process.env.ADMIN_USER_IDS || []).split(",").includes(userId);
+    const ret = (process.env.ADMIN_USER_IDS || "").split(",").includes(userId);
     // console.log(">> app._component.SidePanel.isUserAdmin", { userId, adminUserIds: process.env.ADMIN_USER_IDS, isUserAdmin: ret });
     return ret;
   };
 
+  const bySolvedAtDesc = (a: any, b: any) => {
+    return (b.solvedAt || 0) - (a.solvedAt || 0)
+  }  
+
   useEffect(() => {
-    // just admins for now
-    if (user?.id) {
-      loadHaikus({ /* createdBy: user.id */ mine: true }, mode);
+    console.log(">> app._component.Nav.useEffect", { user, mode });
+    if (user?.id && ["haiku", "haikudle", "lyrics", "lyricle"].includes(mode || "")) {
+      loadHaikus({ /* createdBy: user.id */ mine: true}, mode);
     }
   }, [user?.id]);
 
@@ -431,7 +435,7 @@ function SidePanel({
             {/* note: don't render when not opened to save on resources */}
             {(panelAnimating || panelOpened) && myHaikus && myHaikus
               // .filter((h: Haiku) => h.createdBy == user.id)
-              .sort(byCreatedAtDesc)
+              .sort(user.isAdmin ? byCreatedAtDesc : bySolvedAtDesc)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
               .map((h: Haiku, i: number) => (
                 <StyledLayers key={i} styles={altStyles}>
@@ -541,7 +545,7 @@ export function NavOverlay({
   const router = useRouter();
   const [user] = useUser((state: any) => [state.user]);
 
-  // console.log(">> app._component.Nav.render", {  });
+  // console.log(">> app._component.Nav.render", { user, mode });
 
   const handleKeyDown = async (e: any) => {
     // console.log(">> app._component.Nav.handleKeyDown", {  });

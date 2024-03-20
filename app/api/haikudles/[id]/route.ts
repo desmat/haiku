@@ -1,7 +1,9 @@
+import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { getHaikudle, deleteHaikudle, saveHaikudle, saveUserHaikudle, getUserHaikudle, createHaikudle } from '@/services/haikudles';
+import { getHaikudle, deleteHaikudle, saveHaikudle, saveUserHaikudle, getUserHaikudle, createHaikudle, getDailyHaikudles } from '@/services/haikudles';
 import { userSession } from '@/services/users';
 import { getHaiku } from '@/services/haikus';
+import { DailyHaikudle } from '@/types/Haikudle';
 
 // TODO I don't think we need this let's remove
 // export const maxDuration = 300;
@@ -18,11 +20,16 @@ export async function GET(
   const { user } = await userSession(request);
   // TODO reject?
 
+  const todaysDateCode = moment().format("YYYYMMDD");
+  const dailyHaikudles = await getDailyHaikudles();
+  const dailyHaikudle = dailyHaikudles
+    .filter((dh: DailyHaikudle) => dh.id < todaysDateCode && dh.haikudleId == params.id)[0];
+
   let [haiku, haikudle] = await Promise.all([
-    await getHaiku(params.id, true),
+    await getHaiku(params.id, !dailyHaikudle?.id),
     await getHaikudle(params.id),
   ]);
-  // console.log('>> app.api.haikudles.GET', { haiku, haikudle });
+  // console.log('>> app.api.haikudles.GET', { haiku, haikudle, dailyHaikudle });
 
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
@@ -42,6 +49,7 @@ export async function GET(
   const ret = {
     ...haikudle,
     ...userHaikudle?.haikudle,
+    previousDailyHaikudleId: dailyHaikudle?.id,
     haiku,
   };
 

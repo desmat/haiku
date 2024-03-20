@@ -54,6 +54,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     resetHaikudles,
     createHaikudle,
     haikudleInProgress,
+    previousDailyHaikudleId,
   ] = useHaikudle((state: any) => [
     state.loaded(haikuId || { lang }),
     state.load,
@@ -62,11 +63,15 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     state.reset,
     state.create,
     state.inProgress,
+    state.previousDailyHaikudleId,
   ]);
 
   let [loading, setLoading] = useState(false);
   const loaded = isHaikudleMode || isLyricleMode ? haikudleLoaded : haikusLoaded;
-  const haiku = !loading && (isHaikudleMode || isLyricleMode ? haikudleHaiku : haikuId && getHaiku(haikuId) || haikus[0]);
+  const haiku = !loading && (
+    isHaikudleMode || isLyricleMode
+      ? haikudleHaiku
+      : haikuId && getHaiku(haikuId) || haikus[0]);
 
   const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
@@ -146,10 +151,21 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   }, [haiku, loaded, loading]);
 
   useEffect(() => {
-    if ((isHaikudleMode || isLyricleMode) && user && !user?.preferences?.onboarded) {
-      setTimeout(handleShowAbout, 2000);
+    // @ts-ignore
+    let timeoutId;
+    if (user && haikudleLoaded) {
+      if (previousDailyHaikudleId && user && !user?.preferences?.onboardedPreviousDaily) {
+        timeoutId = setTimeout(handleShowAboutPreviousDaily, 2000);
+      } else if ((isHaikudleMode || isLyricleMode) && user && !user?.preferences?.onboarded) {
+        timeoutId = setTimeout(handleShowAbout, 2000);
+      }
     }
-  }, [user]);
+
+    return () => {
+      // @ts-ignore
+      timeoutId && clearTimeout(timeoutId);
+    }
+  }, [user, haikudleLoaded, previousDailyHaikudleId]);
 
   const handleShowAbout = () => {
     plainAlert(
@@ -170,6 +186,28 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
               <div>Try also Haikudle, a daily puzzle version: <b><a href="https://haikudle.art/">haikudle.art</a></b>.</div>
             </div>`,
       () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
+      "Got it!");
+  }
+
+  const handleShowAboutPreviousDaily = () => {
+    const previousDailyHaikudleDate = moment(previousDailyHaikudleId, "YYYYMMDD")
+    const calendarFormat = {
+      sameDay: '[today]',
+      nextDay: '[tomorrow]',
+      nextWeek: 'dddd',
+      lastDay: '[yesterday]',
+      lastWeek: '[last] dddd',
+      sameElse: (now: any) => now.diff(previousDailyHaikudleDate, "years") ? 'MMM Do YYYY' : 'MMM Do',    
+    };
+
+    plainAlert(
+      `<div style="display: flex; flex-direction: column; gap: 0.4rem">
+        <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with five syllables in the first line, seven in the second, and five in the third.</div>
+        <div><b>Wordle</b>: a word game with a single daily solution, with all players attempting to guess the same word.</div>
+        <div>This was ${previousDailyHaikudleDate.calendar(null, calendarFormat)}'s daily haiku puzzle, try solving today's <b><a href="https://haikudle.art/">Haikudle</a></b>!</div>
+      </div>`
+      ,
+      () => saveUser({ ...user, preferences: { ...user.preferences, onboardedPreviousDaily: true } }),
       "Got it!");
   }
 
@@ -290,7 +328,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         onSwitchMode={handleSwitchMode}
         onDelete={handleDelete}
         onSaveHaikudle={handleSaveHaikudle}
-        onShowAbout={handleShowAbout}
+        onShowAbout={previousDailyHaikudleId ? handleShowAboutPreviousDaily : handleShowAbout}
         onSelectHaiku={handleSelectHaiku}
       />
       <HaikuPage

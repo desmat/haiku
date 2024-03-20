@@ -33,7 +33,7 @@ export async function userSession(request: any) {
   // console.log(">> services.users.userSession", { decodedToken, adminUserIds: process.env.ADMIN_USER_IDS });
   
   // @ts-ignore
-  decodedToken.user.isAdmin = ((process.env.ADMIN_USER_IDS || []).split(",").includes(decodedToken.user.id));
+  decodedToken.user.isAdmin = ((process.env.ADMIN_USER_IDS || "").split(",").includes(decodedToken.user.id));
 
   return decodedToken;
 }

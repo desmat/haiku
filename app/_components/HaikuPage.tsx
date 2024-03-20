@@ -34,19 +34,21 @@ function HaikuPoem({
     solved,
     swap,
     haikudleId,
+    previousDailyHaikudleId,
   ] = useHaikudle((state: any) => [
     state.inProgress,
     state.solved,
     state.swap,
     state.haikudleId,
+    state.previousDailyHaikudleId,
   ]);
 
   const isHaikudleMode = mode == "haikudle";
   const isLyricleMode = mode == "lyricle";
-  const isPuzzleMode = isHaikudleMode || isLyricleMode;
+  const isPuzzleMode = !previousDailyHaikudleId && (isHaikudleMode || isLyricleMode);
   const poem = isPuzzleMode ? inProgress : haiku.poem.map((line: string) => line.split(/\s+/).map((w: string) => { return { word: w } }));
 
-  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem });
+  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem, previousDailyHaikudleId, isPuzzleMode });
 
   const upperCaseFirstLetter = (s: string) => {
     if (!s || s.length == 0) return "";
@@ -141,7 +143,7 @@ function HaikuPoem({
                 </StyledLayers>
               </div>
               {regenerate &&
-                <div 
+                <div
                   className="md:mt-[0.1rem] md:ml-[0.8rem] sm:mt-[0.2rem] sm:ml-[0.7rem] mt-[0rem] ml-[0.5rem]"
                   title="Regenerate this haiku with the same theme"
                 >
@@ -263,7 +265,7 @@ export default function HaikuPage({
     move,
     _haiku,
     haikudleId,
-    haikudleSolved,
+    previousDailyHaikudleId,
   ] = useHaikudle((state: any) => [
     state.loaded,
     state.load,
@@ -272,7 +274,7 @@ export default function HaikuPage({
     state.move,
     isPuzzleMode ? state.haiku : haiku,
     state.haikudleId,
-    state.solved,
+    state.previousDailyHaikudleId,
   ]);
 
   // TODO move to hook store
@@ -312,7 +314,9 @@ export default function HaikuPage({
     ? [0.8, 1, 1.2, 1.3, 1.35, 1.45, 1.5, 1.55, 1.6]
     : [1];
   const numWords = inProgress.flat().length;
-  let numCorrectWords = inProgress.flat().filter((word: any) => word.correct).length
+  let numCorrectWords = previousDailyHaikudleId
+    ? inProgress.flat().length
+    : inProgress.flat().filter((word: any) => word.correct).length;
   // if (numCorrectWords > 0) numCorrectWords = numCorrectWords + 1; // make the last transition more impactful
   let blurValue = mode == "social-img-lyricle"
     ? blurCurve[blurCurve.length - 1]

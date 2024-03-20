@@ -45,7 +45,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     if (token) {
       user = (await decodeJWT(token)).user as User;
       // @ts-ignore
-      if ((process.env.ADMIN_USER_IDS || []).split(",").includes(user.id)) {
+      if ((process.env.ADMIN_USER_IDS || "").split(",").includes(user.id)) {
         user.isAdmin = true;
       }
     } else {

@@ -30,7 +30,7 @@ export default async function Page() {
 
   return (
     <div>
-      <NavOverlay mode="haiku" styles={textStyles} altStyles={altTextStyles} />
+      <NavOverlay mode="loading" styles={textStyles} altStyles={altTextStyles} />
       <Loading />
     </div>
   )
