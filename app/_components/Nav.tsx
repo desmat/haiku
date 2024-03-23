@@ -337,12 +337,12 @@ function SidePanel({
 
   const bySolvedAtDesc = (a: any, b: any) => {
     return (b.solvedAt || 0) - (a.solvedAt || 0)
-  }  
+  }
 
   useEffect(() => {
     console.log(">> app._component.Nav.useEffect", { user, mode });
     if (user?.id && ["haiku", "haikudle", "lyrics", "lyricle"].includes(mode || "")) {
-      loadHaikus({ /* createdBy: user.id */ mine: true}, mode);
+      loadHaikus({ /* createdBy: user.id */ mine: true }, mode);
     }
   }, [user?.id]);
 
@@ -547,12 +547,16 @@ export function NavOverlay({
 
   // console.log(">> app._component.Nav.render", { user, mode });
 
+  const switchMode = async () => {
+    await onSwitchMode();
+    router.push(`/${haiku ? haiku?.id : ""}`);
+  }
+
   const handleKeyDown = async (e: any) => {
     // console.log(">> app._component.Nav.handleKeyDown", {  });
     if (e.key == "Escape") {
       if (["social-img", "social-img-lyricle"].includes(mode)) {
-        await onSwitchMode();
-        router.push(`/${haiku ? haiku?.id : ""}`);
+        switchMode();
       }
     }
   }
@@ -575,7 +579,11 @@ export function NavOverlay({
       }
       {mode == "social-img" &&
         <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}>
-          <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
+          <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} />
+          <div
+            className="_bg-pink-400 _opacity-50 fixed top-0 left-0 w-full h-full cursor-pointer"
+            onClick={switchMode}
+          />
         </div>
       }
       {["lyrics", "lyricle"].includes(mode) &&
@@ -585,7 +593,11 @@ export function NavOverlay({
       }
       {mode == "social-img-lyricle" &&
         <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}>
-          <LyricleLogo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
+          <LyricleLogo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} />
+          <div
+            className="_bg-pink-400 _opacity-50 fixed top-0 left-0 w-full h-full cursor-pointer"
+            onClick={switchMode}
+          />
         </div>
       }
 
