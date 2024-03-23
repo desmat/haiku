@@ -381,27 +381,27 @@ function SidePanel({
         <div className="_bg-pink-400 flex flex-col h-[100vh]">
           {/* hotspot to open the side panel on mouse hover */}
           <div
-            className="_bg-red-400 group absolute top-[4rem] right-0 w-[1.5rem] mr-[-1.5rem] h-[calc(100vh-4rem)] z-90"
+            className="_bg-red-400 group absolute top-[4rem] right-0 w-[1rem] mr-[-1rem] h-[calc(100vh-4rem)] z-90"
             onMouseEnter={() => !panelOpened && !panelAnimating && toggleMenuOpened()}
             onClick={() => panelOpened && toggleMenuOpened()}
           >
           </div>
           <div
-            className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[32pt] _md:text-[36pt] bold py-5 opacity-40 hover:opacity-100 transition-all"
+            className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[22pt] _md:text-[36pt] bold py-5 _opacity-40 hover:opacity-100 transition-all"
             onClick={() => {
               !panelOpened && !panelPinned && setPanelPinned(true);
               toggleMenuOpened();
             }}
             style={{
               filter: `drop-shadow(0px 0px 16px ${haiku?.bgColor})`,
-              marginRight: panelOpened ? "-0.5rem" : "-2.6rem",
+              marginRight: panelOpened ? "-0.2rem" : "-1.7rem",
               display: panelAnimating ? "none" : "block",
               transitionDuration: "80ms",
             }}
             title={panelOpened ? "Hide side panel" : "Show side panel"}
           >
             <StyledLayers styles={styles}>
-              <div className="rotate-90 group-hover:hidden ml-[-1rem]">
+              <div className="_bg-orange-400 rotate-90 group-hover:hidden ml-[-1rem]">
                 <BsDashLg />
               </div>
               <div className="hidden group-hover:block">
@@ -411,7 +411,7 @@ function SidePanel({
                   </div>
                 }
                 {!panelOpened &&
-                  <div className="mr-[-0.2rem] ml-[-0.8rem] _md:mr-[-0.3rem]">
+                  <div className="_bg-orange-400 mr-[-0.2rem] ml-[-0.8rem] _md:mr-[-0.3rem]">
                     <BsChevronCompactRight />
                   </div>
                 }
@@ -470,9 +470,9 @@ function SidePanel({
               </div>
             }
           </div>
-          <div className="_bg-purple-400 flex flex-row sm:justify-center justify-start px-2 pt-4 pb-2 h-fit w-full">
+          <div className="_bg-purple-400 flex flex-row justify-center px-2 pt-4 pb-2 h-fit w-full">
             <StyledLayers styles={styles}>
-              <div className="_bg-purple-200 flex sm:flex-row flex-col sm:gap-3 gap-2">
+              <div className="_bg-purple-200 flex flex-row gap-3">
                 <Link
                   key="about"
                   className="flex flex-row"
