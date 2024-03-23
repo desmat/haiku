@@ -150,7 +150,7 @@ function HaikuPoem({
               </div>
               {regenerate &&
                 <div
-                  className="md:mt-[0.1rem] md:ml-[0.8rem] sm:mt-[0.2rem] sm:ml-[0.7rem] mt-[0rem] ml-[0.5rem]"
+                  className="mt-auto md:pt-[0.1rem] sm:pt-[0.2rem] mdpb-[0.4rem] sm:pb-[0.3rem] pb-[0.2rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
                   title="Regenerate this haiku with the same theme"
                 >
                   <StyledLayers styles={altStyles || []}>
