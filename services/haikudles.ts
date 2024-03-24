@@ -189,10 +189,10 @@ export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: st
   let dailyhaikudle = await store.dailyHaikudles.get(dateCode);
 
   if (dailyhaikudle) {
-    return store.dailyHaikudles.update(dateCode, { id: dateCode, haikuId, haikudleId });
+    return store.dailyHaikudles.update(user.id, { id: dateCode, haikuId, haikudleId });
   }
 
-  return store.dailyHaikudles.create(dateCode, {
+  return store.dailyHaikudles.create(user.id, {
     id: dateCode,
     haikuId,
     haikudleId,
