@@ -19,7 +19,7 @@ const appName = isLyricleMode
 const appDescription = isLyricleMode
   ? "Daily lyric puzzles"
   : isHaikudleMode
-    ? "AI-generated daily art and haiku puzzles"
+    ? "AI-generated art and daily haiku puzzles"
     : "AI-generated art and haiku poems";
 
 const metaUrl = isLyricleMode
@@ -38,9 +38,10 @@ if (isHaikudleMode) {
   const dateCodes = Array.from(Array(numDateCodes))
     .map((_, i: number) => moment(dateCodeFrom).add(i, "days").format("YYYYMMDD"))
   const dateCode = dateCodes[Math.floor(Math.random() * dateCodes.length)];
-  console.log("==> layout: metaImages", { dateCode, dateCodes });
+  // console.log("==> layout: metaImages", { dateCode, dateCodes });
 
   metaImages = [
+    `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${moment().format("YYYYMMDD")}.png`,
     `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${dateCode}.png`,
     "https://haikudle.art/social_img_haikudle.png",
   ];
