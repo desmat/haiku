@@ -28,20 +28,32 @@ const metaUrl = isLyricleMode
     ? "https://haikudle.art/"
     : "https://haiku.desmat.ca/";
 
-const metaImages = isLyricleMode
-  ? [
+let metaImages: string[];
+
+if (isHaikudleMode) {
+  // for haikudles pick up a previously published image at random (too much work to publish for every daily haikudle)
+  const dateCodeFrom = "20240222";
+  const dateCodeTo = "20240327";
+  const numDateCodes = moment(dateCodeTo).diff(moment(dateCodeFrom), "days");
+  const dateCodes = Array.from(Array(numDateCodes))
+    .map((_, i: number) => moment(dateCodeFrom).add(i, "days").format("YYYYMMDD"))
+  const dateCode = dateCodes[Math.floor(Math.random() * dateCodes.length)];
+  // console.log("==> ", { dateCode, dateCodes });
+
+  metaImages = [
+    `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${dateCode}.png`,
+    "https://haikudle.art/social_img_haikudle.png",
+  ];
+} else if (isLyricleMode) {
+  metaImages = [
     `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_lyrics/${moment().format("YYYYMMDD")}.png`,
     "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_lyrics/default.png",
-  ]
-  : isHaikudleMode
-    ? [
-      `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${moment().format("YYYYMMDD")}.png`,
-      `https://haikudle.art/social_img/${moment().format("YYYYMMDD")}.png`,
-      "https://haikudle.art/social_img_haikudle.png",
-    ]
-    : [
-      "https://haiku.desmat.ca/social_img_haiku.png"
-    ];
+  ];
+} else {
+  metaImages = [
+    "https://haiku.desmat.ca/social_img_haiku.png"
+  ];
+}
 
 export const metadata: Metadata = {
   title: `${appName} - ${appDescription}`,
