@@ -38,7 +38,7 @@ if (isHaikudleMode) {
   const dateCodes = Array.from(Array(numDateCodes))
     .map((_, i: number) => moment(dateCodeFrom).add(i, "days").format("YYYYMMDD"))
   const dateCode = dateCodes[Math.floor(Math.random() * dateCodes.length)];
-  // console.log("==> ", { dateCode, dateCodes });
+  console.log("==> layout: metaImages", { dateCode, dateCodes });
 
   metaImages = [
     `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${dateCode}.png`,
