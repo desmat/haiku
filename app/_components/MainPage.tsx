@@ -84,9 +84,11 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       fontWeight: 300,
     },
     {
-      color: fontColor,
       filter: `drop-shadow(0px 0px 2px ${bgColor})`,
-    }
+    },
+    {
+      filter: `drop-shadow(0px 0px 12px ${bgColor}44)`,
+    },
   ];
   const altTextStyles = [
     {
