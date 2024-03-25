@@ -215,6 +215,9 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     // console.log('>> app.page.handleGenerate()');
     e.preventDefault();
 
+    // TEMP: choose pic
+    const img = prompt("Image URL?");
+
     const subject = user?.isAdmin
       ? prompt("Subject? (For example 'nature', 'sunset', or leave blank)")
       : "";
@@ -222,7 +225,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     if (typeof (subject) == "string") {
       resetAlert();
       setGenerating(true);
-      const ret = await generateHaiku(user, { lang, subject });
+      const ret = await generateHaiku(user, { lang, subject, img });
       // console.log('>> app.page.handleGenerate()', { ret });
 
       if (ret?.id) {

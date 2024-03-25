@@ -142,7 +142,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
   });
 }
 
-export async function generateHaiku(user: any, lang?: LanguageType, subject?: string, mood?: string): Promise<Haiku> {
+export async function generateHaiku(user: any, lang?: LanguageType, subject?: string, mood?: string, img?: string): Promise<Haiku> {
   console.log(">> services.haiku.generateHaiku", { lang, subject, mood, user });
   const language = supportedLanguages[lang || "en"].name;
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
@@ -157,11 +157,14 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
   // console.log(">> services.haiku.generateHaiku", { ret });
   console.log(">> services.haiku.generateHaiku", { poem, generatedSubject });
 
-  const {
-    url: openaiUrl,
-    prompt: imagePrompt,
-    revisedPrompt: imageRevisedPrompt
-  } = await openai.generateBackgroundImage(subject || generatedSubject, mood || generatedMood);
+  // const {
+  //   url: openaiUrl,
+  //   prompt: imagePrompt,
+  //   revisedPrompt: imageRevisedPrompt
+  // } = await openai.generateBackgroundImage(subject || generatedSubject, mood || generatedMood);
+  const openaiUrl = img || "";
+  const imagePrompt = undefined;
+  const imageRevisedPrompt = undefined;
 
   const imageRet = await fetch(openaiUrl);
   // console.log(">> services.haiku.generateHaiku", { imageRet });
