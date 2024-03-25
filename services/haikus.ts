@@ -8,7 +8,8 @@ import * as samples from '@/services/stores/samples';
 import * as openai from './openai';
 import chroma from 'chroma-js';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
-import { UserHaikudle } from '@/types/Haikudle';
+import { Haikudle, UserHaikudle } from '@/types/Haikudle';
+import { deleteHaikudle, getHaikudle } from './haikudles';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -127,6 +128,12 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
   // console.log(">> services.haiku.regenerateHaikuPoem", { ret });
   console.log(">> services.haiku.regenerateHaikuPoem", { poem, generatedSubject, generatedMood });
 
+  // TODO: delete corresponding haikudle 
+  getHaikudle(haiku.id).then(async (haikudle: Haikudle) => {
+    console.log(">> services.haiku.regenerateHaikuPoem", { haikudle });
+    deleteHaikudle(user, haikudle.id);
+  })
+  
   return saveHaiku(user, {
     ...haiku,
     poem,
