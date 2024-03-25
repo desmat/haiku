@@ -6,22 +6,22 @@ export const supportedLanguages = {
     name: "English",
     nativeName: "English",
   },
-  "de": {
-    name: "German",
-    nativeName: "Deutsch",
-  },
-  "es": {
-    name: "Spanish",
-    nativeName: "Español",
-  },
+  // "de": {
+  //   name: "German",
+  //   nativeName: "Deutsch",
+  // },
+  // "es": {
+  //   name: "Spanish",
+  //   nativeName: "Español",
+  // },
   // "pt": {
   //   name: "Portuguese",
   //   nativeName: "Português",
   // },
-  "fr": {
-    name: "French",
-    nativeName: "Français",
-  },
+  // "fr": {
+  //   name: "French",
+  //   nativeName: "Français",
+  // },
 };
 
 export const isSupportedLanguage = (lang: any): boolean => {
