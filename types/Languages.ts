@@ -1,4 +1,4 @@
-export type LanguageType = "en" | "fr" | "es" | "de";
+export type LanguageType = "en" //| "fr" | "es" | "de";
 
 // why can't I do this automatically based on the above type?
 export const supportedLanguages = {

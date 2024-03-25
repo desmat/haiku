@@ -112,7 +112,7 @@ export async function createHaiku(user: User): Promise<Haiku> {
 }
 
 export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haiku> {
-  const lang = (haiku.lang || "eng") as LanguageType;
+  const lang = (haiku.lang || "en") as LanguageType;
   const subject = haiku.theme;
   const mood = undefined; // TODO
   console.log(">> services.haiku.regenerateHaikuPoem", { lang, subject, mood, user });
