@@ -239,7 +239,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     // console.log('>> app.page.handleRegenerateHaiku()');
     e.preventDefault();
 
-    if (user?.isAdmin /* || TODO: IS MY HAIKU */) {
+    if (user?.isAdmin /* || haiku.createdBy == user.id */) {
       resetAlert();
       setRegenerating(true);
       const ret = await regenerateHaiku(user, haiku);
@@ -339,7 +339,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         // haikus={haikus}
         styles={textStyles}
         altStyles={altTextStyles}
-        regenerateHaiku={handleRegenerateHaiku}
+        regenerateHaiku={(user.isAdmin /* || haiku.createdBy == user.id */) && handleRegenerateHaiku}
         regenerating={regenerating}
       />
     </div>

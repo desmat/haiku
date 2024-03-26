@@ -21,20 +21,8 @@ export async function POST(request: Request) {
   const { user } = await userSession(request);
 
   if (!user.isAdmin) {
-    // const haikus = await getHaikus({ createdBy: user.id });
-    // // console.log('>> app.api.haiku.POST', { haikus });
-
-    // const createdToday = haikus
-    //   .filter((haiku: Haiku) => moment(haiku.createdAt).isSame(new Date(), "day"))
-    //   .length;
-    // // console.log('>> app.api.haiku.POST', { createdToday });
-
-    // if (createdToday >= 3) {
-    //   return NextResponse.json(
-    //     { success: false, message: 'exceeded daily limit' },
-    //     { status: 429 }
-    //   );
-    // }
+    // TODO allow haiku owners but check max regenerated
+    
     
     // FOR NOW
     return NextResponse.json(
