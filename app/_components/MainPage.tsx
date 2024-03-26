@@ -23,6 +23,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   const router = useRouter();
   const [user, saveUser] = useUser((state: any) => [state.user, state.save]);
   const [resetAlert, plainAlert, warningAlert, infoAlert] = useAlert((state: any) => [state.reset, state.plain, state.warning, state.info]);
+  const isHaikuMode = mode == "haiku";
   const isHaikudleMode = mode == "haikudle";
   const isLyricleMode = mode == "lyricle";
 
@@ -47,6 +48,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   ]);
 
   const [
+    haikudleReady,
     haikudleLoaded,
     loadHaikudle,
     haikudleHaiku,
@@ -56,6 +58,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     haikudleInProgress,
     previousDailyHaikudleId,
   ] = useHaikudle((state: any) => [
+    state.ready,
     state.loaded(haikuId || { lang }),
     state.load,
     state.haiku,
@@ -165,10 +168,10 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   useEffect(() => {
     // @ts-ignore
     let timeoutId;
-    if (user && haikudleLoaded) {
+    if (user && (isHaikudleMode && haikudleReady || !isHaikudleMode)) {
       if (previousDailyHaikudleId && user && !user?.preferences?.onboardedPreviousDaily) {
         timeoutId = setTimeout(handleShowAboutPreviousDaily, 2000);
-      } else if ((isHaikudleMode || isLyricleMode) && user && !user?.preferences?.onboarded) {
+      } else if ((isHaikuMode || isHaikudleMode || isLyricleMode) && user && !user?.preferences?.onboarded) {
         timeoutId = setTimeout(handleShowAbout, 2000);
       }
     }
@@ -177,7 +180,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       // @ts-ignore
       timeoutId && clearTimeout(timeoutId);
     }
-  }, [user, haikusLoaded, haikudleLoaded, previousDailyHaikudleId]);
+  }, [user, haikudleReady, previousDailyHaikudleId]);
 
   const handleShowAbout = () => {
     plainAlert(

@@ -48,6 +48,7 @@ type StatusMap = { [key: string]: boolean };
 
 const initialState = {
   // access via get(id) or find(query?)
+  ready: false,
   haiku: undefined,
   haikudleId: undefined,
   previousDailyHaikudle: undefined,
@@ -123,6 +124,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     const solved = isSolved(inProgress, solution);
 
     set({
+      ready: true,
       haiku,
       haikudleId: haikudle.id,
       previousDailyHaikudleId: haikudle.previousDailyHaikudleId,
