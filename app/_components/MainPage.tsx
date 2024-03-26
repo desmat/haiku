@@ -248,12 +248,12 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
   }
 
-  const handleRefresh = (e: any) => {
+  const handleRefresh = (e?: any) => {
     if (isHaikudleMode && !user.isAdmin) {
       return;
     }
 
-    e.preventDefault();
+    e && e.preventDefault();
 
     if (haikuId) {
       router.push(`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
@@ -341,6 +341,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         altStyles={altTextStyles}
         regenerateHaiku={(user.isAdmin /* || haiku.createdBy == user.id */) && handleRegenerateHaiku}
         regenerating={regenerating}
+        refresh={handleRefresh}
       />
     </div>
   )

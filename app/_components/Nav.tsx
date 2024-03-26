@@ -11,6 +11,7 @@ import { RiFullscreenLine } from "react-icons/ri";
 import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg } from "react-icons/bs";
 import { FaRandom } from "react-icons/fa";
 import * as font from "@/app/font";
+import useAlert from '@/app/_hooks/alert';
 import useUser from '@/app/_hooks/user';
 import useHaikus from '@/app/_hooks/haikus';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
@@ -232,12 +233,12 @@ function BottomLinks({
         {!["social-img", "social-img-lyricle"].includes(mode) && user?.isAdmin &&
           <Link
             key="socialImgMode"
-            href={`/${haiku ? haiku?.id : ""}?mode=social-img${["lyrics", "lyricle"].includes(mode) ? "-lyricle" : ""}`}
-            title="Switch to fullscreen mode (for social image)"
+            href={`/${haiku ? haiku?.id : ""}?mode=showcase`}
+            title="Switch to showcase mode "
             onClick={async (e: any) => {
               e.preventDefault();
               await onSwitchMode();
-              router.push(`/${haiku ? haiku?.id : ""}?mode=social-img${["lyrics", "lyricle"].includes(mode) ? "-lyricle" : ""}`);
+              router.push(`/${haiku ? haiku?.id : ""}?mode=showcase`);
             }}
           >
             <RiFullscreenLine className="text-xl" />
@@ -540,33 +541,66 @@ export function NavOverlay({
   onDelete?: any,
   onSaveHaikudle?: any,
   onShowAbout?: any,
-  onSelectHaiku?: any
+  onSelectHaiku?: any,
 }) {
   const router = useRouter();
   const [user] = useUser((state: any) => [state.user]);
+  const [refreshDelay, setRefreshDelay] = useState(24 * 60 * 60 * 1000); // every day
+  const [refreshTimeout, setRefreshTimeout] = useState<any>();
+  const [resetAlert, alert] = useAlert((state: any) => [state.reset, state.plain]);
 
   // console.log(">> app._component.Nav.render", { user, mode });
 
   const switchMode = async () => {
+    // console.log(">> app._component.Nav.switchMode", {});    
     await onSwitchMode();
     router.push(`/${haiku ? haiku?.id : ""}`);
   }
 
   const handleKeyDown = async (e: any) => {
-    // console.log(">> app._component.Nav.handleKeyDown", {  });
+    // console.log(">> app._component.Nav.handleKeyDown", { mode });
     if (e.key == "Escape") {
-      if (["social-img", "social-img-lyricle"].includes(mode)) {
+      if (["showcase", "social-img", "social-img-lyricle"].includes(mode)) {
         switchMode();
       }
     }
   }
 
+  const changeDelay = (val: number) => {
+    setRefreshDelay(val);
+
+    if (refreshTimeout) {
+      clearTimeout(refreshTimeout);
+    }
+
+    setRefreshTimeout(setTimeout(onClickLogo, val));
+
+    alert(`Refreshing every ${moment.duration(val).humanize()} (${val / 1000}s)`);
+    setTimeout(resetAlert, 2000);
+  }
+
+  const increaseDelay = () => {
+    changeDelay(refreshDelay * 2);
+  }
+
+  const decreaseDelay = () => {
+    changeDelay(refreshDelay / 2);
+  }
+
   useEffect(() => {
     // console.log(">> app._component.Nav.useEffect", { mode, haiku });
     document.body.addEventListener('keydown', handleKeyDown);
+    
+    if (mode == "showcase" && refreshDelay) {
+      setRefreshTimeout(setTimeout(onClickLogo, refreshDelay));
+    }
 
     return () => {
-      document.body.removeEventListener('keydown', handleKeyDown)
+      document.body.removeEventListener('keydown', handleKeyDown);
+    
+      if (refreshTimeout) {
+        clearTimeout(refreshTimeout);
+      }
     }
   }, [mode, haiku]);
 
@@ -617,7 +651,7 @@ export function NavOverlay({
         }}
       />
 
-      {!["social-img", "social-img-lyricle"].includes(mode) &&
+      {["haiku", "haikudle", "lyricle"].includes(mode) &&
         <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
           <StyledLayers styles={styles}>
             <BottomLinks
@@ -634,7 +668,27 @@ export function NavOverlay({
         </div>
       }
 
-      {!["social-img", "social-img-lyricle"].includes(mode) &&
+      {["showcase", "social-img", "social-img-lyricle"].includes(mode) &&
+        <>
+          <div
+            className="_bg-pink-400 fixed top-0 left-0 w-10 h-full z-10 cursor-pointer"
+            title="Exit showcase mode"
+            onClick={switchMode}
+          />
+          <div
+            className="_bg-yellow-400 fixed bottom-0 left-0 w-10 h-10 z-40 cursor-pointer"
+            title="Increase refresh time"
+            onClick={increaseDelay}
+          />
+          <div
+            className="_bg-yellow-400 fixed bottom-0 right-0 w-10 h-10 z-40 cursor-pointer"
+            title="Decrease refresh time"
+            onClick={decreaseDelay}
+          />
+        </>
+      }
+
+      {["haiku", "haikudle", "lyricle"].includes(mode) &&
         <SidePanel
           user={user}
           haiku={haiku}
