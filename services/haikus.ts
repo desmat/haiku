@@ -131,8 +131,10 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
   // TODO: delete corresponding haikudle 
   getHaikudle(haiku.id).then(async (haikudle: Haikudle) => {
     console.log(">> services.haiku.regenerateHaikuPoem", { haikudle });
-    deleteHaikudle(user, haikudle.id);
-  })
+    if (haikudle) {
+      deleteHaikudle(user, haikudle.id);
+    }
+  });
   
   return saveHaiku(user, {
     ...haiku,
