@@ -29,7 +29,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     onDissmiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number
-  }) => {
+  } = {}) => {
     console.log(">> hooks.alert.error", { message });
     set({ message, type: message && "error", onDissmiss, closeLabel });
   },
@@ -40,7 +40,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     onDissmiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number
-  }) => {
+  } = {}) => {
     // console.log(">> hooks.alert.warning", { message, closeDelay });
     if (closeDelay) {
       const { setCloseTimeout } = get();
@@ -56,7 +56,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     onDissmiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number
-  }) => {
+  } = {}) => {
     // console.log(">> hooks.alert.info", { message });
     if (closeDelay) {
       const { setCloseTimeout } = get();
@@ -72,7 +72,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     onDissmiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number
-  }) => {
+  } = {}) => {
     // console.log(">> hooks.alert.success", { message });
     if (closeDelay) {
       const { setCloseTimeout } = get();
@@ -88,7 +88,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     onDissmiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number
-  }) => {
+  } = {}) => {
     // console.log(">> hooks.alert.plain", { message, onDissmiss, closeLabel, closeDelay });
     if (closeDelay) {
       const { setCloseTimeout } = get();
