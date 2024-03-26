@@ -143,7 +143,7 @@ function HaikuPoem({
         </div>
         {(solved || !isPuzzleMode) &&
           <div
-            className="relative md:text-[14pt] sm:text-[10pt] text-[8pt] md:mt-[-0.5rem] sm:mt-[-0.3rem] mt-[-0.1rem]"
+            className="relative md:text-[14pt] sm:text-[10pt] text-[8pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]"
             style={{
               // background: "pink",
               height: mode == "haikudle"
