@@ -49,6 +49,7 @@ function HaikuPoem({
   const isLyricleMode = mode == "lyricle";
   const isPuzzleMode = !previousDailyHaikudleId && (isHaikudleMode || isLyricleMode);
   const poem = isPuzzleMode ? inProgress : haiku.poem.map((line: string) => line.split(/\s+/).map((w: string) => { return { word: w } }));
+  const maxHaikuTheme = 18;
 
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem, previousDailyHaikudleId, isPuzzleMode });
 
@@ -141,7 +142,17 @@ function HaikuPoem({
           ))}
         </div>
         {(solved || !isPuzzleMode) &&
-          <div className="relative md:text-[16pt] sm:text-[12pt] text-[10pt]">
+          <div
+            className="relative md:text-[14pt] sm:text-[10pt] text-[8pt] md:mt-[-0.5rem] sm:mt-[-0.3rem] mt-[-0.1rem]"
+            style={{
+              // background: "pink",
+              height: mode == "haikudle"
+                ? ""
+                : haiku.theme?.length > maxHaikuTheme
+                  ? "2.6rem"
+                  : "1.3rem"
+            }}
+          >
             <div className="absolute w-max flex flex-row">
               <div
                 className="transition-all"
@@ -153,7 +164,7 @@ function HaikuPoem({
               >
                 <StyledLayers styles={styles}>
                   <span
-                    dangerouslySetInnerHTML={{ __html: `—${haikuTitleAndAuthorTag.join(haiku.theme?.length > 18 ? "<br/>&nbsp;" : "")}`}}
+                    dangerouslySetInnerHTML={{ __html: `—${haikuTitleAndAuthorTag.join(haiku.theme?.length > maxHaikuTheme ? "<br/>&nbsp;" : "")}` }}
                   >
                   </span>
                 </StyledLayers>
