@@ -129,18 +129,20 @@ function AnimatedAlert({
   type,
   onDissmiss,
   closeLabel,
+  closedTimestamp,
   timestamp,
 }: {
   message: string,
   type: AlertType,
   onDissmiss?: () => void,
   closeLabel?: string,
+  closedTimestamp?: number,
   timestamp: number
 }) {
-  const [setError] = useAlert((state: any) => [state.error]);
+  const [reset] = useAlert((state: any) => [state.reset]);
   const [lastMessage, setLastMessage] = useState<string | undefined>(message);
   let [dismissedAt, setDismissedAt] = useState<number | undefined>();
-
+  
   useEffect(() => {
     // console.log('>> app._components.Alert.AnimatedAlert.render() useEffect', { message, lastMessage, timestamp });
 
@@ -169,6 +171,11 @@ function AnimatedAlert({
     }
   }, [message, timestamp]);
 
+  useEffect(() => {
+    // console.log('>> app._components.Alert.AnimatedAlert.render() useEffect', { closedTimestamp });
+    handleClose();
+  }, [closedTimestamp]);
+
   const handleKeyDown = async (e: any) => {
     // console.log(">> app._components.Alert.AnimatedAlert.handleKeyDown", { e });
     if (e.key == "Escape") {
@@ -179,9 +186,7 @@ function AnimatedAlert({
   const handleClose = () => {
     setDismissedAt(timestamp);
     onDissmiss && onDissmiss();
-    setTimeout(() => {
-      setError(undefined);
-    }, 50);
+    setTimeout(reset, 50);
   }
 
   // console.log('>> app._components.Alert.AnimatedAlert.render()', { message, timestamp, lastMessage, dismissedAt });
@@ -200,11 +205,30 @@ export default function Alert({
   message?: string | undefined,
   type?: AlertType | undefined
 }) {
-  const [_message, _type, _onDissmiss, _closeLabel] = useAlert((state: any) => [state.message, state.type, state.onDissmiss, state.closeLabel]);
+  const [
+    _message,
+    _type,
+    onDissmiss,
+    closeLabel,
+    closedTimestamp
+  ] = useAlert((state: any) => [
+    state.message,
+    state.type,
+    state.onDissmiss,
+    state.closeLabel,
+    state.closedTimestamp,
+  ]);
 
   // console.log('>> app._components.Alert.Error.render()', { message, _message });
 
   return (
-    <AnimatedAlert message={message || _message} type={type || _type || "info"} onDissmiss={_onDissmiss} timestamp={moment().valueOf()} closeLabel={_closeLabel} />
+    <AnimatedAlert
+      message={message || _message}
+      type={type || _type || "info"}
+      onDissmiss={onDissmiss}
+      closeLabel={closeLabel}
+      closedTimestamp={closedTimestamp}
+      timestamp={moment().valueOf()}
+    />
   )
 }

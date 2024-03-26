@@ -571,35 +571,41 @@ export function NavOverlay({
 
     if (refreshTimeout) {
       clearTimeout(refreshTimeout);
+      setRefreshTimeout(undefined);
     }
 
     setRefreshTimeout(setTimeout(onClickLogo, val));
 
-    alert(`Refreshing every ${moment.duration(val).humanize()} (${val / 1000}s)`);
-    setTimeout(resetAlert, 2000);
+    alert(
+      `Refreshing every ${moment.duration(val).humanize()} (${Math.floor(val / 1000)} seconds)`,
+      { closeDelay: 1000 }
+    );
   }
 
   const increaseDelay = () => {
-    changeDelay(refreshDelay * 2);
+    // max value, otherwise is basically 0
+    changeDelay(Math.min(refreshDelay * 2, 2147483647));
   }
 
   const decreaseDelay = () => {
-    changeDelay(refreshDelay / 2);
+    // less than 1000 and things get weird
+    changeDelay(Math.max(refreshDelay / 2, 1000));
   }
 
   useEffect(() => {
     // console.log(">> app._component.Nav.useEffect", { mode, haiku });
     document.body.addEventListener('keydown', handleKeyDown);
-    
+
     if (mode == "showcase" && refreshDelay) {
       setRefreshTimeout(setTimeout(onClickLogo, refreshDelay));
     }
 
     return () => {
       document.body.removeEventListener('keydown', handleKeyDown);
-    
+
       if (refreshTimeout) {
         clearTimeout(refreshTimeout);
+        setRefreshTimeout(undefined);
       }
     }
   }, [mode, haiku]);
