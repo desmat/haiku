@@ -57,6 +57,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     createHaikudle,
     haikudleInProgress,
     previousDailyHaikudleId,
+    nextDailyHaikudleId,
   ] = useHaikudle((state: any) => [
     state.ready,
     state.loaded(haikuId || { lang }),
@@ -67,6 +68,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     state.create,
     state.inProgress,
     state.previousDailyHaikudleId,
+    state.nextDailyHaikudleId,
   ]);
 
   let [loading, setLoading] = useState(false);
@@ -306,7 +308,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
 
   const handleSaveHaikudle = () => {
     // console.log('>> app._components.NavOverlay.onSaveHaikudle()', {});
-    const ret = prompt("YYYYMMDD?", moment().format("YYYYMMDD"));
+    const ret = prompt("YYYYMMDD?", nextDailyHaikudleId);
     if (ret) {
       createHaikudle(user, {
         id: haiku?.id,

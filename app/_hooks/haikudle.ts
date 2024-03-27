@@ -52,6 +52,7 @@ const initialState = {
   haiku: undefined,
   haikudleId: undefined,
   previousDailyHaikudle: undefined,
+  nextDailyHaikudleId: undefined,
   solution: [[], [], []],
   inProgress: [[], [], []],
   solved: false,
@@ -385,10 +386,13 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
           const data = await res.json();
           const haikudle = data.haikudle;
+          const nextDailyHaikudleId = data.nextDailyHaikudleId;
+          // console.log(">> hooks.haikudle.load", { data });
 
           setLoaded([haikudle]);
           set({
             _haikudles: { ..._haikudles, [haikudle.id]: haikudle },
+            nextDailyHaikudleId,
           });
 
           await get().init(haikudle?.haiku, haikudle);
@@ -415,10 +419,12 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           const data = await res.json();
           // const haikus = data.haikus;
           const haikudles = data.haikudles; // TODO fix this junk
+          const nextDailyHaikudleId = data.nextDailyHaikudleId;
 
           setLoaded(haikudles);
           set({
-            _haikudles: { ..._haikudles, ...listToMap(haikudles) }
+            _haikudles: { ..._haikudles, ...listToMap(haikudles) },
+            nextDailyHaikudleId,
           });
 
           // TODO bleh

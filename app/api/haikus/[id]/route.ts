@@ -37,10 +37,6 @@ export async function GET(
   }
   // console.log('>> app.api.haikus.GET', { dailyHaikudle });
 
-  if (dailyHaikudle) {
-    haiku.dailyHaikudleId = dailyHaikudle?.id;
-  }
-
   return NextResponse.json({ haiku });
 }
 

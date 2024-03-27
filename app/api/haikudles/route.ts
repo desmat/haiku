@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikudles, createHaikudle, getHaikudle, getUserHaikudle, getDailyHaikudle, saveDailyHaikudle, getDailyHaikudles } from '@/services/haikudles';
+import { getHaikudles, createHaikudle, getHaikudle, getUserHaikudle, getDailyHaikudle, saveDailyHaikudle, getDailyHaikudles, getNextDailyHaikudleId } from '@/services/haikudles';
 import { userSession } from '@/services/users';
 import { searchParamsToMap, uuid } from '@/utils/misc';
 import moment from 'moment';
@@ -41,13 +41,14 @@ export async function GET(request: NextRequest, params?: any) {
     todaysHaikudle = await saveDailyHaikudle(user, todaysDateCode, randomHaikudle.haikuId, randomHaikudle.id);
   }
 
-  const [haiku, haikudle, userHaikudle] = await Promise.all([
+  const [haiku, haikudle, userHaikudle, nextDailyHaikudleId] = await Promise.all([
     getHaiku(todaysHaikudle.haikuId, true),
     getHaikudle(todaysHaikudle.haikuId),
     getUserHaikudle(`${todaysHaikudle.haikuId}-${user?.id}`),
+    getNextDailyHaikudleId(),
   ]);
 
-  console.log('>> app.api.haikudles.GET', { haiku, haikudle, userHaikudle });
+  console.log('>> app.api.haikudles.GET', { haiku, haikudle, userHaikudle, nextDailyHaikudleId });
 
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
@@ -63,7 +64,11 @@ export async function GET(request: NextRequest, params?: any) {
     haiku,
   }
 
-  return NextResponse.json({ haikudles: [ret] });
+  return NextResponse.json(
+    nextDailyHaikudleId
+      ? { haikudles: [ret], nextDailyHaikudleId }
+      : { haikudles: [ret] }
+  );
 }
 
 export async function POST(request: Request) {

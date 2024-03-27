@@ -115,7 +115,7 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
 
   const haikudle = await getHaikudle(id);
   if (!haikudle) {
-    throw `Haikudle not found: ${id}`;    
+    throw `Haikudle not found: ${id}`;
   }
 
   if (!(haikudle.createdBy == user.id || user.isAdmin)) {
@@ -178,6 +178,24 @@ export async function getDailyHaikudles(query?: any): Promise<Haikudle[]> {
   let haikudles = await store.dailyHaikudles.find(query);
   return new Promise((resolve, reject) => resolve(haikudles.filter(Boolean)));
 }
+
+export async function getNextDailyHaikudleId(): Promise<string> {
+  const dailyHaikudles = await getDailyHaikudles();
+  const ids = dailyHaikudles
+    .map((dh: DailyHaikudle) => dh.id)
+    .sort()
+    .reverse();
+  const todays = moment().format("YYYYMMDD");
+
+  if (!ids.includes(todays)) {
+    return todays;
+  }
+
+  const next = moment(ids[0]).add(1, "days").format("YYYYMMDD");
+
+  return next;
+}
+
 
 export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: string, haikudleId: string): Promise<DailyHaikudle> {
   console.log(">> services.haikudle.saveDailyHaikudle", { user, dateCode, haikuId, haikudleId });
