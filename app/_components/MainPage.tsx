@@ -21,7 +21,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   const [generating, setGenerating] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const router = useRouter();
-  const [user, saveUser] = useUser((state: any) => [state.user, state.save]);
+  const [user, saveUser, updateUser] = useUser((state: any) => [state.user, state.save, state.update]);
   const [resetAlert, plainAlert, warningAlert, infoAlert] = useAlert((state: any) => [state.reset, state.plain, state.warning, state.info]);
   const isHaikuMode = mode == "haiku";
   const isHaikudleMode = mode == "haikudle";
@@ -255,6 +255,13 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         // router.push(`/?id=${ret.id}`);
         setHaikuId(ret.id);
         setGenerating(false);
+        updateUser({
+          ...user,
+          usage: {
+            ...user.usage,
+            haikusCreated: (user.usage?.haikusCreated || 0) + 1,
+          }
+        });
       }
     }
   }
@@ -263,12 +270,19 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     // console.log('>> app.page.handleRegenerateHaiku()');
     e.preventDefault();
 
-    if (user?.isAdmin /* || haiku.createdBy == user.id */) {
+    if (user?.isAdmin || haiku.createdBy == user.id) {
       resetAlert();
       setRegenerating(true);
       const ret = await regenerateHaiku(user, haiku);
       // console.log('>> app.page.handleRegenerateHaiku()', { ret });
       setRegenerating(false);
+      updateUser({
+        ...user,
+        usage: {
+          ...user.usage,
+          haikusRegenerated: (user.usage?.haikusRegenerated || 0) + 1,
+        }
+      });
     }
   }
 
@@ -368,7 +382,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         // haikus={haikus}
         styles={textStyles}
         altStyles={altTextStyles}
-        regenerateHaiku={(user.isAdmin /* || haiku.createdBy == user.id */) && handleRegenerateHaiku}
+        regenerateHaiku={(user.isAdmin || haiku.createdBy == user.id) && handleRegenerateHaiku}
         regenerating={regenerating}
         refresh={handleRefresh}
       />

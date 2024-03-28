@@ -1,17 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, createHaiku, generateHaiku, regenerateHaikuPoem } from '@/services/haikus';
+import { NextResponse } from 'next/server'
+import { regenerateHaikuPoem, getHaiku } from '@/services/haikus';
 import { userSession } from '@/services/users';
-import { searchParamsToMap } from '@/utils/misc';
-import moment from 'moment';
-import { Haiku } from '@/types/Haiku';
-import { getDailyHaikudles } from '@/services/haikudles';
-import { DailyHaikudle } from '@/types/Haikudle';
+import { userUsage } from '@/services/usage';
+import { USAGE_LIMIT } from '@/types/Usage';
 
 export const maxDuration = 300;
 // export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  console.log('>> app.api.haiku.POST', {  });
+  console.log('>> app.api.haiku.POST', {});
 
   const data: any = await request.json();
   const haiku = data.haiku;
@@ -21,14 +18,24 @@ export async function POST(request: Request) {
   const { user } = await userSession(request);
 
   if (!user.isAdmin) {
-    // TODO allow haiku owners but check max regenerated
+    const h = await getHaiku(haiku.id);
     
-    
-    // FOR NOW
-    return NextResponse.json(
-      { success: false, message: 'authorization failed' },
-      { status: 403 }
-    );
+    // only owners and admins can update
+    if (!user.isAdmin && h.createdBy != haiku.createdBy) {
+      return NextResponse.json(
+        { success: false, message: 'authorization failed' },
+        { status: 403 }
+      );  
+    }
+
+    const { haikusRegenerated } = await userUsage(user);
+
+    if (haikusRegenerated >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU) {
+      return NextResponse.json(
+        { success: false, message: 'exceeded daily limit' },
+        { status: 429 }
+      );
+    }
   }
 
   const updatedHaiku = await regenerateHaikuPoem(user, haiku);

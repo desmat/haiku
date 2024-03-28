@@ -1,10 +1,9 @@
 
-import moment from "moment";
-import { mapToList, uuid } from "@/utils/misc";
+import { mapToList } from "@/utils/misc";
 import { Haiku } from "@/types/Haiku";
 import { GenericStore, Store } from "@/types/Store";
-import * as samples from "./samples";
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
+import { User } from "@/types/User";
 
 type MenoryStoreEntry = {
   id?: string,
@@ -151,5 +150,6 @@ export function create(): Store {
     haikudles: new MemoryStore<Haikudle>("haikudle"),
     userHaikudles: new MemoryStore<UserHaikudle>("userhaikudle"),
     dailyHaikudles: new MemoryStore<DailyHaikudle>("dailyhaikudle"),
+    users: new MemoryStore<User>("user"),
   }
 }

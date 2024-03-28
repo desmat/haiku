@@ -1,5 +1,7 @@
 import { Haiku } from "./Haiku";
 import { Haikudle, UserHaikudle, DailyHaikudle } from "./Haikudle";
+import { Usage } from "./Usage";
+import { User } from "./User";
 
 export interface GenericStore<T> {
   get: (id: string) => Promise<T | undefined>,
@@ -13,5 +15,6 @@ export type Store = {
   haikus: GenericStore<Haiku>,
   haikudles: GenericStore<Haikudle>,
   userHaikudles: GenericStore<UserHaikudle>,
-  dailyHaikudles: GenericStore<DailyHaikudle>,  
+  dailyHaikudles: GenericStore<DailyHaikudle>,
+  users: GenericStore<User>,
 }

@@ -374,6 +374,15 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         set({
           _haikus: { ..._haikus, [generated.id || ""]: generated },
         });
+
+        // also update the side bar
+        (await useHaikus.getState()).addUserHaiku({
+          id: generated.id,
+          createdBy: generated.createdBy,
+          createdAt: generated.createdAt,
+          theme: generated.theme,
+        });       
+
         return resolve(generated);
       });
     });

@@ -19,6 +19,7 @@ import { Haiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
 import { byCreatedAtDesc } from '@/utils/sort';
+import { USAGE_LIMIT } from '@/types/Usage';
 import { StyledLayers } from './StyledLayers';
 
 export function Loading() {
@@ -97,10 +98,13 @@ export function LyricleLogo({ mode, href, onClick, styles, altStyles }: { mode: 
 }
 
 export function GenerateIcon({ onClick, sizeOverwrite }: { onClick?: any, sizeOverwrite?: string }) {
-
+  const icon = <IoSparkles className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />;
+  if (!onClick) {
+    return icon;
+  }
   return (
     <Link href="#" onClick={onClick}>
-      <IoSparkles className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />
+      {icon}
     </Link>
   )
 }
@@ -175,7 +179,7 @@ function BottomLinks({
             title="Copy direct link to share"
             className="cursor-copy"
             style={{
-              filter: `${pop ? `drop-shadow(0px 0px 16px ${haiku?.bgColor})` : ""}`,
+              filter: `${pop ? `drop-shadow(0px 0px 16px ${haiku.bgColor})` : ""}`,
             }}
             onClick={(e: any) => {
               e.preventDefault();
@@ -186,6 +190,11 @@ function BottomLinks({
           >
             <MdIosShare className="text-xl mt-[-0.1rem]" />
           </Link>
+        }
+        {!haiku?.id &&
+          <div className="opacity-30">
+            <MdIosShare className="text-xl mt-[-0.1rem]" />
+          </div>
         }
         {haiku?.id && user?.isAdmin &&
           <Link
@@ -338,8 +347,8 @@ function SidePanel({
     return ret;
   };
 
-  const bySolvedAtDesc = (a: any, b: any) => {
-    return (b.solvedAt || 0) - (a.solvedAt || 0)
+  const bySolvedOrCreatedAtDesc = (a: any, b: any) => {
+    return (b.solvedAt || b.createdAt || 0) - (a.solvedAt || a.createdAt || 0)
   }
 
   useEffect(() => {
@@ -427,7 +436,7 @@ function SidePanel({
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
             <div className="py-2">
               <StyledLayers styles={styles}>
-                {user.isAdmin && listMode == "haiku" &&
+                {user?.isAdmin && listMode == "haiku" &&
                   <div
                     className="cursor-pointer"
                     title="Show daily haikudles"
@@ -436,7 +445,7 @@ function SidePanel({
                     Latest {thingName}s
                   </div>
                 }
-                {user.isAdmin && listMode == "dailyHaikudle" &&
+                {user?.isAdmin && listMode == "dailyHaikudle" &&
                   <div
                     className="cursor-pointer"
                     title="Show Haikus"
@@ -453,7 +462,7 @@ function SidePanel({
             {/* note: don't render when not opened to save on resources */}
             {listMode == "haiku" && (panelAnimating || panelOpened) && myHaikus
               // .filter((h: Haiku) => h.createdBy == user.id)
-              .sort(user.isAdmin ? byCreatedAtDesc : bySolvedAtDesc)
+              .sort(user.isAdmin ? byCreatedAtDesc : bySolvedOrCreatedAtDesc)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
               .map((h: Haiku, i: number) => (
                 <StyledLayers key={i} styles={altStyles}>
@@ -468,17 +477,20 @@ function SidePanel({
                     }}
                   >
                     <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>
-                    {user.isAdmin &&
-                      <span className="font-normal"> generated {moment(h.createdAt).fromNow()} by {h.createdBy == user.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
+                    {user?.isAdmin &&
+                      <span className="font-normal"> generated {moment(h.createdAt).fromNow()} by {h.createdBy == user?.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
                     }
-                    {!user.isAdmin &&
+                    {!user?.isAdmin && h.solvedAt &&
                       <span className="font-normal"> solved {moment(h.solvedAt).fromNow()}{h.moves ? ` in ${h.moves} move${h.moves > 1 ? "s" : ""}` : ""}</span>
+                    }
+                    {!user?.isAdmin && !h.solvedAt && h.createdAt &&
+                      <span className="font-normal"> generated {moment(h.createdAt).fromNow()}</span>
                     }
                   </Link>
                 </StyledLayers>
               ))
             }
-            {listMode == "dailyHaikudle" && user.isAdmin && (panelAnimating || panelOpened) && dailyHaikudles
+            {listMode == "dailyHaikudle" && user?.isAdmin && (panelAnimating || panelOpened) && dailyHaikudles
               // .filter((h: Haiku) => h.createdBy == user.id)
               .sort((a: any, b: any) => b.id - a.id)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
@@ -683,9 +695,20 @@ export function NavOverlay({
 
       {["lyricle", "haikudle", "haiku"].includes(mode) && onClickGenerate &&
         <div className="fixed top-2.5 right-2.5 z-20">
-          <StyledLayers styles={altStyles}>
-            <GenerateIcon onClick={onClickGenerate} />
-          </StyledLayers>
+          {!user?.isAdmin && user.usage?.haikusCreated >= USAGE_LIMIT.DAILY_CREATE_HAIKU &&
+            <div className="opacity-30" title="Exceeded daily limit: try again later">
+              <StyledLayers styles={altStyles}>
+                <GenerateIcon />
+              </StyledLayers>
+            </div>
+          }
+          {(user?.isAdmin || user.usage?.haikusCreated < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+            <div title="Generate a new haiku">
+              <StyledLayers styles={altStyles}>
+                <GenerateIcon onClick={onClickGenerate} />
+              </StyledLayers>
+            </div>
+          }
         </div>
       }
 

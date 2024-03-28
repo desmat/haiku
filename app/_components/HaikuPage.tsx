@@ -4,8 +4,10 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import useHaikudle from '@/app/_hooks/haikudle';
+import useUser from "@/app/_hooks/user";
 import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
+import { USAGE_LIMIT } from "@/types/Usage";
 import { capitalize } from "@/utils/format";
 import { StyledLayers } from "./StyledLayers";
 import { GenerateIcon, Loading } from "./Nav";
@@ -30,7 +32,7 @@ function HaikuPoem({
   refresh?: any
 }) {
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { mode, haiku });
-
+  const [user] = useUser((state: any) => [state.user]);
   const [
     inProgress,
     solved,
@@ -48,7 +50,12 @@ function HaikuPoem({
   const isHaikudleMode = mode == "haikudle";
   const isLyricleMode = mode == "lyricle";
   const isPuzzleMode = !previousDailyHaikudleId && (isHaikudleMode || isLyricleMode);
-  const poem = isPuzzleMode ? inProgress : haiku.poem.map((line: string) => line.split(/\s+/).map((w: string) => { return { word: w } }));
+  const poem = isPuzzleMode
+    ? inProgress
+    : haiku.poem
+      .map((line: string) => line
+        .split(/\s+/)
+        .map((w: string) => { return { word: w } }));
   const maxHaikuTheme = 18;
 
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
@@ -121,7 +128,7 @@ function HaikuPoem({
     navigator.clipboard.writeText(haikuToCopy);
   }
 
-  if (solved || !isPuzzleMode) {
+  if (solved || !isPuzzleMode || (!user?.isAdmin && haiku.createdBy == user?.id)) {
     return (
       <div>
         <div
@@ -168,15 +175,25 @@ function HaikuPoem({
                 </span>
               </StyledLayers>
             </div>
-            {regenerate && mode == "haiku" &&
+            {regenerate && (user?.isAdmin || haiku.createdBy == user?.id) &&
               <div
                 className="mt-auto md:pt-[0.1rem] sm:pt-[0.2rem] mdpb-[0.4rem] sm:pb-[0.3rem] pb-[0.2rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
                 title="Regenerate this haiku with the same theme"
               >
-                <StyledLayers styles={altStyles || []}>
-                  <GenerateIcon onClick={regenerate} sizeOverwrite="h-4 w-4 md:h-6 md:w-6" />
-                </StyledLayers>
+                {!user?.isAdmin && user.usage?.haikusRegenerated >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
+                  <span className="opacity-30" title="Exceeded daily limit: try again later">
+                    <StyledLayers styles={altStyles || []}>
+                      <GenerateIcon sizeOverwrite="h-4 w-4 md:h-6 md:w-6" />
+                    </StyledLayers>
+                  </span>
+                }
+                {(user?.isAdmin || user.usage?.haikusRegenerated < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
+                  <StyledLayers styles={altStyles || []}>
+                    <GenerateIcon onClick={regenerate} sizeOverwrite="h-4 w-4 md:h-6 md:w-6" />
+                  </StyledLayers>
+                }
               </div>
+
             }
           </div>
         </div>
@@ -218,14 +235,14 @@ function HaikuPoem({
                               {...provided.dragHandleProps}
                               onMouseDown={() => isPuzzleMode && !w?.correct && handleClickWord(w, i, j)}
                             >
-                              <StyledLayers key={i} styles={!isPuzzleMode || solved || w?.correct ? styles : [styles[0]]}>
+                              <StyledLayers key={i} styles={w?.correct ? styles : [styles[0]]}>
                                 <div
-                                  className={`px-1 ${!isPuzzleMode || solved || w?.correct ? "" : "m-1"} transition-all ${!solved && !w?.correct && "draggable-notsure-why-cant-inline"}`}
+                                  className={`px-1 ${w?.correct ? "" : "m-1"} transition-all ${!w?.correct && "draggable-notsure-why-cant-inline"}`}
                                   style={{
-                                    backgroundColor: (!isPuzzleMode || solved || w?.correct)
+                                    backgroundColor: w?.correct
                                       ? undefined
                                       : haiku?.bgColor || "lightgrey",
-                                    filter: (!isPuzzleMode || solved || w?.correct)
+                                    filter: w?.correct
                                       ? undefined
                                       : snapshot.isDragging
                                         ? `drop-shadow(0px 1px 3px rgb(0 0 0 / 0.9))`
@@ -284,6 +301,7 @@ export default function HaikuPage({
   const isLyricleMode = mode == "lyricle";
   const isPuzzleMode = isHaikudleMode || isLyricleMode;
 
+  const [user] = useUser((state: any) => [state.user]);
   const [
     solved,
     inProgress,
@@ -343,12 +361,12 @@ export default function HaikuPage({
   // if (numCorrectWords > 0) numCorrectWords = numCorrectWords + 1; // make the last transition more impactful
   let blurValue = mode == "social-img-lyricle"
     ? blurCurve[blurCurve.length - 1]
-    : solved
+    : solved || (!user?.isAdmin && haiku.createdBy == user?.id)
       ? blurCurve[0]
       : blurCurve[numWords - numCorrectWords];
   let saturateValue = mode == "social-img-lyricle"
     ? saturateCurve[saturateCurve.length - 1]
-    : solved
+    : solved || (!user?.isAdmin && haiku.createdBy == user?.id)
       ? saturateCurve[0]
       : saturateCurve[numWords - numCorrectWords];
 

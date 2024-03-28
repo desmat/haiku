@@ -43,6 +43,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       ...localUser,
       isAdmin: remoteUser?.isAdmin,
       isAnonymous: remoteUser?.isAnonymous,
+      usage: remoteUser?.usage,
     }
 
     set({ user, token, loaded: true });
@@ -91,6 +92,10 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     const user = data.user;
 
     return { user };
+  },
+
+  update: async (user: any) => {
+    set({ user });
   },
 
   save: async (user: any) => {

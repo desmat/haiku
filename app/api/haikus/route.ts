@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, createHaiku, generateHaiku, getUserHaikus } from '@/services/haikus';
+import { getHaikus, generateHaiku, getUserHaikus } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
-import moment from 'moment';
-import { Haiku } from '@/types/Haiku';
 import { getDailyHaikudles } from '@/services/haikudles';
+import { userUsage } from '@/services/usage';
 import { DailyHaikudle } from '@/types/Haikudle';
+import { USAGE_LIMIT } from '@/types/Usage';
 
 export const maxDuration = 300;
 // export const dynamic = 'force-dynamic';
@@ -83,15 +83,9 @@ export async function POST(request: Request) {
   const { user } = await userSession(request);
 
   if (!user.isAdmin) {
-    const haikus = await getHaikus({ createdBy: user.id });
-    // console.log('>> app.api.haiku.POST', { haikus });
+    const { haikusCreated } = await userUsage(user);
 
-    const createdToday = haikus
-      .filter((haiku: Haiku) => moment(haiku.createdAt).isSame(new Date(), "day"))
-      .length;
-    // console.log('>> app.api.haiku.POST', { createdToday });
-
-    if (createdToday >= 3) {
+    if (haikusCreated >= USAGE_LIMIT.DAILY_CREATE_HAIKU) {
       return NextResponse.json(
         { success: false, message: 'exceeded daily limit' },
         { status: 429 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { userSession } from '@/services/users';
+import { userUsage } from '@/services/usage';
 
 export async function GET(request: NextRequest, params?: any) {
   const { user } = await userSession(request);
@@ -12,5 +13,12 @@ export async function GET(request: NextRequest, params?: any) {
     );
   }
 
-  return NextResponse.json({ user });
+  const usage = await userUsage(user);
+
+  return NextResponse.json({
+    user: {
+      ...user,
+      usage,
+    }
+  });
 }
