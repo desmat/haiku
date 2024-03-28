@@ -21,7 +21,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   const [generating, setGenerating] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const router = useRouter();
-  const [user, saveUser, updateUser] = useUser((state: any) => [state.user, state.save, state.update]);
+  const [user, saveUser, incUserUsage] = useUser((state: any) => [state.user, state.save, state.incUserUsage]);
   const [resetAlert, plainAlert, warningAlert, infoAlert] = useAlert((state: any) => [state.reset, state.plain, state.warning, state.info]);
   const isHaikuMode = mode == "haiku";
   const isHaikudleMode = mode == "haikudle";
@@ -52,7 +52,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     haikudleLoaded,
     loadHaikudle,
     haikudleHaiku,
-    haikudles,
     resetHaikudles,
     createHaikudle,
     haikudleInProgress,
@@ -63,7 +62,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     state.loaded(haikuId || { lang }),
     state.load,
     state.haiku,
-    state._haikudles,
     state.reset,
     state.create,
     state.inProgress,
@@ -255,13 +253,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         // router.push(`/?id=${ret.id}`);
         setHaikuId(ret.id);
         setGenerating(false);
-        updateUser({
-          ...user,
-          usage: {
-            ...user.usage,
-            haikusCreated: (user.usage?.haikusCreated || 0) + 1,
-          }
-        });
+        incUserUsage(user, "haikusCreated");
       }
     }
   }
@@ -276,13 +268,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       const ret = await regenerateHaiku(user, haiku);
       // console.log('>> app.page.handleRegenerateHaiku()', { ret });
       setRegenerating(false);
-      updateUser({
-        ...user,
-        usage: {
-          ...user.usage,
-          haikusRegenerated: (user.usage?.haikusRegenerated || 0) + 1,
-        }
-      });
+      incUserUsage(user, "haikusRegenerated");    
     }
   }
 

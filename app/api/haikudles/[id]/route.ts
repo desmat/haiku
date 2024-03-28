@@ -30,7 +30,8 @@ export async function GET(
     getHaikudle(params.id),
     getNextDailyHaikudleId(),
   ]);
-  // console.log('>> app.api.haikudles.GET', { haiku, haikudle, dailyHaikudle });
+  const myHaiku = !user.isAdmin && haiku.createdBy == user.id && await getHaiku(params.id);
+  // console.log('>> app.api.haikudles.GET', { haiku, haikudle, dailyHaikudle, myHaiku });
 
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
@@ -51,7 +52,7 @@ export async function GET(
     ...haikudle,
     ...userHaikudle?.haikudle,
     previousDailyHaikudleId: dailyHaikudle?.id,
-    haiku,
+    haiku: myHaiku || haiku,
   };
 
   return NextResponse.json(

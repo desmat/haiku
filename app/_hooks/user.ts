@@ -74,8 +74,8 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   loadRemote: async (token: string) => {
     // console.log(">> hooks.user.loadRemote()", { token });
 
-    const res = await fetch(`/api/user`, { 
-      headers: { Authorization: `Bearer ${token}` } 
+    const res = await fetch(`/api/user`, {
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     if (res.status != 200) {
@@ -84,7 +84,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         code: res.status,
         token,
       });
-      useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);      
+      useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);
       return {};
     }
 
@@ -96,6 +96,18 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
   update: async (user: any) => {
     set({ user });
+  },
+
+  incUserUsage: async (user: any, resource: string) => {
+    set({
+      user: {
+        ...user,
+        usage: {
+          ...user.usage,
+          [resource]: (user.usage[resource] || 0) + 1,
+        }
+      }
+    });
   },
 
   save: async (user: any) => {

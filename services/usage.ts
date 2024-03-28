@@ -25,3 +25,24 @@ export async function userUsage(user: User) {
     haikusRegenerated: haikusRegenerated || 0,
   };
 }
+
+export async function incUserUsage(user: User, resource: string) {
+  store.users.get(user.id).then((u: User | undefined) => {
+    const datecode = moment().format("YYYYMMDD");
+    const updatedUser = {
+      ...(u || user),
+      usage: {
+        [datecode]: {
+          ...u?.usage[datecode],
+          [resource]: (u?.usage[datecode][resource] || 0) + 1,
+        }
+      }
+    }
+
+    if (!u) {
+      return store.users.create(user.id, updatedUser);
+    }
+
+    return store.users.update(user.id, updatedUser);
+  });  
+}

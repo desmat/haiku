@@ -10,6 +10,7 @@ import chroma from 'chroma-js';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { Haikudle, UserHaikudle } from '@/types/Haikudle';
 import { deleteHaikudle, getHaikudle } from './haikudles';
+import { incUserUsage } from './usage';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -94,7 +95,7 @@ export async function getUserHaikus(user: User): Promise<Haiku[]> {
 }
 
 export async function getHaiku(id: string, hashPoem?: boolean): Promise<Haiku | undefined> {
-  console.log(`>> services.haiku.getHaiku`, { id });
+  console.log(`>> services.haiku.getHaiku`, { id, hashPoem });
 
   let haiku = await store.haikus.get(id);
 
@@ -150,24 +151,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
   });
 
   if (!user.isAdmin) {
-    store.users.get(user.id).then((u: User | undefined) => {
-      const datecode = moment().format("YYYYMMDD");
-      const updatedUser = {
-        ...(u || user),
-        usage: {
-          [datecode]: {
-            ...u?.usage[datecode],
-            haikusRegenerated: (u?.usage[datecode]?.haikusRegenerated || 0) + 1,
-          }
-        }
-      }
-
-      if (!u) {
-        return store.users.create(user.id, updatedUser);
-      }
-
-      return store.users.update(user.id, updatedUser);
-    });
+    incUserUsage(user, "haikusRegenerated");
   }
 
   return saveHaiku(user, {
@@ -240,25 +224,7 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
   } as Haiku;
 
   if (!user.isAdmin) {
-    store.users.get(user.id).then((u: User | undefined) => {
-      const datecode = moment().format("YYYYMMDD");
-      const updatedUser = {
-        ...user,
-        ...u,
-        usage: {
-          [datecode]: {
-            ...u?.usage[datecode],
-            haikusCreated: (u?.usage[datecode]?.haikusCreated || 0) + 1,
-          }
-        }
-      }
-
-      if (!u) {
-        return store.users.create(user.id, updatedUser);
-      }
-
-      return store.users.update(user.id, updatedUser);
-    });
+    incUserUsage(user, "haikusCreated");
   }
 
   return store.haikus.create(user.id, haiku);
