@@ -3,14 +3,8 @@ import { devtools } from 'zustand/middleware'
 import { User } from '@/types/User';
 import { decodeJWT, encodeJWT } from '@/utils/jwt';
 import { uuid } from '@/utils/misc';
-
-async function getSession() {
-  const session = window?.localStorage && window.localStorage.getItem("session");
-  const decoded = session && await decodeJWT(session);
-
-  // @ts-ignore
-  return { token: session, session: decoded, user: decoded?.user };
-}
+import trackEvent from '@/utils/trackEvent';
+import useAlert from './alert';
 
 const useUser: any = create(devtools((set: any, get: any) => ({
   user: undefined as User | undefined,
@@ -38,9 +32,27 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   load: async () => {
+    const { loadLocal, loadRemote } = get();
+    let user;
+    // console.log(">> hooks.user.load()", { token });
+
+    const { user: localUser, token } = await loadLocal();
+    const { user: remoteUser } = await loadRemote(token);
+
+    user = {
+      ...localUser,
+      isAdmin: remoteUser?.isAdmin,
+      isAnonymous: remoteUser?.isAnonymous,
+    }
+
+    set({ user, token, loaded: true });
+    return { user, token };
+  },
+
+  loadLocal: async () => {
     let user;
     let token = window?.localStorage && window.localStorage.getItem("session");
-    // console.log(">> hooks.user.load()", { token });
+    // console.log(">> hooks.user.loadLocal()", { token });
 
     if (token) {
       user = (await decodeJWT(token)).user as User;
@@ -55,15 +67,37 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       window?.localStorage && window.localStorage.setItem("session", token || "");
     }
 
-    set({ user, token, loaded: true });
     return { user, token };
+  },
+
+  loadRemote: async (token: string) => {
+    // console.log(">> hooks.user.loadRemote()", { token });
+
+    const res = await fetch(`/api/user`, { 
+      headers: { Authorization: `Bearer ${token}` } 
+    });
+
+    if (res.status != 200) {
+      trackEvent("error", {
+        type: "fetch-user",
+        code: res.status,
+        token,
+      });
+      useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);      
+      return {};
+    }
+
+    const data = await res.json();
+    const user = data.user;
+
+    return { user };
   },
 
   save: async (user: any) => {
     const token = await encodeJWT({ user });
     window?.localStorage && window.localStorage.setItem("session", token || "");
     set({ user });
-  },  
+  },
 })));
 
 export default useUser;

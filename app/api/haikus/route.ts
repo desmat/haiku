@@ -13,7 +13,7 @@ export const maxDuration = 300;
 export async function GET(request: NextRequest, params?: any) {
   const query = searchParamsToMap(request.nextUrl.searchParams.toString()) as any;
   const { user } = await userSession(request);
-  console.log('>> app.api.haikus.GET', { query, searchParams: request.nextUrl.searchParams.toString() });
+  console.log('>> app.api.haikus.GET', { query, searchParams: request.nextUrl.searchParams.toString(), user });
 
   if (query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
     return NextResponse.json(
@@ -24,6 +24,14 @@ export async function GET(request: NextRequest, params?: any) {
 
   if (query.random) {
     const mode = query.mode;
+
+    if (mode != "haiku" && !user.isAdmin) {
+      return NextResponse.json(
+        { success: false, message: 'authorization failed' },
+        { status: 403 }
+      );
+    }
+
     delete query.mode;
     delete query.random;
     if (!query.lang) {
@@ -35,7 +43,7 @@ export async function GET(request: NextRequest, params?: any) {
     const dailyHaikudles = await getDailyHaikudles();
     const dailyHaikudle = dailyHaikudles
       .filter((dailyHaikudles: DailyHaikudle) => dailyHaikudles.haikuId == random.id)[0];
-      // console.log('>> app.api.haikus.GET', { dailyHaikudles, dailyHaikudle });
+    // console.log('>> app.api.haikus.GET', { dailyHaikudles, dailyHaikudle });
 
     if (dailyHaikudle) {
       random.dailyHaikudleId = dailyHaikudle?.id;
@@ -46,7 +54,7 @@ export async function GET(request: NextRequest, params?: any) {
 
   if (query.mine) {
     const haikus = await getUserHaikus(user);
-    return NextResponse.json({ haikus });  
+    return NextResponse.json({ haikus });
   }
 
   const haikus = await getHaikus(query, process.env.EXPERIENCE_MODE == "haikudle");
@@ -54,7 +62,7 @@ export async function GET(request: NextRequest, params?: any) {
 }
 
 export async function POST(request: Request) {
-  console.log('>> app.api.haiku.POST', {  });
+  console.log('>> app.api.haiku.POST', {});
 
   const data: any = await request.json();
   let { subject, lang } = data.request;

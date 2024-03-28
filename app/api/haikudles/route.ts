@@ -65,7 +65,7 @@ export async function GET(request: NextRequest, params?: any) {
   }
 
   return NextResponse.json(
-    nextDailyHaikudleId
+    nextDailyHaikudleId && user.isAdmin
       ? { haikudles: [ret], nextDailyHaikudleId }
       : { haikudles: [ret] }
   );

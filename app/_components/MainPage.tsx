@@ -17,7 +17,7 @@ import { syllable } from 'syllable';
 
 export default function MainPage({ mode, id, lang }: { mode: string, id?: string, lang?: undefined | LanguageType }) {
   // console.log('>> app.mainPage.render()', { mode, id, lang });
-  const [haikuId, setHaikuId] = useState(id);
+  let [haikuId, setHaikuId] = useState(id);
   const [generating, setGenerating] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const router = useRouter();
@@ -118,20 +118,23 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   //   console.log('>> app.page useEffect (mode)', { haikuId, mode, loaded, loading, user, haiku });
   // }, [mode]);
 
-  useEffect(() => {
-    console.log('>> app.page useEffect [haikuId, lang, mode]', { haikuId, mode, loaded, loading, user, haiku });
+  const loadPage = () => {
+    setLoading(true);
+    loading = true;
+    isHaikudleMode || isLyricleMode
+      ? loadHaikudle(haikuId || { lang })
+        .then((haikudle: Haikudle) => setLoading(false))
+      : loadHaikus(haikuId || { random: true, lang }, mode)
+        .then((haikus: Haiku | Haiku[]) => {
+          setHaikuId(haikus.id || haikus[0]?.id);
+          setLoading(false);
+        });
+  }
 
+  useEffect(() => {
+    // console.log('>> app.page useEffect [haikuId, lang, mode]', { haikuId, mode, loaded, loading, user, haiku });
     if (/* !loaded && */ !loading) {
-      setLoading(true);
-      loading = true;
-      isHaikudleMode || isLyricleMode
-        ? loadHaikudle(haikuId || { lang })
-          .then((haikudle: Haikudle) => setLoading(false))
-        : loadHaikus(haikuId || { random: true, lang }, mode)
-          .then((haikus: Haiku | Haiku[]) => {
-            setHaikuId(haikus.id || haikus[0]?.id);
-            setLoading(false);
-          })
+      loadPage();
     }
   }, [haikuId, lang, mode]);
 
@@ -271,11 +274,15 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
 
   const handleRefresh = (e?: any) => {
     // console.log('>> app.page.handleRefresh()', {  });
+    e && e.preventDefault();
+
     if (isHaikudleMode && !user.isAdmin) {
+      router.push("/");
+      setHaikuId(undefined);
+      haikuId = undefined;
+      loadPage();
       return;
     }
-
-    e && e.preventDefault();
 
     if (haikuId) {
       router.push(`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);

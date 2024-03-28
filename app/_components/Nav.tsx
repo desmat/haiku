@@ -49,7 +49,7 @@ export function Logo({ mode, href, onClick, styles, altStyles }: { mode: string,
   return (
     <Link
       onClick={onClick}
-      href={href || "#"}
+      href={href || "/"}
       className={`hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
     >
       <div className={`${font.architects_daughter.className} flex flex-row`}>
