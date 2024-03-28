@@ -51,17 +51,20 @@ export async function getUserHaikus(user: User): Promise<Haiku[]> {
       createdBy: user.id,
       // solved: true, // nope, need to filter on haikudle.solved and can't do that
     });
-    
+
     const userHaikudleLookup = new Map(userHaikudles
       .filter((uh: UserHaikudle) => uh?.haikudle?.solved)
-      .map((uh: UserHaikudle) => [uh.haikudle.haikuId, uh.updatedAt || uh.createdAt]));
+      .map((uh: UserHaikudle) => [uh.haikudle.haikuId, {
+        solvedAt: uh.updatedAt || uh.createdAt,
+        moves: uh.haikudle?.moves,
+      }]));
 
     haikus = haikus
       .filter((haiku: Haiku) => userHaikudleLookup.get(haiku.id))
       .map((haiku: Haiku) => {
         return {
           ...haiku,
-          solvedAt: userHaikudleLookup.get(haiku.id),
+          ...userHaikudleLookup.get(haiku.id),
         }
       });
   }
@@ -74,6 +77,7 @@ export async function getUserHaikus(user: User): Promise<Haiku[]> {
       createdAt: haiku.createdAt,
       solvedAt: haiku.solvedAt,
       theme: haiku.theme,
+      moves: haiku.moves,
     };
   });
 
@@ -135,7 +139,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
       deleteHaikudle(user, haikudle.id);
     }
   });
-  
+
   return saveHaiku(user, {
     ...haiku,
     poem,
