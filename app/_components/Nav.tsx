@@ -283,7 +283,7 @@ function SidePanel({
   const [panelPinned, setPanelPinned] = useState(false);
   const pageSize = 20;
   const [numPages, setNumPages] = useState(1);
-  const [listMode, setListMode] = useState<"haiku" | "dailyHaikudle">("dailyHaikudle");
+  const [listMode, setListMode] = useState<"haiku" | "dailyHaikudle">("haiku");
   const [
     loadHaikus,
     myHaikus,
