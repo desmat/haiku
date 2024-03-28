@@ -187,7 +187,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
             set({
               mode: mode || _mode,
               myHaikus: listToMap(haikus),
-              dailyHaikudles: listToMap(data.dailyHaikudles),
+              dailyHaikudles: data.dailyHaikudles && listToMap(data.dailyHaikudles),
             });
           } else {
             setLoaded(haikus);
