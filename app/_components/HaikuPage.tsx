@@ -51,7 +51,7 @@ function HaikuPoem({
   const poem = isPuzzleMode ? inProgress : haiku.poem.map((line: string) => line.split(/\s+/).map((w: string) => { return { word: w } }));
   const maxHaikuTheme = 18;
 
-  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem, previousDailyHaikudleId, isPuzzleMode });
+  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
 
   const upperCaseFirstLetter = (s: string) => {
     if (!s || s.length == 0) return "";
@@ -141,47 +141,45 @@ function HaikuPoem({
             </StyledLayers>
           ))}
         </div>
-        {(solved || !isPuzzleMode) &&
-          <div
-            className="relative md:text-[14pt] sm:text-[10pt] text-[8pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]"
-            style={{
-              // background: "pink",
-              height: mode == "haikudle"
-                ? ""
-                : haiku.theme?.length > maxHaikuTheme
-                  ? "2.6rem"
-                  : "1.3rem"
-            }}
-          >
-            <div className="absolute w-max flex flex-row">
+        <div
+          className="relative md:text-[14pt] sm:text-[10pt] text-[8pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]"
+          style={{
+            // background: "pink",
+            height: mode == "haikudle"
+              ? ""
+              : haiku.theme?.length > maxHaikuTheme
+                ? "2.6rem"
+                : "1.3rem"
+          }}
+        >
+          <div className="absolute w-max flex flex-row">
+            <div
+              className="transition-all"
+              onClick={handleClickHaiku}
+              title={mode == "showcase" ? "Refresh" : "Copy to clipboard"}
+              style={{
+                cursor: mode == "showcase" ? "pointer" : "copy"
+              }}
+            >
+              <StyledLayers styles={styles}>
+                <span
+                  dangerouslySetInnerHTML={{ __html: `—${haikuTitleAndAuthorTag.join(haiku.theme?.length > maxHaikuTheme ? "<br/>&nbsp;" : "")}` }}
+                >
+                </span>
+              </StyledLayers>
+            </div>
+            {regenerate && mode == "haiku" &&
               <div
-                className="transition-all"
-                onClick={handleClickHaiku}
-                title={mode == "showcase" ? "Refresh" : "Copy to clipboard"}
-                style={{
-                  cursor: mode == "showcase" ? "pointer" : "copy"
-                }}
+                className="mt-auto md:pt-[0.1rem] sm:pt-[0.2rem] mdpb-[0.4rem] sm:pb-[0.3rem] pb-[0.2rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
+                title="Regenerate this haiku with the same theme"
               >
-                <StyledLayers styles={styles}>
-                  <span
-                    dangerouslySetInnerHTML={{ __html: `—${haikuTitleAndAuthorTag.join(haiku.theme?.length > maxHaikuTheme ? "<br/>&nbsp;" : "")}` }}
-                  >
-                  </span>
+                <StyledLayers styles={altStyles || []}>
+                  <GenerateIcon onClick={regenerate} sizeOverwrite="h-4 w-4 md:h-6 md:w-6" />
                 </StyledLayers>
               </div>
-              {regenerate && mode == "haiku" &&
-                <div
-                  className="mt-auto md:pt-[0.1rem] sm:pt-[0.2rem] mdpb-[0.4rem] sm:pb-[0.3rem] pb-[0.2rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
-                  title="Regenerate this haiku with the same theme"
-                >
-                  <StyledLayers styles={altStyles || []}>
-                    <GenerateIcon onClick={regenerate} sizeOverwrite="h-4 w-4 md:h-6 md:w-6" />
-                  </StyledLayers>
-                </div>
-              }
-            </div>
+            }
           </div>
-        }
+        </div>
       </div>
     )
   }
@@ -287,19 +285,15 @@ export default function HaikuPage({
   const isPuzzleMode = isHaikudleMode || isLyricleMode;
 
   const [
-    loaded,
-    load,
+    solved,
     inProgress,
-    init,
     move,
     _haiku,
     haikudleId,
     previousDailyHaikudleId,
   ] = useHaikudle((state: any) => [
-    state.loaded,
-    state.load,
+    state.solved,
     state.inProgress,
-    state.init,
     state.move,
     isPuzzleMode ? state.haiku : haiku,
     state.haikudleId,
@@ -349,10 +343,14 @@ export default function HaikuPage({
   // if (numCorrectWords > 0) numCorrectWords = numCorrectWords + 1; // make the last transition more impactful
   let blurValue = mode == "social-img-lyricle"
     ? blurCurve[blurCurve.length - 1]
-    : blurCurve[numWords - numCorrectWords];
+    : solved
+      ? blurCurve[0]
+      : blurCurve[numWords - numCorrectWords];
   let saturateValue = mode == "social-img-lyricle"
     ? saturateCurve[saturateCurve.length - 1]
-    : saturateCurve[numWords - numCorrectWords];
+    : solved
+      ? saturateCurve[0]
+      : saturateCurve[numWords - numCorrectWords];
 
   if (typeof (blurValue) != "number") {
     blurValue = blurCurve[blurCurve.length - 1];

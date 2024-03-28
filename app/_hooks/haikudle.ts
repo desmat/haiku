@@ -119,10 +119,10 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         .map((word: string) => hashCode(normalizeWord(word))))
       || haiku.poem;
 
-    const inProgress = haikudle?.inProgress
+    const inProgress = haikudle?.inProgress;
 
     checkCorrect(inProgress, solution);
-    const solved = isSolved(inProgress, solution);
+    const solved = haikudle.solved || isSolved(inProgress, solution);
 
     set({
       ready: true,
