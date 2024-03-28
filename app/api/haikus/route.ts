@@ -54,6 +54,12 @@ export async function GET(request: NextRequest, params?: any) {
 
   if (query.mine) {
     const haikus = await getUserHaikus(user);
+
+    if (user.isAdmin) {
+      const dailyHaikudles = await getDailyHaikudles();
+      return NextResponse.json({ haikus, dailyHaikudles });
+    }
+    
     return NextResponse.json({ haikus });
   }
 

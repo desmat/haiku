@@ -16,6 +16,7 @@ import useUser from '@/app/_hooks/user';
 import useHaikus from '@/app/_hooks/haikus';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { Haiku } from '@/types/Haiku';
+import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
 import { byCreatedAtDesc } from '@/utils/sort';
 import { StyledLayers } from './StyledLayers';
@@ -282,15 +283,18 @@ function SidePanel({
   const [panelPinned, setPanelPinned] = useState(false);
   const pageSize = 20;
   const [numPages, setNumPages] = useState(1);
+  const [listMode, setListMode] = useState<"haiku" | "dailyHaikudle">("dailyHaikudle");
   const [
     loadHaikus,
-    myHaikus
+    myHaikus,
+    dailyHaikudles,
   ] = useHaikus((state: any) => [
     state.load,
     state.myHaikus ? Object.values(state.myHaikus) : [],
+    state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
   ]);
 
-  // console.log(">> app._component.Nav.render", { panelOpened, panelAnimating });
+  // console.log(">> app._component.Nav.render", { panelOpened, panelAnimating, dailyHaikudles });
 
   // TODO: move to shared lib between Nav and Layout
   const isLyricleMode = process.env.EXPERIENCE_MODE == "lyricle";
@@ -301,10 +305,8 @@ function SidePanel({
       ? "AI-generated daily art and haiku puzzles"
       : "AI-generated art and haiku poems";
   const thingName = isLyricleMode
-    ? "yricle"
-    : isHaikudleMode
-      ? "haikudle"
-      : "haiku";
+    ? "lyricle"
+    : "haiku";
 
   // console.log(">> app._component.SidePanel.render", { user, mode });
 
@@ -425,8 +427,23 @@ function SidePanel({
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
             <div className="py-2">
               <StyledLayers styles={styles}>
-                {user.isAdmin &&
-                  <>Latest {thingName}s</>
+                {user.isAdmin && listMode == "haiku" &&
+                  <div
+                    className="cursor-pointer"
+                    title="Show daily haikudles"
+                    onClick={() => setListMode("dailyHaikudle")}
+                  >
+                    Latest {thingName}s
+                  </div>
+                }
+                {user.isAdmin && listMode == "dailyHaikudle" &&
+                  <div
+                    className="cursor-pointer"
+                    title="Show Haikus"
+                    onClick={() => setListMode("haiku")}
+                  >
+                    Daily Haikudles
+                  </div>
                 }
                 {!user.isAdmin &&
                   <>Your haikus</>
@@ -434,7 +451,7 @@ function SidePanel({
               </StyledLayers>
             </div>
             {/* note: don't render when not opened to save on resources */}
-            {(panelAnimating || panelOpened) && myHaikus && myHaikus
+            {listMode == "haiku" && (panelAnimating || panelOpened) && myHaikus
               // .filter((h: Haiku) => h.createdBy == user.id)
               .sort(user.isAdmin ? byCreatedAtDesc : bySolvedAtDesc)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
@@ -459,8 +476,31 @@ function SidePanel({
                     }
                   </Link>
                 </StyledLayers>
-              ))}
-            {myHaikus && (Object.values(myHaikus).length > numPages * pageSize) &&
+              ))
+            }
+            {listMode == "dailyHaikudle" && user.isAdmin && (panelAnimating || panelOpened) && dailyHaikudles
+              // .filter((h: Haiku) => h.createdBy == user.id)
+              .sort((a: any, b: any) => b.id - a.id)
+              .slice(0, numPages * pageSize) // more than that and things blow up on safari
+              .map((dh: DailyHaikudle, i: number) => (
+                <StyledLayers key={i} styles={altStyles}>
+                  <Link
+                    href={`/${dh.haikuId}`}
+                    onClick={(e: any) => {
+                      if (onSelectHaiku) {
+                        e.preventDefault();
+                        /* !panelPinned && */ toggleMenuOpened();
+                        onSelectHaiku(dh.haikuId);
+                      }
+                    }}
+                  >
+                    <span className="capitalize font-semibold">&quot;{dh.theme}&quot;</span>
+                    <span className="font-normal"> {dh.id == moment().format("YYYYMMDD") ? "Today" : moment(dh.id).format('MMMM Do YYYY')}</span>
+                  </Link>
+                </StyledLayers>
+              ))
+            }
+            {(listMode == "haiku" ? myHaikus : dailyHaikudles) && (Object.values(listMode == "haiku" ? myHaikus : dailyHaikudles).length > numPages * pageSize) &&
               <div
                 className="py-2 cursor-pointer"
                 onClick={loadMore}

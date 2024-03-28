@@ -11,6 +11,7 @@ import chroma from 'chroma-js';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import shuffleArray from '@/utils/shuffleArray';
 import { getHaiku } from './haikus';
+import { Haiku } from '@/types/Haiku';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -174,9 +175,28 @@ export async function getDailyHaikudle(id: string): Promise<DailyHaikudle | unde
   return new Promise((resolve, reject) => resolve(dailyHaikudle));
 }
 
-export async function getDailyHaikudles(query?: any): Promise<Haikudle[]> {
-  let haikudles = await store.dailyHaikudles.find(query);
-  return new Promise((resolve, reject) => resolve(haikudles.filter(Boolean)));
+export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
+  const dailyHaikudles = (await store.dailyHaikudles.find(query))
+    .filter(Boolean);
+  // lookup theme; 
+  // at some point we won't need to do this since we're now 
+  // saving the them with th daily haikudle record  
+  const haikus = await store.haikus.find(query);
+  const themeLookup = new Map(haikus
+    .map((haiku: Haiku) => [haiku.id, haiku.theme]));
+
+  // @ts-ignore
+  return dailyHaikudles
+    .map((dh: DailyHaikudle) => {
+      const theme = themeLookup.get(dh?.haikuId)
+      if (theme) {
+        return {
+          ...dh,
+          theme,
+        }
+      }
+    })
+    .sort((a: any, b: any) => a.id - b.id);
 }
 
 export async function getNextDailyHaikudleId(): Promise<string> {
@@ -204,15 +224,29 @@ export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: st
     throw `Unauthorized`;
   }
 
-  let dailyhaikudle = await store.dailyHaikudles.get(dateCode);
+  const [dailyhaikudle, haiku, haikudle] = await Promise.all([
+    store.dailyHaikudles.get(dateCode),
+    store.haikus.get(haikuId),
+    store.haikudles.get(haikudleId),
+  ]);
+
+  if (!haiku) throw `Haiku not found: ${haikuId}`;
+
+  if (!haikudle) throw `Haikudle not found: ${haikudleId}`;
 
   if (dailyhaikudle) {
-    return store.dailyHaikudles.update(user.id, { id: dateCode, haikuId, haikudleId });
+    return store.dailyHaikudles.update(user.id, {
+      id: dateCode,
+      haikuId,
+      haikudleId,
+      theme: haiku.theme
+    });
   }
 
   return store.dailyHaikudles.create(user.id, {
     id: dateCode,
     haikuId,
     haikudleId,
+    theme: haiku.theme,
   });
 }

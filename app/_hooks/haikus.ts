@@ -23,8 +23,6 @@ const initialState = {
   // access via get(id) or find(query?)
   _haikus: <HaikuMap>{},
 
-  myhaikus: <HaikuMap>{},
-
   // to smooth out UX when deleting,
   _deleted: <StatusMap>{},
 
@@ -34,6 +32,9 @@ const initialState = {
   // and query is stringyfied json from loaded
   // list of haikus
   _loaded: <StatusMap>{},
+
+  myhaikus: <HaikuMap>{},
+  dailyHaikudles: <any>{},
 }
 
 const useHaikus: any = create(devtools((set: any, get: any) => ({
@@ -186,6 +187,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
             set({
               mode: mode || _mode,
               myHaikus: listToMap(haikus),
+              dailyHaikudles: listToMap(data.dailyHaikudles),
             });
           } else {
             setLoaded(haikus);
