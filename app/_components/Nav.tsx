@@ -4,8 +4,8 @@ import moment from 'moment';
 import Link from 'next/link'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'
-import { IoSparkles, IoAddCircle, IoLinkSharp, IoHelpCircle, IoLogoGithub } from 'react-icons/io5';
-import { MdMail, MdHome, MdDelete } from "react-icons/md";
+import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub } from 'react-icons/io5';
+import { MdMail, MdHome, MdDelete, MdIosShare } from "react-icons/md";
 import { TbSwitchVertical } from "react-icons/tb";
 import { RiFullscreenLine } from "react-icons/ri";
 import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg } from "react-icons/bs";
@@ -171,7 +171,7 @@ function BottomLinks({
           <Link
             key="link"
             href={haiku.id}
-            title="Copy direct link"
+            title="Copy direct link to share"
             className="cursor-copy"
             style={{
               filter: `${pop ? `drop-shadow(0px 0px 16px ${haiku?.bgColor})` : ""}`,
@@ -183,7 +183,7 @@ function BottomLinks({
               navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : mode == "lycicle" ? "https://lyricle.desmat.ca" : "https://haiku.desmat.ca"}/${haiku.id}`);
             }}
           >
-            <IoLinkSharp className="text-xl" />
+            <MdIosShare className="text-xl mt-[-0.1rem]" />
           </Link>
         }
         {haiku?.id && user?.isAdmin &&
