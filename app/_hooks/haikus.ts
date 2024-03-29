@@ -6,6 +6,7 @@ import { User } from '@/types/User';
 import { listToMap, mapToList, mapToSearchParams, uuid } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from "./alert";
+import useHaikudle from './haikudle';
 import useUser from './user';
 
 async function fetchOpts() {
@@ -437,6 +438,9 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         set({
           _haikus: { ..._haikus, [regenerated.id || ""]: regenerated },
         });
+        // also sync up haikudle store 
+        useHaikudle.setState({ haiku: regenerated });
+
         return resolve(regenerated);
       });
     });

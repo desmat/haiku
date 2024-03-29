@@ -16,16 +16,37 @@ import { Haikudle } from '@/types/Haikudle';
 import { syllable } from 'syllable';
 
 export default function MainPage({ mode, id, lang }: { mode: string, id?: string, lang?: undefined | LanguageType }) {
-  // console.log('>> app.mainPage.render()', { mode, id, lang });
-  let [haikuId, setHaikuId] = useState(id);
-  const [generating, setGenerating] = useState(false);
-  const [regenerating, setRegenerating] = useState(false);
-  const router = useRouter();
-  const [user, saveUser, incUserUsage] = useUser((state: any) => [state.user, state.save, state.incUserUsage]);
-  const [resetAlert, plainAlert, warningAlert, infoAlert] = useAlert((state: any) => [state.reset, state.plain, state.warning, state.info]);
+  // console.log('>> app.MainPage.render()', { mode, id, lang });
   const isHaikuMode = mode == "haiku";
   const isHaikudleMode = mode == "haikudle";
   const isLyricleMode = mode == "lyricle";
+  const router = useRouter();
+  let [haikuId, setHaikuId] = useState(id);
+
+  const [generating, setGenerating] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+
+  const [
+    user,
+    saveUser,
+    incUserUsage
+  ] = useUser((state: any) => [
+    state.user,
+    state.save,
+    state.incUserUsage
+  ]);
+
+  const [
+    resetAlert,
+    plainAlert,
+    warningAlert,
+    infoAlert
+  ] = useAlert((state: any) => [
+    state.reset,
+    state.plain,
+    state.warning,
+    state.info
+  ]);
 
   const [
     haikusLoaded,
@@ -76,7 +97,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       ? haikudleHaiku
       : haikuId && getHaiku(haikuId) || haikus[0]);
 
-  const fontColor = haiku?.color || "#555555";
+    const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
   const textStyles = [
     {
@@ -106,7 +127,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
   ];
 
-  // console.log('>> app.page.render()', { haikuId, mode, loaded, loading, user, haiku });
+  // console.log('>> app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
 
   // useEffect(() => {
   //   console.log('>> app.page useEffect (initial)', { haikuId, mode, loaded, loading, user, haiku });
@@ -268,7 +289,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       const ret = await regenerateHaiku(user, haiku);
       // console.log('>> app.page.handleRegenerateHaiku()', { ret });
       setRegenerating(false);
-      incUserUsage(user, "haikusRegenerated");    
+      incUserUsage(user, "haikusRegenerated");
     }
   }
 
