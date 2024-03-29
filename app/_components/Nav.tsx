@@ -133,6 +133,7 @@ function BottomLinks({
   const router = useRouter();
   const user = useUser((state: any) => state.user);
   const [pop, setPop] = useState(false);
+  const [alert] = useAlert((state: any) => [state.plain]);
 
   return (
     <div
@@ -187,6 +188,7 @@ function BottomLinks({
               setPop(true);
               setTimeout(() => setPop(false), 100);
               navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : mode == "lycicle" ? "https://lyricle.desmat.ca" : "https://haiku.desmat.ca"}/${haiku.id}`);
+              alert(`Link to this haiku copied to clipboard`, { closeDelay: 750 });
               trackEvent("error", {
                 type: "share-haiku",
                 userId: user.id,

@@ -9,6 +9,7 @@ import { User } from "@/types/User";
 import { StyledLayers } from "./StyledLayers";
 import { GenerateIcon } from "./Nav";
 import trackEvent from "@/utils/trackEvent";
+import useAlert from "../_hooks/alert";
 
 export default function HaikuPoem({
   user,
@@ -32,8 +33,11 @@ export default function HaikuPoem({
   // console.log('>> app._components.HaikuPoem.render()', { mode, haiku });
   const isHaikudleMode = mode == "haikudle";
   const maxHaikuTheme = 18;
+  const [alert] = useAlert((state: any) => [state.plain]);
 
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
+
+
 
   const upperCaseFirstLetter = (s: string) => {
     if (!s || s.length == 0) return "";
@@ -67,6 +71,8 @@ export default function HaikuPoem({
     doPop();
     // console.log('>> app._components.HaikuPage.handleClickHaiku()', { haikuToCopy });
     navigator.clipboard.writeText(haikuToCopy);
+
+    alert(`Haiku poem copied to clipboard`, { closeDelay: 750 });
 
     trackEvent("error", {
       type: "copy-haiku",
