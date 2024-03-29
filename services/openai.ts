@@ -1,22 +1,19 @@
 import OpenAI from 'openai';
-import delay from '@/utils/delay';
 import * as samples from "@/services/stores/samples";
+import delay from '@/utils/delay';
 import { mapToList } from '@/utils/misc';
-
-let store: any;
-import(`@/services/stores/${process.env.STORE_TYPE}`).then((importedStore) => {
-  store = importedStore;
-});
 
 const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// const model = "gpt-3.5-turbo"; // seems good and fast enough for now
-const model = "gpt-4";
+const languageModel = "gpt-4";
+// const languageModel = "gpt-3.5-turbo";
+const imageModel = "dall-e-3";
+// const imageModel = "dall-e-2";
 
 export async function generateBackgroundImage(subject?: string, mood?: string): Promise<any> {
-  console.log(`>> services.openai.generateBackgroundImage`, { subject });
+  console.log(`>> services.openai.generateBackgroundImage`, { subject, mood });
   const imageTypes = [
     // "charcoal drawing", 
     // "pencil drawing",
@@ -36,22 +33,16 @@ export async function generateBackgroundImage(subject?: string, mood?: string): 
   // for testing
   if (process.env.OPENAI_API_KEY == "DEBUG") {
     console.warn(`>> services.openai.generateBackgroundImage: DEBUG mode: returning dummy response`);
-    // const sampleHaikus = mapToList(samples.haikus)
+    const sampleHaikus = mapToList(samples.haikus)
     const res = {
       "created": 1705515146,
       "data": [
         {
           "revised_prompt": "Create an image that uses extremely muted, almost monochromatic colors. Make the style similar to traditional Japanese artwork, with the subject matter focused on various aspects of nature. Ensure the colors used are slightly varied but maintain a consistent, subdued aesthetic.",
-          "url": "https://haiku.desmat.ca/backgrounds/DALL%C2%B7E%202024-01-15%2017.55.09%20-%20An%20extremely%20muted,%20almost%20monochromatic%20painting%20in%20the%20Japanese%20style,%20featuring%20a%20winter%20snow%20scene.%20The%20artwork%20captures%20the%20quiet%20beauty%20of%20a%20sno.png"
-          // "url": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-2MGbI0LLfEavnqcGsIgw6J4L/user-KM4FaAIbSJ6GtgT2mO363LEE/img-xbunXGE7qzyF0Bf2RW2BFiZk.png?st=2024-01-17T21%3A27%3A35Z&se=2024-01-17T23%3A27%3A35Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-01-17T19%3A18%3A49Z&ske=2024-01-18T19%3A18%3A49Z&sks=b&skv=2021-08-06&sig=Iv7zzVZ2zl8CjGxBuVNCa5xBRBQD%2B0cSBG5yf9JjtiQ%3D"
-          // url: `http://localhost:3000${encodeURI(sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].bgImage)}`,
+          // "url": "https://haiku.desmat.ca/backgrounds/DALL%C2%B7E%202024-01-15%2017.55.09%20-%20An%20extremely%20muted,%20almost%20monochromatic%20painting%20in%20the%20Japanese%20style,%20featuring%20a%20winter%20snow%20scene.%20The%20artwork%20captures%20the%20quiet%20beauty%20of%20a%20sno.png"
+          url: `http://localhost:3000${encodeURI(sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].bgImage)}`,
           // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/haiku-f98a2e55-nature.png",
           // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/45e37365-nmjxiOoeO9WKMUAkgv5tJvxdKGFNkt.png"
-          // "url": `http://localhost:3000/backgrounds/${encodeURI("DALL·E 2024-02-23 17.40.14 - An abstract painting in the Japanese style, capturing the essence of transience and vulnerability with large, expressive brush strokes. This artwork s.png")}`,
-          // "url": "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/test/The-story-behind-Fleetwood-Macs-Rumours-cover-art-hb2ZJMukxNLFE8ssP2O1qrbcQneFHi.png",
-          // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/test/michael-jackson-bad-D9MGDmFnp1KmbzhQP8YyaKVmy0kmtU.png",
-          // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/test/michael-jackson-bad%20(1)-meWyGUVGKy0Kej6Og46Pr5HIBtT9gS.png",
-          // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/test/tswift-1989-ONj0U6Xl2uk5BEJU6PsMjGZ4sVRq9G.png",
         }
       ]
     }
@@ -65,18 +56,15 @@ export async function generateBackgroundImage(subject?: string, mood?: string): 
 
   // @ts-ignore
   const response = await openai.images.generate({
-    model: "dall-e-3",
-    // model: "dall-e-2",
+    model: imageModel,
     prompt,
     n: 1,
     size: "1024x1024",
     // size: "256x256",
   });
-  // image_url = response.data.data[0].url;  
 
   try {
     console.log(">> services.openai.generateBackgroundImage RESULTS FROM API", { response });
-    console.log(">> services.openai.generateBackgroundImage RESULTS FROM API (as json)", JSON.stringify(response));
     return {
       prompt: (response.data[0]["revised_prompt"] || prompt),
       url: response.data[0].url
@@ -87,18 +75,14 @@ export async function generateBackgroundImage(subject?: string, mood?: string): 
 }
 
 export async function generateHaiku(language?: string, subject?: string, mood?: string): Promise<any> {
-  console.log(`>> services.openai.generateHaiku`, { language, subject, mood });
-  // const prompt = "age: 46; gender: male; difficulty: beginner; total length: about 45 minutes; maybe involving the following equiments or just the floor: rowing machine. " // parameters.map(([name, value]: any) => `${name}: ${value}`).join("; ");
   const prompt = `Topic: ${subject || "any"}${mood ? ` Mood: ${mood}` : ""}`;
 
-  console.log(`>> services.openai.generateHaiku`, { prompt });
-
-  // for testing
-
-  // await delay(3000);
+  console.log(`>> services.openai.generateHaiku`, { language, subject, mood, prompt });
 
   if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
     console.warn(`>> services.openai.generateHaiku: DEBUG mode: returning dummy response`);
+    // await delay(3000);
     return {
       response: {
         prompt,
@@ -106,43 +90,16 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
           "line one,",
           "line two,",
           "line three.",
-
-          // 'Moonlight on the lake',
-          // 'Soft whispers in the night air',
-          // "Nature's lullaby"
-
-          // "Un cheval s'écroule au milieu d'une allée",
-          // "Les feuilles tombent sur lui",
-          // "Notre amour frissonne",
-          // "Et le soleil aussi.",
-
-          // "Now here you go again",
-          // "You say you want your freedom",
-          // "Well, who am I to keep you down?",
-
-          // "I'm gonna make a change",
-          // "For once in my life",
-          // "It's gonna feel real good",
-          // "Gonna make a difference",
-          // "Gonna make it right",
-
-          // "I stay out too late",
-          // "Got nothing in my brain",
-          // "That's what people say, mm-mm",
-
         ],
-        // subject: "Test subject",
-        // subject: "Nature",
-        subject: subject || "any",
-        // subject: "Transience and vulnerability",
-        // subject: "fall, falling leaves, sun, alley, horse falling down"
+        subject: subject || "test subject",
+        mood: mood || "test mood",
       }
     };
   }
 
   // @ts-ignore
   const completion = await openai.chat.completions.create({
-    model,
+    model: languageModel,
     messages: [
       {
         role: 'system',
@@ -162,7 +119,6 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
     // console.log(">> services.openai.generateHaiku RESULTS FROM API", completion);
     response = JSON.parse(completion.choices[0].message.content || "{}");
     console.log(">> services.openai.generateHaiku RESULTS FROM API", { response });
-    console.log(">> services.openai.generateHaiku RESULTS FROM API (as json)", JSON.stringify(response));
     return { prompt, response };
   } catch (error) {
     console.error("Error reading results", { error, response, completion });
