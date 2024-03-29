@@ -96,8 +96,9 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     isHaikudleMode || isLyricleMode
       ? haikudleHaiku
       : haikuId && getHaiku(haikuId) || haikus[0]);
+  const userGeneratedHaiku = haiku?.createdBy == user?.id && !user?.isAdmin;
 
-    const fontColor = haiku?.color || "#555555";
+  const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
   const textStyles = [
     {
@@ -195,6 +196,8 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     if (user && (isHaikudleMode && haikudleReady || !isHaikudleMode)) {
       if (previousDailyHaikudleId && user && !user?.preferences?.onboardedPreviousDaily) {
         timeoutId = setTimeout(handleShowAboutPreviousDaily, 2000);
+      } else if (userGeneratedHaiku && user && !user?.preferences?.onboardedGenerated) {
+        timeoutId = setTimeout(handleShowAboutGenerated, 2000);
       } else if ((isHaikuMode || isHaikudleMode || isLyricleMode) && user && !user?.preferences?.onboarded) {
         timeoutId = setTimeout(handleShowAbout, 2000);
       }
@@ -204,7 +207,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       // @ts-ignore
       timeoutId && clearTimeout(timeoutId);
     }
-  }, [user, haikudleReady, previousDailyHaikudleId]);
+  }, [user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku]);
 
   const handleShowAbout = () => {
     plainAlert(
@@ -251,6 +254,21 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       ,
       {
         onDissmiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboardedPreviousDaily: true } }),
+        closeLabel: "Got it!",
+      }
+    );
+  }
+
+  const handleShowAboutGenerated = () => {
+    plainAlert(
+      `<div style="display: flex; flex-direction: column; gap: 0.4rem">
+        <div>This haiku was generated for you on the theme <i>${haiku?.theme}</i>${haiku?.mood ? ` with a <i>${haiku?.mood}</i> mood using <b>ChatGPT</b>` : ""}.</div>
+        <div>The same theme and mood were used to generate the art in the background using <b>DALL-E</b> with a curated prompt, aiming to harmonize with the haiku poem.</div>
+        <div>Curious about those prompts? See <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L106-L108" target="_blank">here</a></b> and <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L17-L31" target="_blank">here</a></b> in the source code.</b></div>
+        <div>Generated art and poems are sometimes great, sometimes not! Try the <b>✨</b> button next to the poem to regenerate.</div>
+      </div>`,
+      {
+        onDissmiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboardedGenerated: true } }),
         closeLabel: "Got it!",
       }
     );
@@ -380,7 +398,12 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         onSwitchMode={handleSwitchMode}
         onDelete={handleDelete}
         onSaveHaikudle={handleSaveHaikudle}
-        onShowAbout={previousDailyHaikudleId ? handleShowAboutPreviousDaily : handleShowAbout}
+        onShowAbout={userGeneratedHaiku
+          ? handleShowAboutGenerated
+          : previousDailyHaikudleId
+            ? handleShowAboutPreviousDaily
+            : handleShowAbout
+        }
         onSelectHaiku={handleSelectHaiku}
       />
       <HaikuPage
