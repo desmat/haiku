@@ -85,7 +85,7 @@ export async function POST(request: Request) {
   if (!user.isAdmin) {
     const { haikusCreated } = await userUsage(user);
 
-    if (haikusCreated >= USAGE_LIMIT.DAILY_CREATE_HAIKU) {
+    if (haikusCreated && haikusCreated >= USAGE_LIMIT.DAILY_CREATE_HAIKU) {
       return NextResponse.json(
         { success: false, message: 'exceeded daily limit' },
         { status: 429 }

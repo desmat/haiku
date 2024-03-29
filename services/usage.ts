@@ -29,12 +29,13 @@ export async function userUsage(user: User) {
 export async function incUserUsage(user: User, resource: string) {
   store.users.get(user.id).then((u: User | undefined) => {
     const datecode = moment().format("YYYYMMDD");
+    const val = u?.usage[datecode] && u?.usage[datecode][resource] || 0;
     const updatedUser = {
       ...(u || user),
       usage: {
         [datecode]: {
           ...u?.usage[datecode],
-          [resource]: (u?.usage[datecode][resource] || 0) + 1,
+          [resource]: val + 1,
         }
       }
     }
