@@ -18,7 +18,7 @@ export default function HaikuPuzzle({
   selectedWord: any,
   setSelectedWord: any,
 }) {
-  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { mode, haiku });
+  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { haiku });
   const [
     inProgress,
     solved,

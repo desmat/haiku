@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DragDropContext } from "@hello-pangea/dnd";
 import useHaikudle from '@/app/_hooks/haikudle';
 import useUser from "@/app/_hooks/user";
@@ -17,6 +17,7 @@ export default function HaikuPage({
   altStyles,
   regenerateHaiku,
   regenerating,
+  loading,
   refresh,
 }: {
   mode: string,
@@ -25,9 +26,10 @@ export default function HaikuPage({
   altStyles?: any[],
   regenerateHaiku?: any,
   regenerating?: boolean,
+  loading?: boolean,
   refresh?: any,
 }) {
-  // console.log('>> app._components.HaikuPage.render()', { mode, haiku, id: haiku.id });
+  console.log('>> app._components.HaikuPage.render()', { mode, haiku, id: haiku.id });
 
   const [user] = useUser((state: any) => [state.user]);
   const [
@@ -61,6 +63,7 @@ export default function HaikuPage({
     }
     : haiku;
 
+  const [_loading, setLoading] = useState(true);
 
   // TODO move to hook store
   const [selectedWord, setSelectedWord] = useState<any>();
@@ -103,16 +106,20 @@ export default function HaikuPage({
     ? inProgress.flat().length
     : inProgress.flat().filter((word: any) => word.correct).length;
   // if (numCorrectWords > 0) numCorrectWords = numCorrectWords + 1; // make the last transition more impactful
-  let blurValue = mode == "social-img-lyricle"
-    ? blurCurve[blurCurve.length - 1]
-    : solved || (!user?.isAdmin && haiku.createdBy == user?.id)
-      ? blurCurve[0]
-      : blurCurve[numWords - numCorrectWords];
-  let saturateValue = mode == "social-img-lyricle"
-    ? saturateCurve[saturateCurve.length - 1]
-    : solved || (!user?.isAdmin && haiku.createdBy == user?.id)
-      ? saturateCurve[0]
-      : saturateCurve[numWords - numCorrectWords];
+  let blurValue = loading || _loading
+    ? 8
+    : mode == "social-img-lyricle"
+      ? blurCurve[blurCurve.length - 1]
+      : solved || (!user?.isAdmin && haiku.createdBy == user?.id)
+        ? blurCurve[0]
+        : blurCurve[numWords - numCorrectWords];
+  let saturateValue = loading || _loading
+    ? 0.7
+    : mode == "social-img-lyricle"
+      ? saturateCurve[saturateCurve.length - 1]
+      : solved || (!user?.isAdmin && haiku.createdBy == user?.id)
+        ? saturateCurve[0]
+        : saturateCurve[numWords - numCorrectWords];
 
   if (typeof (blurValue) != "number") {
     blurValue = blurCurve[blurCurve.length - 1];
@@ -121,6 +128,15 @@ export default function HaikuPage({
     saturateValue = saturateCurve[saturateCurve.length - 1];
   }
   // console.log('>> app._components.HaikuPage.render()', { numWords, numCorrectWords, blurValue });
+
+  // leverage css transition
+  useEffect(() => {
+    // under normal conditions give the page a blur transition
+    // except if overwritten by param
+    if (!loading) {
+      setTimeout(() => setLoading(false), 1);
+    }
+  }, [haiku?.id]);
 
   return (
     <div>
@@ -141,16 +157,16 @@ export default function HaikuPage({
 
 
         <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-10 transition-all `}>
-          {regenerating &&
-            <div className="relative opacity-30">
+          {(regenerating || _loading) &&
+            <div className="relative opacity-50">
               <StyledLayers styles={styles}>
                 <div className="animate-pulse">
-                  Generating...
+                  Loading...
                 </div>
               </StyledLayers>
             </div>
           }
-          {!regenerating && !["social-img", "social-img-lyricle"].includes(mode) &&
+          {!regenerating && !_loading && !["social-img", "social-img-lyricle"].includes(mode) &&
             <div className="_bg-pink-200 relative">
               {notPuzzleMode &&
                 <HaikuPoem

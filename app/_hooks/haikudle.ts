@@ -379,7 +379,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
               id,
               userId: (await useUser.getState()).user.id,
             });
-            useAlert.getState().error(`Error fetching haikudle ${id}: ${res.status} (${res.statusText})`);
+            // smooth out the the alert pop-up
+            setTimeout(() => useAlert.getState().error(`Error fetching haikudle ${id}: ${res.status} (${res.statusText})`), 500)
             await get().init(notFoundHaiku, notFoundHaikudle, true);
             return resolve(res.statusText);
           }

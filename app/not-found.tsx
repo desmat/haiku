@@ -32,6 +32,7 @@ export default function NotFound({ mode, lang, onClickGenerate }: { mode: string
       filter: `drop-shadow(0px 0px 1px ${fontColor})`,
     }
   ];
+
   return (
     <div>
       <NavOverlay mode={mode} styles={textStyles} altStyles={altTextStyles} onClickGenerate={onClickGenerate} />

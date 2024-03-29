@@ -148,7 +148,8 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
               userId: (await useUser.getState()).user.id,
               id,
             });
-            useAlert.getState().error(`Error fetching haiku ${id}: ${res.status} (${res.statusText})`);
+            // smooth out the the alert pop-up
+            setTimeout(() => useAlert.getState().error(`Error fetching haiku ${id}: ${res.status} (${res.statusText})`), 500);
             return resolve(res.statusText);
           }
 
