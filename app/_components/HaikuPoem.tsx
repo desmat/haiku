@@ -8,6 +8,7 @@ import { capitalize } from "@/utils/format";
 import { User } from "@/types/User";
 import { StyledLayers } from "./StyledLayers";
 import { GenerateIcon } from "./Nav";
+import trackEvent from "@/utils/trackEvent";
 
 export default function HaikuPoem({
   user,
@@ -66,6 +67,12 @@ export default function HaikuPoem({
     doPop();
     // console.log('>> app._components.HaikuPage.handleClickHaiku()', { haikuToCopy });
     navigator.clipboard.writeText(haikuToCopy);
+
+    trackEvent("error", {
+      type: "copy-haiku",
+      userId: user.id,
+      id: haiku.id,
+    });    
   }
 
   useEffect(() => {
@@ -138,7 +145,6 @@ export default function HaikuPoem({
                 </StyledLayers>
               }
             </div>
-
           }
         </div>
       </div>

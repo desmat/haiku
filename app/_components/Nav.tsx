@@ -21,6 +21,7 @@ import { User } from '@/types/User';
 import { byCreatedAtDesc } from '@/utils/sort';
 import { USAGE_LIMIT } from '@/types/Usage';
 import { StyledLayers } from './StyledLayers';
+import trackEvent from '@/utils/trackEvent';
 
 export function Loading() {
   return (
@@ -186,6 +187,11 @@ function BottomLinks({
               setPop(true);
               setTimeout(() => setPop(false), 100);
               navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : mode == "lycicle" ? "https://lyricle.desmat.ca" : "https://haiku.desmat.ca"}/${haiku.id}`);
+              trackEvent("error", {
+                type: "share-haiku",
+                userId: user.id,
+                id: haiku.id,
+              });
             }}
           >
             <MdIosShare className="text-xl mt-[-0.1rem]" />
