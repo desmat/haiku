@@ -4,6 +4,8 @@ export type TrackingEventType =
   "haiku-created" |
   "haiku-generated" |
   "haiku-regenerated" |
+  "haiku-copied" |
+  "haiku-shared" |
   "haikudle-created" |
   "haikudle-started" |
   "haikudle-solved"

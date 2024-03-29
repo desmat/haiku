@@ -190,7 +190,7 @@ function BottomLinks({
               navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : mode == "lycicle" ? "https://lyricle.desmat.ca" : "https://haiku.desmat.ca"}/${haiku.id}`);
               alert(`Link to this haiku copied to clipboard`, { closeDelay: 750 });
               trackEvent("error", {
-                type: "share-haiku",
+                type: "haiku-shared",
                 userId: user.id,
                 id: haiku.id,
               });
