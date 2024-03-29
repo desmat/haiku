@@ -74,8 +74,7 @@ export default function HaikuPoem({
 
     alert(`Haiku poem copied to clipboard`, { closeDelay: 750 });
 
-    trackEvent("error", {
-      type: "haiku-copied",
+    trackEvent("haiku-copied", {
       userId: user.id,
       id: haiku.id,
     });    

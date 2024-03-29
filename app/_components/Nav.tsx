@@ -189,8 +189,7 @@ function BottomLinks({
               setTimeout(() => setPop(false), 100);
               navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : mode == "lycicle" ? "https://lyricle.desmat.ca" : "https://haiku.desmat.ca"}/${haiku.id}`);
               alert(`Link to this haiku copied to clipboard`, { closeDelay: 750 });
-              trackEvent("error", {
-                type: "haiku-shared",
+              trackEvent("haiku-shared", {
                 userId: user.id,
                 id: haiku.id,
               });
