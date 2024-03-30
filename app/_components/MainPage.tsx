@@ -25,10 +25,9 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   const isHaikudleMode = mode == "haikudle";
   const router = useRouter();
   let [haikuId, setHaikuId] = useState(id);
-  // console.log('>> app.MainPage.render()', { haikuId });
-
   const [generating, setGenerating] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+// console.log('>> app.MainPage.render()', { haikuId });
 
   const [
     user,
@@ -100,7 +99,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     isHaikudleMode
       ? haikudleHaiku
       : haikuId && getHaiku(haikuId));
-  // let [previousHaiku, setPreviousHaiku] = useState<Haiku | undefined>();
   const userGeneratedHaiku = haiku?.createdBy == user?.id && !user?.isAdmin;
   console.log('>> app.MainPage.render()', { haikuId, haiku_Id: haiku?.id, getHaiku: getHaiku(haikuId) });
 
@@ -140,7 +138,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   ];
 
   // console.log('>> app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
-  // console.log('>> app.MainPage.render()', { previousHaikuId: previousHaiku?.id, previousHaiku });
 
   const loadPage = async () => {
     console.log('>> app.MainPage.loadPage', { haikuId, mode, loaded, loading, user, haiku });
@@ -148,9 +145,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     // race conditions
     loading = true;
     setLoading(loading);
-
-    // previousHaiku = getHaiku(haikuId);
-    // setPreviousHaiku(previousHaiku);
 
     isHaikudleMode
       ? loadHaikudle(haikuId || { lang })
@@ -161,9 +155,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       : loadHaikus(haikuId || { random: true, lang }, mode)
         .then((haikus: Haiku | Haiku[]) => {
           console.log('>> app.MainPage.loadPage loadHaikus.then', { haikus });
-          // previousHaiku = haikus[0] || haikus; // race condition      
-          // setPreviousHaiku(previousHaiku);
-
           haiku = haikus || haikus[0];  // race condition
           haikuId = haikus.id || haikus[0]?.id || haikuId
           setHaikuId(haikuId);
@@ -183,7 +174,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
           loadHaikudle(haikuId);
         } else {
           loadHaikus(haikuId);
-          // haiku = getHaiku(haikuId);
         }
       } else if (user?.isAdmin && mode == "haiku" && haiku?.poem) {
         const syllables = haiku.poem
@@ -305,8 +295,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       : "";
 
     if (typeof (subject) == "string") {
-      // previousHaiku = haiku;
-      // setPreviousHaiku(previousHaiku);
       resetAlert();
       setGenerating(true);
       const ret = await generateHaiku(user, { lang, subject });
@@ -352,7 +340,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       router.push(`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
     }
 
-    // setPreviousHaiku(haiku);
     // resetAlert();
     setLoading(true);
     loadHaikus({ random: true, lang }, mode)
@@ -391,14 +378,12 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
 
   const handleSelectHaiku = (id: string) => {
     console.log('>> app._components.MainPage.handleSelectHaiku()', { id });
-    // setPreviousHaiku(haiku);
     setHaikuId(id);
     window.history.replaceState(null, '', `/${id}`);
   }
 
   if (!loaded || loading || generating) {
-    // using previousHaiku doesn't work given the messy load sequence
-    return <LoadingPage mode={mode} /* haiku={haiku} */ /* haiku={previousHaiku} */ />
+    return <LoadingPage mode={mode} /* haiku={haiku} */ />
   }
 
   if (loaded && !loading && !haiku) {
