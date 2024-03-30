@@ -279,18 +279,18 @@ function BottomLinks({
 
 function SidePanel({
   user,
-  haiku,
   mode,
   styles,
   altStyles,
+  bgColor,
   onShowAbout,
   onSelectHaiku,
 }: {
   user: User,
-  haiku?: Haiku,
   mode?: string
   styles: any[],
   altStyles: any[],
+  bgColor: string,
   onShowAbout?: any,
   onSelectHaiku?: any,
 }) {
@@ -310,7 +310,7 @@ function SidePanel({
     state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
   ]);
 
-  // console.log(">> app._component.Nav.render", { panelOpened, panelAnimating, dailyHaikudles });
+  // console.log(">> app._component.Nav.SidePanel.render()", { panelOpened, panelAnimating, dailyHaikudles });
 
   // TODO: move to shared lib between Nav and Layout
   const isLyricleMode = process.env.EXPERIENCE_MODE == "lyricle";
@@ -412,7 +412,7 @@ function SidePanel({
               toggleMenuOpened();
             }}
             style={{
-              filter: `drop-shadow(0px 0px 16px ${haiku?.bgColor})`,
+              filter: `drop-shadow(0px 0px 16px ${bgColor})`,
               marginRight: panelOpened ? "-0.2rem" : "-1.7rem",
               display: panelAnimating ? "none" : "block",
               transitionDuration: "80ms",
@@ -608,7 +608,7 @@ export function NavOverlay({
   const [refreshTimeout, setRefreshTimeout] = useState<any>();
   const [resetAlert, alert] = useAlert((state: any) => [state.reset, state.plain]);
 
-  // console.log(">> app._component.Nav.render", { user, mode });
+  // console.log(">> app._component.Nav.render", { mode, haikuId: haiku?.id });
 
   const switchMode = async () => {
     // console.log(">> app._component.Nav.switchMode", {});    
@@ -700,16 +700,16 @@ export function NavOverlay({
         </div>
       }
 
-      {["lyricle", "haikudle", "haiku"].includes(mode) && onClickGenerate &&
+      {["lyricle", "haikudle", "haiku"].includes(mode) && 
         <div className="fixed top-2.5 right-2.5 z-20">
-          {!user?.isAdmin && user.usage?.haikusCreated >= USAGE_LIMIT.DAILY_CREATE_HAIKU &&
+          {(!onClickGenerate || !user?.isAdmin && user.usage?.haikusCreated >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
             <div className="opacity-30" title="Exceeded daily limit: try again later">
               <StyledLayers styles={altStyles}>
                 <GenerateIcon />
               </StyledLayers>
             </div>
           }
-          {(user?.isAdmin || user.usage?.haikusCreated < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+          {onClickGenerate && (user?.isAdmin || user?.usage?.haikusCreated < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
             <div title="Generate a new haiku">
               <StyledLayers styles={altStyles}>
                 <GenerateIcon onClick={onClickGenerate} />
@@ -767,10 +767,10 @@ export function NavOverlay({
       {["haiku", "haikudle", "lyricle"].includes(mode) &&
         <SidePanel
           user={user}
-          haiku={haiku}
           mode={mode}
           styles={styles}
           altStyles={altStyles}
+          bgColor={haiku?.bgColor}
           onShowAbout={onShowAbout}
           onSelectHaiku={onSelectHaiku}
         />

@@ -5,19 +5,22 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react';
 import { syllable } from 'syllable';
 import { Haiku } from "@/types/Haiku";
-import { Loading, NavOverlay } from '@/app/_components/Nav';
+import { NavOverlay } from '@/app/_components/Nav';
 import HaikuPage from '@/app/_components/HaikuPage';
 import useAlert from '@/app/_hooks/alert';
 import useHaikus from "@/app/_hooks/haikus";
 import useHaikudle from '@/app/_hooks/haikudle';
 import useUser from '@/app/_hooks/user';
+// import LoadingPage from '@/app/_components/LoadingPage';
 import LoadingPage from '@/app/loading';
 import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
 import { Haikudle } from '@/types/Haikudle';
+import HaikudlePage from './HaikudlePage';
 
 export default function MainPage({ mode, id, lang }: { mode: string, id?: string, lang?: undefined | LanguageType }) {
-  // console.log('>> app.MainPage.render()', { mode, id, lang });
+  console.log('>> app.MainPage.render()', { mode, id, lang });
+
   const isHaikuMode = mode == "haiku";
   const isHaikudleMode = mode == "haikudle";
   const isLyricleMode = mode == "lyricle";
@@ -53,7 +56,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   const [
     haikusLoaded,
     loadHaikus,
-    haikus,
     getHaiku,
     generateHaiku,
     regenerateHaiku,
@@ -62,7 +64,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   ] = useHaikus((state: any) => [
     state.loaded(haikuId || { random: true, lang }),
     state.load,
-    state.find({ lang }),
     state.get,
     state.generate,
     state.regenerate,
@@ -80,6 +81,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     haikudleInProgress,
     previousDailyHaikudleId,
     nextDailyHaikudleId,
+    haikudleSolved,
   ] = useHaikudle((state: any) => [
     state.ready,
     state.loaded(haikuId || { lang }),
@@ -90,16 +92,23 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     state.inProgress,
     state.previousDailyHaikudleId,
     state.nextDailyHaikudleId,
+    state.solved,
   ]);
 
   let [loading, setLoading] = useState(false);
   const loaded = isHaikudleMode || isLyricleMode ? haikudleLoaded : haikusLoaded;
-  const haiku = !loading && (
+  let haiku = !loading && (
     isHaikudleMode || isLyricleMode
       ? haikudleHaiku
-      : haikuId && getHaiku(haikuId) || haikus[0]);
-  // let [previousHaiku, setPreviousHaiku] = useState<Haiku | undefined>(haiku);
+      : haikuId && getHaiku(haikuId));
+  // let [previousHaiku, setPreviousHaiku] = useState<Haiku | undefined>();
   const userGeneratedHaiku = haiku?.createdBy == user?.id && !user?.isAdmin;
+  console.log('>> app.MainPage.render()', { haikuId, haiku_Id: haiku?.id, getHaiku: getHaiku(haikuId) });
+
+  const notPuzzleMode = !(isHaikudleMode || isLyricleMode)
+    || ((isHaikudleMode || isLyricleMode) && haikudleSolved)
+    || ((isHaikudleMode || isLyricleMode) && previousDailyHaikudleId && !user.isAdmin)
+    || ((isHaikudleMode || isLyricleMode) && haiku?.createdBy == user?.id && !user?.isAdmin)
 
   const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
@@ -131,7 +140,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
   ];
 
-  console.log('>> app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
+  // console.log('>> app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
   // console.log('>> app.MainPage.render()', { previousHaikuId: previousHaiku?.id, previousHaiku });
 
   // useEffect(() => {
@@ -143,12 +152,13 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   // }, [mode]);
 
   const loadPage = async () => {
-    // console.log('>> app.MainPage.loadPage', { haikuId, mode, loaded, loading, user, haiku });
+    console.log('>> app.MainPage.loadPage', { haikuId, mode, loaded, loading, user, haiku });
 
     // race conditions
-    setLoading(true);
     loading = true;
-    // previousHaiku = await getHaiku(haikuId);
+    setLoading(loading);
+
+    // previousHaiku = getHaiku(haikuId);
     // setPreviousHaiku(previousHaiku);
 
     isHaikudleMode || isLyricleMode
@@ -160,52 +170,61 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       : loadHaikus(haikuId || { random: true, lang }, mode)
         .then((haikus: Haiku | Haiku[]) => {
           console.log('>> app.MainPage.loadPage loadHaikus.then', { haikus });
-          setHaikuId(haikus.id || haikus[0]?.id || haikuId);
-          loading = false; // race condition
-          setLoading(loading);
           // previousHaiku = haikus[0] || haikus; // race condition      
           // setPreviousHaiku(previousHaiku);
+
+          haiku = haikus || haikus[0];  // race condition
+          haikuId = haikus.id || haikus[0]?.id || haikuId
+          setHaikuId(haikuId);
+          loading = false; // race condition
+          setLoading(loading);
         });
   }
 
   useEffect(() => {
-    // console.log('>> app.page useEffect [haikuId, lang, mode]', { haikuId, mode, loaded, loading, user, haiku });
-    if (!loaded && !loading) {
-      loadPage();
-    }
-  }, [haikuId, lang, mode]);
+    console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded]', { haikuId, haiku_id: haiku?.id, loading, loaded });
+    if (!loading) {
+      if (!loaded || !haiku) {
+        loadPage();
+      } else if (haikuId != haiku?.id) {
+        console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded]', { getHaiku: getHaiku(haikuId) });
+        if (isHaikudleMode || isLyricleMode) {
+          loadHaikudle(haikuId);
+        } else {
+          loadHaikus(haikuId);
+          // haiku = getHaiku(haikuId);
+        }
+      } else if (user?.isAdmin && mode == "haiku" && haiku?.poem) {
+        const syllables = haiku.poem
+          .map((line: string) => line.split(/\s/)
+            .map((word: string) => syllable(word))
+            .reduce((a: number, v: number) => a + v, 0))
+        const isCorrect = syllables[0] == 5 && syllables[1] == 7 && syllables[2] == 5
+        // console.log(">> app.page useEffect [haiku, loading, loaded]", { syllables });
 
-  useEffect(() => {
-    // console.log('>> app.page useEffect [haiku, loading, loaded]', { haikuId, mode, loaded, loading, user, haiku });
-    if (loaded && !loading && haiku && mode == "haiku") {
-      const syllables = haiku.poem
-        .map((line: string) => line.split(/\s/)
-          .map((word: string) => syllable(word))
-          .reduce((a: number, v: number) => a + v, 0))
-      const isCorrect = syllables[0] == 5 && syllables[1] == 7 && syllables[2] == 5
-      // console.log(">> app.page useEffect [haiku, loading, loaded]", { syllables });
+        // TODO UN-CRIPPLE
+        // if (user.isAdmin && haiku.status == "created" && !isCorrect) {
+        //   warningAlert(
+        //     `This haiku doesn't follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`,
+        //     {
+        //       closeDelay: 3000
+        //     }
+        //   );
+        //   return;
+        // }
 
-      if (user.isAdmin && haiku.status == "created" && !isCorrect) {
-        warningAlert(
-          `This haiku doesn't follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`,
-          {
-            closeDelay: 3000
-          }
-        );
-        return;
+        // if (user.isAdmin && haiku.dailyHaikudleId) {
+        //   infoAlert(
+        //     `This haiku was previously featured as a daily haikudle: ${haiku.dailyHaikudleId}`,
+        //     {
+        //       closeDelay: 3000
+        //     }
+        //   );
+        //   return;
+        // }
       }
-
-      if (user.isAdmin && haiku.dailyHaikudleId) {
-        infoAlert(
-          `This haiku was previously featured as a daily haikudle: ${haiku.dailyHaikudleId}`,
-          {
-            closeDelay: 3000
-          }
-        );
-        return;
-      }
     }
-  }, [haiku, loaded, loading]);
+  }, [haikuId, haiku?.id, loading, loaded]);
 
   useEffect(() => {
     // @ts-ignore
@@ -300,14 +319,17 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       : "";
 
     if (typeof (subject) == "string") {
+      // previousHaiku = haiku;
+      // setPreviousHaiku(previousHaiku);
       resetAlert();
       setGenerating(true);
       const ret = await generateHaiku(user, { lang, subject });
-      // console.log('>> app.page.handleGenerate()', { ret });
+      console.log('>> app.page.handleGenerate()', { ret });
 
       if (ret?.id) {
         // router.push(`/?id=${ret.id}`);
-        setHaikuId(ret.id);
+        haikuId = ret.id
+        setHaikuId(haikuId);
         setGenerating(false);
         incUserUsage(user, "haikusCreated");
       }
@@ -318,7 +340,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     // console.log('>> app.page.handleRegenerateHaiku()');
     e.preventDefault();
 
-    if (user?.isAdmin || haiku.createdBy == user.id) {
+    if (user?.isAdmin || haiku?.createdBy == user.id) {
       resetAlert();
       setRegenerating(true);
       const ret = await regenerateHaiku(user, haiku);
@@ -329,7 +351,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   }
 
   const handleRefresh = (e?: any) => {
-    // console.log('>> app.page.handleRefresh()', {  });
+    console.log('>> app.page.handleRefresh()', {});
     e && e.preventDefault();
 
     if (isHaikudleMode && !user.isAdmin) {
@@ -344,15 +366,17 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       router.push(`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
     }
 
-    resetAlert();
+    // setPreviousHaiku(haiku);
+    // resetAlert();
     setLoading(true);
     loadHaikus({ random: true, lang }, mode)
-      .then((haikus: Haiku[]) => {
+      .then((haikus: Haiku | Haiku[]) => {
+        console.log('>> app.page.handleRefresh() loadHaikus.then', { haikus });
         setLoading(false);
-        if (isHaikudleMode || isLyricleMode && haikus?.length > 0) {
-          loadHaikudle(haikus[0]?.id || { lang });
-          setHaikuId(haikus[0].id);
-        }
+        setHaikuId(haikus.id || haikus[0]?.id || haikuId);
+        // if ((isHaikudleMode || isLyricleMode) && haikus?.length > 0) {
+        //   loadHaikudle(haikus.id || haikus[0]?.id || haikuId || { lang });
+        // }
       });
   }
 
@@ -384,13 +408,14 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
 
   const handleSelectHaiku = (id: string) => {
     console.log('>> app._components.MainPage.handleSelectHaiku()', { id });
-    setHaikuId(id);
+    // setPreviousHaiku(haiku);
+    // setHaikuId(id);
     window.history.replaceState(null, '', `/${id}`);
   }
 
   if (!loaded || loading || generating) {
     // using previousHaiku doesn't work given the messy load sequence
-    return <LoadingPage mode={mode} /* haiku={previousHaiku} */ />
+    return <LoadingPage mode={mode} /* haiku={haiku} */ /* haiku={previousHaiku} */ />
   }
 
   if (loaded && !loading && !haiku) {
@@ -419,16 +444,34 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         }
         onSelectHaiku={handleSelectHaiku}
       />
-      <HaikuPage
-        mode={mode}
-        haiku={haiku}
-        // haikus={haikus}
-        styles={textStyles}
-        altStyles={altTextStyles}
-        regenerateHaiku={(user.isAdmin || haiku.createdBy == user.id) && handleRegenerateHaiku}
-        regenerating={regenerating}
-        refresh={handleRefresh}
-      />
+      {notPuzzleMode &&
+        <HaikuPage
+          mode={mode}
+          haiku={haikudleSolved ?
+            {
+              ...haiku,
+              poem: haikudleInProgress
+                .map((line: any) => line
+                  .map((word: any) => word.word)
+                  .join(" "))
+            }
+            : haiku}
+          styles={textStyles}
+          altStyles={altTextStyles}
+          popPoem={haikudleSolved}
+          regenerateHaiku={(user.isAdmin || haiku?.createdBy == user.id) && handleRegenerateHaiku}
+          regenerating={regenerating}
+          refresh={handleRefresh}
+        />
+      }
+      {!notPuzzleMode &&
+        <HaikudlePage
+          mode={mode}
+          haiku={haiku}
+          styles={textStyles}
+          regenerating={regenerating}
+        />
+      }
     </div>
   )
 }

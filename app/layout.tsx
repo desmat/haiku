@@ -74,6 +74,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // console.log('>> app.layout.render()', {});
 
   return (
     <html lang="en">
@@ -94,9 +95,9 @@ export default function RootLayout({
             {children}
           </div>
         </div>
+        <Analytics />
+        <Alert />
       </body>
-      <Analytics />
-      <Alert />
     </html>
   )
 }
