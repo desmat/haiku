@@ -142,14 +142,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   // console.log('>> app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
   // console.log('>> app.MainPage.render()', { previousHaikuId: previousHaiku?.id, previousHaiku });
 
-  // useEffect(() => {
-  //   console.log('>> app.page useEffect (initial)', { haikuId, mode, loaded, loading, user, haiku });
-  // }, []);
-
-  // useEffect(() => {
-  //   console.log('>> app.page useEffect (mode)', { haikuId, mode, loaded, loading, user, haiku });
-  // }, [mode]);
-
   const loadPage = async () => {
     console.log('>> app.MainPage.loadPage', { haikuId, mode, loaded, loading, user, haiku });
 
@@ -400,7 +392,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   const handleSelectHaiku = (id: string) => {
     console.log('>> app._components.MainPage.handleSelectHaiku()', { id });
     // setPreviousHaiku(haiku);
-    // setHaikuId(id);
+    setHaikuId(id);
     window.history.replaceState(null, '', `/${id}`);
   }
 
