@@ -41,7 +41,7 @@ export default function HaikuPage({
     // under normal conditions give the page a blur transition
     // except if overwritten by param
     if (!loading) {
-      setTimeout(() => setLoading(false), 1);
+      setTimeout(() => setLoading(false), 100);
     }
   }, [haiku?.id]);
 
@@ -58,7 +58,7 @@ export default function HaikuPage({
         }}
       />
       <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-10 transition-all `}>
-        {(regenerating || _loading) &&
+        {(regenerating || loading) &&
           <div className="relative opacity-50">
             <StyledLayers styles={styles}>
               <div className="animate-pulse">
@@ -67,7 +67,7 @@ export default function HaikuPage({
             </StyledLayers>
           </div>
         }
-        {!regenerating && !_loading &&
+        {!regenerating && !loading &&
           <div className="_bg-pink-200 relative">
             <HaikuPoem
               user={user}

@@ -5,14 +5,12 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react';
 import { syllable } from 'syllable';
 import { Haiku } from "@/types/Haiku";
-import { NavOverlay } from '@/app/_components/Nav';
+import { Loading, NavOverlay } from '@/app/_components/Nav';
 import HaikuPage from '@/app/_components/HaikuPage';
 import useAlert from '@/app/_hooks/alert';
 import useHaikus from "@/app/_hooks/haikus";
 import useHaikudle from '@/app/_hooks/haikudle';
 import useUser from '@/app/_hooks/user';
-// import LoadingPage from '@/app/_components/LoadingPage';
-import LoadingPage from '@/app/loading';
 import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
 import { Haikudle } from '@/types/Haikudle';
@@ -27,7 +25,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   let [haikuId, setHaikuId] = useState(id);
   const [generating, setGenerating] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
-// console.log('>> app.MainPage.render()', { haikuId });
+  // console.log('>> app.MainPage.render()', { haikuId });
 
   const [
     user,
@@ -166,7 +164,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   useEffect(() => {
     console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded]', { haikuId, haiku_id: haiku?.id, loading, loaded });
     if (!loading) {
-      if (!loaded || !haiku) {
+      if (!loaded /*|| !haiku */) {
         loadPage();
       } else if (haikuId != haiku?.id) {
         console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded]', { getHaiku: getHaiku(haikuId) });
@@ -383,7 +381,14 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   }
 
   if (!loaded || loading || generating) {
-    return <LoadingPage mode={mode} /* haiku={haiku} */ />
+    // return <LoadingPage mode={mode} /* haiku={haiku} */ />
+    return (
+      <div>
+        <NavOverlay mode={mode} styles={textStyles} altStyles={altTextStyles} />
+        <Loading />
+        {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}
+      </div>
+    )
   }
 
   if (loaded && !loading && !haiku) {
@@ -426,8 +431,8 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
             : haiku}
           styles={textStyles}
           altStyles={altTextStyles}
-          popPoem={haikudleSolved}
-          regenerateHaiku={(user.isAdmin || haiku?.createdBy == user.id) && handleRegenerateHaiku}
+          popPoem={isHaikudleMode && haikudleSolved}
+          regenerateHaiku={(user?.isAdmin || haiku?.createdBy == user?.id) && handleRegenerateHaiku}
           regenerating={regenerating}
           refresh={handleRefresh}
         />
