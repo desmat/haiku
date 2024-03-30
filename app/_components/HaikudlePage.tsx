@@ -42,13 +42,8 @@ export default function HaikudlePage({
 
   console.log('>> app._components.HaikudlePage.render()', { solved, haiku, inProgress });
 
-  const blurCurve = ["lyricle", "social-img-lyricle"].includes(mode)
-    ? [0, 1, 2.5, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
-    : [0, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10];
-
-  const saturateCurve = ["lyricle", "social-img-lyricle"].includes(mode)
-    ? [0.8, 1, 1.2, 1.3, 1.35, 1.45, 1.5, 1.55, 1.6]
-    : [1];
+  const blurCurve = [0, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10];
+  const saturateCurve = [1];
 
   const numWords = inProgress.flat().length;
   let numCorrectWords = previousDailyHaikudleId
@@ -56,16 +51,12 @@ export default function HaikudlePage({
     : inProgress.flat().filter((word: any) => word?.correct).length;
   // if (numCorrectWords > 0) numCorrectWords = numCorrectWords + 1; // make the last transition more impactful
   let blurValue =
-    mode == "social-img-lyricle"
-      ? blurCurve[blurCurve.length - 1]
-      : solved || (!user?.isAdmin && haiku.createdBy == user?.id)
-        ? blurCurve[0]
-        : blurCurve[numWords - numCorrectWords];
-  let saturateValue = mode == "social-img-lyricle"
-    ? saturateCurve[saturateCurve.length - 1]
-    : solved || (!user?.isAdmin && haiku.createdBy == user?.id)
-      ? saturateCurve[0]
-      : saturateCurve[numWords - numCorrectWords];
+    solved || (!user?.isAdmin && haiku.createdBy == user?.id)
+      ? blurCurve[0]
+      : blurCurve[numWords - numCorrectWords];
+  let saturateValue = solved || (!user?.isAdmin && haiku.createdBy == user?.id)
+    ? saturateCurve[0]
+    : saturateCurve[numWords - numCorrectWords];
 
   if (typeof (blurValue) != "number") {
     blurValue = blurCurve[blurCurve.length - 1];
@@ -127,7 +118,7 @@ export default function HaikudlePage({
               </StyledLayers>
             </div>
           }
-          {!regenerating && !["social-img", "social-img-lyricle"].includes(mode) &&
+          {!regenerating &&
             <div className="_bg-pink-200 relative">
               <HaikuPuzzle
                 haiku={haiku}

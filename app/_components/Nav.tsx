@@ -64,40 +64,6 @@ export function Logo({ mode, href, onClick, styles, altStyles }: { mode: string,
   )
 }
 
-export function LyricleLogo({ mode, href, onClick, styles, altStyles }: { mode: string, href?: string, onClick?: any, styles?: any, altStyles?: any }) {
-  const isSocialImgMode = mode == "social-img-lyricle";
-  const isLyricleMode = mode == "lyricle";
-
-  const ai = (
-    <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode ? "text-[80pt]" : "text-[22pt] md:text-[28pt]"} font-semibold`}>
-      le
-    </span>
-  );
-
-  const styledAi = altStyles
-    ? (
-      <StyledLayers styles={altStyles}>
-        {(isLyricleMode || isSocialImgMode) && ai}
-      </StyledLayers>
-    )
-    : (
-      <div>{(isLyricleMode || isSocialImgMode) && ai}</div>
-    );
-
-  return (
-    <Link
-      onClick={onClick}
-      href={href || "#"}
-      className={`hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
-    >
-      <div className={`${font.architects_daughter.className} flex flex-row`}>
-        <StyledLayers styles={styles}>{`Lyric${isLyricleMode || isSocialImgMode ? "" : "s"}`}</StyledLayers>
-        {styledAi}
-      </div>
-    </Link>
-  )
-}
-
 export function GenerateIcon({ onClick, sizeOverwrite }: { onClick?: any, sizeOverwrite?: string }) {
   const icon = <IoSparkles className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />;
   if (!onClick) {
@@ -187,7 +153,7 @@ function BottomLinks({
               e.preventDefault();
               setPop(true);
               setTimeout(() => setPop(false), 100);
-              navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : mode == "lycicle" ? "https://lyricle.desmat.ca" : "https://haiku.desmat.ca"}/${haiku.id}`);
+              navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : "https://haiku.desmat.ca"}/${haiku.id}`);
               alert(`Link to this haiku copied to clipboard`, { closeDelay: 750 });
               trackEvent("haiku-shared", {
                 userId: user.id,
@@ -223,7 +189,7 @@ function BottomLinks({
             <MdDelete className="text-xl" />
           </Link>
         }
-        {["lyricle", "haikudle"].includes(mode) && user?.isAdmin &&
+        {["haikudle"].includes(mode) && user?.isAdmin &&
           <Link
             key="saveHaikudle"
             href="#"
@@ -236,18 +202,18 @@ function BottomLinks({
         {mode != "social-img" && user?.isAdmin &&
           <Link
             key="changeMode"
-            href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : mode == "haikudle" ? "haiku" : mode == "lyricle" ? "lyrics" : "lyricle"}`}
+            href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`}
             title="Switch between haiku/haikudle mode"
             onClick={async (e: any) => {
               e.preventDefault();
               await onSwitchMode();
-              router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : mode == "haikudle" ? "haiku" : mode == "lyricle" ? "lyrics" : "lyricle"}`);
+              router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
             }}
           >
             <TbSwitchVertical className="text-xl" />
           </Link>
         }
-        {!["social-img", "social-img-lyricle"].includes(mode) && user?.isAdmin &&
+        {!["social-img"].includes(mode) && user?.isAdmin &&
           <Link
             key="socialImgMode"
             href={`/${haiku ? haiku?.id : ""}?mode=showcase`}
@@ -262,7 +228,8 @@ function BottomLinks({
           </Link>
         }
       </div>
-      {mode == "haiku" &&
+      {
+        mode == "haiku" &&
         Object.entries(supportedLanguages)
           .filter((e: any) => (!lang && e[0] != "en") || (lang && lang != e[0]))
           .map(([k, v]: any) => (
@@ -272,8 +239,9 @@ function BottomLinks({
             >
               {v.nativeName}
             </Link>
-          ))}
-    </div>
+          ))
+      }
+    </div >
   )
 }
 
@@ -313,16 +281,11 @@ function SidePanel({
   // console.log(">> app._component.Nav.SidePanel.render()", { panelOpened, panelAnimating, dailyHaikudles });
 
   // TODO: move to shared lib between Nav and Layout
-  const isLyricleMode = process.env.EXPERIENCE_MODE == "lyricle";
   const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
-  const appDescription = isLyricleMode
-    ? "Daily lyric puzzles"
-    : isHaikudleMode
-      ? "AI-generated daily art and haiku puzzles"
-      : "AI-generated art and haiku poems";
-  const thingName = isLyricleMode
-    ? "lyricle"
-    : "haiku";
+  const appDescription = isHaikudleMode
+    ? "AI-generated daily art and haiku puzzles"
+    : "AI-generated art and haiku poems";
+  const thingName = "haiku";
 
   // console.log(">> app._component.SidePanel.render", { user, mode });
 
@@ -360,7 +323,7 @@ function SidePanel({
 
   useEffect(() => {
     console.log(">> app._component.Nav.useEffect", { user, mode });
-    if (user?.id && ["haiku", "haikudle", "lyrics", "lyricle"].includes(mode || "")) {
+    if (user?.id && ["haiku", "haikudle"].includes(mode || "")) {
       loadHaikus({ /* createdBy: user.id */ mine: true }, mode);
     }
   }, [user?.id]);
@@ -619,7 +582,7 @@ export function NavOverlay({
   const handleKeyDown = async (e: any) => {
     // console.log(">> app._component.Nav.handleKeyDown", { mode });
     if (e.key == "Escape") {
-      if (["showcase", "social-img", "social-img-lyricle"].includes(mode)) {
+      if (["showcase", "social-img"].includes(mode)) {
         switchMode();
       }
     }
@@ -685,22 +648,7 @@ export function NavOverlay({
           />
         </div>
       }
-      {["lyrics", "lyricle"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-30`}>
-          <LyricleLogo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
-        </div>
-      }
-      {mode == "social-img-lyricle" &&
-        <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}>
-          <LyricleLogo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} />
-          <div
-            className="_bg-pink-400 _opacity-50 fixed top-0 left-0 w-full h-full cursor-pointer"
-            onClick={switchMode}
-          />
-        </div>
-      }
-
-      {["lyricle", "haikudle", "haiku"].includes(mode) && 
+      {["haikudle", "haiku"].includes(mode) &&
         <div className="fixed top-2.5 right-2.5 z-20">
           {(!onClickGenerate || !user?.isAdmin && user.usage?.haikusCreated >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
             <div className="opacity-30" title="Exceeded daily limit: try again later">
@@ -727,7 +675,7 @@ export function NavOverlay({
         }}
       />
 
-      {["haiku", "haikudle", "lyricle"].includes(mode) &&
+      {["haiku", "haikudle"].includes(mode) &&
         <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
           <StyledLayers styles={styles}>
             <BottomLinks
@@ -744,7 +692,7 @@ export function NavOverlay({
         </div>
       }
 
-      {["showcase", "social-img", "social-img-lyricle"].includes(mode) &&
+      {["showcase", "social-img"].includes(mode) &&
         <>
           <div
             className="_bg-pink-400 fixed top-0 left-0 w-10 h-full z-10 cursor-pointer"
@@ -764,7 +712,7 @@ export function NavOverlay({
         </>
       }
 
-      {["haiku", "haikudle", "lyricle"].includes(mode) &&
+      {["haiku", "haikudle"].includes(mode) &&
         <SidePanel
           user={user}
           mode={mode}

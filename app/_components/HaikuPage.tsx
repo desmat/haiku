@@ -67,7 +67,7 @@ export default function HaikuPage({
             </StyledLayers>
           </div>
         }
-        {!regenerating && !_loading && !["social-img", "social-img-lyricle"].includes(mode) &&
+        {!regenerating && !_loading &&
           <div className="_bg-pink-200 relative">
             <HaikuPoem
               user={user}

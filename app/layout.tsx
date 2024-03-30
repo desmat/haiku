@@ -6,27 +6,20 @@ import Alert from '@/app/_components/Alert';
 import type { Viewport } from 'next'
 import moment from 'moment';
 
-const isLyricleMode = process.env.EXPERIENCE_MODE == "lyricle";
 const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 const inter = Inter({ subsets: ['latin'] });
 
-const appName = isLyricleMode
-  ? "Lyricle"
-  : isHaikudleMode
-    ? "hAIkudle"
-    : "hAIku";
+const appName = isHaikudleMode
+  ? "hAIkudle"
+  : "hAIku";
 
-const appDescription = isLyricleMode
-  ? "Daily lyric puzzles"
-  : isHaikudleMode
-    ? "AI-generated art and daily haiku puzzles"
-    : "AI-generated art and haiku poems";
+const appDescription = isHaikudleMode
+  ? "AI-generated art and daily haiku puzzles"
+  : "AI-generated art and haiku poems";
 
-const metaUrl = isLyricleMode
-  ? "https://lyricle.desmat.ca/"
-  : isHaikudleMode
-    ? "https://haikudle.art/"
-    : "https://haiku.desmat.ca/";
+const metaUrl = isHaikudleMode
+  ? "https://haikudle.art/"
+  : "https://haiku.desmat.ca/";
 
 let metaImages: string[];
 
@@ -44,11 +37,6 @@ if (isHaikudleMode) {
     `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${moment().format("YYYYMMDD")}.png`,
     `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${dateCode}.png`,
     "https://haikudle.art/social_img_haikudle.png",
-  ];
-} else if (isLyricleMode) {
-  metaImages = [
-    `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_lyrics/${moment().format("YYYYMMDD")}.png`,
-    "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_lyrics/default.png",
   ];
 } else {
   metaImages = [
