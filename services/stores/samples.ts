@@ -2,8 +2,8 @@ import { Haiku } from "@/types/Haiku";
 
 export const notFoundHaiku = {
   id: "404notfound",
-  theme: "not finding what you wanted",
-  bgImage: "/backgrounds/DALL·E 2024-01-17 11.32.41 - An extremely muted, almost monochromatic painting in the Japanese style, depicting the concept of emptiness. The artwork captures a minimalist landsca.png",
+  theme: "404 not found",
+  bgImage: "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/haiku-404notfound-md.png",
   color: "#4a5247",
   bgColor: "#ffffff",
   colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
@@ -12,6 +12,26 @@ export const notFoundHaiku = {
     "'404 Not Found' echoes,",
     "Lost in digital.",
   ],
+}
+
+export const loadingHaiku = {
+  "updatedBy": "4a2d28ad",
+  "createdAt": 1711812467761,
+  "status": "created",
+  "mood": "Anticipation",
+  "bgColor": "#ffffff",
+  "color": "#161618",
+  "colorPalette": ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
+  "lang": "en",
+  "poem": [
+    "Dots spin round and round,",
+    "Uploaded world takes its time,",
+    "Screen blinks, game is found,"],
+  "theme": "Loading screen",
+  "bgImage": "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/haiku-404notfound-md.png",
+  "id": "e5ac5085",
+  "createdBy": "4a2d28ad",
+  "updatedAt": 1711812547206
 }
 
 export const notFoundHaikudle = {

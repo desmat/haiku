@@ -1,6 +1,6 @@
 import HaikuPage from "@/app/_components/HaikuPage";
 import { NavOverlay } from "@/app/_components/Nav";
-import { notFoundHaiku } from "@/services/stores/samples";
+import { loadingHaiku } from "@/services/stores/samples";
 import { Haiku } from "@/types/Haiku";
 
 export default async function LoadingPage({
@@ -41,7 +41,7 @@ export default async function LoadingPage({
   return (
     <div>
       {/* <NavOverlay mode={_mode} styles={textStyles} altStyles={altTextStyles} /> */}
-      <HaikuPage mode={_mode} loading={true} haiku={haiku || notFoundHaiku} styles={textStyles} />      
+      <HaikuPage mode={_mode} loading={true} haiku={haiku || loadingHaiku} styles={textStyles} />      
     </div>
   )
 }
