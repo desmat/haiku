@@ -88,10 +88,6 @@ const initialState = {
   // access via get(id) or find(query?)
   _haikudles: <HaikudleMap>{},
 
-  // TODO maybe remove this 
-  // to smooth out UX when deleting,
-  _deleted: <StatusMap>{},
-
   // access via loaded(queryOrId?),
   // stored as id->bool or query->bool, 
   // where id refers to the loaded haiku 

@@ -303,6 +303,8 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         haikuId = ret.id
         setHaikuId(haikuId);
         setGenerating(false);
+        setHaikuId(haikuId);
+        window.history.replaceState(null, '', `/${haikuId}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
         incUserUsage(user, "haikusCreated");
       }
     }
@@ -327,7 +329,8 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     e && e.preventDefault();
 
     if (isHaikudleMode && !user.isAdmin) {
-      router.push("/");
+      // router.push("/");
+      window.history.replaceState(null, '', `/`);
       setHaikuId(undefined);
       haikuId = undefined;
       loadPage();
@@ -335,16 +338,20 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
 
     if (haikuId) {
-      router.push(`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
+      // router.push(`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
+      window.history.replaceState(null, '', `/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
     }
 
     // resetAlert();
+    loading = true;
     setLoading(true);
     loadHaikus({ random: true, lang }, mode)
       .then((haikus: Haiku | Haiku[]) => {
         console.log('>> app.page.handleRefresh() loadHaikus.then', { haikus });
         setLoading(false);
-        setHaikuId(haikus.id || haikus[0]?.id || haikuId);
+        haikuId = haikus.id || haikus[0]?.id || haikuId
+        setHaikuId(haikuId);
+        window.history.replaceState(null, '', `/${haikuId}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
       });
   }
 
@@ -356,8 +363,12 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   };
 
   const handleDelete = async () => {
-    if (confirm("Delete this Haiku?")) {
-      await deleteHaiku(haiku?.id);
+    // console.log('>> app.page.handleDelete()', {});
+    if (haiku?.id && confirm("Delete this Haiku?")) {
+      // router.push("/"); // not sure why this doesn't work here
+                           // probably because we're mixing router.push and window.history.replaceState
+      window.history.replaceState(null, '', `/`);
+      deleteHaiku(haiku.id); // don't wait
       handleRefresh();
     }
   }
@@ -385,7 +396,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     // return <LoadingPage mode={mode} /* haiku={haiku} */ />
     return (
       <div>
-        <NavOverlay mode={mode} styles={textStyles} altStyles={altTextStyles} />
+        <NavOverlay mode={mode} styles={textStyles} altStyles={altTextStyles} onClickLogo={handleRefresh} />
         <Loading />
         {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}
       </div>
@@ -393,7 +404,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   }
 
   if (loaded && !loading && !haiku) {
-    return <NotFound mode={mode} lang={lang} onClickGenerate={handleGenerate} />
+    return <NotFound mode={mode} lang={lang} onClickGenerate={handleGenerate} onClickLogo={handleRefresh} />
   }
 
   return (

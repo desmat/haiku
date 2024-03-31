@@ -270,15 +270,16 @@ function SidePanel({
   const [listMode, setListMode] = useState<"haiku" | "dailyHaikudle">("haiku");
   const [
     loadHaikus,
-    myHaikus,
+    userHaikus,
     dailyHaikudles,
   ] = useHaikus((state: any) => [
     state.load,
-    state.myHaikus ? Object.values(state.myHaikus) : [],
+    state.userHaikus ? Object.values(state.userHaikus) : [],
     state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
   ]);
 
-  // console.log(">> app._component.Nav.SidePanel.render()", { panelOpened, panelAnimating, dailyHaikudles });
+  console.log(">> app._component.Nav.SidePanel.render()", { panelOpened, panelAnimating, dailyHaikudles, userHaikus });
+  console.log(">> app._component.Nav.SidePanel.render()", { userHaikus: userHaikus?.length });
 
   // TODO: move to shared lib between Nav and Layout
   const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
@@ -324,7 +325,7 @@ function SidePanel({
   useEffect(() => {
     console.log(">> app._component.Nav.useEffect", { user, mode });
     if (user?.id && ["haiku", "haikudle"].includes(mode || "")) {
-      loadHaikus({ /* createdBy: user.id */ mine: true }, mode);
+      loadHaikus({ mine: true }, mode);
     }
   }, [user?.id]);
 
@@ -337,7 +338,7 @@ function SidePanel({
     }
   }, []);
 
-  if (!myHaikus.length) {
+  if (!userHaikus.length) {
     return <></>
   }
 
@@ -430,7 +431,7 @@ function SidePanel({
               </StyledLayers>
             </div>
             {/* note: don't render when not opened to save on resources */}
-            {listMode == "haiku" && (panelAnimating || panelOpened) && myHaikus
+            {listMode == "haiku" && (panelAnimating || panelOpened) && userHaikus
               // .filter((h: Haiku) => h.createdBy == user.id)
               .sort(user.isAdmin ? byCreatedAtDesc : bySolvedOrCreatedAtDesc)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
@@ -482,7 +483,7 @@ function SidePanel({
                 </StyledLayers>
               ))
             }
-            {(listMode == "haiku" ? myHaikus : dailyHaikudles) && (Object.values(listMode == "haiku" ? myHaikus : dailyHaikudles).length > numPages * pageSize) &&
+            {(listMode == "haiku" ? userHaikus : dailyHaikudles) && (Object.values(listMode == "haiku" ? userHaikus : dailyHaikudles).length > numPages * pageSize) &&
               <div
                 className="py-2 cursor-pointer"
                 onClick={loadMore}

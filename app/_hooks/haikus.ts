@@ -34,7 +34,7 @@ const initialState = {
   // list of haikus
   _loaded: <StatusMap>{},
 
-  myhaikus: <HaikuMap>{},
+  userHaikus: <HaikuMap>{},
   dailyHaikudles: <any>{},
 }
 
@@ -188,7 +188,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
             // special case: these were partially loaded for the side bar: don't setLoaded
             set({
               mode: mode || _mode,
-              myHaikus: listToMap(haikus),
+              userHaikus: listToMap(haikus),
               dailyHaikudles: data.dailyHaikudles && listToMap(data.dailyHaikudles),
             });
           } else {
@@ -448,13 +448,13 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   delete: async (id: string) => {
-    // console.log(">> hooks.haiku.delete id:", id);
+    console.log(">> hooks.haiku.delete id:", id);
 
     if (!id) {
       throw `Cannot delete haiku with null id`;
     }
 
-    const { _haikus, _deleted, get: _get } = get();
+    const { _haikus, _deleted, userHaikus, get: _get } = get();
     const deleting = _get(id);
 
     if (!deleting) {
@@ -466,37 +466,43 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     set({
       _haikus: { ..._haikus, [id]: undefined },
       _deleted: { ..._deleted, [id]: true },
+      userHaikus: { ...userHaikus, [id]: undefined },
     });
 
-    fetch(`/api/haikus/${id}`, {
+    const res = await fetch(`/api/haikus/${id}`, {
       ...await fetchOpts(),
       method: "DELETE",
-    }).then(async (res) => {
-      if (res.status != 200) {
-        const { _haikus, _deleted } = get();
-        trackEvent("error", {
-          type: "delete-haiku",
-          code: res.status,
-          userId: (await useUser.getState()).user.id,
-          id,
-        });
-        useAlert.getState().error(`Error deleting haikus ${id}: ${res.status} (${res.statusText})`);
-        // revert
-        set({
-          _haikus: { ..._haikus, [id]: deleting },
-          _deleted: { ..._deleted, [id]: false },
-        });
-        return;
-      }
     });
+  
+    if (res.status != 200) {
+      const { _haikus, _deleted } = get();
+      trackEvent("error", {
+        type: "delete-haiku",
+        code: res.status,
+        userId: (await useUser.getState()).user.id,
+        id,
+      });
+      useAlert.getState().error(`Error deleting haikus ${id}: ${res.status} (${res.statusText})`);
+      // revert
+      set({
+        _haikus: { ..._haikus, [id]: deleting },
+        _deleted: { ..._deleted, [id]: false },
+        userHaikus: { ...userHaikus, [id]: deleting },
+      });
+    }
+
+    const data = await res.json();
+    const deleted = data.haiku;
+    
+    return deleted;
   },
 
   addUserHaiku: async (userHaiku: any) => {
     // console.log(">> hooks.haiku.addUserHaiku", { userHaiku });
-    const { myHaikus } = get();
+    const { userHaikus } = get();
 
     set({
-      myHaikus: { ...myHaikus, [userHaiku.id || ""]: userHaiku },
+      userHaikus: { ...userHaikus, [userHaiku.id || ""]: userHaiku },
     });
   },
 
