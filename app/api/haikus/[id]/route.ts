@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getHaiku, deleteHaiku, saveHaiku } from '@/services/haikus';
-import { deleteHaikudle, getDailyHaikudles } from '@/services/haikudles';
+import { deleteHaikudle, getDailyHaikudles, getHaikudle } from '@/services/haikudles';
 import { userSession } from '@/services/users';
-import { DailyHaikudle } from '@/types/Haikudle';
+import { DailyHaikudle, Haikudle } from '@/types/Haikudle';
 import { searchParamsToMap } from '@/utils/misc';
 
 export const maxDuration = 300;
@@ -74,7 +74,8 @@ export async function DELETE(
 
   const [haiku, haikudle] = await Promise.all([
     deleteHaiku(user, params.id),
-    deleteHaikudle(user, params.id),
+    getHaikudle(params.id)
+      .then((haikudle: Haikudle) => haikudle && deleteHaikudle(user, params.id)),
     // dailyHaikudle && deleteDailyHaikudle(user, params.id),
   ]);
   

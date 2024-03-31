@@ -133,7 +133,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const { setLoaded, _mode } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    console.log(">> hooks.haiku.load", { id, query, mode });
+    console.log(">> hooks.haiku.load", { mode, id, query: JSON.stringify(query) });
 
     return new Promise(async (resolve, reject) => {
       if (id) {

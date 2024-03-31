@@ -305,6 +305,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   // regular crud stuff below
 
   loaded: (idOrQuery?: object | string) => {
+    console.log(">> hooks.haikudle.loaded", { idOrQuery });
     const { _loaded } = get();
 
     if (!idOrQuery) {
@@ -364,7 +365,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     const { setLoaded } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    // console.log(">> hooks.haikudle.load", { id, query });
+    console.log(">> hooks.haikudle.load", { id, query: JSON.stringify(query) });
 
     return new Promise(async (resolve, reject) => {
       if (id) {

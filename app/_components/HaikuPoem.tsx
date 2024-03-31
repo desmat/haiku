@@ -44,6 +44,7 @@ export default function HaikuPoem({
   ];
 
   const doPop = () => {
+    // console.log('>> app._components.HaikuPoem.doPop()', { mode, haikuId: haiku?.id, popPoem, pop });
     setPop(true);
     setTimeout(() => setPop(false), 100);
   }
