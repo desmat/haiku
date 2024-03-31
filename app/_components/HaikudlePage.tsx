@@ -20,7 +20,7 @@ export default function HaikudlePage({
   styles: any[],
   regenerating?: boolean,
 }) {
-  console.log('>> app._components.HaikudlePage.render()', { mode, id: haiku.id, haiku });
+  // console.log('>> app._components.HaikudlePage.render()', { mode, id: haiku.id, haiku });
 
   const [user] = useUser((state: any) => [state.user]);
   // TODO move to hook store
@@ -40,7 +40,7 @@ export default function HaikudlePage({
     state.previousDailyHaikudleId,
   ]);
 
-  console.log('>> app._components.HaikudlePage.render()', { solved, haiku, inProgress });
+  // console.log('>> app._components.HaikudlePage.render()', { solved, haiku, inProgress });
 
   const blurCurve = [0, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10];
   const saturateCurve = [1];

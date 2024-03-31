@@ -55,10 +55,10 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
   getRandom: () => {
     const { _haikus } = get();
-    console.log(">> hooks.haiku.getRandom", { _haikus });
+    // console.log(">> hooks.haiku.getRandom", { _haikus });
     const haikus = mapToList(_haikus);
     const haiku = haikus[Math.floor(Math.random() * haikus.length)];
-    console.log(">> hooks.haiku.getRandom", { haiku });
+    // console.log(">> hooks.haiku.getRandom", { haiku });
 
     return haiku;
   },
@@ -133,7 +133,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const { setLoaded, _mode } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    console.log(">> hooks.haiku.load", { mode, id, query: JSON.stringify(query) });
+    // console.log(">> hooks.haiku.load", { mode, id, query: JSON.stringify(query) });
 
     return new Promise(async (resolve, reject) => {
       if (id) {
@@ -324,7 +324,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   generate: async (user: User, request: any) => {
-    console.log(">> hooks.haiku.generate", { request });
+    // console.log(">> hooks.haiku.generate", { request });
     const { _haikus } = get();
 
     // optimistic
@@ -391,7 +391,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   regenerate: async (user: User, haiku: Haiku) => {
-    console.log(">> hooks.haiku.regenerate", { haiku });
+    // console.log(">> hooks.haiku.regenerate", { haiku });
     const { _haikus } = get();
 
     const regenerating = {
@@ -448,7 +448,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   delete: async (id: string) => {
-    console.log(">> hooks.haiku.delete id:", id);
+    // console.log(">> hooks.haiku.delete id:", id);
 
     if (!id) {
       throw `Cannot delete haiku with null id`;

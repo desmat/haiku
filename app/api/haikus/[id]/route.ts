@@ -65,6 +65,8 @@ export async function DELETE(
 
   const { user } = await userSession(request)
 
+  // TODO LOCK DOWN TO ONLY ADMINS (or owners?)
+
   if (!params.id) {
     throw `Cannot delete haiku with null id`;
   }

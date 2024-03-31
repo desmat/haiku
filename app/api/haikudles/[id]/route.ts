@@ -14,11 +14,7 @@ export async function GET(
 ) {
   console.log('>> app.api.haikudle.[id].GET', { params });
 
-  // TODO pull Haikudle and User Haikudle and figure out the rest
-  // also, if haikudle was created before today, share as solved?
-
   const { user } = await userSession(request);
-  // TODO reject?
 
   const todaysDateCode = moment().format("YYYYMMDD");
   const dailyHaikudles = await getDailyHaikudles();
@@ -96,7 +92,7 @@ export async function DELETE(
     throw `Cannot delete haiku with null id`;
   }
 
-  // TODO LOCK DOWN THIS API
+  // TODO LOCK DOWN TO ONLY ADMINS (or owners?)
 
   const haikudle = await deleteHaikudle(user, params.id);
   return NextResponse.json({ haikudle });

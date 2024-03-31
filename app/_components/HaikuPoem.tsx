@@ -30,7 +30,7 @@ export default function HaikuPoem({
   regenerate?: any,
   refresh?: any
 }) {
-  console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, popPoem });
+  // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, popPoem });
   const isHaikudleMode = mode == "haikudle";
   const maxHaikuTheme = 18;
   const [alert] = useAlert((state: any) => [state.plain]);

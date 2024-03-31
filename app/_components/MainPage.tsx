@@ -17,7 +17,7 @@ import { Haikudle } from '@/types/Haikudle';
 import HaikudlePage from './HaikudlePage';
 
 export default function MainPage({ mode, id, lang }: { mode: string, id?: string, lang?: undefined | LanguageType }) {
-  console.log('>> app.MainPage.render()', { mode, id, lang });
+  // console.log('>> app.MainPage.render()', { mode, id, lang });
 
   const isHaikuMode = mode == "haiku";
   const isHaikudleMode = mode == "haikudle";
@@ -98,7 +98,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       ? haikudleHaiku
       : haikuId && getHaiku(haikuId));
   const userGeneratedHaiku = haiku?.createdBy == user?.id && !user?.isAdmin;
-  console.log('>> app.MainPage.render()', { haikuId, haiku_Id: haiku?.id, getHaiku: getHaiku(haikuId) });
+  // console.log('>> app.MainPage.render()', { haikuId, haiku_Id: haiku?.id, getHaiku: getHaiku(haikuId) });
 
   const notPuzzleMode = !isHaikudleMode
     || (isHaikudleMode && haikudleSolved)
@@ -138,7 +138,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   // console.log('>> app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
 
   const loadPage = async () => {
-    console.log('>> app.MainPage.loadPage', { haikuId, mode, loaded, loading, user, haiku });
+    // console.log('>> app.MainPage.loadPage', { haikuId, mode, loaded, loading, user, haiku });
 
     // race conditions
     loading = true;
@@ -152,7 +152,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         })
       : loadHaikus(haikuId || { random: true, lang }, mode)
         .then((haikus: Haiku | Haiku[]) => {
-          console.log('>> app.MainPage.loadPage loadHaikus.then', { haikus });
+          // console.log('>> app.MainPage.loadPage loadHaikus.then', { haikus });
           haiku = haikus || haikus[0];  // race condition
           haikuId = haikus.id || haikus[0]?.id || haikuId
           setHaikuId(haikuId);
@@ -162,12 +162,12 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   }
 
   useEffect(() => {
-    console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded]', { haikuId, haiku_id: haiku?.id, loading, loaded });
+    // console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded]', { haikuId, haiku_id: haiku?.id, loading, loaded });
     if (!loading) {
       if (!loaded /*|| !haiku */) {
         loadPage();
       } else if (haikuId != haiku?.id) {
-        console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded]', { getHaiku: getHaiku(haikuId) });
+        // console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded]', { getHaiku: getHaiku(haikuId) });
         if (isHaikudleMode) {
           loadHaikudle(haikuId);
         } else {
@@ -180,27 +180,26 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
             .reduce((a: number, v: number) => a + v, 0))
         const isCorrect = syllables[0] == 5 && syllables[1] == 7 && syllables[2] == 5
         // console.log(">> app.page useEffect [haiku, loading, loaded]", { syllables });
+        
+        if (user.isAdmin && haiku.status == "created" && !isCorrect) {
+          warningAlert(
+            `This haiku doesn't follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`,
+            {
+              closeDelay: 3000
+            }
+          );
+          return;
+        }
 
-        // TODO UN-CRIPPLE
-        // if (user.isAdmin && haiku.status == "created" && !isCorrect) {
-        //   warningAlert(
-        //     `This haiku doesn't follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`,
-        //     {
-        //       closeDelay: 3000
-        //     }
-        //   );
-        //   return;
-        // }
-
-        // if (user.isAdmin && haiku.dailyHaikudleId) {
-        //   infoAlert(
-        //     `This haiku was previously featured as a daily haikudle: ${haiku.dailyHaikudleId}`,
-        //     {
-        //       closeDelay: 3000
-        //     }
-        //   );
-        //   return;
-        // }
+        if (user.isAdmin && haiku.dailyHaikudleId) {
+          infoAlert(
+            `This haiku was previously featured as a daily haikudle: ${haiku.dailyHaikudleId}`,
+            {
+              closeDelay: 3000
+            }
+          );
+          return;
+        }
       }
     }
   }, [haikuId, haiku?.id, loading, loaded]);
@@ -296,7 +295,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       resetAlert();
       setGenerating(true);
       const ret = await generateHaiku(user, { lang, subject });
-      console.log('>> app.page.handleGenerate()', { ret });
+      // console.log('>> app.page.handleGenerate()', { ret });
 
       if (ret?.id) {
         // router.push(`/?id=${ret.id}`);
@@ -325,7 +324,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   }
 
   const handleRefresh = (e?: any) => {
-    console.log('>> app.page.handleRefresh()', {});
+    // console.log('>> app.page.handleRefresh()', {});
     e && e.preventDefault();
 
     if (isHaikudleMode && !user.isAdmin) {
@@ -347,7 +346,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     setLoading(true);
     loadHaikus({ random: true, lang }, mode)
       .then((haikus: Haiku | Haiku[]) => {
-        console.log('>> app.page.handleRefresh() loadHaikus.then', { haikus });
+        // console.log('>> app.page.handleRefresh() loadHaikus.then', { haikus });
         setLoading(false);
         haikuId = haikus.id || haikus[0]?.id || haikuId
         setHaikuId(haikuId);
@@ -387,7 +386,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   }
 
   const handleSelectHaiku = (id: string) => {
-    console.log('>> app._components.MainPage.handleSelectHaiku()', { id });
+    // console.log('>> app._components.MainPage.handleSelectHaiku()', { id });
     setHaikuId(id);
     window.history.replaceState(null, '', `/${id}`);
   }

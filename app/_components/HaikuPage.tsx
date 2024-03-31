@@ -28,7 +28,7 @@ export default function HaikuPage({
   loading?: boolean,
   refresh?: any,
 }) {
-  console.log('>> app._components.HaikuPage.render()', { mode, id: haiku.id, popPoem, haiku });
+  // console.log('>> app._components.HaikuPage.render()', { mode, id: haiku.id, popPoem, haiku });
 
   const [user] = useUser((state: any) => [state.user]);
   const [_loading, setLoading] = useState(!popPoem);

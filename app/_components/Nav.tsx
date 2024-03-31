@@ -278,9 +278,8 @@ function SidePanel({
     state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
   ]);
 
-  console.log(">> app._component.Nav.SidePanel.render()", { panelOpened, panelAnimating, dailyHaikudles, userHaikus });
-  console.log(">> app._component.Nav.SidePanel.render()", { userHaikus: userHaikus?.length });
-
+  // console.log(">> app._component.Nav.SidePanel.render()", { panelOpened, panelAnimating, dailyHaikudles, userHaikus });
+  
   // TODO: move to shared lib between Nav and Layout
   const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
   const appDescription = isHaikudleMode
@@ -323,7 +322,7 @@ function SidePanel({
   }
 
   useEffect(() => {
-    console.log(">> app._component.Nav.useEffect", { user, mode });
+    // console.log(">> app._component.Nav.useEffect", { user, mode });
     if (user?.id && ["haiku", "haikudle"].includes(mode || "")) {
       loadHaikus({ mine: true }, mode);
     }
