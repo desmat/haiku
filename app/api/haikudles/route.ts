@@ -8,10 +8,6 @@ import { DailyHaikudle, Haikudle } from '@/types/Haikudle';
 import shuffleArray from '@/utils/shuffleArray';
 import { Haiku } from '@/types/Haiku';
 
-// TODO I don't think we need this let's remove
-// export const maxDuration = 300;
-// export const dynamic = 'force-dynamic';
-
 export async function GET(request: NextRequest, params?: any) {
   const query = searchParamsToMap(request.nextUrl.searchParams.toString());
   console.log('>> app.api.haikudles.GET', { query, searchParams: request.nextUrl.searchParams.toString() });

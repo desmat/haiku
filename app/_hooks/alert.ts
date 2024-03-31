@@ -30,7 +30,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     closeLabel?: string,
     closeDelay?: number
   } = {}) => {
-    console.log(">> hooks.alert.error", { message });
+    // console.log(">> hooks.alert.error", { message });
     set({ message, type: message && "error", onDissmiss, closeLabel });
   },
 

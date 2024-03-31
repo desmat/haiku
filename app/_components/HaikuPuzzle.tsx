@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState } from "react";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 import useHaikudle from '@/app/_hooks/haikudle';
 import { Haiku } from "@/types/Haiku";
-import { User } from "@/types/User";
+import { upperCaseFirstLetter } from "@/utils/format";
 import { StyledLayers } from "./StyledLayers";
 
 export default function HaikuPuzzle({
@@ -21,12 +20,10 @@ export default function HaikuPuzzle({
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { haiku });
   const [
     inProgress,
-    solved,
     swap,
     haikudleId,
   ] = useHaikudle((state: any) => [
     state.inProgress,
-    state.solved,
     state.swap,
     state.haikudleId,
   ]);
@@ -34,11 +31,6 @@ export default function HaikuPuzzle({
   const poem = inProgress
 
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
-
-  const upperCaseFirstLetter = (s: string) => {
-    if (!s || s.length == 0) return "";
-    return s.substring(0, 1).toUpperCase() + s.substring(1);
-  }
 
   const handleClickWord = (word: any, lineNumber: number, wordNumber: number) => {
     // console.log('>> app._components.HaikuPage.handleClickWord()', { word, lineNumber, wordNumber });

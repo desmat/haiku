@@ -29,7 +29,7 @@ export const loadingHaiku = {
     "Screen blinks, game is found,"],
   "theme": "Loading screen",
   "bgImage": "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/haiku-404notfound-md.png",
-  "id": "e5ac5085",
+  "id": "loading",
   "createdBy": "4a2d28ad",
   "updatedAt": 1711812547206
 }

@@ -3,7 +3,17 @@ import { NavOverlay } from '@/app/_components/Nav';
 import { notFoundHaiku } from "@/services/stores/samples";
 import { LanguageType } from '@/types/Languages';
 
-export default function NotFound({ mode, lang, onClickGenerate }: { mode: string, lang?: undefined | LanguageType, onClickGenerate?: any }) {
+export default function NotFound({
+  mode,
+  lang,
+  onClickGenerate,
+  onClickLogo,
+}: {
+  mode: string,
+  lang?: undefined | LanguageType,
+  onClickGenerate?: any,
+  onClickLogo?: any
+}) {
   // console.log('>> app.NotFound.render()');
 
   const fontColor = notFoundHaiku?.color || "#555555";
@@ -35,7 +45,7 @@ export default function NotFound({ mode, lang, onClickGenerate }: { mode: string
 
   return (
     <div>
-      <NavOverlay mode={mode} styles={textStyles} altStyles={altTextStyles} onClickGenerate={onClickGenerate} />
+      <NavOverlay mode={mode} styles={textStyles} altStyles={altTextStyles} onClickGenerate={onClickGenerate} onClickLogo={onClickLogo} />
       <HaikuPage mode={mode} haiku={notFoundHaiku} styles={textStyles} />
     </div>
   )

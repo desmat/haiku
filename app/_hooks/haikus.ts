@@ -34,7 +34,7 @@ const initialState = {
   // list of haikus
   _loaded: <StatusMap>{},
 
-  myhaikus: <HaikuMap>{},
+  userHaikus: <HaikuMap>{},
   dailyHaikudles: <any>{},
 }
 
@@ -55,10 +55,10 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
   getRandom: () => {
     const { _haikus } = get();
-    console.log(">> hooks.haiku.getRandom", { _haikus });
+    // console.log(">> hooks.haiku.getRandom", { _haikus });
     const haikus = mapToList(_haikus);
     const haiku = haikus[Math.floor(Math.random() * haikus.length)];
-    console.log(">> hooks.haiku.getRandom", { haiku });
+    // console.log(">> hooks.haiku.getRandom", { haiku });
 
     return haiku;
   },
@@ -133,7 +133,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const { setLoaded, _mode } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    console.log(">> hooks.haiku.load", { id, query, mode });
+    // console.log(">> hooks.haiku.load", { mode, id, query: JSON.stringify(query) });
 
     return new Promise(async (resolve, reject) => {
       if (id) {
@@ -188,7 +188,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
             // special case: these were partially loaded for the side bar: don't setLoaded
             set({
               mode: mode || _mode,
-              myHaikus: listToMap(haikus),
+              userHaikus: listToMap(haikus),
               dailyHaikudles: data.dailyHaikudles && listToMap(data.dailyHaikudles),
             });
           } else {
@@ -286,7 +286,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     };
 
     set({
-      _haikus: { ..._haikus, [haiku.id || ""]: saving }, // TODO: update type to make id mandatory
+      _haikus: { ..._haikus, [haiku.id]: saving },
     });
 
     return new Promise(async (resolve, reject) => {
@@ -307,7 +307,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           useAlert.getState().error(`Error saving haiku: ${res.status} (${res.statusText})`);
           // revert
           set({
-            _haikus: { ..._haikus, [haiku.id || ""]: haiku }, // TODO: update type to make id mandatory
+            _haikus: { ..._haikus, [haiku.id]: haiku },
           });
           return reject(res.statusText);
         }
@@ -316,7 +316,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         const saved = data.haiku;
 
         set({
-          _haikus: { ..._haikus, [saved.id || ""]: saved },
+          _haikus: { ..._haikus, [saved.id]: saved },
         });
         return resolve(saved);
       });
@@ -324,7 +324,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   generate: async (user: User, request: any) => {
-    console.log(">> hooks.haiku.generate", { request });
+    // console.log(">> hooks.haiku.generate", { request });
     const { _haikus } = get();
 
     // optimistic
@@ -336,7 +336,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     // };
 
     // set({
-    //   _haikus: { ..._haikus, [haiku.id || ""]: generating },
+    //   _haikus: { ..._haikus, [haiku.id ]: generating },
     // });
 
     return new Promise(async (resolve, reject) => {
@@ -374,7 +374,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
         // replace optimistic 
         set({
-          _haikus: { ..._haikus, [generated.id || ""]: generated },
+          _haikus: { ..._haikus, [generated.id]: generated },
         });
 
         // also update the side bar
@@ -383,7 +383,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           createdBy: generated.createdBy,
           createdAt: generated.createdAt,
           theme: generated.theme,
-        });       
+        });
 
         return resolve(generated);
       });
@@ -391,7 +391,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   regenerate: async (user: User, haiku: Haiku) => {
-    console.log(">> hooks.haiku.regenerate", { haiku });
+    // console.log(">> hooks.haiku.regenerate", { haiku });
     const { _haikus } = get();
 
     const regenerating = {
@@ -399,7 +399,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       status: "generating",
     }
     set({
-      _haikus: { ..._haikus, [haiku.id || ""]: regenerating },
+      _haikus: { ..._haikus, [haiku.id]: regenerating },
     });
 
     return new Promise(async (resolve, reject) => {
@@ -437,7 +437,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
         // replace optimistic 
         set({
-          _haikus: { ..._haikus, [regenerated.id || ""]: regenerated },
+          _haikus: { ..._haikus, [regenerated.id]: regenerated },
         });
         // also sync up haikudle store 
         useHaikudle.setState({ haiku: regenerated });
@@ -454,7 +454,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       throw `Cannot delete haiku with null id`;
     }
 
-    const { _haikus, _deleted, get: _get } = get();
+    const { _haikus, _deleted, userHaikus, get: _get } = get();
     const deleting = _get(id);
 
     if (!deleting) {
@@ -466,37 +466,43 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     set({
       _haikus: { ..._haikus, [id]: undefined },
       _deleted: { ..._deleted, [id]: true },
+      userHaikus: { ...userHaikus, [id]: undefined },
     });
 
-    fetch(`/api/haikus/${id}`, {
+    const res = await fetch(`/api/haikus/${id}`, {
       ...await fetchOpts(),
       method: "DELETE",
-    }).then(async (res) => {
-      if (res.status != 200) {
-        const { _haikus, _deleted } = get();
-        trackEvent("error", {
-          type: "delete-haiku",
-          code: res.status,
-          userId: (await useUser.getState()).user.id,
-          id,
-        });
-        useAlert.getState().error(`Error deleting haikus ${id}: ${res.status} (${res.statusText})`);
-        // revert
-        set({
-          _haikus: { ..._haikus, [id]: deleting },
-          _deleted: { ..._deleted, [id]: false },
-        });
-        return;
-      }
     });
+
+    if (res.status != 200) {
+      const { _haikus, _deleted } = get();
+      trackEvent("error", {
+        type: "delete-haiku",
+        code: res.status,
+        userId: (await useUser.getState()).user.id,
+        id,
+      });
+      useAlert.getState().error(`Error deleting haikus ${id}: ${res.status} (${res.statusText})`);
+      // revert
+      set({
+        _haikus: { ..._haikus, [id]: deleting },
+        _deleted: { ..._deleted, [id]: false },
+        userHaikus: { ...userHaikus, [id]: deleting },
+      });
+    }
+
+    const data = await res.json();
+    const deleted = data.haiku;
+
+    return deleted;
   },
 
   addUserHaiku: async (userHaiku: any) => {
     // console.log(">> hooks.haiku.addUserHaiku", { userHaiku });
-    const { myHaikus } = get();
+    const { userHaikus } = get();
 
     set({
-      myHaikus: { ...myHaikus, [userHaiku.id || ""]: userHaiku },
+      userHaikus: { ...userHaikus, [userHaiku.id]: userHaiku },
     });
   },
 

@@ -1,6 +1,13 @@
-export type Haikudle = any;
+export type Haikudle = {
+  id: string,
+  haikuId: string,
+} | any;
 
-export type UserHaikudle = any;
+export type UserHaikudle = {
+  id: string,
+  userId: string,
+  haikudle: Haikudle,
+} | any;
 
 export type DailyHaikudle = {
   id: string,

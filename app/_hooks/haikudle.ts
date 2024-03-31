@@ -35,7 +35,7 @@ const checkCorrect = (inProgress: any, solution: any) => {
 }
 
 const isSolved = (inProgress: any, solution: any) => {
-  console.log("*** isSolved", { inProgress });
+  // console.log("*** isSolved", { inProgress });
 
   checkCorrect(inProgress, solution); // side effects yuk!
   const ret = inProgress.flat().reduce((a: boolean, m: any, i: number) => a && m.correct, true);
@@ -88,10 +88,6 @@ const initialState = {
   // access via get(id) or find(query?)
   _haikudles: <HaikudleMap>{},
 
-  // TODO maybe remove this 
-  // to smooth out UX when deleting,
-  _deleted: <StatusMap>{},
-
   // access via loaded(queryOrId?),
   // stored as id->bool or query->bool, 
   // where id refers to the loaded haiku 
@@ -112,7 +108,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   },
 
   init: async (haiku: Haiku, haikudle: Haikudle, hashSolution?: boolean) => {
-    console.log(">> hooks.haikudle.init", { haiku, haikudle, hashSolution });
+    // console.log(">> hooks.haikudle.init", { haiku, haikudle, hashSolution });
 
     const solution = hashSolution && haiku.poem
       .map((line: string) => line.split(/\s+/)
@@ -138,7 +134,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   solve: () => {
     const { inProgress, words, solution } = get();
-    console.log(">> hooks.haikudle.solve", { words, solution, inProgress });
+    // console.log(">> hooks.haikudle.solve", { words, solution, inProgress });
 
     const solvedInProgress = [
       solution[0].map((w: string) => {
@@ -305,6 +301,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   // regular crud stuff below
 
   loaded: (idOrQuery?: object | string) => {
+    // console.log(">> hooks.haikudle.loaded", { idOrQuery });
     const { _loaded } = get();
 
     if (!idOrQuery) {
@@ -364,7 +361,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     const { setLoaded } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    // console.log(">> hooks.haikudle.load", { id, query });
+    // console.log(">> hooks.haikudle.load", { id, query: JSON.stringify(query) });
 
     return new Promise(async (resolve, reject) => {
       if (id) {

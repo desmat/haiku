@@ -55,3 +55,8 @@ export function capitalize(s: string) {
     .map((s: string) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
     .join(" ");
 }
+
+export function upperCaseFirstLetter(s: string) {
+  if (!s || s.length == 0) return "";
+  return s.substring(0, 1).toUpperCase() + s.substring(1);
+}
