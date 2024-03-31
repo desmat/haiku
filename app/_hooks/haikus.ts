@@ -286,7 +286,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     };
 
     set({
-      _haikus: { ..._haikus, [haiku.id || ""]: saving }, // TODO: update type to make id mandatory
+      _haikus: { ..._haikus, [haiku.id]: saving },
     });
 
     return new Promise(async (resolve, reject) => {
@@ -307,7 +307,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           useAlert.getState().error(`Error saving haiku: ${res.status} (${res.statusText})`);
           // revert
           set({
-            _haikus: { ..._haikus, [haiku.id || ""]: haiku }, // TODO: update type to make id mandatory
+            _haikus: { ..._haikus, [haiku.id]: haiku },
           });
           return reject(res.statusText);
         }
@@ -316,7 +316,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         const saved = data.haiku;
 
         set({
-          _haikus: { ..._haikus, [saved.id || ""]: saved },
+          _haikus: { ..._haikus, [saved.id]: saved },
         });
         return resolve(saved);
       });
@@ -336,7 +336,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     // };
 
     // set({
-    //   _haikus: { ..._haikus, [haiku.id || ""]: generating },
+    //   _haikus: { ..._haikus, [haiku.id ]: generating },
     // });
 
     return new Promise(async (resolve, reject) => {
@@ -374,7 +374,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
         // replace optimistic 
         set({
-          _haikus: { ..._haikus, [generated.id || ""]: generated },
+          _haikus: { ..._haikus, [generated.id]: generated },
         });
 
         // also update the side bar
@@ -383,7 +383,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           createdBy: generated.createdBy,
           createdAt: generated.createdAt,
           theme: generated.theme,
-        });       
+        });
 
         return resolve(generated);
       });
@@ -399,7 +399,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       status: "generating",
     }
     set({
-      _haikus: { ..._haikus, [haiku.id || ""]: regenerating },
+      _haikus: { ..._haikus, [haiku.id]: regenerating },
     });
 
     return new Promise(async (resolve, reject) => {
@@ -437,7 +437,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
         // replace optimistic 
         set({
-          _haikus: { ..._haikus, [regenerated.id || ""]: regenerated },
+          _haikus: { ..._haikus, [regenerated.id]: regenerated },
         });
         // also sync up haikudle store 
         useHaikudle.setState({ haiku: regenerated });
@@ -473,7 +473,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       ...await fetchOpts(),
       method: "DELETE",
     });
-  
+
     if (res.status != 200) {
       const { _haikus, _deleted } = get();
       trackEvent("error", {
@@ -493,7 +493,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
     const data = await res.json();
     const deleted = data.haiku;
-    
+
     return deleted;
   },
 
@@ -502,7 +502,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const { userHaikus } = get();
 
     set({
-      userHaikus: { ...userHaikus, [userHaiku.id || ""]: userHaiku },
+      userHaikus: { ...userHaikus, [userHaiku.id]: userHaiku },
     });
   },
 

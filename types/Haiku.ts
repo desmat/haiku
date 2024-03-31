@@ -1,1 +1,3 @@
-export type Haiku = any;
+export type Haiku = {
+  id: string,
+} | any;
