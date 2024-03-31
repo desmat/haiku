@@ -355,9 +355,10 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     ]);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (confirm("Delete this Haiku?")) {
-      deleteHaiku(haiku?.id);
+      await deleteHaiku(haiku?.id);
+      handleRefresh();
     }
   }
 
