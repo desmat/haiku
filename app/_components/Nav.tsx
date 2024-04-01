@@ -25,7 +25,12 @@ import trackEvent from '@/utils/trackEvent';
 
 export function Loading() {
   return (
-    <div className='_bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 italic text-dark-2 opacity-5 animate-pulse'>Loading...</div>
+    <div
+      onClick={() => document.location.href = "/"}
+      className='_bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 italic text-dark-2 opacity-5 animate-pulse cursor-pointer z-50'
+    >
+      Loading...
+    </div>
   );
 }
 

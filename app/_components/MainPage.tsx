@@ -226,7 +226,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         loadPage();
       }
     }
-  }, [haikuId, haiku, loading, loaded]);
+  }, [haikuId, haiku?.id, loading, loaded]);
 
   useEffect(() => {
     // @ts-ignore
@@ -332,6 +332,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       setRegenerating(true);
       const ret = await regenerateHaiku(user, haiku);
       // console.log('>> app.page.handleRegenerateHaiku()', { ret });
+      setHaiku(ret);
       setRegenerating(false);
       incUserUsage(user, "haikusRegenerated");
     }
