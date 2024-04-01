@@ -1,7 +1,6 @@
 'use client'
 
 import moment from 'moment';
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react';
 import { syllable } from 'syllable';
 import { Haiku } from "@/types/Haiku";
@@ -21,7 +20,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
 
   const isHaikuMode = mode == "haiku";
   const isHaikudleMode = mode == "haikudle";
-  const router = useRouter();
   let [haikuId, setHaikuId] = useState(id);
   const [generating, setGenerating] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
@@ -78,7 +76,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     previousDailyHaikudleId,
     nextDailyHaikudleId,
     haikudleSolved,
-      ] = useHaikudle((state: any) => [
+  ] = useHaikudle((state: any) => [
     state.ready,
     state.loaded(haikuId || { lang }),
     state.load,
@@ -89,7 +87,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     state.previousDailyHaikudleId,
     state.nextDailyHaikudleId,
     state.solved,
-      ]);
+  ]);
 
   const loaded = isHaikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
   let [loading, setLoading] = useState(false);
@@ -97,10 +95,10 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
   const userGeneratedHaiku = haiku?.createdBy == user?.id && !user?.isAdmin;
   console.log('>> app.MainPage.render()', { loading, loaded, haikuId, haiku_Id: haiku?.id, getHaiku: getHaiku(haikuId), haikudleHaiku });
 
-  const notPuzzleMode = !isHaikudleMode
-    || (isHaikudleMode && haikudleSolved)
-    || (isHaikudleMode && previousDailyHaikudleId && !user.isAdmin)
-    || (isHaikudleMode && haiku?.createdBy == user?.id && !user?.isAdmin)
+  const isPuzzleMode = isHaikudleMode &&
+    !haikudleSolved &&
+    (!previousDailyHaikudleId || user?.isAdmin) &&
+    (!(haiku?.createdBy == user?.id) || user?.isAdmin);
 
   const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
@@ -161,65 +159,68 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
   }
 
+  const checkHaiku = () => {
+    console.log('>> app.MainPage.checkHaiku', { user, haiku });
+
+    const syllables = haiku.poem
+      .map((line: string) => line.split(/\s/)
+        .map((word: string) => syllable(word))
+        .reduce((a: number, v: number) => a + v, 0))
+    const isCorrect = syllables[0] == 5 && syllables[1] == 7 && syllables[2] == 5
+
+    if (haiku.status == "created" && !isCorrect) {
+      warningAlert(`This haiku doesn't follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`, {
+        closeDelay: 3000
+      });
+      return;
+    }
+
+    if (haiku.dailyHaikudleId) {
+      infoAlert(`This haiku was previously featured as a daily haikudle: ${haiku.dailyHaikudleId}`, {
+        closeDelay: 3000
+      });
+      return;
+    }
+  }
+
   useEffect(() => {
     console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded]', { loading, loaded, haikuId, haiku_id: haiku?.id, haikudleHaiku });
-    if (loading && loaded) {
-      // const loadedHaiku = isHaikudleMode ? haikudleHaiku : getHaiku(haikuId);
-      const loadedHaiku = getHaiku(haikuId) || haikudleHaiku;
-      console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded] setting haiku', { loadedHaiku });
-      setHaikuId(loadedHaiku.id);
-      setHaiku(loadedHaiku);
-      setLoading(false);
-    } else if (!loading) {
+
+    if (loading) {
+      if (loaded) {
+        const loadedHaiku = getHaiku(haikuId) || haikudleHaiku;
+        console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded] setting haiku', { loadedHaiku });
+        setHaikuId(loadedHaiku.id);
+        setHaiku(loadedHaiku);
+        setLoading(false);
+      }
+    } else { // !loading 
       console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded] haikuId != haiku?.id', { val: haikuId != haiku?.id, haikuId, haiku_id: haiku?.id });
-      if (!loaded /* && (!haikuId || haikuId != haiku?.id) */) {
-        loadPage();
-      } else if (haikuId != haiku?.id) {
-        if (isHaikudleMode) {
-          if (!haikuId && haikudleHaiku) {
-            // initial page load with no params: what we loaded from API is today's haikudle
-            setHaiku(haikudleHaiku);
-            setHaikuId(haikudleHaiku.id);
+      if (loaded) {
+        if (haikuId != haiku?.id) {
+          if (isHaikudleMode) {
+            if (!haikuId && haikudleHaiku) {
+              // initial page load with no params: what we loaded from API is today's haikudle
+              setHaiku(haikudleHaiku);
+              setHaikuId(haikudleHaiku.id);
+            } else {
+              setHaiku(undefined);
+              loadPage();
+            }
           } else {
-            setHaiku(undefined);
-            loadPage();
-          }
-        } else {
-          const loadedHaiku = getHaiku(haikuId);
-          console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded]', { loadedHaiku });
-          if (loadedHaiku) {
-            setHaiku(loadedHaiku);
-            setHaikuId(loadedHaiku.id);
+            const loadedHaiku = getHaiku(haikuId);
+            console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded]', { loadedHaiku });
+            if (loadedHaiku) {
+              setHaiku(loadedHaiku);
+              setHaikuId(loadedHaiku.id);
+            }
           }
         }
-      } else if (user?.isAdmin && mode == "haiku" && haiku?.poem) {
-        const syllables = haiku.poem
-          .map((line: string) => line.split(/\s/)
-            .map((word: string) => syllable(word))
-            .reduce((a: number, v: number) => a + v, 0))
-        const isCorrect = syllables[0] == 5 && syllables[1] == 7 && syllables[2] == 5
-        // console.log(">> app.page useEffect [haiku, loading, loaded]", { syllables });
-
-        // TODO UNCRIPPLE
-        // if (user.isAdmin && haiku.status == "created" && !isCorrect) {
-        //   warningAlert(
-        //     `This haiku doesn't follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`,
-        //     {
-        //       closeDelay: 3000
-        //     }
-        //   );
-        //   return;
-        // }
-
-        // if (user.isAdmin && haiku.dailyHaikudleId) {
-        //   infoAlert(
-        //     `This haiku was previously featured as a daily haikudle: ${haiku.dailyHaikudleId}`,
-        //     {
-        //       closeDelay: 3000
-        //     }
-        //   );
-        //   return;
-        // }
+        else if (user?.isAdmin && mode == "haiku" && haiku?.poem) {
+          checkHaiku();
+        }
+      } else { // !loading && !loaded
+        loadPage();
       }
     }
   }, [haikuId, haiku, loading, loaded]);
@@ -255,12 +256,10 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
               <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with five syllables in the first line, seven in the second, and five in the third.</div>
               <div>This haiku poem and art were generated by ChatGPT and DALL-E, respectively. Hit the logo to see another one, and the top-right button to generate a brand new one!</div>
               <div>Try also Haikudle, a daily puzzle version: <b><a href="https://haikudle.art/">haikudle.art</a></b>.</div>
-            </div>`,
-      {
-        onDissmiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
-        closeLabel: "Got it!",
-      }
-    );
+            </div>`, {
+      onDissmiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
+      closeLabel: "Got it!",
+    });
   }
 
   const handleShowAboutPreviousDaily = () => {
@@ -279,13 +278,10 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with five syllables in the first line, seven in the second, and five in the third.</div>
         <div><b>Wordle</b>: a word game with a single daily solution, with all players attempting to guess the same word.</div>
         <div>This was ${previousDailyHaikudleDate.calendar(null, calendarFormat)}'s daily haiku puzzle, try solving today's <b><a href="https://haikudle.art/">Haikudle</a></b>!</div>
-      </div>`
-      ,
-      {
-        onDissmiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboardedPreviousDaily: true } }),
-        closeLabel: "Got it!",
-      }
-    );
+      </div>`, {
+      onDissmiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboardedPreviousDaily: true } }),
+      closeLabel: "Got it!",
+    });
   }
 
   const handleShowAboutGenerated = () => {
@@ -295,12 +291,10 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         <div>The same theme and mood were used to generate the art in the background using <b>DALL-E</b> with a curated prompt, aiming to harmonize with the haiku poem.</div>
         <div>Curious about those prompts? See <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L106-L108" target="_blank">here</a></b> and <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L17-L31" target="_blank">here</a></b> in the source code.</b></div>
         <div>Generated art and poems are sometimes great, sometimes not! Try the <b>✨</b> button next to the poem to regenerate.</div>
-      </div>`,
-      {
-        onDissmiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboardedGenerated: true } }),
-        closeLabel: "Got it!",
-      }
-    );
+      </div>`, {
+      onDissmiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboardedGenerated: true } }),
+      closeLabel: "Got it!",
+    });
   }
 
   const handleGenerate = async (e: any) => {
@@ -461,7 +455,15 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         }
         onSelectHaiku={handleSelectHaiku}
       />
-      {notPuzzleMode &&
+      {isPuzzleMode &&
+        <HaikudlePage
+          mode={mode}
+          haiku={haiku}
+          styles={textStyles}
+          regenerating={regenerating}
+        />
+      }
+      {!isPuzzleMode &&
         <HaikuPage
           mode={mode}
           haiku={haikudleSolved ?
@@ -479,14 +481,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
           regenerateHaiku={(user?.isAdmin || haiku?.createdBy == user?.id) && handleRegenerateHaiku}
           regenerating={regenerating}
           refresh={handleRefresh}
-        />
-      }
-      {!notPuzzleMode &&
-        <HaikudlePage
-          mode={mode}
-          haiku={haiku}
-          styles={textStyles}
-          regenerating={regenerating}
         />
       }
     </div>
