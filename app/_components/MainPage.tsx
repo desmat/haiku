@@ -525,7 +525,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
           styles={textStyles}
           altStyles={altTextStyles}
           popPoem={isHaikudleMode && haikudleSolvedJustNow}
-          regenerateHaiku={(user?.isAdmin || haiku?.createdBy == user?.id) && handleRegenerateHaiku}
+          regenerateHaiku={mode == "haiku" && (user?.isAdmin || haiku?.createdBy == user?.id) && handleRegenerateHaiku}
           regenerating={regenerating}
           refresh={handleRefresh}
         />
