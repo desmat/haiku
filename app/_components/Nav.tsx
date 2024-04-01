@@ -642,7 +642,7 @@ export function NavOverlay({
       {["haikudle", "haiku"].includes(mode) &&
         <div className="fixed top-2.5 right-2.5 z-20">
           {(!onClickGenerate || !user?.isAdmin && user.usage?.haikusCreated >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
-            <div className="opacity-30" title="Exceeded daily limit: try again later">
+            <div className="opacity-30" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
               <StyledLayers styles={altStyles}>
                 <GenerateIcon />
               </StyledLayers>
