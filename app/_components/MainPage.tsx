@@ -138,7 +138,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     console.log('>> app.MainPage.loadPage', { haikuId, mode, loaded, loading, user, haiku });
 
     if (!loading) {
-      loading = true;
       setLoading(true);
 
       isHaikudleMode
@@ -203,25 +202,25 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         // console.log(">> app.page useEffect [haiku, loading, loaded]", { syllables });
 
         // TODO UNCRIPPLE
-        if (user.isAdmin && haiku.status == "created" && !isCorrect) {
-          warningAlert(
-            `This haiku doesn't follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`,
-            {
-              closeDelay: 3000
-            }
-          );
-          return;
-        }
+        // if (user.isAdmin && haiku.status == "created" && !isCorrect) {
+        //   warningAlert(
+        //     `This haiku doesn't follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`,
+        //     {
+        //       closeDelay: 3000
+        //     }
+        //   );
+        //   return;
+        // }
 
-        if (user.isAdmin && haiku.dailyHaikudleId) {
-          infoAlert(
-            `This haiku was previously featured as a daily haikudle: ${haiku.dailyHaikudleId}`,
-            {
-              closeDelay: 3000
-            }
-          );
-          return;
-        }
+        // if (user.isAdmin && haiku.dailyHaikudleId) {
+        //   infoAlert(
+        //     `This haiku was previously featured as a daily haikudle: ${haiku.dailyHaikudleId}`,
+        //     {
+        //       closeDelay: 3000
+        //     }
+        //   );
+        //   return;
+        // }
       }
     }
   }, [haikuId, haiku, loading, loaded]);
@@ -321,10 +320,9 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
 
       if (ret?.id) {
         incUserUsage(user, "haikusCreated");
-        setGenerating(false);
-        haikuId = ret.id
         setHaikuId(haikuId);
         window.history.replaceState(null, '', `/${haikuId}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
+        setGenerating(false);
       }
     }
   }
@@ -347,13 +345,13 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     // console.log('>> app.page.handleRefresh()', {});
     e && e.preventDefault();
 
-    if (isHaikudleMode && !user.isAdmin) {
+    if (isHaikudleMode /* && !user.isAdmin */) {
       // TODO: figure out visual glitch
       haiku = undefined;
       haikuId = undefined;
       loading = true;
 
-      window.location.href = "/";
+      window.location.href = `/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`;
       return;
     }
 
@@ -362,11 +360,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
 
     resetAlert();
-
-    haiku = undefined;
-    haikuId = undefined;
-    loading = true;
-
     setHaiku(undefined);
     setHaikuId(undefined);
     setLoading(true);
@@ -375,8 +368,6 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       .then((haikus: Haiku | Haiku[]) => {
         console.log('>> app.page.handleRefresh() loadHaikus.then', { haikus });
         const loadedHaiku = haikus[0] || haikus;
-        haiku = loadedHaiku;
-        haikuId = loadedHaiku?.id;
         setHaiku(loadedHaiku);
         setHaikuId(loadedHaiku?.id);
         window.history.replaceState(null, '', `/${loadedHaiku?.id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
@@ -423,16 +414,11 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
       // TODO smooth out visual glitch in haikudle mode
       document.location.href = `/${id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`;
     } else {
-      loading = true;
-      haiku = undefined;
-      haikuId = id;
 
-      setLoading(true);
       setHaikuId(id);
       setHaiku(undefined);
 
       window.history.replaceState(null, '', `/${id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
-      loadPage();
     }
   }
 

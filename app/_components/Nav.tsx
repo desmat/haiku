@@ -206,7 +206,7 @@ function BottomLinks({
             title="Switch between haiku/haikudle mode"
             onClick={async (e: any) => {
               e.preventDefault();
-              onSwitchMode();
+              onSwitchMode && onSwitchMode();
               // router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
             }}
           >
@@ -220,7 +220,7 @@ function BottomLinks({
             title="Switch to showcase mode "
             onClick={async (e: any) => {
               e.preventDefault();
-              onSwitchMode("showcase");
+              onSwitchMode && onSwitchMode("showcase");
             }}
           >
             <RiFullscreenLine className="text-xl" />
@@ -571,9 +571,9 @@ export function NavOverlay({
   // console.log(">> app._component.Nav.render", { mode, haikuId: haiku?.id });
 
   const handleKeyDown = async (e: any) => {
-    console.log(">> app._component.Nav.handleKeyDown", { mode });
+    // console.log(">> app._component.Nav.handleKeyDown", { mode });
     if (e.key == "Escape") {
-      if (["showcase", "social-img"].includes(mode)) {
+      if (["showcase", "social-img"].includes(mode) && onSwitchMode) {
         onSwitchMode();
       }
     }
@@ -635,7 +635,7 @@ export function NavOverlay({
           <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} />
           <div
             className="_bg-pink-400 _opacity-50 fixed top-0 left-0 w-full h-full cursor-pointer"
-            onClick={() => onSwitchMode(process.env.EXPERIENCE_MODE)}
+            onClick={() => onSwitchMode && onSwitchMode(process.env.EXPERIENCE_MODE)}
           />
         </div>
       }
@@ -688,7 +688,7 @@ export function NavOverlay({
           <div
             className="_bg-pink-400 fixed top-0 left-0 w-10 h-full z-10 cursor-pointer"
             title="Exit showcase mode"
-            onClick={() => onSwitchMode()}
+            onClick={() => onSwitchMode && onSwitchMode()}
           />
           <div
             className="_bg-yellow-400 fixed bottom-0 left-0 w-10 h-10 z-40 cursor-pointer"
