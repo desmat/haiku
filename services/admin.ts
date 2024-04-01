@@ -36,5 +36,5 @@ export async function backup(user: User) {
     addRandomSuffix: false,
   });
 
-  return { filename, url: blob.url, size: formatBytes(Buffer.byteLength(buffer)) };
+  return { filename, size: formatBytes(Buffer.byteLength(buffer)) };
 }
