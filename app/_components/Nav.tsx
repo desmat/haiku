@@ -206,8 +206,8 @@ function BottomLinks({
             title="Switch between haiku/haikudle mode"
             onClick={async (e: any) => {
               e.preventDefault();
-              await onSwitchMode();
-              router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
+              onSwitchMode();
+              // router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
             }}
           >
             <TbSwitchVertical className="text-xl" />
@@ -220,8 +220,7 @@ function BottomLinks({
             title="Switch to showcase mode "
             onClick={async (e: any) => {
               e.preventDefault();
-              await onSwitchMode();
-              router.push(`/${haiku ? haiku?.id : ""}?mode=showcase`);
+              onSwitchMode("showcase");
             }}
           >
             <RiFullscreenLine className="text-xl" />
@@ -279,7 +278,7 @@ function SidePanel({
   ]);
 
   // console.log(">> app._component.Nav.SidePanel.render()", { panelOpened, panelAnimating, dailyHaikudles, userHaikus });
-  
+
   // TODO: move to shared lib between Nav and Layout
   const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
   const appDescription = isHaikudleMode
@@ -439,11 +438,9 @@ function SidePanel({
                   <Link
                     href={`/${h.id}`}
                     onClick={(e: any) => {
-                      if (onSelectHaiku) {
-                        e.preventDefault();
-                        /* !panelPinned && */ toggleMenuOpened();
-                        onSelectHaiku(h.id);
-                      }
+                      e.preventDefault();
+                      /* !panelPinned && */ toggleMenuOpened();
+                      onSelectHaiku && onSelectHaiku(h.id);
                     }}
                   >
                     <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>
@@ -573,17 +570,11 @@ export function NavOverlay({
 
   // console.log(">> app._component.Nav.render", { mode, haikuId: haiku?.id });
 
-  const switchMode = async () => {
-    // console.log(">> app._component.Nav.switchMode", {});    
-    await onSwitchMode();
-    router.push(`/${haiku ? haiku?.id : ""}`);
-  }
-
   const handleKeyDown = async (e: any) => {
-    // console.log(">> app._component.Nav.handleKeyDown", { mode });
+    console.log(">> app._component.Nav.handleKeyDown", { mode });
     if (e.key == "Escape") {
       if (["showcase", "social-img"].includes(mode)) {
-        switchMode();
+        onSwitchMode();
       }
     }
   }
@@ -644,7 +635,7 @@ export function NavOverlay({
           <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} />
           <div
             className="_bg-pink-400 _opacity-50 fixed top-0 left-0 w-full h-full cursor-pointer"
-            onClick={switchMode}
+            onClick={() => onSwitchMode(process.env.EXPERIENCE_MODE)}
           />
         </div>
       }
@@ -697,7 +688,7 @@ export function NavOverlay({
           <div
             className="_bg-pink-400 fixed top-0 left-0 w-10 h-full z-10 cursor-pointer"
             title="Exit showcase mode"
-            onClick={switchMode}
+            onClick={() => onSwitchMode()}
           />
           <div
             className="_bg-yellow-400 fixed bottom-0 left-0 w-10 h-10 z-40 cursor-pointer"
