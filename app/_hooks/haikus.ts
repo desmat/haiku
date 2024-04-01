@@ -51,7 +51,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
   get: (id: string) => {
     const { _haikus } = get();
-    console.log(">> hooks.haiku.get", { id, _haikus });
+    // console.log(">> hooks.haiku.get", { id, _haikus });
     return _haikus[id];
   },
 
@@ -77,7 +77,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
   loaded: (idOrQuery?: object | string) => {
     const { _loaded } = get();
-    console.log(">> hooks.haiku.loaded", { idOrQuery, _loaded });
+    // console.log(">> hooks.haiku.loaded", { idOrQuery, _loaded });
 
     if (!idOrQuery) {
       return _loaded[JSON.stringify({})];
@@ -136,7 +136,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const { setLoaded, _mode } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    console.log(">> hooks.haiku.load", { mode, id, query: JSON.stringify(query) });
+    // console.log(">> hooks.haiku.load", { mode, id, query: JSON.stringify(query) });
 
     return new Promise(async (resolve, reject) => {
       if (id) {
