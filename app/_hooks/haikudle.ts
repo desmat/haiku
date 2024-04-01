@@ -357,7 +357,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     }
   },
 
-  load: async (queryOrId?: string, onSolved = () => undefined): Promise<Haikudle> => {
+  load: async (queryOrId?: string): Promise<Haikudle> => {
     const { setLoaded } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
