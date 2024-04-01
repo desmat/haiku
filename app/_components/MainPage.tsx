@@ -32,11 +32,13 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   const [
     user,
     saveUser,
-    incUserUsage
+    incUserUsage,
+    getUserToken,
   ] = useUser((state: any) => [
     state.user,
     state.save,
-    state.incUserUsage
+    state.incUserUsage,
+    state.getToken,
   ]);
 
   const [
@@ -464,6 +466,27 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     );
   }
 
+  const handleBackup = async () => {
+    // console.log('>> app._components.MainPage.handleBackup()', {});
+
+    const token = await getUserToken();
+    const res = await fetch("/api/admin/backup", {
+      headers: { Authorization: `Bearer ${token}` },
+      method: "POST",
+    });
+
+    // console.log('>> app._components.MainPage.handleBackup()', { ret });
+    if (res.status != 200) {
+      warningAlert(`Error saving backup: ${res.status} (${res.statusText})`);
+      return;
+    }
+
+    const data = await res.json();
+    plainAlert(`Backup successful: ${JSON.stringify(data)}`, {
+      // closeDelay: 3000
+    });
+  }
+
   if (!loaded || loading || loadingUI || generating) {
     // return <LoadingPage mode={mode} /* haiku={haiku} */ />
     return (
@@ -501,6 +524,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         }
         onSelectHaiku={handleSelectHaiku}
         onChangeRefreshDelay={handleChangeRefreshDelay}
+        onBackup={handleBackup}
       />
       {isPuzzleMode &&
         <HaikudlePage

@@ -8,7 +8,7 @@ import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub } from 'react-icons
 import { MdMail, MdHome, MdDelete, MdIosShare } from "react-icons/md";
 import { TbSwitchVertical } from "react-icons/tb";
 import { RiFullscreenLine } from "react-icons/ri";
-import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg } from "react-icons/bs";
+import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg, BsDatabaseFillUp } from "react-icons/bs";
 import { FaRandom } from "react-icons/fa";
 import * as font from "@/app/font";
 import useAlert from '@/app/_hooks/alert';
@@ -91,6 +91,7 @@ function BottomLinks({
   onDelete,
   onSaveHaikudle,
   onShowAbout,
+  onBackup,
 }: {
   mode: string,
   haiku?: Haiku,
@@ -100,6 +101,7 @@ function BottomLinks({
   onDelete: any,
   onSaveHaikudle: any,
   onShowAbout: any,
+  onBackup?: any,
 }) {
   // console.log("BottomLinks", { lang })
   const router = useRouter();
@@ -203,6 +205,16 @@ function BottomLinks({
             title="Save as daily Haikudle"
           >
             <IoAddCircle className="text-xl" />
+          </Link>
+        }
+        {user?.isAdmin && onBackup &&
+          <Link
+            key="backup"
+            href="#"
+            onClick={onBackup}
+            title="Backup database"
+          >
+            <BsDatabaseFillUp className="text-xl" />
           </Link>
         }
         {mode != "social-img" && user?.isAdmin &&
@@ -545,7 +557,7 @@ export function NavOverlay({
   altStyles,
   haiku,
   lang,
-  refreshDelay =  24 * 60 * 60 * 1000,
+  refreshDelay = 24 * 60 * 60 * 1000,
   onClickLogo,
   onClickGenerate,
   onSwitchMode,
@@ -554,6 +566,7 @@ export function NavOverlay({
   onShowAbout,
   onSelectHaiku,
   onChangeRefreshDelay,
+  onBackup,
 }: {
   mode: string,
   styles: any[],
@@ -569,6 +582,7 @@ export function NavOverlay({
   onShowAbout?: any,
   onSelectHaiku?: any,
   onChangeRefreshDelay?: any,
+  onBackup?: any
 }) {
   const router = useRouter();
   const [user] = useUser((state: any) => [state.user]);
@@ -661,6 +675,7 @@ export function NavOverlay({
               onDelete={onDelete}
               onSaveHaikudle={onSaveHaikudle}
               onShowAbout={onShowAbout}
+              onBackup={onBackup}
             />
           </StyledLayers>
         </div>
