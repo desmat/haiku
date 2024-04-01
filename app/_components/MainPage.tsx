@@ -15,14 +15,18 @@ import { LanguageType } from '@/types/Languages';
 import { Haikudle } from '@/types/Haikudle';
 import HaikudlePage from './HaikudlePage';
 
-export default function MainPage({ mode, id, lang }: { mode: string, id?: string, lang?: undefined | LanguageType }) {
+export default function MainPage({ mode, id, lang, refreshDelay }: { mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
   // console.log('>> app.MainPage.render()', { mode, id, lang });
 
   const isHaikuMode = mode == "haiku";
   const isHaikudleMode = mode == "haikudle";
+  const isShowcaseMode = mode == "showcase";
   let [haikuId, setHaikuId] = useState(id);
   const [generating, setGenerating] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [_refreshDelay, setRefreshDelay] = useState(refreshDelay || 24 * 60 * 60 * 1000); // every day
+  const [refreshTimeout, setRefreshTimeout] = useState<any>();
+
   // console.log('>> app.MainPage.render()', { haikuId });
 
   const [
@@ -247,6 +251,37 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
   }, [user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku]);
 
+  useEffect(() => {
+    // console.log('>> app.page useEffect [loadingUI, isShowcaseMode]', { loadingUI, isShowcaseMode });
+
+    // in case we're in showcase mode and refresh didn't work:
+    // refresh after loading for 10 seconds
+    const timeoutId = loadingUI && isShowcaseMode && setInterval(() => {
+      // console.log('>> app.page useEffect [loadingUI, isShowcaseMode] forcing refresh after waiting too long');
+      setLoadingUI(false);
+      document.location.href = `/?mode=showcase${_refreshDelay ? `&refreshDelay=${_refreshDelay}` : ""}`;
+    }, 10000);
+
+    return () => {
+      timeoutId && clearInterval(timeoutId);
+    }
+  }, [loadingUI, isShowcaseMode]);
+
+  useEffect(() => {
+    console.log('>> app.page useEffect [loadingUI, isShowcaseMode]', { loadingUI, isShowcaseMode });
+
+    if (mode == "showcase" && _refreshDelay) {
+      setRefreshTimeout(setTimeout(handleRefresh, _refreshDelay));
+    }
+
+    return () => {
+      if (refreshTimeout) {
+        clearTimeout(refreshTimeout);
+        setRefreshTimeout(undefined);
+      }
+    }
+  }, [isShowcaseMode, haiku]);
+
   const handleShowAbout = () => {
     plainAlert(
       isHaikudleMode
@@ -353,7 +388,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     }
 
     if (haikuId) {
-      window.history.replaceState(null, '', `/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
+      window.history.replaceState(null, '', `/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}${isShowcaseMode && _refreshDelay ? `&refreshDelay=${_refreshDelay}` : ""}`);
     }
 
     resetAlert();
@@ -415,12 +450,29 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     window.history.replaceState(null, '', `/${id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
   }
 
+  const handleChangeRefreshDelay = (val: number) => {
+    setRefreshDelay(val);
+    window.history.replaceState(null, '', `/$?mode=showcase&refreshDelay=${val}`);
+
+    if (refreshTimeout) {
+      clearTimeout(refreshTimeout);
+      setRefreshTimeout(undefined);
+    }
+
+    setRefreshTimeout(setTimeout(handleRefresh, val));
+
+    plainAlert(
+      `Refreshing every ${moment.duration(val).humanize()} (${Math.floor(val / 1000)} seconds)`,
+      { closeDelay: 1000 }
+    );
+  }
+
   if (!loaded || loading || loadingUI || generating) {
     // return <LoadingPage mode={mode} /* haiku={haiku} */ />
     return (
       <div>
         <NavOverlay mode={mode} styles={textStyles} altStyles={altTextStyles} onClickLogo={handleRefresh} />
-        <Loading />
+        <Loading onClick={isShowcaseMode && handleRefresh} />
         {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}
       </div>
     )
@@ -436,7 +488,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
         mode={mode}
         lang={lang}
         haiku={haiku}
-        // haikus={haikus}
+        refreshDelay={_refreshDelay}
         styles={textStyles}
         altStyles={altTextStyles}
         onClickLogo={handleRefresh}
@@ -451,6 +503,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
             : handleShowAbout
         }
         onSelectHaiku={handleSelectHaiku}
+        onChangeRefreshDelay={handleChangeRefreshDelay}
       />
       {isPuzzleMode &&
         <HaikudlePage

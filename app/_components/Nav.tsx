@@ -23,10 +23,11 @@ import { USAGE_LIMIT } from '@/types/Usage';
 import { StyledLayers } from './StyledLayers';
 import trackEvent from '@/utils/trackEvent';
 
-export function Loading() {
+export function Loading({ onClick }: { onClick?: any }) {
+  const defaultOnClick = () => document.location.href = "/";
   return (
     <div
-      onClick={() => document.location.href = "/"}
+      onClick={onClick || defaultOnClick}
       className='_bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 italic text-dark-2 opacity-5 animate-pulse cursor-pointer z-50'
     >
       Loading...
@@ -543,8 +544,8 @@ export function NavOverlay({
   styles,
   altStyles,
   haiku,
-  // haikus,
   lang,
+  refreshDelay =  24 * 60 * 60 * 1000,
   onClickLogo,
   onClickGenerate,
   onSwitchMode,
@@ -552,13 +553,14 @@ export function NavOverlay({
   onSaveHaikudle,
   onShowAbout,
   onSelectHaiku,
+  onChangeRefreshDelay,
 }: {
   mode: string,
   styles: any[],
   altStyles: any[],
   haiku?: Haiku,
-  // haikus?: Haiku[],
   lang?: LanguageType,
+  refreshDelay?: number,
   onClickLogo?: any,
   onClickGenerate?: any,
   onSwitchMode?: any,
@@ -566,10 +568,11 @@ export function NavOverlay({
   onSaveHaikudle?: any,
   onShowAbout?: any,
   onSelectHaiku?: any,
+  onChangeRefreshDelay?: any,
 }) {
   const router = useRouter();
   const [user] = useUser((state: any) => [state.user]);
-  const [refreshDelay, setRefreshDelay] = useState(24 * 60 * 60 * 1000); // every day
+  // const [refreshDelay, setRefreshDelay] = useState(24 * 60 * 60 * 1000); // every day
   const [refreshTimeout, setRefreshTimeout] = useState<any>();
   const [resetAlert, alert] = useAlert((state: any) => [state.reset, state.plain]);
 
@@ -584,47 +587,22 @@ export function NavOverlay({
     }
   }
 
-  const changeDelay = (val: number) => {
-    setRefreshDelay(val);
-
-    if (refreshTimeout) {
-      clearTimeout(refreshTimeout);
-      setRefreshTimeout(undefined);
-    }
-
-    setRefreshTimeout(setTimeout(onClickLogo, val));
-
-    alert(
-      `Refreshing every ${moment.duration(val).humanize()} (${Math.floor(val / 1000)} seconds)`,
-      { closeDelay: 1000 }
-    );
-  }
-
   const increaseDelay = () => {
     // max value, otherwise is basically 0
-    changeDelay(Math.min(refreshDelay * 2, 2147483647));
+    onChangeRefreshDelay(Math.min(refreshDelay * 2, 2147483647));
   }
 
   const decreaseDelay = () => {
     // less than 1000 and things get weird
-    changeDelay(Math.max(refreshDelay / 2, 1000));
+    onChangeRefreshDelay(Math.max(refreshDelay / 2, 1000));
   }
 
   useEffect(() => {
     // console.log(">> app._component.Nav.useEffect", { mode, haiku });
     document.body.addEventListener('keydown', handleKeyDown);
 
-    if (mode == "showcase" && refreshDelay) {
-      setRefreshTimeout(setTimeout(onClickLogo, refreshDelay));
-    }
-
     return () => {
       document.body.removeEventListener('keydown', handleKeyDown);
-
-      if (refreshTimeout) {
-        clearTimeout(refreshTimeout);
-        setRefreshTimeout(undefined);
-      }
     }
   }, [mode, haiku]);
 

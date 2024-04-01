@@ -83,14 +83,16 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
     // for testing
     console.warn(`>> services.openai.generateHaiku: DEBUG mode: returning dummy response`);
     // await delay(3000);
+    const sampleHaikus = mapToList(samples.haikus);
     return {
       response: {
         prompt,
-        haiku: [
-          "line one,",
-          "line two,",
-          "line three.",
-        ],
+        // haiku: [
+        //   "line one,",
+        //   "line two,",
+        //   "line three.",
+        // ],
+        haiku: sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].poem,
         subject: subject || "test subject",
         mood: mood || "test mood",
       }
