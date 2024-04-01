@@ -196,10 +196,12 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       if (loaded) {
         const loadedHaiku = getHaiku(haikuId) || haikudleHaiku;
         // console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded] setting haiku', { loadedHaiku });
-        setHaikuId(loadedHaiku.id);
-        setHaiku(loadedHaiku);
-        setLoading(false);
-        setLoadingUI(false);
+        if (loadedHaiku) {
+          setHaikuId(loadedHaiku.id);
+          setHaiku(loadedHaiku);
+          setLoading(false);
+          setLoadingUI(false);
+        }
       }
     } else { // !loading 
       // console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded] haikuId != haiku?.id', { val: haikuId != haiku?.id, haikuId, haiku_id: haiku?.id });
@@ -252,35 +254,30 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   }, [user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku]);
 
   useEffect(() => {
-    // console.log('>> app.page useEffect [loadingUI, isShowcaseMode]', { loadingUI, isShowcaseMode });
+    // console.log('>> app.page useEffect [haiku?.id, loadingUI, isShowcaseMode, _refreshDelay]', { haiku_id: haiku?.id, loadingUI, isShowcaseMode, _refreshDelay });
 
-    // in case we're in showcase mode and refresh didn't work:
-    // refresh after loading for 10 seconds
-    const timeoutId = loadingUI && isShowcaseMode && setInterval(() => {
-      // console.log('>> app.page useEffect [loadingUI, isShowcaseMode] forcing refresh after waiting too long');
-      setLoadingUI(false);
-      document.location.href = `/?mode=showcase${_refreshDelay ? `&refreshDelay=${_refreshDelay}` : ""}`;
-    }, 10000);
-
-    return () => {
-      timeoutId && clearInterval(timeoutId);
-    }
-  }, [loadingUI, isShowcaseMode]);
-
-  useEffect(() => {
-    console.log('>> app.page useEffect [loadingUI, isShowcaseMode]', { loadingUI, isShowcaseMode });
-
-    if (mode == "showcase" && _refreshDelay) {
+    if (isShowcaseMode && !loadingUI && _refreshDelay) {
+      window.history.replaceState(null, '', `/${haiku?.id || ""}?mode=showcase${_refreshDelay ? `&refreshDelay=${_refreshDelay}` : ""}`);
       setRefreshTimeout(setTimeout(handleRefresh, _refreshDelay));
     }
 
+    // in case we're in showcase mode and refresh didn't work:
+    // refresh after loading for 10 seconds
+    const retryInterval = loadingUI && isShowcaseMode && setInterval(() => {
+      // console.log('>> app.page useEffect [loadingUI, isShowcaseMode] forcing refresh after waiting too long');
+      setLoadingUI(false);
+      document.location.href = `/${haiku?.id || ""}?mode=showcase${_refreshDelay ? `&refreshDelay=${_refreshDelay}` : ""}`;
+    }, 10000);
+
     return () => {
+      retryInterval && clearInterval(retryInterval);
+
       if (refreshTimeout) {
         clearTimeout(refreshTimeout);
         setRefreshTimeout(undefined);
       }
     }
-  }, [isShowcaseMode, haiku]);
+  }, [haiku?.id, loadingUI, isShowcaseMode, _refreshDelay]);
 
   const handleShowAbout = () => {
     plainAlert(
@@ -388,7 +385,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     }
 
     if (haikuId) {
-      window.history.replaceState(null, '', `/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}${isShowcaseMode && _refreshDelay ? `&refreshDelay=${_refreshDelay}` : ""}`);
+      window.history.replaceState(null, '', `/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
     }
 
     resetAlert();
@@ -452,7 +449,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
 
   const handleChangeRefreshDelay = (val: number) => {
     setRefreshDelay(val);
-    window.history.replaceState(null, '', `/$?mode=showcase&refreshDelay=${val}`);
+    window.history.replaceState(null, '', `/${haiku?.id || ""}$?mode=showcase&refreshDelay=${val}`);
 
     if (refreshTimeout) {
       clearTimeout(refreshTimeout);
