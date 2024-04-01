@@ -56,6 +56,7 @@ const initialState = {
   solution: [[], [], []],
   inProgress: [[], [], []],
   solved: false,
+  solvedJustNow: false,
   moves: 0,
   onSolved: async (id: string, moves: number) => {
     // race condition
@@ -171,7 +172,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     set({
       inProgress: solvedInProgress,
       words: solvedWords,
-      solved: true
+      solved: true, 
+      solvedJustNow: true,
     });
   },
 
@@ -204,6 +206,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     set({
       inProgress,
       solved,
+      solvedJustNow: true,
       moves: moves + 1,
     });
 
@@ -266,6 +269,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     set({
       inProgress,
       solved,
+      solvedJustNow: true,
       moves: moves + 1,
     });
 

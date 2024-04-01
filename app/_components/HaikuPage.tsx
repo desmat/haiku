@@ -31,19 +31,8 @@ export default function HaikuPage({
   // console.log('>> app._components.HaikuPage.render()', { mode, id: haiku.id, popPoem, haiku });
 
   const [user] = useUser((state: any) => [state.user]);
-  const [_loading, setLoading] = useState(!popPoem);
-
-  const blurValue = loading || _loading ? 8 : 0
-  const saturateValue = loading || _loading ? 0.7 : 1
-
-  // leverage css transition
-  useEffect(() => {
-    // under normal conditions give the page a blur transition
-    // except if overwritten by param
-    if (!loading) {
-      setTimeout(() => setLoading(false), 100);
-    }
-  }, [haiku?.id]);
+  const blurValue = loading ? 8 : 0
+  const saturateValue = loading ? 0.7 : 1
 
   return (
     <div>

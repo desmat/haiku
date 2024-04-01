@@ -76,6 +76,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     previousDailyHaikudleId,
     nextDailyHaikudleId,
     haikudleSolved,
+    haikudleSolvedJustNow,
   ] = useHaikudle((state: any) => [
     state.ready,
     state.loaded(haikuId || { lang }),
@@ -87,6 +88,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
     state.previousDailyHaikudleId,
     state.nextDailyHaikudleId,
     state.solved,
+    state.solvedJustNow,
   ]);
 
   const loaded = isHaikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
@@ -471,7 +473,7 @@ export default function MainPage({ mode, id, lang }: { mode: string, id?: string
             : haiku}
           styles={textStyles}
           altStyles={altTextStyles}
-          popPoem={isHaikudleMode && haikudleSolved}
+          popPoem={isHaikudleMode && haikudleSolvedJustNow}
           regenerateHaiku={(user?.isAdmin || haiku?.createdBy == user?.id) && handleRegenerateHaiku}
           regenerating={regenerating}
           refresh={handleRefresh}
