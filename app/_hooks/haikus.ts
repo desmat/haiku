@@ -50,7 +50,9 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   get: (id: string) => {
-    return get()._haikus[id];
+    const { _haikus } = get();
+    // console.log(">> hooks.haiku.get", { id, _haikus });
+    return _haikus[id];
   },
 
   getRandom: () => {
@@ -75,6 +77,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
   loaded: (idOrQuery?: object | string) => {
     const { _loaded } = get();
+    // console.log(">> hooks.haiku.loaded", { idOrQuery, _loaded });
 
     if (!idOrQuery) {
       return _loaded[JSON.stringify({})];
@@ -139,9 +142,9 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       if (id) {
         fetch(`/api/haikus/${id}?mode=${mode || _mode}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();
-          setLoaded(id);
 
           if (res.status != 200) {
+            setLoaded(id);
             trackEvent("error", {
               type: "fetch-haiku",
               code: res.status,
@@ -160,6 +163,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
             mode: mode || _mode,
             _haikus: { ..._haikus, [haiku.id]: haiku },
           });
+          setLoaded(id);
 
           resolve(haiku);
         });
@@ -199,12 +203,13 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
             if (query.random) {
               set({
                 mode: mode || _mode,
-                _haikus: listToMap(haikus)
+                _haikus: { ..._haikus ,...listToMap(haikus) },
               });
+              return resolve(haikus[0]);
             } else {
               set({
                 mode: mode || _mode,
-                _haikus: { ..._haikus, ...listToMap(haikus) }
+                _haikus: { ..._haikus, ...listToMap(haikus) },
               });
             }
           }

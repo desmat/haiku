@@ -301,8 +301,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   // regular crud stuff below
 
   loaded: (idOrQuery?: object | string) => {
-    // console.log(">> hooks.haikudle.loaded", { idOrQuery });
     const { _loaded } = get();
+    // console.log(">> hooks.haikudle.loaded", { idOrQuery, _loaded });
 
     if (!idOrQuery) {
       return _loaded[JSON.stringify({})];
@@ -357,7 +357,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     }
   },
 
-  load: async (queryOrId?: string, onSolved = () => undefined): Promise<Haikudle> => {
+  load: async (queryOrId?: string): Promise<Haikudle> => {
     const { setLoaded } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
@@ -367,9 +367,9 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       if (id) {
         fetch(`/api/haikudles/${id}`, await fetchOpts()).then(async (res) => {
           const { _haikudles } = get();
-          setLoaded(id);
 
           if (res.status != 200) {
+            setLoaded(id);
             trackEvent("error", {
               type: "fetch-haikudle",
               code: res.status,
@@ -387,11 +387,11 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           const nextDailyHaikudleId = data.nextDailyHaikudleId;
           // console.log(">> hooks.haikudle.load", { data });
 
-          setLoaded([haikudle]);
           set({
             _haikudles: { ..._haikudles, [haikudle.id]: haikudle },
             nextDailyHaikudleId,
           });
+          setLoaded([haikudle]);
 
           await get().init(haikudle?.haiku, haikudle);
           resolve(haikudle);
@@ -419,11 +419,11 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           const haikudles = data.haikudles; // TODO fix this junk
           const nextDailyHaikudleId = data.nextDailyHaikudleId;
 
-          setLoaded(haikudles);
           set({
             _haikudles: { ..._haikudles, ...listToMap(haikudles) },
             nextDailyHaikudleId,
           });
+          setLoaded(haikudles);
 
           // TODO bleh
           await get().init(haikudles[0]?.haiku, haikudles[0]);
