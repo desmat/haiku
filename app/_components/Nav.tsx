@@ -22,6 +22,7 @@ import { byCreatedAtDesc } from '@/utils/sort';
 import { USAGE_LIMIT } from '@/types/Usage';
 import { StyledLayers } from './StyledLayers';
 import trackEvent from '@/utils/trackEvent';
+import PopOnClick from './PopOnClick';
 
 export function Loading({ onClick }: { onClick?: any }) {
   const defaultOnClick = () => document.location.href = "/";
@@ -86,6 +87,7 @@ function BottomLinks({
   mode,
   haiku,
   lang,
+  backupInProgress,
   onRefresh,
   onSwitchMode,
   onDelete,
@@ -96,6 +98,7 @@ function BottomLinks({
   mode: string,
   haiku?: Haiku,
   lang?: LanguageType,
+  backupInProgress?: boolean,
   onRefresh: any,
   onSwitchMode: any,
   onDelete: any,
@@ -106,7 +109,6 @@ function BottomLinks({
   // console.log("BottomLinks", { lang })
   const router = useRouter();
   const user = useUser((state: any) => state.user);
-  const [pop, setPop] = useState(false);
   const [alert] = useAlert((state: any) => [state.plain]);
 
   return (
@@ -116,30 +118,36 @@ function BottomLinks({
       <div
         className="relative flex flex-row gap-2 items-center justify-center _font-semibold"
       >
-        <Link
+        <div
           key="about"
-          href="#"
+          className="cursor-pointer"
           title="About"
           onClick={(e: any) => {
             e.preventDefault();
             onShowAbout && onShowAbout();
           }}
         >
-          <IoHelpCircle className="text-2xl" />
-        </Link>
+          <PopOnClick color={haiku?.bgColor}>
+            <IoHelpCircle className="text-2xl" />
+          </PopOnClick>
+        </div>
         <Link
           key="github"
           href="https://github.com/desmat/haiku"
           target="_blank"
         >
-          <IoLogoGithub className="text-xl" />
+          <PopOnClick color={haiku?.bgColor}>
+            <IoLogoGithub className="text-xl" />
+          </PopOnClick>
         </Link>
         <Link
           key="web"
           href="https://www.desmat.ca"
           target="_blank"
         >
-          <MdHome className="text-2xl" />
+          <PopOnClick color={haiku?.bgColor}>
+            <MdHome className="text-2xl" />
+          </PopOnClick>
         </Link>
         {/* <Link
           key="email"
@@ -151,16 +159,11 @@ function BottomLinks({
         {haiku?.id &&
           <Link
             key="link"
-            href={haiku.id}
+            href={`/${haiku.id}`}
             title="Copy direct link to share"
             className="cursor-copy"
-            style={{
-              filter: `${pop ? `drop-shadow(0px 0px 16px ${haiku.bgColor})` : ""}`,
-            }}
             onClick={(e: any) => {
               e.preventDefault();
-              setPop(true);
-              setTimeout(() => setPop(false), 100);
               navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : "https://haiku.desmat.ca"}/${haiku.id}`);
               alert(`Link to this haiku copied to clipboard`, { closeDelay: 750 });
               trackEvent("haiku-shared", {
@@ -169,53 +172,66 @@ function BottomLinks({
               });
             }}
           >
-            <MdIosShare className="text-xl mt-[-0.1rem]" />
+            <PopOnClick color={haiku?.bgColor}>
+              <MdIosShare className="text-xl mt-[-0.1rem]" />
+            </PopOnClick>
           </Link>
         }
         {!haiku?.id &&
           <div className="opacity-30">
-            <MdIosShare className="text-xl mt-[-0.1rem]" />
+            <PopOnClick color={haiku?.bgColor}>
+              <MdIosShare className="text-xl mt-[-0.1rem]" />
+            </PopOnClick>
           </div>
         }
         {haiku?.id && user?.isAdmin &&
-          <Link
+          <div
             key="refresh"
-            href="#"
+            className="cursor-pointer"
             onClick={onRefresh}
             title="Load random"
           >
-            <FaRandom className="text-xl" />
-          </Link>
+            <PopOnClick color={haiku?.bgColor}>
+              <FaRandom className="text-xl" />
+            </PopOnClick>
+          </div>
         }
         {user?.isAdmin && haiku?.id &&
-          <Link
+          <div
             key="deleteHaiku"
-            href="#"
+            className="cursor-pointer"
             onClick={onDelete}
             title="Delete"
           >
-            <MdDelete className="text-xl" />
-          </Link>
+            <PopOnClick color={haiku?.bgColor}>
+              <MdDelete className="text-xl" />
+            </PopOnClick>
+          </div>
         }
         {["haikudle"].includes(mode) && user?.isAdmin &&
-          <Link
+          <div
             key="saveHaikudle"
-            href="#"
+            className="cursor-pointer"
             onClick={onSaveHaikudle}
             title="Save as daily Haikudle"
           >
-            <IoAddCircle className="text-xl" />
-          </Link>
+            <PopOnClick color={haiku?.bgColor}>
+              <IoAddCircle className="text-xl" />
+            </PopOnClick>
+
+          </div>
         }
         {user?.isAdmin && onBackup &&
-          <Link
+          <div
             key="backup"
-            href="#"
-            onClick={onBackup}
-            title="Backup database"
+            onClick={!backupInProgress && onBackup}
+            title={backupInProgress ? "Database backup in progress..." : "Backup database"}
+            className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : "cursor-pointer"}
           >
-            <BsDatabaseFillUp className="text-xl" />
-          </Link>
+            <PopOnClick color={haiku?.bgColor} disabled={backupInProgress}>
+              <BsDatabaseFillUp className="text-xl" />
+            </PopOnClick>
+          </div>
         }
         {mode != "social-img" && user?.isAdmin &&
           <Link
@@ -228,7 +244,9 @@ function BottomLinks({
               // router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
             }}
           >
-            <TbSwitchVertical className="text-xl" />
+            <PopOnClick color={haiku?.bgColor}>
+              <TbSwitchVertical className="text-xl" />
+            </PopOnClick>
           </Link>
         }
         {!["social-img"].includes(mode) && user?.isAdmin &&
@@ -241,7 +259,9 @@ function BottomLinks({
               onSwitchMode && onSwitchMode("showcase");
             }}
           >
-            <RiFullscreenLine className="text-xl" />
+            <PopOnClick color={haiku?.bgColor}>
+              <RiFullscreenLine className="text-xl" />
+            </PopOnClick>
           </Link>
         }
       </div>
@@ -254,7 +274,9 @@ function BottomLinks({
               key={k}
               href={`/${k != "en" ? `?lang=${k}` : ""}`}
             >
-              {v.nativeName}
+              <PopOnClick color={haiku?.bgColor}>
+                {v.nativeName}
+              </PopOnClick>
             </Link>
           ))
       }
@@ -558,6 +580,7 @@ export function NavOverlay({
   haiku,
   lang,
   refreshDelay = 24 * 60 * 60 * 1000,
+  backupInProgress,
   onClickLogo,
   onClickGenerate,
   onSwitchMode,
@@ -574,6 +597,7 @@ export function NavOverlay({
   haiku?: Haiku,
   lang?: LanguageType,
   refreshDelay?: number,
+  backupInProgress?: boolean,
   onClickLogo?: any,
   onClickGenerate?: any,
   onSwitchMode?: any,
@@ -624,16 +648,26 @@ export function NavOverlay({
     <div className="_bg-pink-200 z-90">
       {["haikudle", "haiku"].includes(mode) &&
         <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-30`}>
-          <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} onClick={onClickLogo} />
+          <PopOnClick color={haiku?.bgColor}>
+            <Logo
+              styles={styles}
+              altStyles={altStyles}
+              mode={mode}
+              href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`}
+              onClick={onClickLogo}
+            />
+          </PopOnClick>
         </div>
       }
       {mode == "social-img" &&
         <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}>
-          <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} />
-          <div
-            className="_bg-pink-400 _opacity-50 fixed top-0 left-0 w-full h-full cursor-pointer"
-            onClick={() => onSwitchMode && onSwitchMode(process.env.EXPERIENCE_MODE)}
-          />
+          <PopOnClick color={haiku?.bgColor}>
+            <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} />
+            <div
+              className="_bg-pink-400 _opacity-50 fixed top-0 left-0 w-full h-full cursor-pointer"
+              onClick={() => onSwitchMode && onSwitchMode(process.env.EXPERIENCE_MODE)}
+            />
+          </PopOnClick>
         </div>
       }
       {["haikudle", "haiku"].includes(mode) &&
@@ -647,9 +681,11 @@ export function NavOverlay({
           }
           {onClickGenerate && (user?.isAdmin || user?.usage?.haikusCreated < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
             <div title="Generate a new haiku">
-              <StyledLayers styles={altStyles}>
-                <GenerateIcon onClick={onClickGenerate} />
-              </StyledLayers>
+              <PopOnClick color={haiku?.bgColor}>
+                <StyledLayers styles={altStyles}>
+                  <GenerateIcon onClick={onClickGenerate} />
+                </StyledLayers>
+              </PopOnClick>
             </div>
           }
         </div>
@@ -670,6 +706,7 @@ export function NavOverlay({
               mode={mode}
               lang={lang}
               haiku={haiku}
+              backupInProgress={backupInProgress}
               onRefresh={onClickLogo}
               onSwitchMode={onSwitchMode}
               onDelete={onDelete}
@@ -683,21 +720,27 @@ export function NavOverlay({
 
       {["showcase", "social-img"].includes(mode) &&
         <>
-          <div
-            className="_bg-pink-400 fixed top-0 left-0 w-10 h-full z-10 cursor-pointer"
-            title="Exit showcase mode"
-            onClick={() => onSwitchMode && onSwitchMode()}
-          />
-          <div
-            className="_bg-yellow-400 fixed bottom-0 left-0 w-10 h-10 z-40 cursor-pointer"
-            title="Increase refresh time"
-            onClick={increaseDelay}
-          />
-          <div
-            className="_bg-yellow-400 fixed bottom-0 right-0 w-10 h-10 z-40 cursor-pointer"
-            title="Decrease refresh time"
-            onClick={decreaseDelay}
-          />
+          {onSwitchMode &&
+            <div
+              className="_bg-pink-400 fixed top-0 left-0 w-10 h-full z-10 cursor-pointer"
+              title="Exit showcase mode"
+              onClick={() => onSwitchMode && onSwitchMode()}
+            />
+          }
+          {increaseDelay &&
+            <div
+              className="_bg-yellow-400 fixed bottom-0 left-0 w-10 h-10 z-40 cursor-pointer"
+              title="Increase refresh time"
+              onClick={increaseDelay}
+            />
+          }
+          {decreaseDelay &&
+            <div
+              className="_bg-yellow-400 fixed bottom-0 right-0 w-10 h-10 z-40 cursor-pointer"
+              title="Decrease refresh time"
+              onClick={decreaseDelay}
+            />
+          }
         </>
       }
 
