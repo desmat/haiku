@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
 import { getHaikus, generateHaiku, getUserHaikus } from '@/services/haikus';
 import { userSession } from '@/services/users';
@@ -83,7 +84,8 @@ export async function POST(request: Request) {
   const { user } = await userSession(request);
 
   if (!user.isAdmin) {
-    const { haikusCreated } = await userUsage(user);
+    const usage = await userUsage(user);
+    const { haikusCreated } = usage[moment().format("YYYYMMDD")];
 
     if (haikusCreated && haikusCreated >= USAGE_LIMIT.DAILY_CREATE_HAIKU) {
       return NextResponse.json(

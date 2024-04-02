@@ -77,7 +77,10 @@ export function GenerateIcon({ onClick, sizeOverwrite }: { onClick?: any, sizeOv
     return icon;
   }
   return (
-    <Link href="#" onClick={onClick}>
+    <Link href="#" onClick={(e: any) => {
+      e.preventDefault();
+      onClick && onClick();
+    }}>
       {icon}
     </Link>
   )
@@ -610,12 +613,8 @@ export function NavOverlay({
   onChangeRefreshDelay?: any,
   onBackup?: any
 }) {
-  const router = useRouter();
+  const dateCode = moment().format("YYYYMMDD");
   const [user] = useUser((state: any) => [state.user]);
-  // const [refreshDelay, setRefreshDelay] = useState(24 * 60 * 60 * 1000); // every day
-  const [refreshTimeout, setRefreshTimeout] = useState<any>();
-  const [resetAlert, alert] = useAlert((state: any) => [state.reset, state.plain]);
-
   // console.log(">> app._component.Nav.render", { mode, haikuId: haiku?.id });
 
   const handleKeyDown = async (e: any) => {
@@ -674,14 +673,14 @@ export function NavOverlay({
       }
       {["haikudle", "haiku"].includes(mode) &&
         <div className="fixed top-2.5 right-2.5 z-20">
-          {(!onClickGenerate || !user?.isAdmin && user.usage?.haikusCreated >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
-            <div className="opacity-30" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
+          {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+            <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
               <StyledLayers styles={altStyles}>
                 <GenerateIcon />
               </StyledLayers>
             </div>
           }
-          {onClickGenerate && (user?.isAdmin || user?.usage?.haikusCreated < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+          {onClickGenerate && (user?.isAdmin || (user?.usage[dateCode]?.haikusCreated || 0) < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
             <div title="Generate a new haiku">
               <PopOnClick color={haiku?.bgColor}>
                 <StyledLayers styles={altStyles}>

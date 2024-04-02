@@ -351,7 +351,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       if (ret?.id) {
         incUserUsage(user, "haikusCreated");
         setHaikuId(ret.id);
-        window.history.replaceState(null, '', `/${haikuId}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
+        window.history.replaceState(null, '', `/${ret.id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
         setGenerating(false);
       }
     }
@@ -365,9 +365,9 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       setRegenerating(true);
       const ret = await regenerateHaiku(user, haiku);
       // console.log('>> app.page.startRegenerateHaiku()', { ret });
+      incUserUsage(user, "haikusRegenerated");
       setHaiku(ret);
       setRegenerating(false);
-      incUserUsage(user, "haikusRegenerated");
     }
   }
 
@@ -551,7 +551,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
           styles={textStyles}
           altStyles={altTextStyles}
           popPoem={isHaikudleMode && haikudleSolvedJustNow}
-          regenerateHaiku={["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku}
+          regenerateHaiku={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku()}
           regenerating={regenerating}
           refresh={doRefresh}
         />

@@ -12,38 +12,42 @@ import(`@/services/stores/${process.env.STORE_TYPE}`)
   });
 
 export async function userUsage(user: User) {
-  console.log('>> app.services.users.userUsage', { user });
+  console.log('>> app.services.usage.userUsage', { user });
 
   const dateCode = moment().format("YYYYMMDD");
-  const {
-    haikusCreated,
-    haikusRegenerated
-   } = (await store.users.get(user.id))?.usage[dateCode] || {};
+  const id = `${user.id}:${dateCode}`;
+  const userUsage = await store.userUsage.get(id);
 
   return {
-    haikusCreated: haikusCreated || 0,
-    haikusRegenerated: haikusRegenerated || 0,
+    [dateCode]: userUsage?.usage || {},
   };
 }
 
-export async function incUserUsage(user: User, resource: string) {
-  store.users.get(user.id).then((u: User | undefined) => {
-    const datecode = moment().format("YYYYMMDD");
-    const val = u?.usage[datecode] && u?.usage[datecode][resource] || 0;
-    const updatedUser = {
-      ...(u || user),
-      usage: {
-        [datecode]: {
-          ...u?.usage[datecode],
-          [resource]: val + 1,
-        }
-      }
-    }
+export async function incUserUsage(user: User, resource: "haikusCreated" | "haikusRegenerated") {
+  const expire = 60 * 60 * 24; // 24 hours
+  const dateCode = moment().format("YYYYMMDD");
+  const id = `${user.id}:${dateCode}`;
+  const userUsage = await store.userUsage.get(id);
+  const val = userUsage?.usage && userUsage?.usage[resource] || 0;
 
-    if (!u) {
-      return store.users.create(user.id, updatedUser);
-    }
+  const updatedUsage = {
+    ...userUsage?.usage,
+    [resource]: val + 1,
+  }
 
-    return store.users.update(user.id, updatedUser);
-  });  
+  const updatedUserUsage = {
+    id,
+    userId: user.id,
+    dateCode,
+    ...userUsage,
+    usage: updatedUsage,
+  }
+
+  // console.log('>> app.services.usage.incUserUsage', { updatedUserUsage });
+
+  if (userUsage) {
+    return store.userUsage.update(user.id, updatedUserUsage, { expire });
+  } else {
+    return store.userUsage.create(user.id, updatedUserUsage, { expire });
+  }
 }

@@ -34,6 +34,7 @@ export default function HaikuPoem({
   // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, popPoem });
   const isHaikudleMode = mode == "haikudle";
   const maxHaikuTheme = 18;
+  const dateCode = moment().format("YYYYMMDD");
   const [alert] = useAlert((state: any) => [state.plain]);
 
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem, pop });
@@ -116,16 +117,16 @@ export default function HaikuPoem({
                 className="mt-auto md:pt-[0.1rem] sm:pt-[0.2rem] mdpb-[0.4rem] sm:pb-[0.3rem] pb-[0.2rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
                 title="Regenerate this haiku with the same theme"
               >
-                {!user?.isAdmin && user.usage?.haikusRegenerated >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
-                  <span className="opacity-30" title="Exceeded daily limit: try again later">
+                {!user?.isAdmin && (user.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
+                  <span className="opacity-40" title="Exceeded daily limit: try again later">
                     <StyledLayers styles={altStyles || []}>
                       <GenerateIcon sizeOverwrite="h-4 w-4 md:h-6 md:w-6" />
                     </StyledLayers>
                   </span>
                 }
-                {(user?.isAdmin || user.usage?.haikusRegenerated < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
+                {(user?.isAdmin || (user.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
                   <StyledLayers styles={altStyles || []}>
-                    <GenerateIcon onClick={regenerate} sizeOverwrite="h-4 w-4 md:h-6 md:w-6" />
+                    <GenerateIcon onClick={() => regenerate && regenerate()} sizeOverwrite="h-4 w-4 md:h-6 md:w-6" />
                   </StyledLayers>
                 }
               </div>

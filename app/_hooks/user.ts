@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { User } from '@/types/User';
@@ -99,14 +100,21 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   incUserUsage: async (user: any, resource: string) => {
+    const dateCode = moment().format("YYYYMMDD");
+    const usage = user?.usage[dateCode] && user?.usage[dateCode] || {};
+    const val = usage[resource] || 0;
+
     set({
       user: {
         ...user,
         usage: {
-          ...user.usage,
-          [resource]: (user.usage[resource] || 0) + 1,
-        }
-      }
+          ...usage,
+          [dateCode]: {
+            ...usage[resource],
+            [resource]: val + 1,
+          },
+        },
+      },
     });
   },
 

@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { NextResponse } from 'next/server'
 import { regenerateHaikuPoem, getHaiku } from '@/services/haikus';
 import { userSession } from '@/services/users';
@@ -28,9 +29,10 @@ export async function POST(request: Request) {
       );  
     }
 
-    const { haikusRegenerated } = await userUsage(user);
+    const usage = await userUsage(user);
+    const { haikusRegenerated } = usage[moment().format("YYYYMMDD")];
 
-    if (haikusRegenerated >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU) {
+    if (haikusRegenerated && haikusRegenerated >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU) {
       return NextResponse.json(
         { success: false, message: 'exceeded daily limit' },
         { status: 429 }

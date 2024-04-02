@@ -14,6 +14,7 @@ export async function GET(request: NextRequest, params?: any) {
   }
 
   const usage = await userUsage(user);
+  // console.log('>> app.api.user.GET', { usage });
 
   return NextResponse.json({
     user: {

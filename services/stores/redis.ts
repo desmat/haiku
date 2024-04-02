@@ -16,13 +16,11 @@
 
 import moment from "moment";
 import { kv } from "@vercel/kv";
-// import { Exercise } from '@/types/Exercise';
-// import { Workout, WorkoutSession, WorkoutSet } from '@/types/Workout';
 import { uuid } from "@/utils/misc";
 import { GenericStore, Store } from "@/types/Store";
 import { Haiku } from "@/types/Haiku";
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
-import { User } from "@/types/User";
+import { UserUsage } from "@/types/Usage";
 
 const jsonNotDeletedExpression = "(@.deletedAt > 0) == false";
 const jsonEqualsExpression = (key: string, val: string) => {
@@ -123,7 +121,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     return values as T[];
   }
 
-  async create(userId: string, value: T): Promise<T> {
+  async create(userId: string, value: T, options: any = {}): Promise<T> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { userId, value });
 
     if (!value.id) {
@@ -147,6 +145,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     const responses = await Promise.all([
       kv.json.arrappend(this.listKey(), "$", createdListValue),
       kv.json.set(this.valueKey(value.id), "$", createdValue),
+      (options.expire ? kv.expire(this.valueKey(value.id), options.expire) : undefined),
     ]);
 
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { responses });
@@ -154,7 +153,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     return new Promise((resolve) => resolve(value));
   }
 
-  async update(userId: string, value: T): Promise<T> {
+  async update(userId: string, value: T, options: any = {}): Promise<T> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { value });
 
     if (!value.id) {
@@ -170,6 +169,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       kv.json.set(this.listKey(), `${jsonGetBy("id", value.id)}.updatedAt`, updatedValue.updatedAt),
       kv.json.set(this.listKey(), `${jsonGetBy("id", value.id)}.updatedBy`, `"${updatedValue.updatedBy}"`),
       kv.json.set(this.valueKey(value.id), "$", updatedValue),
+      (options.expire ? kv.expire(this.valueKey(value.id), options.expire) : undefined),
     ]);
 
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { response });
@@ -209,6 +209,6 @@ export function create(): Store {
     haikudles: new RedisStore<Haikudle>("haikudle"),
     userHaikudles: new RedisStore<UserHaikudle>("userhaikudle"),
     dailyHaikudles: new RedisStore<DailyHaikudle>("dailyhaikudle"),
-    users: new RedisStore<User>("user"),
+    userUsage: new RedisStore<UserUsage>("userusage"),
   }
 }
