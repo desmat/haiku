@@ -227,7 +227,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
             }
           }
         }
-        else if (user?.isAdmin && mode == "haiku" && haiku?.poem) {
+        else if (process.env.OPENAI_API_KEY != "DEBUG" && user?.isAdmin && mode == "haiku" && haiku?.poem) {
           checkHaiku();
         }
       } else { // !loading && !loaded
@@ -339,7 +339,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     e.preventDefault();
 
     const subject = user?.isAdmin
-      ? prompt("Subject? (For example 'nature', 'sunset', or leave blank)")
+      ? prompt(`Subject? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test poem)" : "(For example 'nature', 'sunset', or leave blank)"}`)
       : "";
 
     if (typeof (subject) == "string") {
@@ -549,7 +549,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
           styles={textStyles}
           altStyles={altTextStyles}
           popPoem={isHaikudleMode && haikudleSolvedJustNow}
-          regenerateHaiku={mode == "haiku" && (user?.isAdmin || haiku?.createdBy == user?.id) && handleRegenerateHaiku}
+          regenerateHaiku={["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && handleRegenerateHaiku}
           regenerating={regenerating}
           refresh={handleRefresh}
         />

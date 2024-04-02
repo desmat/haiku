@@ -87,12 +87,12 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
     return {
       response: {
         prompt,
-        // haiku: [
-        //   "line one,",
-        //   "line two,",
-        //   "line three.",
-        // ],
-        haiku: sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].poem,
+        haiku: subject == "DEBUG"
+          ? [
+            "line one,",
+            "line two,",
+            "line three.",
+          ] : sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].poem,
         subject: subject || "test subject",
         mood: mood || "test mood",
       }
