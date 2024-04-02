@@ -5,9 +5,9 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'
 import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub } from 'react-icons/io5';
-import { MdMail, MdHome, MdDelete, MdIosShare } from "react-icons/md";
-import { TbSwitchVertical } from "react-icons/tb";
-import { RiFullscreenLine } from "react-icons/ri";
+import { FaShare, FaExpand } from "react-icons/fa";
+import { HiSwitchVertical } from "react-icons/hi";
+import { MdMail, MdHome, MdDelete } from "react-icons/md";
 import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg, BsDatabaseFillUp } from "react-icons/bs";
 import { FaRandom } from "react-icons/fa";
 import * as font from "@/app/font";
@@ -172,63 +172,63 @@ function BottomLinks({
               });
             }}
           >
-            <PopOnClick color={haiku?.bgColor}>
-              <MdIosShare className="text-xl mt-[-0.1rem]" />
+            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
+              <FaShare className="text-xl" />
             </PopOnClick>
           </Link>
         }
         {!haiku?.id &&
-          <div className="opacity-30">
+          <div className="opacity-40">
             <PopOnClick color={haiku?.bgColor}>
-              <MdIosShare className="text-xl mt-[-0.1rem]" />
+              <FaShare className="text-xl" />
             </PopOnClick>
           </div>
         }
-        {haiku?.id && user?.isAdmin &&
+        {user?.isAdmin &&
           <div
             key="refresh"
-            className="cursor-pointer"
-            onClick={onRefresh}
+            className={haiku?.id && onRefresh ? "cursor-pointer" : "opacity-40"}
+            onClick={() => haiku?.id && onRefresh && onRefresh()}
             title="Load random"
           >
-            <PopOnClick color={haiku?.bgColor}>
+            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
               <FaRandom className="text-xl" />
             </PopOnClick>
           </div>
         }
-        {user?.isAdmin && haiku?.id &&
+        {user?.isAdmin &&
           <div
             key="deleteHaiku"
-            className="cursor-pointer"
-            onClick={onDelete}
+            className={haiku?.id && onDelete ? "cursor-pointer" : "opacity-40"}
+            onClick={() => haiku?.id && onDelete && onDelete()}
             title="Delete"
           >
-            <PopOnClick color={haiku?.bgColor}>
+            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
               <MdDelete className="text-xl" />
             </PopOnClick>
           </div>
         }
-        {["haikudle"].includes(mode) && user?.isAdmin &&
+        {user?.isAdmin &&
           <div
             key="saveHaikudle"
-            className="cursor-pointer"
-            onClick={onSaveHaikudle}
+            className={["haikudle"].includes(mode) && haiku?.id && onSaveHaikudle ? "cursor-pointer" : "opacity-40"}
+            onClick={() => ["haikudle"].includes(mode) && haiku?.id && onSaveHaikudle && onSaveHaikudle()}
             title="Save as daily Haikudle"
           >
-            <PopOnClick color={haiku?.bgColor}>
+            <PopOnClick color={haiku?.bgColor} disabled={!["haikudle"].includes(mode) || !haiku?.id}>
               <IoAddCircle className="text-xl" />
             </PopOnClick>
 
           </div>
         }
-        {user?.isAdmin && onBackup &&
+        {user?.isAdmin &&
           <div
             key="backup"
-            onClick={!backupInProgress && onBackup}
+            onClick={() => !backupInProgress && onBackup && onBackup()}
             title={backupInProgress ? "Database backup in progress..." : "Backup database"}
-            className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : "cursor-pointer"}
+            className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
           >
-            <PopOnClick color={haiku?.bgColor} disabled={backupInProgress}>
+            <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
               <BsDatabaseFillUp className="text-xl" />
             </PopOnClick>
           </div>
@@ -237,30 +237,32 @@ function BottomLinks({
           <Link
             key="changeMode"
             href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`}
+            className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
             title="Switch between haiku/haikudle mode"
             onClick={async (e: any) => {
               e.preventDefault();
-              onSwitchMode && onSwitchMode();
+              haiku?.id && onSwitchMode && onSwitchMode();
               // router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
             }}
           >
-            <PopOnClick color={haiku?.bgColor}>
-              <TbSwitchVertical className="text-xl" />
+            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
+              <HiSwitchVertical className="text-xl" />
             </PopOnClick>
           </Link>
         }
-        {!["social-img"].includes(mode) && user?.isAdmin &&
+        {user?.isAdmin &&
           <Link
             key="socialImgMode"
             href={`/${haiku ? haiku?.id : ""}?mode=showcase`}
+            className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
             title="Switch to showcase mode "
             onClick={async (e: any) => {
               e.preventDefault();
-              onSwitchMode && onSwitchMode("showcase");
+              haiku?.id && onSwitchMode && onSwitchMode("showcase");
             }}
           >
-            <PopOnClick color={haiku?.bgColor}>
-              <RiFullscreenLine className="text-xl" />
+            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
+              <FaExpand className="text-xl" />
             </PopOnClick>
           </Link>
         }
