@@ -387,6 +387,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           id: generated.id,
           createdBy: generated.createdBy,
           createdAt: generated.createdAt,
+          generatedAt: generated.createdAt,
           theme: generated.theme,
         });
 

@@ -23,7 +23,7 @@ export async function encodeJWT(payload: any) {
     .setIssuedAt()
     .sign(privateKey);
   // console.log(token);
-  console.log(">> utils.jwt.encode after new SignJWT")
+  // console.log(">> utils.jwt.encode after new SignJWT")
 
   return token;
 }
