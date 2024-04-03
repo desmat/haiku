@@ -87,7 +87,7 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
     return {
       response: {
         prompt,
-        haiku: subject == "DEBUG"
+        haiku: subject?.includes("DEBUG")
           ? [
             "line one,",
             "line two,",

@@ -2,7 +2,7 @@ import moment from 'moment';
 import { NextResponse } from 'next/server'
 import { getHaikudle, deleteHaikudle, saveHaikudle, saveUserHaikudle, getUserHaikudle, createHaikudle, getDailyHaikudles, getNextDailyHaikudleId } from '@/services/haikudles';
 import { userSession } from '@/services/users';
-import { getHaiku } from '@/services/haikus';
+import { createUserHaiku, getHaiku, getUserHaiku } from '@/services/haikus';
 import { DailyHaikudle } from '@/types/Haikudle';
 
 // TODO I don't think we need this let's remove
@@ -41,8 +41,16 @@ export async function GET(
     });
   }
 
-  const userHaikudle = await getUserHaikudle(user?.id, haikudle?.haikuId);
+  const [userHaiku, userHaikudle] = await Promise.all([
+    getUserHaiku(user?.id, haikudle?.haikuId),
+    getUserHaikudle(user?.id, haikudle?.haikuId),
+  ]);
   // console.log('>> app.api.haikudles.GET', { userHaikudle, haikudle });
+
+  if (!user.isAdmin && !userHaikudle && haiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
+    // console.log('>> app.api.haikudles.GET createUserHaiku');
+    createUserHaiku(user?.id, haikudle?.haikuId);
+  }
 
   const ret = {
     ...haikudle,
