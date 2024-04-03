@@ -40,7 +40,7 @@ export async function GET(request: NextRequest, params?: any) {
   const [haiku, haikudle, userHaikudle, nextDailyHaikudleId] = await Promise.all([
     getHaiku(todaysHaikudle.haikuId, true),
     getHaikudle(todaysHaikudle.haikuId),
-    getUserHaikudle(`${todaysHaikudle.haikuId}-${user?.id}`),
+    getUserHaikudle(user?.id, todaysHaikudle?.haikuId),
     getNextDailyHaikudleId(),
   ]);
 

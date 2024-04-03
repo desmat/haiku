@@ -136,9 +136,10 @@ export async function saveHaikudle(user: any, haikudle: Haikudle): Promise<Haiku
   return store.haikudles.update(user.id, haikudle);
 }
 
-export async function getUserHaikudle(userHaikudleId: string): Promise<UserHaikudle | undefined> {
-  console.log(`>> services.haikudle.getUserHaikudle`, { userHaikudleId });
+export async function getUserHaikudle(userId: string, haikudleId: string): Promise<UserHaikudle | undefined> {
+  console.log(`>> services.haikudle.getUserHaikudle`, { userId, haikudleId });
 
+  const userHaikudleId = `${haikudleId}-${userId}`; // this really should be userId:haikudleId but too late ¯\_(ツ)_/¯
   const userHaikudle = await store.userHaikudles.get(userHaikudleId);
   console.log(`>> services.haikudle.getUserHaikudle`, { userHaikudleId, userHaikudle });
   return new Promise((resolve, reject) => resolve(userHaikudle));

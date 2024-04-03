@@ -1,9 +1,9 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, generateHaiku, getUserHaikus } from '@/services/haikus';
+import { getHaikus, generateHaiku, getUserHaikus, getUserHaiku, createUserHaiku } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
-import { getDailyHaikudles } from '@/services/haikudles';
+import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
 import { userUsage } from '@/services/usage';
 import { DailyHaikudle } from '@/types/Haikudle';
 import { USAGE_LIMIT } from '@/types/Usage';
@@ -38,19 +38,28 @@ export async function GET(request: NextRequest, params?: any) {
     if (!query.lang) {
       query.lang = "en";
     }
-    const haikus = await getHaikus(query, mode == "haikudle");
-    const random = haikus[Math.floor(Math.random() * haikus.length)];
 
-    const dailyHaikudles = await getDailyHaikudles();
+    const [ haikus, dailyHaikudles, userHaiku, userHaikudle ] = await Promise.all([
+      getHaikus(query, mode == "haikudle"),
+      getDailyHaikudles(),
+      getUserHaiku(user.id, params.id),
+      getUserHaikudle(user?.id, params.id),
+    ]);
+
+    const randomHaiku = haikus[Math.floor(Math.random() * haikus.length)];    
     const dailyHaikudle = dailyHaikudles
-      .filter((dailyHaikudles: DailyHaikudle) => dailyHaikudles.haikuId == random.id)[0];
+      .filter((dailyHaikudles: DailyHaikudle) => dailyHaikudles.haikuId == randomHaiku.id)[0];
     // console.log('>> app.api.haikus.GET', { dailyHaikudles, dailyHaikudle });
 
     if (dailyHaikudle) {
-      random.dailyHaikudleId = dailyHaikudle?.id;
+      randomHaiku.dailyHaikudleId = dailyHaikudle?.id;
     }
 
-    return NextResponse.json({ haikus: [random] });
+    if (!user.isAdmin && randomHaiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
+      createUserHaiku(user.id, randomHaiku.id);
+    }
+  
+    return NextResponse.json({ haikus: [randomHaiku] });
   }
 
   if (query.mine) {

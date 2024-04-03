@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaiku, deleteHaiku, saveHaiku } from '@/services/haikus';
-import { deleteHaikudle, getDailyHaikudles, getHaikudle } from '@/services/haikudles';
+import { getHaiku, deleteHaiku, saveHaiku, getUserHaiku, createUserHaiku } from '@/services/haikus';
+import { deleteHaikudle, getDailyHaikudles, getHaikudle, getUserHaikudle } from '@/services/haikudles';
 import { userSession } from '@/services/users';
 import { DailyHaikudle, Haikudle } from '@/types/Haikudle';
 import { searchParamsToMap } from '@/utils/misc';
@@ -22,12 +22,17 @@ export async function GET(
     );
   }
 
-  const haiku = await getHaiku(params.id, query.mode == "haikudle");
+  const [ haiku, dailyHaikudles, userHaiku, userHaikudle ] = await Promise.all([
+    getHaiku(params.id, query.mode == "haikudle"),
+    getDailyHaikudles(),
+    getUserHaiku(user.id, params.id),
+    getUserHaikudle(user?.id, params.id),
+  ]);
+
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
 
-  const dailyHaikudles = await getDailyHaikudles();
   const dailyHaikudle = dailyHaikudles
     .filter((dailyHaikudles: DailyHaikudle) => dailyHaikudles.haikuId == haiku.id)[0];
   // console.log('>> app.api.haikus.GET', { dailyHaikudles, dailyHaikudle });
@@ -35,7 +40,12 @@ export async function GET(
   if (dailyHaikudle) {
     haiku.dailyHaikudleId = dailyHaikudle?.id;
   }
-  // console.log('>> app.api.haikus.GET', { dailyHaikudle });
+
+  if (!user.isAdmin && haiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
+    createUserHaiku(user.id, haiku.id);
+  }
+
+  console.log('>> app.api.haikus.GET', { haiku, dailyHaikudle, userHaiku });
 
   return NextResponse.json({ haiku });
 }

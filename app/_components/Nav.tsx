@@ -361,8 +361,8 @@ function SidePanel({
     return ret;
   };
 
-  const bySolvedOrCreatedAtDesc = (a: any, b: any) => {
-    return (b.solvedAt || b.createdAt || 0) - (a.solvedAt || a.createdAt || 0)
+  const byGeneratedOrSolvedOrViewedDesc = (a: any, b: any) => {
+    return (b.generatedAt || b.solvedAt || b.viewedAt || 0) - (a.generatedAt || a.solvedAt || a.viewedAt || 0)
   }
 
   useEffect(() => {
@@ -476,7 +476,7 @@ function SidePanel({
             {/* note: don't render when not opened to save on resources */}
             {listMode == "haiku" && (panelAnimating || panelOpened) && userHaikus
               // .filter((h: Haiku) => h.createdBy == user.id)
-              .sort(user.isAdmin ? byCreatedAtDesc : bySolvedOrCreatedAtDesc)
+              .sort(user.isAdmin ? byCreatedAtDesc : byGeneratedOrSolvedOrViewedDesc)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
               .map((h: Haiku, i: number) => (
                 <StyledLayers key={i} styles={altStyles}>
@@ -492,11 +492,14 @@ function SidePanel({
                     {user?.isAdmin &&
                       <span className="font-normal"> generated {moment(h.createdAt).fromNow()} by {h.createdBy == user?.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
                     }
-                    {!user?.isAdmin && h.solvedAt &&
+                    {!user?.isAdmin && h.generatedAt &&
+                      <span className="font-normal"> generated {moment(h.generatedAt).fromNow()}</span>
+                    }
+                    {!user?.isAdmin && !h.generatedAt && h.solvedAt &&
                       <span className="font-normal"> solved {moment(h.solvedAt).fromNow()}{h.moves ? ` in ${h.moves} move${h.moves > 1 ? "s" : ""}` : ""}</span>
                     }
-                    {!user?.isAdmin && !h.solvedAt && h.createdAt &&
-                      <span className="font-normal"> generated {moment(h.createdAt).fromNow()}</span>
+                    {!user?.isAdmin && !h.generatedAt && !h.solvedAt && h.viewedAt && 
+                      <span className="font-normal"> viewed {moment(h.viewedAt).fromNow()}</span>
                     }
                   </Link>
                 </StyledLayers>

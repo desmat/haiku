@@ -41,7 +41,7 @@ export async function GET(
     });
   }
 
-  const userHaikudle = await getUserHaikudle(`${haikudle.haikuId}-${user?.id}`);
+  const userHaikudle = await getUserHaikudle(user?.id, haikudle?.haikuId);
   // console.log('>> app.api.haikudles.GET', { userHaikudle, haikudle });
 
   const ret = {

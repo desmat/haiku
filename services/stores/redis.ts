@@ -18,7 +18,7 @@ import moment from "moment";
 import { kv } from "@vercel/kv";
 import { uuid } from "@/utils/misc";
 import { GenericStore, Store } from "@/types/Store";
-import { Haiku } from "@/types/Haiku";
+import { Haiku, UserHaiku } from "@/types/Haiku";
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
 
@@ -116,7 +116,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
 
-    const values = keys && keys.length > 0 && (await kv.json.mget(keys, "$")).flat() || [];
+    const values = keys && keys.length > 0 && (await kv.json.mget(keys, "$")).filter(Boolean).flat() || [];
 
     return values as T[];
   }
@@ -207,8 +207,9 @@ export function create(): Store {
   return {
     haikus: new RedisStore<Haiku>("haiku"),
     haikudles: new RedisStore<Haikudle>("haikudle"),
-    userHaikudles: new RedisStore<UserHaikudle>("userhaikudle"),
     dailyHaikudles: new RedisStore<DailyHaikudle>("dailyhaikudle"),
+    userHaikudles: new RedisStore<UserHaikudle>("userhaikudle"),
+    userHaikus: new RedisStore<UserHaiku>("userhaiku"),
     userUsage: new RedisStore<UserUsage>("userusage"),
   }
 }
