@@ -4,7 +4,7 @@ import moment from "moment";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { syllable } from "syllable";
-import { FaEdit } from "react-icons/fa";
+import { FaCopy, FaEdit } from "react-icons/fa";
 import useAlert from "@/app/_hooks/alert";
 import useHaikus from "@/app/_hooks/haikus";
 import { Haiku } from "@/types/Haiku";
@@ -63,7 +63,7 @@ export default function HaikuPoem({
     }
 
     const haikuToCopy = haiku.poem
-      .map((line: string, i: number) => upperCaseFirstLetter(line))
+      .map((line: string, i: number) => upperCaseFirstLetter(updatedLines[i] || line))
       .join("\n")
       + `\n—${haikuTitleAndAuthorTag.join("")}\n`;
 
@@ -78,12 +78,13 @@ export default function HaikuPoem({
     });
   }
 
-  const startEdit = () => {
+  const startEdit = (inputIndex?: number) => {
     setEditMode(true);
     // allow a bit of time for re-draw
+    const ref = inputRefs[inputIndex || 0];
     setTimeout(() => {
-      inputRefs[0].current.focus();
-      inputRefs[0].current.select();
+      ref?.current && ref.current.focus();
+      ref?.current && ref.current.select();
     }, 10);
   }
 
@@ -114,10 +115,10 @@ export default function HaikuPoem({
       .map((line: string, i: number) => {
         if (updatedLines[i] == "") return "...";
         if (updatedLines[i] && (updatedLines[i].includes("...") || updatedLines[i].includes("…"))) return updatedLines[i];
-        // if ((i == 0 || i == 2) && syllables[i] <= 3) return `${updatedLines[i]} ...`;
-        // if (i == 1 && syllables[i] <= 5) return `${updatedLines[i]} ...`;
-        if ((i == 0 || i == 2) && syllables[i] <= 3) return `... ${updatedLines[i]} ...`;
-        if (i == 1 && syllables[i] <= 5) return `... ${updatedLines[i]} ...`;
+        // if ((i == 0 || i == 2) && syllables[i] <= 3) return `${updatedLines[i] || line} ...`;
+        // if (i == 1 && syllables[i] <= 5) return `${updatedLines[i] || line} ...`;
+        if ((i == 0 || i == 2) && syllables[i] <= 3) return `... ${updatedLines[i] || line} ...`;
+        if (i == 1 && syllables[i] <= 5) return `... ${updatedLines[i] || line} ...`;
         return updatedLines[i] || line;
       });
 
@@ -130,6 +131,7 @@ export default function HaikuPoem({
 
       // TODO check error
       console.log('>> app._components.HaikuPoem.finishEdit()', { saved });
+      haiku.poem = saved.poem;
       setUpdatedLines(saved.poem.map((line: string) => line));
       setSaving(false);
     } catch (error: any) {
@@ -171,19 +173,20 @@ export default function HaikuPoem({
         onClick={() => editMode && finishEdit()}
       />
 
-      <PopOnClick color={haiku.bgColor} force={popPoem} disabled={editMode || saving}>
+      <PopOnClick color={haiku.bgColor} force={popPoem} disabled={!isShowcaseMode}>
         <div className={saving ? "animate-pulse" : ""}>
           <div
             className="_bg-purple-200 flex flex-col transition-all"
             onClick={(e: any) => {
               e.preventDefault();
-              if (!editMode) {
-                handleClickHaiku(e);
-              }
+              // if (!editMode) {
+              //   handleClickHaiku(e);
+              // }
+              isShowcaseMode && handleClickHaiku(e)
             }}
-            title={mode == "showcase" ? "Refresh" : "Copy to clipboard"}
+            title={isShowcaseMode ? "Refresh" : "Click to edit"}
             style={{
-              cursor: mode == "showcase" ? "pointer" : "copy"
+              cursor: isShowcaseMode ? "pointer" : ""
             }}
           >
             {haiku.poem.map((line: string, i: number) => (
@@ -191,6 +194,7 @@ export default function HaikuPoem({
                 <div
                   className="relative m-[0rem] transition-all"
                   onKeyDown={(e: any) => handlePoemLineKeyDown(e, i)}
+                  onClick={(e: any) => !editMode && startEdit(i)}
                 >
                   {/* used to set the width */}
                   <div
@@ -239,10 +243,10 @@ export default function HaikuPoem({
             <div className="absolute w-max flex flex-row">
               <div
                 className="transition-all"
-                onClick={handleClickHaiku}
-                title={mode == "showcase" ? "Refresh" : "Copy to clipboard"}
+                onClick={(e: any) => isShowcaseMode && handleClickHaiku(e)}
+                title={isShowcaseMode ? "Refresh" : ""}
                 style={{
-                  cursor: mode == "showcase" ? "pointer" : "copy"
+                  cursor: isShowcaseMode ? "pointer" : ""
                 }}
               >
                 <StyledLayers styles={styles}>
@@ -257,6 +261,19 @@ export default function HaikuPoem({
                 <div
                   className="flex flex-row gap-2 mt-auto md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.4rem] sm:pb-[0.3rem] pb-[0.2rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
                 >
+                  <Link
+                    href="#"
+                    className="cursor-pointer"
+                    title="Copy to clipboard"
+                    onClick={(e: any) => {
+                      e.preventDefault();
+                      handleClickHaiku(e);
+                    }}
+                  >
+                    <StyledLayers styles={altStyles || []}>
+                      <FaCopy className="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6" />
+                    </StyledLayers>
+                  </Link>
                   <Link
                     href="#"
                     className="cursor-pointer"
