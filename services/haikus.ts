@@ -184,6 +184,42 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
   });
 }
 
+export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku> {
+  const lang = (haiku.lang || "en") as LanguageType;
+  const subject = haiku.theme;
+  const mood = haiku.mood;
+  const language = supportedLanguages[lang].name;
+  console.log(">> services.haiku.completeHaikuPoem", { language, subject, mood, user });
+
+  const {
+    response: {
+      haiku: completedPoem,
+      subject: generatedSubject,
+      mood: generatedMood,
+    }
+  } = await openai.completeHaiku(haiku.poem, language, subject, mood);
+  console.log(">> services.haiku.completeHaikuPoem", { completedPoem, generatedSubject, generatedMood });
+
+  // delete corresponding haikudle 
+  getHaikudle(haiku.id).then(async (haikudle: Haikudle) => {
+    console.log(">> services.haiku.regenerateHaikuPoem", { haikudle });
+    if (haikudle) {
+      deleteHaikudle(user, haikudle.id);
+    }
+  });
+
+  if (!user.isAdmin) {
+    incUserUsage(user, "haikusRegenerated");
+  }
+
+  return store.haikus.update(user.id, {
+    ...haiku,
+    poem: completedPoem,
+    theme: generatedSubject,
+    mood: generatedMood,
+  });
+}
+
 export async function generateHaiku(user: any, lang?: LanguageType, subject?: string, mood?: string): Promise<Haiku> {
   console.log(">> services.haiku.generateHaiku", { lang, subject, mood, user });
   const language = supportedLanguages[lang || "en"].name;
@@ -276,6 +312,11 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
 
   if (!(haiku.createdBy == user.id || user.isAdmin)) {
     throw `Unauthorized`;
+  }
+
+  const poem = haiku.poem.join("/");
+  if (poem.includes("...") || poem.includes("…")) {
+    return completeHaikuPoem(user, haiku);
   }
 
   return store.haikus.update(user.id, haiku);

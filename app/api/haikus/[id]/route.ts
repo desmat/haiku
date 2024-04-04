@@ -22,7 +22,7 @@ export async function GET(
     );
   }
 
-  const [ haiku, dailyHaikudles, userHaiku, userHaikudle ] = await Promise.all([
+  const [haiku, dailyHaikudles, userHaiku, userHaikudle] = await Promise.all([
     getHaiku(params.id, query.mode == "haikudle"),
     getDailyHaikudles(),
     getUserHaiku(user.id, params.id),
@@ -63,7 +63,24 @@ export async function PUT(
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
 
-  const savedHaiku = await saveHaiku(user, haiku);
+  const data: any = await request.json();
+  const { haiku: haikuToSave } = data;
+
+  if (!haikuToSave) {
+    return NextResponse.json(
+      { success: false, message: 'empty request' },
+      { status: 400 }
+    );
+  }
+
+  if (!user.isAdmin && haiku.createdBy != user.id) {
+    return NextResponse.json(
+      { success: false, message: 'authorization failed' },
+      { status: 403 }
+    );
+  }
+
+  const savedHaiku = await saveHaiku(user, haikuToSave);
   return NextResponse.json({ haiku: savedHaiku });
 }
 
@@ -90,6 +107,6 @@ export async function DELETE(
       .then((haikudle: Haikudle) => haikudle && deleteHaikudle(user, params.id)),
     // dailyHaikudle && deleteDailyHaikudle(user, params.id),
   ]);
-  
+
   return NextResponse.json({ haiku, haikudle });
 }

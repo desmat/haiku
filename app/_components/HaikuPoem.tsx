@@ -1,16 +1,20 @@
 'use client'
 
 import moment from "moment";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRef, useState } from "react";
+import { syllable } from "syllable";
+import { FaEdit } from "react-icons/fa";
 import useAlert from "@/app/_hooks/alert";
+import useHaikus from "@/app/_hooks/haikus";
 import { Haiku } from "@/types/Haiku";
 import { USAGE_LIMIT } from "@/types/Usage";
 import { User } from "@/types/User";
 import { capitalize, upperCaseFirstLetter } from "@/utils/format";
 import trackEvent from "@/utils/trackEvent";
-import { StyledLayers } from "./StyledLayers";
 import { GenerateIcon } from "./Nav";
 import PopOnClick from "./PopOnClick";
+import { StyledLayers } from "./StyledLayers";
 
 export default function HaikuPoem({
   user,
@@ -31,12 +35,19 @@ export default function HaikuPoem({
   regenerate?: any,
   refresh?: any
 }) {
-  // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, popPoem });
+  // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku.status, popPoem, haiku });
   const isHaikudleMode = mode == "haikudle";
   const isShowcaseMode = mode == "showcase";
   const maxHaikuTheme = 18;
   const dateCode = moment().format("YYYYMMDD");
+
+  const inputRefs = haiku.poem.map(() => useRef());
+  const [updatedLines, setUpdatedLines] = useState<string[]>([]);
+  const [editMode, setEditMode] = useState(false);
+  const [saving, setSaving] = useState(false);
+
   const [alert] = useAlert((state: any) => [state.plain]);
+  const [saveHaiku] = useHaikus((state: any) => [state.save]);
 
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem, pop });
 
@@ -66,76 +77,224 @@ export default function HaikuPoem({
     });
   }
 
-  return (
-    <PopOnClick color={haiku.bgColor} force={popPoem}>
-      <div>
-        <div
-          className="_bg-purple-200 flex flex-col transition-all"
-          onClick={handleClickHaiku}
-          title={mode == "showcase" ? "Refresh" : "Copy to clipboard"}
-          style={{
-            cursor: mode == "showcase" ? "pointer" : "copy"
-          }}
-        >
-          {haiku.poem.map((line: string, i: number) => (
-            <StyledLayers key={i} styles={styles}>
-              <div className="m-[0rem] transition-all">
-                {upperCaseFirstLetter(line)}
-              </div>
-            </StyledLayers>
-          ))}
-        </div>
-        <div
-          className="relative md:text-[14pt] sm:text-[10pt] text-[8pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]"
-          style={{
-            // background: "pink",
-            height: mode == "haikudle"
-              ? ""
-              : haiku.theme?.length > maxHaikuTheme
-                ? "2.6rem"
-                : "1.3rem"
-          }}
-        >
-          <div className="absolute w-max flex flex-row">
-            <div
-              className="transition-all"
-              onClick={handleClickHaiku}
-              title={mode == "showcase" ? "Refresh" : "Copy to clipboard"}
-              style={{
-                cursor: mode == "showcase" ? "pointer" : "copy"
-              }}
-            >
-              <StyledLayers styles={styles}>
-                <span
-                  dangerouslySetInnerHTML={{ __html: `—${haikuTitleAndAuthorTag.join(haiku.theme?.length > maxHaikuTheme ? "<br/>&nbsp;" : "")}` }}
-                >
-                </span>
-              </StyledLayers>
-            </div>
+  const startEdit = () => {
+    setEditMode(true);
+    // allow a bit of time for re-draw
+    setTimeout(() => {
+      inputRefs[0].current.focus();
+      inputRefs[0].current.select();
+    }, 10);
+  }
 
-            {regenerate && !isShowcaseMode && (user?.isAdmin || haiku.createdBy == user?.id) &&
+  const cancelEdit = () => {
+    setUpdatedLines(haiku.poem.map((line: string) => line));
+    setEditMode(false);
+  }
+
+  const finishEdit = async () => {
+    console.log('>> app._components.HaikuPoem.finishEdit()', { haiku, poem: haiku.poem, updatedLines });
+    setEditMode(false);
+
+    // TODO UNCPLIPPLE
+    if (updatedLines.length == 0 || haiku.poem.join("/") == updatedLines.join("/")) {
+      // no updates to save
+      return;
+    }
+
+    setSaving(true);
+
+    const syllables = haiku.poem
+      .map((line: string, i: number) => (updatedLines[i] || "").split(/\s/)
+        .map((word: string) => syllable(word))
+        .reduce((a: number, v: number) => a + v, 0))
+    console.log('>> app._components.HaikuPoem.finishEdit()', { syllables });
+
+    const updatedOpen = haiku.poem
+      .map((line: string, i: number) => {
+        if (updatedLines[i] == "") return "...";
+        if (updatedLines[i] && (updatedLines[i].includes("...") || updatedLines[i].includes("…"))) return updatedLines[i];
+        // if ((i == 0 || i == 2) && syllables[i] <= 3) return `${updatedLines[i]} ...`;
+        // if (i == 1 && syllables[i] <= 5) return `${updatedLines[i]} ...`;
+        if ((i == 0 || i == 2) && syllables[i] <= 3) return `... ${updatedLines[i]} ...`;
+        if (i == 1 && syllables[i] <= 5) return `... ${updatedLines[i]} ...`;
+        return updatedLines[i] || line;
+      });
+
+    try {
+      const saved = await saveHaiku(user, {
+        ...haiku,
+        originalPoem: haiku.poem,
+        poem: updatedOpen,
+      });
+
+      // TODO check error
+      console.log('>> app._components.HaikuPoem.finishEdit()', { saved });
+      setUpdatedLines(saved.poem.map((line: string) => line));
+      setSaving(false);
+    } catch (error: any) {
+      console.log('>> app._components.HaikuPoem.finishEdit()', { error });
+      setUpdatedLines(haiku.poem.map((line: string) => line));
+      setSaving(false);
+    }
+  }
+
+  const handlePoemLineKeyDown = (e: any, lineNumber: number) => {
+    // console.log({ e, key: e.key });
+    if (e.key == "Escape") {
+      cancelEdit();
+    } else if (e.key == "Enter") {
+      if (lineNumber == haiku.poem.length - 1) {
+        finishEdit();
+      } else {
+        // next line
+        inputRefs[lineNumber + 1].current.focus();
+        inputRefs[lineNumber + 1].current.select();
+      }
+    } else if (e.key == "Tab") {
+      if (lineNumber == 0 && e.shiftKey || lineNumber == haiku.poem.length - 1 && !e.shiftKey) {
+        finishEdit();
+      }
+    }
+  };
+
+  const handleInputChange = (e: any, lineNumber: number) => {
+    // console.log(e.target.value);
+    updatedLines[lineNumber] = upperCaseFirstLetter(e.target.value);
+    setUpdatedLines([...updatedLines]);
+  };
+
+  return (
+    <div className="relative">
+      <div
+        className={`_bg-pink-200 fixed top-0 left-0 w-[100vw] h-[100vh]${saving ? " opacity-50" : ""}`}
+        onClick={() => editMode && finishEdit()}
+      />
+
+      <PopOnClick color={haiku.bgColor} force={popPoem} disabled={editMode || saving}>
+        <div className={saving ? "animate-pulse" : ""}>
+          <div
+            className="_bg-purple-200 flex flex-col transition-all"
+            onClick={(e: any) => {
+              e.preventDefault();
+              if (!editMode) {
+                handleClickHaiku(e);
+              }
+            }}
+            title={mode == "showcase" ? "Refresh" : "Copy to clipboard"}
+            style={{
+              cursor: mode == "showcase" ? "pointer" : "copy"
+            }}
+          >
+            {haiku.poem.map((line: string, i: number) => (
+              <StyledLayers key={i} styles={styles}>
+                <div
+                  className="relative m-[0rem] transition-all"
+                  onKeyDown={(e: any) => handlePoemLineKeyDown(e, i)}
+                >
+                  {/* used to set the width */}
+                  <div
+                    className="_bg-pink-200 px-[0.5rem] h-[2.2rem] sm:h-[2.6rem] md:h-[3.2rem]"
+                    style={{
+                      visibility: editMode ? "hidden" : "visible"
+                    }}
+                  >
+                    {/* keep at minimum original width to avoid wierd alignment issues */}
+                    <div className="_bg-orange-200 h-0 invisible">
+                      {line}
+                    </div>
+                    {/* show this when not editing */}
+                    <div className="_bg-yellow-200">
+                      {typeof (updatedLines[i]) == "string" ? updatedLines[i] : line}
+                    </div>
+                  </div>
+                  {/* show input fields in edit mode */}
+                  <input
+                    ref={inputRefs[i]}
+                    className="w-full absolute top-0 left-[-0.01rem] px-[0.5rem]"
+                    style={{
+                      background: "none",
+                      visibility: editMode ? "visible" : "hidden"
+                    }}
+                    onChange={(e: any) => handleInputChange(e, i)}
+                    defaultValue={line}
+                    value={updatedLines[i]}
+                  >
+                  </input>
+                </div>
+              </StyledLayers>
+            ))}
+          </div>
+          <div
+            className="relative md:text-[14pt] sm:text-[10pt] text-[8pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem] pl-[0.7rem]"
+            style={{
+              // background: "pink",
+              height: mode == "haikudle"
+                ? ""
+                : haiku.theme?.length > maxHaikuTheme
+                  ? "2.6rem"
+                  : "1.3rem"
+            }}
+          >
+            <div className="absolute w-max flex flex-row">
               <div
-                className="mt-auto md:pt-[0.1rem] sm:pt-[0.2rem] mdpb-[0.4rem] sm:pb-[0.3rem] pb-[0.2rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
-                title="Regenerate this haiku with the same theme"
+                className="transition-all"
+                onClick={handleClickHaiku}
+                title={mode == "showcase" ? "Refresh" : "Copy to clipboard"}
+                style={{
+                  cursor: mode == "showcase" ? "pointer" : "copy"
+                }}
               >
-                {!user?.isAdmin && (user.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
-                  <span className="opacity-40" title="Exceeded daily limit: try again later">
-                    <StyledLayers styles={altStyles || []}>
-                      <GenerateIcon sizeOverwrite="h-4 w-4 md:h-6 md:w-6" />
-                    </StyledLayers>
+                <StyledLayers styles={styles}>
+                  <span
+                    dangerouslySetInnerHTML={{ __html: `—${haikuTitleAndAuthorTag.join(haiku.theme?.length > maxHaikuTheme ? "<br/>&nbsp;" : "")}` }}
+                  >
                   </span>
-                }
-                {(user?.isAdmin || (user.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
-                  <StyledLayers styles={altStyles || []}>
-                    <GenerateIcon onClick={() => regenerate && regenerate()} sizeOverwrite="h-4 w-4 md:h-6 md:w-6" />
-                  </StyledLayers>
-                }
+                </StyledLayers>
               </div>
-            }
+
+              {regenerate && !isShowcaseMode && (user?.isAdmin || haiku.createdBy == user?.id) &&
+                <div
+                  className="flex flex-row gap-2 mt-auto md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.4rem] sm:pb-[0.3rem] pb-[0.2rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
+                >
+                  <Link
+                    href="#"
+                    className="cursor-pointer"
+                    title="Edit this haiku"
+                    onClick={(e: any) => {
+                      e.preventDefault();
+                      startEdit();
+                    }}
+                  >
+                    <StyledLayers styles={altStyles || []}>
+                      <FaEdit className="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6" />
+                    </StyledLayers>
+                  </Link>
+                  {!user?.isAdmin && (user.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
+                    <span
+                      className="opacity-40"
+                      title="Exceeded daily limit: try again later"
+                    >
+                      <StyledLayers styles={altStyles || []}>
+                        <GenerateIcon sizeOverwrite="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6" />
+                      </StyledLayers>
+                    </span>
+                  }
+                  {(user?.isAdmin || (user.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
+                    <span title="Regenerate this haiku with the same theme">
+                      <StyledLayers styles={altStyles || []}>
+                        <GenerateIcon
+                          onClick={() => regenerate && regenerate()}
+                          sizeOverwrite="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6"
+                        />
+                      </StyledLayers>
+                    </span>
+                  }
+                </div>
+              }
+            </div>
           </div>
         </div>
-      </div>
-    </PopOnClick>
+      </PopOnClick>
+    </div>
   )
 }
-
