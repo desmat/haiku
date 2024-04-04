@@ -41,7 +41,8 @@ export default function HaikuPoem({
   const maxHaikuTheme = 18;
   const dateCode = moment().format("YYYYMMDD");
 
-  const inputRefs = haiku.poem.map(() => useRef());
+  // can't create refs in a loop: hopefully 10 will be enough for most usecase
+  const inputRefs: any[] = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef()]
   const [updatedLines, setUpdatedLines] = useState<string[]>([]);
   const [editMode, setEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
