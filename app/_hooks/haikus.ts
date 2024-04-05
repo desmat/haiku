@@ -320,6 +320,11 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         const data = await res.json();
         const saved = data.haiku;
 
+        trackEvent("haiku-updated", {
+          id: saved.id,
+          userId: saved.createdBy,
+        });
+
         set({
           _haikus: { ..._haikus, [saved.id]: saved },
         });
@@ -373,7 +378,6 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
         trackEvent("haiku-generated", {
           id: generated.id,
-          name: generated.name,
           userId: generated.createdBy,
         });
 

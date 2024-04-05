@@ -106,7 +106,7 @@ export default function HaikuPoem({
     setSaving(true);
 
     const syllables = haiku.poem
-      .map((line: string, i: number) => (updatedLines[i] || "").split(/\s/)
+      .map((line: string, i: number) => (updatedLines[i] || line || "").split(/\s/)
         .map((word: string) => syllable(word))
         .reduce((a: number, v: number) => a + v, 0))
     console.log('>> app._components.HaikuPoem.finishEdit()', { syllables });
