@@ -62,6 +62,11 @@ export function PoemLineInput({
         // @ts-ignore
         ref?.current && ref.current.focus();
 
+        if (expandSelection) {
+          // @ts-ignore
+          ref?.current && ref.current.select();
+        }
+
         // if (resetCursor) {
         //   // @ts-ignore
         //   ref?.current && ref.current.setSelectionRange(0, 0);
@@ -103,7 +108,7 @@ export function PoemLineInput({
           __html: `
             .poem-input {
               background: none;
-              _background: pink;
+              _background: pink; /* for debugging */
             }
             .poem-input:focus {
               outline: 2px solid ${haiku?.bgColor || ""}88;
@@ -133,12 +138,7 @@ export function PoemLineInput({
         onBlur={() => {
           // onChange(localValue);
         }}
-        onFocus={() => {
-          if (expandSelection) {
-            // @ts-ignore
-            ref?.current && ref.current.select();
-          }
-        }}
+
         // defaultValue={value}
         value={localValue}
       >
@@ -249,7 +249,14 @@ export default function HaikuPoem({
     console.log('>> app._components.HaikuPoem.finishEdit()', { haiku, poem: haiku.poem, updatedLines });
     setEditMode(undefined);
 
-    if (updatedLines.length == 0 || haiku.poem.join("/") == updatedLines.join("/")) {
+    const hasUpdates = (original: string[], updates: string[]): boolean => {
+      return original
+        .reduce((reduced: boolean, value: string, i: number) => {
+          return reduced || typeof (updates[i]) == "string" && updates[i] != value;
+        }, false);
+    }
+
+    if (!hasUpdates(haiku.poem, updatedLines)) {
       // no updates to save
       setUpdatedLines([]);
       return;
@@ -367,19 +374,16 @@ export default function HaikuPoem({
                 >
                   {/* used to set the width */}
                   <div
-                    className="_bg-pink-200 px-[0.5rem] h-[2.2rem] sm:h-[2.6rem] md:h-[3.2rem]"
-                    style={{
-                      visibility: editMode == i && (typeof (updatedLines[i]) == "string") && "hidden" || "visible"
-                    }}
+                    className="_bg-pink-200 invisible px-[0.5rem] h-[2.2rem] sm:h-[2.6rem] md:h-[3.2rem]"
                   >
                     {/* keep at minimum original width to avoid wierd alignment issues */}
-                    <div className="_bg-orange-200 h-0 invisible">
-                      {typeof(updatedLines[i]) == "string" ? updatedLines[i] : poemLine}
+                    <div className="bg-orange-200 h-0 invisible">
+                      {saving ? typeof (updatedLines[i]) == "string" ? updatedLines[i] : poemLine : poemLine}
                     </div>
-                    {/* show this when not editing */}
-                    {/* <div className="bg-yellow-200">
-                      {typeof (updatedLines[i]) == "string" ? updatedLines[i] : value}
-                    </div> */}
+                    {/* and stretch if updates are longer */}
+                    <div className="bg-orange-400 h-0 invisible">
+                      {saving ? typeof (updatedLines[i]) == "string" ? updatedLines[i] : poemLine : updatedLines[i]}
+                    </div>
                   </div>
                   {/* show input fields in edit mode */}
                   {
@@ -387,10 +391,7 @@ export default function HaikuPoem({
                     <PoemLineInput
                       id={i}
                       activeId={editMode}
-                      // value={typeof(updatedLines[i]) == "string" ? updatedLines[i] :  value}
-                      // value={value}
-                      // value={saving ? updatedLines[i] : value}
-                      value={saving ? typeof(updatedLines[i]) == "string" ? updatedLines[i] : poemLine : poemLine}
+                      value={saving ? typeof (updatedLines[i]) == "string" ? updatedLines[i] : poemLine : poemLine}
                       haiku={haiku}
                       visible={editMode == i}
                       expandSelection={expandSelection}
@@ -433,7 +434,7 @@ export default function HaikuPoem({
             ))}
           </div>
           <div
-            className="relative md:text-[14pt] sm:text-[10pt] text-[8pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem] pl-[0.7rem]"
+              className="relative md:text-[14pt] sm:text-[10pt] text-[8pt] md:mt-[0.0rem] sm:mt-[0.1rem] mt-[-0.1rem] pl-[0.7rem]"
             style={{
               // background: "pink",
               height: mode == "haikudle"
