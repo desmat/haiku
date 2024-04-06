@@ -16,69 +16,136 @@ import { GenerateIcon } from "./Nav";
 import PopOnClick from "./PopOnClick";
 import { StyledLayers } from "./StyledLayers";
 
-// function PoemLineInput({
-//   line,
-//   haiku,
-//   // ref,
-//   visible,
-//   onChange,
-// }: {
-//   line: string,
-//   haiku: Haiku,
-//   // ref: any,
-//   visible: boolean,
-//   onChange: any
-// }) {
-//   const [updatedLine, setUpdatedLine] = useState(line);
-//   const ref = useRef();
-//   console.log('>> app._components.PoemLineInput.render()', { visible, line, updatedLine, ref });
+export function PoemLineInput({
+  id,
+  activeId,
+  value,
+  haiku,
+  visible,
+  resetCursor,
+  expandSelection,
+  onChange,
+}: {
+  id: number,
+  activeId?: number,
+  value?: string,
+  haiku: Haiku,
+  visible: boolean,
+  resetCursor?: boolean,
+  expandSelection?: boolean,
+  onChange: any,
+}) {
+  const [localValue, setLocalValue] = useState<string>(upperCaseFirstLetter(value || ""));
+  const [active, setActive] = useState(false);
+  const ref = useRef();
+  console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, expandSelection, resetCursor, value, updatedLine: localValue });
 
-//   useEffect(() => {
-//     console.log('>> app._components.PoemLineInput.useEffect()', { visible, line, updatedLine, ref });
+  useEffect(() => {
+    console.log('>> app._components.PoemLineInput.useEffect()', { id, activeId, visible, ref, value, updatedLine: localValue });
 
-//     ref?.current && ref.current.focus();
-//     ref?.current && ref.current.setSelectionRange(0, 0);
-//   });
+    // if (visible && typeof (value) == "string" && typeof (updatedLine) != "string") {
+    // if (visible && typeof (value) == "string") {
 
-//   return (
-//     <>
-//       {/* https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
-//       <style
-//         dangerouslySetInnerHTML={{
-//           __html: `
-//             .poem-input {
-//               background: none;
-//             }
-//             .poem-input:focus {
-//               outline: 2px solid ${haiku?.bgColor || ""}88;
-//               background-color: ${haiku?.bgColor || "white"}88;
-//               border-radius: 5px;
-//               caret-color: ${haiku?.color || "black"};
-//             }
-//             ::selection { 
-//               background: ${haiku.color || "black"}66 
-//             }`
-//         }}
-//       >
-//       </style>
-//       <input
-//         ref={ref}
-//         className="poem-input w-full absolute top-0 left-[-0.01rem] px-[0.5rem]"
-//         style={{
-//           visibility: visible ? "visible" : "hidden",
-//         }}
-//         onChange={(e: any) => {
-//           // e.preventDefault();
-//           setUpdatedLine(e.target.value);
-//           onChange(e);
-//         }}
-//         // defaultValue={line}
-//         value={updatedLine}
-//       >
-//       </input>
-//     </>
-//   )
-// }
+    // if ( typeof (value) == "string" && typeof (updatedLine) != "string") {
+    //   setUpdatedLine(upperCaseFirstLetter(value || ""));
+    // }
+
+    if (typeof (activeId) == "number") {
+      // if (activeId == id && typeof (value) == "string" && typeof (updatedLine) != "string") {
+      if (activeId == id && typeof (value) == "string" && !active) {
+        console.log('>> app._components.PoemLineInput.useEffect() setFocus', { id, activeId, visible, expandSelection, resetCursor, value, updatedLine: localValue });
+        // setUpdatedLine(upperCaseFirstLetter(value || ""));
+        // setUpdatedLine(value);
+
+        setActive(true);
+
+        // @ts-ignore
+        ref?.current && ref.current.focus();
+
+        // if (resetCursor) {
+        //   // @ts-ignore
+        //   ref?.current && ref.current.setSelectionRange(0, 0);
+        // } else if (expandSelection) {
+        //   // @ts-ignore
+        //   ref?.current && ref.current.select();
+        // }
+      }
+      // } else if (typeof (value) != "string" && typeof (updatedLine) == "string") {
+      //   console.log('>> app._components.PoemLineInput.useEffect() resetting', { id, visible, value, updatedLine, ref });
+      //   setUpdatedLine(undefined);
+      else {
+        console.log('>> app._components.PoemLineInput.useEffect() resetting', { id, visible, value, updatedLine: localValue, ref });
+        setActive(false);
+        // @ts-ignore
+        ref?.current && ref.current.blur();
+      }
+    } else {
+      console.log('>> app._components.PoemLineInput.useEffect() resetting', { id, activeId, visible, expandSelection, resetCursor, value, updatedLine: localValue });
+      // @ts-ignore
+      ref?.current && ref.current.blur();
+      setLocalValue(value || "");
+      setActive(false);
+    }
+
+    return () => {
+      console.log('>> app._components.PoemLineInput.useEffect() unloading', { id, visible, expandSelection, resetCursor, value, updatedLine: localValue });
+      // @ts-ignore
+      // ref?.current && ref.current.blur();
+      // setUpdatedLine(value || "");
+    }
+  }, [value, id, activeId]);
+
+  return (
+    <>
+      {/* https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            .poem-input {
+              background: none;
+              _background: pink;
+            }
+            .poem-input:focus {
+              outline: 2px solid ${haiku?.bgColor || ""}88;
+              background-color: ${haiku?.bgColor || "white"}88;
+              border-radius: 5px;
+              caret-color: ${haiku?.color || "black"};
+            }
+            ::selection { 
+              background: ${haiku.color || "black"}66 
+            }`
+        }}
+      >
+      </style>
+
+      <input
+        //@ts-ignore
+        ref={ref}
+        className="poem-input bg-pink-200 w-full absolute top-0 left-[-0.01rem] px-[0.5rem]"
+        style={{
+          // visibility: visible ? "visible" : "hidden",
+        }}
+        onChange={(e: any) => {
+          // e.preventDefault();
+          setLocalValue(e.target.value);
+          onChange(e.target.value);
+        }}
+        onBlur={() => {
+          // onChange(localValue);
+        }}
+        onFocus={() => {
+          if (expandSelection) {
+            // @ts-ignore
+            ref?.current && ref.current.select();
+          }
+        }}
+        // defaultValue={value}
+        value={localValue}
+      >
+      </input>
+    </>
+  )
+}
 
 export default function HaikuPoem({
   user,
@@ -107,10 +174,11 @@ export default function HaikuPoem({
 
   // can't create refs in a loop: hopefully 10 will be enough for most usecase
   const inputRefs: any[] = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef()]
-  // let [updatedLines, setUpdatedLines] = useState<string[]>(haiku && haiku.poem.map((line: string) => line) || []);
+  // let [updatedLines, setUpdatedLines] = useState<string[]>(haiku && haiku.poem.map((value: string) => value) || []);
   let [updatedLines, setUpdatedLines] = useState<string[]>([]);
-  const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState<number | undefined>(undefined);
   const [saving, setSaving] = useState(false);
+  const [expandSelection, setExpandSelection] = useState(false);
   // const [editingLineNumber, setEditingLineNumber] = useState(Array.from(new Array(haiku?.poem?.length)));
 
   const [alert] = useAlert((state: any) => [state.plain]);
@@ -129,7 +197,7 @@ export default function HaikuPoem({
     }
 
     const haikuToCopy = haiku.poem
-      .map((line: string, i: number) => upperCaseFirstLetter(updatedLines[i] || line))
+      .map((value: string, i: number) => upperCaseFirstLetter(updatedLines[i] || value))
       .join("\n")
       + `\n—${haikuTitleAndAuthorTag.join("")}\n`;
 
@@ -146,59 +214,64 @@ export default function HaikuPoem({
 
   const startEdit = (inputIndex: number, expandSelection?: boolean) => {
     console.log('>> app._components.HaikuPoem.startEdit()', { inputIndex, expandSelection });
-    setEditMode(true);
+    setEditMode(inputIndex);
+    setExpandSelection(!!expandSelection);
     // editingLineNumber[inputIndex] = true;
     // setEditingLineNumber(editingLineNumber);
-    updatedLines[inputIndex] = updatedLines[inputIndex] || haiku.poem[inputIndex];
+    updatedLines[inputIndex] = typeof (updatedLines[inputIndex]) == "string"
+      ? updatedLines[inputIndex]
+      : haiku.poem[inputIndex];
     // const updated = [...updatedLines]
     setUpdatedLines([...updatedLines]);
     // updatedLines = updated;
 
     // allow a bit of time for re-draw
-    setTimeout(() => {
-      const ref = inputRefs[inputIndex || 0];
-      console.log('>> app._components.HaikuPoem.startEdit()', { currentRef: ref?.current });
-      ref?.current && ref.current.focus();
-      if (expandSelection) {
-        ref?.current && ref.current.select();
-      } else {
-        ref?.current && ref.current.setSelectionRange(0, 0);
-      }
-    }, 10);
+    // setTimeout(() => {
+    //   const ref = inputRefs[inputIndex || 0];
+    //   console.log('>> app._components.HaikuPoem.startEdit()', { currentRef: ref?.current });
+    //   ref?.current && ref.current.focus();
+    //   if (expandSelection) {
+    //     ref?.current && ref.current.select();
+    //   } else {
+    //     ref?.current && ref.current.setSelectionRange(0, 0);
+    //   }
+    // }, 10);
   }
 
   const cancelEdit = () => {
-    // setUpdatedLines(haiku.poem.map((line: string) => line));
+    console.log('>> app._components.HaikuPoem.cancelEdit()', { haiku, poem: haiku.poem, updatedLines });
+    // setUpdatedLines(haiku.poem.map((value: string) => value));
     setUpdatedLines([]);
-    setEditMode(false);
+    setEditMode(undefined);
   }
 
   const finishEdit = async () => {
     console.log('>> app._components.HaikuPoem.finishEdit()', { haiku, poem: haiku.poem, updatedLines });
-    setEditMode(false);
+    setEditMode(undefined);
 
     if (updatedLines.length == 0 || haiku.poem.join("/") == updatedLines.join("/")) {
       // no updates to save
+      setUpdatedLines([]);
       return;
     }
 
     setSaving(true);
 
     const syllables = haiku.poem
-      .map((line: string, i: number) => (updatedLines[i] || line || "").split(/\s/)
+      .map((value: string, i: number) => (updatedLines[i] || value || "").split(/\s/)
         .map((word: string) => syllable(word))
         .reduce((a: number, v: number) => a + v, 0))
     console.log('>> app._components.HaikuPoem.finishEdit()', { syllables });
 
     const updatedOpen = haiku.poem
-      .map((line: string, i: number) => {
+      .map((value: string, i: number) => {
         if (updatedLines[i] == "") return "...";
         if (updatedLines[i] && (updatedLines[i].includes("...") || updatedLines[i].includes("…"))) return updatedLines[i];
-        // if ((i == 0 || i == 2) && syllables[i] <= 3) return `${updatedLines[i] || line} ...`;
-        // if (i == 1 && syllables[i] <= 5) return `${updatedLines[i] || line} ...`;
-        if ((i == 0 || i == 2) && syllables[i] <= 3) return `... ${updatedLines[i] || line} ...`;
-        if (i == 1 && syllables[i] <= 5) return `... ${updatedLines[i] || line} ...`;
-        return updatedLines[i] || line;
+        // if ((i == 0 || i == 2) && syllables[i] <= 3) return `${updatedLines[i] || value} ...`;
+        // if (i == 1 && syllables[i] <= 5) return `${updatedLines[i] || value} ...`;
+        if ((i == 0 || i == 2) && syllables[i] <= 3) return `... ${updatedLines[i] || value} ...`;
+        if (i == 1 && syllables[i] <= 5) return `... ${updatedLines[i] || value} ...`;
+        return updatedLines[i] || value;
       });
 
     try {
@@ -211,13 +284,12 @@ export default function HaikuPoem({
       // TODO check error
       console.log('>> app._components.HaikuPoem.finishEdit()', { saved });
       haiku.poem = saved.poem;
-      setUpdatedLines(saved.poem.map((line: string) => line));
-      setSaving(false);
     } catch (error: any) {
       console.log('>> app._components.HaikuPoem.finishEdit()', { error });
-      setUpdatedLines(haiku.poem.map((line: string) => line));
-      setSaving(false);
     }
+
+    setUpdatedLines([]);
+    setSaving(false);
   }
 
   const handlePoemLineKeyDown = (e: any, lineNumber: number) => {
@@ -226,31 +298,37 @@ export default function HaikuPoem({
       cancelEdit();
     } else if (e.key == "Enter") {
       if (lineNumber == haiku.poem.length - 1) {
+        setEditMode(undefined);
         finishEdit();
       } else {
-        // next line
-        inputRefs[lineNumber + 1].current.focus();
-        inputRefs[lineNumber + 1].current.select();
+        // next value
+        // inputRefs[lineNumber + 1].current.focus();
+        // inputRefs[lineNumber + 1].current.select();
+        startEdit(lineNumber + 1);
       }
     } else if (e.key == "Tab") {
       if (lineNumber == 0 && e.shiftKey || lineNumber == haiku.poem.length - 1 && !e.shiftKey) {
+        e.preventDefault();
         finishEdit();
       } else {
+        e.preventDefault();
         startEdit(lineNumber + (e.shiftKey ? -1 : 1), true);
       }
     } else if (e.key == "ArrowUp" && lineNumber > 0) {
+      e.preventDefault();
       startEdit(lineNumber - 1, true);
     } else if (e.key == "ArrowDown" && lineNumber < haiku.poem.length - 1) {
+      e.preventDefault();
       startEdit(lineNumber + 1, true);
-      // } else if (["ArrowUp", "ArrowDown"].includes(e.key)) {
-      //   // e.preventDefault();
+    } else if (["ArrowUp", "ArrowDown"].includes(e.key)) {
+      e.preventDefault();
     }
   };
 
-  const handleInputChange = (e: any, lineNumber: number) => {
-    // console.log(e.target.value);
+  const handleInputChange = (value: string, lineNumber: number) => {
+    console.log('>> app._components.HaikuPoem.handleInputChange()', { value, lineNumber });
     const updated = [...updatedLines];
-    updated[lineNumber] = upperCaseFirstLetter(e.target.value);
+    updated[lineNumber] = upperCaseFirstLetter(value);
     // setTimeout(() => {
     updatedLines = updated;
     setUpdatedLines(updated);
@@ -261,7 +339,7 @@ export default function HaikuPoem({
     <div className="relative">
       <div
         className={`_bg-pink-200 fixed top-0 left-0 w-[100vw] h-[100vh]${saving ? " opacity-50" : ""}`}
-        onClick={() => editMode && finishEdit()}
+        onClick={() => typeof (editMode) == "number" && finishEdit()}
       />
 
       <PopOnClick color={haiku.bgColor} force={popPoem} disabled={!isShowcaseMode}>
@@ -270,7 +348,7 @@ export default function HaikuPoem({
             className="_bg-purple-200 flex flex-col transition-all"
             onClick={(e: any) => {
               e.preventDefault();
-              // if (!editMode) {
+              // if (!typeof(editMode) == "number") {
               //   handleClickHaiku(e);
               // }
               isShowcaseMode && handleClickHaiku(e)
@@ -280,42 +358,47 @@ export default function HaikuPoem({
               cursor: isShowcaseMode ? "pointer" : ""
             }}
           >
-            {haiku.poem.map((line: string, i: number) => (
+            {haiku.poem.map((poemLine: string, i: number) => (
               <StyledLayers key={i} styles={styles}>
                 <div
                   className="relative m-[0rem] transition-all"
                   onKeyDown={(e: any) => handlePoemLineKeyDown(e, i)}
-                  onMouseDown={(e: any) => !editMode && startEdit(i)}
+                  onMouseDown={(e: any) => /* !typeof(editMode) == "number" && */ startEdit(i, false)}
                 >
                   {/* used to set the width */}
                   <div
                     className="_bg-pink-200 px-[0.5rem] h-[2.2rem] sm:h-[2.6rem] md:h-[3.2rem]"
                     style={{
-                      visibility: editMode ? "hidden" : "visible"
+                      visibility: editMode == i && (typeof (updatedLines[i]) == "string") && "hidden" || "visible"
                     }}
                   >
                     {/* keep at minimum original width to avoid wierd alignment issues */}
                     <div className="_bg-orange-200 h-0 invisible">
-                      {line}
+                      {typeof(updatedLines[i]) == "string" ? updatedLines[i] : poemLine}
                     </div>
                     {/* show this when not editing */}
-                    <div className="_bg-yellow-200">
-                      {typeof (updatedLines[i]) == "string" ? updatedLines[i] : line}
-                    </div>
+                    {/* <div className="bg-yellow-200">
+                      {typeof (updatedLines[i]) == "string" ? updatedLines[i] : value}
+                    </div> */}
                   </div>
                   {/* show input fields in edit mode */}
                   {
-                    // editMode && editingLineNumber[i] && 
-                    //   <PoemLineInput
-                    //     line={updatedLines[i] /* line */}
-                    //     haiku={haiku}
-                    //     // ref={inputRefs[i]}
-                    //     visible={editMode}
-                    //     onChange={(e: any) => handleInputChange(e, i)}
-                    //   />
+                    // (typeof (updatedLines[i]) == "string") &&
+                    <PoemLineInput
+                      id={i}
+                      activeId={editMode}
+                      // value={typeof(updatedLines[i]) == "string" ? updatedLines[i] :  value}
+                      // value={value}
+                      // value={saving ? updatedLines[i] : value}
+                      value={saving ? typeof(updatedLines[i]) == "string" ? updatedLines[i] : poemLine : poemLine}
+                      haiku={haiku}
+                      visible={editMode == i}
+                      expandSelection={expandSelection}
+                      onChange={(value: string) => handleInputChange(value, i)}
+                    />
                   }
                   {/* https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
-                  <style
+                  {/* <style
                     dangerouslySetInnerHTML={{
                       __html: `
                         .poem-input {
@@ -341,10 +424,10 @@ export default function HaikuPoem({
                       visibility: editMode ? "visible" : "hidden",
                     }}
                     onChange={(e: any) => handleInputChange(e, i)}
-                    // defaultValue={line}
-                    value={typeof (updatedLines[i]) == "string" ? updatedLines[i] : line}
+                    // defaultValue={value}
+                    value={typeof (updatedLines[i]) == "string" ? updatedLines[i] : value}
                   >
-                  </input>
+                  </input> */}
                 </div>
               </StyledLayers>
             ))}
