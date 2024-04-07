@@ -1,42 +1,53 @@
 // Adapted from https://thomasstep.com/blog/a-guide-to-using-jwt-in-javascript
 
-import { SignJWT, decodeJwt, importPKCS8 } from "jose";
+// import { SignJWT, decodeJwt, importPKCS8 } from "jose";
 
 const algorithm = "RS256"
 const privateKeyStr = process.env.AUTH_PRIVATE_KEY || "NO_KEY";
 const publicKeyStr = process.env.AUTH_PUBLIC_KEY || "NO_KEY";
 
 export async function encodeJWT(payload: any) {
-  // console.log(">> utils.jwt.encode", { payload, privateKeyStr: privateKeyStr.substring(0, 16) });
+  // console.log(">> utils.jwt.encodeJWT", { payload, encode: process.env.SESSION_ENCODE });
 
-  // const privateKey = await importPKCS8(privateKeyStr, algorithm)
+  if (process.env.SESSION_ENCODE == "btoa") {
+    console.warn(">> utils.jwt.encodeJWT ALTERNATIVE ENCODING", { encode: process.env.SESSION_ENCODE });
+    // workaround safari 12 issue
+    return btoa(JSON.stringify(payload));
+  }
 
-  // const token = await new SignJWT(payload)
-  //   .setProtectedHeader({
-  //     typ: 'JWT',
-  //     alg: algorithm,
-  //   })
-  //   .setIssuer('https://haiku.desmat.ca')
-  //   // .setSubject('uniqueUserId')
-  //   .setAudience('haiku.desmat.ca')
-  //   .setExpirationTime('1y')
-  //   .setIssuedAt()
-  //   .sign(privateKey);
-  // // console.log(token);
-  // // console.log(">> utils.jwt.encode after new SignJWT")
+  const jose = await require("jose");
 
-  // return token;
+  const privateKey = await jose.importPKCS8(privateKeyStr, algorithm)
 
-  // jose lib breaks on safari 12
-  return btoa(JSON.stringify(payload));
+  const token = await new jose.SignJWT(payload)
+    .setProtectedHeader({
+      typ: 'JWT',
+      alg: algorithm,
+    })
+    .setIssuer('https://haiku.desmat.ca')
+    // .setSubject('uniqueUserId')
+    .setAudience('haiku.desmat.ca')
+    .setExpirationTime('1y')
+    .setIssuedAt()
+    .sign(privateKey);
+  // console.log(token);
+  // console.log(">> utils.jwt.encode after new SignJWT")
+
+  return token;
 }
 
 export async function decodeJWT(token: string) {
-  // const ret = decodeJwt(token);
-  // console.log(ret);
+  // console.log(">> utils.jwt.decodeJWT", { token: token, encode: process.env.SESSION_ENCODE });
 
-  // return ret;
+  if (process.env.SESSION_ENCODE == "btoa") {
+    console.warn(">> utils.jwt.decodeJWT ALTERNATIVE DECODING", { encode: process.env.SESSION_ENCODE });
+    // workaround safari 12 issue
+    return JSON.parse(atob(token));
+  }
 
-  // jose lib breaks on safari 12
-  return JSON.parse(atob(token));
+  const jose = await require("jose");
+  const ret = jose.decodeJwt(token);
+  // console.log(">> utils.jwt.decodeJWT", { ret });
+
+  return ret;
 }
