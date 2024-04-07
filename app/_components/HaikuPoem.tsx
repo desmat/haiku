@@ -86,7 +86,7 @@ export default function HaikuPoem({
           ))}
         </div>
         <div
-          className="_bg-pink-200 relative md:text-[18pt] sm:text-[14pt] text-[12pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]"
+          className="_bg-pink-200 relative md:text-[16pt] sm:text-[14pt] text-[12pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]"
           style={{
             // background: "pink",
             height: isHaikudleMode

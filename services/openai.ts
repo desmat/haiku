@@ -27,7 +27,9 @@ export async function generateBackgroundImage(subject?: string, mood?: string): 
     "expressionist painting",
     "landscape painting"
   ];
-  const prompt = `Please respond with an extremely muted, almost monochromatic colors, old-school japanese-style ${imageTypes[Math.floor(Math.random() * imageTypes.length)]}
+  const prompt = `
+    Please respond with an extremely muted, almost monochromatic colors, 
+    old-school japanese-style ${imageTypes[Math.floor(Math.random() * imageTypes.length)]}
     on the theme of ${subject || "any"}${mood ? ` with a mood of ${mood}` : ""}.`
 
   // for testing
