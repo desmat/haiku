@@ -113,8 +113,7 @@ export default function HaikuPoem({
               <StyledLayers styles={styles}>
                 <span
                   dangerouslySetInnerHTML={{ __html: `${haikuTitleAndAuthorTag.join(haiku.theme?.length > maxHaikuTheme ? "<br/>&nbsp;" : "")}` }}
-                >
-                </span>
+                />
               </StyledLayers>
             </div>
 

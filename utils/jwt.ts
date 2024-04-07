@@ -15,25 +15,29 @@ export async function encodeJWT(payload: any) {
     return btoa(JSON.stringify(payload));
   }
 
-  const jose = await require("jose");
+  throw 'Encoding not supported: ' + process.env.SESSION_ENCODE;
+  
+  // this still breaks with a production build
 
-  const privateKey = await jose.importPKCS8(privateKeyStr, algorithm)
+  // const jose = await require("jose");
 
-  const token = await new jose.SignJWT(payload)
-    .setProtectedHeader({
-      typ: 'JWT',
-      alg: algorithm,
-    })
-    .setIssuer('https://haiku.desmat.ca')
-    // .setSubject('uniqueUserId')
-    .setAudience('haiku.desmat.ca')
-    .setExpirationTime('1y')
-    .setIssuedAt()
-    .sign(privateKey);
-  // console.log(token);
-  // console.log(">> utils.jwt.encode after new SignJWT")
+  // const privateKey = await jose.importPKCS8(privateKeyStr, algorithm)
 
-  return token;
+  // const token = await new jose.SignJWT(payload)
+  //   .setProtectedHeader({
+  //     typ: 'JWT',
+  //     alg: algorithm,
+  //   })
+  //   .setIssuer('https://haiku.desmat.ca')
+  //   // .setSubject('uniqueUserId')
+  //   .setAudience('haiku.desmat.ca')
+  //   .setExpirationTime('1y')
+  //   .setIssuedAt()
+  //   .sign(privateKey);
+  // // console.log(token);
+  // // console.log(">> utils.jwt.encode after new SignJWT")
+
+  // return token;
 }
 
 export async function decodeJWT(token: string) {
@@ -45,9 +49,13 @@ export async function decodeJWT(token: string) {
     return JSON.parse(atob(token));
   }
 
-  const jose = await require("jose");
-  const ret = jose.decodeJwt(token);
-  // console.log(">> utils.jwt.decodeJWT", { ret });
+  throw 'Encoding not supported: ' + process.env.SESSION_ENCODE;
 
-  return ret;
+  // this still breaks with a production build
+
+  // const jose = await require("jose");
+  // const ret = jose.decodeJwt(token);
+  // // console.log(">> utils.jwt.decodeJWT", { ret });
+
+  // return ret;
 }
