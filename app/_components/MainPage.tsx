@@ -406,10 +406,10 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   }
 
   const switchMode = async (newMode?: string) => {
-    // console.log('>> app.page.switchMode()', { mode, newMode });
+    console.log('>> app.page.switchMode()', { mode, newMode });
     const url = newMode
       ? `/${haikuId || ""}?mode=${newMode}`
-      : `/${haikuId || ""}?mode=${mode == "haiku" ? "haikudle" : mode == "haikudle" ? "haiku" : process.env.EXPERIENCE_MODE}`
+      : `/${haikuId || ""}?mode=${mode == "haiku" ? "haikudle" : mode != "haiku" ? "haiku" : process.env.EXPERIENCE_MODE}`
 
     setLoadingUI(true);
     window.history.replaceState(null, '', url);
