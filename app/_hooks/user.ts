@@ -64,7 +64,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       }
     } else {
       // console.log('>> hooks.user.load() creating session', {});
-      user = { id: uuid(), isAnonymous: true, isAdmin: false, preferences: {} };
+      user = { id: 'showcase-ipad', isAnonymous: true, isAdmin: false, preferences: {} };
       token = await encodeJWT({ user });
       window?.localStorage && window.localStorage.setItem("session", token || "");
     }
