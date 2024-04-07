@@ -50,8 +50,9 @@ export default function HaikuPage({
         {(regenerating || loading) &&
           <div className="relative opacity-50">
             <StyledLayers styles={styles}>
-              <div className="animate-pulse">
-                Loading...
+              <div className="animate-pulse flex flex-col items-center">
+                {/* <div>読込</div> */}
+                <div>Loading</div>
               </div>
             </StyledLayers>
           </div>

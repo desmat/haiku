@@ -70,7 +70,7 @@ export default function HaikuPoem({
     <PopOnClick color={haiku.bgColor} force={popPoem}>
       <div>
         <div
-          className="_bg-purple-200 flex flex-col transition-all"
+          className="_bg-purple-200 flex flex-col gap-[-0.5rem] _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
           onClick={handleClickHaiku}
           title={mode == "showcase" ? "Refresh" : "Copy to clipboard"}
           style={{
@@ -79,21 +79,23 @@ export default function HaikuPoem({
         >
           {haiku.poem.map((line: string, i: number) => (
             <StyledLayers key={i} styles={styles}>
-              <div className="m-[0rem] transition-all">
+              <div className="my-[-0.1rem] transition-all">
                 {upperCaseFirstLetter(line)}
               </div>
             </StyledLayers>
           ))}
         </div>
         <div
-          className="relative md:text-[14pt] sm:text-[10pt] text-[8pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]"
+          className="_bg-pink-200 relative md:text-[18pt] sm:text-[14pt] text-[12pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]"
           style={{
             // background: "pink",
-            height: mode == "haikudle"
+            height: isHaikudleMode
               ? ""
-              : haiku.theme?.length > maxHaikuTheme
-                ? "2.6rem"
-                : "1.3rem"
+              : isShowcaseMode
+                ? "" //"8rem" // looks better when pushed up a bit
+                : haiku.theme?.length > maxHaikuTheme
+                  ? "2.6rem"
+                  : "1.3rem"
           }}
         >
           <div className={isShowcaseMode
@@ -110,7 +112,7 @@ export default function HaikuPoem({
             >
               <StyledLayers styles={styles}>
                 <span
-                  dangerouslySetInnerHTML={{ __html: `—${haikuTitleAndAuthorTag.join(haiku.theme?.length > maxHaikuTheme ? "<br/>&nbsp;" : "")}` }}
+                  dangerouslySetInnerHTML={{ __html: `${haikuTitleAndAuthorTag.join(haiku.theme?.length > maxHaikuTheme ? "<br/>&nbsp;" : "")}` }}
                 >
                 </span>
               </StyledLayers>

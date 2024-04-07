@@ -113,19 +113,40 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
   const textStyles = [
+    // {
+    //   color: fontColor,
+    //   bgColor,
+    //   filter: `drop-shadow(0px 0px 8px ${bgColor})`,
+    //   // filter: `drop-shadow(0px 0px 16px ${bgColor}88)`,
+    //   // filter: `drop-shadow(0px 0px 16px ${fontColor}88)`,
+    //   WebkitTextStroke: `1.5px ${fontColor}`,
+    //   fontWeight: 300,
+    // },
     {
-      color: fontColor,
-      bgColor,
-      filter: `drop-shadow(0px 0px 8px ${bgColor})`,
-      WebkitTextStroke: `1.5px ${fontColor}`,
-      fontWeight: 300,
+      filter: `drop-shadow(0px 0px 16px ${fontColor}88)`,
+    },
+    {
+      filter: `drop-shadow(0px 0px 4px ${bgColor})`,
     },
     {
       filter: `drop-shadow(0px 0px 2px ${bgColor})`,
     },
     {
-      filter: `drop-shadow(0px 0px 12px ${bgColor}44)`,
+      filter: `drop-shadow(0px 0px 8px ${bgColor}44)`,
     },
+    {
+      filter: `drop-shadow(0px 0px 22px ${bgColor}22)`,
+    },
+    {
+      color: fontColor,
+      bgColor,
+      filter: `drop-shadow(0px 0px 8px ${bgColor})`,
+      // filter: `drop-shadow(0px 0px 16px ${bgColor}88)`,
+      // filter: `drop-shadow(0px 0px 16px ${fontColor}88)`,
+      WebkitTextStroke: `1.5px ${fontColor}`,
+      fontWeight: 300,
+    },
+
   ];
   const altTextStyles = [
     {

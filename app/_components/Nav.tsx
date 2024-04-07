@@ -29,9 +29,12 @@ export function Loading({ onClick }: { onClick?: any }) {
   return (
     <div
       onClick={onClick || defaultOnClick}
-      className='_bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 italic text-dark-2 opacity-5 animate-pulse cursor-pointer z-50'
+      className='_bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-dark-2 opacity-5 animate-pulse cursor-pointer z-50'
     >
-      Loading...
+      <div className="animate-pulse flex flex-col items-center">
+        {/* <div>読込</div> */}
+        <div>Loading</div>
+      </div>
     </div>
   );
 }
@@ -398,7 +401,7 @@ function SidePanel({
       <div
         className={`_bg-pink-200 fixed top-0 h-full w-[27rem] max-w-[90vw] z-20 transition-all _blur-[10px]`}
         style={{
-          backgroundColor: `${styles[1]?.color ? styles[0]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
+          backgroundColor: `${styles[styles.length - 1]?.color ? styles[styles.length - 1]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
           backdropFilter: "blur(10px)",
           left: panelOpened ? 0 : "-27rem"
         }}
@@ -498,7 +501,7 @@ function SidePanel({
                     {!user?.isAdmin && !h.generatedAt && h.solvedAt &&
                       <span className="font-normal"> solved {moment(h.solvedAt).fromNow()}{h.moves ? ` in ${h.moves} move${h.moves > 1 ? "s" : ""}` : ""}</span>
                     }
-                    {!user?.isAdmin && !h.generatedAt && !h.solvedAt && h.viewedAt && 
+                    {!user?.isAdmin && !h.generatedAt && !h.solvedAt && h.viewedAt &&
                       <span className="font-normal"> viewed {moment(h.viewedAt).fromNow()}</span>
                     }
                   </Link>
@@ -726,7 +729,7 @@ export function NavOverlay({
         <>
           {onSwitchMode &&
             <div
-              className="_bg-pink-400 fixed top-0 left-0 w-10 h-full z-10 cursor-pointer"
+              className="_bg-pink-400 fixed top-0 left-0 w-10 h-full z-40 cursor-pointer"
               title="Exit showcase mode"
               onClick={() => onSwitchMode && onSwitchMode()}
             />
