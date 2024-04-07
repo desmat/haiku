@@ -23,7 +23,7 @@ export default function Page({
       {loading &&
         <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-dark-2 opacity-5 animate-pulse'>
           <div className="animate-pulse flex flex-col items-center">
-            {/* <div>読込</div> */}
+            <div>読込</div>
             <div>Loading</div>
           </div>
         </div>
@@ -43,9 +43,9 @@ export default function Page({
           </PageLinks>
         </div>
       }
-      {/* {loading &&
+      {loading &&
         <p className='italic text-center opacity-20 animate-pulse'>読込</p>
-      } */}
+      }
       {!loading &&
         <div className="px-2 flex flex-col align-center self-center w-fit">
           {/* <> */}

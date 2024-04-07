@@ -32,7 +32,7 @@ export function Loading({ onClick }: { onClick?: any }) {
       className='_bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-dark-2 opacity-5 animate-pulse cursor-pointer z-50'
     >
       <div className="animate-pulse flex flex-col items-center">
-        {/* <div>読込</div> */}
+        <div>読込</div>
         <div>Loading</div>
       </div>
     </div>
