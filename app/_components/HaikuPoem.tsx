@@ -104,10 +104,10 @@ export default function HaikuPoem({
           }>
             <div
               className="transition-all"
-              onClick={handleClickHaiku}
-              title={mode == "showcase" ? "Refresh" : "Copy to clipboard"}
+              onClick={(e: any) => !isShowcaseMode && handleClickHaiku(e)}
+              title={isShowcaseMode ? "" : "Copy to clipboard"}
               style={{
-                cursor: mode == "showcase" ? "pointer" : "copy"
+                cursor: isShowcaseMode ? "default" : "copy"
               }}
             >
               <StyledLayers styles={styles.slice(2)}>
