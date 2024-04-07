@@ -110,7 +110,7 @@ export default function HaikuPoem({
                 cursor: mode == "showcase" ? "pointer" : "copy"
               }}
             >
-              <StyledLayers styles={styles}>
+              <StyledLayers styles={styles.slice(2)}>
                 <span
                   dangerouslySetInnerHTML={{ __html: `${haikuTitleAndAuthorTag.join(haiku.theme?.length > maxHaikuTheme ? "<br/>&nbsp;" : "")}` }}
                 />
