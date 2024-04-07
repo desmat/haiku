@@ -32,14 +32,12 @@ export function ControlledInput({
   id,
   activeId,
   value,
-  disabled,
   select,
   onChange,
 }: {
   id: number,
   activeId?: number,
   value?: string,
-  disabled?: boolean,
   select?: boolean,
   onChange: any,
 }) {
@@ -47,14 +45,6 @@ export function ControlledInput({
   const [active, setActive] = useState(false);
   const ref = useRef();
   // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
-
-  if (disabled) {
-    return (
-      <div className="bg-purple-400">
-        {value}
-      </div>
-    )
-  }
 
   useEffect(() => {
     // console.log('>> app._components.PoemLineInput.useEffect()', { id, activeId, visible, ref, value, updatedLine: localValue });
@@ -355,7 +345,6 @@ export default function HaikuPoem({
                         <ControlledInput
                           id={i}
                           activeId={editingPoemLine}
-                          // disabled={!canEdit}
                           value={saving ? typeof (updatedPoem[i]) == "string" ? updatedPoem[i] : poemLine : poemLine}
                           select={select}
                           onChange={(value: string) => handleInputChange(value, i)}
