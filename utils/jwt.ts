@@ -27,6 +27,7 @@ export async function encodeJWT(payload: any) {
 
   // return token;
 
+  // jose lib breaks on safari 12
   return btoa(JSON.stringify(payload));
 }
 
@@ -36,5 +37,6 @@ export async function decodeJWT(token: string) {
 
   // return ret;
 
+  // jose lib breaks on safari 12
   return JSON.parse(atob(token));
 }
