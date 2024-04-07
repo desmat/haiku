@@ -32,14 +32,14 @@ export function ControlledInput({
   id,
   activeId,
   value,
-  visible,
+  disabled,
   select,
   onChange,
 }: {
   id: number,
   activeId?: number,
   value?: string,
-  visible: boolean,
+  disabled?: boolean,
   select?: boolean,
   onChange: any,
 }) {
@@ -47,6 +47,14 @@ export function ControlledInput({
   const [active, setActive] = useState(false);
   const ref = useRef();
   // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
+
+  if (disabled) {
+    return (
+      <div className="bg-purple-400">
+        {value}
+      </div>
+    )
+  }
 
   useEffect(() => {
     // console.log('>> app._components.PoemLineInput.useEffect()', { id, activeId, visible, ref, value, updatedLine: localValue });
@@ -123,6 +131,13 @@ export default function HaikuPoem({
   const [select, setExpandSelection] = useState(false);
   const [alert] = useAlert((state: any) => [state.plain]);
   const [saveHaiku] = useHaikus((state: any) => [state.save]);
+  const editing = typeof (editingPoemLine) == "number";
+  const copyAllowed = true;
+  const canCopy = copyAllowed && !editing && !saving;
+  const editAllowed = !isShowcaseMode && (user?.isAdmin || haiku.createdBy == user?.id) && saveHaiku;
+  const canEdit = editAllowed && !saving;
+  const regenerateAllowed = (user?.isAdmin || haiku.createdBy == user?.id) && regenerate;
+  const canRegenerate = regenerateAllowed && !editing && !saving;
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { haiku, updatedPoem, editingPoemLine });
 
   const haikuTitleAndAuthorTag = [
@@ -256,7 +271,7 @@ export default function HaikuPoem({
 
   const handleKeyDown = async (e: any) => {
     // console.log(">> app._component.SidePanel.handleKeyDown", { panelOpened, panelAnimating });
-    if (e.key == "Tab" && typeof (editingPoemLine) != "number") {
+    if (e.key == "Tab" && !editing) {
       e.preventDefault();
       startEdit(0, true);
     }
@@ -273,13 +288,14 @@ export default function HaikuPoem({
 
   return (
     <div className="relative">
+      {/* allow editors to click out and finish */}
       <div
-        className={`_bg-pink-200 fixed top-0 left-0 w-[100vw] h-[100vh]${saving ? " opacity-50" : ""}`}
-        onClick={() => typeof (editingPoemLine) == "number" && finishEdit()}
+        className={`_bg-pink-100 fixed top-0 left-0 w-[100vw] h-[100vh]${saving ? " opacity-50" : ""}`}
+        onClick={() => editing && finishEdit()}
       />
 
       <PopOnClick color={haiku.bgColor} force={popPoem} disabled={!isShowcaseMode}>
-        <div className={saving ? "animate-pulse" : ""}>
+        <div className={`_bg-pink-200 ${canEdit ? "group/edit" : canCopy ? "group/copy" : ""} p-2 ${saving ? "animate-pulse" : ""}`}>
           <div
             className="_bg-purple-200 flex flex-col transition-all"
             onClick={(e: any) => {
@@ -295,28 +311,30 @@ export default function HaikuPoem({
               <StyledLayers key={i} styles={styles}>
                 <div
                   className="relative m-[0rem] transition-all"
-                  onKeyDown={(e: any) => handlePoemLineKeyDown(e, i)}
-                  onMouseDown={(e: any) => startEdit(i, false)}
+                  onKeyDown={(e: any) => canEdit && handlePoemLineKeyDown(e, i)}
+                  onMouseDown={(e: any) => canEdit && startEdit(i, false)}
                 >
                   {/* set the width while editing */}
-                  <div
-                    className="_bg-pink-200 invisible px-[0.5rem] h-[2.2rem] sm:h-[2.6rem] md:h-[3.2rem]"
-                  >
-                    {/* keep at minimum original width to avoid wierd alignment issues */}
-                    <div className="bg-orange-200 h-0 invisible">
-                      {saving ? typeof (updatedPoem[i]) == "string" ? updatedPoem[i] : poemLine : poemLine}
-                    </div>
-                    {/* and stretch if updates are longer */}
-                    <div className="bg-orange-400 h-0 invisible">
-                      {saving ? typeof (updatedPoem[i]) == "string" ? updatedPoem[i] : poemLine : updatedPoem[i]}
-                    </div>
-                  </div>
+                  {editAllowed &&
+                    <>
+                      <div
+                        className="_bg-pink-200 invisible px-[0.5rem] h-[2.2rem] sm:h-[2.6rem] md:h-[3.2rem]"
+                      >
+                        {/* keep at minimum original width to avoid wierd alignment issues */}
+                        <div className="bg-orange-200 h-0 invisible">
+                          {saving ? typeof (updatedPoem[i]) == "string" ? updatedPoem[i] : poemLine : poemLine}
+                        </div>
+                        {/* and stretch if updates are longer */}
+                        <div className="bg-orange-400 h-0 invisible">
+                          {saving ? typeof (updatedPoem[i]) == "string" ? updatedPoem[i] : poemLine : updatedPoem[i]}
+                        </div>
+                      </div>
 
-                  {/* input field used in both view and edit modes */}
-                  {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
-                  <style
-                    dangerouslySetInnerHTML={{
-                      __html: `
+                      {/* input field used in both view and edit modes */}
+                      {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
+                      <style
+                        dangerouslySetInnerHTML={{
+                          __html: `
                         .poem-line-input input {
                           background: none;
                           _background: pink; /* for debugging */
@@ -330,25 +348,35 @@ export default function HaikuPoem({
                         .poem-line-input input::selection { 
                           background: ${haiku.color || "black"}66 
                         }`
-                    }}
-                  >
-                  </style>
-                  <div className="poem-line-input">
-                    <ControlledInput
-                      id={i}
-                      activeId={editingPoemLine}
-                      value={saving ? typeof (updatedPoem[i]) == "string" ? updatedPoem[i] : poemLine : poemLine}
-                      visible={editingPoemLine == i}
-                      select={select}
-                      onChange={(value: string) => handleInputChange(value, i)}
-                    />
-                  </div>
+                        }}
+                      >
+                      </style>
+                      <div className="poem-line-input">
+                        <ControlledInput
+                          id={i}
+                          activeId={editingPoemLine}
+                          // disabled={!canEdit}
+                          value={saving ? typeof (updatedPoem[i]) == "string" ? updatedPoem[i] : poemLine : poemLine}
+                          select={select}
+                          onChange={(value: string) => handleInputChange(value, i)}
+                        />
+                      </div>
+                    </>
+                  }
+                  {!editAllowed &&
+                    <div
+                      className={`_bg-purple-400 my-[0.05rem] ${isShowcaseMode ? "cursor-pointer" : "cursor-copy"}`}
+                      onClick={(e: any) => canCopy && handleClickHaiku(e)}
+                    >
+                      {poemLine}
+                    </div>
+                  }
                 </div>
               </StyledLayers>
             ))}
           </div>
           <div
-            className="relative md:text-[14pt] sm:text-[10pt] text-[8pt] md:mt-[0.0rem] sm:mt-[0.1rem] mt-[-0.1rem] pl-[0.7rem]"
+            className="relative md:text-[18pt] sm:text-[12pt] text-[10pt] md:mt-[0.0rem] sm:mt-[0.1rem] mt-[-0.1rem] pl-[0.7rem]"
             style={{
               height: mode == "haikudle"
                 ? ""
@@ -363,7 +391,11 @@ export default function HaikuPoem({
                 onClick={(e: any) => isShowcaseMode && handleClickHaiku(e)}
                 title={isShowcaseMode ? "Refresh" : ""}
                 style={{
-                  cursor: isShowcaseMode ? "pointer" : ""
+                  cursor: isShowcaseMode
+                    ? "pointer"
+                    : !editAllowed && canCopy
+                      ? "copy"
+                      : ""
                 }}
               >
                 <StyledLayers styles={styles}>
@@ -374,62 +406,73 @@ export default function HaikuPoem({
                 </StyledLayers>
               </div>
 
-              {regenerate && !isShowcaseMode && (user?.isAdmin || haiku.createdBy == user?.id) &&
+              {!isShowcaseMode && (copyAllowed || editAllowed || regenerateAllowed) && //&& (user?.isAdmin || haiku.createdBy == user?.id) &&
                 <div
-                  className="flex flex-row gap-2 mt-auto md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.4rem] sm:pb-[0.3rem] pb-[0.2rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
+                  className="group/actions _bg-yellow-200 flex flex-row gap-2 mt-auto md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.4rem] sm:pb-[0.3rem] pb-[0.2rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
                 >
-                  <Link
-                    href="#"
-                    className="cursor-pointer"
-                    title="Copy to clipboard"
-                    onClick={(e: any) => {
-                      e.preventDefault();
-                      handleClickHaiku(e);
-                    }}
-                  >
-                    <StyledLayers styles={altStyles || []}>
-                      <FaCopy className="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6" />
-                    </StyledLayers>
-                  </Link>
-                  <Link
-                    href="#"
-                    className="cursor-pointer"
-                    title="Edit this haiku"
-                    onClick={(e: any) => {
-                      e.preventDefault();
-                      startEdit(0, true);
-                    }}
-                  >
-                    <StyledLayers styles={altStyles || []}>
-                      <FaEdit className="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6" />
-                    </StyledLayers>
-                  </Link>
-                  {!user?.isAdmin && (user.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
-                    <span
-                      className="opacity-40"
-                      title="Exceeded daily limit: try again later"
+                  {copyAllowed &&
+                    <Link
+                      href="#"
+                      className={`${editing ? "" : "cursor-pointer"}`}
+                      title="Copy to clipboard"
+                      onClick={(e: any) => {
+                        e.preventDefault();
+                        canCopy && handleClickHaiku(e);
+                      }}
                     >
                       <StyledLayers styles={altStyles || []}>
-                        <GenerateIcon sizeOverwrite="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6" />
+                        <FaCopy className={`h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 opacity-60 ${canCopy ? "group-hover/actions:opacity-100 group-hover/copy:opacity-100 cursor-pointer" : "cursor-default"}`} />
                       </StyledLayers>
-                    </span>
+                    </Link>
                   }
-                  {(user?.isAdmin || (user.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
-                    <span title="Regenerate this haiku with the same theme">
+                  {editAllowed &&
+                    <Link
+                      href="#"
+                      className={`${!saving ? "cursor-pointer" : "cursor-default"}`}
+                      title="Edit this haiku"
+                      onClick={(e: any) => {
+                        e.preventDefault();
+                        if (editAllowed) {
+                          editing
+                            ? finishEdit()
+                            : canEdit
+                              ? startEdit(0, true)
+                              : undefined;
+                        }
+                      }}
+                    >
                       <StyledLayers styles={altStyles || []}>
-                        <GenerateIcon
-                          onClick={() => regenerate && regenerate()}
-                          sizeOverwrite="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6"
-                        />
+                        <FaEdit className={`h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 ${saving ? "opacity-60" : editing ? "opacity-100" : canEdit ? "opacity-60 group-hover/edit:opacity-100 group-hover/actions:opacity-100" : ""}`} />
                       </StyledLayers>
-                    </span>
+                    </Link>
+                  }
+                  {regenerateAllowed &&
+                    <>
+                      {!user?.isAdmin && (user.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
+                        <span title="Exceeded daily limit: try again later">
+                          <StyledLayers styles={altStyles || []}>
+                            <GenerateIcon sizeOverwrite="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 opacity-60" />
+                          </StyledLayers>
+                        </span>
+                      }
+                      {(user?.isAdmin || (user.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
+                        <span title="Regenerate this haiku with the same theme">
+                          <StyledLayers styles={altStyles || []}>
+                            <GenerateIcon
+                              onClick={() => canRegenerate && regenerate()}
+                              sizeOverwrite={`h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 opacity-60 ${canRegenerate ? "group-hover/actions:opacity-100 cursor-pointer" : "cursor-default"}`}
+                            />
+                          </StyledLayers>
+                        </span>
+                      }
+                    </>
                   }
                 </div>
               }
             </div>
           </div>
         </div>
-      </PopOnClick>
-    </div>
+      </PopOnClick >
+    </div >
   )
 }
