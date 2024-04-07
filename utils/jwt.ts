@@ -7,7 +7,7 @@ const privateKeyStr = process.env.AUTH_PRIVATE_KEY || "NO_KEY";
 const publicKeyStr = process.env.AUTH_PUBLIC_KEY || "NO_KEY";
 
 export async function encodeJWT(payload: any) {
-  // console.log(">> utils.jwt.encodeJWT", { payload, encode: process.env.SESSION_ENCODE });
+  console.log(">> utils.jwt.encodeJWT", { payload, encode: process.env.SESSION_ENCODE });
 
   if (process.env.SESSION_ENCODE == "btoa") {
     console.warn(">> utils.jwt.encodeJWT ALTERNATIVE ENCODING", { encode: process.env.SESSION_ENCODE });
@@ -37,7 +37,7 @@ export async function encodeJWT(payload: any) {
 }
 
 export async function decodeJWT(token: string) {
-  // console.log(">> utils.jwt.decodeJWT", { token: token, encode: process.env.SESSION_ENCODE });
+  console.log(">> utils.jwt.decodeJWT", { token: token, encode: process.env.SESSION_ENCODE });
 
   if (process.env.SESSION_ENCODE == "btoa") {
     console.warn(">> utils.jwt.decodeJWT ALTERNATIVE DECODING", { encode: process.env.SESSION_ENCODE });
