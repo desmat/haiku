@@ -34,7 +34,7 @@ export default function HaikuPoem({
   // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, popPoem });
   const isHaikudleMode = mode == "haikudle";
   const isShowcaseMode = mode == "showcase";
-  const maxHaikuTheme = 32;
+  const maxHaikuTheme = isShowcaseMode ? 32 : 18;
   const dateCode = moment().format("YYYYMMDD");
   const [alert] = useAlert((state: any) => [state.plain]);
 
@@ -67,24 +67,26 @@ export default function HaikuPoem({
   }
 
   return (
-    <PopOnClick color={haiku.bgColor} force={popPoem}>
+    <PopOnClick color={haiku.bgColor} force={popPoem} disabled={isShowcaseMode}>
       <div>
-        <div
-          className="_bg-purple-200 flex flex-col gap-[-0.5rem] _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
-          onClick={handleClickHaiku}
-          title={mode == "showcase" ? "Refresh" : "Copy to clipboard"}
-          style={{
-            cursor: mode == "showcase" ? "pointer" : "copy"
-          }}
-        >
-          {haiku.poem.map((line: string, i: number) => (
-            <StyledLayers key={i} styles={styles}>
-              <div className="my-[-0.1rem] transition-all">
-                {upperCaseFirstLetter(line)}
-              </div>
-            </StyledLayers>
-          ))}
-        </div>
+        <PopOnClick color={haiku.bgColor} force={popPoem} disabled={!isShowcaseMode}>
+          <div
+            className="_bg-purple-200 flex flex-col gap-[-0.5rem] _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
+            onClick={handleClickHaiku}
+            title={mode == "showcase" ? "Refresh" : "Copy to clipboard"}
+            style={{
+              cursor: mode == "showcase" ? "pointer" : "copy"
+            }}
+          >
+            {haiku.poem.map((line: string, i: number) => (
+              <StyledLayers key={i} styles={styles}>
+                <div className="my-[-0.1rem] transition-all">
+                  {upperCaseFirstLetter(line)}
+                </div>
+              </StyledLayers>
+            ))}
+          </div>
+        </PopOnClick>
         <div
           className="_bg-pink-200 relative md:text-[16pt] sm:text-[14pt] text-[12pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]"
           style={{
@@ -98,10 +100,12 @@ export default function HaikuPoem({
                   : "1.3rem"
           }}
         >
-          <div className={isShowcaseMode
-            ? "fixed bottom-2 right-4 w-max flex flex-row"
-            : "absolute w-max flex flex-row"
-          }>
+          <div
+            className={isShowcaseMode
+              ? "fixed bottom-2 right-4 w-max flex flex-row"
+              : "absolute w-max flex flex-row"
+            }
+          >
             <div
               className="transition-all"
               onClick={(e: any) => !isShowcaseMode && handleClickHaiku(e)}

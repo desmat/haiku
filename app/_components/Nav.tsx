@@ -248,7 +248,7 @@ function BottomLinks({
             onClick={async (e: any) => {
               e.preventDefault();
               haiku?.id && onSwitchMode && onSwitchMode();
-              // router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
+              router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
             }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
@@ -262,8 +262,7 @@ function BottomLinks({
             href={`/${haiku ? haiku?.id : ""}?mode=showcase`}
             className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
             title="Switch to showcase mode "
-            onClick={async (e: any) => {
-              e.preventDefault();
+            onClick={(e: any) => {
               haiku?.id && onSwitchMode && onSwitchMode("showcase");
             }}
           >
@@ -625,10 +624,8 @@ export function NavOverlay({
 
   const handleKeyDown = async (e: any) => {
     // console.log(">> app._component.Nav.handleKeyDown", { mode });
-    if (e.key == "Escape") {
-      if (["showcase", "social-img"].includes(mode) && onSwitchMode) {
-        onSwitchMode();
-      }
+    if (e.key == "Escape" && ["showcase", "social-img"].includes(mode) && onSwitchMode) {
+      onSwitchMode();
     }
   }
 
@@ -729,21 +726,21 @@ export function NavOverlay({
         <>
           {onSwitchMode &&
             <div
-              className="_bg-pink-400 fixed top-0 left-0 w-10 h-full z-40 cursor-pointer"
+              className="_bg-pink-400 fixed top-0 left-0 w-[10vw] h-full z-40 cursor-pointer"
               title="Exit showcase mode"
-              onClick={() => onSwitchMode && onSwitchMode()}
+              onClick={() => onSwitchMode()}
             />
           }
           {increaseDelay &&
             <div
-              className="_bg-yellow-400 fixed bottom-0 left-0 w-10 h-10 z-40 cursor-pointer"
+              className="_bg-yellow-400 fixed bottom-0 left-0 w-[10vw] h-[10vw] z-40 cursor-pointer"
               title="Increase refresh time"
               onClick={increaseDelay}
             />
           }
           {decreaseDelay &&
             <div
-              className="_bg-yellow-400 fixed bottom-0 right-0 w-10 h-10 z-40 cursor-pointer"
+              className="_bg-yellow-400 fixed bottom-0 right-0 w-[10vw] h-[10vw] z-40 cursor-pointer"
               title="Decrease refresh time"
               onClick={decreaseDelay}
             />

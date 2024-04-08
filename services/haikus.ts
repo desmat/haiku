@@ -240,7 +240,7 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
     // @ts-ignore
     bgImage: debugOpenai ? openaiUrl : blob.url,
     color: sortedColors[0].darken(0.5).hex(),
-    bgColor: sortedColors[sortedColors.length - 1].brighten(1).hex(),
+    bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),
     poem,
   } as Haiku;
