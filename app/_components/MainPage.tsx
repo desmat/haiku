@@ -112,21 +112,32 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
 
   const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
+  
   const textStyles = [
     {
       color: fontColor,
       bgColor,
       filter: `drop-shadow(0px 0px 8px ${bgColor})`,
-      WebkitTextStroke: `1.5px ${fontColor}`,
+      WebkitTextStroke: `1px ${fontColor}`,
       fontWeight: 300,
     },
     {
       filter: `drop-shadow(0px 0px 2px ${bgColor})`,
     },
     {
-      filter: `drop-shadow(0px 0px 12px ${bgColor}44)`,
+      filter: `drop-shadow(0px 0px 4px ${bgColor}99)`,
+    },
+    {
+      filter: `drop-shadow(0px 0px 8px ${bgColor}66)`,
+    },
+    {
+      filter: `drop-shadow(0px 0px 12px ${bgColor}33)`,
+    },
+    {
+      filter: `drop-shadow(0px 0px 18px ${bgColor}22)`,
     },
   ];
+
   const altTextStyles = [
     {
       color: bgColor,
@@ -135,9 +146,17 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       fontWeight: 300,
     },
     {
-      color: bgColor,
       filter: `drop-shadow(0px 0px 1px ${fontColor})`,
-    }
+    },
+    {
+      filter: `drop-shadow(0px 0px 8px ${bgColor}55)`,
+    },
+    {
+      filter: `drop-shadow(0px 0px 12px ${bgColor}33)`,
+    },
+    {
+      filter: `drop-shadow(0px 0px 18px ${bgColor}11)`,
+    },
   ];
 
   // console.log('>> app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
@@ -406,10 +425,10 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   }
 
   const switchMode = async (newMode?: string) => {
-    // console.log('>> app.page.switchMode()', { mode, newMode });
+    console.log('>> app.page.switchMode()', { mode, newMode });
     const url = newMode
       ? `/${haikuId || ""}?mode=${newMode}`
-      : `/${haikuId || ""}?mode=${mode == "haiku" ? "haikudle" : mode == "haikudle" ? "haiku" : process.env.EXPERIENCE_MODE}`
+      : `/${haikuId || ""}?mode=${mode == "haiku" ? "haikudle" : mode != "haiku" ? "haiku" : process.env.EXPERIENCE_MODE}`
 
     setLoadingUI(true);
     window.history.replaceState(null, '', url);
@@ -492,7 +511,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     // return <LoadingPage mode={mode} /* haiku={haiku} */ />
     return (
       <div>
-        <NavOverlay mode={mode} styles={textStyles} altStyles={altTextStyles} onClickLogo={doRefresh} />
+        <NavOverlay mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} onClickLogo={doRefresh} />
         <Loading onClick={isShowcaseMode && doRefresh} />
         {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}
       </div>
@@ -511,7 +530,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         haiku={haiku}
         refreshDelay={_refreshDelay}
         backupInProgress={backupInProgress}
-        styles={textStyles}
+        styles={textStyles.slice(0, textStyles.length - 3)}
         altStyles={altTextStyles}
         onClickLogo={doRefresh}
         onClickGenerate={startGenerateHaiku}

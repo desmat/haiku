@@ -114,7 +114,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       .map((value: T) => value.id && this.valueKey(value.id))
       .filter(Boolean);
 
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
 
     const values = keys && keys.length > 0 && (await kv.json.mget(keys, "$")).filter(Boolean).flat() || [];
 

@@ -63,8 +63,17 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         user.isAdmin = true;
       }
     } else {
-      // console.log('>> hooks.user.load() creating session', {});
-      user = { id: uuid(), isAnonymous: true, isAdmin: false, preferences: {} };
+      // console.log('>> hooks.user.load() creating session', { onboardingUserId: process.env.ONBOARDING_USER_ID });
+      if (process.env.ONBOARDING_USER_ID) {
+        console.warn('>> hooks.user.load() CREATING SESSION WITH ONBOARDING USER ID', { onboardingUserId: process.env.ONBOARDING_USER_ID });
+      }
+      
+      user = {
+        id: process.env.ONBOARDING_USER_ID || uuid(),
+        isAnonymous: true,
+        isAdmin: false,
+        preferences: {}
+      };
       token = await encodeJWT({ user });
       window?.localStorage && window.localStorage.setItem("session", token || "");
     }

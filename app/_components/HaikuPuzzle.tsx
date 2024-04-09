@@ -90,7 +90,7 @@ export default function HaikuPuzzle({
                               {...provided.dragHandleProps}
                               onMouseDown={() => !w?.correct && handleClickWord(w, i, j)}
                             >
-                              <StyledLayers key={i} styles={w?.correct ? styles : [styles[0]]}>
+                              <StyledLayers key={i} styles={w?.correct ? styles : [styles[styles.length - 1]]}>
                                 <div
                                   className={`px-1 ${w?.correct ? "" : "m-1"} transition-all ${!w?.correct && "draggable-notsure-why-cant-inline"}`}
                                   style={{

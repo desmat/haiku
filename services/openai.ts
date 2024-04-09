@@ -27,8 +27,12 @@ export async function generateBackgroundImage(subject?: string, mood?: string): 
     "expressionist painting",
     "landscape painting"
   ];
-  const prompt = `Please respond with an extremely muted, almost monochromatic colors, old-school japanese-style ${imageTypes[Math.floor(Math.random() * imageTypes.length)]}
-    on the theme of ${subject || "any"}${mood ? ` with a mood of ${mood}` : ""}.`
+  const prompt = `
+    Respond with an extremely muted, almost monochromatic colors, 
+    old-school japanese-style ${imageTypes[Math.floor(Math.random() * imageTypes.length)]}
+    on the theme of ${subject || "any"}${mood ? ` with a mood of ${mood}` : ""}.
+    Make the art low-key with negative space in the middle, so that a haiku poem can be overlayed afterwards.
+  `;
 
   // for testing
   if (process.env.OPENAI_API_KEY == "DEBUG") {
