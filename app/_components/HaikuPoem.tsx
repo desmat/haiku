@@ -176,6 +176,7 @@ export default function HaikuPoem({
   const finishEdit = async () => {
     // console.log('>> app._components.HaikuPoem.finishEdit()', { haiku, poem: haiku.poem, updatedLines: updatedPoem });
     setEditingPoemLine(undefined);
+    setAboutToEditPoemLine(undefined);
 
     const hasUpdates = (original: string[], updates: string[]): boolean => {
       return original
@@ -201,11 +202,9 @@ export default function HaikuPoem({
     const updatedOpen = haiku.poem
       .map((value: string, i: number) => {
         if (updatedPoem[i] == "") return "...";
-        if (updatedPoem[i] && (updatedPoem[i].includes("...") || updatedPoem[i].includes("…"))) return updatedPoem[i];
-        // if ((i == 0 || i == 2) && syllables[i] <= 3) return `${updatedLines[i] || value} ...`;
-        // if (i == 1 && syllables[i] <= 5) return `${updatedLines[i] || value} ...`;
-        if ((i == 0 || i == 2) && syllables[i] <= 3) return `... ${updatedPoem[i] || value} ...`;
-        if (i == 1 && syllables[i] <= 5) return `... ${updatedPoem[i] || value} ...`;
+        if (updatedPoem[i] && (updatedPoem[i].includes("...") || updatedPoem[i].includes("…"))) return updatedPoem[i].trim();
+        if ((i == 0 || i == 2) && syllables[i] <= 3) return `... ${(updatedPoem[i] || value).trim()} ...`;
+        if (i == 1 && syllables[i] <= 5) return `... ${(updatedPoem[i] || value).trim()} ...`;
         return updatedPoem[i] || value;
       });
 
@@ -232,18 +231,16 @@ export default function HaikuPoem({
     if (e.key == "Escape") {
       cancelEdit();
     } else if (e.key == "Enter") {
-      if (lineNumber == haiku.poem.length - 1) {
-        setEditingPoemLine(undefined);
+      if (editing) {
         finishEdit();
-      } else {
-        startEdit(lineNumber + 1, true);
       }
     } else if (e.key == "Tab") {
-      if (lineNumber == 0 && e.shiftKey || lineNumber == haiku.poem.length - 1 && !e.shiftKey) {
-        e.preventDefault();
-        finishEdit();
+      e.preventDefault();
+      if (lineNumber == 0 && e.shiftKey) {
+        startEdit(haiku.poem.length - 1, true);
+      } else if (lineNumber == haiku.poem.length - 1 && !e.shiftKey) {
+        startEdit(0, true);
       } else {
-        e.preventDefault();
         startEdit(lineNumber + (e.shiftKey ? -1 : 1), true);
       }
     } else if (e.key == "ArrowUp" && lineNumber > 0) {
@@ -321,11 +318,19 @@ export default function HaikuPoem({
                           >
                             {/* keep at minimum original width to avoid wierd alignment issues */}
                             <div className="bg-orange-200 h-0 invisible">
-                              {saving ? typeof (updatedPoem[i]) == "string" ? updatedPoem[i] : poemLine : poemLine}
+                              {upperCaseFirstLetter(saving
+                                ? typeof (updatedPoem[i]) == "string"
+                                  ? updatedPoem[i]
+                                  : poemLine
+                                : poemLine)}
                             </div>
                             {/* and stretch if updates are longer */}
                             <div className="bg-orange-400 h-0 invisible">
-                              {saving ? typeof (updatedPoem[i]) == "string" ? updatedPoem[i] : poemLine : updatedPoem[i]}
+                              {upperCaseFirstLetter(saving
+                                ? typeof (updatedPoem[i]) == "string"
+                                  ? updatedPoem[i]
+                                  : poemLine
+                                : updatedPoem[i])}
                             </div>
                           </div>
 
@@ -355,7 +360,11 @@ export default function HaikuPoem({
                             <ControlledInput
                               id={i}
                               activeId={editingPoemLine}
-                              value={saving ? typeof (updatedPoem[i]) == "string" ? updatedPoem[i] : poemLine : poemLine}
+                              value={upperCaseFirstLetter(saving
+                                ? typeof (updatedPoem[i]) == "string"
+                                  ? updatedPoem[i]
+                                  : upperCaseFirstLetter(poemLine)
+                                : upperCaseFirstLetter(poemLine))}
                               select={select}
                               onChange={(value: string) => handleInputChange(value, i)}
                             />
@@ -367,7 +376,7 @@ export default function HaikuPoem({
                           className={`_bg-purple-400 my-[0.05rem] ${isShowcaseMode ? "cursor-pointer" : "cursor-copy"}`}
                           onClick={(e: any) => canCopy && handleClickHaiku(e)}
                         >
-                          {poemLine}
+                          {upperCaseFirstLetter(poemLine)}
                         </div>
                       }
                     </div>

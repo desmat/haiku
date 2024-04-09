@@ -145,7 +145,7 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
     return {
       response: {
         prompt,
-        haiku: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "REPLACEMENT") : line),
+        haiku: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "_ _ _") : line),
         subject: subject || "test subject",
         mood: mood || "test mood",
       }
@@ -167,6 +167,7 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
           Optionally a topic (or "any", meaning you pick) and/or mood may be included.
           Please generate a haiku in ${language || "English"} and respond in JSON where each response is an array of 3 strings.
           Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
+          Also, please fix up any extraneous white spaces, punctuation, incorrect capitalized words, typos or incorrectly words.
           Also include in the response, in fewest number of words, what were the subject and mood of the haiku. Please only include keys "haiku", "subject" and "mood"`
       },
       {
