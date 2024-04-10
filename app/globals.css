@@ -189,7 +189,7 @@ ul {
 .onboarding-focus {
   display: none;
   border-radius: 50%;
-  box-shadow: 0 0 max(100vh, 100vw) max(90vh, 90vw) #000000, inset 0 0 1rem 2rem #000000;
+  box-shadow: 0 0 max(100vh, 100vw) max(100vh, 100vw) #000000, inset 0 0 1rem 2rem #000000;
   opacity: 0.6;
   position: absolute;
   top: -60px;

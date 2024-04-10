@@ -282,7 +282,7 @@ export default function HaikuPoem({
     <div className="relative">
       {/* allow editors to click out and finish */}
       <div
-        className={`_bg-pink-100 fixed top-0 left-0 w-[100vw] h-[100vh]${saving ? " opacity-50" : ""}`}
+        className={`_bg-pink-100 absolute top-0 left-0 w-[100vw] h-[100vh]${saving ? " opacity-50" : ""}`}
         onClick={() => editing && finishEdit()}
       />
 
@@ -481,7 +481,7 @@ export default function HaikuPoem({
                       </Link>
                     }
                     {regenerateAllowed &&
-                      <>
+                      <div className="_bg-pink-200">
                         {!user?.isAdmin && (user.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
                           <span title="Exceeded daily limit: try again later">
                             <StyledLayers styles={altStyles || []}>
@@ -499,7 +499,7 @@ export default function HaikuPoem({
                             </StyledLayers>
                           </span>
                         }
-                      </>
+                      </div>
                     }
                   </div>
                 }

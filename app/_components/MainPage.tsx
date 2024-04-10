@@ -301,6 +301,12 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     }
   }, [haiku?.id, loadingUI, isShowcaseMode, _refreshDelay]);
 
+
+
+
+
+
+  
   // for testing: replace with a store
 
   const onboardingElements = [
@@ -317,26 +323,25 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   const [onboardingElement, setOnboardingElement] = useState<number | undefined>();
 
   // cycle for testing
-  useEffect(() => {
+  // useEffect(() => {
+  //   let _onboardingElement: number|undefined = undefined;
 
-    let _onboardingElement: number|undefined = undefined;
+  //   const interval = setInterval(() => {
+  //     console.log('>> app.page useEffect []', { onboardingElement });
+  //     if (typeof (_onboardingElement) != "number") {
+  //       setOnboardingElement(0);
+  //       _onboardingElement = 0;
+  //     } else if (_onboardingElement > onboardingElements.length - 1) {
+  //       setOnboardingElement(undefined);
+  //       _onboardingElement = undefined;
+  //     } else {
+  //       setOnboardingElement(_onboardingElement + 1);
+  //       _onboardingElement++;
+  //     }
+  //   }, 1000);
 
-    const interval = setInterval(() => {
-      console.log('>> app.page useEffect []', { onboardingElement });
-      if (typeof (_onboardingElement) != "number") {
-        setOnboardingElement(0);
-        _onboardingElement = 0;
-      } else if (_onboardingElement > onboardingElements.length - 1) {
-        setOnboardingElement(undefined);
-        _onboardingElement = undefined;
-      } else {
-        setOnboardingElement(_onboardingElement + 1);
-        _onboardingElement++;
-      }
-    }, 1000);
-
-    return (() => clearInterval(interval));
-  }, []);
+  //   return (() => clearInterval(interval));
+  // }, []);
 
 
 
@@ -563,7 +568,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   }
 
   return (
-    <div>
+    <div className="_bg-yellow-200 main-page relative h-[100vh] w-[100vw]">
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -596,7 +601,9 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         onSelectHaiku={selectHaiku}
         onChangeRefreshDelay={changeRefreshDelay}
         onBackup={startBackup}
+        onboardingElement={typeof(onboardingElement) == "number" ? onboardingElements[onboardingElement] : ""}
       />
+
       {isPuzzleMode &&
         <HaikudlePage
           mode={mode}
@@ -605,6 +612,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
           regenerating={regenerating}
         />
       }
+
       {!isPuzzleMode &&
         <HaikuPage
           mode={mode}
@@ -623,6 +631,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
           regenerateHaiku={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku()}
           regenerating={regenerating}
           refresh={doRefresh}
+          onboardingElement={typeof(onboardingElement) == "number" ? onboardingElements[onboardingElement] : ""}
         />
       }
     </div>

@@ -29,7 +29,7 @@ export function Loading({ onClick }: { onClick?: any }) {
   return (
     <div
       onClick={onClick || defaultOnClick}
-      className='_bg-pink-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-dark-2 opacity-5 animate-pulse cursor-pointer z-50'
+      className='_bg-pink-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-dark-2 opacity-5 animate-pulse cursor-pointer z-50'
     >
       <div className="animate-pulse flex flex-col items-center">
         <div>読込</div>
@@ -299,6 +299,7 @@ function SidePanel({
   bgColor,
   onShowAbout,
   onSelectHaiku,
+  onboardingElement,
 }: {
   user: User,
   mode?: string
@@ -307,6 +308,7 @@ function SidePanel({
   bgColor: string,
   onShowAbout?: any,
   onSelectHaiku?: any,
+  onboardingElement?: string,
 }) {
   const [panelOpened, setPanelOpened] = useState(false);
   const [panelAnimating, setPanelAnimating] = useState(false);
@@ -398,7 +400,7 @@ function SidePanel({
         </div>
       }
       <div
-        className={`_bg-pink-200 fixed top-0 h-full w-[27rem] max-w-[90vw] z-20 transition-all _blur-[10px]`}
+        className={`_bg-pink-200 absolute top-0 h-full w-[27rem] max-w-[90vw] ${onboardingElement && ["side-panel"].includes(onboardingElement) ? "z-50" : "z-20"} TODO:bringthisbackbutnoTransitionWhenOnboardingAnySteps _transition-all _blur-[10px]`}
         style={{
           backgroundColor: `${styles[styles.length - 1]?.color ? styles[styles.length - 1]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
           backdropFilter: "blur(10px)",
@@ -603,6 +605,7 @@ export function NavOverlay({
   onSelectHaiku,
   onChangeRefreshDelay,
   onBackup,
+  onboardingElement,
 }: {
   mode: string,
   styles: any[],
@@ -619,7 +622,8 @@ export function NavOverlay({
   onShowAbout?: any,
   onSelectHaiku?: any,
   onChangeRefreshDelay?: any,
-  onBackup?: any
+  onBackup?: any,
+  onboardingElement?: string,
 }) {
   const dateCode = moment().format("YYYYMMDD");
   const [user] = useUser((state: any) => [state.user]);
@@ -652,9 +656,9 @@ export function NavOverlay({
   }, [mode, haiku]);
 
   return (
-    <div className="_bg-pink-200 nav-overlay z-90">
+    <div className="_bg-pink-200 nav-overlay relative h-full w-full z-1">
       {["haikudle", "haiku"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-30`}>
+        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
           <div className="onboarding-container">
             <div className="onboarding-focus onboarding-focus-logo" />
             <PopOnClick color={haiku?.bgColor}>
@@ -670,18 +674,18 @@ export function NavOverlay({
         </div>
       }
       {mode == "social-img" &&
-        <div className={`${font.architects_daughter.className} fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}>
+        <div className={`${font.architects_daughter.className} absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}>
           <PopOnClick color={haiku?.bgColor}>
             <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} />
             <div
-              className="_bg-pink-400 _opacity-50 fixed top-0 left-0 w-full h-full cursor-pointer"
+              className="_bg-pink-400 _opacity-50 absolute top-0 left-0 w-full h-full cursor-pointer"
               onClick={() => onSwitchMode && onSwitchMode(process.env.EXPERIENCE_MODE)}
             />
           </PopOnClick>
         </div>
       }
       {["haikudle", "haiku"].includes(mode) &&
-        <div className="fixed top-2.5 right-2.5 z-20">
+        <div className={`absolute top-2.5 right-2.5 ${onboardingElement && ["generate-icon"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
             <div className="onboarding-focus onboarding-focus-generate-icon" />
 
@@ -706,7 +710,7 @@ export function NavOverlay({
       }
 
       <div
-        className={`foo fixed top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-10`}
+        className={`absolute top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-10`}
         style={{
           background: `radial-gradient(circle at center, white, #868686 35%, ${styles[0]?.color || "black"} 70%)`,
           opacity: 0.2,
@@ -714,7 +718,7 @@ export function NavOverlay({
       />
 
       {["haiku", "haikudle"].includes(mode) &&
-        <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
+        <div className={`absolute bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center ${onboardingElement && ["bottom-links"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
             <div className="onboarding-focus onboarding-focus-bottom-links" />
             <StyledLayers styles={styles}>
@@ -739,21 +743,21 @@ export function NavOverlay({
         <>
           {onSwitchMode &&
             <div
-              className="_bg-pink-400 fixed top-0 left-0 w-[10vw] h-full z-40 cursor-pointer"
+              className="_bg-pink-400 absolute top-0 left-0 w-[10vw] h-full z-40 cursor-pointer"
               title="Exit showcase mode"
               onClick={() => onSwitchMode()}
             />
           }
           {increaseDelay &&
             <div
-              className="_bg-yellow-400 fixed bottom-0 left-0 w-[10vw] h-[10vw] z-40 cursor-pointer"
+              className="_bg-yellow-400 absolute bottom-0 left-0 w-[10vw] h-[10vw] z-40 cursor-pointer"
               title="Increase refresh time"
               onClick={increaseDelay}
             />
           }
           {decreaseDelay &&
             <div
-              className="_bg-yellow-400 fixed bottom-0 right-0 w-[10vw] h-[10vw] z-40 cursor-pointer"
+              className="_bg-yellow-400 absolute bottom-0 right-0 w-[10vw] h-[10vw] z-40 cursor-pointer"
               title="Decrease refresh time"
               onClick={decreaseDelay}
             />
@@ -770,6 +774,7 @@ export function NavOverlay({
           bgColor={haiku?.bgColor}
           onShowAbout={onShowAbout}
           onSelectHaiku={onSelectHaiku}
+          onboardingElement={onboardingElement}
         />
       }
     </div>
