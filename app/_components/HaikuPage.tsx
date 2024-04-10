@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from "react";
 import useUser from "@/app/_hooks/user";
 import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
@@ -13,22 +12,22 @@ export default function HaikuPage({
   styles,
   altStyles,
   popPoem,
-  regenerateHaiku,
   regenerating,
   loading,
+  onboardingElement,
   refresh,
-  onboardingElement
+  regenerateHaiku,
 }: {
   mode: string,
   haiku?: Haiku,
   styles: any[],
   altStyles?: any[],
   popPoem?: boolean,
-  regenerateHaiku?: any,
   regenerating?: boolean,
   loading?: boolean,
-  refresh?: any,
   onboardingElement?: string,
+  refresh?: any,
+  regenerateHaiku?: any,
 }) {
   // console.log('>> app._components.HaikuPage.render()', { mode, id: haiku.id, popPoem, haiku });
 
@@ -68,6 +67,7 @@ export default function HaikuPage({
               popPoem={popPoem}
               styles={styles}
               altStyles={altStyles}
+              onboardingElement={onboardingElement}
               regenerate={regenerateHaiku}
               refresh={refresh}
             />

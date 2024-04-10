@@ -16,12 +16,14 @@ function TypedAlert({
   closed,
   handleClose,
   closeLabel,
+  positionClassName,
 }: {
   message: string,
   type: AlertType,
   closed: boolean,
   handleClose: any,
   closeLabel?: string,
+  positionClassName?: string,
 }) {
   // console.log('>> app._components.Alert.Alert.render()', { message, type, closed });
   let icon;
@@ -86,7 +88,7 @@ function TypedAlert({
   }
 
   return (
-    <div className={`_border-[1px] ${colorClasses[5]} border-solid fixed bottom-3 left-3 md:left-[calc(50vw-(700px/2))] _lg:_left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-20"}`}>
+    <div className={`_border-[1px] ${colorClasses[5]} border-solid fixed ${positionClassName || "bottom-3 left-3"} md:left-[calc(50vw-(700px/2))] _lg:_left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-50"}`}>
       <div className={`${closed ? "opacity-0" : "opacity-100"} transition-all rounded-sm ${colorClasses[0]} px-2 py-1 w-[calc(100vw-1.5rem)] md:w-[700px] shadow-md hover:shadow-lg`}>
         <div className="flex flex-col">
           <div className="flex items-center">
@@ -127,22 +129,24 @@ function TypedAlert({
 function AnimatedAlert({
   message,
   type,
-  onDissmiss,
+  onDismiss,
   closeLabel,
   closedTimestamp,
   timestamp,
+  positionClassName,
 }: {
   message: string,
   type: AlertType,
-  onDissmiss?: () => void,
+  onDismiss?: () => void,
   closeLabel?: string,
   closedTimestamp?: number,
-  timestamp: number
+  timestamp: number,
+  positionClassName?: string,
 }) {
   const [reset] = useAlert((state: any) => [state.reset]);
   const [lastMessage, setLastMessage] = useState<string | undefined>(message);
   let [dismissedAt, setDismissedAt] = useState<number | undefined>();
-  
+
   useEffect(() => {
     // console.log('>> app._components.Alert.AnimatedAlert.render() useEffect', { message, lastMessage, timestamp });
 
@@ -185,7 +189,7 @@ function AnimatedAlert({
 
   const handleClose = () => {
     setDismissedAt(timestamp);
-    onDissmiss && onDissmiss();
+    onDismiss && onDismiss();
     setTimeout(reset, 50);
   }
 
@@ -193,7 +197,14 @@ function AnimatedAlert({
 
   if (message) {
     return (
-      <TypedAlert message={message} type={type} closed={!!dismissedAt} handleClose={handleClose} closeLabel={closeLabel} />
+      <TypedAlert
+        message={message}
+        type={type}
+        closed={!!dismissedAt}
+        handleClose={handleClose}
+        closeLabel={closeLabel}
+        positionClassName={positionClassName}
+      />
     )
   }
 }
@@ -208,15 +219,17 @@ export default function Alert({
   const [
     _message,
     _type,
-    onDissmiss,
+    onDismiss,
     closeLabel,
-    closedTimestamp
+    closedTimestamp,
+    positionClassName,
   ] = useAlert((state: any) => [
     state.message,
     state.type,
-    state.onDissmiss,
+    state.onDismiss,
     state.closeLabel,
     state.closedTimestamp,
+    state.positionClassName,
   ]);
 
   // console.log('>> app._components.Alert.Error.render()', { message, _message });
@@ -225,10 +238,11 @@ export default function Alert({
     <AnimatedAlert
       message={message || _message}
       type={type || _type || "info"}
-      onDissmiss={onDissmiss}
+      onDismiss={onDismiss}
       closeLabel={closeLabel}
       closedTimestamp={closedTimestamp}
       timestamp={moment().valueOf()}
+      positionClassName={positionClassName}
     />
   )
 }

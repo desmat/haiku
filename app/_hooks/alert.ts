@@ -6,10 +6,11 @@ import moment from 'moment';
 const useAlert: any = create(devtools((set: any, get: any) => ({
   message: undefined as string | undefined,
   type: undefined as AlertType | undefined,
-  onDissmiss: () => undefined,
+  onDismiss: () => undefined,
   closeLabel: undefined as string | undefined,
   closeTimeout: undefined as any,
   closedTimestamp: undefined as number | undefined,
+  positionClassName: undefined as string | undefined,
 
   reset: async () => {
     // console.log(">> hooks.alert.reset", {});
@@ -20,26 +21,34 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
       closeLabel: undefined,
       closeTimeout: undefined,
       closedTimestamp: undefined,
+      positionClassName: undefined,
     });
   },
 
   error: async (message: string, {
-    onDissmiss, closeLabel, closeDelay
+    onDismiss, closeLabel, closeDelay, positionClassName
   }: {
-    onDissmiss?: () => undefined,
+    onDismiss?: () => undefined,
     closeLabel?: string,
-    closeDelay?: number
+    closeDelay?: number,
+    positionClassName?: string,
   } = {}) => {
     // console.log(">> hooks.alert.error", { message });
-    set({ message, type: message && "error", onDissmiss, closeLabel });
+    if (closeDelay) {
+      const { setCloseTimeout } = get();
+      setCloseTimeout(closeDelay);
+    }
+
+    set({ message, type: message && "error", onDismiss, closeLabel, positionClassName });
   },
 
   warning: async (message: string, {
-    onDissmiss, closeLabel, closeDelay
+    onDismiss, closeLabel, closeDelay, positionClassName
   }: {
-    onDissmiss?: () => undefined,
+    onDismiss?: () => undefined,
     closeLabel?: string,
-    closeDelay?: number
+    closeDelay?: number,
+    positionClassName?: string,
   } = {}) => {
     // console.log(">> hooks.alert.warning", { message, closeDelay });
     if (closeDelay) {
@@ -47,15 +56,16 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
       setCloseTimeout(closeDelay);
     }
 
-    set({ message, type: message && "warning", onDissmiss, closeLabel });
+    set({ message, type: message && "warning", onDismiss, closeLabel, positionClassName });
   },
 
   info: async (message: string, {
-    onDissmiss, closeLabel, closeDelay
+    onDismiss, closeLabel, closeDelay, positionClassName
   }: {
-    onDissmiss?: () => undefined,
+    onDismiss?: () => undefined,
     closeLabel?: string,
-    closeDelay?: number
+    closeDelay?: number,
+    positionClassName?: string,
   } = {}) => {
     // console.log(">> hooks.alert.info", { message });
     if (closeDelay) {
@@ -63,15 +73,16 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
       setCloseTimeout(closeDelay);
     }
 
-    set({ message, type: message && "info", onDissmiss, closeLabel });
+    set({ message, type: message && "info", onDismiss, closeLabel, positionClassName });
   },
 
   success: async (message: string, {
-    onDissmiss, closeLabel, closeDelay
+    onDismiss, closeLabel, closeDelay, positionClassName
   }: {
-    onDissmiss?: () => undefined,
+    onDismiss?: () => undefined,
     closeLabel?: string,
-    closeDelay?: number
+    closeDelay?: number,
+    positionClassName?: string,
   } = {}) => {
     // console.log(">> hooks.alert.success", { message });
     if (closeDelay) {
@@ -79,23 +90,24 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
       setCloseTimeout(closeDelay);
     }
 
-    set({ message, type: message && "success", onDissmiss, closeLabel });
+    set({ message, type: message && "success", onDismiss, closeLabel, positionClassName });
   },
 
   plain: async (message: string, {
-    onDissmiss, closeLabel, closeDelay
+    onDismiss, closeLabel, closeDelay, positionClassName
   }: {
-    onDissmiss?: () => undefined,
+    onDismiss?: () => undefined,
     closeLabel?: string,
-    closeDelay?: number
+    closeDelay?: number,
+    positionClassName?: string,
   } = {}) => {
-    // console.log(">> hooks.alert.plain", { message, onDissmiss, closeLabel, closeDelay });
+    // console.log(">> hooks.alert.plain", { message, onDismiss, closeLabel, closeDelay });
     if (closeDelay) {
       const { setCloseTimeout } = get();
       setCloseTimeout(closeDelay);
     }
 
-    set({ message, type: message && "plain", onDissmiss, closeLabel });
+    set({ message, type: message && "plain", onDismiss, closeLabel, positionClassName });
   },
 
   setCloseTimeout: async (closeDelayMs: number) => {

@@ -297,18 +297,18 @@ function SidePanel({
   styles,
   altStyles,
   bgColor,
+  onboardingElement,
   onShowAbout,
   onSelectHaiku,
-  onboardingElement,
 }: {
   user: User,
   mode?: string
   styles: any[],
   altStyles: any[],
   bgColor: string,
+  onboardingElement?: string,
   onShowAbout?: any,
   onSelectHaiku?: any,
-  onboardingElement?: string,
 }) {
   const [panelOpened, setPanelOpened] = useState(false);
   const [panelAnimating, setPanelAnimating] = useState(false);
@@ -339,6 +339,8 @@ function SidePanel({
 
   const toggleMenuOpened = () => {
     // console.log(">> app._component.SidePanel.toggleMenuOpened", {});
+    if (onboardingElement) return;
+
     setPanelAnimating(true);
     setTimeout(() => setPanelAnimating(false), 100);
 
@@ -431,7 +433,9 @@ function SidePanel({
             title={panelOpened ? "Hide side panel" : "Show side panel"}
           >
             <div className="onboarding-container">
-              <div className="onboarding-focus onboarding-focus-side-panel" />
+              {onboardingElement == "side-panel" &&
+                <div className="onboarding-focus" />
+              }
               <StyledLayers styles={styles}>
                 <div className="_bg-orange-400 rotate-90 group-hover:hidden ml-[-1rem]">
                   <BsDashLg />
@@ -596,6 +600,7 @@ export function NavOverlay({
   lang,
   refreshDelay = 24 * 60 * 60 * 1000,
   backupInProgress,
+  onboardingElement,
   onClickLogo,
   onClickGenerate,
   onSwitchMode,
@@ -605,7 +610,6 @@ export function NavOverlay({
   onSelectHaiku,
   onChangeRefreshDelay,
   onBackup,
-  onboardingElement,
 }: {
   mode: string,
   styles: any[],
@@ -614,6 +618,7 @@ export function NavOverlay({
   lang?: LanguageType,
   refreshDelay?: number,
   backupInProgress?: boolean,
+  onboardingElement?: string,
   onClickLogo?: any,
   onClickGenerate?: any,
   onSwitchMode?: any,
@@ -623,7 +628,6 @@ export function NavOverlay({
   onSelectHaiku?: any,
   onChangeRefreshDelay?: any,
   onBackup?: any,
-  onboardingElement?: string,
 }) {
   const dateCode = moment().format("YYYYMMDD");
   const [user] = useUser((state: any) => [state.user]);
@@ -660,7 +664,9 @@ export function NavOverlay({
       {["haikudle", "haiku"].includes(mode) &&
         <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
           <div className="onboarding-container">
-            <div className="onboarding-focus onboarding-focus-logo" />
+            {onboardingElement == "logo" &&
+              <div className="onboarding-focus" />
+            }
             <PopOnClick color={haiku?.bgColor}>
               <Logo
                 styles={styles}
@@ -687,8 +693,9 @@ export function NavOverlay({
       {["haikudle", "haiku"].includes(mode) &&
         <div className={`absolute top-2.5 right-2.5 ${onboardingElement && ["generate-icon"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
-            <div className="onboarding-focus onboarding-focus-generate-icon" />
-
+            {onboardingElement == "generate-icon" &&
+              <div className="onboarding-focus" />
+            }
             {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
                 <StyledLayers styles={altStyles}>
@@ -720,7 +727,9 @@ export function NavOverlay({
       {["haiku", "haikudle"].includes(mode) &&
         <div className={`absolute bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center ${onboardingElement && ["bottom-links"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
-            <div className="onboarding-focus onboarding-focus-bottom-links" />
+            {onboardingElement == "bottom-links" &&
+              <div className="onboarding-focus" />
+            }
             <StyledLayers styles={styles}>
               <BottomLinks
                 mode={mode}
@@ -772,9 +781,9 @@ export function NavOverlay({
           styles={styles}
           altStyles={altStyles}
           bgColor={haiku?.bgColor}
+          onboardingElement={onboardingElement}
           onShowAbout={onShowAbout}
           onSelectHaiku={onSelectHaiku}
-          onboardingElement={onboardingElement}
         />
       }
     </div>

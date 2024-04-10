@@ -183,11 +183,9 @@ ul {
   position: relative;
   height: fit-content;
   width: fit-content;
-
 }
 
 .onboarding-focus {
-  display: none;
   border-radius: 50%;
   box-shadow: 0 0 max(100vh, 100vw) max(100vh, 100vw) #000000, inset 0 0 1rem 2rem #000000;
   opacity: 0.6;
