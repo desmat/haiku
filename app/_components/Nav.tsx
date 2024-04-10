@@ -63,7 +63,7 @@ export function Logo({ mode, href, onClick, styles, altStyles }: { mode: string,
     <Link
       onClick={onClick}
       href={href || "/"}
-      className={`hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
+      className={`logo hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
     >
       <div className={`${font.architects_daughter.className} flex flex-row`}>
         <StyledLayers styles={styles}>h</StyledLayers>
@@ -80,7 +80,7 @@ export function GenerateIcon({ onClick, sizeOverwrite }: { onClick?: any, sizeOv
     return icon;
   }
   return (
-    <Link href="#" onClick={(e: any) => {
+    <Link className="generate-icon" href="#" onClick={(e: any) => {
       e.preventDefault();
       onClick && onClick();
     }}>
@@ -119,7 +119,7 @@ function BottomLinks({
 
   return (
     <div
-      className="_bg-yellow-100 relative flex flex-row gap-3 items-center justify-center _font-semibold"
+      className="_bg-yellow-100 bottom-links relative flex flex-row gap-3 items-center justify-center _font-semibold"
     >
       <div
         className="relative flex flex-row gap-2 items-center justify-center _font-semibold"
@@ -388,7 +388,7 @@ function SidePanel({
   }
 
   return (
-    <div>
+    <div className="side-panel">
       {/* Area behind side panel but in front of main content to allow users to click and close the panel */}
       {panelOpened &&
         <div
@@ -421,30 +421,33 @@ function SidePanel({
               toggleMenuOpened();
             }}
             style={{
-              filter: `drop-shadow(0px 0px 16px ${bgColor})`,
+              // filter: `drop-shadow(0px 0px 16px ${bgColor})`, // what does this even do?!
               marginRight: panelOpened ? "-0.2rem" : "-1.7rem",
               display: panelAnimating ? "none" : "block",
               transitionDuration: "80ms",
             }}
             title={panelOpened ? "Hide side panel" : "Show side panel"}
           >
-            <StyledLayers styles={styles}>
-              <div className="_bg-orange-400 rotate-90 group-hover:hidden ml-[-1rem]">
-                <BsDashLg />
-              </div>
-              <div className="hidden group-hover:block">
-                {panelOpened &&
-                  <div className="mr-[0.1rem] _md:mr-[0.3rem]">
-                    <BsChevronCompactLeft />
-                  </div>
-                }
-                {!panelOpened &&
-                  <div className="_bg-orange-400 mr-[-0.2rem] ml-[-0.8rem] _md:mr-[-0.3rem]">
-                    <BsChevronCompactRight />
-                  </div>
-                }
-              </div>
-            </StyledLayers>
+            <div className="onboarding-container">
+              <div className="onboarding-focus onboarding-focus-side-panel" />
+              <StyledLayers styles={styles}>
+                <div className="_bg-orange-400 rotate-90 group-hover:hidden ml-[-1rem]">
+                  <BsDashLg />
+                </div>
+                <div className="hidden group-hover:block">
+                  {panelOpened &&
+                    <div className="mr-[0.1rem] _md:mr-[0.3rem]">
+                      <BsChevronCompactLeft />
+                    </div>
+                  }
+                  {!panelOpened &&
+                    <div className="_bg-orange-400 mr-[-0.2rem] ml-[-0.8rem] _md:mr-[-0.3rem]">
+                      <BsChevronCompactRight />
+                    </div>
+                  }
+                </div>
+              </StyledLayers>
+            </div>
           </div>
           {/* Spacer for the logo to punch trough */}
           <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">
@@ -649,18 +652,21 @@ export function NavOverlay({
   }, [mode, haiku]);
 
   return (
-    <div className="_bg-pink-200 z-90">
+    <div className="_bg-pink-200 nav-overlay z-90">
       {["haikudle", "haiku"].includes(mode) &&
         <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 z-30`}>
-          <PopOnClick color={haiku?.bgColor}>
-            <Logo
-              styles={styles}
-              altStyles={altStyles}
-              mode={mode}
-              href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`}
-              onClick={onClickLogo}
-            />
-          </PopOnClick>
+          <div className="onboarding-container">
+            <div className="onboarding-focus onboarding-focus-logo" />
+            <PopOnClick color={haiku?.bgColor}>
+              <Logo
+                styles={styles}
+                altStyles={altStyles}
+                mode={mode}
+                href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`}
+                onClick={onClickLogo}
+              />
+            </PopOnClick>
+          </div>
         </div>
       }
       {mode == "social-img" &&
@@ -676,22 +682,26 @@ export function NavOverlay({
       }
       {["haikudle", "haiku"].includes(mode) &&
         <div className="fixed top-2.5 right-2.5 z-20">
-          {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
-            <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
-              <StyledLayers styles={altStyles}>
-                <GenerateIcon />
-              </StyledLayers>
-            </div>
-          }
-          {onClickGenerate && (user?.isAdmin || (user?.usage[dateCode]?.haikusCreated || 0) < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
-            <div title="Generate a new haiku">
-              <PopOnClick color={haiku?.bgColor}>
+          <div className="onboarding-container">
+            <div className="onboarding-focus onboarding-focus-generate-icon" />
+
+            {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+              <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
                 <StyledLayers styles={altStyles}>
-                  <GenerateIcon onClick={onClickGenerate} />
+                  <GenerateIcon />
                 </StyledLayers>
-              </PopOnClick>
-            </div>
-          }
+              </div>
+            }
+            {onClickGenerate && (user?.isAdmin || (user?.usage[dateCode]?.haikusCreated || 0) < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+              <div title="Generate a new haiku">
+                <PopOnClick color={haiku?.bgColor}>
+                  <StyledLayers styles={altStyles}>
+                    <GenerateIcon onClick={onClickGenerate} />
+                  </StyledLayers>
+                </PopOnClick>
+              </div>
+            }
+          </div>
         </div>
       }
 
@@ -705,20 +715,23 @@ export function NavOverlay({
 
       {["haiku", "haikudle"].includes(mode) &&
         <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center z-20`}>
-          <StyledLayers styles={styles}>
-            <BottomLinks
-              mode={mode}
-              lang={lang}
-              haiku={haiku}
-              backupInProgress={backupInProgress}
-              onRefresh={onClickLogo}
-              onSwitchMode={onSwitchMode}
-              onDelete={onDelete}
-              onSaveHaikudle={onSaveHaikudle}
-              onShowAbout={onShowAbout}
-              onBackup={onBackup}
-            />
-          </StyledLayers>
+          <div className="onboarding-container">
+            <div className="onboarding-focus onboarding-focus-bottom-links" />
+            <StyledLayers styles={styles}>
+              <BottomLinks
+                mode={mode}
+                lang={lang}
+                haiku={haiku}
+                backupInProgress={backupInProgress}
+                onRefresh={onClickLogo}
+                onSwitchMode={onSwitchMode}
+                onDelete={onDelete}
+                onSaveHaikudle={onSaveHaikudle}
+                onShowAbout={onShowAbout}
+                onBackup={onBackup}
+              />
+            </StyledLayers>
+          </div>
         </div>
       }
 

@@ -112,7 +112,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
 
   const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
-  
+
   const textStyles = [
     {
       color: fontColor,
@@ -300,6 +300,46 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       }
     }
   }, [haiku?.id, loadingUI, isShowcaseMode, _refreshDelay]);
+
+  // for testing: replace with a store
+
+  const onboardingElements = [
+    "poem",
+    "poem-actions",
+    "side-panel",
+    "logo",
+    "generate-icon",
+    "bottom-links",
+  ];
+
+  // for testing: replace with a store
+  
+  const [onboardingElement, setOnboardingElement] = useState<number | undefined>();
+
+  // cycle for testing
+  useEffect(() => {
+
+    let _onboardingElement: number|undefined = undefined;
+
+    const interval = setInterval(() => {
+      console.log('>> app.page useEffect []', { onboardingElement });
+      if (typeof (_onboardingElement) != "number") {
+        setOnboardingElement(0);
+        _onboardingElement = 0;
+      } else if (_onboardingElement > onboardingElements.length - 1) {
+        setOnboardingElement(undefined);
+        _onboardingElement = undefined;
+      } else {
+        setOnboardingElement(_onboardingElement + 1);
+        _onboardingElement++;
+      }
+    }, 1000);
+
+    return (() => clearInterval(interval));
+  }, []);
+
+
+
 
   const showAbout = () => {
     plainAlert(
@@ -524,6 +564,16 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
 
   return (
     <div>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            .onboarding-focus-${typeof (onboardingElement) == "number" && onboardingElements[onboardingElement]} {
+              display: block !important;
+            }`
+        }}
+      >
+      </style>
+
       <NavOverlay
         mode={mode}
         lang={lang}
