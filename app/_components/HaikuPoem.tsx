@@ -311,8 +311,8 @@ export default function HaikuPoem({
                     <div
                       className="relative m-[0rem] transition-all"
                       onKeyDown={(e: any) => canEdit && handlePoemLineKeyDown(e, i)}
-                      onMouseOver={() => setAboutToEditLine(i)}
-                      onMouseOut={() => setAboutToEditLine(undefined)}
+                      onMouseOver={() => canEdit && setAboutToEditLine(i)}
+                      onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
                       onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
                     >
                       {/* set the width while editing */}
