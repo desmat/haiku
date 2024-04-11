@@ -470,13 +470,10 @@ export default function HaikuPoem({
                   <div
                     className="onboarding-container group/actions _bg-yellow-200 flex flex-row gap-2 mt-auto md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.2rem] sm:pb-[0.5rem] pb-[0.4rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
                   >
-                    {onboardingElement && ["poem-actions", "_poem-and-poem-actions"].includes(onboardingElement) &&
+                    {onboardingElement && ["poem-actions"].includes(onboardingElement) &&
                       <div className="onboarding-focus" />
                     }
-                    {onboardingElement && ["poem-actions", "_poem-and-poem-actions"].includes(onboardingElement) &&
-                      <div className="onboarding-focus" />
-                    }
-                    {onboardingElement && ["_poem-actions", "poem-and-poem-actions"].includes(onboardingElement) &&
+                    {onboardingElement && ["poem-and-poem-actions"].includes(onboardingElement) &&
                       <div className="onboarding-focus double" />
                     }
                     {copyAllowed &&

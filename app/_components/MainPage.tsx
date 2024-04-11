@@ -273,10 +273,8 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       if (previousDailyHaikudleId && !user?.preferences?.onboardedPreviousDaily) {
         timeoutId = setTimeout(showAboutPreviousDaily, 2000);
       } else if (userGeneratedHaiku && !user?.preferences?.onboardedGenerated) {
-        // timeoutId = setTimeout(showAboutGenerated, 2000);
-        timeoutId = setTimeout(startFirstGeneratedOnboarding, 2000);
+        timeoutId = setTimeout(showAboutGenerated, 2000);
       } else if ((isHaikuMode || isHaikudleMode) && !previousDailyHaikudleId && !user?.preferences?.onboarded) {
-        // timeoutId = setTimeout(showAbout, 2000);
         timeoutId = setTimeout(startFirstVisitOnboarding, 2000);
       }
     }
@@ -425,40 +423,23 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     });
   }
 
-  const startFirstGeneratedOnboarding = () => {
+  const showAboutGenerated = () => {
     startOnboarding(
       [
         {
-          focus: "poem",
-          message: "TODO initial First Generated message<br/>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore <br/><br/>et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<br/><br/> Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.<br/> Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-          positionClassName: "top-2 left-3",
-        },
-        {
           focus: "poem-actions",
-          message: "TODO message for poem-actions",
-          positionClassName: "top-[20vh] left-3",
-        },
-        {
-          focus: "bottom-links-share",
-          message: "TODO message for bottom-links-share",
-          positionClassName: "bottom-[20vh] left-3",
+          message: `
+            <div style="display: flex; flex-direction: column; gap: 0.4rem; padding: 0.8rem;">
+              <div>This haiku was generated on the theme <i>${haiku?.theme}</i>${haiku?.mood ? ` with a <i>${haiku?.mood}</i> mood using <b>ChatGPT</b>` : ""}. Both were used to generate art using <b>DALL-E</b> with a curated prompts to harmonize together.</div>
+              <div>Curious about those prompts? See <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L106-L108" target="_blank">here</a></b> and <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L17-L31" target="_blank">here</a></b> in the source code.</b></div>
+              <div>Try the buttons next to the poem to edit or regenerate. Mouse, keyboard, arrow keys, Tab, Escape and Enter can be used to edit.</div>
+              <div>You can also ask for assistance! Save with empty or incomplete lines, or "..." as placeholders for AI to fill in.
+            </div>`,
+          positionClassName: "top-3 left-3",
         },
       ],
       () => saveUser({ ...user, preferences: { ...user.preferences, onboardedGenerated: true } })
     );
-  }
-
-  const showAboutGenerated = () => {
-    plainAlert(
-      `<div style="display: flex; flex-direction: column; gap: 0.4rem">
-        <div>This haiku was generated for you on the theme <i>${haiku?.theme}</i>${haiku?.mood ? ` with a <i>${haiku?.mood}</i> mood using <b>ChatGPT</b>` : ""}.</div>
-        <div>The same theme and mood were used to generate the art in the background using <b>DALL-E</b> with a curated prompt, aiming to harmonize with the haiku poem.</div>
-        <div>Curious about those prompts? See <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L106-L108" target="_blank">here</a></b> and <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L17-L31" target="_blank">here</a></b> in the source code.</b></div>
-        <div>Generated art and poems are sometimes great, sometimes not! Try the <b>✨</b> button next to the poem to regenerate.</div>
-      </div>`, {
-      onDismiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboardedGenerated: true } }),
-      closeLabel: "Got it!",
-    });
   }
 
   const startGenerateHaiku = async () => {
@@ -647,10 +628,10 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         onSaveHaikudle={doSaveHaikudle}
         onShowAbout={
           userGeneratedHaiku
-            ? startFirstGeneratedOnboarding //showAboutGenerated
+            ? showAboutGenerated
             : previousDailyHaikudleId
               ? showAboutPreviousDaily
-              : startFirstVisitOnboarding //showAbout            
+              : startFirstVisitOnboarding
         }
         onSelectHaiku={selectHaiku}
         onChangeRefreshDelay={changeRefreshDelay}

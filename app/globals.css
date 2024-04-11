@@ -185,12 +185,10 @@ ul {
   width: fit-content;
 }
 
-/* .onboarding-focus:not(:has(~ * .onboarding-focus)), */
-
 .onboarding-focus {
   /* background-color: blue; */
   border-radius: 50%;
-  opacity: 0.3;
+  /* opacity: 0.3; */
   /* box-shadow: 0 0 max(100vh, 100vw) max(100vh, 100vw) #000000, inset 0 0 1rem 2rem #000000; */
   position: absolute;
   top: -60px;
@@ -204,11 +202,9 @@ ul {
   /* background-color: yellow; */
   opacity: 0.52;
   box-shadow: 
-  0 0 max(100vh, 100vw) max(100vh, 100vw) #000000, 
-  /* 0 0 max(100vh, 100vw) max(100vh, 100vw) #00000088,  */
-  inset 0 0 1rem 2rem #000000,
-  inset 0 0 1rem max(100vh, 100vw) #00000088;
-
+    0 0 max(100vh, 100vw) max(100vh, 100vw) #000000, 
+    inset 0 0 1rem 2rem #000000,
+    inset 0 0 1rem max(100vh, 100vw) #00000044;
 }
 
 .onboarding-focus.double {
