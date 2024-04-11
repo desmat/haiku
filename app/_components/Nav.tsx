@@ -39,7 +39,21 @@ export function Loading({ onClick }: { onClick?: any }) {
   );
 }
 
-export function Logo({ mode, href, onClick, styles, altStyles }: { mode: string, href?: string, onClick?: any, styles?: any, altStyles?: any }) {
+export function Logo({
+  mode,
+  href,
+  onClick,
+  styles,
+  altStyles,
+  onboardingElement,
+}: {
+  mode: string,
+  href?: string,
+  onClick?: any,
+  styles?: any,
+  altStyles?: any,
+  onboardingElement?: string,
+}) {
   const isHaikudleMode = mode == "haikudle";
   const isSocialImgMode = mode == "social-img";
 
@@ -51,7 +65,12 @@ export function Logo({ mode, href, onClick, styles, altStyles }: { mode: string,
 
   const styledAi = altStyles
     ? (
-      <StyledLayers styles={altStyles}>
+      <StyledLayers
+        styles={onboardingElement && !onboardingElement.startsWith("logo")
+          ? altStyles.slice(0, 1)
+          : altStyles
+        }
+      >
         {ai}
       </StyledLayers>
     )
@@ -66,9 +85,19 @@ export function Logo({ mode, href, onClick, styles, altStyles }: { mode: string,
       className={`logo hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
     >
       <div className={`${font.architects_daughter.className} flex flex-row`}>
-        <StyledLayers styles={styles}>h</StyledLayers>
+        <StyledLayers
+          styles={onboardingElement && !onboardingElement.startsWith("logo")
+            ? styles.slice(0, 1)
+            : styles
+          }
+        >h</StyledLayers>
         {styledAi}
-        <StyledLayers styles={styles}>{isHaikudleMode || isSocialImgMode ? "kudle" : "ku"}</StyledLayers>
+        <StyledLayers
+          styles={onboardingElement && !onboardingElement.startsWith("logo")
+            ? styles.slice(0, 1)
+            : styles
+          }
+        >{isHaikudleMode || isSocialImgMode ? "kudle" : "ku"}</StyledLayers>
       </div>
     </Link>
   )
@@ -454,8 +483,15 @@ function SidePanel({
               {onboardingElement && ["_side-panel", "side-panel-and-bottom-links"].includes(onboardingElement) &&
                 <div className="onboarding-focus double" />
               }
-              <PopOnClick active={onboarding}>
-                <StyledLayers styles={styles}>
+              <PopOnClick
+                active={!!(onboardingElement && onboardingElement.includes("side-panel"))}
+              >
+                <StyledLayers
+                  styles={onboardingElement && !onboardingElement.includes("side-panel")
+                    ? styles.slice(0, 1)
+                    : styles
+                  }
+                >
                   <div className="_bg-orange-400 rotate-90 group-hover:hidden ml-[-1rem]">
                     <BsDashLg />
                   </div>
@@ -698,6 +734,7 @@ export function NavOverlay({
                 mode={mode}
                 href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`}
                 onClick={onClickLogo}
+                onboardingElement={onboardingElement}
               />
             </PopOnClick>
           </div>
@@ -765,7 +802,13 @@ export function NavOverlay({
               disabled={!onboarding}
               active={onboarding}
             >
-              <StyledLayers styles={styles} disabled={onboardingElement == "bottom-links-share"}>
+              <StyledLayers
+                styles={onboardingElement && !onboardingElement.includes("bottom-links")
+                  ? styles.slice(0, 1)
+                  : styles
+                }
+                disabled={onboardingElement == "bottom-links-share"}
+              >
                 <BottomLinks
                   mode={mode}
                   lang={lang}

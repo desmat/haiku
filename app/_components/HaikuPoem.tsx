@@ -317,14 +317,17 @@ export default function HaikuPoem({
                 color={haiku.bgColor}
                 force={popPoem}
                 disabled={editing || !showcaseMode}
+                active={!!(onboardingElement && onboardingElement.includes("poem"))}
               >
                 {haiku.poem.map((poemLine: string, i: number) => (
                   <div key={i} className="my-[0.05rem] transition-all">
                     <StyledLayers styles={saving
                       ? styles.slice(0, 3)
-                      : aboutToEditLine == i || editingLine == i
-                        ? styles.slice(0, 1)
-                        : styles
+                      : onboardingElement && !onboardingElement.includes("poem")
+                        ? styles.slice(0, 2)
+                        : aboutToEditLine == i || editingLine == i
+                          ? styles.slice(0, 1)
+                          : styles
                     }>
                       <div
                         className="relative m-[0rem] transition-all"
@@ -444,7 +447,15 @@ export default function HaikuPoem({
                         : ""
                   }}
                 >
-                  <StyledLayers styles={saving ? styles.slice(0, 3) : styles}>
+                  <StyledLayers
+                    styles={
+                      saving
+                        ? styles.slice(0, 3)
+                        : onboardingElement && !onboardingElement.includes("poem")
+                          ? styles.slice(0, 2)
+                          : styles
+                    }
+                  >
                     <span
                       dangerouslySetInnerHTML={{
                         __html: `${haikuTitleAndAuthorTag.join(haiku.theme?.length > maxHaikuTheme
