@@ -28,8 +28,8 @@ function TypedAlert({
   customActions?: any
 }) {
   // console.log('>> app._components.Alert.Alert.render()', { message, type, closed });
-  let icon;
-  let colorClasses;
+  let icon: any;
+  let colorClasses: any;
 
   switch (type) {
     case 'error':
