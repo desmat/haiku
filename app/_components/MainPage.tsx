@@ -402,7 +402,9 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
               <div>Follow the next steps to learn all about <b>Haiku Genius!</b></div>
             </div>
           `,
-          positionClassName: "top-[50vh] -translate-y-1/2 left-3",
+          // positionClassName: "top-[50vh] -translate-y-1/2 left-3",
+          positionClassName: "bottom-[10vh] left-3",
+
         },
 
         // Just the poem for testing
@@ -425,7 +427,9 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
               <div>AI-generated haiku poems are sometimes good, sometimes less good! Click on the haiku poem or the icon next to it to copy the poem’s text.</div>
             </div>
           `,
-          positionClassName: "top-[5vh] left-3",
+          // positionClassName: "top-[5vh] left-3",
+          positionClassName: "bottom-[10vh] left-3",
+
         },
 
         // Logo and Generate
@@ -437,7 +441,9 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
               <div>To create your very own hit the generate link and pick a theme: the AI help you write a poem and generate art work to match.</div>
             </div>
           `,
-          positionClassName: "top-[15vh] left-3",
+          // positionClassName: "top-[15vh] left-3",
+          positionClassName: "bottom-[10vh] left-3",
+
         },
 
         // Side Panel and Bottom Links
@@ -449,7 +455,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
               <div>Enjoy <b>Haiku Genius!</b></div>        
             </div>
           `,
-          positionClassName: "bottom-[15vh] left-3",
+          positionClassName: "bottom-[10vh] left-3",
         },
       ],
       () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
