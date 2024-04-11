@@ -35,7 +35,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   load: async () => {
     const { loadLocal, loadRemote } = get();
     let user;
-    // console.log(">> hooks.user.load()", { token });
+    // console.log(">> hooks.user.load()", {});
 
     const { user: localUser, token } = await loadLocal();
     const { user: remoteUser } = await loadRemote(token);
@@ -128,6 +128,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   save: async (user: any) => {
+    // console.log(">> hooks.user.save()", { user });
     const token = await encodeJWT({ user });
     window?.localStorage && window.localStorage.setItem("session", token || "");
     set({ user });

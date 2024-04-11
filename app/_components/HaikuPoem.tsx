@@ -114,6 +114,7 @@ export default function HaikuPoem({
   // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku.status, popPoem, haiku });
   const haikudleMode = mode == "haikudle";
   const showcaseMode = mode == "showcase";
+  const onboarding = typeof (onboardingElement) == "string"
   const maxHaikuTheme = showcaseMode ? 32 : 18;
   const dateCode = moment().format("YYYYMMDD");
 
@@ -129,7 +130,7 @@ export default function HaikuPoem({
   const copyAllowed = true;
   const canCopy = copyAllowed && !editing && !saving;
   const editAllowed = !showcaseMode && (user?.isAdmin || haiku.createdBy == user?.id) && saveHaiku;
-  const canEdit = editAllowed && !saving;
+  const canEdit = editAllowed && !saving && !onboarding;
   const regenerateAllowed = (user?.isAdmin || haiku.createdBy == user?.id) && regenerate;
   const canRegenerate = regenerateAllowed && !editing && !saving;
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { haiku, updatedPoem, editingPoemLine });
@@ -292,7 +293,11 @@ export default function HaikuPoem({
         {onboardingElement == "poem" &&
           <div className="onboarding-focus" />
         }
-        <PopOnClick color={haiku.bgColor} force={popPoem} disabled={editing || canEdit || showcaseMode}>
+        <PopOnClick
+          color={haiku.bgColor}
+          force={popPoem}
+          disabled={editing || canEdit || showcaseMode}
+        >
           <div className={`_bg-pink-200 ${canEdit ? "group/edit" : canCopy ? "group/copy" : ""} p-2 ${saving ? "animate-pulse" : ""}`}>
             <div
               className="_bg-purple-200 flex flex-col gap-[2rem] _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
@@ -305,7 +310,11 @@ export default function HaikuPoem({
                 cursor: showcaseMode ? "pointer" : ""
               }}
             >
-              <PopOnClick color={haiku.bgColor} force={popPoem} disabled={editing || !showcaseMode}>
+              <PopOnClick
+                color={haiku.bgColor}
+                force={popPoem}
+                disabled={editing || !showcaseMode}
+              >
                 {haiku.poem.map((poemLine: string, i: number) => (
                   <div key={i} className="my-[0.05rem] transition-all">
                     <StyledLayers styles={saving
@@ -350,24 +359,24 @@ export default function HaikuPoem({
                             <style
                               dangerouslySetInnerHTML={{
                                 __html: `
-                        .poem-line-input input {
-                          background: none;
-                          _background: pink; /* for debugging */
-                          caret-color: ${haiku?.color || "black"};
-                          border-radius: 5px;
-                          height: auto;
-                        }
-                        .poem-line-input.poem-line-${/* !editing && */ !saving && aboutToEditLine} input {
-                          outline: none; //1px solid ${haiku?.bgColor || ""}66;
-                          background-color: ${haiku?.bgColor || "white"}44;
-                        }
-                        ${saving ? "" : ".poem-line-input input:focus"} {
-                          outline: none; // 1px solid ${haiku?.bgColor || ""}88;
-                          background-color: ${haiku?.bgColor || "white"}66;
-                        }
-                        .poem-line-input input::selection { 
-                          background: ${haiku.color || "black"}66 
-                        }`
+                                  .poem-line-input input {
+                                    background: none;
+                                    _background: pink; /* for debugging */
+                                    caret-color: ${haiku?.color || "black"};
+                                    border-radius: 5px;
+                                    height: auto;
+                                  }
+                                  .poem-line-input.poem-line-${/* !editing && */ !saving && !onboarding && aboutToEditLine} input {
+                                    outline: none; //1px solid ${haiku?.bgColor || ""}66;
+                                    background-color: ${haiku?.bgColor || "white"}44;  
+                                  }
+                                  ${saving || onboarding ? "" : ".poem-line-input input:focus"} {
+                                    outline: none; // 1px solid ${haiku?.bgColor || ""}88;
+                                    background-color: ${haiku?.bgColor || "white"}66;
+                                  }
+                                  .poem-line-input input::selection { 
+                                    background: ${haiku.color || "black"}66 
+                                  }`
                               }}
                             >
                             </style>
@@ -460,9 +469,11 @@ export default function HaikuPoem({
                           canCopy && handleClickHaiku(e);
                         }}
                       >
-                        <StyledLayers styles={altStyles || []}>
-                          <FaCopy className={`h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 opacity-60 ${canCopy ? "group-hover/actions:opacity-100 group-hover/copy:opacity-100 cursor-pointer" : "cursor-default"}`} />
-                        </StyledLayers>
+                        <PopOnClick>
+                          <StyledLayers styles={altStyles || []}>
+                            <FaCopy className={`h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"} ${canCopy ? "group-hover/actions:opacity-100 group-hover/copy:opacity-100 cursor-pointer" : "cursor-default"}`} />
+                          </StyledLayers>
+                        </PopOnClick>
                       </Link>
                     }
                     {editAllowed &&
@@ -482,7 +493,17 @@ export default function HaikuPoem({
                         }}
                       >
                         <StyledLayers styles={altStyles || []}>
-                          <FaEdit className={`h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 ${saving ? "opacity-60" : editing ? "opacity-100" : canEdit ? "opacity-60 group-hover/edit:opacity-100 group-hover/actions:opacity-100" : ""}`} />
+                          <FaEdit className={`
+                            h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 
+                            ${editing || onboardingElement == "poem-actions"
+                              ? "opacity-100"
+                              : saving || !canEdit
+                                ? "opacity-60"
+                                : canEdit
+                                  ? "opacity-60 group-hover/edit:opacity-100 group-hover/actions:opacity-100"
+                                  : ""
+                            }
+                          `} />
                         </StyledLayers>
                       </Link>
                     }
@@ -491,7 +512,10 @@ export default function HaikuPoem({
                         {!user?.isAdmin && (user.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
                           <span title="Exceeded daily limit: try again later">
                             <StyledLayers styles={altStyles || []}>
-                              <GenerateIcon sizeOverwrite="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 opacity-60" />
+                              <GenerateIcon sizeOverwrite={`
+                                h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 
+                                ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"}
+                              `} />
                             </StyledLayers>
                           </span>
                         }
@@ -500,7 +524,11 @@ export default function HaikuPoem({
                             <StyledLayers styles={altStyles || []}>
                               <GenerateIcon
                                 onClick={() => canRegenerate && regenerate()}
-                                sizeOverwrite={`h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 opacity-60 ${canRegenerate ? "group-hover/actions:opacity-100 cursor-pointer" : "cursor-default"}`}
+                                sizeOverwrite={`
+                                  h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 
+                                  ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"} 
+                                  ${canRegenerate ? "group-hover/actions:opacity-100 cursor-pointer" : "cursor-default"}
+                                `}
                               />
                             </StyledLayers>
                           </span>

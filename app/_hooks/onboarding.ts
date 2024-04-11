@@ -5,102 +5,90 @@ import moment from 'moment';
 import useAlert from './alert';
 import { clear } from 'console';
 
-const steps = [
-  {
-    focus: "",
-    message: "TODO initial message<br/>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore <br/><br/>et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<br/><br/> Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.<br/> Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-    positionClassName: "top-[50vh] -translate-y-1/2 left-3",
-  },
-  {
-    focus: "poem",
-    message: "TODO message for poem",
-    positionClassName: "top-[10vh] left-3",
-  },
-  {
-    focus: "poem-actions",
-    message: "TODO message for poem-actions",
-    positionClassName: "top-[20vh] left-3",
-  },
-  {
-    focus: "logo",
-    message: "TODO message logo",
-    positionClassName: "top-[20vh] left-3",
-  },
-  {
-    focus: "generate-icon",
-    message: "TODO message generate-icon",
-    positionClassName: "top-[20vh] left-3",
-  },
-  {
-    focus: "side-panel",
-    message: "TODO message side-panel",
-    positionClassName: "bottom-[20vh] left-3",
-  },
-  {
-    focus: "bottom-links",
-    message: "TODO message for bottom-links",
-    positionClassName: "bottom-[20vh] left-3",
-  },
-]
+export type OnboardingStep = {
+  focus?: string,
+  message?: string,
+  positionClassName?: string,
+};
 
 const initialState = {
+  steps: undefined as OnboardingStep[] | undefined,
   step: undefined as number | undefined,
   focus: undefined as string | undefined,
   message: undefined as string | undefined,
   interval: undefined as any,
+  onDismiss: undefined as (() => void) | undefined,
 }
 
 const useOnboarding: any = create(devtools((set: any, get: any) => ({
   ...initialState,
 
   reset: () => {
-    // console.log(">> hooks.useOnboarding.reset", {});
-    return new Promise(async (resolve) => {
-      set(initialState);
-      resolve(true);
-    })
+    set(initialState);
   },
 
   nextStep: async () => {
-    const { step, finish } = get();
-    const nextStep = typeof (step) != "number"
+    const { steps, step, nextStep, finish, onDismiss } = get();
+    const nextStepOffset = typeof (step) != "number"
       ? 0
       : step >= steps.length - 1
         // ? 0 cycle
         ? undefined
         : step + 1;
 
-    console.log(">> hooks.useOnboarding.nextStep", { step, nextStep, steps });
+    // console.log(">> hooks.useOnboarding.nextStep", { step, nextStepOffset, steps, test: nextStepOffset && nextStepOffset < steps.length });
 
-    if (typeof (nextStep) != "number") {
-      return finish();
+    if (typeof (nextStepOffset) != "number") {
+      return //finish();
     }
 
     set({
-      step: nextStep,
-      focus: typeof (nextStep) == "number" && steps[nextStep]?.focus,
-      message: typeof (nextStep) == "number" && steps[nextStep]?.message,
+      step: nextStepOffset,
+      focus: typeof (nextStepOffset) == "number" && steps[nextStepOffset]?.focus,
+      message: typeof (nextStepOffset) == "number" && steps[nextStepOffset]?.message,
     });
 
-    useAlert.getState().plain(steps[nextStep]?.message, {
-      onDismiss: finish,
-      positionClassName: steps[nextStep]?.positionClassName,
+    useAlert.getState().plain(steps[nextStepOffset]?.message, {
+      onDismiss: () => {
+        // console.log("hooks.useOnboarding.nextStep onDismiss")
+        onDismiss && onDismiss();
+        finish();
+      },
+      positionClassName: steps[nextStepOffset]?.positionClassName,
+      customActions: [
+        {
+          label: "Close",
+          action: "close"
+        },
+        typeof (nextStepOffset) == "number" && nextStepOffset < steps.length - 1 && {
+          label: `Next (${nextStepOffset + 1}/${steps.length})`,
+          action: nextStep,
+        },
+      ]
     });
 
-    return typeof (nextStep) == "number" && steps[nextStep];
+    return typeof (nextStepOffset) == "number" && steps[nextStepOffset];
   },
 
-  start: async () => {
+  start: async (steps: OnboardingStep[], onDismiss?: () => void | undefined) => {
     const { nextStep } = get();
 
-    const interval = setInterval(async () => {
-      console.log(">> hooks.useOnboarding.start", {});
+    // const interval = setInterval(async () => {
+    //   console.log(">> hooks.useOnboarding.start", { steps });
+    //   nextStep();
+    // }, 2000);
+
+    // avoid race condition
+    setTimeout(async () => {
+      console.log(">> hooks.useOnboarding.start", { onDismiss });
       nextStep();
-    }, 2000);
+    }, 100);
 
     set({
-      interval,
-    })
+      steps,
+      onDismiss,
+      // interval,
+    });
   },
 
   finish: async () => {

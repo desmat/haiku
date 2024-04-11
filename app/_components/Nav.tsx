@@ -93,7 +93,9 @@ function BottomLinks({
   mode,
   haiku,
   lang,
+  styles,
   backupInProgress,
+  onboardingElement,
   onRefresh,
   onSwitchMode,
   onDelete,
@@ -104,7 +106,9 @@ function BottomLinks({
   mode: string,
   haiku?: Haiku,
   lang?: LanguageType,
+  styles?: any,
   backupInProgress?: boolean,
+  onboardingElement?: string | undefined,
   onRefresh: any,
   onSwitchMode: any,
   onDelete: any,
@@ -163,25 +167,35 @@ function BottomLinks({
           <MdMail className="text-xl" />
         </Link> */}
         {haiku?.id &&
-          <Link
-            key="link"
-            href={`/${haiku.id}`}
-            title="Copy direct link to share"
-            className="cursor-copy"
-            onClick={(e: any) => {
-              e.preventDefault();
-              navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : "https://haiku.desmat.ca"}/${haiku.id}`);
-              alert(`Link to this haiku copied to clipboard`, { closeDelay: 750 });
-              trackEvent("haiku-shared", {
-                userId: user.id,
-                id: haiku.id,
-              });
-            }}
-          >
-            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
-              <FaShare className="text-xl" />
-            </PopOnClick>
-          </Link>
+          <div className="onboarding-container">
+            {onboardingElement == "bottom-links-share" &&
+              <div className="onboarding-focus" />
+            }
+            <StyledLayers
+              styles={styles}
+              disabled={onboardingElement != "bottom-links-share"}
+            >
+              <Link
+                key="link"
+                href={`/${haiku.id}`}
+                title="Copy direct link to share"
+                className="cursor-copy"
+                onClick={(e: any) => {
+                  e.preventDefault();
+                  navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : "https://haiku.desmat.ca"}/${haiku.id}`);
+                  alert(`Link to this haiku copied to clipboard`, { closeDelay: 750 });
+                  trackEvent("haiku-shared", {
+                    userId: user.id,
+                    id: haiku.id,
+                  });
+                }}
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
+                  <FaShare className="text-xl" />
+                </PopOnClick>
+              </Link>
+            </StyledLayers>
+          </div>
         }
         {!haiku?.id &&
           <div className="opacity-40">
@@ -329,8 +343,9 @@ function SidePanel({
   // console.log(">> app._component.Nav.SidePanel.render()", { panelOpened, panelAnimating, dailyHaikudles, userHaikus });
 
   // TODO: move to shared lib between Nav and Layout
-  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
-  const appDescription = isHaikudleMode
+  const haikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+  const onboarding = onboardingElement == "side-panel";
+  const appDescription = haikudleMode
     ? "AI-generated daily art and haiku puzzles"
     : "AI-generated art and haiku poems";
   const thingName = "haiku";
@@ -402,7 +417,7 @@ function SidePanel({
         </div>
       }
       <div
-        className={`_bg-pink-200 absolute top-0 h-full w-[27rem] max-w-[90vw] ${onboardingElement && ["side-panel"].includes(onboardingElement) ? "z-50" : "z-20"} TODO:bringthisbackbutnoTransitionWhenOnboardingAnySteps _transition-all _blur-[10px]`}
+        className={`_bg-pink-200 absolute top-0 h-full w-[27rem] max-w-[90vw] ${onboarding ? "z-50" : "z-20"} ${!onboarding && "transition-all"} _blur-[10px]`}
         style={{
           backgroundColor: `${styles[styles.length - 1]?.color ? styles[styles.length - 1]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
           backdropFilter: "blur(10px)",
@@ -433,26 +448,28 @@ function SidePanel({
             title={panelOpened ? "Hide side panel" : "Show side panel"}
           >
             <div className="onboarding-container">
-              {onboardingElement == "side-panel" &&
+              {onboarding &&
                 <div className="onboarding-focus" />
               }
-              <StyledLayers styles={styles}>
-                <div className="_bg-orange-400 rotate-90 group-hover:hidden ml-[-1rem]">
-                  <BsDashLg />
-                </div>
-                <div className="hidden group-hover:block">
-                  {panelOpened &&
-                    <div className="mr-[0.1rem] _md:mr-[0.3rem]">
-                      <BsChevronCompactLeft />
-                    </div>
-                  }
-                  {!panelOpened &&
-                    <div className="_bg-orange-400 mr-[-0.2rem] ml-[-0.8rem] _md:mr-[-0.3rem]">
-                      <BsChevronCompactRight />
-                    </div>
-                  }
-                </div>
-              </StyledLayers>
+              <PopOnClick active={onboarding}>
+                <StyledLayers styles={styles}>
+                  <div className="_bg-orange-400 rotate-90 group-hover:hidden ml-[-1rem]">
+                    <BsDashLg />
+                  </div>
+                  <div className="hidden group-hover:block">
+                    {panelOpened &&
+                      <div className="mr-[0.1rem] _md:mr-[0.3rem]">
+                        <BsChevronCompactLeft />
+                      </div>
+                    }
+                    {!panelOpened &&
+                      <div className="_bg-orange-400 mr-[-0.2rem] ml-[-0.8rem] _md:mr-[-0.3rem]">
+                        <BsChevronCompactRight />
+                      </div>
+                    }
+                  </div>
+                </StyledLayers>
+              </PopOnClick>
             </div>
           </div>
           {/* Spacer for the logo to punch trough */}
@@ -667,7 +684,7 @@ export function NavOverlay({
             {onboardingElement == "logo" &&
               <div className="onboarding-focus" />
             }
-            <PopOnClick color={haiku?.bgColor}>
+            <PopOnClick color={haiku?.bgColor} active={onboardingElement == "logo"}>
               <Logo
                 styles={styles}
                 altStyles={altStyles}
@@ -705,7 +722,7 @@ export function NavOverlay({
             }
             {onClickGenerate && (user?.isAdmin || (user?.usage[dateCode]?.haikusCreated || 0) < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div title="Generate a new haiku">
-                <PopOnClick color={haiku?.bgColor}>
+                <PopOnClick color={haiku?.bgColor} active={onboardingElement == "generate-icon"}>
                   <StyledLayers styles={altStyles}>
                     <GenerateIcon onClick={onClickGenerate} />
                   </StyledLayers>
@@ -725,25 +742,32 @@ export function NavOverlay({
       />
 
       {["haiku", "haikudle"].includes(mode) &&
-        <div className={`absolute bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center ${onboardingElement && ["bottom-links"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
+        <div className={`absolute bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center ${onboardingElement && onboardingElement.startsWith("bottom-links") ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
             {onboardingElement == "bottom-links" &&
               <div className="onboarding-focus" />
             }
-            <StyledLayers styles={styles}>
-              <BottomLinks
-                mode={mode}
-                lang={lang}
-                haiku={haiku}
-                backupInProgress={backupInProgress}
-                onRefresh={onClickLogo}
-                onSwitchMode={onSwitchMode}
-                onDelete={onDelete}
-                onSaveHaikudle={onSaveHaikudle}
-                onShowAbout={onShowAbout}
-                onBackup={onBackup}
-              />
-            </StyledLayers>
+            <PopOnClick
+              disabled={onboardingElement != "bottom-links"}
+              active={onboardingElement == "bottom-links"}
+            >
+              <StyledLayers styles={styles} disabled={onboardingElement == "bottom-links-share"}>
+                <BottomLinks
+                  mode={mode}
+                  lang={lang}
+                  haiku={haiku}
+                  styles={styles}
+                  backupInProgress={backupInProgress}
+                  onboardingElement={onboardingElement}
+                  onRefresh={onClickLogo}
+                  onSwitchMode={onSwitchMode}
+                  onDelete={onDelete}
+                  onSaveHaikudle={onSaveHaikudle}
+                  onShowAbout={onShowAbout}
+                  onBackup={onBackup}
+                />
+              </StyledLayers>
+            </PopOnClick>
           </div>
         </div>
       }

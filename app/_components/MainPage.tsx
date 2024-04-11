@@ -266,16 +266,18 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   }, [haikuId, haiku?.id, loading, loaded]);
 
   useEffect(() => {
+    // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
     // @ts-ignore
     let timeoutId;
     if (user && (isHaikudleMode && haikudleReady || !isHaikudleMode)) {
-      if (previousDailyHaikudleId && user && !user?.preferences?.onboardedPreviousDaily) {
+      if (previousDailyHaikudleId && !user?.preferences?.onboardedPreviousDaily) {
         timeoutId = setTimeout(showAboutPreviousDaily, 2000);
-      } else if (userGeneratedHaiku && user && !user?.preferences?.onboardedGenerated) {
-        timeoutId = setTimeout(showAboutGenerated, 2000);
-      } else if ((isHaikuMode || isHaikudleMode) && !previousDailyHaikudleId && user && !user?.preferences?.onboarded) {
+      } else if (userGeneratedHaiku && !user?.preferences?.onboardedGenerated) {
+        // timeoutId = setTimeout(showAboutGenerated, 2000);
+        timeoutId = setTimeout(startFirstGeneratedOnboarding, 2000);
+      } else if ((isHaikuMode || isHaikudleMode) && !previousDailyHaikudleId && !user?.preferences?.onboarded) {
         // timeoutId = setTimeout(showAbout, 2000);
-        timeoutId = setTimeout(startOnboarding, 2000);
+        timeoutId = setTimeout(startFirstVisitOnboarding, 2000);
       }
     }
 
@@ -349,6 +351,72 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       onDismiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboardedPreviousDaily: true } }),
       closeLabel: "Got it!",
     });
+  }
+
+  const startFirstVisitOnboarding = () => {
+    startOnboarding(
+      [
+        {
+          focus: "",
+          message: "TODO initial First Visit message<br/>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore <br/><br/>et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<br/><br/> Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.<br/> Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          positionClassName: "top-[50vh] -translate-y-1/2 left-3",
+        },
+        {
+          focus: "poem",
+          message: "TODO message for poem",
+          positionClassName: "top-[10vh] left-3",
+        },
+        // {
+        //   focus: "poem-actions",
+        //   message: "TODO message for poem-actions",
+        //   positionClassName: "top-[20vh] left-3",
+        // },
+        // {
+        //   focus: "logo",
+        //   message: "TODO message logo",
+        //   positionClassName: "top-[20vh] left-3",
+        // },
+        // {
+        //   focus: "generate-icon",
+        //   message: "TODO message generate-icon",
+        //   positionClassName: "top-[20vh] left-3",
+        // },
+        // {
+        //   focus: "side-panel",
+        //   message: "TODO message side-panel",
+        //   positionClassName: "bottom-[20vh] left-3",
+        // },
+        // {
+        //   focus: "bottom-links",
+        //   message: "TODO message for bottom-links",
+        //   positionClassName: "bottom-[20vh] left-3",
+        // },
+      ],
+      () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
+    );
+  }
+
+  const startFirstGeneratedOnboarding = () => {
+    startOnboarding(
+      [
+        {
+          focus: "poem",
+          message: "TODO initial First Generated message<br/>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore <br/><br/>et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<br/><br/> Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.<br/> Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          positionClassName: "top-2 left-3",
+        },
+        {
+          focus: "poem-actions",
+          message: "TODO message for poem-actions",
+          positionClassName: "top-[20vh] left-3",
+        },
+        {
+          focus: "bottom-links-share",
+          message: "TODO message for bottom-links-share",
+          positionClassName: "bottom-[20vh] left-3",
+        },
+      ],
+      () => saveUser({ ...user, preferences: { ...user.preferences, onboardedGenerated: true } })
+    );
   }
 
   const showAboutGenerated = () => {
@@ -548,11 +616,12 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         onSwitchMode={switchMode}
         onDelete={doDelete}
         onSaveHaikudle={doSaveHaikudle}
-        onShowAbout={userGeneratedHaiku
-          ? showAboutGenerated
-          : previousDailyHaikudleId
-            ? showAboutPreviousDaily
-            : showAbout
+        onShowAbout={
+          userGeneratedHaiku
+            ? startFirstGeneratedOnboarding //showAboutGenerated
+            : previousDailyHaikudleId
+              ? showAboutPreviousDaily
+              : startFirstVisitOnboarding //showAbout            
         }
         onSelectHaiku={selectHaiku}
         onChangeRefreshDelay={changeRefreshDelay}

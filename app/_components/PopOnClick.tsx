@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 
 export default function PopOnClick({
   color = "white",
+  active,
   disabled,
   force,
   children,
 }: {
   color?: string,
+  active?: boolean,
   disabled?: boolean,
   force?: boolean,
   children: React.ReactNode,
@@ -29,7 +31,7 @@ export default function PopOnClick({
   return (
     <div
       style={{
-        filter: `${pop ? `drop-shadow(0px 0px 16px ${color})` : ""}`,
+        filter: `${pop || active ? `drop-shadow(0px 0px 16px ${color})` : ""}`,
       }}
       onMouseDown={() => !disabled && setPop(true)}
       onMouseUp={() => !disabled && doPop()}

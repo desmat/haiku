@@ -3,7 +3,13 @@ import { devtools } from 'zustand/middleware'
 import { AlertType } from '@/types/Alert';
 import moment from 'moment';
 
-const useAlert: any = create(devtools((set: any, get: any) => ({
+export type CustomAction = {
+  label: string,
+  action?: () => void | "close" | undefined,
+  disabled?: boolean,
+};
+
+const initialState = {
   message: undefined as string | undefined,
   type: undefined as AlertType | undefined,
   onDismiss: () => undefined,
@@ -11,27 +17,28 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
   closeTimeout: undefined as any,
   closedTimestamp: undefined as number | undefined,
   positionClassName: undefined as string | undefined,
+  customActions: undefined as CustomAction[] | undefined,
+}
 
-  reset: async () => {
-    // console.log(">> hooks.alert.reset", {});
-    set({
-      message: undefined,
-      type: undefined,
-      onDismiss: undefined,
-      closeLabel: undefined,
-      closeTimeout: undefined,
-      closedTimestamp: undefined,
-      positionClassName: undefined,
-    });
+const useAlert: any = create(devtools((set: any, get: any) => ({
+  ...initialState,
+
+  reset: () => {
+    set(initialState);
   },
 
-  error: async (message: string, {
-    onDismiss, closeLabel, closeDelay, positionClassName
+  _alert: async (type: AlertType, message: string, {
+    onDismiss,
+    closeLabel,
+    closeDelay,
+    positionClassName,
+    customActions,
   }: {
     onDismiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number,
     positionClassName?: string,
+    customActions?: any,
   } = {}) => {
     // console.log(">> hooks.alert.error", { message });
     if (closeDelay) {
@@ -39,75 +46,99 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
       setCloseTimeout(closeDelay);
     }
 
-    set({ message, type: message && "error", onDismiss, closeLabel, positionClassName });
+    set({
+      message,
+      type: message && type,
+      onDismiss,
+      closeLabel,
+      positionClassName,
+      customActions
+    });
+  },
+
+  error: async (message: string, {
+    onDismiss,
+    closeLabel,
+    closeDelay,
+    positionClassName,
+    customActions,
+  }: {
+    onDismiss?: () => undefined,
+    closeLabel?: string,
+    closeDelay?: number,
+    positionClassName?: string,
+    customActions?: any,
+  } = {}) => {
+    // console.log(">> hooks.alert.error", { message, closeDelay });
+    get()._alert("error", message, { onDismiss, closeLabel, closeDelay, positionClassName, customActions });
   },
 
   warning: async (message: string, {
-    onDismiss, closeLabel, closeDelay, positionClassName
+    onDismiss,
+    closeLabel,
+    closeDelay,
+    positionClassName,
+    customActions,
   }: {
     onDismiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number,
     positionClassName?: string,
+    customActions?: any,
   } = {}) => {
     // console.log(">> hooks.alert.warning", { message, closeDelay });
-    if (closeDelay) {
-      const { setCloseTimeout } = get();
-      setCloseTimeout(closeDelay);
-    }
-
-    set({ message, type: message && "warning", onDismiss, closeLabel, positionClassName });
+    get()._alert("warning", message, { onDismiss, closeLabel, closeDelay, positionClassName, customActions });
   },
 
   info: async (message: string, {
-    onDismiss, closeLabel, closeDelay, positionClassName
+    onDismiss,
+    closeLabel,
+    closeDelay,
+    positionClassName,
+    customActions,
   }: {
     onDismiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number,
     positionClassName?: string,
+    customActions?: any,
   } = {}) => {
     // console.log(">> hooks.alert.info", { message });
-    if (closeDelay) {
-      const { setCloseTimeout } = get();
-      setCloseTimeout(closeDelay);
-    }
-
-    set({ message, type: message && "info", onDismiss, closeLabel, positionClassName });
+    get()._alert("info", message, { onDismiss, closeLabel, closeDelay, positionClassName, customActions });
   },
 
   success: async (message: string, {
-    onDismiss, closeLabel, closeDelay, positionClassName
+    onDismiss,
+    closeLabel,
+    closeDelay,
+    positionClassName,
+    customActions,
   }: {
     onDismiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number,
     positionClassName?: string,
+    customActions?: any,
   } = {}) => {
     // console.log(">> hooks.alert.success", { message });
-    if (closeDelay) {
-      const { setCloseTimeout } = get();
-      setCloseTimeout(closeDelay);
-    }
-
-    set({ message, type: message && "success", onDismiss, closeLabel, positionClassName });
+    get()._alert("success", message, { onDismiss, closeLabel, closeDelay, positionClassName, customActions });
   },
 
   plain: async (message: string, {
-    onDismiss, closeLabel, closeDelay, positionClassName
+    onDismiss,
+    closeLabel,
+    closeDelay,
+    positionClassName,
+    customActions,
   }: {
     onDismiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number,
     positionClassName?: string,
+    customActions?: any
   } = {}) => {
     // console.log(">> hooks.alert.plain", { message, onDismiss, closeLabel, closeDelay });
-    if (closeDelay) {
-      const { setCloseTimeout } = get();
-      setCloseTimeout(closeDelay);
-    }
-
-    set({ message, type: message && "plain", onDismiss, closeLabel, positionClassName });
+    get()._alert("plain", message, { onDismiss, closeLabel, closeDelay, positionClassName, customActions });
   },
 
   setCloseTimeout: async (closeDelayMs: number) => {

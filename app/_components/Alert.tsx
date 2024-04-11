@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { CheckCircleIcon, ExclamationTriangleIcon, InformationCircleIcon, XMarkIcon, ExclamationCircleIcon } from '@heroicons/react/20/solid'
 import { MdCelebration } from "react-icons/md";
 import { MdOutlineCelebration } from "react-icons/md";
-import useAlert from '@/app/_hooks/alert';
+import useAlert, { CustomAction } from '@/app/_hooks/alert';
 import { AlertType } from '@/types/Alert';
 
 // from https://tailwindui.com/components/application-ui/feedback/alerts
@@ -17,6 +17,7 @@ function TypedAlert({
   handleClose,
   closeLabel,
   positionClassName,
+  customActions,
 }: {
   message: string,
   type: AlertType,
@@ -24,6 +25,7 @@ function TypedAlert({
   handleClose: any,
   closeLabel?: string,
   positionClassName?: string,
+  customActions?: any
 }) {
   // console.log('>> app._components.Alert.Alert.render()', { message, type, closed });
   let icon;
@@ -111,13 +113,32 @@ function TypedAlert({
               </div>
             </div>
           </div>
-          <div
-            className={`_bg-pink-100 text-center`}
-            onClick={handleClose}
-          >
-            <div className={`_bg-pink-200 w-fit m-auto px-2 font-bold cursor-pointer hover:underline text-sm ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>
-              {closeLabel || "Close"}
-            </div>
+          <div className="flex flex-row gap-1 m-auto">
+            {customActions && customActions.map((ca: CustomAction, i: number) => {
+              if (ca) {
+                return (
+                  <div
+                    key={i}
+                    className={`_bg-pink-100 text-center`}
+                    onClick={typeof (ca.action) == "string" && ca.action == "close" ? handleClose : ca.action}
+                  >
+                    <div className={`_bg-pink-200 w-fit m-auto px-1 font-bold cursor-pointer hover:underline text-sm ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>
+                      {ca.label}
+                    </div>
+                  </div>
+                )
+              }
+            })}
+            {!customActions &&
+              <div
+                className={`_bg-pink-100 text-center`}
+                onClick={handleClose}
+              >
+                <div className={`_bg-pink-200 w-fit m-auto px-1 font-bold cursor-pointer hover:underline text-sm ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>
+                  {closeLabel || "Close"}
+                </div>
+              </div>
+            }
           </div>
         </div>
       </div>
@@ -134,6 +155,7 @@ function AnimatedAlert({
   closedTimestamp,
   timestamp,
   positionClassName,
+  customActions,
 }: {
   message: string,
   type: AlertType,
@@ -142,6 +164,7 @@ function AnimatedAlert({
   closedTimestamp?: number,
   timestamp: number,
   positionClassName?: string,
+  customActions?: any,
 }) {
   const [reset] = useAlert((state: any) => [state.reset]);
   const [lastMessage, setLastMessage] = useState<string | undefined>(message);
@@ -204,6 +227,7 @@ function AnimatedAlert({
         handleClose={handleClose}
         closeLabel={closeLabel}
         positionClassName={positionClassName}
+        customActions={customActions}
       />
     )
   }
@@ -223,6 +247,7 @@ export default function Alert({
     closeLabel,
     closedTimestamp,
     positionClassName,
+    customActions,
   ] = useAlert((state: any) => [
     state.message,
     state.type,
@@ -230,6 +255,7 @@ export default function Alert({
     state.closeLabel,
     state.closedTimestamp,
     state.positionClassName,
+    state.customActions,
   ]);
 
   // console.log('>> app._components.Alert.Error.render()', { message, _message });
@@ -243,6 +269,7 @@ export default function Alert({
       closedTimestamp={closedTimestamp}
       timestamp={moment().valueOf()}
       positionClassName={positionClassName}
+      customActions={customActions}
     />
   )
 }
