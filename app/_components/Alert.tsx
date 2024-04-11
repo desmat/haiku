@@ -98,7 +98,7 @@ function TypedAlert({
               {icon}
             </div>
             <div className={`${icon ? "ml-3" : ""}`}>
-              <p className={`text-sm font-medium ${colorClasses[3]}`} dangerouslySetInnerHTML={{ __html: message }} />
+              <div className={`text-md font-medium ${colorClasses[3]}`} dangerouslySetInnerHTML={{ __html: message }} />
             </div>
             <div className="ml-auto pl-3">
               <div className="absolute top-1 right-[-0px] opacity-40 hover:opacity-100">
@@ -122,7 +122,7 @@ function TypedAlert({
                     className={`_bg-pink-100 text-center`}
                     onClick={typeof (ca.action) == "string" && ca.action == "close" ? handleClose : ca.action}
                   >
-                    <div className={`_bg-pink-200 w-fit m-auto px-1 font-bold cursor-pointer hover:underline text-sm ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>
+                    <div className={`_bg-pink-200 w-fit m-auto px-1 font-bold cursor-pointer hover:underline ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>
                       {ca.label}
                     </div>
                   </div>
@@ -131,10 +131,10 @@ function TypedAlert({
             })}
             {!customActions &&
               <div
-                className={`_bg-pink-100 text-center`}
+                className={`_bg-pink-100 text-center text-md font-medium`}
                 onClick={handleClose}
               >
-                <div className={`_bg-pink-200 w-fit m-auto px-1 font-bold cursor-pointer hover:underline text-sm ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>
+                <div className={`_bg-pink-200 w-fit m-auto px-1 font-bold cursor-pointer hover:underline ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>
                   {closeLabel || "Close"}
                 </div>
               </div>

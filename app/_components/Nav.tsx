@@ -344,7 +344,7 @@ function SidePanel({
 
   // TODO: move to shared lib between Nav and Layout
   const haikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
-  const onboarding = onboardingElement == "side-panel";
+  const onboarding = !!(onboardingElement && ["side-panel", "side-panel-and-bottom-links"].includes(onboardingElement));
   const appDescription = haikudleMode
     ? "AI-generated daily art and haiku puzzles"
     : "AI-generated art and haiku poems";
@@ -448,8 +448,11 @@ function SidePanel({
             title={panelOpened ? "Hide side panel" : "Show side panel"}
           >
             <div className="onboarding-container">
-              {onboarding &&
+              {onboardingElement && ["side-panel", "_side-panel-and-bottom-links"].includes(onboardingElement) &&
                 <div className="onboarding-focus" />
+              }
+              {onboardingElement && ["_side-panel", "side-panel-and-bottom-links"].includes(onboardingElement) &&
+                <div className="onboarding-focus double" />
               }
               <PopOnClick active={onboarding}>
                 <StyledLayers styles={styles}>
@@ -648,6 +651,7 @@ export function NavOverlay({
 }) {
   const dateCode = moment().format("YYYYMMDD");
   const [user] = useUser((state: any) => [state.user]);
+  const onboarding = !!(onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement));
   // console.log(">> app._component.Nav.render", { mode, haikuId: haiku?.id });
 
   const handleKeyDown = async (e: any) => {
@@ -679,10 +683,13 @@ export function NavOverlay({
   return (
     <div className="_bg-pink-200 nav-overlay relative h-full w-full z-1">
       {["haikudle", "haiku"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
+        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
           <div className="onboarding-container">
-            {onboardingElement == "logo" &&
+            {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement) &&
               <div className="onboarding-focus" />
+            }
+            {onboardingElement && ["_logo", "logo-and-generate"].includes(onboardingElement) &&
+              <div className="onboarding-focus double" />
             }
             <PopOnClick color={haiku?.bgColor} active={onboardingElement == "logo"}>
               <Logo
@@ -708,10 +715,13 @@ export function NavOverlay({
         </div>
       }
       {["haikudle", "haiku"].includes(mode) &&
-        <div className={`absolute top-2.5 right-2.5 ${onboardingElement && ["generate-icon"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
+        <div className={`absolute top-2.5 right-2.5 ${onboardingElement && ["generate"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
-            {onboardingElement == "generate-icon" &&
+            {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement) &&
               <div className="onboarding-focus" />
+            }
+            {onboardingElement && ["_logo", "logo-and-generate"].includes(onboardingElement) &&
+              <div className="onboarding-focus double" />
             }
             {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
@@ -722,7 +732,7 @@ export function NavOverlay({
             }
             {onClickGenerate && (user?.isAdmin || (user?.usage[dateCode]?.haikusCreated || 0) < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div title="Generate a new haiku">
-                <PopOnClick color={haiku?.bgColor} active={onboardingElement == "generate-icon"}>
+                <PopOnClick color={haiku?.bgColor} active={!!onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement)}>
                   <StyledLayers styles={altStyles}>
                     <GenerateIcon onClick={onClickGenerate} />
                   </StyledLayers>
@@ -744,12 +754,16 @@ export function NavOverlay({
       {["haiku", "haikudle"].includes(mode) &&
         <div className={`absolute bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center ${onboardingElement && onboardingElement.startsWith("bottom-links") ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
-            {onboardingElement == "bottom-links" &&
+            {onboardingElement && ["bottom-links", "_side-panel-and-bottom-links"].includes(onboardingElement) &&
               <div className="onboarding-focus" />
             }
+            {onboardingElement && ["_bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement) &&
+              <div className="onboarding-focus double" />
+            }
+
             <PopOnClick
-              disabled={onboardingElement != "bottom-links"}
-              active={onboardingElement == "bottom-links"}
+              disabled={!onboarding}
+              active={onboarding}
             >
               <StyledLayers styles={styles} disabled={onboardingElement == "bottom-links-share"}>
                 <BottomLinks

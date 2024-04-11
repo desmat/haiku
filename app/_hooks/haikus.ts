@@ -159,9 +159,17 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           const data = await res.json();
           const haiku = data.haiku;
 
+          // race condition: make sure that initial load we have at least have the one haiku in the side panel
+          const { userHaikus } = get();
+          const viewedHaiku = {
+            ...haiku,
+            viewedAt: moment().valueOf(),
+          };
+
           set({
             mode: mode || _mode,
             _haikus: { ..._haikus, [haiku.id]: haiku },
+            userHaikus: { ...userHaikus, [viewedHaiku.id]: viewedHaiku },
           });
           setLoaded(id);
 
@@ -190,20 +198,31 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           // @ts-ignore
           if (query.mine) {
             // special case: these were partially loaded for the side bar: don't setLoaded
-            set({
-              mode: mode || _mode,
-              userHaikus: listToMap(haikus),
-              dailyHaikudles: data.dailyHaikudles && listToMap(data.dailyHaikudles),
-            });
+            // also avoid race condition loading haikus vs marking current one as viewed
+            if (Object.keys(haikus).length) {
+              set({
+                mode: mode || _mode,
+                userHaikus: listToMap(haikus),
+                dailyHaikudles: data.dailyHaikudles && listToMap(data.dailyHaikudles),
+              });
+            }
           } else {
             setLoaded(haikus);
 
             // special case for random fetch: only keep the last one
             // @ts-ignore
             if (query.random) {
+              // race condition: make sure that initial load we have at least have the one haiku in the side panel
+              const { userHaikus } = get();
+              const viewedHaiku = {
+                ...haikus[0],
+                viewedAt: moment().valueOf(),
+              };
+
               set({
                 mode: mode || _mode,
-                _haikus: { ..._haikus ,...listToMap(haikus) },
+                _haikus: { ..._haikus, ...listToMap(haikus) },
+                userHaikus: { ...userHaikus, ...listToMap([viewedHaiku]) },
               });
               return resolve(haikus[0]);
             } else {
