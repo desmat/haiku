@@ -145,7 +145,7 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
     return {
       response: {
         prompt,
-        haiku: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "_ _ _") : line),
+        haiku: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "_") : line),
         subject: subject || "test subject",
         mood: mood || "test mood",
       }
