@@ -2,6 +2,7 @@ export type TrackingEventType =
   "error" |
   "user-signedin" |
   "user-session-created" |
+  "user-session-loaded" | 
   "haiku-created" |
   "haiku-updated" | 
   "haiku-generated" |

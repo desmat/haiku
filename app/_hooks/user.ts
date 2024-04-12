@@ -62,6 +62,13 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       if ((process.env.ADMIN_USER_IDS || "").split(",").includes(user.id)) {
         user.isAdmin = true;
       }
+
+      trackEvent("user-session-loaded", {
+        userId: user.id,
+        isAdmin: user.isAdmin,
+        isAnonymous: user.isAnonymous,
+        // token, 
+      });
     } else {
       // console.log('>> hooks.user.load() creating session', { onboardingUserId: process.env.ONBOARDING_USER_ID });
       if (process.env.ONBOARDING_USER_ID) {
