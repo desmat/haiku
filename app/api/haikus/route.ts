@@ -1,12 +1,14 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, generateHaiku, getUserHaikus, getUserHaiku, createUserHaiku } from '@/services/haikus';
+import { getHaikus, generateHaiku, getUserHaikus, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, createHaiku, saveDailyHaiku, getNextDailyHaikuId } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
 import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
 import { userUsage } from '@/services/usage';
 import { DailyHaikudle } from '@/types/Haikudle';
 import { USAGE_LIMIT } from '@/types/Usage';
+import { DailyHaiku, Haiku } from '@/types/Haiku';
+import shuffleArray from '@/utils/shuffleArray';
 
 export const maxDuration = 300;
 // export const dynamic = 'force-dynamic';
@@ -39,14 +41,14 @@ export async function GET(request: NextRequest, params?: any) {
       query.lang = "en";
     }
 
-    const [ haikus, dailyHaikudles, userHaiku, userHaikudle ] = await Promise.all([
+    const [haikus, dailyHaikudles, userHaiku, userHaikudle] = await Promise.all([
       getHaikus(query, mode == "haikudle"),
       getDailyHaikudles(),
       getUserHaiku(user.id, params.id),
       getUserHaikudle(user?.id, params.id),
     ]);
 
-    const randomHaiku = haikus[Math.floor(Math.random() * haikus.length)];    
+    const randomHaiku = haikus[Math.floor(Math.random() * haikus.length)];
     const dailyHaikudle = dailyHaikudles
       .filter((dailyHaikudles: DailyHaikudle) => dailyHaikudles.haikuId == randomHaiku.id)[0];
     // console.log('>> app.api.haikus.GET', { dailyHaikudles, dailyHaikudle });
@@ -58,7 +60,7 @@ export async function GET(request: NextRequest, params?: any) {
     if (!user.isAdmin && randomHaiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
       createUserHaiku(user.id, randomHaiku.id);
     }
-  
+
     return NextResponse.json({ haikus: [randomHaiku] });
   }
 
@@ -66,14 +68,45 @@ export async function GET(request: NextRequest, params?: any) {
     const haikus = await getUserHaikus(user);
 
     if (user.isAdmin) {
-      const dailyHaikudles = await getDailyHaikudles();
-      return NextResponse.json({ haikus, dailyHaikudles });
+      const [dailyHaikus, dailyHaikudles, nextDailyHaikuId] = await Promise.all([
+        await getDailyHaikus(),
+        await getDailyHaikudles(),
+        await getNextDailyHaikuId(),
+      ]);
+
+      return NextResponse.json({ haikus, dailyHaikus, dailyHaikudles, nextDailyHaikuId });
     }
-    
+
     return NextResponse.json({ haikus });
   }
 
   const haikus = await getHaikus(query, process.env.EXPERIENCE_MODE == "haikudle");
+
+  // create daily haiku if none for today
+  const todaysDateCode = moment().format("YYYYMMDD");
+  let todaysHaiku = await getDailyHaiku(todaysDateCode);
+  console.log('>> app.api.haiku.GET', { todaysDateCode, todaysHaiku });
+
+  if (!todaysHaiku) {
+    // create a new dailyhaiku
+    const previousDailyHaikus = await getDailyHaikus()
+    const previousDailyHaikuIds = previousDailyHaikus.map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
+    const nonDailyhaikus = haikus.filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
+    const randomHaikuId = shuffleArray(nonDailyhaikus)[0].id;
+    const randomHaiku = haikus[randomHaikuId];
+
+    console.log('>> app.api.haikus.GET', { randomHaikuId, randomHaiku, previousDailyHaikus, haikus });
+
+    todaysHaiku = await saveDailyHaiku(user, todaysDateCode, randomHaikuId);
+  }
+
+
+
+
+
+
+
+
   return NextResponse.json({ haikus });
 }
 

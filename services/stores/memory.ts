@@ -1,6 +1,6 @@
 
 import { mapToList } from "@/utils/misc";
-import { Haiku, UserHaiku } from "@/types/Haiku";
+import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
 import { GenericStore, Store } from "@/types/Store";
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
@@ -147,6 +147,7 @@ class MemoryStore<T extends MenoryStoreEntry> implements GenericStore<T> {
 export function create(): Store {
   return {
     haikus: new MemoryStore<Haiku>("haiku"),
+    dailyHaikus: new MemoryStore<DailyHaiku>("dailyhaiku"),
     haikudles: new MemoryStore<Haikudle>("haikudle"),
     dailyHaikudles: new MemoryStore<DailyHaikudle>("dailyhaikudle"),
     userHaikudles: new MemoryStore<UserHaikudle>("userhaikudle"),

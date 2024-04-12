@@ -22,5 +22,5 @@ export type DailyHaikudle = {
   createdBy?: string,
   updatedAt?: number,
   updatedBy?: string,
-  theme?: string,
+  theme?: string,  // ???
 };

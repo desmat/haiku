@@ -35,7 +35,11 @@ const initialState = {
   _loaded: <StatusMap>{},
 
   userHaikus: <HaikuMap>{},
+
+  // TODO move to user hook and end-points
+  dailyHaikus: <any>{},
   dailyHaikudles: <any>{},
+  nextDailyHaikuId: <string|undefined>undefined,
 }
 
 const useHaikus: any = create(devtools((set: any, get: any) => ({
@@ -203,7 +207,9 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
               set({
                 mode: mode || _mode,
                 userHaikus: listToMap(haikus),
+                dailyHaikus: data.dailyHaikus && listToMap(data.dailyHaikus),
                 dailyHaikudles: data.dailyHaikudles && listToMap(data.dailyHaikudles),
+                nextDailyHaikuId: data.nextDailyHaikuId,
               });
             }
           } else {
@@ -534,6 +540,43 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       userHaikus: { ...userHaikus, [userHaiku.id]: userHaiku },
     });
   },
+
+  createDailyHaiku: async (dateCode: string, haikuId: string) => {
+    // console.log(">> hooks.haiku.createDailyHaiku", { dateCode, haikuId });
+
+    return new Promise(async (resolve, reject) => {
+      fetch(`/api/haikus/${haikuId}/daily`, {
+        ...await fetchOpts(),
+        method: "POST",
+        body: JSON.stringify({ dateCode, haikuId }),
+      }).then(async (res) => {
+        const { _haikus } = get();
+
+        if (res.status != 200) {
+          trackEvent("error", {
+            type: "create-daily-haiku",
+            code: res.status,
+            userId: (await useUser.getState()).user.id,
+          });
+
+          useAlert.getState().error(`Error creating daily haiku: ${res.status} (${res.statusText})`);
+          return reject(res.statusText);
+        }
+
+        const data = await res.json();
+        const dailyHaiku = data.dailyHaiku;
+
+        set({
+          dailyHaikus: {
+            ...get().dailyHaikus,
+            [dailyHaiku.id]: dailyHaiku,
+          }
+        });
+
+        return resolve(dailyHaiku);
+      });
+    });
+  }
 
 })));
 

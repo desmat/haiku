@@ -62,6 +62,7 @@ export async function GET(request: NextRequest, params?: any) {
 
   return NextResponse.json(
     nextDailyHaikudleId && user.isAdmin
+      // TODO move this to /api/haikudles?mine=true to follow haiku pattern
       ? { haikudles: [ret], nextDailyHaikudleId }
       : { haikudles: [ret] }
   );
@@ -70,9 +71,16 @@ export async function GET(request: NextRequest, params?: any) {
 export async function POST(request: Request) {
   console.log('>> app.api.haikudles.POST');
 
+  // TODO: move this to api/haikudle/id/daily to follow haiku pattern
+
   const { user } = await userSession(request);
 
-  // TODO lock down to admins
+  if (!user.isAdmin) {
+    return NextResponse.json(
+      { success: false, message: 'authorization failed' },
+      { status: 403 }
+    );
+  }
 
   const data: any = await request.json();
   const haikudle = data.haikudle;

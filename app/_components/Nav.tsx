@@ -128,7 +128,7 @@ function BottomLinks({
   onRefresh,
   onSwitchMode,
   onDelete,
-  onSaveHaikudle,
+  onSaveDailyHaiku,
   onShowAbout,
   onBackup,
 }: {
@@ -141,7 +141,7 @@ function BottomLinks({
   onRefresh: any,
   onSwitchMode: any,
   onDelete: any,
-  onSaveHaikudle: any,
+  onSaveDailyHaiku: any,
   onShowAbout: any,
   onBackup?: any,
 }) {
@@ -259,12 +259,12 @@ function BottomLinks({
         }
         {user?.isAdmin &&
           <div
-            key="saveHaikudle"
-            className={["haikudle"].includes(mode) && haiku?.id && onSaveHaikudle ? "cursor-pointer" : "opacity-40"}
-            onClick={() => ["haikudle"].includes(mode) && haiku?.id && onSaveHaikudle && onSaveHaikudle()}
-            title="Save as daily Haikudle"
+            key="saveHaiku"
+            className={haiku?.id && onSaveDailyHaiku ? "cursor-pointer" : "opacity-40"}
+            onClick={haiku?.id && onSaveDailyHaiku && onSaveDailyHaiku}
+            title={`Save as daily ${mode}`}
           >
-            <PopOnClick color={haiku?.bgColor} disabled={!["haikudle"].includes(mode) || !haiku?.id}>
+            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
               <IoAddCircle className="text-xl" />
             </PopOnClick>
 
@@ -358,28 +358,20 @@ function SidePanel({
   const [panelPinned, setPanelPinned] = useState(false);
   const pageSize = 20;
   const [numPages, setNumPages] = useState(1);
-  const [listMode, setListMode] = useState<"haiku" | "dailyHaikudle">("haiku");
+  const [listMode, setListMode] = useState<"haiku" | "dailyHaiku" | "dailyHaikudle">("haiku");
   const [
     loadHaikus,
     userHaikus,
+    dailyHaikus,
     dailyHaikudles,
   ] = useHaikus((state: any) => [
     state.load,
     state.userHaikus ? Object.values(state.userHaikus) : [],
+    state.dailyHaikus ? Object.values(state.dailyHaikus) : [],
     state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
   ]);
-
-  // console.log(">> app._component.Nav.SidePanel.render()", { panelOpened, panelAnimating, dailyHaikudles, userHaikus });
-
-  // TODO: move to shared lib between Nav and Layout
-  const haikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
   const onboarding = !!(onboardingElement && ["side-panel", "side-panel-and-bottom-links"].includes(onboardingElement));
-  const appDescription = haikudleMode
-    ? "AI-generated daily art and haiku puzzles"
-    : "AI-generated art and haiku poems";
-  const thingName = "haiku";
-
-  // console.log(">> app._component.SidePanel.render", { user, mode });
+  // console.log(">> app._component.Nav.SidePanel.render()", { panelOpened, panelAnimating, dailyHaikudles, userHaikus });
 
   const toggleMenuOpened = () => {
     // console.log(">> app._component.SidePanel.toggleMenuOpened", {});
@@ -517,13 +509,22 @@ function SidePanel({
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
             <div className="py-2">
               <StyledLayers styles={styles}>
-                {user?.isAdmin && listMode == "haiku" &&
+              {user?.isAdmin && listMode == "haiku" &&
+                  <div
+                    className="cursor-pointer"
+                    title="Show daily haikudles"
+                    onClick={() => setListMode("dailyHaiku")}
+                  >
+                    Latest Haikus
+                  </div>
+                }
+                {user?.isAdmin && listMode == "dailyHaiku" &&
                   <div
                     className="cursor-pointer"
                     title="Show daily haikudles"
                     onClick={() => setListMode("dailyHaikudle")}
                   >
-                    Latest {thingName}s
+                    Daily Haikus
                   </div>
                 }
                 {user?.isAdmin && listMode == "dailyHaikudle" &&
@@ -572,7 +573,7 @@ function SidePanel({
                 </StyledLayers>
               ))
             }
-            {listMode == "dailyHaikudle" && user?.isAdmin && (panelAnimating || panelOpened) && dailyHaikudles
+            {["dailyHaiku", "dailyHaikudle"].includes(listMode) && user?.isAdmin && (panelAnimating || panelOpened) && (listMode == "dailyHaiku" && dailyHaikus || dailyHaikudles)
               // .filter((h: Haiku) => h.createdBy == user.id)
               .sort((a: any, b: any) => b.id - a.id)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
@@ -594,7 +595,7 @@ function SidePanel({
                 </StyledLayers>
               ))
             }
-            {(listMode == "haiku" ? userHaikus : dailyHaikudles) && (Object.values(listMode == "haiku" ? userHaikus : dailyHaikudles).length > numPages * pageSize) &&
+            {(Object.values(listMode == "haiku" ? userHaikus : dailyHaikudles).length > numPages * pageSize) &&
               <div
                 className="py-2 cursor-pointer"
                 onClick={loadMore}
@@ -661,7 +662,7 @@ export function NavOverlay({
   onClickGenerate,
   onSwitchMode,
   onDelete,
-  onSaveHaikudle,
+  onSaveDailyHaiku,
   onShowAbout,
   onSelectHaiku,
   onChangeRefreshDelay,
@@ -679,7 +680,7 @@ export function NavOverlay({
   onClickGenerate?: any,
   onSwitchMode?: any,
   onDelete?: any,
-  onSaveHaikudle?: any,
+  onSaveDailyHaiku?: any,
   onShowAbout?: any,
   onSelectHaiku?: any,
   onChangeRefreshDelay?: any,
@@ -819,7 +820,7 @@ export function NavOverlay({
                   onRefresh={onClickLogo}
                   onSwitchMode={onSwitchMode}
                   onDelete={onDelete}
-                  onSaveHaikudle={onSaveHaikudle}
+                  onSaveDailyHaiku={onSaveDailyHaiku}
                   onShowAbout={onShowAbout}
                   onBackup={onBackup}
                 />

@@ -64,6 +64,8 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     regenerateHaiku,
     resetHaikus,
     deleteHaiku,
+    nextDailyHaikuId,
+    createDailyHaiku,
   ] = useHaikus((state: any) => [
     state.loaded(haikuId),
     state.load,
@@ -72,6 +74,8 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     state.regenerate,
     state.reset,
     state.delete,
+    state.nextDailyHaikuId,
+    state.createDailyHaiku,
   ]);
 
   const [
@@ -187,7 +191,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
             setHaiku(loadedHaikudle?.haiku);
             setHaikuId(loadedHaikudle?.haiku?.id);
           })
-        : loadHaikus(haikuId || { random: true, lang }, mode)
+        : loadHaikus(haikuId || { lang }, mode)
           .then((haikus: Haiku | Haiku[]) => {
             // console.log('>> app.MainPage.loadPage loadHaikus.then', { haikus });
             const loadedHaiku = haikus[0] || haikus;
@@ -485,16 +489,23 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     }
   }
 
-  const doSaveHaikudle = () => {
-    // console.log('>> app._components.NavOverlay.onSaveHaikudle()', {});
-    const ret = prompt("YYYYMMDD?", nextDailyHaikudleId);
-    if (ret) {
-      createHaikudle(user, {
-        id: haiku?.id,
-        dateCode: ret,
-        haikuId: haiku?.id,
-        inProgress: haikudleInProgress,
-      });
+  const saveDailyHaiku = () => {
+    // console.log('>> app._components.MainPage.saveDailyHaiku()', {});
+    if (haikudleMode) {
+      const ret = prompt("YYYYMMDD?", nextDailyHaikudleId || moment().format("YYYYMMDD"));
+      if (ret) {
+        createHaikudle(user, {
+          id: haiku?.id,
+          dateCode: ret,
+          haikuId: haiku?.id,
+          inProgress: haikudleInProgress,
+        });
+      }
+    } else {
+      const ret = prompt("YYYYMMDD?", nextDailyHaikuId || moment().format("YYYYMMDD"));
+      if (ret) {
+        createDailyHaiku(ret, haiku?.id);
+      }
     }
   }
 
@@ -574,11 +585,11 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         styles={textStyles.slice(0, textStyles.length - 3)}
         altStyles={altTextStyles}
         onboardingElement={onboardingElement}
-        onClickLogo={doRefresh}
+        onClickLogo={doRefresh} // TODO FIGURE THIS OUT FOR ADMINS in haiku mode
         onClickGenerate={startGenerateHaiku}
         onSwitchMode={switchMode}
         onDelete={doDelete}
-        onSaveHaikudle={doSaveHaikudle}
+        onSaveDailyHaiku={saveDailyHaiku}
         onShowAbout={
           userGeneratedHaiku
             ? showAboutGenerated

@@ -16,3 +16,13 @@ export type UserHaiku = {
   updatedAt?: number,
   updatedBy?: string,
 };
+
+export type DailyHaiku = {
+  id: string,
+  haikuId: string,
+  createdAt?: number,
+  createdBy?: string,
+  updatedAt?: number,
+  updatedBy?: string,
+  theme?: string, // ???
+};
