@@ -110,23 +110,23 @@ export default function HaikuPoem({
   refresh?: any
 }) {
   // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku.status, popPoem, haiku });
-  const isHaikudleMode = mode == "haikudle";
-  const isShowcaseMode = mode == "showcase";
-  const maxHaikuTheme = isShowcaseMode ? 32 : 18;
+  const haikudleMode = mode == "haikudle";
+  const showcaseMode = mode == "showcase";
+  const maxHaikuTheme = showcaseMode ? 32 : 18;
   const dateCode = moment().format("YYYYMMDD");
 
   const [updatedPoem, setUpdatedPoem] = useState<string[]>([]);
-  const [editingPoemLine, setEditingPoemLine] = useState<number | undefined>(undefined);
-  const [aboutToEditPoemLine, setAboutToEditPoemLine] = useState<number | undefined>(undefined);
+  const [editingLine, setEditingLine] = useState<number | undefined>(undefined);
+  const [aboutToEditLine, setAboutToEditLine] = useState<number | undefined>(undefined);
   const [saving, setSaving] = useState(false);
-  const [select, setExpandSelection] = useState(false);
+  const [select, setSelection] = useState(false);
   const [alert] = useAlert((state: any) => [state.plain]);
   const [saveHaiku] = useHaikus((state: any) => [state.save]);
-  const editing = typeof (editingPoemLine) == "number";
-  const aboutToEdit = typeof (aboutToEditPoemLine) == "number";
+  const editing = typeof (editingLine) == "number";
+  const aboutToEdit = typeof (aboutToEditLine) == "number";
   const copyAllowed = true;
   const canCopy = copyAllowed && !editing && !saving;
-  const editAllowed = !isShowcaseMode && (user?.isAdmin || haiku.createdBy == user?.id) && saveHaiku;
+  const editAllowed = !showcaseMode && (user?.isAdmin || haiku.createdBy == user?.id) && saveHaiku;
   const canEdit = editAllowed && !saving;
   const regenerateAllowed = (user?.isAdmin || haiku.createdBy == user?.id) && regenerate;
   const canRegenerate = regenerateAllowed && !editing && !saving;
@@ -134,14 +134,14 @@ export default function HaikuPoem({
 
   const haikuTitleAndAuthorTag = [
     `"${capitalize(haiku.theme)}", `,
-    `${isHaikudleMode || isShowcaseMode
+    `${haikudleMode || showcaseMode
       ? "haikudle.art"
       : "haiku.desmat.ca"
     } (${moment(haiku.createdAt).format("YYYY")})`
   ];
 
   const handleClickHaiku = (e: any) => {
-    if (isShowcaseMode) {
+    if (showcaseMode) {
       return refresh && refresh(e);
     }
 
@@ -163,20 +163,20 @@ export default function HaikuPoem({
 
   const startEdit = (inputIndex: number, select?: boolean) => {
     // console.log('>> app._components.HaikuPoem.startEdit()', { inputIndex, select, updatedPoem });
-    setEditingPoemLine(inputIndex);
-    setExpandSelection(!!select);
+    setEditingLine(inputIndex);
+    setSelection(!!select);
   }
 
   const cancelEdit = () => {
     // console.log('>> app._components.HaikuPoem.cancelEdit()', { haiku, poem: haiku.poem, updatedLines: updatedPoem });
     setUpdatedPoem([]);
-    setEditingPoemLine(undefined);
+    setEditingLine(undefined);
   }
 
   const finishEdit = async () => {
     // console.log('>> app._components.HaikuPoem.finishEdit()', { haiku, poem: haiku.poem, updatedLines: updatedPoem });
-    setEditingPoemLine(undefined);
-    setAboutToEditPoemLine(undefined);
+    setEditingLine(undefined);
+    setAboutToEditLine(undefined);
 
     const hasUpdates = (original: string[], updates: string[]): boolean => {
       return original
@@ -286,28 +286,28 @@ export default function HaikuPoem({
         onClick={() => editing && finishEdit()}
       />
 
-      <PopOnClick color={haiku.bgColor} force={popPoem} disabled={editing || canEdit || isShowcaseMode}>
+      <PopOnClick color={haiku.bgColor} force={popPoem} disabled={editing || canEdit || showcaseMode}>
         <div className={`_bg-pink-200 ${canEdit ? "group/edit" : canCopy ? "group/copy" : ""} p-2 ${saving ? "animate-pulse" : ""}`}>
           <div
             className="_bg-purple-200 flex flex-col gap-[-0.5rem] _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
             onClick={(e: any) => {
               e.preventDefault();
-              isShowcaseMode && handleClickHaiku(e);
+              showcaseMode && handleClickHaiku(e);
             }}
-            title={isShowcaseMode ? "Refresh" : "Click to edit"}
+            title={showcaseMode ? "Refresh" : "Click to edit"}
             style={{
-              cursor: isShowcaseMode ? "pointer" : ""
+              cursor: showcaseMode ? "pointer" : ""
             }}
           >
-            <PopOnClick color={haiku.bgColor} force={popPoem} disabled={editing || !isShowcaseMode}>
+            <PopOnClick color={haiku.bgColor} force={popPoem} disabled={editing || !showcaseMode}>
               {haiku.poem.map((poemLine: string, i: number) => (
                 <div key={i} className="my-[-0.1rem] transition-all">
                   <StyledLayers styles={aboutToEdit || editing || saving ? styles.slice(0, 1) : styles}>
                     <div
                       className="relative m-[0rem] transition-all"
                       onKeyDown={(e: any) => canEdit && handlePoemLineKeyDown(e, i)}
-                      onMouseOver={() => setAboutToEditPoemLine(i)}
-                      onMouseOut={() => setAboutToEditPoemLine(undefined)}
+                      onMouseOver={() => setAboutToEditLine(i)}
+                      onMouseOut={() => setAboutToEditLine(undefined)}
                       onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
                     >
                       {/* set the width while editing */}
@@ -343,7 +343,7 @@ export default function HaikuPoem({
                           background: none;
                           _background: pink; /* for debugging */
                         }
-                        .poem-line-input.poem-line-${!editing && !saving && aboutToEditPoemLine} input,
+                        .poem-line-input.poem-line-${!editing && !saving && aboutToEditLine} input,
                         ${saving ? "" : ".poem-line-input input:focus"} {
                           outline: 2px solid ${haiku?.bgColor || ""}66;
                           background-color: ${haiku?.bgColor || "white"}66;
@@ -359,7 +359,7 @@ export default function HaikuPoem({
                           <div className={`poem-line-input poem-line-${i}`}>
                             <ControlledInput
                               id={i}
-                              activeId={editingPoemLine}
+                              activeId={editingLine}
                               value={upperCaseFirstLetter(saving
                                 ? typeof (updatedPoem[i]) == "string"
                                   ? updatedPoem[i]
@@ -373,7 +373,7 @@ export default function HaikuPoem({
                       }
                       {!editAllowed &&
                         <div
-                          className={`_bg-purple-400 my-[0.05rem] ${isShowcaseMode ? "cursor-pointer" : "cursor-copy"}`}
+                          className={`_bg-purple-400 my-[0.05rem] ${showcaseMode ? "cursor-pointer" : "cursor-copy"}`}
                           onClick={(e: any) => canCopy && handleClickHaiku(e)}
                         >
                           {upperCaseFirstLetter(poemLine)}
@@ -390,9 +390,9 @@ export default function HaikuPoem({
             className="_bg-pink-200 relative md:text-[16pt] sm:text-[14pt] text-[12pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]"
             style={{
               // background: "pink",
-              height: isHaikudleMode
+              height: haikudleMode
                 ? ""
-                : isShowcaseMode
+                : showcaseMode
                   ? "" //"8rem" // maybelooks better when pushed up a bit
                   : haiku.theme?.length > maxHaikuTheme
                     ? "2.6rem"
@@ -400,17 +400,17 @@ export default function HaikuPoem({
             }}
           >
             <div
-              className={isShowcaseMode
+              className={showcaseMode
                 ? "_bg-yellow-200 fixed bottom-2 right-4 w-max flex flex-row"
                 : "_bg-orange-200 flex flex-row absolute w-max ml-[0.5rem] mt-[0.1rem]"
               }
             >
               <div
                 className="transition-all _bg-pink-400"
-                onClick={(e: any) => !isShowcaseMode && handleClickHaiku(e)}
-                title={isShowcaseMode ? "" : "Copy to clipboard"}
+                onClick={(e: any) => !showcaseMode && handleClickHaiku(e)}
+                title={showcaseMode ? "" : "Copy to clipboard"}
                 style={{
-                  cursor: isShowcaseMode
+                  cursor: showcaseMode
                     ? "pointer"
                     : !editAllowed && canCopy
                       ? "copy"
@@ -428,7 +428,7 @@ export default function HaikuPoem({
                 </StyledLayers>
               </div>
 
-              {!isShowcaseMode && (copyAllowed || editAllowed || regenerateAllowed) && //&& (user?.isAdmin || haiku.createdBy == user?.id) &&
+              {!showcaseMode && (copyAllowed || editAllowed || regenerateAllowed) && //&& (user?.isAdmin || haiku.createdBy == user?.id) &&
                 <div
                   className="group/actions _bg-yellow-200 flex flex-row gap-2 mt-auto md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.4rem] sm:pb-[0.3rem] pb-[0.4rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
                 >
