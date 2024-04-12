@@ -1,15 +1,7 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { AlertType } from '@/types/Alert';
-import moment from 'moment';
 import useAlert from './alert';
-import { clear } from 'console';
-
-export type OnboardingStep = {
-  focus?: string,
-  message?: string,
-  positionClassName?: string,
-};
+import { OnboardingStep } from '@/types/Onboarding';
 
 const initialState = {
   steps: undefined as OnboardingStep[] | undefined,

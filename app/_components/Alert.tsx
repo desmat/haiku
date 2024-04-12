@@ -91,29 +91,32 @@ function TypedAlert({
 
   return (
     <div className={`_border-[1px] ${colorClasses[5]} border-solid fixed ${positionClassName || "bottom-3 left-3"} md:left-[calc(50vw-(700px/2))] _lg:_left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-50"}`}>
-      <div className={`${closed ? "opacity-0" : "opacity-100"} transition-all rounded-sm ${colorClasses[0]} px-2 py-1 w-[calc(100vw-1.5rem)] md:w-[700px] shadow-md hover:shadow-lg`}>
-        <div className="flex flex-col">
+      <div className={`_bg-pink-200 ${closed ? "opacity-0" : "opacity-100"} transition-all rounded-sm ${colorClasses[0]} p-[0.8rem] w-[calc(100vw-1.5rem)] md:w-[700px] shadow-md hover:shadow-lg`}>
+        <div className="flex flex-col gap-[0.4rem] ">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               {icon}
             </div>
-            <div className={`${icon ? "ml-3" : ""}`}>
-              <div className={`text-md font-medium ${colorClasses[3]}`} dangerouslySetInnerHTML={{ __html: message }} />
+            <div className={`_bg-yellow-200 ${icon ? "ml-3" : ""}`}>
+              <div
+                className={`text-md font-medium ${colorClasses[3]}`}
+                dangerouslySetInnerHTML={{ __html: message }}
+              />
             </div>
-            <div className="ml-auto pl-3">
-              <div className="absolute top-1 right-[-0px] opacity-40 hover:opacity-100">
+            <div className="_bg-orange-200 _ml-auto pl-[0rem]">
+              <div className="_bg-orange-400 absolute top-[0.2rem] right-[0.2rem] opacity-40 hover:opacity-100">
                 <button
                   type="button"
                   className={`inline-flex rounded-md ${colorClasses[0]} p-0 ${colorClasses[4]} ${colorClasses[1]} focus:outline-none ${colorClasses[2]} focus:ring-offset-2`}
                   onClick={handleClose}
                 >
                   <span className="sr-only">Dismiss</span>
-                  <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                  <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                 </button>
               </div>
             </div>
           </div>
-          <div className="flex flex-row gap-1 m-auto">
+          <div className="flex flex-row mx-auto my-[0rem]">
             {customActions && customActions.map((ca: CustomAction, i: number) => {
               if (ca) {
                 return (
@@ -122,7 +125,7 @@ function TypedAlert({
                     className={`_bg-pink-100 text-center`}
                     onClick={typeof (ca.action) == "string" && ca.action == "close" ? handleClose : ca.action}
                   >
-                    <div className={`_bg-pink-200 w-fit m-auto px-1 font-bold cursor-pointer hover:underline ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>
+                    <div className={`_bg-pink-200 w-fit h-fit m-auto px-1 font-bold cursor-pointer hover:underline ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>
                       {ca.label}
                     </div>
                   </div>

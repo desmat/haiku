@@ -14,14 +14,15 @@ import useUser from '@/app/_hooks/user';
 import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
 import { Haikudle } from '@/types/Haikudle';
+import { haikuOnboardingSteps, haikudleOnboardingSteps } from '@/types/Onboarding';
 import HaikudlePage from './HaikudlePage';
 
 export default function MainPage({ mode, id, lang, refreshDelay }: { mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
   // console.log('>> app.MainPage.render()', { mode, id, lang });
 
-  const isHaikuMode = mode == "haiku";
-  const isHaikudleMode = mode == "haikudle";
-  const isShowcaseMode = mode == "showcase";
+  const haikuMode = mode == "haiku";
+  const haikudleMode = mode == "haikudle";
+  const showcaseMode = mode == "showcase";
   let [haikuId, setHaikuId] = useState(id);
   const [generating, setGenerating] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
@@ -107,14 +108,14 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     state.start,
   ]);
 
-  const loaded = isHaikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
+  const loaded = haikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
   let [loading, setLoading] = useState(false);
   let [loadingUI, setLoadingUI] = useState(false);
   let [haiku, setHaiku] = useState<Haiku | undefined>();
   const userGeneratedHaiku = haiku?.createdBy == user?.id && !user?.isAdmin;
   // console.log('>> app.MainPage.render()', { loading, loaded, haikuId, haiku_Id: haiku?.id, getHaiku: getHaiku(haikuId), haikudleHaiku });
 
-  const isPuzzleMode = isHaikudleMode &&
+  const isPuzzleMode = haikudleMode &&
     !haikudleSolved &&
     (!previousDailyHaikudleId || user?.isAdmin) &&
     (!(haiku?.createdBy == user?.id) || user?.isAdmin);
@@ -178,7 +179,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       setLoading(true);
       setLoadingUI(true);
 
-      isHaikudleMode
+      haikudleMode
         ? loadHaikudle(haikuId || { lang })
           .then((haikudles: Haikudle | Haikudle[]) => {
             // console.log('>> app.MainPage.loadPage loadHaikudle.then', { haikudles });
@@ -238,7 +239,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       // console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded] haikuId != haiku?.id', { val: haikuId != haiku?.id, haikuId, haiku_id: haiku?.id });
       if (loaded) {
         if (haikuId != haiku?.id) {
-          if (isHaikudleMode) {
+          if (haikudleMode) {
             if (!haikuId && haikudleHaiku) {
               // initial page load with no params: what we loaded from API is today's haikudle
               setHaiku(haikudleHaiku);
@@ -269,13 +270,13 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
     // @ts-ignore
     let timeoutId;
-    if (user && (isHaikudleMode && haikudleReady || !isHaikudleMode)) {
+    if (user && (haikudleMode && haikudleReady || !haikudleMode)) {
       if (previousDailyHaikudleId && !user?.preferences?.onboardedPreviousDaily) {
         timeoutId = setTimeout(showAboutPreviousDaily, 2000);
       } else if (userGeneratedHaiku && !user?.preferences?.onboardedGenerated) {
         timeoutId = setTimeout(showAboutGenerated, 2000);
-      } else if ((isHaikuMode || isHaikudleMode) && !previousDailyHaikudleId && !user?.preferences?.onboarded) {
-        timeoutId = setTimeout(startFirstVisitOnboarding, 2000);
+      } else if ((haikuMode || haikudleMode) && !previousDailyHaikudleId && !user?.preferences?.onboarded) {
+        timeoutId = setTimeout(haikudleMode ? startFirstVisitHaikudleOnboarding : startFirstVisitOnboarding, 2000);
       }
     }
 
@@ -288,14 +289,14 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   useEffect(() => {
     // console.log('>> app.page useEffect [haiku?.id, loadingUI, isShowcaseMode, _refreshDelay]', { haiku_id: haiku?.id, loadingUI, isShowcaseMode, _refreshDelay });
 
-    if (isShowcaseMode && !loadingUI && _refreshDelay) {
+    if (showcaseMode && !loadingUI && _refreshDelay) {
       window.history.replaceState(null, '', `/${haiku?.id || ""}?mode=showcase${_refreshDelay ? `&refreshDelay=${_refreshDelay}` : ""}`);
       setRefreshTimeout(setTimeout(doRefresh, _refreshDelay));
     }
 
     // in case we're in showcase mode and refresh didn't work:
     // refresh after loading for 10 seconds
-    const retryInterval = loadingUI && isShowcaseMode && setInterval(() => {
+    const retryInterval = loadingUI && showcaseMode && setInterval(() => {
       // console.log('>> app.page useEffect [loadingUI, isShowcaseMode] forcing refresh after waiting too long');
       setLoadingUI(false);
       document.location.href = `/${haiku?.id || ""}?mode=showcase${_refreshDelay ? `&refreshDelay=${_refreshDelay}` : ""}`;
@@ -309,25 +310,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         setRefreshTimeout(undefined);
       }
     }
-  }, [haiku?.id, loadingUI, isShowcaseMode, _refreshDelay]);
-
-  const showAbout = () => {
-    plainAlert(
-      isHaikudleMode
-        ? `<div style="display: flex; flex-direction: column; gap: 0.4rem">
-              <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with five syllables in the first line, seven in the second, and five in the third.</div>
-              <div><b>Wordle</b>: a word game with a single daily solution, with all players attempting to guess the same word.</div>
-              <div>Drag-and-drop the scrabbled words to solve today's AI-generated <b>Haikudle</b>!</div>
-            </div>`
-        : `<div style="display: flex; flex-direction: column; gap: 0.4rem">
-              <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with five syllables in the first line, seven in the second, and five in the third.</div>
-              <div>This haiku poem and art were generated by ChatGPT and DALL-E, respectively. Hit the logo to see another one, and the top-right button to generate a brand new one!</div>
-              <div>Try also Haikudle, a daily puzzle version: <b><a href="https://haikudle.art/">haikudle.art</a></b>.</div>
-            </div>`, {
-      onDismiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
-      closeLabel: "Got it!",
-    });
-  }
+  }, [haiku?.id, loadingUI, showcaseMode, _refreshDelay]);
 
   const showAboutPreviousDaily = () => {
     const previousDailyHaikudleDate = moment(previousDailyHaikudleId, "YYYYMMDD")
@@ -360,64 +343,35 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     });
   };
 
-  const startFirstVisitOnboarding = () => {
-    const steps = [
-      {
-        focus: "",
-        message: `
-          <div style="display: flex; flex-direction: column; gap: 0.4rem; padding: 0.8rem;">
-            <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with 5/7/5 syllable per line, traditionally evoking images of the natural world. Learn more in this <b><a href="https://en.wikipedia.org/wiki/Haiku" target="_blank">Wikipedia article</a></b>.</div>
-            <div>I built this for haiku enthusiasts to make and share their creations, also to have a bit of fun with <b><a href="https://en.wikipedia.org/wiki/Large_language_model" target="_blank">Large Language Models</a></b>. Enjoy and share your creations!</div>
-            <div>Follow the next steps to learn all about <b>Haiku Genius!</b></div>
-          </div>
-        `,
-        positionClassName: "top-[50vh] -translate-y-1/2 left-3",
-      },
-      {
-        focus: "poem",
-        message: `
-          <div style="display: flex; flex-direction: column; gap: 0.4rem; padding: 0.8rem;">
-            <div>This haiku poem was created with the assistance of ChatGPT, with art specifically generated by DALL-E to blend with the poem.</div>
-            <div>AI-generated haiku poems are sometimes good, sometimes less good! Click on the haiku poem or the icon next to it to copy the poem's text.</div>
-          </div>
-        `,
-        positionClassName: "bottom-[10vh] left-3",
-
-      },
-      {
-        focus: "logo-and-generate",
-        message: `
-          <div style="display: flex; flex-direction: column; gap: 0.4rem; padding: 0.8rem;">
-            <div>A new haikus will be featured every day. Click on the logo to return to today's, and come back to tomorrow!</div>
-            <div>To create your very own hit the generate link and pick a theme: the AI help you write a poem and generate art work to match.</div>
-          </div>
-        `,
-        positionClassName: "bottom-[10vh] left-3",
-
-      },
-      {
-        focus: "side-panel-and-bottom-links",
-        message: `
-          <div style="display: flex; flex-direction: column; gap: 0.4rem; padding: 0.8rem;">
-            <div>Find all your haikus (viewed or created) in the side panel to the left. To access the source code, learn more about me, or access a shareable link to this haiku see the links at the bottom.</div>
-            <div>Enjoy <b>Haiku Genius!</b></div>        
-          </div>
-        `,
-        positionClassName: "bottom-[10vh] left-3",
-      },
-    ];
-
-    plainAlert(steps[0].message, {
+  const startFirstVisitHaikudleOnboarding = () => {
+    plainAlert(haikudleOnboardingSteps[0].message, {
       onDismiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
-      positionClassName: steps[0].positionClassName,
+      positionClassName: haikudleOnboardingSteps[0].positionClassName,
       customActions: [
         {
-          label: "Dismiss",
+          label: "Close",
           action: "close"
         },
         {
           label: "Show Instructions",
-          action: () => startOnboarding(steps.slice(1), saveUserOnboarded),
+          action: () => startOnboarding(haikudleOnboardingSteps.slice(1), saveUserOnboarded),
+        },
+      ]
+    });
+  }
+
+  const startFirstVisitOnboarding = () => {
+    plainAlert(haikuOnboardingSteps[0].message, {
+      onDismiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
+      positionClassName: haikuOnboardingSteps[0].positionClassName,
+      customActions: [
+        {
+          label: "Close",
+          action: "close"
+        },
+        {
+          label: "Show Instructions",
+          action: () => startOnboarding(haikuOnboardingSteps.slice(1), saveUserOnboarded),
         },
       ]
     });
@@ -429,7 +383,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         {
           focus: "poem-actions",
           message: `
-            <div style="display: flex; flex-direction: column; gap: 0.4rem; padding: 0.8rem;">
+            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
               <div>This haiku was generated on the theme <i>${haiku?.theme}</i>${haiku?.mood ? ` with a <i>${haiku?.mood}</i> mood using <b>ChatGPT</b>` : ""}. Both were used to generate art using <b>DALL-E</b> with a curated prompts to harmonize together.</div>
               <div>Curious about those prompts? See <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L106-L108" target="_blank">here</a></b> and <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L17-L31" target="_blank">here</a></b> in the source code.</b></div>
               <div>Try the buttons next to the poem to edit or regenerate. Mouse, keyboard, arrow keys, Tab, Escape and Enter can be used to edit.</div>
@@ -481,7 +435,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   const doRefresh = () => {
     // console.log('>> app.page.doRefresh()', {});
 
-    if (isHaikudleMode && !user.isAdmin) {
+    if (haikudleMode && !user.isAdmin) {
       // TODO: figure out visual glitch
       haiku = undefined;
       haikuId = undefined;
@@ -498,7 +452,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     resetAlert();
     setLoadingUI(true);
 
-    if (isHaikudleMode) {
+    if (haikudleMode) {
       loadHaikus({ random: true, lang }, mode)
         .then((haikus: Haiku | Haiku[]) => {
           // console.log('>> app.MainPage.doRefresh loadHaikus.then', { haikus });
@@ -600,7 +554,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     return (
       <div>
         <NavOverlay mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} onClickLogo={doRefresh} />
-        <Loading onClick={isShowcaseMode && doRefresh} />
+        <Loading onClick={showcaseMode && doRefresh} />
         {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}
       </div>
     )
@@ -629,8 +583,10 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         onShowAbout={
           userGeneratedHaiku
             ? showAboutGenerated
-            : previousDailyHaikudleId
-              ? showAboutPreviousDaily
+            : haikudleMode
+              ? previousDailyHaikudleId
+                ? showAboutPreviousDaily // with onboarding?
+                : startFirstVisitHaikudleOnboarding
               : startFirstVisitOnboarding
         }
         onSelectHaiku={selectHaiku}
@@ -639,12 +595,13 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       />
 
       {isPuzzleMode &&
-        <HaikudlePage
-          mode={mode}
-          haiku={haiku}
-          styles={textStyles}
-          regenerating={regenerating}
-        />
+          <HaikudlePage
+            mode={mode}
+            haiku={haiku}
+            styles={textStyles}
+            regenerating={regenerating}
+            onboardingElement={onboardingElement}
+          />
       }
 
       {!isPuzzleMode &&
@@ -661,7 +618,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
             : haiku}
           styles={textStyles}
           altStyles={altTextStyles}
-          popPoem={isHaikudleMode && haikudleSolvedJustNow}
+          popPoem={haikudleMode && haikudleSolvedJustNow}
           regenerating={regenerating}
           onboardingElement={onboardingElement}
           refresh={doRefresh}
