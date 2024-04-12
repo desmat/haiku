@@ -1,6 +1,7 @@
 export type TrackingEventType =
   "error" |
   "user-signedin" |
+  "user-session-created" |
   "haiku-created" |
   "haiku-updated" | 
   "haiku-generated" |
@@ -9,4 +10,7 @@ export type TrackingEventType =
   "haiku-shared" |
   "haikudle-created" |
   "haikudle-started" |
-  "haikudle-solved"
+  "haikudle-solved" |
+  "onboarding-started" |
+  "onboarding-dismissed" |
+  "onboarding-completed" 

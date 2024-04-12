@@ -15,6 +15,7 @@ import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
 import { Haikudle } from '@/types/Haikudle';
 import { haikuOnboardingSteps, haikudleOnboardingSteps } from '@/types/Onboarding';
+import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 
 export default function MainPage({ mode, id, lang, refreshDelay }: { mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
@@ -358,7 +359,30 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         },
         {
           label: "Show Instructions",
-          action: () => startOnboarding(haikudleOnboardingSteps.slice(1), saveUserOnboarded),
+          action: () => {
+            trackEvent("onboarding-started", {
+              userId: user.id,
+              type: "haikudle-fist-visit",
+            });
+
+            startOnboarding(
+              haikudleOnboardingSteps.slice(1), 
+              () => {
+                saveUserOnboarded();
+                trackEvent("onboarding-dismissed", {
+                  userId: user.id,
+                  type: "haikudle-fist-visit",
+                });
+              },
+              () => {
+                saveUserOnboarded();
+                trackEvent("onboarding-completed", {
+                  userId: user.id,
+                  type: "haikudle-fist-visit",
+                });
+              }
+            );
+          }
         },
       ]
     });
@@ -375,7 +399,30 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         },
         {
           label: "Show Instructions",
-          action: () => startOnboarding(haikuOnboardingSteps.slice(1), saveUserOnboarded),
+          action: () => {
+            trackEvent("onboarding-started", {
+              userId: user.id,
+              type: "haiku-fist-visit",
+            });
+
+            startOnboarding(
+              haikuOnboardingSteps.slice(1),
+              () => {
+                saveUserOnboarded();
+                trackEvent("onboarding-dismissed", {
+                  userId: user.id,
+                  type: "haiku-fist-visit",
+                });
+              },
+              () => {
+                saveUserOnboarded();
+                trackEvent("onboarding-completed", {
+                  userId: user.id,
+                  type: "haiku-fist-visit",
+                });
+              }
+            );
+          }
         },
       ]
     });
@@ -605,13 +652,13 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       />
 
       {isPuzzleMode &&
-          <HaikudlePage
-            mode={mode}
-            haiku={haiku}
-            styles={textStyles}
-            regenerating={regenerating}
-            onboardingElement={onboardingElement}
-          />
+        <HaikudlePage
+          mode={mode}
+          haiku={haiku}
+          styles={textStyles}
+          regenerating={regenerating}
+          onboardingElement={onboardingElement}
+        />
       }
 
       {!isPuzzleMode &&

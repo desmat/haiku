@@ -10,6 +10,7 @@ const initialState = {
   message: undefined as string | undefined,
   interval: undefined as any,
   onDismiss: undefined as (() => void) | undefined,
+  onComplete: undefined as (() => void) | undefined,
 }
 
 const useOnboarding: any = create(devtools((set: any, get: any) => ({
@@ -20,17 +21,19 @@ const useOnboarding: any = create(devtools((set: any, get: any) => ({
   },
 
   nextStep: async () => {
-    const { steps, step, nextStep, finish, onDismiss } = get();
+    const { steps, step, nextStep, finish, onDismiss, onComplete } = get();
     const nextStepOffset = typeof (step) != "number"
       ? 0
       : step >= steps.length - 1
         // ? 0 cycle
         ? undefined
         : step + 1;
+    const done = typeof (nextStepOffset) != "number";    
+    const lastStep = !done && nextStepOffset >= steps.length - 1;
 
-    // console.log(">> hooks.useOnboarding.nextStep", { step, nextStepOffset, steps, test: nextStepOffset && nextStepOffset < steps.length });
+    // console.log(">> hooks.useOnboarding.nextStep", { step, nextStepOffset, done, lastStep, steps, onDismiss, onComplete });
 
-    if (typeof (nextStepOffset) != "number") {
+    if (done) {
       return //finish();
     }
 
@@ -42,8 +45,10 @@ const useOnboarding: any = create(devtools((set: any, get: any) => ({
 
     useAlert.getState().plain(steps[nextStepOffset]?.message, {
       onDismiss: () => {
-        // console.log("hooks.useOnboarding.nextStep onDismiss")
-        onDismiss && onDismiss();
+        // console.log("hooks.useOnboarding.nextStep onDismiss", { lastStep, onComplete, onDismiss })
+        onComplete && lastStep 
+          ? onComplete()
+          : onDismiss && onDismiss();
         finish();
       },
       style: steps[nextStepOffset]?.style,
@@ -52,7 +57,7 @@ const useOnboarding: any = create(devtools((set: any, get: any) => ({
           label: "Close",
           action: "close"
         },
-        typeof (nextStepOffset) == "number" && nextStepOffset < steps.length - 1 && {
+        !lastStep && {
           label: `Next (${nextStepOffset + 1}/${steps.length})`,
           action: nextStep,
         },
@@ -62,7 +67,7 @@ const useOnboarding: any = create(devtools((set: any, get: any) => ({
     return typeof (nextStepOffset) == "number" && steps[nextStepOffset];
   },
 
-  start: async (steps: OnboardingStep[], onDismiss?: () => void | undefined) => {
+  start: async (steps: OnboardingStep[], onDismiss?: () => void | undefined, onComplete?: () => void | undefined) => {
     const { nextStep } = get();
 
     // const interval = setInterval(async () => {
@@ -72,20 +77,21 @@ const useOnboarding: any = create(devtools((set: any, get: any) => ({
 
     // avoid race condition
     setTimeout(async () => {
-      console.log(">> hooks.useOnboarding.start", { onDismiss });
+      // console.log(">> hooks.useOnboarding.start", { onDismiss, onComplete });
       nextStep();
     }, 100);
 
     set({
       steps,
       onDismiss,
+      onComplete,
       // interval,
     });
   },
 
   finish: async () => {
     const { reset, interval } = get();
-    console.log(">> hooks.useOnboarding.finish", { reset, interval });
+    // console.log(">> hooks.useOnboarding.finish", { reset, interval });
 
     if (interval) {
       clearInterval(interval);

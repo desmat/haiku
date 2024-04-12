@@ -74,8 +74,17 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         isAdmin: false,
         preferences: {}
       };
+      
       token = await encodeJWT({ user });
+
       window?.localStorage && window.localStorage.setItem("session", token || "");
+
+      trackEvent("user-session-created", {
+        userId: user.id,
+        isAdmin: user.isAdmin,
+        isAnonymous: user.isAnonymous,
+        // token, 
+      });
     }
 
     return { user, token };

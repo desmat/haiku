@@ -290,7 +290,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
         trackEvent("haiku-created", {
           id: created.id,
-          name: created.name,
+          theme: created.theme,
           userId: created.createdBy,
         });
 

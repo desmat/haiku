@@ -137,7 +137,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     style?: any,
     customActions?: any
   } = {}) => {
-    console.log(">> hooks.alert.plain", { message, onDismiss, closeLabel, closeDelay, style });
+    // console.log(">> hooks.alert.plain", { message, onDismiss, closeLabel, closeDelay, style });
     get()._alert("plain", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 

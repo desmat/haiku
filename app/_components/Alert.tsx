@@ -27,7 +27,7 @@ function TypedAlert({
   closeLabel?: string,
   customActions?: any
 }) {
-  console.log('>> app._components.Alert.Alert.render()', { message, type, closed, style });
+  // console.log('>> app._components.Alert.Alert.render()', { message, type, closed, style });
   let icon: any;
   let colorClasses: any;
 
