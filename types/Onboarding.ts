@@ -2,7 +2,7 @@
 export type OnboardingStep = {
   focus?: string,
   message?: string,
-  positionClassName?: string,
+  style?: any | undefined,
 };
 
 export const haikuOnboardingSteps = [
@@ -15,7 +15,7 @@ export const haikuOnboardingSteps = [
         <div>Follow the next steps to learn all about <b>Haiku Genius</b>.</div>
       </div>
     `,
-    positionClassName: "top-[50vh] -translate-y-1/2 left-3",
+    style: { top: "50vh", transform: "translateY(-50%)" },
   },
   {
     focus: "poem",
@@ -25,8 +25,7 @@ export const haikuOnboardingSteps = [
         <div>AI-generated haiku poems are sometimes good, sometimes less good! Click on the haiku poem or the button next to it to copy the poem's text.</div>
       </div>
     `,
-    positionClassName: "bottom-[10vh] left-3",
-
+    style: { bottom: "10vh" },
   },
   {
     focus: "logo-and-generate",
@@ -36,8 +35,7 @@ export const haikuOnboardingSteps = [
         <div>To create your very own hit the generate button at the top of the screen and pick a theme: AI will help you write a poem and generate art work to match.</div>
       </div>
     `,
-    positionClassName: "bottom-[10vh] left-3",
-
+    style: { bottom: "10vh" },
   },
   {
     focus: "side-panel-and-bottom-links",
@@ -48,7 +46,7 @@ export const haikuOnboardingSteps = [
         <div>Enjoy <b>Haiku Genius!</b></div>        
       </div>
     `,
-    positionClassName: "bottom-[10vh] left-3",
+    style: { bottom: "10vh" },
   },
 ];
 
@@ -62,7 +60,7 @@ export const haikudleOnboardingSteps = [
         <div>Unscramble the poem to solve today's haiku puzzle and reveal the art work!</div>
         <div>Follow the next steps to learn all about <b>Haikudle</b>.</div>
       </div>`,
-    positionClassName: "top-[50vh] -translate-y-1/2 left-3",
+    style: { top: "50vh", transform: "translateY(-50%)" },
   },
   {
     focus: "puzzle",
@@ -73,8 +71,7 @@ export const haikudleOnboardingSteps = [
         <div>Daily puzzles only last for the day: solve and share before time runs out!</div>
       </div>
     `,
-    positionClassName: "bottom-[10vh] left-3",
-
+    style: { bottom: "10vh" },
   },
   {
     focus: "logo-and-generate",
@@ -84,8 +81,7 @@ export const haikudleOnboardingSteps = [
         <div>To create your very own haikus hit the generate button at the top of the screen and pick a theme: AI will help you write a poem and generate art work to match.</div>
       </div>
     `,
-    positionClassName: "bottom-[10vh] left-3",
-
+    style: { bottom: "10vh" },
   },
   {
     focus: "side-panel-and-bottom-links",
@@ -96,6 +92,6 @@ export const haikudleOnboardingSteps = [
         <div>Enjoy <b>Haikudle!</b></div>        
       </div>
     `,
-    positionClassName: "bottom-[10vh] left-3",
+    style: { bottom: "10vh" },
   },
 ];

@@ -346,7 +346,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   const startFirstVisitHaikudleOnboarding = () => {
     plainAlert(haikudleOnboardingSteps[0].message, {
       onDismiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
-      positionClassName: haikudleOnboardingSteps[0].positionClassName,
+      style: haikudleOnboardingSteps[0].style,
       customActions: [
         {
           label: "Close",
@@ -363,7 +363,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   const startFirstVisitOnboarding = () => {
     plainAlert(haikuOnboardingSteps[0].message, {
       onDismiss: () => saveUser({ ...user, preferences: { ...user.preferences, onboarded: true } }),
-      positionClassName: haikuOnboardingSteps[0].positionClassName,
+      style: haikuOnboardingSteps[0].style,
       customActions: [
         {
           label: "Close",
@@ -389,7 +389,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
               <div>Try the buttons next to the poem to edit or regenerate. Mouse, keyboard, arrow keys, Tab, Escape and Enter can be used to edit.</div>
               <div>You can also ask for assistance! Save with empty or incomplete lines, or "..." as placeholders for AI to fill in.
             </div>`,
-          positionClassName: "top-3 left-3",
         },
       ],
       () => saveUser({ ...user, preferences: { ...user.preferences, onboardedGenerated: true } })

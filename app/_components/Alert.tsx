@@ -13,21 +13,21 @@ import { AlertType } from '@/types/Alert';
 function TypedAlert({
   message,
   type,
+  style,
   closed,
   handleClose,
   closeLabel,
-  positionClassName,
   customActions,
 }: {
   message: string,
   type: AlertType,
+  style?: any
   closed: boolean,
   handleClose: any,
   closeLabel?: string,
-  positionClassName?: string,
   customActions?: any
 }) {
-  // console.log('>> app._components.Alert.Alert.render()', { message, type, closed });
+  console.log('>> app._components.Alert.Alert.render()', { message, type, closed, style });
   let icon: any;
   let colorClasses: any;
 
@@ -90,7 +90,10 @@ function TypedAlert({
   }
 
   return (
-    <div className={`_border-[1px] ${colorClasses[5]} border-solid fixed ${positionClassName || "bottom-3 left-3"} md:left-[calc(50vw-(700px/2))] _lg:_left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-50"}`}>
+    <div 
+      className={`_border-[1px] ${colorClasses[5]} border-solid fixed bottom-3 left-3 md:left-[calc(50vw-(700px/2))] _lg:_left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-50"}`}
+      style={style}
+      >
       <div className={`_bg-pink-200 ${closed ? "opacity-0" : "opacity-100"} transition-all rounded-sm ${colorClasses[0]} p-[0.8rem] w-[calc(100vw-1.5rem)] md:w-[700px] shadow-md hover:shadow-lg`}>
         <div className="flex flex-col gap-[0.4rem] ">
           <div className="flex items-center">
@@ -153,20 +156,20 @@ function TypedAlert({
 function AnimatedAlert({
   message,
   type,
+  style,
   onDismiss,
   closeLabel,
   closedTimestamp,
   timestamp,
-  positionClassName,
   customActions,
 }: {
   message: string,
   type: AlertType,
+  style?: any
   onDismiss?: () => void,
   closeLabel?: string,
   closedTimestamp?: number,
   timestamp: number,
-  positionClassName?: string,
   customActions?: any,
 }) {
   const [reset] = useAlert((state: any) => [state.reset]);
@@ -226,10 +229,10 @@ function AnimatedAlert({
       <TypedAlert
         message={message}
         type={type}
+        style={style}
         closed={!!dismissedAt}
         handleClose={handleClose}
         closeLabel={closeLabel}
-        positionClassName={positionClassName}
         customActions={customActions}
       />
     )
@@ -246,18 +249,18 @@ export default function Alert({
   const [
     _message,
     _type,
+    style,
     onDismiss,
     closeLabel,
     closedTimestamp,
-    positionClassName,
     customActions,
   ] = useAlert((state: any) => [
     state.message,
     state.type,
+    state.style,
     state.onDismiss,
     state.closeLabel,
     state.closedTimestamp,
-    state.positionClassName,
     state.customActions,
   ]);
 
@@ -267,11 +270,11 @@ export default function Alert({
     <AnimatedAlert
       message={message || _message}
       type={type || _type || "info"}
+      style={style}
       onDismiss={onDismiss}
       closeLabel={closeLabel}
       closedTimestamp={closedTimestamp}
       timestamp={moment().valueOf()}
-      positionClassName={positionClassName}
       customActions={customActions}
     />
   )

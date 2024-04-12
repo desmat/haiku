@@ -16,7 +16,7 @@ const initialState = {
   closeLabel: undefined as string | undefined,
   closeTimeout: undefined as any,
   closedTimestamp: undefined as number | undefined,
-  positionClassName: undefined as string | undefined,
+  style: undefined as any | undefined,
   customActions: undefined as CustomAction[] | undefined,
 }
 
@@ -31,13 +31,13 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     onDismiss,
     closeLabel,
     closeDelay,
-    positionClassName,
+    style,
     customActions,
   }: {
     onDismiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number,
-    positionClassName?: string,
+    style?: any,
     customActions?: any,
   } = {}) => {
     // console.log(">> hooks.alert.error", { message });
@@ -51,7 +51,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
       type: message && type,
       onDismiss,
       closeLabel,
-      positionClassName,
+      style,
       customActions
     });
   },
@@ -60,85 +60,85 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     onDismiss,
     closeLabel,
     closeDelay,
-    positionClassName,
+    style,
     customActions,
   }: {
     onDismiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number,
-    positionClassName?: string,
+    style?: any,
     customActions?: any,
   } = {}) => {
     // console.log(">> hooks.alert.error", { message, closeDelay });
-    get()._alert("error", message, { onDismiss, closeLabel, closeDelay, positionClassName, customActions });
+    get()._alert("error", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
   warning: async (message: string, {
     onDismiss,
     closeLabel,
-    closeDelay,
-    positionClassName,
+    closeDelay,    
+    style,
     customActions,
   }: {
     onDismiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number,
-    positionClassName?: string,
+    style?: any,
     customActions?: any,
   } = {}) => {
     // console.log(">> hooks.alert.warning", { message, closeDelay });
-    get()._alert("warning", message, { onDismiss, closeLabel, closeDelay, positionClassName, customActions });
+    get()._alert("warning", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
   info: async (message: string, {
     onDismiss,
     closeLabel,
     closeDelay,
-    positionClassName,
+    style,
     customActions,
   }: {
     onDismiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number,
-    positionClassName?: string,
+    style?: any,
     customActions?: any,
   } = {}) => {
     // console.log(">> hooks.alert.info", { message });
-    get()._alert("info", message, { onDismiss, closeLabel, closeDelay, positionClassName, customActions });
+    get()._alert("info", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
   success: async (message: string, {
     onDismiss,
     closeLabel,
     closeDelay,
-    positionClassName,
+    style,
     customActions,
   }: {
     onDismiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number,
-    positionClassName?: string,
+    style?: any,
     customActions?: any,
   } = {}) => {
     // console.log(">> hooks.alert.success", { message });
-    get()._alert("success", message, { onDismiss, closeLabel, closeDelay, positionClassName, customActions });
+    get()._alert("success", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
   plain: async (message: string, {
     onDismiss,
     closeLabel,
     closeDelay,
-    positionClassName,
+    style,
     customActions,
   }: {
     onDismiss?: () => undefined,
     closeLabel?: string,
     closeDelay?: number,
-    positionClassName?: string,
+    style?: any,
     customActions?: any
   } = {}) => {
-    // console.log(">> hooks.alert.plain", { message, onDismiss, closeLabel, closeDelay });
-    get()._alert("plain", message, { onDismiss, closeLabel, closeDelay, positionClassName, customActions });
+    console.log(">> hooks.alert.plain", { message, onDismiss, closeLabel, closeDelay, style });
+    get()._alert("plain", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
   setCloseTimeout: async (closeDelayMs: number) => {

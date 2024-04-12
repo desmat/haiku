@@ -46,7 +46,7 @@ const useOnboarding: any = create(devtools((set: any, get: any) => ({
         onDismiss && onDismiss();
         finish();
       },
-      positionClassName: steps[nextStepOffset]?.positionClassName,
+      style: steps[nextStepOffset]?.style,
       customActions: [
         {
           label: "Close",
