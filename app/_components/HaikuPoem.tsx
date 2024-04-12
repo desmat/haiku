@@ -301,8 +301,14 @@ export default function HaikuPoem({
           >
             <PopOnClick color={haiku.bgColor} force={popPoem} disabled={editing || !showcaseMode}>
               {haiku.poem.map((poemLine: string, i: number) => (
-                <div key={i} className="my-[-0.1rem] transition-all">
-                  <StyledLayers styles={aboutToEdit || editing || saving ? styles.slice(0, 1) : styles}>
+                <div key={i} className="my-[0.05rem] transition-all">
+                  <StyledLayers styles={
+                    aboutToEdit || editing || saving
+                      ? styles.slice(0, 1)
+                      : saving
+                        ? styles.slice(0, 3)
+                        : styles
+                  }>
                     <div
                       className="relative m-[0rem] transition-all"
                       onKeyDown={(e: any) => canEdit && handlePoemLineKeyDown(e, i)}
