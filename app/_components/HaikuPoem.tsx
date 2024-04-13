@@ -137,10 +137,7 @@ export default function HaikuPoem({
 
   const haikuTitleAndAuthorTag = [
     `"${capitalize(haiku.theme)}", `,
-    `${haikudleMode || showcaseMode
-      ? "haikudle.art"
-      : "haiku.desmat.ca"
-    } (${moment(haiku.createdAt).format("YYYY")})`
+    `${haikudleMode ? "haikudle.art" : "haikugenius.io"}/${haiku.id}`
   ];
 
   const handleClickHaiku = (e: any) => {
