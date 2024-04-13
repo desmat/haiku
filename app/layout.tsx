@@ -19,7 +19,7 @@ const appDescription = isHaikudleMode
 
 const metaUrl = isHaikudleMode
   ? "https://haikudle.art/"
-  : "https://haiku.desmat.ca/";
+  : "https://haikugenius.io/";
 
 let metaImages: string[];
 
@@ -40,7 +40,7 @@ if (isHaikudleMode) {
   ];
 } else {
   metaImages = [
-    "https://haiku.desmat.ca/social_img_haiku.png"
+    "https://haikugenius.io/social_img_haiku.png"
   ];
 }
 

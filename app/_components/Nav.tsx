@@ -170,7 +170,7 @@ function BottomLinks({
             className="cursor-copy"
             onClick={(e: any) => {
               e.preventDefault();
-              navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : "https://haiku.desmat.ca"}/${haiku.id}`);
+              navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : "https://haikugenius.io"}/${haiku.id}`);
               alert(`Link to this haiku copied to clipboard`, { closeDelay: 750 });
               trackEvent("haiku-shared", {
                 userId: user.id,
