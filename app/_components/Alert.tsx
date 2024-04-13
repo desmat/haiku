@@ -36,8 +36,8 @@ function TypedAlert({
       icon = undefined //<ExclamationTriangleIcon className={`h-5 w-5 text-red-400`} aria-hidden="true" />
       colorClasses = [
         'bg-red-50',
-        'hover:bg-red-100',
-        'active:bg-red-200',
+        '_hover:bg-red-100',
+        '_active:bg-red-200',
         'text-red-800',
         'text-red-800',
         // 'border-red-100',
@@ -47,10 +47,10 @@ function TypedAlert({
       icon = undefined //<ExclamationCircleIcon className={`h-5 w-5 text-yellow-400`} aria-hidden="true" />
       colorClasses = [
         'bg-yellow-50',
-        'hover:bg-yellow-100',
-        'active:bg-yellow-200',
+        '_hover:bg-yellow-100',
+        '_active:bg-yellow-100',
         'text-yellow-800',
-        'text-yellow-500',
+        'text-yellow-800',
         // 'border-yellow-200',
       ];
       break;
@@ -58,8 +58,8 @@ function TypedAlert({
       icon = undefined //<MdCelebration className={`h-5 w-5 text-[#6d6d6d]`} aria-hidden="true" />
       colorClasses = [
         'bg-[#f8f8f8]',
-        'hover:bg-black-100',
-        'active:bg-black-200',
+        '_hover:bg-black-100',
+        '_active:bg-black-200',
         'text-[#6d6d6d]',
         'text-[#6d6d6d]',
         // 'border-green-100',
@@ -69,10 +69,10 @@ function TypedAlert({
       icon = undefined //<InformationCircleIcon className={`h-5 w-5 text-blue-400`} aria-hidden="true" />
       colorClasses = [
         'bg-blue-50',
-        'hover:bg-blue-100',
-        'active:bg-blue-200',
+        '_hover:bg-blue-100',
+        '_active:bg-blue-200',
         'text-blue-800',
-        'text-blue-500',
+        'text-blue-800',
         // 'border-blue-100'
       ];
       break;
@@ -80,8 +80,8 @@ function TypedAlert({
       icon = undefined;
       colorClasses = [
         'bg-[#f8f8f8]',
-        'hover:text-black',
-        'active:text-black',
+        '_hover:text-black',
+        '_active:text-black',
         'text-[#6d6d6d]',
         'text-[#6d6d6d]',
         // 'border-blue-100'
