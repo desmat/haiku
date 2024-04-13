@@ -440,6 +440,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
               <div>Try the buttons next to the poem to edit or regenerate. Mouse, keyboard, arrow keys, Tab, Escape and Enter can be used to edit.</div>
               <div>You can also ask for assistance! Save with empty or incomplete lines, or "..." as placeholders for AI to fill in.
             </div>`,
+          style: { bottom: "50vh" },
         },
       ],
       () => saveUser({ ...user, preferences: { ...user.preferences, onboardedGenerated: true } })
@@ -522,7 +523,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
 
   const loadHomePage = () => {
     // console.log('>> app.page.loadHomePage()', { mode });
-    
+
     window.history.replaceState(null, '', `/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
 
     resetAlert();
@@ -694,7 +695,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
           altStyles={altTextStyles}
           popPoem={haikudleMode && haikudleSolvedJustNow}
           regenerating={regenerating}
-          onboardingElement={onboardingElement}          
+          onboardingElement={onboardingElement}
           refresh={loadRandom}
           regenerateHaiku={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku()}
         />
