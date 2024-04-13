@@ -308,8 +308,8 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
         trackEvent("haiku-created", {
           id: created.id,
-          theme: created.theme,
           userId: created.createdBy,
+          theme: created.theme,
         });
 
         // replace optimistic 
@@ -411,6 +411,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         trackEvent("haiku-generated", {
           id: generated.id,
           userId: generated.createdBy,
+          theme: generated.theme,
         });
 
         // replace optimistic 
