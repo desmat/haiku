@@ -102,7 +102,9 @@ export async function getUserHaikus(user: User): Promise<Haiku[]> {
   // strip down to just the basics
   haikus = haikus.map((haiku: Haiku) => {
     return {
-      id: haiku.id,
+      id: `${user.id}:${haiku.id}`,
+      haikuId: haiku.id,
+      userId: user.id,
       createdBy: haiku.createdBy,
       createdAt: haiku.createdAt,
       generatedAt: haiku.generatedAt,

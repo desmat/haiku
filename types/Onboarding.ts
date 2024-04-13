@@ -15,7 +15,7 @@ export const haikuOnboardingSteps = [
         <div>Follow the next steps to learn all about <b>Haiku Genius</b>.</div>
       </div>
     `,
-    style: { top: "50vh", transform: "translateY(-50%)" },
+    style: { bottom: "50vh", transform: "translateY(50%)" },
   },
   {
     focus: "poem",
@@ -60,7 +60,7 @@ export const haikudleOnboardingSteps = [
         <div>Unscramble the poem to solve today's haiku puzzle and reveal the art work!</div>
         <div>Follow the next steps to learn all about <b>Haikudle</b>.</div>
       </div>`,
-    style: { top: "50vh", transform: "translateY(-50%)" },
+    style: { bottom: "50vh", transform: "translateY(50%)" },
   },
   {
     focus: "puzzle",

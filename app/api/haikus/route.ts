@@ -5,7 +5,7 @@ import { userSession } from '@/services/users';
 import { listToMap, mapToList, searchParamsToMap } from '@/utils/misc';
 import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
 import { userUsage } from '@/services/usage';
-import { DailyHaiku, Haiku } from '@/types/Haiku';
+import { DailyHaiku, Haiku, UserHaiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 import shuffleArray from '@/utils/shuffleArray';
 import { USAGE_LIMIT } from '@/types/Usage';
@@ -90,21 +90,22 @@ export async function GET(request: NextRequest, params?: any) {
 
   if (query.mine) {
     // mapToList->listToMap to remove dupes
-    const userHaikus = await getUserHaikus(user);
-    const haikus = process.env.EXPERIENCE_MODE == "haiku"
-      ? mapToList(listToMap([
-        // make sure we include today's haiku
-        {
-          id: todaysHaiku.id,
-          createdBy: todaysHaiku.createdBy,
-          createdAt: todaysHaiku.createdAt,
-          generatedAt: todaysHaiku.generatedAt,
-          viewedAt: moment().valueOf(),
-          theme: todaysHaiku.theme,
-        },
+    let userHaikus = await getUserHaikus(user);
+
+    if (!user.isAdmin
+      && process.env.EXPERIENCE_MODE == "haiku"
+      && !userHaikus.filter((uh: UserHaiku) => uh.haikuId == todaysHaiku.id)[0]) {
+      const userHaiku = await createUserHaiku(user.id, todaysHaiku.id);
+      // console.log(">> app.api.haikus.GET created user haiku for today's daily haiku", { user, todaysHaiku, userHaikus, userHaiku });
+      userHaikus = [
         ...userHaikus,
-      ]))
-      : userHaikus;
+        { 
+          ...userHaiku, 
+          theme: todaysHaiku.theme,
+          viewedAt: moment().valueOf(),
+        }
+      ];
+    }
 
     if (user.isAdmin) {
       const [dailyHaikus, dailyHaikudles, nextDailyHaikuId] = await Promise.all([
@@ -113,10 +114,10 @@ export async function GET(request: NextRequest, params?: any) {
         await getNextDailyHaikuId(),
       ]);
 
-      return NextResponse.json({ haikus, dailyHaikus, dailyHaikudles, nextDailyHaikuId });
+      return NextResponse.json({ haikus: userHaikus, dailyHaikus, dailyHaikudles, nextDailyHaikuId });
     }
 
-    return NextResponse.json({ haikus });
+    return NextResponse.json({ haikus: userHaikus });
   }
 
   return NextResponse.json({ haikus: [todaysHaiku] });
