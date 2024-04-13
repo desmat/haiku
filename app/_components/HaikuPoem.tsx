@@ -144,6 +144,7 @@ export default function HaikuPoem({
   ];
 
   const handleClickHaiku = (e: any) => {
+    // console.log('>> app._components.HaikuPoem.handleClickHaiku()', { mode, haikuId: haiku?.id, status: haiku.status, popPoem, haiku });
     if (showcaseMode) {
       return refresh && refresh(e);
     }
@@ -405,7 +406,7 @@ export default function HaikuPoem({
                         {!editAllowed &&
                           <div
                             className={`_bg-purple-400 my-[0.05rem] ${showcaseMode ? "cursor-pointer" : "cursor-copy"}`}
-                            onClick={(e: any) => canCopy && handleClickHaiku(e)}
+                            // onClick={(e: any) => canCopy && handleClickHaiku(e)}
                           >
                             {upperCaseFirstLetter(poemLine)}
                           </div>

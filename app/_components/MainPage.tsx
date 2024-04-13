@@ -176,8 +176,8 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
 
   // console.log('>> app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
 
-  const loadPage = async () => {
-    // console.log('>> app.MainPage.loadPage', { haikuId, mode, loaded, loading, user, haiku });
+  const loadPage = async (random?: boolean | undefined) => {
+    // console.log('>> app.MainPage.loadPage', { haikuId, mode, random, loaded, loading, user, haiku });
 
     if (!loading) {
       loading = true; // race condition at initial load
@@ -185,14 +185,14 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       setLoadingUI(true);
 
       haikudleMode
-        ? loadHaikudle(haikuId || { lang })
+        ? loadHaikudle(haikuId || (random ? { random: true, lang } : { lang }))
           .then((haikudles: Haikudle | Haikudle[]) => {
             // console.log('>> app.MainPage.loadPage loadHaikudle.then', { haikudles });
             const loadedHaikudle = haikudles[0] || haikudles;
             setHaiku(loadedHaikudle?.haiku);
             setHaikuId(loadedHaikudle?.haiku?.id);
           })
-        : loadHaikus(haikuId || { lang }, mode)
+        : loadHaikus(haikuId || (random ? { random: true, lang } : { lang }), mode)
           .then((haikus: Haiku | Haiku[]) => {
             // console.log('>> app.MainPage.loadPage loadHaikus.then', { haikus });
             const loadedHaiku = haikus[0] || haikus;
@@ -296,7 +296,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
 
     if (showcaseMode && !loadingUI && _refreshDelay) {
       window.history.replaceState(null, '', `/${haiku?.id || ""}?mode=showcase${_refreshDelay ? `&refreshDelay=${_refreshDelay}` : ""}`);
-      setRefreshTimeout(setTimeout(doRefresh, _refreshDelay));
+      setRefreshTimeout(setTimeout(loadRandom, _refreshDelay));
     }
 
     // in case we're in showcase mode and refresh didn't work:
@@ -366,7 +366,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
             });
 
             startOnboarding(
-              haikudleOnboardingSteps.slice(1), 
+              haikudleOnboardingSteps.slice(1),
               () => {
                 saveUserOnboarded();
                 trackEvent("onboarding-dismissed", {
@@ -482,42 +482,58 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     }
   }
 
-  const doRefresh = () => {
-    // console.log('>> app.page.doRefresh()', {});
+  const loadRandom = () => {
+    // console.log('>> app.page.loadRandom()', {});
 
-    if (haikudleMode && !user.isAdmin) {
-      // TODO: figure out visual glitch
-      haiku = undefined;
-      haikuId = undefined;
-      loading = true;
-
-      window.location.href = `/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`;
-      return;
+    if (/* haikudleMode && */ !user.isAdmin) {
+      return loadHomePage();
     }
 
     if (haikuId) {
       window.history.replaceState(null, '', `/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
     }
 
-    resetAlert();
+    // resetAlert();
+    setLoading(true);
     setLoadingUI(true);
+    // loadingUI = true;
+    setHaiku(undefined);
+    setHaikuId(undefined);
 
-    if (haikudleMode) {
-      loadHaikus({ random: true, lang }, mode)
+    haikudleMode
+      ? loadHaikudle(haikuId || { random: true, lang })
+        .then((haikudles: Haikudle | Haikudle[]) => {
+          // console.log('>> app.MainPage.loadPage loadRandom.then', { haikudles });
+          const loadedHaikudle = haikudles[0] || haikudles;
+          setHaiku(loadedHaikudle?.haiku);
+          setHaikuId(loadedHaikudle?.haiku?.id);
+        })
+      : loadHaikus({ random: true, lang }, mode)
         .then((haikus: Haiku | Haiku[]) => {
-          // console.log('>> app.MainPage.doRefresh loadHaikus.then', { haikus });
+          // console.log('>> app.MainPage.loadPage loadRandom.then', { haikus });
           const loadedHaiku = haikus[0] || haikus;
+          window.history.replaceState(null, '', `/${loadedHaiku?.id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
           setHaiku(loadedHaiku);
           setHaikuId(loadedHaiku?.id);
         });
-    } else {
-      setHaiku(undefined);
-      setHaikuId(undefined);
-    }
+
+
+  }
+
+  const loadHomePage = () => {
+    // console.log('>> app.page.loadHomePage()', { mode });
+    
+    window.history.replaceState(null, '', `/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
+
+    resetAlert();
+    setLoadingUI(true);
+    setHaiku(undefined);
+    setHaikuId(undefined);
+    // loadPage(); //useEffect will kick off
   }
 
   const switchMode = async (newMode?: string) => {
-    console.log('>> app.page.switchMode()', { mode, newMode });
+    // console.log('>> app.page.switchMode()', { mode, newMode });
     const url = newMode
       ? `/${haikuId || ""}?mode=${newMode}`
       : `/${haikuId || ""}?mode=${mode == "haiku" ? "haikudle" : mode != "haiku" ? "haiku" : process.env.EXPERIENCE_MODE}`
@@ -532,7 +548,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     if (haiku?.id && confirm("Delete this Haiku?")) {
       window.history.replaceState(null, '', `/`);
       deleteHaiku(haiku.id); // don't wait
-      doRefresh();
+      loadHomePage();
     }
   }
 
@@ -574,7 +590,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       setRefreshTimeout(undefined);
     }
 
-    setRefreshTimeout(setTimeout(doRefresh, val));
+    setRefreshTimeout(setTimeout(loadRandom, val));
 
     plainAlert(
       `Refreshing every ${moment.duration(val).humanize()} (${Math.floor(val / 1000)} seconds)`,
@@ -583,7 +599,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   }
 
   const startBackup = async () => {
-    console.log('>> app._components.MainPage.startBackup()', {});
+    // console.log('>> app._components.MainPage.startBackup()', {});
 
     const token = await getUserToken();
     setBackupInProgress(true);
@@ -610,15 +626,15 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     // return <LoadingPage mode={mode} /* haiku={haiku} */ />
     return (
       <div>
-        <NavOverlay mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} onClickLogo={doRefresh} />
-        <Loading onClick={showcaseMode && doRefresh} />
+        <NavOverlay loading={true} mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} onClickLogo={loadHomePage} />
+        <Loading onClick={showcaseMode && loadRandom} />
         {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}
       </div>
     )
   }
 
   if (loaded && !loading && !haiku) {
-    return <NotFound mode={mode} lang={lang} onClickGenerate={startGenerateHaiku} onClickLogo={doRefresh} />
+    return <NotFound mode={mode} lang={lang} onClickGenerate={startGenerateHaiku} onClickLogo={loadHomePage} />
   }
 
   return (
@@ -632,8 +648,9 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         styles={textStyles.slice(0, textStyles.length - 3)}
         altStyles={altTextStyles}
         onboardingElement={onboardingElement}
-        onClickLogo={doRefresh} // TODO FIGURE THIS OUT FOR ADMINS in haiku mode
+        onClickLogo={loadHomePage}
         onClickGenerate={startGenerateHaiku}
+        onClickRandom={loadRandom}
         onSwitchMode={switchMode}
         onDelete={doDelete}
         onSaveDailyHaiku={saveDailyHaiku}
@@ -677,8 +694,8 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
           altStyles={altTextStyles}
           popPoem={haikudleMode && haikudleSolvedJustNow}
           regenerating={regenerating}
-          onboardingElement={onboardingElement}
-          refresh={doRefresh}
+          onboardingElement={onboardingElement}          
+          refresh={loadRandom}
           regenerateHaiku={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku()}
         />
       }

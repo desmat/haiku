@@ -37,7 +37,7 @@ export async function GET(request: NextRequest, params?: any) {
     todaysHaikudle = await saveDailyHaikudle(user, todaysDateCode, randomHaikudle.haikuId, randomHaikudle.id);
   }
 
-  const [haiku, haikudle, userHaikudle, nextDailyHaikudleId] = await Promise.all([
+  let [haiku, haikudle, userHaikudle, nextDailyHaikudleId] = await Promise.all([
     getHaiku(todaysHaikudle.haikuId, true),
     getHaikudle(todaysHaikudle.haikuId),
     getUserHaikudle(user?.id, todaysHaikudle?.haikuId),
@@ -51,7 +51,8 @@ export async function GET(request: NextRequest, params?: any) {
   }
 
   if (!haikudle) {
-    return NextResponse.json({ haikudle: {} }, { status: 404 });
+    // no puzzle for this haiku yet: create one
+    haikudle = await createHaikudle(user, { id: haiku.id, haikuId: haiku.id });
   }
 
   const ret = {

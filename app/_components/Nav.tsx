@@ -410,7 +410,7 @@ function SidePanel({
   useEffect(() => {
     // console.log(">> app._component.Nav.useEffect", { user, mode });
     if (user?.id && ["haiku", "haikudle"].includes(mode || "")) {
-      loadHaikus({ mine: true }, mode);
+      loadHaikus({ mine: true }, mode != process.env.EXPERIENCE_MODE && mode);
     }
   }, [user?.id]);
 
@@ -509,7 +509,7 @@ function SidePanel({
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
             <div className="py-2">
               <StyledLayers styles={styles}>
-              {user?.isAdmin && listMode == "haiku" &&
+                {user?.isAdmin && listMode == "haiku" &&
                   <div
                     className="cursor-pointer"
                     title="Show daily haikudles"
@@ -651,6 +651,7 @@ function SidePanel({
 
 export function NavOverlay({
   mode,
+  loading,
   styles,
   altStyles,
   haiku,
@@ -660,6 +661,7 @@ export function NavOverlay({
   onboardingElement,
   onClickLogo,
   onClickGenerate,
+  onClickRandom,
   onSwitchMode,
   onDelete,
   onSaveDailyHaiku,
@@ -669,6 +671,7 @@ export function NavOverlay({
   onBackup,
 }: {
   mode: string,
+  loading?: boolean,
   styles: any[],
   altStyles: any[],
   haiku?: Haiku,
@@ -678,6 +681,7 @@ export function NavOverlay({
   onboardingElement?: string,
   onClickLogo?: any,
   onClickGenerate?: any,
+  onClickRandom?: any,
   onSwitchMode?: any,
   onDelete?: any,
   onSaveDailyHaiku?: any,
@@ -729,11 +733,12 @@ export function NavOverlay({
               <div className="onboarding-focus double" />
             }
             <PopOnClick color={haiku?.bgColor} active={onboardingElement == "logo"}>
+              {/* TODO: href to support multi-language */}
               <Logo
                 styles={styles}
                 altStyles={altStyles}
                 mode={mode}
-                href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`}
+                href={`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`}
                 onClick={onClickLogo}
                 onboardingElement={onboardingElement}
               />
@@ -744,7 +749,13 @@ export function NavOverlay({
       {mode == "social-img" &&
         <div className={`${font.architects_daughter.className} absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}>
           <PopOnClick color={haiku?.bgColor}>
-            <Logo styles={styles} altStyles={altStyles} mode={mode} href={`/${lang && lang != "en" && `?lang=${lang}` || ""}`} />
+            {/* TODO: href to support multi-language */}
+            <Logo
+              styles={styles}
+              altStyles={altStyles}
+              mode={mode}
+              href={`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`}
+            />
             <div
               className="_bg-pink-400 _opacity-50 absolute top-0 left-0 w-full h-full cursor-pointer"
               onClick={() => onSwitchMode && onSwitchMode(process.env.EXPERIENCE_MODE)}
@@ -817,7 +828,7 @@ export function NavOverlay({
                   styles={styles}
                   backupInProgress={backupInProgress}
                   onboardingElement={onboardingElement}
-                  onRefresh={onClickLogo}
+                  onRefresh={onClickRandom}
                   onSwitchMode={onSwitchMode}
                   onDelete={onDelete}
                   onSaveDailyHaiku={onSaveDailyHaiku}
@@ -856,7 +867,7 @@ export function NavOverlay({
         </>
       }
 
-      {["haiku", "haikudle"].includes(mode) &&
+      {!loading && ["haiku", "haikudle"].includes(mode) &&
         <SidePanel
           user={user}
           mode={mode}

@@ -18,7 +18,8 @@ export async function GET(request: NextRequest, params?: any) {
   const { user } = await userSession(request);
   console.log('>> app.api.haikus.GET', { query, searchParams: request.nextUrl.searchParams.toString(), user });
 
-  if (query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
+  if (!query.mine && query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
+    // TODO query.mine is conflated in this end-point and smells up the code: move to /user end-point
     return NextResponse.json(
       { success: false, message: 'authorization failed' },
       { status: 403 }
@@ -89,18 +90,21 @@ export async function GET(request: NextRequest, params?: any) {
 
   if (query.mine) {
     // mapToList->listToMap to remove dupes
-    const haikus = mapToList(listToMap([
-      // make sure we include today's haiku
-      {
-        id: todaysHaiku.id,
-        createdBy: todaysHaiku.createdBy,
-        createdAt: todaysHaiku.createdAt,
-        generatedAt: todaysHaiku.generatedAt,
-        viewedAt: moment().valueOf(),
-        theme: todaysHaiku.theme,
-      },
-      ...(await getUserHaikus(user)),
-    ]));
+    const userHaikus = await getUserHaikus(user);
+    const haikus = process.env.EXPERIENCE_MODE == "haiku"
+      ? mapToList(listToMap([
+        // make sure we include today's haiku
+        {
+          id: todaysHaiku.id,
+          createdBy: todaysHaiku.createdBy,
+          createdAt: todaysHaiku.createdAt,
+          generatedAt: todaysHaiku.generatedAt,
+          viewedAt: moment().valueOf(),
+          theme: todaysHaiku.theme,
+        },
+        ...userHaikus,
+      ]))
+      : userHaikus;
 
     if (user.isAdmin) {
       const [dailyHaikus, dailyHaikudles, nextDailyHaikuId] = await Promise.all([
