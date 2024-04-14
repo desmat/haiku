@@ -97,7 +97,7 @@ export function Logo({
             ? styles.slice(0, 1)
             : styles
           }
-        >{isHaikudleMode || isSocialImgMode ? "kudle" : "ku"}</StyledLayers>
+        >{isHaikudleMode /* || isSocialImgMode */ ? "kudle" : "ku"}</StyledLayers>
       </div>
     </Link>
   )
