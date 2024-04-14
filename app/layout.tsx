@@ -10,12 +10,14 @@ const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 const inter = Inter({ subsets: ['latin'] });
 
 const appName = isHaikudleMode
-  ? "hAIkudle"
-  : "hAIku";
+  ? "Haikudle - AI-powered daily haiku puzzle and "
+  : "Haiku Genius - AI-powered haiku poems and generative art";
 
 const appDescription = isHaikudleMode
   ? "AI-generated art and daily haiku puzzles"
-  : "AI-generated art and haiku poems";
+  : "Haiku Genius integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
+    "Craft haiku poems seamlessly with our AI assistant and share your creations with stunning AI-generated imagery, powered by OpenAI’s ChatGPT and DALL-E. " +
+    "Explore daily featured haikus and experience AI-assisted creativity and discover the limitless possibilities of poetic exploration with Haiku Genius.";
 
 const metaUrl = isHaikudleMode
   ? "https://haikudle.art/"
