@@ -99,8 +99,8 @@ export async function GET(request: NextRequest, params?: any) {
       // console.log(">> app.api.haikus.GET created user haiku for today's daily haiku", { user, todaysHaiku, userHaikus, userHaiku });
       userHaikus = [
         ...userHaikus,
-        { 
-          ...userHaiku, 
+        {
+          ...userHaiku,
           theme: todaysHaiku.theme,
           viewedAt: moment().valueOf(),
         }
@@ -118,6 +118,20 @@ export async function GET(request: NextRequest, params?: any) {
     }
 
     return NextResponse.json({ haikus: userHaikus });
+  }
+
+  if (user.isAdmin) {
+    // TODO: there's a bit of inconsistent redundancy: we sometimes add dailyHaikudleId when a daily is created...
+    const [dailyHaikus, dailyHaikudles] = await Promise.all([
+      await getDailyHaikus(),
+      await getDailyHaikudles(),
+    ]);
+
+    todaysHaiku.dailyHaikuId = dailyHaikus
+      .filter((dh: DailyHaiku) => dh.haikuId == todaysHaiku.id)[0]?.id;
+
+    todaysHaiku.dailyHaikudleId = dailyHaikudles
+      .filter((dhle: DailyHaikudle) => dhle.haikuId == todaysHaiku.id)[0]?.id;
   }
 
   return NextResponse.json({ haikus: [todaysHaiku] });
