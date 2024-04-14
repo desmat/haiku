@@ -40,7 +40,7 @@ if (isHaikudleMode) {
   ];
 } else {
   metaImages = [
-    "https://haikugenius.io/social_img_haiku.png"
+    "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haiku/haiku_4b0c6b45.png"
   ];
 }
 
