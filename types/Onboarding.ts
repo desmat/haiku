@@ -16,7 +16,7 @@ export const haikuOnboardingSteps = [
         <div>Follow the next steps to learn all about <b>Haiku Genius</b>.</div>
       </div>
     `,
-    style: { bottom: "50vh", transform: "translateY(50%)" },
+    style: { bottom: "50svh", transform: "translateY(50%)" },
   },
   {
     focus: "poem",
@@ -26,7 +26,7 @@ export const haikuOnboardingSteps = [
         <div>AI-generated content is often good, but sometimes less so! Haiku creators start with a generated poem, then their creativity takes over.</div>
       </div>
     `,
-    style: { bottom: "10vh" },
+    style: { bottom: "10svh" },
   },
   {
     focus: "logo-and-generate",
@@ -36,7 +36,7 @@ export const haikuOnboardingSteps = [
         <div>To create your own haiku hit the <b>generate</b> button at the top of the screen and pick a theme: we'll get you started and the rest is up to!</div>
       </div>
     `,
-    style: { bottom: "10vh" },
+    style: { bottom: "10svh" },
   },
   {
     focus: "side-panel-and-bottom-links",
@@ -48,7 +48,7 @@ export const haikuOnboardingSteps = [
         <div>Enjoy <b>Haiku Genius!</b></div>        
       </div>
     `,
-    style: { bottom: "10vh" },
+    style: { bottom: "10svh" },
   },
 ];
 
@@ -62,7 +62,7 @@ export const haikuGeneratedOnboardingSteps = (haiku: Haiku) => [
         <div>Try the buttons next to the poem to edit or regenerate. Use your mouse, keyboard, arrow keys, Tab, Escape and Enter keys to edit, cancel or save.</div>
         <div>Level up your creativity with our AI assistant: save with empty or incomplete lines, or "..." as placeholders for to fill in.
       </div>`,
-    style: { bottom: "50vh" },
+    style: { bottom: "50svh" },
   },
 ];
 
@@ -76,7 +76,7 @@ export const haikudleOnboardingSteps = [
         <div>Unscramble the poem to solve today's haiku puzzle and reveal the art work!</div>
         <div>Follow the next steps to learn all about <b>Haikudle</b>.</div>
       </div>`,
-    style: { bottom: "50vh", transform: "translateY(50%)" },
+    style: { bottom: "50svh", transform: "translateY(50%)" },
   },
   {
     focus: "puzzle",
@@ -87,7 +87,7 @@ export const haikudleOnboardingSteps = [
         <div>Daily puzzles only last for the day: solve and share before time runs out!</div>
       </div>
     `,
-    style: { bottom: "10vh" },
+    style: { bottom: "10svh" },
   },
   {
     focus: "logo-and-generate",
@@ -97,7 +97,7 @@ export const haikudleOnboardingSteps = [
         <div>To create your very own haikus hit the generate button at the top of the screen and pick a theme: AI will help you write a poem and generate art work to match.</div>
       </div>
     `,
-    style: { bottom: "10vh" },
+    style: { bottom: "10svh" },
   },
   {
     focus: "side-panel-and-bottom-links",
@@ -108,6 +108,6 @@ export const haikudleOnboardingSteps = [
         <div>Enjoy <b>Haikudle!</b></div>        
       </div>
     `,
-    style: { bottom: "10vh" },
+    style: { bottom: "10svh" },
   },
 ];

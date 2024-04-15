@@ -283,7 +283,7 @@ export default function HaikuPoem({
     <div className="relative">
       {/* allow editors to click out and finish */}
       <div
-        className={`_bg-pink-100 absolute top-0 left-0 w-[100vw] h-[100vh]${saving ? " opacity-50" : ""}`}
+        className={`_bg-pink-100 fixed top-0 left-0 w-[100vw] h-[100svh]${saving ? " opacity-50" : ""}`}
         onClick={() => editing && finishEdit()}
       />
 
