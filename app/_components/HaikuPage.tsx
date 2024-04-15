@@ -17,6 +17,7 @@ export default function HaikuPage({
   onboardingElement,
   refresh,
   regenerateHaiku,
+  copyHaiku,
 }: {
   mode: string,
   haiku?: Haiku,
@@ -28,6 +29,7 @@ export default function HaikuPage({
   onboardingElement?: string,
   refresh?: any,
   regenerateHaiku?: any,
+  copyHaiku?: any
 }) {
   // console.log('>> app._components.HaikuPage.render()', { mode, id: haiku.id, popPoem, haiku });
 
@@ -70,6 +72,7 @@ export default function HaikuPage({
               onboardingElement={onboardingElement}
               regenerate={regenerateHaiku}
               refresh={refresh}
+              copyHaiku={copyHaiku}
             />
           </div>
         }

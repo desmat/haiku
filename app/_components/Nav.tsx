@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'
 import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub } from 'react-icons/io5';
-import { FaShare, FaExpand } from "react-icons/fa";
+import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
 import { HiSwitchVertical } from "react-icons/hi";
 import { MdMail, MdHome, MdDelete } from "react-icons/md";
 import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg, BsDatabaseFillUp } from "react-icons/bs";
@@ -21,7 +21,6 @@ import { User } from '@/types/User';
 import { byCreatedAtDesc } from '@/utils/sort';
 import { USAGE_LIMIT } from '@/types/Usage';
 import { StyledLayers } from './StyledLayers';
-import trackEvent from '@/utils/trackEvent';
 import PopOnClick from './PopOnClick';
 
 export function Loading({ onClick }: { onClick?: any }) {
@@ -131,6 +130,8 @@ function BottomLinks({
   onSaveDailyHaiku,
   onShowAbout,
   onBackup,
+  onCopyHaiku,
+  onCopyLink,
 }: {
   mode: string,
   haiku?: Haiku,
@@ -144,6 +145,8 @@ function BottomLinks({
   onSaveDailyHaiku: any,
   onShowAbout: any,
   onBackup?: any,
+  onCopyHaiku?: any,
+  onCopyLink?: any,
 }) {
   // console.log("BottomLinks", { lang })
   const router = useRouter();
@@ -161,10 +164,7 @@ function BottomLinks({
           key="about"
           className="cursor-pointer"
           title="About"
-          onClick={(e: any) => {
-            e.preventDefault();
-            onShowAbout && onShowAbout();
-          }}
+          onClick={() => onShowAbout && onShowAbout()}
         >
           <PopOnClick color={haiku?.bgColor}>
             <IoHelpCircle className="text-2xl" />
@@ -195,7 +195,17 @@ function BottomLinks({
         >
           <MdMail className="text-xl" />
         </Link> */}
-        {haiku?.id &&
+        <div
+          key="copy"
+          className={haiku?.id && onCopyHaiku ? "cursor-copy" : "opacity-40"}
+          title="Copy haiku poem "
+          onClick={() => onCopyHaiku && onCopyHaiku()}
+        >
+          <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onCopyHaiku}>
+            <FaCopy className="text-xl" />
+          </PopOnClick>
+        </div>
+        {haiku?.id && onCopyLink &&
           <div className="onboarding-container">
             {onboardingElement == "bottom-links-share" &&
               <div className="onboarding-focus" />
@@ -207,16 +217,11 @@ function BottomLinks({
               <Link
                 key="link"
                 href={`/${haiku.id}`}
-                title="Copy direct link to share"
+                title="Copy link to share"
                 className="cursor-copy"
                 onClick={(e: any) => {
                   e.preventDefault();
-                  navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : "https://haikugenius.io"}/${haiku.id}`);
-                  alert(`Link to this haiku copied to clipboard`, { closeDelay: 750 });
-                  trackEvent("haiku-shared", {
-                    userId: user.id,
-                    id: haiku.id,
-                  });
+                  onCopyLink()
                 }}
               >
                 <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
@@ -226,11 +231,9 @@ function BottomLinks({
             </StyledLayers>
           </div>
         }
-        {!haiku?.id &&
+        {(!haiku?.id || !onCopyLink) &&
           <div className="opacity-40">
-            <PopOnClick color={haiku?.bgColor}>
-              <FaShare className="text-xl" />
-            </PopOnClick>
+            <FaShare className="text-xl" />
           </div>
         }
         {user?.isAdmin &&
@@ -669,6 +672,8 @@ export function NavOverlay({
   onSelectHaiku,
   onChangeRefreshDelay,
   onBackup,
+  onCopyHaiku,
+  onCopyLink,
 }: {
   mode: string,
   loading?: boolean,
@@ -689,6 +694,8 @@ export function NavOverlay({
   onSelectHaiku?: any,
   onChangeRefreshDelay?: any,
   onBackup?: any,
+  onCopyHaiku?: any,
+  onCopyLink?: any,
 }) {
   const dateCode = moment().format("YYYYMMDD");
   const [user] = useUser((state: any) => [state.user]);
@@ -834,6 +841,8 @@ export function NavOverlay({
                   onSaveDailyHaiku={onSaveDailyHaiku}
                   onShowAbout={onShowAbout}
                   onBackup={onBackup}
+                  onCopyHaiku={onCopyHaiku}
+                  onCopyLink={onCopyLink}
                 />
               </StyledLayers>
             </PopOnClick>

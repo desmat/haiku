@@ -4,7 +4,7 @@ import moment from "moment";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { syllable } from "syllable";
-import { FaCopy, FaEdit } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import useAlert from "@/app/_hooks/alert";
 import useHaikus from "@/app/_hooks/haikus";
 import { Haiku } from "@/types/Haiku";
@@ -15,6 +15,22 @@ import trackEvent from "@/utils/trackEvent";
 import { GenerateIcon } from "./Nav";
 import PopOnClick from "./PopOnClick";
 import { StyledLayers } from "./StyledLayers";
+
+const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
+  return [
+    `"${capitalize(haiku.theme)}", `,
+    `${mode == "haikudle" ? "haikudle.art" : "haikugenius.io"}/${haiku.id}`
+  ];
+}
+
+export const formatHaikuText = (haiku: Haiku, mode?: string) => {
+  const haikuTitleAndAuthor = formatHaikuTitleAndAuthor(haiku, mode);
+
+  return haiku.poem
+    .map((value: string, i: number) => upperCaseFirstLetter(value))
+    .join("\n")
+    + `\n—${haikuTitleAndAuthor.join("")}\n`;
+};
 
 /**
  * Extra efforts at the UX with a controlled input.
@@ -100,6 +116,7 @@ export default function HaikuPoem({
   onboardingElement,
   regenerate,
   refresh,
+  copyHaiku
 }: {
   user: User,
   mode: string,
@@ -110,6 +127,7 @@ export default function HaikuPoem({
   onboardingElement?: string,
   regenerate?: any,
   refresh?: any,
+  copyHaiku?: any,
 }) {
   // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku.status, popPoem, haiku });
   const haikudleMode = mode == "haikudle";
@@ -135,31 +153,13 @@ export default function HaikuPoem({
   const canRegenerate = regenerateAllowed && !editing && !saving;
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { haiku, updatedPoem, editingPoemLine });
 
-  const haikuTitleAndAuthorTag = [
-    `"${capitalize(haiku.theme)}", `,
-    `${haikudleMode ? "haikudle.art" : "haikugenius.io"}/${haiku.id}`
-  ];
-
   const handleClickHaiku = (e: any) => {
     // console.log('>> app._components.HaikuPoem.handleClickHaiku()', { mode, haikuId: haiku?.id, status: haiku.status, popPoem, haiku });
     if (showcaseMode) {
       return refresh && refresh(e);
     }
 
-    const haikuToCopy = haiku.poem
-      .map((value: string, i: number) => upperCaseFirstLetter(updatedPoem[i] || value))
-      .join("\n")
-      + `\n—${haikuTitleAndAuthorTag.join("")}\n`;
-
-    // console.log('>> app._components.HaikuPage.handleClickHaiku()', { haikuToCopy });
-    navigator.clipboard.writeText(haikuToCopy);
-
-    alert(`Haiku poem copied to clipboard`, { closeDelay: 750 });
-
-    trackEvent("haiku-copied", {
-      userId: user.id,
-      id: haiku.id,
-    });
+    copyHaiku && copyHaiku();
   }
 
   const startEdit = (inputIndex: number, select?: boolean) => {
@@ -299,13 +299,10 @@ export default function HaikuPoem({
           force={popPoem}
           disabled={editing || canEdit || showcaseMode}
         >
-          <div className={`_bg-pink-200 ${canEdit ? "group/edit" : canCopy ? "group/copy" : ""} p-2 ${saving ? "animate-pulse" : ""}`}>
+          <div className={`_bg-pink-200 ${canEdit ? "group/edit" : ""} p-2 ${saving ? "animate-pulse" : ""}`}>
             <div
               className="_bg-purple-200 flex flex-col gap-[2rem] _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
-              onClick={(e: any) => {
-                e.preventDefault();
-                showcaseMode && handleClickHaiku(e);
-              }}
+              onClick={handleClickHaiku}
               title={showcaseMode ? "Refresh" : "Click to edit"}
               style={{
                 cursor: showcaseMode ? "pointer" : ""
@@ -403,7 +400,6 @@ export default function HaikuPoem({
                         {!editAllowed &&
                           <div
                             className={`_bg-purple-400 my-[0.05rem] ${showcaseMode ? "cursor-pointer" : "cursor-copy"}`}
-                            // onClick={(e: any) => canCopy && handleClickHaiku(e)}
                           >
                             {upperCaseFirstLetter(poemLine)}
                           </div>
@@ -457,7 +453,7 @@ export default function HaikuPoem({
                   >
                     <span
                       dangerouslySetInnerHTML={{
-                        __html: `${haikuTitleAndAuthorTag.join(haiku.theme?.length > maxHaikuTheme
+                        __html: `${formatHaikuTitleAndAuthor(haiku, mode).join(haiku.theme?.length > maxHaikuTheme
                           ? "<br/>&nbsp;"
                           : "")}`
                       }}
@@ -474,23 +470,6 @@ export default function HaikuPoem({
                     }
                     {onboardingElement && ["poem-and-poem-actions"].includes(onboardingElement) &&
                       <div className="onboarding-focus double" />
-                    }
-                    {copyAllowed &&
-                      <Link
-                        href="#"
-                        className={`${editing ? "" : "cursor-pointer"}`}
-                        title="Copy to clipboard"
-                        onClick={(e: any) => {
-                          e.preventDefault();
-                          canCopy && handleClickHaiku(e);
-                        }}
-                      >
-                        <PopOnClick>
-                          <StyledLayers styles={altStyles || []}>
-                            <FaCopy className={`h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"} ${canCopy ? "group-hover/actions:opacity-100 group-hover/copy:opacity-100 cursor-pointer" : "cursor-default"}`} />
-                          </StyledLayers>
-                        </PopOnClick>
-                      </Link>
                     }
                     {editAllowed &&
                       <Link
