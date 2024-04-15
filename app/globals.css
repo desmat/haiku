@@ -215,26 +215,6 @@ ul {
     inset 0 0 1rem 2rem #000000;
 }
 
-
-
-
-
-
-
-
-_.onboarding-focus:not(:has(~ * .onboarding-focus)) {
-  background-color: orange;
-  /* opacity: 0.6; */
-}
-
-_.onboarding-focus:has(:not(~ * .onboarding-focus)) {
-  background-color: purple;
-  /* opacity: 0.6;
-  box-shadow: 0 0 max(100vh, 100vw) max(100vh, 100vw) #000000aa, inset 0 0 1rem 2rem #000000aa; */
-}
-
-_.onboarding-focus:has(~ * .double) {
-  background-color: blue;
-  /* opacity: 0.3 !important; */
-  /* box-shadow: 0 0 max(100vh, 100vw) max(100vh, 100vw) #000000, inset 0 0 1rem 2rem #000000; */
+.Alert a, .Alert .Action {
+  text-decoration: underline;
 }

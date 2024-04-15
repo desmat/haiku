@@ -91,7 +91,7 @@ function TypedAlert({
 
   return (
     <div 
-      className={`_border-[1px] ${colorClasses[5]} border-solid fixed bottom-3 left-3 md:left-[calc(50vw-(700px/2))] _lg:_left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-50"}`}
+      className={`Alert _border-[1px] ${colorClasses[5]} border-solid fixed bottom-3 left-3 md:left-[calc(50vw-(700px/2))] _lg:_left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-50"}`}
       style={style}
       >
       <div className={`_bg-pink-200 ${closed ? "opacity-0" : "opacity-100"} transition-all rounded-sm ${colorClasses[0]} p-[0.8rem] w-[calc(100vw-1.5rem)] md:w-[700px] shadow-md hover:shadow-lg`}>
@@ -125,7 +125,7 @@ function TypedAlert({
                 return (
                   <div
                     key={i}
-                    className={`_bg-pink-100 text-center`}
+                    className={`Action _bg-pink-100 text-center`}
                     onClick={typeof (ca.action) == "string" && ca.action == "close" ? handleClose : ca.action}
                   >
                     <div className={`_bg-pink-200 w-fit h-fit m-auto px-1 font-bold cursor-pointer hover:underline ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>
@@ -137,7 +137,7 @@ function TypedAlert({
             })}
             {!customActions &&
               <div
-                className={`_bg-pink-100 text-center text-md font-medium`}
+                className={`Action _bg-pink-100 text-center text-md font-medium`}
                 onClick={handleClose}
               >
                 <div className={`_bg-pink-200 w-fit m-auto px-1 font-bold cursor-pointer hover:underline ${colorClasses[0]} ${colorClasses[4]} ${colorClasses[1]}`}>

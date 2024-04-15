@@ -159,7 +159,7 @@ export default function HaikuPoem({
       return refresh && refresh(e);
     }
 
-    copyHaiku && copyHaiku();
+    !canEdit && copyHaiku && copyHaiku();
   }
 
   const startEdit = (inputIndex: number, select?: boolean) => {
@@ -212,7 +212,7 @@ export default function HaikuPoem({
     try {
       const saved = await saveHaiku(user, {
         ...haiku,
-        originalPoem: haiku.poem,
+        originalPoem: haiku.originalPoem || haiku.poem,
         poem: updatedOpen,
       });
 
