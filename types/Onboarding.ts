@@ -12,7 +12,8 @@ export const haikuOnboardingSteps = [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with 5/7/5 syllable per line, traditionally evoking images of the natural world. Learn more <b><a href="https://en.wikipedia.org/wiki/Haiku" target="_blank">here</a></b>.</div>
-        <div>I built this for haiku enthusiasts to make and share their creations, but also for me to have a bit of fun with <b><a href="https://en.wikipedia.org/wiki/Large_language_model" target="_blank">Large Language Models</a></b>. Enjoy and share with the world!</div>
+        <div>I built this for haiku enthusiasts to make and share their creations, but also for me to have a bit of fun with <b><a href="https://en.wikipedia.org/wiki/Large_language_model" target="_blank">Large Language Models</a></b>.</div>
+        <div>Hit the ✨ button at the top of screen to <b>create your own haiku</b> and share it with the world!</div>
         <div>Follow the next steps to learn all about <b>Haiku Genius</b>.</div>
       </div>
     `,
