@@ -202,7 +202,7 @@ ul {
   /* background-color: yellow; */
   opacity: 0.52;
   box-shadow: 
-    0 0 max(100vh, 100vw) max(100svh, 100vw) #000000, 
+    0 0 max(100vh, 100vw) max(100vh, 100vw) #000000, 
     inset 0 0 1rem 2rem #000000,
     inset 0 0 1rem max(100vh, 100vw) #00000044;
 }
@@ -211,7 +211,7 @@ ul {
   /* background-color: pink; */
   opacity: 0.3;
   box-shadow: 
-    0 0 max(100vh, 100vw) max(100svh, 100vw) #000000, 
+    0 0 max(100vh, 100vw) max(100vh, 100vw) #000000, 
     inset 0 0 1rem 2rem #000000;
 }
 

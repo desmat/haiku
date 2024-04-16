@@ -678,7 +678,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   }
 
   return (
-    <div className="_bg-yellow-200 main-page relative h-[100svh] w-[100vw]">
+    <div className="_bg-yellow-200 main-page relative h-[100vh] w-[100vw]">
       <NavOverlay
         mode={mode}
         lang={lang}

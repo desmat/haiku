@@ -427,7 +427,7 @@ function SidePanel({
       {/* Area behind side panel but in front of main content to allow users to click and close the panel */}
       {panelOpened &&
         <div
-          className="_bg-blue-400 absolute top-0 left-0 w-[100vw] h-[100svh] z-20"
+          className="_bg-blue-400 absolute top-0 left-0 w-[100vw] h-[100vh] z-20"
           onClick={() => panelOpened && toggleMenuOpened()}
         >
         </div>
@@ -441,10 +441,10 @@ function SidePanel({
         }}
         onMouseLeave={() => panelOpened && !panelPinned && toggleMenuOpened()}
       >
-        <div className="_bg-pink-400 flex flex-col h-[100svh]">
+        <div className="_bg-pink-400 flex flex-col h-[100vh]">
           {/* hotspot to open the side panel on mouse hover */}
           <div
-            className="_bg-red-400 group absolute top-[4rem] right-0 w-[1rem] mr-[-1rem] h-[calc(100svh-4rem)] z-90"
+            className="_bg-red-400 group absolute top-[4rem] right-0 w-[1rem] mr-[-1rem] h-[calc(100vh-4rem)] z-90"
             onMouseEnter={() => !panelOpened && !panelAnimating && toggleMenuOpened()}
             onClick={() => panelOpened && toggleMenuOpened()}
           >
@@ -792,7 +792,7 @@ export function NavOverlay({
       }
 
       <div
-        className={`absolute top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100svh] z-10`}
+        className={`absolute top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-10`}
         style={{
           background: `radial-gradient(circle at center, white, #868686 35%, ${styles[0]?.color || "black"} 70%)`,
           opacity: 0.2,
