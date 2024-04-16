@@ -59,9 +59,6 @@ const initialState = {
   solvedJustNow: false,
   moves: 0,
   onSolved: async (id: string, moves: number) => {
-    // race condition
-    // useHaikus.getState().load({ /* createdBy: user.id */ mine: true }, useHaikus.getState().mode);
-    
     // anticipate instead
     const currentHaiku = (await useHaikudle.getState()).haiku;
     (await useHaikus.getState()).addUserHaiku({
@@ -173,7 +170,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     set({
       inProgress: solvedInProgress,
       words: solvedWords,
-      solved: true, 
+      solved: true,
       solvedJustNow: true,
     });
   },
@@ -383,19 +380,33 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
             });
             // smooth out the the alert pop-up
             setTimeout(() => useAlert.getState().error(`Error fetching haikudle ${id}: ${res.status} (${res.statusText})`), 500)
-            const errorHaiku = { ...notFoundHaikudle, id, haiku: { ...notFoundHaiku, id } }; 
+            const errorHaiku = { ...notFoundHaikudle, id, haiku: { ...notFoundHaiku, id } };
             await get().init(errorHaiku, true);
             return resolve(errorHaiku);
           }
 
           const data = await res.json();
           const haikudle = data.haikudle;
-          const nextDailyHaikudleId = data.nextDailyHaikudleId;
-          // console.log(">> hooks.haikudle.load", { data });
+
+          // race condition: /api/haikus/:id returned a haiku but /api/user 
+          // didn't see that haiku as viewed yet: fake it locally          
+          if (haikudle?.previousDailyHaikudleId) {
+            const userState = await useUser.getState();
+            if (!userState?.user?.isAdmin && !userState.haikus[haikudle.haikuId]) {
+              useUser.setState({
+                haikus: {
+                  ...userState.haikus,
+                  [haikudle.haikuId]: {
+                    ...haikudle.haiku,
+                    viewedAt: moment().valueOf(),
+                  }
+                }
+              })
+            }
+          }
 
           set({
             _haikudles: { ..._haikudles, [haikudle.id]: haikudle },
-            nextDailyHaikudleId,
           });
           setLoaded([haikudle]);
 

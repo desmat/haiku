@@ -13,11 +13,11 @@ import { FaRandom } from "react-icons/fa";
 import * as font from "@/app/font";
 import useAlert from '@/app/_hooks/alert';
 import useUser from '@/app/_hooks/user';
-import useHaikus from '@/app/_hooks/haikus';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { Haiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
+import { formatTimeFromNow } from '@/utils/format';
 import { byCreatedAtDesc } from '@/utils/sort';
 import { USAGE_LIMIT } from '@/types/Usage';
 import { StyledLayers } from './StyledLayers';
@@ -362,19 +362,18 @@ function SidePanel({
   const pageSize = 20;
   const [numPages, setNumPages] = useState(1);
   const [listMode, setListMode] = useState<"haiku" | "dailyHaiku" | "dailyHaikudle">("haiku");
+
   const [
-    loadHaikus,
     userHaikus,
-    dailyHaikus,
-    dailyHaikudles,
-  ] = useHaikus((state: any) => [
-    state.load,
-    state.userHaikus ? Object.values(state.userHaikus) : [],
+    userDailyHaikus,
+    userDailyHaikudles,
+  ] = useUser((state: any) => [
+    state.haikus ? Object.values(state.haikus) : [],
     state.dailyHaikus ? Object.values(state.dailyHaikus) : [],
     state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
   ]);
   const onboarding = !!(onboardingElement && ["side-panel", "side-panel-and-bottom-links"].includes(onboardingElement));
-  // console.log(">> app._component.Nav.SidePanel.render()", { panelOpened, panelAnimating, dailyHaikudles, userHaikus });
+  // console.log(">> app._component.Nav.SidePanel.render()", { user, userUser, userState, panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles, userHaikus });
 
   const toggleMenuOpened = () => {
     // console.log(">> app._component.SidePanel.toggleMenuOpened", {});
@@ -409,13 +408,6 @@ function SidePanel({
   const byGeneratedOrSolvedOrViewedDesc = (a: any, b: any) => {
     return (b.generatedAt || b.solvedAt || b.viewedAt || 0) - (a.generatedAt || a.solvedAt || a.viewedAt || 0)
   }
-
-  useEffect(() => {
-    // console.log(">> app._component.Nav.useEffect", { user, mode });
-    if (user?.id && ["haiku", "haikudle"].includes(mode || "")) {
-      loadHaikus({ mine: true }, mode != process.env.EXPERIENCE_MODE && mode);
-    }
-  }, [user?.id]);
 
   useEffect(() => {
     // console.log(">> app._component.Nav.useEffect", { mode, haiku });
@@ -561,22 +553,22 @@ function SidePanel({
                   >
                     <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>
                     {user?.isAdmin &&
-                      <span className="font-normal"> generated {moment(h.createdAt).fromNow()} by {h.createdBy == user?.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
+                      <span className="font-normal"> generated {formatTimeFromNow(h.createdAt)} by {h.createdBy == user?.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
                     }
                     {!user?.isAdmin && h.generatedAt &&
-                      <span className="font-normal"> generated {moment(h.generatedAt).fromNow()}</span>
+                      <span className="font-normal"> generated {formatTimeFromNow(h.generatedAt)}</span>
                     }
                     {!user?.isAdmin && !h.generatedAt && h.solvedAt &&
-                      <span className="font-normal"> solved {moment(h.solvedAt).fromNow()}{h.moves ? ` in ${h.moves} move${h.moves > 1 ? "s" : ""}` : ""}</span>
+                      <span className="font-normal"> solved {formatTimeFromNow(h.solvedAt)}{h.moves ? ` in ${h.moves} move${h.moves > 1 ? "s" : ""}` : ""}</span>
                     }
                     {!user?.isAdmin && !h.generatedAt && !h.solvedAt && h.viewedAt &&
-                      <span className="font-normal"> viewed {moment(h.viewedAt).fromNow()}</span>
+                      <span className="font-normal"> viewed {formatTimeFromNow(h.viewedAt)}</span>
                     }
                   </Link>
                 </StyledLayers>
               ))
             }
-            {["dailyHaiku", "dailyHaikudle"].includes(listMode) && user?.isAdmin && (panelAnimating || panelOpened) && (listMode == "dailyHaiku" && dailyHaikus || dailyHaikudles)
+            {["dailyHaiku", "dailyHaikudle"].includes(listMode) && user?.isAdmin && (panelAnimating || panelOpened) && (listMode == "dailyHaiku" && userDailyHaikus || userDailyHaikudles)
               // .filter((h: Haiku) => h.createdBy == user.id)
               .sort((a: any, b: any) => b.id - a.id)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
@@ -598,7 +590,7 @@ function SidePanel({
                 </StyledLayers>
               ))
             }
-            {(Object.values(listMode == "haiku" ? userHaikus : dailyHaikudles).length > numPages * pageSize) &&
+            {(Object.values(listMode == "haiku" ? userHaikus : userDailyHaikudles).length > numPages * pageSize) &&
               <div
                 className="py-2 cursor-pointer"
                 onClick={loadMore}

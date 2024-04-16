@@ -18,8 +18,7 @@ export async function GET(request: NextRequest, params?: any) {
   const { user } = await userSession(request);
   console.log('>> app.api.haikus.GET', { query, searchParams: request.nextUrl.searchParams.toString(), user });
 
-  if (!query.mine && query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
-    // TODO query.mine is conflated in this end-point and smells up the code: move to /user end-point
+  if (query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
     return NextResponse.json(
       { success: false, message: 'authorization failed' },
       { status: 403 }
@@ -88,37 +87,6 @@ export async function GET(request: NextRequest, params?: any) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
 
-  if (query.mine) {
-    // mapToList->listToMap to remove dupes
-    let userHaikus = await getUserHaikus(user);
-
-    if (!user.isAdmin
-      && process.env.EXPERIENCE_MODE == "haiku"
-      && !userHaikus.filter((uh: UserHaiku) => uh.haikuId == todaysHaiku.id)[0]) {
-      const userHaiku = await createUserHaiku(user.id, todaysHaiku.id);
-      // console.log(">> app.api.haikus.GET created user haiku for today's daily haiku", { user, todaysHaiku, userHaikus, userHaiku });
-      userHaikus = [
-        ...userHaikus,
-        {
-          ...userHaiku,
-          theme: todaysHaiku.theme,
-          viewedAt: moment().valueOf(),
-        }
-      ];
-    }
-
-    if (user.isAdmin) {
-      const [dailyHaikus, dailyHaikudles, nextDailyHaikuId] = await Promise.all([
-        await getDailyHaikus(),
-        await getDailyHaikudles(),
-        await getNextDailyHaikuId(),
-      ]);
-
-      return NextResponse.json({ haikus: userHaikus, dailyHaikus, dailyHaikudles, nextDailyHaikuId });
-    }
-
-    return NextResponse.json({ haikus: userHaikus });
-  }
 
   if (user.isAdmin) {
     // TODO: there's a bit of inconsistent redundancy: we sometimes add dailyHaikudleId when a daily is created...
@@ -132,6 +100,12 @@ export async function GET(request: NextRequest, params?: any) {
 
     todaysHaiku.dailyHaikudleId = dailyHaikudles
       .filter((dhle: DailyHaikudle) => dhle.haikuId == todaysHaiku.id)[0]?.id;
+  } else {
+    const userHaiku = await getUserHaiku(user.id, todaysHaiku.id);
+    if (!userHaiku) {
+      // user viewed today's featured haiku for the first
+      createUserHaiku(user.id, todaysHaiku.id);
+    }
   }
 
   return NextResponse.json({ haikus: [todaysHaiku] });

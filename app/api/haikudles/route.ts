@@ -61,12 +61,7 @@ export async function GET(request: NextRequest, params?: any) {
     haiku,
   }
 
-  return NextResponse.json(
-    nextDailyHaikudleId && user.isAdmin
-      // TODO move this to /api/haikudles?mine=true to follow haiku pattern
-      ? { haikudles: [ret], nextDailyHaikudleId }
-      : { haikudles: [ret] }
-  );
+  return NextResponse.json({ haikudles: [ret] });
 }
 
 export async function POST(request: Request) {

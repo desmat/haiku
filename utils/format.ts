@@ -1,3 +1,4 @@
+import moment from "moment";
 import { round } from "./misc";
 
 export function formatRange(range: string | number | any[], formatFn: any, unit?: string, unitMany?: string): string | undefined {
@@ -36,6 +37,19 @@ export function formatTime(v: number | string): string {
   if (v == 1000) return `${round(v / 1000)} second`;
 
   return `${round(v / 1000)} seconds`
+}
+
+export function formatTimeFromNow(v: number): string {
+  const now = moment();
+  const then = moment(v);
+  const seconds = now.diff(then, "seconds");
+  // console.log("utils.format.formatTimeFromNow", { seconds });
+  
+  return seconds >= 0 && seconds < 40
+    ? "jost now"
+    : seconds < 0 && seconds > -40
+      ? "now"
+      : moment(v).fromNow();
 }
 
 export function formatNumber(v: number | string, unit?: string, unitMany?: string): string {
