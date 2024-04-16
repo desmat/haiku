@@ -427,7 +427,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
           action: "close"
         },
         {
-          label: "Tell me more",
+          label: "Tell me more!",
           action: () => {
             trackEvent("onboarding-started", {
               userId: user.id,
