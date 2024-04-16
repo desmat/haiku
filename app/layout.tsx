@@ -42,7 +42,7 @@ if (isHaikudleMode) {
   ];
 } else {
   metaImages = [
-    "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haiku/haiku_4b0c6b45.png"
+    "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haiku/haiku_c16c1871_spring_morning.png"
   ];
 }
 
