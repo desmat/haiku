@@ -385,7 +385,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
           action: "close"
         },
         {
-          label: "Show Instructions",
+          label: "Tell me more!",
           action: () => {
             trackEvent("onboarding-started", {
               userId: user.id,
@@ -427,7 +427,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
           action: "close"
         },
         {
-          label: "Show Instructions",
+          label: "Tell me more",
           action: () => {
             trackEvent("onboarding-started", {
               userId: user.id,
