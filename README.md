@@ -1,4 +1,4 @@
-# Haikudle: AI-Powered Haiku Composer and Generative Art
+# Haiku Genius: AI-Powered Haiku Composer and Generative Art
 
 Haiku poem assistant by OpenAI's ChatGPT and generative art by DALL-E:
 
