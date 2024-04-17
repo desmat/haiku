@@ -13,7 +13,7 @@ export const haikuOnboardingSteps = [
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with 5/7/5 syllable per line, traditionally evoking images of the natural world. Learn more <b><a href="https://en.wikipedia.org/wiki/Haiku" target="_blank">here</a></b>.</div>
         <div>I built this for haiku enthusiasts to make and share their creations, but also for me to have a bit of fun with <b><a href="https://en.wikipedia.org/wiki/Large_language_model" target="_blank">Large Language Models</a></b>.</div>
-        <div>Hit the ✨ button at the top of screen to <b>create your own haiku</b> and share it with the world!</div>
+        <div>Hit the <b>Create</b> button at the top of screen to start crafting your own haiku and share it with the world!</div>
         <div>Follow the next steps to learn all about <b>Haiku Genius</b>.</div>
       </div>
     `,
@@ -34,7 +34,7 @@ export const haikuOnboardingSteps = [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>A new haiku will be featured every day, maybe one of yours! Click on the logo to see today's, come back tomorrow for more.</div>
-        <div>To create your own haiku hit the <b>generate</b> button at the top of the screen and pick a theme: we'll get you started and the rest is up to!</div>
+        <div>To create your own haiku hit the <b>Create</b> button at the top of the screen and pick a theme: AI will get you started and the rest is up to!</div>
       </div>
     `,
     style: { bottom: "10%" },
@@ -58,7 +58,7 @@ export const haikuGeneratedOnboardingSteps = (haiku: Haiku) => [
     focus: "poem-actions",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div>This haiku was generated on the theme <i>${haiku?.theme}</i>${haiku?.mood ? ` with a <i>${haiku?.mood}</i> mood using <b>ChatGPT</b>` : ""}. Both were used to generate art using <b>DALL-E</b> with a curated prompt to harmonize together.</div>
+        <div>This haiku was initially generated on the theme <i>${haiku?.theme}</i>${haiku?.mood ? ` with a <i>${haiku?.mood}</i> mood using <b>ChatGPT</b>` : ""}. Both were used to generate art using <b>DALL-E</b> with a curated prompt to harmonize together.</div>
         <div>Curious about those prompts? See <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L106-L108" target="_blank">here</a></b> and <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L17-L31" target="_blank">here</a></b> in the source code.</b></div>
         <div>Try the buttons next to the poem to edit or regenerate. Use your mouse, keyboard, arrow keys, Tab, Escape and Enter keys to edit, cancel or save.</div>
         <div>Level up your creativity with our AI assistant: save with empty or incomplete lines, or "..." as placeholders for to fill in.
@@ -95,7 +95,7 @@ export const haikudleOnboardingSteps = [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>A new haiku puzzle will be featured every day. Click on the logo to return to today's, and come back to tomorrow for a new puzzle!</div>
-        <div>To create your very own haikus hit the generate button at the top of the screen and pick a theme: AI will help you write a poem and generate art work to match.</div>
+        <div>To create your very own haikus hit the <b>Create</b> button at the top of the screen and pick a theme or subject: AI will get you started writing a poem and will generate art work to match.</div>
       </div>
     `,
     style: { bottom: "10%" },

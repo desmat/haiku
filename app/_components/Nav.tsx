@@ -96,23 +96,42 @@ export function Logo({
             ? styles.slice(0, 1)
             : styles
           }
-        >{isHaikudleMode /* || isSocialImgMode */ ? "kudle" : "ku"}</StyledLayers>
+        >{isHaikudleMode /* || isSocialImgMode */ ? "kudle" : "kuGenius"}</StyledLayers>
       </div>
     </Link>
   )
 }
 
-export function GenerateIcon({ onClick, sizeOverwrite }: { onClick?: any, sizeOverwrite?: string }) {
+export function GenerateIcon({
+  onClick,
+  sizeOverwrite,
+  children,
+}: {
+  onClick?: any,
+  sizeOverwrite?: string,
+  children?: React.ReactNode,
+}) {
   const icon = <IoSparkles className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />;
   if (!onClick) {
     return icon;
   }
   return (
-    <Link className="generate-icon" href="#" onClick={(e: any) => {
-      e.preventDefault();
-      onClick && onClick();
-    }}>
-      {icon}
+    <Link
+      className="generate-icon flex flex-row m-auto gap-2 hover:no-underline"
+      href="#"
+      onClick={(e: any) => {
+        e.preventDefault();
+        onClick && onClick();
+      }}
+    >
+      {children &&
+        <div className={`${font.architects_daughter.className} _bg-yellow-200 my-[-0.3rem] md:text-[24pt] sm:text-[22pt] text-[18pt]`}>
+          {children}
+        </div>
+      }
+      <div className="_bg-yellow-300 m-auto">
+        {icon}
+      </div>
     </Link>
   )
 }
@@ -763,18 +782,20 @@ export function NavOverlay({
         </div>
       }
       {["haikudle", "haiku"].includes(mode) &&
-        <div className={`fixed top-2.5 right-2.5 ${onboardingElement && ["generate"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
+        <div className={`fixed top-2.5 right-2.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
-            {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement) &&
+            {onboardingElement && onboardingElement == "logo" &&
               <div className="onboarding-focus" />
             }
-            {onboardingElement && ["_logo", "logo-and-generate"].includes(onboardingElement) &&
+            {onboardingElement && onboardingElement == "logo-and-generate" &&
               <div className="onboarding-focus double" />
             }
             {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
                 <StyledLayers styles={altStyles}>
-                  <GenerateIcon />
+                  <GenerateIcon>
+                    <div style={{ WebkitTextStroke: `1.2px ${altStyles[0].color}` }}>Create</div>
+                  </GenerateIcon>
                 </StyledLayers>
               </div>
             }
@@ -782,7 +803,9 @@ export function NavOverlay({
               <div title="Generate a new haiku">
                 <PopOnClick color={haiku?.bgColor} active={!!onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement)}>
                   <StyledLayers styles={altStyles}>
-                    <GenerateIcon onClick={onClickGenerate} />
+                    <GenerateIcon onClick={onClickGenerate} >
+                      <div style={{ WebkitTextStroke: `1.2px ${altStyles[0].color}` }}>Create</div>
+                    </GenerateIcon>
                   </StyledLayers>
                 </PopOnClick>
               </div>
