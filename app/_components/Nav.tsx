@@ -74,17 +74,36 @@ export function Logo({ mode, href, onClick, styles, altStyles }: { mode: string,
   )
 }
 
-export function GenerateIcon({ onClick, sizeOverwrite }: { onClick?: any, sizeOverwrite?: string }) {
+export function GenerateIcon({
+  onClick,
+  sizeOverwrite,
+  children,
+}: {
+  onClick?: any,
+  sizeOverwrite?: string,
+  children?: React.ReactNode,
+}) {
   const icon = <IoSparkles className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />;
   if (!onClick) {
     return icon;
   }
   return (
-    <Link href="#" onClick={(e: any) => {
-      e.preventDefault();
-      onClick && onClick();
-    }}>
-      {icon}
+    <Link
+      className="generate-icon flex flex-row m-auto gap-2 hover:no-underline"
+      href="#"
+      onClick={(e: any) => {
+        e.preventDefault();
+        onClick && onClick();
+      }}
+    >
+      {children &&
+        <div className={`${font.architects_daughter.className} _bg-yellow-200 my-[-0.3rem] md:text-[24pt] sm:text-[22pt] text-[18pt]`}>
+          {children}
+        </div>
+      }
+      <div className="_bg-yellow-300 m-auto">
+        {icon}
+      </div>
     </Link>
   )
 }
@@ -679,7 +698,9 @@ export function NavOverlay({
           {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
             <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
               <StyledLayers styles={altStyles}>
-                <GenerateIcon />
+                <GenerateIcon>
+                  <div style={{ WebkitTextStroke: `1.2px ${altStyles[0].color}` }}>Create</div>
+                </GenerateIcon>
               </StyledLayers>
             </div>
           }
@@ -687,7 +708,9 @@ export function NavOverlay({
             <div title="Generate a new haiku">
               <PopOnClick color={haiku?.bgColor}>
                 <StyledLayers styles={altStyles}>
-                  <GenerateIcon onClick={onClickGenerate} />
+                  <GenerateIcon onClick={onClickGenerate}>
+                    <div style={{ WebkitTextStroke: `1.2px ${altStyles[0].color}` }}>Create</div>
+                  </GenerateIcon>
                 </StyledLayers>
               </PopOnClick>
             </div>

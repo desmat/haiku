@@ -357,8 +357,8 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   const startGenerateHaiku = async () => {
     // console.log('>> app.page.startGenerateHaiku()');
 
-    const subject = user?.isAdmin
-      ? prompt(`Subject? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test poem)" : "(For example 'nature', 'sunset', or leave blank)"}`)
+    const subject = true // user?.isAdmin
+      ? prompt(`Haiku's theme or subject? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test poem)" : "(For example 'nature', 'cherry blossoms', or leave blank)"}`)
       : "";
 
     if (typeof (subject) == "string") {
