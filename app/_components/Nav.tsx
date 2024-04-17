@@ -723,7 +723,7 @@ export function NavOverlay({
   return (
     <div className="_bg-pink-200 nav-overlay relative h-full w-full z-1">
       {["haikudle", "haiku"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
+        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
           <div className="onboarding-container">
             {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement) &&
               <div className="onboarding-focus" />
@@ -763,7 +763,7 @@ export function NavOverlay({
         </div>
       }
       {["haikudle", "haiku"].includes(mode) &&
-        <div className={`absolute top-2.5 right-2.5 ${onboardingElement && ["generate"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
+        <div className={`fixed top-2.5 right-2.5 ${onboardingElement && ["generate"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
             {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement) &&
               <div className="onboarding-focus" />
@@ -800,7 +800,7 @@ export function NavOverlay({
       />
 
       {["haiku", "haikudle"].includes(mode) &&
-        <div className={`absolute bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center ${onboardingElement && onboardingElement.startsWith("bottom-links") ? "z-50" : "z-20"}`}>
+        <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center ${onboardingElement && onboardingElement.startsWith("bottom-links") ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
             {onboardingElement && ["bottom-links", "_side-panel-and-bottom-links"].includes(onboardingElement) &&
               <div className="onboarding-focus" />
