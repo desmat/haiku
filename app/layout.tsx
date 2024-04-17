@@ -11,7 +11,8 @@ const inter = Inter({ subsets: ['latin'] });
 
 const appName = isHaikudleMode
   ? "Haikudle - AI-powered daily haiku puzzle and "
-  : "Haiku Genius - AI-powered haiku poetry and generative art";
+  // : "Haiku Genius - AI-powered haiku poetry and generative art";
+  : "Compose and share your haiku creations with Haiku Genius - AI-powered haiku poetry and generative art";
 
 const appDescription = isHaikudleMode
   ? "AI-generated art and daily haiku puzzles"
