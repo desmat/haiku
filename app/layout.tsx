@@ -25,6 +25,15 @@ const metaUrl = isHaikudleMode
   ? "https://haikudle.art/"
   : "https://haikugenius.io/";
 
+const haikuGeniusMetaImages = [
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_98b222c0_mountains.png",
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_39044b38_loading_2.png",
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_b124ba3a_blue_sky2.png",
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_bf50dd69_nature.png",
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_c16c1871_spring_morning_scropped.png",
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_f8de7f46_nature.png",
+];
+
 let metaImages: string[];
 
 if (isHaikudleMode) {
@@ -44,7 +53,7 @@ if (isHaikudleMode) {
   ];
 } else {
   metaImages = [
-    "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haiku/haiku_c16c1871_spring_morning.png"
+    haikuGeniusMetaImages[Math.floor(Math.random() * haikuGeniusMetaImages.length)]
   ];
 }
 
