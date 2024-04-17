@@ -8,4 +8,6 @@ export type TrackingEventType =
   "haiku-shared" |
   "haikudle-created" |
   "haikudle-started" |
-  "haikudle-solved"
+  "haikudle-solved" |
+  "user-session-created" |
+  "user-session-loaded"

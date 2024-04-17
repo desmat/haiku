@@ -267,6 +267,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           id: created.id,
           name: created.name,
           userId: created.createdBy,
+          theme: created.theme,
         });
 
         // replace optimistic 
@@ -375,6 +376,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           id: generated.id,
           name: generated.name,
           userId: generated.createdBy,
+          theme: generated.theme,
         });
 
         // replace optimistic 
