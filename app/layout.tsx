@@ -15,7 +15,7 @@ const appName = isHaikudleMode
 
 const appDescription = isHaikudleMode
   ? "AI-generated art and daily haiku puzzles"
-  : "Create and share your haiku masterpieces with beautiful generated art today — no signup required. " +
+  : "Create and share your haiku masterpieces with beautiful generated art — no signup required. " +
     "Haiku Genius integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
     "Craft haiku poems seamlessly with our AI assistant and share your creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
     "Explore daily featured haikus and experience AI-assisted creativity and discover the limitless possibilities of poetic exploration with Haiku Genius.";
