@@ -17,7 +17,7 @@ Haiku poem assistant by OpenAI's ChatGPT and generative art by DALL-E:
 
 ## Live 
 
-- Composer experience: [haikugenius.art](https://haikugenius.io/)
+- Creator experience: [haikugenius.art](https://haikugenius.io/)
 - Daily puzzles: [haikudle.art](https://haikudle.art/)
 
 ## Tech
