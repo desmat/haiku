@@ -43,7 +43,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   load: async () => {
     const { loadLocal, loadRemote } = get();
     let user;
-    console.log(">> hooks.user.load()", {});
+    // console.log(">> hooks.user.load()", {});
 
     const { user: localUser, token } = await loadLocal();
     const remoteRes = await loadRemote(token);
