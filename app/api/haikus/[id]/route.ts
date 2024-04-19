@@ -63,7 +63,6 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   console.log('>> app.api.haiku.[id].PUT', { params });
-
   const { user } = await userSession(request)
   const haiku = await getHaiku(params.id);
 
@@ -73,6 +72,8 @@ export async function PUT(
 
   const data: any = await request.json();
   const { haiku: haikuToSave } = data;
+// TODO uncripple
+return NextResponse.json({ haiku: haikuToSave });
 
   if (!haikuToSave) {
     return NextResponse.json(

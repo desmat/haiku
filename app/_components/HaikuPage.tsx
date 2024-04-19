@@ -31,7 +31,7 @@ export default function HaikuPage({
   regenerateHaiku?: any,
   copyHaiku?: any
 }) {
-  // console.log('>> app._components.HaikuPage.render()', { mode, id: haiku.id, popPoem, haiku });
+  console.log('>> app._components.HaikuPage.render()', { mode, id: haiku.id, theme: haiku.theme, popPoem, haiku });
 
   const [user] = useUser((state: any) => [state.user]);
   const blurValue = loading ? 8 : 0

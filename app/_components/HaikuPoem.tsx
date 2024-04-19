@@ -16,20 +16,15 @@ import { GenerateIcon } from "./Nav";
 import PopOnClick from "./PopOnClick";
 import { StyledLayers } from "./StyledLayers";
 
-const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
-  return [
-    `"${capitalize(haiku.theme)}", `,
-    `${mode == "haikudle" ? "haikudle.art" : "haikugenius.io"}/${haiku.id}`
-  ];
+const formatHaikuAuthor = (haiku: Haiku, mode?: string) => {
+  return `${mode == "haikudle" ? "haikudle.art" : "haikugenius.io"}/${haiku.id}`;
 }
 
 export const formatHaikuText = (haiku: Haiku, mode?: string) => {
-  const haikuTitleAndAuthor = formatHaikuTitleAndAuthor(haiku, mode);
-
   return haiku.poem
     .map((value: string, i: number) => upperCaseFirstLetter(value))
     .join("\n")
-    + `\n—${haikuTitleAndAuthor.join("")}\n`;
+    + `\n—"${capitalize(haiku.theme)}", ${formatHaikuAuthor(haiku, mode)}`;
 };
 
 /**
@@ -60,10 +55,10 @@ export function ControlledInput({
   const [localValue, setLocalValue] = useState<string>(upperCaseFirstLetter(value || ""));
   const [active, setActive] = useState(false);
   const ref = useRef();
-  // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
+  // console.log('>> app._components.ControlledInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
 
   useEffect(() => {
-    // console.log('>> app._components.PoemLineInput.useEffect()', { id, activeId, visible, ref, value, updatedLine: localValue });
+    // console.log('>> app._components.ControlledInput.useEffect()', { id, activeId, visible, ref, value, updatedLine: localValue });
 
     if (typeof (activeId) == "number") {
       if (activeId == id && typeof (value) == "string" && !active) {
@@ -96,7 +91,7 @@ export function ControlledInput({
     <input
       //@ts-ignore
       ref={ref}
-      className="w-full absolute top-0 left-[-0.01rem] px-[0.5rem]"
+      className="w-full absolute top-0 left-[-0.01rem] z-10 px-[0.5rem]"
       onChange={(e: any) => {
         setLocalValue(e.target.value);
         onChange(e.target.value);
@@ -133,15 +128,15 @@ export default function HaikuPoem({
   const haikudleMode = mode == "haikudle";
   const showcaseMode = mode == "showcase";
   const onboarding = typeof (onboardingElement) == "string"
-  const maxHaikuTheme = showcaseMode ? 32 : 18;
+  const maxHaikuTheme = showcaseMode ? 32 : 22;
   const dateCode = moment().format("YYYYMMDD");
 
   const [updatedPoem, setUpdatedPoem] = useState<string[]>([]);
+  const [updatedTheme, setUpdatedTheme] = useState<string | undefined>();
   const [editingLine, setEditingLine] = useState<number | undefined>();
   const [aboutToEditLine, setAboutToEditLine] = useState<number | undefined>();
   const [saving, setSaving] = useState(false);
   const [select, setSelection] = useState(false);
-  const [alert] = useAlert((state: any) => [state.plain]);
   const [saveHaiku] = useHaikus((state: any) => [state.save]);
   const editing = typeof (editingLine) == "number";
   const aboutToEdit = typeof (aboutToEditLine) == "number";
@@ -151,7 +146,8 @@ export default function HaikuPoem({
   const canEdit = editAllowed && !saving && !onboarding;
   const regenerateAllowed = (user?.isAdmin || haiku.createdBy == user?.id) && regenerate;
   const canRegenerate = regenerateAllowed && !editing && !saving;
-  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { haiku, updatedPoem, editingPoemLine });
+  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { haiku, line1: haiku?.poem[0], theme: haiku?.theme, saving, editingLine, updatedPoem, updatedTheme });
+  console.log('>> app._components.HaikuPage.HaikuPoem.render()', { saving, line1: haiku?.poem[0], updatedLine1: updatedPoem[0], theme: haiku.theme, updatedTheme });
 
   const handleClickHaiku = (e: any) => {
     // console.log('>> app._components.HaikuPoem.handleClickHaiku()', { mode, haikuId: haiku?.id, status: haiku.status, popPoem, haiku });
@@ -163,7 +159,7 @@ export default function HaikuPoem({
   }
 
   const startEdit = (inputIndex: number, select?: boolean) => {
-    // console.log('>> app._components.HaikuPoem.startEdit()', { inputIndex, select, updatedPoem });
+    console.log('>> app._components.HaikuPoem.startEdit()', { inputIndex, select, updatedPoem });
     setEditingLine(inputIndex);
     setSelection(!!select);
   }
@@ -171,11 +167,12 @@ export default function HaikuPoem({
   const cancelEdit = () => {
     // console.log('>> app._components.HaikuPoem.cancelEdit()', { haiku, poem: haiku.poem, updatedLines: updatedPoem });
     setUpdatedPoem([]);
+    setUpdatedTheme(undefined);
     setEditingLine(undefined);
   }
 
   const finishEdit = async () => {
-    // console.log('>> app._components.HaikuPoem.finishEdit()', { haiku, poem: haiku.poem, updatedLines: updatedPoem });
+    console.log('>> app._components.HaikuPoem.finishEdit()', { haiku, poem: haiku.poem, updatedLines: updatedPoem });
     setEditingLine(undefined);
     setAboutToEditLine(undefined);
 
@@ -183,15 +180,20 @@ export default function HaikuPoem({
       return original
         .reduce((reduced: boolean, value: string, i: number) => {
           return reduced || typeof (updates[i]) == "string" && updates[i] != value;
-        }, false);
+        }, false) || typeof (updatedTheme) == "string" && updatedTheme != haiku.theme;
+
     }
 
-    if (!hasUpdates(haiku.poem, updatedPoem)) {
+    const updated = hasUpdates(haiku.poem, updatedPoem);
+    console.log('>> app._components.HaikuPoem.finishEdit()', { updated });
+    if (!updated) {
       // no updates to save
       setUpdatedPoem([]);
+      setUpdatedTheme(undefined);
       return;
     }
 
+    haiku.theme = typeof (updatedTheme) == "string" && updatedTheme || haiku.theme; //wtf
     setSaving(true);
 
     const syllables = haiku.poem
@@ -200,7 +202,7 @@ export default function HaikuPoem({
         .reduce((a: number, v: number) => a + v, 0))
     // console.log('>> app._components.HaikuPoem.finishEdit()', { syllables });
 
-    const updatedOpen = haiku.poem
+    const poem = haiku.poem
       .map((value: string, i: number) => {
         if (updatedPoem[i] == "") return "...";
         if (updatedPoem[i] && (updatedPoem[i].includes("...") || updatedPoem[i].includes("…"))) return updatedPoem[i].trim();
@@ -208,27 +210,37 @@ export default function HaikuPoem({
         if (i == 1 && syllables[i] <= 5) return `... ${(updatedPoem[i] || value).trim()} ...`;
         return updatedPoem[i] || value;
       });
+    const theme = typeof (updatedTheme) == "string" && updatedTheme != haiku.theme
+      ? {
+        theme: updatedTheme,
+        originalTheme: haiku.originalTheme || haiku.theme,
+      }
+      : undefined;
+    console.log('>> app._components.HaikuPoem.finishEdit()', { theme });
 
     try {
       const saved = await saveHaiku(user, {
         ...haiku,
+        ...theme,
+        poem,
         originalPoem: haiku.originalPoem || haiku.poem,
-        poem: updatedOpen,
       });
 
-      // console.log('>> app._components.HaikuPoem.finishEdit()', { saved });
+      console.log('>> app._components.HaikuPoem.finishEdit()', { saved });
       haiku.poem = saved.poem;
+      haiku.theme = saved.theme;
     } catch (error: any) {
       // console.log('>> app._components.HaikuPoem.finishEdit()', { error });
       // assumption that saveHaiku store showed an error alert
     }
 
     setUpdatedPoem([]);
+    setUpdatedTheme(undefined);
     setSaving(false);
   }
 
   const handlePoemLineKeyDown = (e: any, lineNumber: number) => {
-    // console.log(">> app._components.HaikuPoem.handlePoemLineKeyDown", { e, key: e.key, lineNumber });
+    console.log(">> app._components.HaikuPoem.handlePoemLineKeyDown", { e, key: e.key, lineNumber, editing, updatedPoem });
     if (e.key == "Escape") {
       cancelEdit();
     } else if (e.key == "Enter") {
@@ -238,9 +250,13 @@ export default function HaikuPoem({
     } else if (e.key == "Tab") {
       e.preventDefault();
       if (lineNumber == 0 && e.shiftKey) {
+        // startEdit(haiku.poem.length - 1, true);
+        startEdit(-1, true); // title
+      } else if (lineNumber == -1 && e.shiftKey) {
         startEdit(haiku.poem.length - 1, true);
       } else if (lineNumber == haiku.poem.length - 1 && !e.shiftKey) {
-        startEdit(0, true);
+        // startEdit(0, true);
+        startEdit(-1, true); // title
       } else {
         startEdit(lineNumber + (e.shiftKey ? -1 : 1), true);
       }
@@ -257,9 +273,13 @@ export default function HaikuPoem({
 
   const handleInputChange = (value: string, lineNumber: number) => {
     // console.log('>> app._components.HaikuPoem.handleInputChange()', { value, lineNumber });
-    const update = [...updatedPoem];
-    update[lineNumber] = upperCaseFirstLetter(value);
-    setUpdatedPoem(update);
+    if (lineNumber == -1) {
+      setUpdatedTheme(value);
+    } else {
+      const update = [...updatedPoem];
+      update[lineNumber] = upperCaseFirstLetter(value);
+      setUpdatedPoem(update);
+    }
   };
 
   const handleKeyDown = async (e: any) => {
@@ -442,23 +462,168 @@ export default function HaikuPoem({
                         : ""
                   }}
                 >
-                  <StyledLayers
-                    styles={
-                      saving
-                        ? styles.slice(0, 3)
-                        : onboardingElement && !onboardingElement.includes("poem")
-                          ? styles.slice(0, 2)
-                          : styles
-                    }
+                  <div
+                    className="relative m-[0rem] transition-all"
+                    onKeyDown={(e: any) => canEdit && handlePoemLineKeyDown(e, -1)}
+                    onMouseOver={() => canEdit && setAboutToEditLine(-1)}
+                    onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
+                    onMouseDown={(e: any) => canEdit && startEdit(-1, false) /* setTimeout(() => startEdit(i, false), 10) */}
                   >
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: `${formatHaikuTitleAndAuthor(haiku, mode).join(haiku.theme?.length > maxHaikuTheme
-                          ? "<br/>&nbsp;"
-                          : "")}`
-                      }}
-                    />
-                  </StyledLayers>
+                    <StyledLayers
+                      styles={
+                        aboutToEdit || editing || saving
+                          ? styles.slice(0, 1)
+                          : onboardingElement && !onboardingElement.includes("poem")
+                            ? styles.slice(0, 2)
+                            : saving
+                              ? styles.slice(0, 3)
+                              : styles
+                      }
+                    >
+                      {haiku.theme?.length > maxHaikuTheme &&
+                        <div className="_bg-pink-200 flex flex-col">
+                          <div>{`${showcaseMode ? "" : "—"}"${haiku.theme}"${showcaseMode ? "" : ","}`}</div>
+                          <div>
+                            {!showcaseMode &&
+                              <>&nbsp;</>
+                            }
+                            {formatHaikuAuthor(haiku, mode)}</div>
+                        </div>
+                      }
+                      {haiku.theme?.length <= maxHaikuTheme &&
+                        <div className="_bg-pink-200 flex flex-row">
+
+
+
+
+
+                          {/* set the width while editing */}
+                          {editAllowed &&
+                            <>
+                              <div
+                                className="_bg-pink-200 invisible px-[0.2rem] h-[2.2rem] sm:h-[2.6rem] md:h-[3.2rem]"
+                              >
+                                {/* keep at minimum original width to avoid wierd alignment issues */}
+                                <div className="bg-orange-200 h-0 _invisible _hidden">
+                                  {showcaseMode ? "" : "—"}"
+                                  {capitalize(saving
+                                    ? typeof (updatedTheme) == "string"
+                                      ? updatedTheme
+                                      : haiku.theme
+                                    : haiku.theme)}
+                                </div>
+                                {/* and stretch if updates are longer */}
+                                <div className="bg-orange-400 h-0 _invisible _hidden flex flex-row">
+                                  {showcaseMode ? "" : "—"}"
+                                  {capitalize(saving
+                                    ? typeof (updatedTheme) == "string"
+                                      ? updatedTheme
+                                      : haiku.theme
+                                    : updatedTheme)}
+                                </div>
+                              </div>
+
+                              {/* input field used in both view and edit modes */}
+                              {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
+                              <style
+                                dangerouslySetInnerHTML={{
+                                  __html: `
+                                  .poem-line-input input {
+                                    background: none;
+                                    _background: pink; /* for debugging */
+                                    caret-color: ${haiku?.color || "black"};
+                                    border-radius: 5px;
+                                    height: auto;
+                                  }
+                                  .poem-theme-input input {
+                                    _background: yellow;
+                                    margin-left: 0.4rem;
+                                  }
+                                  .poem-line-input.poem-line-${/* !editing && */ !saving && !onboarding && aboutToEditLine ? "theme" : "theme"} input {
+                                    outline: none; //1px solid ${haiku?.bgColor || ""}66;
+                                    background-color: ${haiku?.bgColor || "white"}44;  
+                                  }
+                                  ${saving || onboarding ? "" : ".poem-line-input input:focus"} {
+                                    outline: none; // 1px solid ${haiku?.bgColor || ""}88;
+                                    background-color: ${haiku?.bgColor || "white"}66;
+                                  }
+                                  .poem-line-input input::selection { 
+                                    background: ${haiku.color || "black"}66 
+                                  }`
+                                }}
+                              >
+                              </style>
+                              <div className="flex flex-row">
+                                <div className="_bg-red-500 _hidden absolute top-0 left-[-0rem] pl-[0rem]">
+                                  {showcaseMode ? "" : "—"}"
+                                </div>
+                                <div className={`poem-line-input poem-theme-input poem-line--1`}>
+                                  <ControlledInput
+                                    id={-1}
+                                    activeId={editingLine}
+                                    value={capitalize(saving && typeof (updatedTheme) == "string"
+                                      ? updatedTheme
+                                      : haiku.theme)}
+                                    select={select}
+                                    onChange={(value: string) => handleInputChange(value, -1)}
+                                  />
+                                </div>
+                                <div className="_bg-blue-400 md:ml-[-0.3rem] sm:ml-[-0.25rem] ml-[-0.1rem] _hidden relative">
+                                  <div className="absolute left-0 top-0 z-0">
+                                    ",&nbsp;{formatHaikuAuthor(haiku, mode)}
+                                  </div>
+                                </div>
+                              </div>
+
+                            </>
+                          }
+                          {!editAllowed &&
+                            <div
+                              className={`_bg-purple-400 flex flex-row my-[0.05rem] ${showcaseMode ? "cursor-pointer" : "cursor-copy"}`}
+                            >
+                              {showcaseMode ? "" : "—"}
+                              "
+                              {capitalize(haiku.theme)}
+                              "
+                              <div>,&nbsp;</div>
+                              <div>{formatHaikuAuthor(haiku, mode)}</div>
+                            </div>
+                          }
+
+
+
+
+
+
+
+
+
+
+
+                          {/* <div>
+                            {canEdit &&
+                              <ControlledInput
+                                id={-1}
+                                activeId={editingLine}
+                                value={capitalize(
+                                  saving && typeof (updatedTheme) == "string"
+                                    ? updatedTheme
+                                    : haiku.theme
+                                )}
+                                select={select}
+                                onChange={(value: string) => handleInputChange(value, -1)}
+                              />
+                            }
+                            {!canEdit &&
+                              <div>{`${showcaseMode ? "" : "—"}"${haiku.theme}"`}</div>
+                            }
+                          </div>
+                          <div>,&nbsp;</div>
+                          <div>{formatHaikuAuthor(haiku, mode)}</div> */}
+                        </div>
+                      }
+                    </StyledLayers>
+                  </div>
                 </div>
 
                 {!showcaseMode && (copyAllowed || editAllowed || regenerateAllowed) &&

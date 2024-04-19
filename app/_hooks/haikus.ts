@@ -334,7 +334,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   save: async (user: User, haiku: Haiku) => {
-    // console.log(">> hooks.haiku.save", { haiku });
+    console.log(">> hooks.haiku.save", { haiku });
     const { _haikus } = get();
 
     // optimistic
@@ -343,9 +343,9 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       status: "saving",
     };
 
-    set({
-      _haikus: { ..._haikus, [haiku.id]: saving },
-    });
+    // set({
+    //   _haikus: { ..._haikus, [haiku.id]: saving },
+    // });
 
     return new Promise(async (resolve, reject) => {
       fetch(`/api/haikus/${haiku.id}`, {
@@ -378,9 +378,9 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           userId: saved.createdBy,
         });
 
-        set({
-          _haikus: { ..._haikus, [saved.id]: saved },
-        });
+        // set({
+        //   _haikus: { ..._haikus, [saved.id]: saved },
+        // });
         return resolve(saved);
       });
     });
