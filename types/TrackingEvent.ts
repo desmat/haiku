@@ -14,4 +14,15 @@ export type TrackingEventType =
   "haikudle-solved" |
   "onboarding-started" |
   "onboarding-dismissed" |
-  "onboarding-completed" 
+  "onboarding-completed" |
+  "clicked-generate-haiku" |
+  "cancelled-generate-haiku" |
+  "clicked-generate-haiku" |
+  "cancelled-generate-haiku" |
+  "haiku-selected" |
+  "clicked-logo" |
+  "clicked-about" |
+  "clicked-github" |
+  "clicked-web" |
+  "side-panel-opened" |
+  "clicked-open-side-panel" 
