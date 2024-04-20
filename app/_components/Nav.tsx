@@ -103,11 +103,11 @@ export function GenerateInput({
       // @ts-ignore
       ref.current.blur();
     } else if (e.key == "Enter") {
-      handleClickedGenerate(e);
+      handleClickedGenerate();
     }
   }
 
-  const handleClickedGenerate = (e: any) => {
+  const handleClickedGenerate = () => {
     console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate()', { ref, active: document.activeElement == ref.current });
 
     if (!active) {
@@ -122,48 +122,16 @@ export function GenerateInput({
       ref.current.blur();
 
       // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate() GO');
-      generate && generate(value);
+      generate && generate(value || "");
     }
   };
-
-  // useEffect(() => {
-  //   // console.log('>> app._components.Nav.GenerateInput.useEffect()', { id, activeId, visible, ref, value, updatedLine: localValue });
-
-  //   if (typeof (activeId) == "number") {
-  //     if (activeId == id && typeof (value) == "string" && !active) {
-  //       // console.log('>> app._components.PoemLineInput.useEffect() setFocus', { id, activeId, visible, select, value, updatedLine: localValue });
-  //       setActive(true);
-
-  //       // @ts-ignore
-  //       ref?.current && ref.current.focus();
-
-  //       if (select) {
-  //         // @ts-ignore
-  //         ref?.current && ref.current.select();
-  //       }
-  //     } else {
-  //       // console.log('>> app._components.PoemLineInput.useEffect() resetting', { id, visible, value, updatedLine: localValue, ref });
-  //       setActive(false);
-  //       // @ts-ignore
-  //       ref?.current && ref.current.blur();
-  //     }
-  //   } else {
-  //     // console.log('>> app._components.PoemLineInput.useEffect() resetting', { id, activeId, visible, select, value, updatedLine: localValue });
-  //     // @ts-ignore
-  //     ref?.current && ref.current.blur();
-  //     setLocalValue(value || "");
-  //     setActive(false);
-  //   }
-  // }, [value, id, activeId]);
-
-
 
   return (
     <div
       className={`GenerateInput _bg-pink-200 
 
 absolute 
-z-40
+z-20
 
 top-[0.6rem]
 md:top-[0.6rem]
@@ -285,7 +253,7 @@ md:mt-[0.1rem] md:mr-[0rem] md:mb-0 md:ml-0
               className="absolute md:top-[0.25rem] top-[0.0rem] right-[0.3rem] opacity-100 z-50"
               style={{ opacity: active ? "1" : "0.3" }}
               onMouseDown={() => setClickingGenerate(true)}
-              onMouseUp={(e: any) => clickingGenerate && handleClickedGenerate(e)}
+              onMouseUp={() => clickingGenerate && handleClickedGenerate()}
             >
               <StyledLayers styles={active ? altStyles.slice(0, 2) : styles.slice(0, 1)}>
                 <GenerateIcon
@@ -620,7 +588,7 @@ export function NavOverlay({
 
   return (
     <div className="_bg-pink-200 nav-overlay relative h-full w-full z-1">
-      {true &&
+      {!loading && ["haikudle", "haiku"].includes(mode) &&
         <GenerateInput
           color={haiku?.color || "black"}
           bgColor={haiku?.bgColor || "white"}

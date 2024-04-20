@@ -470,7 +470,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       userId: user?.id,
     });
 
-    const subject = !theme // user?.isAdmin
+    const subject = typeof(theme) == "undefined"
       ? prompt(`Haiku's theme or subject? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test poem)" : "(For example 'nature', 'cherry blossoms', or leave blank)"}`)
       : theme;
 
