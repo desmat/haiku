@@ -48,12 +48,16 @@ export function ControlledInput({
   id,
   activeId,
   value,
+  placeholder,
+  className,
   select,
   onChange,
 }: {
   id: number,
   activeId?: number,
   value?: string,
+  placeholder?: string,
+  className?: string,
   select?: boolean,
   onChange: any,
 }) {
@@ -96,11 +100,12 @@ export function ControlledInput({
     <input
       //@ts-ignore
       ref={ref}
-      className="w-full absolute top-0 left-[-0.01rem] px-[0.5rem]"
+      className={className || "w-full absolute top-0 left-[-0.01rem] px-[0.5rem]"}
       onChange={(e: any) => {
         setLocalValue(e.target.value);
         onChange(e.target.value);
       }}
+      placeholder={placeholder}
       value={localValue}
     />
   )

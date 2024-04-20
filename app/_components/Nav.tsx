@@ -4,7 +4,7 @@ import moment from 'moment';
 import Link from 'next/link'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'
-import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub } from 'react-icons/io5';
+import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub, IoMenu } from 'react-icons/io5';
 import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
 import { HiSwitchVertical } from "react-icons/hi";
 import { MdMail, MdHome, MdDelete } from "react-icons/md";
@@ -18,11 +18,12 @@ import { Haiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
 import { formatTimeFromNow } from '@/utils/format';
-import { byCreatedAtDesc } from '@/utils/sort';
 import { USAGE_LIMIT } from '@/types/Usage';
-import { StyledLayers } from './StyledLayers';
-import PopOnClick from './PopOnClick';
+import { byCreatedAtDesc } from '@/utils/sort';
 import trackEvent from '@/utils/trackEvent';
+import PopOnClick from './PopOnClick';
+import { ControlledInput } from './HaikuPoem';
+import { StyledLayers } from './StyledLayers';
 
 export function Loading({ onClick }: { onClick?: any }) {
   const defaultOnClick = () => document.location.href = "/";
@@ -476,6 +477,23 @@ function SidePanel({
         >
         </div>
       }
+      {/* button to open side panel */}
+      {true && //(!panelOpened && !panelAnimating) &&
+        <div
+          className={`_bg-pink-200 ${font.architects_daughter.className} absolute md:top-3.5 top-2.5 md:left-3.5 left-2.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} cursor-pointer`}
+          onClick={() => {
+            !panelOpened && !panelPinned && setPanelPinned(true);
+            toggleMenuOpened();
+          }}
+        >
+          <StyledLayers styles={styles.slice(0, 2)}>
+            <PopOnClick>
+              <IoMenu className="h-6 w-6 md:h-8 md:w-8" />
+            </PopOnClick>
+          </StyledLayers>
+        </div>
+      }
+
       <div
         className={`_bg-pink-200 absolute top-0 h-full w-[27rem] max-w-[90vw] ${onboarding ? "z-50" : "z-20"} ${!onboarding && "transition-all"} _blur-[10px]`}
         style={{
@@ -549,6 +567,31 @@ function SidePanel({
           </div>
           {/* Spacer for the logo to punch trough */}
           <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">
+
+
+            <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
+              {/* <div className="onboarding-container"> */}
+              {/* {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement) &&
+                  <div className="onboarding-focus" />
+                }
+                {onboardingElement && ["_logo", "logo-and-generate"].includes(onboardingElement) &&
+                  <div className="onboarding-focus double" />
+                } */}
+              <PopOnClick color={bgColor} active={onboardingElement == "logo"}>
+                {/* TODO: href to support multi-language */}
+                <Logo
+                  styles={styles}
+                  altStyles={altStyles}
+                  mode={mode || "haiku"}
+                  href={`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`}
+                // onClick={onClickLogo}
+                // onboardingElement={onboardingElement}
+                />
+              </PopOnClick>
+              {/* </div> */}
+            </div>
+
+
           </div>
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
             <div className="py-2">
@@ -705,7 +748,7 @@ function SidePanel({
           </div>
         </div>
       </div>
-    </div>
+    </div >
   )
 }
 
@@ -787,13 +830,13 @@ export function NavOverlay({
 
   return (
     <div className="_bg-pink-200 nav-overlay relative h-full w-full z-1">
-      {["haikudle", "haiku"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
+      {false && ["haikudle", "haiku"].includes(mode) &&
+        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-40"}`}>
           <div className="onboarding-container">
-            {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement) &&
+            {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement || "") &&
               <div className="onboarding-focus" />
             }
-            {onboardingElement && ["_logo", "logo-and-generate"].includes(onboardingElement) &&
+            {onboardingElement && ["_logo", "logo-and-generate"].includes(onboardingElement || "") &&
               <div className="onboarding-focus double" />
             }
             <PopOnClick color={haiku?.bgColor} active={onboardingElement == "logo"}>
@@ -830,13 +873,13 @@ export function NavOverlay({
       {["haikudle", "haiku"].includes(mode) &&
         <div className={`fixed top-2.5 right-2.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
-            {onboardingElement && onboardingElement == "logo" &&
+            {/* {onboardingElement && onboardingElement == "logo" &&
               <div className="onboarding-focus" />
             }
             {onboardingElement && onboardingElement == "logo-and-generate" &&
               <div className="onboarding-focus double" />
-            }
-            {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+            } */}
+            {/* {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
                 <StyledLayers styles={altStyles}>
                   <GenerateIcon>
@@ -844,8 +887,8 @@ export function NavOverlay({
                   </GenerateIcon>
                 </StyledLayers>
               </div>
-            }
-            {onClickGenerate && (user?.isAdmin || (user?.usage[dateCode]?.haikusCreated || 0) < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+            } */}
+            {/* {onClickGenerate && (user?.isAdmin || (user?.usage[dateCode]?.haikusCreated || 0) < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div title="Generate a new haiku">
                 <PopOnClick color={haiku?.bgColor} active={!!onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement)}>
                   <StyledLayers styles={altStyles}>
@@ -855,7 +898,124 @@ export function NavOverlay({
                   </StyledLayers>
                 </PopOnClick>
               </div>
-            }
+            } */}
+            <div className={`bg-pink-200 absolute 
+top-0 right-0 
+md:top-0 
+
+
+w-[calc(100vw-3.5rem)] 
+md:w-[calc(100vw-4.5rem)]
+_md:max-w-[700px]
+
+pr-[0.25rem]
+md:pr-[0rem]
+`}>
+              <StyledLayers styles={styles.slice(0, 1)}>
+                <div className="_bg-yellow-200 flex flex-row gap-0">
+                  <div className={`haiku-theme-input flex-grow ${font.architects_daughter.className} _bg-yellow-200 
+_md:text-[26pt] _sm:text-[22pt] 
+text-[12pt]
+md:text-[16pt]
+
+
+`}>
+                    {/* (input) */}
+                    {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
+                    <style
+                      dangerouslySetInnerHTML={{
+                        __html: `
+                        .haiku-theme-input input {
+                          background: none;
+                          _background: pink; /* for debugging */
+                          outline: 2px solid ${haiku?.bgColor || ""}44;
+                          background-color: ${haiku?.bgColor || "white"}22;
+                          caret-color: ${haiku?.color || "black"};
+                          border-radius: 5px;
+                          height: auto;
+                          WebkitTextStroke: 0.5px ${haiku?.bgColor};
+                          -webkit-text-stroke: 1.25px ${haiku?.color}66;
+                          text-stroke: 1.0px ${haiku?.color}66;
+                        }
+                        .haiku-theme-input.poem-line-${/* !editing && */ /* !saving &&  !onboarding && aboutToEditLine */ 42} input {
+                          outline: none; //1px solid ${haiku?.bgColor || ""}66;
+                          background-color: ${haiku?.bgColor || "white"}44;  
+                        }
+                        ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus"} {
+                          // outline: none; // 1px solid ${haiku?.bgColor || ""}88;
+                          outline: 2px solid ${haiku?.bgColor || ""}66;
+                          background-color: ${haiku?.bgColor || "white"}66;
+                        }
+                        ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus::placeholder"} {
+                          opacity: 0;
+                        }
+                        .haiku-theme-input input::selection { 
+                          background: ${haiku?.color || "black"}66 
+                        }
+                        .haiku-theme-input input::placeholder {
+                          color: ${haiku?.color || "black"};
+                          -webkit-text-stroke: 1px ${haiku?.color};
+                          text-stroke: 1px ${haiku?.color};
+                          opacity: 0.3;
+
+                          // color: ${haiku?.bgColor || "white"};
+                          // -webkit-text-stroke: 1.25px ${haiku?.bgColor}66;
+                          // text-stroke: 1.25px ${haiku?.bgColor}66;
+                          // opacity: 0.4;
+
+                          text-align: center; 
+                        }                    
+                        .haiku-theme-input input::-ms-input-placeholder { /* Edge 12 -18 */
+                          color: ${haiku?.color || "black"};
+                          opacity: 0.3; /* Firefox */
+                          text-align: center; 
+                        }`
+                      }}
+                    >
+                    </style>
+                    <div className="relative">
+                      {/* <StyledLayers styles={styles.slice(0, 2)}> */}
+                      <ControlledInput
+                        id={42}
+                        // value={"AFDASFDSA"}
+                        className={`
+w-full absolute 
+top-0 left-0
+
+pt-[0.1rem] pr-[2.5rem] pb-[0.15rem] pl-[0.5rem]
+md:pt-[0.3rem] md:pr-[3rem] md:pb-[0.15rem] md:pl-[0.5rem]
+
+mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0
+md:mt-[0.1rem] md:mr-[0rem] md:mb-0 md:ml-0
+
+`}
+                        placeholder="Create with theme or surprise me!"
+                        onChange={(value: string) => undefined}
+                      />
+                      {/* </StyledLayers> */}
+                    </div>
+                  </div>
+                  <div className="relative w-0">
+
+                    {/* no focus */}
+                    <div className="absolute  md:top-[0.25rem] top-[0.0rem] right-[0.3rem] opacity-30">
+                      <StyledLayers styles={styles.slice(0, 1)}>
+                        <GenerateIcon onClick={onClickGenerate} ></GenerateIcon>
+                      </StyledLayers>
+                    </div>
+
+                    {/* with focus */}
+                    {/* <div className="absolute top-[0.0rem] right-[0.4rem] opacity-100">
+                      <StyledLayers styles={altStyles.slice(0, 2)}>
+                        <GenerateIcon onClick={onClickGenerate} ></GenerateIcon>
+                      </StyledLayers>
+                    </div> */}
+
+                  </div>
+
+                </div>
+              </StyledLayers>
+            </div>
           </div>
         </div>
       }
