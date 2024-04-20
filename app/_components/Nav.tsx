@@ -20,8 +20,8 @@ import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
 import { byCreatedAtDesc } from '@/utils/sort';
 import { USAGE_LIMIT } from '@/types/Usage';
-import { StyledLayers } from './StyledLayers';
 import trackEvent from '@/utils/trackEvent';
+import { StyledLayers } from './StyledLayers';
 import PopOnClick from './PopOnClick';
 
 export function Loading({ onClick }: { onClick?: any }) {
@@ -147,8 +147,11 @@ function BottomLinks({
           key="about"
           className="cursor-pointer"
           title="About"
-          onClick={(e: any) => {
-            e.preventDefault();
+          onClick={() => {
+            trackEvent("clicked-about", {
+              userId: user?.id,
+              location: "bottom-links",
+            });
             onShowAbout && onShowAbout();
           }}
         >
@@ -160,6 +163,12 @@ function BottomLinks({
           key="github"
           href="https://github.com/desmat/haiku"
           target="_blank"
+          onClick={() => {
+            trackEvent("clicked-github", {
+              userId: user?.id,
+              location: "bottom-links",
+            });
+          }}
         >
           <PopOnClick color={haiku?.bgColor}>
             <IoLogoGithub className="text-xl" />
@@ -169,6 +178,12 @@ function BottomLinks({
           key="web"
           href="https://www.desmat.ca"
           target="_blank"
+          onClick={() => {
+            trackEvent("clicked-web", {
+              userId: user?.id,
+              location: "bottom-links",
+            });
+          }}
         >
           <PopOnClick color={haiku?.bgColor}>
             <MdHome className="text-2xl" />
@@ -359,6 +374,12 @@ function SidePanel({
     setPanelAnimating(true);
     setTimeout(() => setPanelAnimating(false), 100);
 
+    if (!panelOpened) {
+      trackEvent("side-panel-opened", {
+        userId: user?.id,
+      });
+    }
+
     if (panelOpened) setPanelPinned(false);
     setPanelOpened(!panelOpened);
   }
@@ -436,6 +457,11 @@ function SidePanel({
           <div
             className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[22pt] _md:text-[36pt] bold py-5 _opacity-40 hover:opacity-100 transition-all"
             onClick={() => {
+              if (!panelOpened) {
+                trackEvent("clicked-open-side-panel", {
+                  userId: user?.id,
+                });
+              }
               !panelOpened && !panelPinned && setPanelPinned(true);
               toggleMenuOpened();
             }}
@@ -569,6 +595,10 @@ function SidePanel({
                   title="About"
                   onClick={(e: any) => {
                     e.preventDefault();
+                    trackEvent("clicked-about", {
+                      userId: user?.id,
+                      location: "side-panel",
+                    });
                     onShowAbout && onShowAbout();
                   }}
                 >
@@ -580,6 +610,12 @@ function SidePanel({
                   className="flex flex-row gap-1"
                   href="https://github.com/desmat/haiku"
                   target="_blank"
+                  onClick={() => {
+                    trackEvent("clicked-github", {
+                      userId: user?.id,
+                      location: "side-panel",
+                    });
+                  }}
                 >
                   <IoLogoGithub className="text-xl mt-[0.2rem]" />
                   github.com/desmat
@@ -589,6 +625,12 @@ function SidePanel({
                   className="flex flex-row gap-1"
                   href="https://www.desmat.ca"
                   target="_blank"
+                  onClick={() => {
+                    trackEvent("clicked-web", {
+                      userId: user?.id,
+                      location: "side-panel",
+                    });
+                  }}
                 >
                   <MdHome className="text-2xl" />
                   www.desmat.ca

@@ -13,6 +13,7 @@ import useUser from '@/app/_hooks/user';
 import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
 import { Haikudle } from '@/types/Haikudle';
+import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 
 export default function MainPage({ mode, id, lang, refreshDelay }: { mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
@@ -112,7 +113,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
 
   const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
-  
+
   const textStyles = [
     {
       color: fontColor,
@@ -356,6 +357,9 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
 
   const startGenerateHaiku = async () => {
     // console.log('>> app.page.startGenerateHaiku()');
+    trackEvent("clicked-generate-haiku", {
+      userId: user?.id,
+    });
 
     const subject = true // user?.isAdmin
       ? prompt(`Haiku's theme or subject? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test poem)" : "(For example 'nature', 'cherry blossoms', or leave blank)"}`)
@@ -373,6 +377,10 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         window.history.replaceState(null, '', `/${ret.id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
         setGenerating(false);
       }
+    } else {
+      trackEvent("cancelled-generate-haiku", {
+        userId: user?.id,
+      });
     }
   }
 
@@ -392,6 +400,10 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
 
   const doRefresh = () => {
     // console.log('>> app.page.doRefresh()', {});
+
+    trackEvent("clicked-logo", {
+      userId: user?.id,
+    });
 
     if (isHaikudleMode && !user.isAdmin) {
       // TODO: figure out visual glitch
@@ -461,6 +473,11 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     // console.log('>> app._components.MainPage.selectHaiku()', { id, loading, loaded, haikuId, haiku_id: haiku?.id });
 
     if (id == haikuId) return;
+
+    trackEvent("haiku-selected", {
+      userId: user?.id,
+      haikuId: id,
+    });
 
     setHaikuId(id);
     window.history.replaceState(null, '', `/${id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);

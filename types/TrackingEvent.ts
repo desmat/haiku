@@ -10,4 +10,13 @@ export type TrackingEventType =
   "haikudle-started" |
   "haikudle-solved" |
   "user-session-created" |
-  "user-session-loaded"
+  "user-session-loaded"|
+  "clicked-generate-haiku" |
+  "cancelled-generate-haiku" |
+  "haiku-selected" |
+  "clicked-logo" |
+  "clicked-about" |
+  "clicked-github" |
+  "clicked-web" |
+  "side-panel-opened" |
+  "clicked-open-side-panel" 
