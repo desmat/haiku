@@ -121,8 +121,8 @@ export function GenerateInput({
       // @ts-ignore
       ref.current.blur();
 
-      console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate() GO');
-      // generate && generate(localValue);
+      // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate() GO');
+      generate && generate(value);
     }
   };
 
