@@ -144,7 +144,7 @@ export function GenerateInput({
         w-[calc(100vw-3.6rem)] md:w-[600px]
       `}
     >
-      <StyledLayers styles={styles.slice(0, 2)}>
+      <StyledLayers styles={styles.slice(0, 1)}>
         <div className="_bg-yellow-200 flex flex-row gap-0">
           <div className={`_bg-yellow-200 haiku-theme-input flex-grow text-[12pt] md:text-[16pt]`}>
             {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
@@ -177,10 +177,15 @@ export function GenerateInput({
                   .haiku-theme-input input::selection { 
                     background: ${color || "black"}66 
                   }
-                  .haiku-theme-input input::placeholder,
-                  .haiku-theme-input input::-ms-input-placeholder { /* Edge 12 -18 */
+                  .haiku-theme-input input::placeholder {
                     color: ${color || "black"};
                     -webkit-text-stroke: 1px ${color};
+                    text-stroke: 1px ${color};
+                    opacity: 0.3;
+                    text-align: center; 
+                  }
+                  .haiku-theme-input input::-ms-input-placeholder { /* Edge 12 -18 */
+                    color: ${color || "black"};
                     text-stroke: 1px ${color};
                     opacity: 0.3;
                     text-align: center; 
