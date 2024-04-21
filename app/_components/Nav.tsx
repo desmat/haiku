@@ -17,7 +17,6 @@ import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { Haiku } from '@/types/Haiku';
 import trackEvent from '@/utils/trackEvent';
 import PopOnClick from './PopOnClick';
-import { ControlledInput } from './HaikuPoem';
 import { StyledLayers } from './StyledLayers';
 import SidePanel from './SidePanel';
 import { Logo } from './Logo';
@@ -71,7 +70,6 @@ export function GenerateIcon({
   )
 }
 
-
 export function GenerateInput({
   color,
   bgColor,
@@ -85,15 +83,13 @@ export function GenerateInput({
   altStyles?: any
   generate?: any
 }) {
-
-  const onboarding = false; // TODO
-
   const [value, setValue] = useState<string | undefined>();
   const [active, setActive] = useState(false);
   const [clickingGenerate, setClickingGenerate] = useState(false);
   const ref = useRef();
-  // const active = document.activeElement == ref.current;
   // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
+
+  const onboarding = false; // TODO
 
   const handleChange = (e: any) => {
     setActive(true);
@@ -116,21 +112,21 @@ export function GenerateInput({
     // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate()', { ref, active: document.activeElement == ref.current });
 
     // if (!active) {
-      // setActive(true);
-      // @ts-ignore
-      // ref.current.focus();
-    // } else {
-      setActive(false);
-      setClickingGenerate(false);
-      setValue(undefined);
-      // @ts-ignore
-      ref.current.blur();
-
-      // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate() GO');
-      // @ts-ignore
-      generate && generate(ref.current.value || "");
-      // alert("generate: " + ref.current.value);
+    //   setActive(true);
+    //   // @ts-ignore
+    //   ref.current.focus();
+    //   return;
     // }
+
+    setActive(false);
+    setClickingGenerate(false);
+    setValue(undefined);
+    // @ts-ignore
+    ref.current.blur();
+
+    // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate() generate');
+    // @ts-ignore
+    generate && generate(ref.current.value || "");
   };
 
   return (
@@ -143,89 +139,52 @@ export function GenerateInput({
           setActive(false);
         }
       }}
-      className={`GenerateInput _bg-pink-200 
-
-absolute 
-z-20
-
-top-[0.6rem]
-md:top-[0.8rem]
-
-left-[2.8rem]
-md:left-1/2 md:transform md:-translate-x-1/2
-
-w-[calc(100vw-3.8rem)] 
-md:w-[600px]
-
-_h-10 
-
-`}
+      className={`GenerateInput _bg-pink-200 absolute z-20
+        top-[0.6rem] md:top-[0.8rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
+        w-[calc(100vw-3.6rem)] md:w-[600px]
+      `}
     >
-
-
-
-
-
-
-      {/* <StyledLayers styles={styles.slice(0, 1)}> */}
+      <StyledLayers styles={styles.slice(0, 2)}>
         <div className="_bg-yellow-200 flex flex-row gap-0">
-          <div className={`haiku-theme-input flex-grow _bg-yellow-200 
-_md:text-[26pt] _sm:text-[22pt] 
-text-[12pt]
-md:text-[16pt]
-
-
-`}>
-            {/* (input) */}
+          <div className={`_bg-yellow-200 haiku-theme-input flex-grow text-[12pt] md:text-[16pt]`}>
             {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
             <style
               dangerouslySetInnerHTML={{
                 __html: `
-                        .haiku-theme-input input {
-                          background: none;
-                          _background: pink; /* for debugging */
-                          outline: 2px solid ${bgColor || ""}44;
-                          background-color: ${bgColor || "white"}22;
-                          caret-color: ${color || "black"};
-                          border-radius: 5px;
-                          height: auto;
-                          WebkitTextStroke: 0.5px ${bgColor};
-                          -webkit-text-stroke: 1.25px ${color}66;
-                          text-stroke: 1.0px ${color}66;
-                        }
-                        .haiku-theme-input.poem-line-${/* !editing && */ /* !saving &&  !onboarding && aboutToEditLine */ 42} input {
-                          outline: none; //1px solid ${bgColor || ""}66;
-                          background-color: ${bgColor || "white"}44;  
-                        }
-                        ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus"} {
-                          // outline: none; // 1px solid ${bgColor || ""}88;
-                          outline: 2px solid ${bgColor || ""}66;
-                          background-color: ${bgColor || "white"}66;
-                        }
-                        ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus::placeholder"} {
-                          opacity: 0;
-                        }
-                        .haiku-theme-input input::selection { 
-                          background: ${color || "black"}66 
-                        }
-                        .haiku-theme-input input::placeholder {
-                          color: ${color || "black"};
-                          -webkit-text-stroke: 1px ${color};
-                          text-stroke: 1px ${color};
-                          opacity: 0.3;
-
-                          // color: ${bgColor || "white"};
-                          // -webkit-text-stroke: 1.25px ${bgColor}66;
-                          // text-stroke: 1.25px ${bgColor}66;
-                          // opacity: 0.4;
-
-                          text-align: center; 
-                        }                    
-                        .haiku-theme-input input::-ms-input-placeholder { /* Edge 12 -18 */
-                          color: ${color || "black"};
-                          opacity: 0.3; /* Firefox */
-                          text-align: center; 
-                        }`
+                  .haiku-theme-input input {
+                    background: none;
+                    _background: pink; /* for debugging */
+                    outline: 2px solid ${bgColor || ""}44;
+                    background-color: ${bgColor || "white"}22;
+                    caret-color: ${color || "black"};
+                    border-radius: 5px;
+                    height: auto;
+                    WebkitTextStroke: 0.5px ${bgColor};
+                    -webkit-text-stroke: 1.25px ${color}66;
+                    text-stroke: 1.0px ${color}66;
+                  }
+                  .haiku-theme-input.poem-line-${/* !editing && */ /* !saving &&  !onboarding && aboutToEditLine */ 42} input {
+                    outline: none;
+                    background-color: ${bgColor || "white"}44;  
+                  }
+                  ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus"} {
+                    outline: 2px solid ${bgColor || ""}66;
+                    background-color: ${bgColor || "white"}66;
+                  }
+                  ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus::placeholder"} {
+                    opacity: 0;
+                  }
+                  .haiku-theme-input input::selection { 
+                    background: ${color || "black"}66 
+                  }
+                  .haiku-theme-input input::placeholder,
+                  .haiku-theme-input input::-ms-input-placeholder { /* Edge 12 -18 */
+                    color: ${color || "black"};
+                    -webkit-text-stroke: 1px ${color};
+                    text-stroke: 1px ${color};
+                    opacity: 0.3;
+                    text-align: center; 
+                  }`
               }}
             >
             </style>
@@ -241,17 +200,10 @@ md:text-[16pt]
                 onFocus={() => setActive(true)}
                 onBlur={() => (typeof (value) == "undefined") && setActive(false)}
                 onKeyDown={handleKeyDown}
-                className={`
-w-full absolute 
-top-0 left-0
-
-pt-[0.1rem] pr-[2.5rem] pb-[0.1rem] pl-[0.7rem]
-md:pr-[3rem]
-
-mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0
-md:mt-[0.1rem] md:mr-[0rem] md:mb-0 md:ml-0
-      
-      `}
+                className={`w-full absolute top-0 left-0
+                  pt-[0.1rem] pr-[2.5rem] pb-[0.1rem] pl-[0.7rem] md:pr-[3rem]
+                  mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0 md:mt-[0.1rem] md:mr-[0rem]      
+              `}
               />
             </div>
           </div>
@@ -259,20 +211,12 @@ md:mt-[0.1rem] md:mr-[0rem] md:mb-0 md:ml-0
             <div
               className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-50 cursor-pointer"
               style={{ opacity: active ? "1" : "0.3" }}
-              onMouseDown={() => {
-                // console.log(">> app._components.Nav.GenerateInput.onMouseDown()", { });
-                setClickingGenerate(true);
-              }}
-              onMouseUp={() => {
-                // console.log(">> app._components.Nav.GenerateInput.onMouseUp()", { });
-                clickingGenerate && handleClickedGenerate()
-              }}
+              onMouseDown={() => setClickingGenerate(true)}
+              onMouseUp={() => clickingGenerate && handleClickedGenerate()}
             >
               <PopOnClick>
                 <StyledLayers styles={active ? altStyles.slice(0, 2) : styles.slice(0, 1)}>
-                  <GenerateIcon
-                  // onClick={handleClickedGenerate}
-                  >
+                  <GenerateIcon >
                     {/* Create */}
                   </GenerateIcon>
                 </StyledLayers>
@@ -280,11 +224,7 @@ md:mt-[0.1rem] md:mr-[0rem] md:mb-0 md:ml-0
             </div>
           </div>
         </div>
-      {/* </StyledLayers> */}
-
-
-
-
+      </StyledLayers>
     </div>
   )
 }
