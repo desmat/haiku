@@ -100,7 +100,8 @@ export function GenerateInput({
     // console.log(">> app._components.Nav.GenerateInput.handleKeyDown()", { e, key: e.key });
     if (e.key == "Escape") {
       setActive(false);
-      setValue(undefined);
+      // @ts-ignore
+      ref.current.value = "";
       // @ts-ignore
       ref.current.blur();
     } else if (e.key == "Enter") {
@@ -140,8 +141,8 @@ export function GenerateInput({
         }
       }}
       className={`GenerateInput _bg-pink-200 absolute z-20
-        top-[0.6rem] md:top-[0.8rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
-        w-[calc(100vw-3.6rem)] md:w-[600px]
+        top-[0.6rem] md:top-[0.4rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
+        w-[calc(100vw-3.6rem)] md:w-[500px]
       `}
     >
       <StyledLayers styles={styles.slice(0, 1)}>
