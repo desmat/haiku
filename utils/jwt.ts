@@ -8,7 +8,10 @@ const publicKeyStr = process.env.AUTH_PUBLIC_KEY || "NO_KEY";
 
 export async function encodeJWT(payload: any) {
   // console.log(">> utils.jwt.encode", { payload, privateKeyStr: privateKeyStr.substring(0, 16) });
-return JSON.stringify(payload);
+  
+  // debug on local device
+  // return JSON.stringify(payload);
+
   const privateKey = await importPKCS8(privateKeyStr, algorithm)
 
   const token = await new SignJWT(payload)
@@ -29,7 +32,9 @@ return JSON.stringify(payload);
 }
 
 export async function decodeJWT(token: string) {
-  return JSON.parse(token);
+  // debug on local device
+  // return JSON.parse(token);
+  
   const ret = decodeJwt(token);
   // console.log(ret);
 
