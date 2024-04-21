@@ -100,6 +100,7 @@ export function ControlledInput({
     <input
       //@ts-ignore
       ref={ref}
+      maxLength={50}
       className={className || "w-full absolute top-0 left-[-0.01rem] px-[0.5rem]"}
       onChange={(e: any) => {
         setLocalValue(e.target.value);

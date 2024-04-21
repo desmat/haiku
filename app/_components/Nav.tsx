@@ -95,6 +95,11 @@ export function GenerateInput({
   // const active = document.activeElement == ref.current;
   // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
 
+  const handleChange = (e: any) => {
+    setActive(true);
+    // setValue(e.target.value);
+  }
+
   const handleKeyDown = (e: any) => {
     // console.log(">> app._components.Nav.GenerateInput.handleKeyDown()", { e, key: e.key });
     if (e.key == "Escape") {
@@ -108,13 +113,13 @@ export function GenerateInput({
   }
 
   const handleClickedGenerate = () => {
-    console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate()', { ref, active: document.activeElement == ref.current });
+    // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate()', { ref, active: document.activeElement == ref.current });
 
-    if (!active) {
-      setActive(true);
+    // if (!active) {
+      // setActive(true);
       // @ts-ignore
-      ref.current.focus();
-    } else {
+      // ref.current.focus();
+    // } else {
       setActive(false);
       setClickingGenerate(false);
       setValue(undefined);
@@ -122,24 +127,34 @@ export function GenerateInput({
       ref.current.blur();
 
       // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate() GO');
-      generate && generate(value || "");
-    }
+      // @ts-ignore
+      generate && generate(ref.current.value || "");
+      // alert("generate: " + ref.current.value);
+    // }
   };
 
   return (
     <div
+      onMouseOver={() => {
+        setActive(true);
+      }}
+      onMouseOut={() => {
+        if (typeof (value) == "undefined") {
+          setActive(false);
+        }
+      }}
       className={`GenerateInput _bg-pink-200 
 
 absolute 
 z-20
 
 top-[0.6rem]
-md:top-[0.6rem]
+md:top-[0.8rem]
 
 left-[2.8rem]
 md:left-1/2 md:transform md:-translate-x-1/2
 
-w-[calc(100vw-3.3rem)] 
+w-[calc(100vw-3.8rem)] 
 md:w-[600px]
 
 _h-10 
@@ -152,18 +167,9 @@ _h-10
 
 
 
-      <StyledLayers styles={styles.slice(0, 1)}>
-        <div className="_bg-yellow-200 flex flex-row gap-0"
-          onMouseOver={() => {
-            setActive(true);
-          }}
-          onMouseOut={() => {
-            if (typeof (value) == "undefined") {
-              setActive(false);
-            }
-          }}
-        >
-          <div className={`haiku-theme-input flex-grow ${font.architects_daughter.className} _bg-yellow-200 
+      {/* <StyledLayers styles={styles.slice(0, 1)}> */}
+        <div className="_bg-yellow-200 flex flex-row gap-0">
+          <div className={`haiku-theme-input flex-grow _bg-yellow-200 
 _md:text-[26pt] _sm:text-[22pt] 
 text-[12pt]
 md:text-[16pt]
@@ -228,9 +234,10 @@ md:text-[16pt]
               <input
                 //@ts-ignore
                 ref={ref}
+                maxLength={36}
                 placeholder="Create with theme or surprise me!"
-                value={value || ""}
-                onChange={(e: any) => setValue(e.target.value)}
+                // value={value || ""}
+                onChange={handleChange}
                 onFocus={() => setActive(true)}
                 onBlur={() => (typeof (value) == "undefined") && setActive(false)}
                 onKeyDown={handleKeyDown}
@@ -238,8 +245,8 @@ md:text-[16pt]
 w-full absolute 
 top-0 left-0
 
-pt-[0.1rem] pr-[2.5rem] pb-[0.15rem] pl-[0.5rem]
-md:pt-[0.3rem] md:pr-[3rem] md:pb-[0.15rem] md:pl-[0.5rem]
+pt-[0.1rem] pr-[2.5rem] pb-[0.1rem] pl-[0.7rem]
+md:pr-[3rem]
 
 mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0
 md:mt-[0.1rem] md:mr-[0rem] md:mb-0 md:ml-0
@@ -250,20 +257,30 @@ md:mt-[0.1rem] md:mr-[0rem] md:mb-0 md:ml-0
           </div>
           <div className="relative w-0">
             <div
-              className="absolute md:top-[0.25rem] top-[0.0rem] right-[0.3rem] opacity-100 z-50"
+              className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-50 cursor-pointer"
               style={{ opacity: active ? "1" : "0.3" }}
-              onMouseDown={() => setClickingGenerate(true)}
-              onMouseUp={() => clickingGenerate && handleClickedGenerate()}
+              onMouseDown={() => {
+                // console.log(">> app._components.Nav.GenerateInput.onMouseDown()", { });
+                setClickingGenerate(true);
+              }}
+              onMouseUp={() => {
+                // console.log(">> app._components.Nav.GenerateInput.onMouseUp()", { });
+                clickingGenerate && handleClickedGenerate()
+              }}
             >
-              <StyledLayers styles={active ? altStyles.slice(0, 2) : styles.slice(0, 1)}>
-                <GenerateIcon
-                // onClick={handleClickedGenerate}
-                />
-              </StyledLayers>
+              <PopOnClick>
+                <StyledLayers styles={active ? altStyles.slice(0, 2) : styles.slice(0, 1)}>
+                  <GenerateIcon
+                  // onClick={handleClickedGenerate}
+                  >
+                    {/* Create */}
+                  </GenerateIcon>
+                </StyledLayers>
+              </PopOnClick>
             </div>
           </div>
         </div>
-      </StyledLayers>
+      {/* </StyledLayers> */}
 
 
 

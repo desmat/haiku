@@ -122,13 +122,13 @@ export default function SidePanel({
       {/* button to open side panel */}
       {true && //(!panelOpened && !panelAnimating) &&
         <div
-          className={`_bg-pink-200 ${font.architects_daughter.className} absolute md:top-3.5 top-2.5 md:left-3.5 left-2.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} cursor-pointer`}
+          className={`_bg-pink-200 ${font.architects_daughter.className} absolute top-0 left-0 md:p-[1rem] p-[0.6rem] ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} cursor-pointer`}
           onClick={() => {
             !panelOpened && !panelPinned && setPanelPinned(true);
             toggleMenuOpened();
           }}
         >
-          <StyledLayers styles={styles.slice(0, 2)}>
+          <StyledLayers styles={styles}>
             <PopOnClick>
               <IoMenu className="h-6 w-6 md:h-8 md:w-8" />
             </PopOnClick>
@@ -241,7 +241,7 @@ export default function SidePanel({
                 {user?.isAdmin && listMode == "haiku" &&
                   <div
                     className="cursor-pointer"
-                    title="Show daily haikudles"
+                    title="Show daily haikus"
                     onClick={() => setListMode("dailyHaiku")}
                   >
                     Latest Haikus
