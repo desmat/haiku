@@ -18,7 +18,7 @@ export type TrackingEventType =
   "clicked-generate-haiku" |
   "cancelled-generate-haiku" |
   "clicked-generate-haiku" |
-  "cancelled-generate-haiku" |
+  "clicked-generate-haiku-input" | 
   "haiku-selected" |
   "clicked-logo" |
   "clicked-about" |

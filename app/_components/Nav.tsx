@@ -21,6 +21,7 @@ import { StyledLayers } from './StyledLayers';
 import { Logo } from './Logo';
 import PopOnClick from './PopOnClick';
 import SidePanel from './SidePanel';
+import { User } from '@/types/User';
 
 export function Loading({ onClick }: { onClick?: any }) {
   const defaultOnClick = () => document.location.href = "/";
@@ -71,6 +72,7 @@ export function GenerateIcon({
 }
 
 export function GenerateInput({
+  user,
   color,
   bgColor,
   styles,
@@ -78,6 +80,7 @@ export function GenerateInput({
   generate,
   onboardingElement,
 }: {
+  user: User,
   color?: any,
   bgColor?: any,
   styles?: any,
@@ -101,6 +104,9 @@ export function GenerateInput({
   const handleKeyDown = (e: any) => {
     // console.log(">> app._components.Nav.GenerateInput.handleKeyDown()", { e, key: e.key });
     if (e.key == "Escape") {
+      trackEvent("cancelled-generate-haiku", {
+        userId: user?.id,
+      });  
       setActive(false);
       // @ts-ignore
       ref.current.value = "";
@@ -211,7 +217,12 @@ export function GenerateInput({
                   placeholder="Create with theme or surprise me!"
                   // value={value || ""}
                   onChange={handleChange}
-                  onFocus={() => setActive(true)}
+                  onFocus={() => {
+                    trackEvent("clicked-generate-haiku-input", {
+                      userId: user?.id,
+                    });                
+                    setActive(true);
+                  }}
                   onBlur={() => (typeof (value) == "undefined") && setActive(false)}
                   onKeyDown={handleKeyDown}
                   className={`w-full absolute top-0 left-0
@@ -571,6 +582,7 @@ export function NavOverlay({
     <div className="_bg-pink-200 nav-overlay relative h-full w-full z-1">
       {!loading && ["haikudle", "haiku"].includes(mode) &&
         <GenerateInput
+          user={user}
           color={haiku?.color || "black"}
           bgColor={haiku?.bgColor || "white"}
           styles={styles}
