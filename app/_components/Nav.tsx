@@ -4,7 +4,7 @@ import moment from 'moment';
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation'
-import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub, IoMenu } from 'react-icons/io5';
+import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub } from 'react-icons/io5';
 import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
 import { HiSwitchVertical } from "react-icons/hi";
 import { MdHome, MdDelete } from "react-icons/md";
@@ -76,12 +76,14 @@ export function GenerateInput({
   styles,
   altStyles,
   generate,
+  onboardingElement,
 }: {
-  color?: any
-  bgColor?: any
-  styles?: any
-  altStyles?: any
-  generate?: any
+  color?: any,
+  bgColor?: any,
+  styles?: any,
+  altStyles?: any,
+  generate?: any,
+  onboardingElement?: string | undefined,
 }) {
   const [value, setValue] = useState<string | undefined>();
   const [active, setActive] = useState(false);
@@ -136,22 +138,27 @@ export function GenerateInput({
         setActive(true);
       }}
       onMouseOut={() => {
-        if (typeof (value) == "undefined") {
+        // @ts-ignore
+        if (!ref.current.value) {
           setActive(false);
         }
       }}
-      className={`GenerateInput _bg-pink-200 absolute z-20
+      className={`GenerateInput _bg-pink-200 absolute z-30
         top-[0.6rem] md:top-[0.5rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
         w-[calc(100vw-3.6rem)] md:w-[500px]
       `}
     >
-      <StyledLayers styles={styles.slice(0, 1)}>
-        <div className="_bg-yellow-200 flex flex-row gap-0">
-          <div className={`_bg-yellow-200 haiku-theme-input flex-grow text-[12pt] md:text-[16pt]`}>
-            {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
-            <style
-              dangerouslySetInnerHTML={{
-                __html: `
+      <div className="onboarding-container" style={{ width: "auto" }}>
+        {onboardingElement == "generate" &&
+          <div className="onboarding-focus double" />
+        }
+        <StyledLayers styles={styles.slice(0, 1)}>
+          <div className="bg-yellow-200 flex flex-row gap-0">
+            <div className={`_bg-yellow-200 haiku-theme-input flex-grow text-[12pt] md:text-[16pt]`}>
+              {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
+              <style
+                dangerouslySetInnerHTML={{
+                  __html: `
                   .haiku-theme-input input {
                     background: none;
                     _background: pink; /* for debugging */
@@ -191,46 +198,47 @@ export function GenerateInput({
                     opacity: 0.3;
                     text-align: center; 
                   }`
-              }}
-            >
-            </style>
-            <div className="relative">
-              {/* <StyledLayers styles={styles.slice(0, 2)}> */}
-              <input
-                //@ts-ignore
-                ref={ref}
-                maxLength={36}
-                placeholder="Create with theme or surprise me!"
-                // value={value || ""}
-                onChange={handleChange}
-                onFocus={() => setActive(true)}
-                onBlur={() => (typeof (value) == "undefined") && setActive(false)}
-                onKeyDown={handleKeyDown}
-                className={`w-full absolute top-0 left-0
+                }}
+              >
+              </style>
+              <div className="relative">
+                {/* <StyledLayers styles={styles.slice(0, 2)}> */}
+                <input
+                  //@ts-ignore
+                  ref={ref}
+                  maxLength={36}
+                  placeholder="Create with theme or surprise me!"
+                  // value={value || ""}
+                  onChange={handleChange}
+                  onFocus={() => setActive(true)}
+                  onBlur={() => (typeof (value) == "undefined") && setActive(false)}
+                  onKeyDown={handleKeyDown}
+                  className={`w-full absolute top-0 left-0
                   pt-[0.1rem] pr-[2.5rem] pb-[0.1rem] pl-[0.7rem] md:pr-[3rem]
                   mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0 md:mt-[0.1rem] md:mr-[0rem]      
               `}
-              />
+                />
+              </div>
+            </div>
+            <div className="relative w-0">
+              <div
+                className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-50 cursor-pointer"
+                style={{ opacity: active ? "1" : "0.3" }}
+                onMouseDown={() => setClickingGenerate(true)}
+                onMouseUp={() => clickingGenerate && handleClickedGenerate()}
+              >
+                <PopOnClick>
+                  <StyledLayers styles={active ? altStyles.slice(0, 2) : styles.slice(0, 1)}>
+                    <GenerateIcon >
+                      {/* Create */}
+                    </GenerateIcon>
+                  </StyledLayers>
+                </PopOnClick>
+              </div>
             </div>
           </div>
-          <div className="relative w-0">
-            <div
-              className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-50 cursor-pointer"
-              style={{ opacity: active ? "1" : "0.3" }}
-              onMouseDown={() => setClickingGenerate(true)}
-              onMouseUp={() => clickingGenerate && handleClickedGenerate()}
-            >
-              <PopOnClick>
-                <StyledLayers styles={active ? altStyles.slice(0, 2) : styles.slice(0, 1)}>
-                  <GenerateIcon >
-                    {/* Create */}
-                  </GenerateIcon>
-                </StyledLayers>
-              </PopOnClick>
-            </div>
-          </div>
-        </div>
-      </StyledLayers>
+        </StyledLayers>
+      </div>
     </div>
   )
 }
@@ -558,6 +566,7 @@ export function NavOverlay({
           styles={styles}
           altStyles={altStyles}
           generate={onClickGenerate}
+          onboardingElement={onboardingElement}
         />
       }
 

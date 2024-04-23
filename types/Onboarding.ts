@@ -30,7 +30,7 @@ export const haikuOnboardingSteps = [
     style: { bottom: "10%" },
   },
   {
-    focus: "logo-and-generate",
+    focus: "generate",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>A new haiku will be featured every day, maybe one of yours! Click on the logo to see today's, come back tomorrow for more.</div>
@@ -94,7 +94,7 @@ export const haikudleOnboardingSteps = [
     focus: "logo-and-generate",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div>A new haiku puzzle will be featured every day. Click on the logo to return to today's, and come back to tomorrow for a new puzzle!</div>
+        <div>A new haiku puzzle will be featured every day. Click on the logo in the side panel to return to today's, and come back to tomorrow for a new puzzle!</div>
         <div>To create your very own haikus hit the <b>Create</b> button at the top of the screen and pick a theme or subject: AI will get you started writing a poem and will generate art work to match.</div>
       </div>
     `,

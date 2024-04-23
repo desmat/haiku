@@ -124,7 +124,7 @@ export default function HaikudlePage({
           {!regenerating &&
             <div className="_bg-pink-200 onboarding-container">
               {onboardingElement == "puzzle" &&
-                <div className="onboarding-focus" />
+                <div className="onboarding-focus double" />
               }
               <HaikuPuzzle
                 haiku={haiku}

@@ -295,10 +295,10 @@ export default function HaikuPoem({
 
       <div className="onboarding-container">
         {onboardingElement && ["poem"].includes(onboardingElement) &&
-          <div className="onboarding-focus" />
+          <div className="onboarding-focus double" />
         }
         {onboardingElement && ["poem-and-poem-actions"].includes(onboardingElement) &&
-          <div className="onboarding-focus double" />
+          <div className="onboarding-focus" />
         }
         <PopOnClick
           color={haiku.bgColor}

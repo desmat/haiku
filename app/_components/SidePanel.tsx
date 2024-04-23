@@ -125,7 +125,7 @@ export default function SidePanel({
       {/* button to open side panel */}
       {true && //(!panelOpened && !panelAnimating) &&
         <div
-          className={`_bg-pink-200 ${font.architects_daughter.className} absolute top-0 left-0 md:p-[0.8rem] md:mt-[-0.2rem] p-[0.6rem] ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} cursor-pointer`}
+          className={`_bg-pink-200 open-side-panel-icon ${font.architects_daughter.className} absolute top-0 left-0 md:p-[0.8rem] md:mt-[-0.2rem] p-[0.6rem] ${onboardingElement && ["logo", "logo-and-generate", "_generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} cursor-pointer`}
           onClick={() => {
             trackEvent("clicked-open-side-panel", {
               userId: user?.id,
