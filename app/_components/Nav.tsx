@@ -672,6 +672,7 @@ function SidePanel({
                       userId: user?.id,
                       location: "side-panel",
                     });
+                    toggleMenuOpened();
                     onShowAbout && onShowAbout();
                   }}
                 >
@@ -688,6 +689,7 @@ function SidePanel({
                       userId: user?.id,
                       location: "side-panel",
                     });
+                    toggleMenuOpened();
                   }}
                 >
                   <IoLogoGithub className="text-xl mt-[0.2rem]" />
@@ -703,6 +705,7 @@ function SidePanel({
                       userId: user?.id,
                       location: "side-panel",
                     });
+                    toggleMenuOpened();
                   }}
                 >
                   <MdHome className="text-2xl" />
