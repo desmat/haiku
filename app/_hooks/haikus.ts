@@ -170,7 +170,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const { setLoaded, _mode } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    // console.log(">> hooks.haiku.load", { mode, id, query: JSON.stringify(query) });
+    console.log(">> hooks.haiku.load", { mode, id, query: JSON.stringify(query) });
 
     return new Promise(async (resolve, reject) => {
       if (id) {
@@ -213,9 +213,10 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           resolve(haiku);
         });
       } else {
-        const modeParams = mode && `mode=${mode || _mode}`;
-        const queryParams = query && mapToSearchParams(query);
-        const params = `${queryParams || modeParams ? "?" : ""}${queryParams}${queryParams && modeParams ? "&" : ""}${modeParams}`;
+        // const modeParams = mode && `mode=${mode || _mode}`;
+        // const queryParams = query && mapToSearchParams(query);
+        // const params = `${queryParams || modeParams ? "?" : ""}${queryParams}${queryParams && modeParams ? "&" : ""}${modeParams}`;
+        const params = "?mode=haiku";
 
         fetch(`/api/haikus${params}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();

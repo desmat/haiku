@@ -1,7 +1,7 @@
 'use client'
 
 import moment from 'moment';
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { syllable } from 'syllable';
 import { Haiku } from "@/types/Haiku";
 import { Loading, NavOverlay } from '@/app/_components/Nav';
@@ -18,12 +18,10 @@ import { haikuGeneratedOnboardingSteps, haikuOnboardingSteps, haikudleOnboarding
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
-import { useMounted } from '../_hooks/mounted';
-import MainServerSidePage from './MainServerSidePage';
+import delay from '@/utils/delay';
 
-export default function MainPage({ mode, id, lang, refreshDelay }: { mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
-  console.log('>> app.MainPage.render()', { mode, id, lang });
-  const mounted = useMounted();
+export default function MainClientSidePage({ haiku, mode, id, lang, refreshDelay }: { haiku: Haiku, mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
+  // console.log('>> app.MainClientSidePage.render()', { mode, id, lang });
 
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
@@ -73,7 +71,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     createDailyHaiku,
   ] = useHaikus((state: any) => [
     state.loaded(haikuId),
-    state.load,
+    () => undefined,// state.load,
     state.get,
     state.generate,
     state.regenerate,
@@ -117,18 +115,10 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     state.start,
   ]);
 
-  const loaded = haikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
+  const loaded = true; // haikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
   let [loading, setLoading] = useState(false);
   let [loadingUI, setLoadingUI] = useState(false);
-  let [haiku, setHaiku] = useState<Haiku | undefined>();
-
-  // const haikus = await loadHaikus(id);
-  // const haiku = haikus?.haikus[0];
-  loadHaikus(id).then((haikus: any) => {
-    console.log("FDSFASS");
-    setHaiku(haikus[0]);
-  })
-
+  let [_haiku, setHaiku] = useState<Haiku | undefined>();
   let solvedHaikudleHaiku = {
     ...haiku,
     poem: haikudleInProgress
@@ -198,7 +188,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
 
   const loadPage = async (random?: boolean | undefined) => {
     // console.log('>> app.MainPage.loadPage', { haikuId, mode, random, loaded, loading, user, haiku });
-    return;
 
     if (!loading) {
       loading = true; // race condition at initial load
@@ -501,7 +490,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     } else {
       trackEvent("cancelled-generate-haiku", {
         userId: user?.id,
-      });
+      });  
     }
   }
 
@@ -520,7 +509,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
   }
 
   const loadRandom = () => {
-    return;
     // console.log('>> app.page.loadRandom()', {});
 
     if (/* haikudleMode && */ !user.isAdmin) {
@@ -621,7 +609,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     trackEvent("haiku-selected", {
       userId: user?.id,
       haikuId: id,
-    });
+    });  
 
     setHaikuId(id);
     window.history.replaceState(null, '', `/${id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
@@ -690,6 +678,9 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     }
   }
 
+  // await delay(2000);
+  // return <div>RENDERED CLIENT SIDE PAGE</div>
+
   if (!loaded || loading || loadingUI || generating) {
     // return <LoadingPage mode={mode} /* haiku={haiku} */ />
     return (
@@ -698,19 +689,13 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         <Loading onClick={showcaseMode && loadRandom} />
         {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}
       </div>
-      
-      // <Suspense />
-
-      // <Suspense fallback={mounted
-      //   ? <div>client side</div>
-      //   : <div>server side</div> //<MainServerSidePage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
-      // } />
     )
   }
 
   if (loaded && !loading && !haiku) {
     return <NotFound mode={mode} lang={lang} onClickGenerate={startGenerateHaiku} onClickLogo={loadHomePage} />
   }
+
 
   return (
     <div className="_bg-yellow-200 main-page relative h-[100vh] w-[100vw]">

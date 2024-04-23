@@ -72,7 +72,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
   loadLocal: async () => {
     let user;
-    let token = window?.localStorage && window.localStorage.getItem("session");
+    let token = window && window?.localStorage && window.localStorage.getItem("session");
     // console.log(">> hooks.user.loadLocal()", { token });
 
     if (token) {
@@ -103,7 +103,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
       token = await encodeJWT({ user });
 
-      window?.localStorage && window.localStorage.setItem("session", token || "");
+      window && window?.localStorage && window.localStorage.setItem("session", token || "");
 
       trackEvent("user-session-created", {
         userId: user.id,
@@ -162,7 +162,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   save: async (user: any) => {
     // console.log(">> hooks.user.save()", { user });
     const token = await encodeJWT({ user });
-    window?.localStorage && window.localStorage.setItem("session", token || "");
+    window && window?.localStorage && window.localStorage.setItem("session", token || "");
     set({ user });
   },
 })));
