@@ -59,11 +59,10 @@ export const haikuGeneratedOnboardingSteps = (haiku: Haiku) => [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>This haiku was initially generated on the theme <i>${haiku?.theme}</i>${haiku?.mood ? ` with a <i>${haiku?.mood}</i> mood using <b>ChatGPT</b>` : ""}. Both were used to generate art using <b>DALL-E</b> with a curated prompt to harmonize together.</div>
-        <div>Curious about those prompts? See <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L106-L108" target="_blank">here</a></b> and <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L17-L31" target="_blank">here</a></b> in the source code.</b></div>
-        <div>Try the buttons next to the poem to edit or regenerate. Use your mouse, keyboard, arrow keys, Tab, Escape and Enter keys to edit, cancel or save.</div>
-        <div>Level up your creativity with our AI assistant: save with empty or incomplete lines, or "..." as placeholders for to fill in.
+        <div>Try the buttons next to the poem to edit or regenerate. Use your mouse, keyboard, arrow keys, Tab, Escape and Enter keys to <b>edit, cancel or save.</b></div>
+        <div>Level up your creativity with AI! save with empty or incomplete lines, or use "..." placeholders for <b>AI to fill in.</b>
       </div>`,
-    style: { bottom: "50%" },
+    style: { top: "0.5rem" },
   },
 ];
 

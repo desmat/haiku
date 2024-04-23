@@ -659,10 +659,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     if (haikudleMode && haikudleSolved || !haikudleMode) {
       navigator.clipboard.writeText(formatHaikuText(haikudleSolved ? solvedHaikudleHaiku : haiku, mode));
       plainAlert(`Haiku poem copied to clipboard`, { closeDelay: 750 });
-      trackEvent("haiku-copied", {
-        userId: user.id,
-        id: haiku.id,
-      });
     }
   }
 

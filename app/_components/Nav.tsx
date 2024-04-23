@@ -16,10 +16,11 @@ import useUser from '@/app/_hooks/user';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { Haiku } from '@/types/Haiku';
 import trackEvent from '@/utils/trackEvent';
-import PopOnClick from './PopOnClick';
+import { USAGE_LIMIT } from '@/types/Usage';
 import { StyledLayers } from './StyledLayers';
-import SidePanel from './SidePanel';
 import { Logo } from './Logo';
+import PopOnClick from './PopOnClick';
+import SidePanel from './SidePanel';
 
 export function Loading({ onClick }: { onClick?: any }) {
   const defaultOnClick = () => document.location.href = "/";
@@ -46,12 +47,11 @@ export function GenerateIcon({
   children?: React.ReactNode,
 }) {
   const icon = <IoSparkles className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />;
-  if (!onClick) {
-    return icon;
-  }
+
   return (
     <Link
       className="generate-icon flex flex-row m-auto gap-2 hover:no-underline"
+      style={{ cursor: onClick ? "pointer" : "default" }}
       href="#"
       onClick={(e: any) => {
         e.preventDefault();
@@ -344,7 +344,16 @@ function BottomLinks({
           key="copy"
           className={haiku?.id && onCopyHaiku ? "cursor-copy" : "opacity-40"}
           title="Copy haiku poem "
-          onClick={() => onCopyHaiku && onCopyHaiku()}
+          onClick={() => {
+            if (onCopyHaiku) {
+              trackEvent("haiku-copied", {
+                userId: user.id,
+                id: haiku.id,
+                location: "bottom-links",
+              });
+              onCopyHaiku();
+            }
+          }}
         >
           <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onCopyHaiku}>
             <FaCopy className="text-xl" />
