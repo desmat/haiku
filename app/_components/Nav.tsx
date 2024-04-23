@@ -141,7 +141,7 @@ export function GenerateInput({
         }
       }}
       className={`GenerateInput _bg-pink-200 absolute z-20
-        top-[0.6rem] md:top-[0.4rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
+        top-[0.6rem] md:top-[0.5rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
         w-[calc(100vw-3.6rem)] md:w-[500px]
       `}
     >
@@ -721,6 +721,7 @@ export function NavOverlay({
           onboardingElement={onboardingElement}
           onShowAbout={onShowAbout}
           onSelectHaiku={onSelectHaiku}
+          onClickLogo={onClickLogo}
         />
       }
     </div>

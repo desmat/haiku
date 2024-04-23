@@ -25,4 +25,5 @@ export type TrackingEventType =
   "clicked-github" |
   "clicked-web" |
   "side-panel-opened" |
-  "clicked-open-side-panel" 
+  "clicked-open-side-panel" |
+  "clicked-close-side-panel" 
