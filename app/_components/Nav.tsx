@@ -236,7 +236,16 @@ function BottomLinks({
           key="copy"
           className={haiku?.id && onCopyHaiku ? "cursor-copy" : "opacity-40"}
           title="Copy haiku poem "
-          onClick={() => onCopyHaiku && onCopyHaiku()}
+          onClick={() => {
+            if (onCopyHaiku) {
+              trackEvent("haiku-copied", {
+                userId: user.id,
+                id: haiku.id,
+                location: "bottom-links",
+              });
+              onCopyHaiku();
+            }
+          }}
         >
           <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onCopyHaiku}>
             <FaCopy className="text-xl" />

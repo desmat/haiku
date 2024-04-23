@@ -159,7 +159,15 @@ export default function HaikuPoem({
       return refresh && refresh(e);
     }
 
-    !canEdit && copyHaiku && copyHaiku();
+    if (!canEdit && copyHaiku) {
+      trackEvent("haiku-copied", {
+        userId: user.id,
+        id: haiku.id,
+        location: "haiku-poem",
+      });
+
+      copyHaiku();
+    }
   }
 
   const startEdit = (inputIndex: number, select?: boolean) => {
