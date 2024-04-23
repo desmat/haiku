@@ -113,12 +113,11 @@ export function GenerateIcon({
   children?: React.ReactNode,
 }) {
   const icon = <IoSparkles className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />;
-  if (!onClick) {
-    return icon;
-  }
+
   return (
     <Link
       className="generate-icon flex flex-row m-auto gap-2 hover:no-underline"
+      style={{ cursor: onClick ? "pointer" : "default" }}
       href="#"
       onClick={(e: any) => {
         e.preventDefault();
@@ -663,7 +662,7 @@ function SidePanel({
                     trackEvent("clicked-about", {
                       userId: user?.id,
                       location: "side-panel",
-                    });        
+                    });
                     onShowAbout && onShowAbout();
                   }}
                 >
