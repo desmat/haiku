@@ -91,7 +91,7 @@ export function GenerateInput({
   const ref = useRef();
   // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
 
-  const onboarding = false; // TODO
+  const onboarding = onboardingElement == "generate";
 
   const handleChange = (e: any) => {
     setActive(true);
@@ -143,16 +143,17 @@ export function GenerateInput({
           setActive(false);
         }
       }}
-      className={`GenerateInput _bg-pink-200 absolute z-30
+      className={`GenerateInput _bg-pink-200 absolute
         top-[0.6rem] md:top-[0.5rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
         w-[calc(100vw-3.6rem)] md:w-[500px]
       `}
+      style={{ zIndex: onboarding ? "50" : "20" }}
     >
       <div className="onboarding-container" style={{ width: "auto" }}>
-        {onboardingElement == "generate" &&
+        {onboarding &&
           <div className="onboarding-focus double" />
         }
-        <StyledLayers styles={styles.slice(0, 1)}>
+        <StyledLayers styles={onboarding ? styles.slice(0, 3) : styles.slice(0, 2) }>
           <div className="bg-yellow-200 flex flex-row gap-0">
             <div className={`_bg-yellow-200 haiku-theme-input flex-grow text-[12pt] md:text-[16pt]`}>
               {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
@@ -222,7 +223,7 @@ export function GenerateInput({
             </div>
             <div className="relative w-0">
               <div
-                className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-50 cursor-pointer"
+                className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-20 cursor-pointer"
                 style={{ opacity: active ? "1" : "0.3" }}
                 onMouseDown={() => setClickingGenerate(true)}
                 onMouseUp={() => clickingGenerate && handleClickedGenerate()}
