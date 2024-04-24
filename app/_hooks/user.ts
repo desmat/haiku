@@ -3,9 +3,11 @@ import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { User } from '@/types/User';
 import { decodeJWT, encodeJWT } from '@/utils/jwt';
-import { uuid } from '@/utils/misc';
+import { listToMap, uuid } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from './alert';
+import { DailyHaiku, Haiku } from '@/types/Haiku';
+import { DailyHaikudle } from '@/types/Haikudle';
 
 const useUser: any = create(devtools((set: any, get: any) => ({
   user: undefined as User | undefined,
@@ -13,6 +15,12 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   token: undefined,
   loaded: false,
   // loading: false, // guard against signin in many times anonymously
+
+  // populate the side panel
+  haikus: {} as { number: Haiku },
+  dailyHaikus: {} as { string: DailyHaiku },
+  dailyHaikudles: {} as { string: DailyHaikudle },
+  nextDailyHaikuId: undefined as string | undefined,
 
   getUser: async () => {
     const { loaded, user, load } = get();
@@ -35,10 +43,12 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   load: async () => {
     const { loadLocal, loadRemote } = get();
     let user;
-    // console.log(">> hooks.user.load()", { token });
+    // console.log(">> hooks.user.load()", {});
 
     const { user: localUser, token } = await loadLocal();
-    const { user: remoteUser } = await loadRemote(token);
+    const remoteRes = await loadRemote(token);
+    const { user: remoteUser, haikus, dailyHaikus, dailyHaikudles, nextDailyHaikuId } = remoteRes;
+    // console.log(">> hooks.user.load()", { remoteRes });
 
     user = {
       ...localUser,
@@ -47,8 +57,17 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       usage: remoteUser?.usage,
     }
 
-    set({ user, token, loaded: true });
-    return { user, token };
+    set({
+      user,
+      token,
+      loaded: true,
+      haikus: haikus ? listToMap(haikus, { keyFn: (e: any) => e.haikuId }) : {},
+      dailyHaikus: dailyHaikus ? listToMap(dailyHaikus, { keyFn: (e: any) => e.haikuId }) : {},
+      dailyHaikudles: dailyHaikudles ? listToMap(dailyHaikudles, { keyFn: (e: any) => e.haikuId }) : {},
+      nextDailyHaikuId,
+    });
+
+    return { user, token, haikus, dailyHaikus, dailyHaikudles, nextDailyHaikuId };
   },
 
   loadLocal: async () => {
@@ -62,20 +81,36 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       if ((process.env.ADMIN_USER_IDS || "").split(",").includes(user.id)) {
         user.isAdmin = true;
       }
+
+      trackEvent("user-session-loaded", {
+        userId: user.id,
+        isAdmin: user.isAdmin,
+        isAnonymous: user.isAnonymous,
+        // token, 
+      });
     } else {
       // console.log('>> hooks.user.load() creating session', { onboardingUserId: process.env.ONBOARDING_USER_ID });
       if (process.env.ONBOARDING_USER_ID) {
         console.warn('>> hooks.user.load() CREATING SESSION WITH ONBOARDING USER ID', { onboardingUserId: process.env.ONBOARDING_USER_ID });
       }
-      
+
       user = {
         id: process.env.ONBOARDING_USER_ID || uuid(),
         isAnonymous: true,
         isAdmin: false,
         preferences: {}
       };
+
       token = await encodeJWT({ user });
+
       window?.localStorage && window.localStorage.setItem("session", token || "");
+
+      trackEvent("user-session-created", {
+        userId: user.id,
+        isAdmin: user.isAdmin,
+        isAnonymous: user.isAnonymous,
+        // token, 
+      });
     }
 
     return { user, token };
@@ -98,10 +133,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       return {};
     }
 
-    const data = await res.json();
-    const user = data.user;
-
-    return { user };
+    return res.json();
   },
 
   update: async (user: any) => {
@@ -128,6 +160,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   save: async (user: any) => {
+    // console.log(">> hooks.user.save()", { user });
     const token = await encodeJWT({ user });
     window?.localStorage && window.localStorage.setItem("session", token || "");
     set({ user });

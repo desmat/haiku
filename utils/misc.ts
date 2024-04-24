@@ -46,7 +46,8 @@ export function listToMap(
   opts?: {
     keyFn?: (e: any) => string,
     valFn?: (e: any) => any,
-  }) {
+  }
+): { [key: string]: any } {
   const keyFn = opts?.keyFn || function (e: any) { return e.id };
   const valFn = opts?.valFn || function (e: any) { return e };
 
@@ -55,7 +56,8 @@ export function listToMap(
 
 export function mapToList(
   m: any = {},
-  entryFn: (e: [any, any]) => any = ([k, v]: any) => v): any[] {
+  entryFn: (e: [any, any]) => any = ([k, v]: any) => v
+): any[] {
   return Object.entries(m).map((e: any) => entryFn(e));
 }
 

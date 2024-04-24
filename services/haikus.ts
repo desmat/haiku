@@ -1,7 +1,7 @@
 import chroma from 'chroma-js';
 import moment from 'moment';
 import { put } from '@vercel/blob';
-import { Haiku, UserHaiku } from "@/types/Haiku";
+import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
 import { Store } from "@/types/Store";
 import { User } from '@/types/User';
 import { hashCode, mapToList, normalizeWord, uuid } from '@/utils/misc';
@@ -102,7 +102,9 @@ export async function getUserHaikus(user: User): Promise<Haiku[]> {
   // strip down to just the basics
   haikus = haikus.map((haiku: Haiku) => {
     return {
-      id: haiku.id,
+      id: `${user.id}:${haiku.id}`,
+      haikuId: haiku.id,
+      userId: user.id,
       createdBy: haiku.createdBy,
       createdAt: haiku.createdAt,
       generatedAt: haiku.generatedAt,
@@ -179,6 +181,42 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
   return saveHaiku(user, {
     ...haiku,
     poem,
+    theme: generatedSubject,
+    mood: generatedMood,
+  });
+}
+
+export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku> {
+  const lang = (haiku.lang || "en") as LanguageType;
+  const subject = haiku.theme;
+  const mood = haiku.mood;
+  const language = supportedLanguages[lang].name;
+  console.log(">> services.haiku.completeHaikuPoem", { language, subject, mood, user });
+
+  const {
+    response: {
+      haiku: completedPoem,
+      subject: generatedSubject,
+      mood: generatedMood,
+    }
+  } = await openai.completeHaiku(haiku.poem, language, subject, mood);
+  console.log(">> services.haiku.completeHaikuPoem", { completedPoem, generatedSubject, generatedMood });
+
+  // delete corresponding haikudle 
+  getHaikudle(haiku.id).then(async (haikudle: Haikudle) => {
+    console.log(">> services.haiku.regenerateHaikuPoem", { haikudle });
+    if (haikudle) {
+      deleteHaikudle(user, haikudle.id);
+    }
+  });
+
+  if (!user.isAdmin) {
+    incUserUsage(user, "haikusRegenerated");
+  }
+
+  return store.haikus.update(user.id, {
+    ...haiku,
+    poem: completedPoem,
     theme: generatedSubject,
     mood: generatedMood,
   });
@@ -278,6 +316,11 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
     throw `Unauthorized`;
   }
 
+  const poem = haiku.poem.join("/");
+  if (poem.includes("...") || poem.includes("…")) {
+    return completeHaikuPoem(user, haiku);
+  }
+
   return store.haikus.update(user.id, haiku);
 }
 
@@ -305,4 +348,82 @@ export async function createUserHaiku(userId: string, haikuId: string): Promise<
 
   console.log(`>> services.haiku.createUserHaiku`, { userHaiku: createdUserHaiku });
   return new Promise((resolve, reject) => resolve(createdUserHaiku));
+}
+
+export async function getDailyHaiku(id: string): Promise<DailyHaiku | undefined> {
+  console.log(`>> services.haiku.getDailyHaiku`, { id });
+
+  const dailyHaiku = await store.dailyHaikus.get(id);
+  console.log(`>> services.haiku.getDailyHaiku`, { id, dailyHaiku });
+  return new Promise((resolve, reject) => resolve(dailyHaiku));
+}
+
+export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
+  const dailyHaikus = (await store.dailyHaikus.find(query))
+    .filter(Boolean);
+  // lookup theme; 
+  // at some point we won't need to do this since we're now 
+  // saving the them with th daily haiku record  
+  const haikus = await store.haikus.find(query);
+  const themeLookup = new Map(haikus
+    .map((haiku: Haiku) => [haiku.id, haiku.theme]));
+
+  // @ts-ignore
+  return dailyHaikus
+    .map((dh: DailyHaiku) => {
+      const theme = themeLookup.get(dh?.haikuId)
+      if (theme) {
+        return {
+          ...dh,
+          theme,
+        }
+      }
+    })
+    .sort((a: any, b: any) => a.id - b.id);
+}
+
+export async function getNextDailyHaikuId(): Promise<string> {
+  const dailyHaikus = await getDailyHaikus();
+  const ids = dailyHaikus
+    .map((dh: DailyHaiku) => dh.id)
+    .sort()
+    .reverse();
+  const todays = moment().format("YYYYMMDD");
+
+  if (!ids.includes(todays)) {
+    return todays;
+  }
+
+  const next = moment(ids[0]).add(1, "days").format("YYYYMMDD");
+
+  return next;
+}
+
+export async function saveDailyHaiku(user: any, dateCode: string, haikuId: string): Promise<DailyHaiku> {
+  console.log(">> services.haiku.saveDailyHaiku", { user, dateCode, haikuId });
+
+  if (!user) {
+    throw `Unauthorized`;
+  }
+
+  const [dailyHaiku, haiku] = await Promise.all([
+    store.dailyHaikus.get(dateCode),
+    store.haikus.get(haikuId),
+  ]);
+
+  if (!haiku) throw `Haiku not found: ${haikuId}`;
+
+  if (dailyHaiku) {
+    return store.dailyHaikus.update(user.id, {
+      id: dateCode,
+      haikuId,
+      theme: haiku.theme
+    });
+  }
+
+  return store.dailyHaikus.create(user.id, {
+    id: dateCode,
+    haikuId,
+    theme: haiku.theme,
+  });
 }

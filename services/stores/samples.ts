@@ -14,6 +14,54 @@ export const notFoundHaiku = {
   ],
 }
 
+export const error429Haiku = {
+  id: "429error",
+  theme: "429 Too Many Requests",
+  bgImage: "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/haiku-404notfound-md.png",
+  color: "#4a5247",
+  bgColor: "#ffffff",
+  colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
+  poem: [
+    "Requests flood, cascade",
+    "'429 Too Many Requests'",
+    "Rest now, try later."
+  ],
+}
+
+export const error4xxHaiku = (code: number, message?: string) => {
+  const errorStr = `${code} ${message || "Unknown Error"}`;
+  return {
+    id: "4xxerror",
+    theme: errorStr,
+    bgImage: "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/haiku-404notfound-md.png",
+    color: "#4a5247",
+    bgColor: "#ffffff",
+    colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
+    poem: [
+      "Seeking resources,",
+      "Request returned unfulfilled:",
+      `'${errorStr}'.`
+    ],
+  }
+}
+
+export const serverErrorHaiku = (code: number, message?: string) => {
+  const errorStr = `${code} ${message || "Unknown Error"}`;
+  return {
+    id: "servererror",
+    theme: errorStr,
+    bgImage: "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/haiku-404notfound-md.png",
+    color: "#4a5247",
+    bgColor: "#ffffff",
+    colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
+    poem: [
+      "Server falls in strife",
+      `'${errorStr}'`,
+      "Silent bytes, no life."
+    ],
+  }
+}
+
 export const loadingHaiku = {
   "updatedBy": "4a2d28ad",
   "createdAt": 1711812467761,

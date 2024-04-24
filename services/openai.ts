@@ -130,3 +130,60 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
     console.error("Error reading results", { error, response, completion });
   }
 }
+
+export async function completeHaiku(poem: string[], language?: string, subject?: string, mood?: string): Promise<any> {
+  const prompt = `Haiku to complete: "${poem.join(" / ")}"
+  ${subject ? `Topic: "${subject}"` : ""}
+  ${mood ? ` Mood: "${mood}"` : ""}`;
+
+  console.log(`>> services.openai.completeHaiku`, { language, subject, mood, prompt });
+
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
+    console.warn(`>> services.openai.completeHaiku: DEBUG mode: returning dummy response`);
+    // await delay(3000);
+    return {
+      response: {
+        prompt,
+        haiku: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "_") : line),
+        subject: subject || "test subject",
+        mood: mood || "test mood",
+      }
+    };
+  }
+
+  // @ts-ignore
+  const completion = await openai.chat.completions.create({
+    model: languageModel,
+    messages: [
+      {
+        role: 'system',
+        content: `
+          Given an incomplete haiku please complete the haiku. 
+          Characters "..." or "…" will be used to indicate a placeholder, please keep the existing word(s) and fill the rest.
+          If a line looks like this: "<some one or more words> ..." then keep the word(s) at the beginning and fill the rest.          If a line looks like this: "... <one or more words>" then keep the word(s) at the end and fill the rest.
+          If a line looks like this: "... <one or more words> ..." then keep the word(s) together and fill the rest.
+          Additionally, if a line looks obviously incomplete even without "..." characters please complete it.
+          Optionally a topic (or "any", meaning you pick) and/or mood may be included.
+          Please generate a haiku in ${language || "English"} and respond in JSON where each response is an array of 3 strings.
+          Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
+          Also, please fix up any extraneous white spaces, punctuation, incorrect capitalized words, typos or incorrectly words.
+          Also include in the response, in fewest number of words, what were the subject and mood of the haiku. Please only include keys "haiku", "subject" and "mood"`
+      },
+      {
+        role: 'user',
+        content: prompt,
+      }
+    ],
+  });
+
+  let response;
+  try {
+    // console.log(">> services.openai.completeHaiku RESULTS FROM API", { completion });
+    response = JSON.parse(completion.choices[0].message.content || "{}");
+    console.log(">> services.openai.completeHaiku RESULTS FROM API", { response });
+    return { prompt, response };
+  } catch (error) {
+    console.error("Error reading results", { error, response, completion });
+  }
+}

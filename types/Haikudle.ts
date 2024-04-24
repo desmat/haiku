@@ -1,6 +1,11 @@
 export type Haikudle = {
   id: string,
   haikuId: string,
+  status?: string,
+  createdAt?: number,
+  createdBy?: string,
+  updatedAt?: number,
+  updatedBy?: string,
 } | any;
 
 export type UserHaikudle = {
@@ -17,5 +22,5 @@ export type DailyHaikudle = {
   createdBy?: string,
   updatedAt?: number,
   updatedBy?: string,
-  theme?: string,
+  theme?: string,  // ???
 };

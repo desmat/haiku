@@ -59,9 +59,6 @@ const initialState = {
   solvedJustNow: false,
   moves: 0,
   onSolved: async (id: string, moves: number) => {
-    // race condition
-    // useHaikus.getState().load({ /* createdBy: user.id */ mine: true }, useHaikus.getState().mode);
-    
     // anticipate instead
     const currentHaiku = (await useHaikudle.getState()).haiku;
     (await useHaikus.getState()).addUserHaiku({
@@ -108,7 +105,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     })
   },
 
-  init: async (haiku: Haiku, haikudle: Haikudle, hashSolution?: boolean) => {
+  init: async (haikudle: Haikudle, hashSolution?: boolean) => {
+    const haiku = haikudle?.haiku;
     // console.log(">> hooks.haikudle.init", { haiku, haikudle, hashSolution });
 
     const solution = hashSolution && haiku.poem
@@ -172,7 +170,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     set({
       inProgress: solvedInProgress,
       words: solvedWords,
-      solved: true, 
+      solved: true,
       solvedJustNow: true,
     });
   },
@@ -382,22 +380,37 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
             });
             // smooth out the the alert pop-up
             setTimeout(() => useAlert.getState().error(`Error fetching haikudle ${id}: ${res.status} (${res.statusText})`), 500)
-            await get().init(notFoundHaiku, notFoundHaikudle, true);
-            return resolve(res.statusText);
+            const errorHaiku = { ...notFoundHaikudle, id, haiku: { ...notFoundHaiku, id } };
+            await get().init(errorHaiku, true);
+            return resolve(errorHaiku);
           }
 
           const data = await res.json();
           const haikudle = data.haikudle;
-          const nextDailyHaikudleId = data.nextDailyHaikudleId;
-          // console.log(">> hooks.haikudle.load", { data });
+
+          // race condition: /api/haikus/:id returned a haiku but /api/user 
+          // didn't see that haiku as viewed yet: fake it locally          
+          if (haikudle?.previousDailyHaikudleId) {
+            const userState = await useUser.getState();
+            if (!userState?.user?.isAdmin && !userState.haikus[haikudle.haikuId]) {
+              useUser.setState({
+                haikus: {
+                  ...userState.haikus,
+                  [haikudle.haikuId]: {
+                    ...haikudle.haiku,
+                    viewedAt: moment().valueOf(),
+                  }
+                }
+              })
+            }
+          }
 
           set({
             _haikudles: { ..._haikudles, [haikudle.id]: haikudle },
-            nextDailyHaikudleId,
           });
           setLoaded([haikudle]);
 
-          await get().init(haikudle?.haiku, haikudle);
+          await get().init(haikudle);
           resolve(haikudle);
         });
       } else {
@@ -414,8 +427,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
               userId: (await useUser.getState()).user.id,
             });
             useAlert.getState().error(`Error fetching haikudles: ${res.status} (${res.statusText})`);
-            await get().init(notFoundHaiku, notFoundHaikudle, true);
-            return resolve(res.statusText);
+            get().init(notFoundHaikudle, true);
+            return resolve(notFoundHaikudle);
           }
 
           const data = await res.json();
@@ -430,7 +443,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           setLoaded(haikudles);
 
           // TODO bleh
-          await get().init(haikudles[0]?.haiku, haikudles[0]);
+          await get().init(haikudles[0]);
           resolve(haikudles[0]);
         });
       }
