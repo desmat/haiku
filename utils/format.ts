@@ -46,7 +46,7 @@ export function formatTimeFromNow(v: number): string {
   // console.log("utils.format.formatTimeFromNow", { seconds });
   
   return seconds >= 0 && seconds < 40
-    ? "jost now"
+    ? "just now"
     : seconds < 0 && seconds > -40
       ? "now"
       : moment(v).fromNow();
