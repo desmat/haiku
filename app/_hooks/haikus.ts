@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { Haiku } from '@/types/Haiku';
+import { Haiku, HaikuAction } from '@/types/Haiku';
 import { User } from '@/types/User';
 import { listToMap, mapToList, mapToSearchParams, uuid } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
@@ -9,6 +9,7 @@ import useAlert from "./alert";
 import useHaikudle from './haikudle';
 import useUser from './user';
 import { error429Haiku, error4xxHaiku, notFoundHaiku, serverErrorHaiku } from '@/services/stores/samples';
+import { formatActionInProgress, formatPastAction } from '@/utils/format';
 
 async function fetchOpts() {
   const token = await useUser.getState().getToken();
@@ -572,7 +573,80 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         return resolve(dailyHaiku);
       });
     });
-  }
+  },
+
+  action: async (haikuId: string, action: HaikuAction, value?: any) => {
+    // console.log(">> hooks.haiku.action", { haikuId, action, value });
+    const { _haikus } = get();
+    const haiku = _haikus[haikuId];
+    const userState = await useUser.getState();
+    const userHaikus = userState.haikus
+    const userHaiku = userHaikus[haikuId];
+
+    // const userHaiku = userHaikus[haikuId] || { haikuId };
+
+    if (!haiku) {
+      console.error(">> hooks.haiku.action: haiku not found", { haikuId, action, value });
+    }
+
+    set({
+      _haikus: {
+        ..._haikus,
+        [haikuId]: {
+          ...haiku,
+          [`${action}dAt`]: value,
+        }
+      },
+    });
+
+    if (!userState?.user?.isAdmin && userHaiku) {
+      useUser.setState({
+        haikus: {
+          ...userState.haikus,
+          [haikuId]: {
+            ...userHaiku,
+            [`${action}dAt`]: value,
+          }
+        }
+      })
+    }
+
+    return new Promise(async (resolve, reject) => {
+      fetch(`/api/haikus/${haiku.id}/${action}`, {
+        ...await fetchOpts(),
+        method: "POST",
+        body: JSON.stringify({ value }),
+      }).then(async (res) => {
+        const event = `haiku-${formatPastAction(action, !value)}`;
+        const actionVerb = formatActionInProgress(action, !value);
+
+        if (res.status != 200) {
+          handleErrorResponse(res, event, haikuId, `Error ${actionVerb} haiku`);
+
+          // roll back optimistic
+          set({ _haikus });
+          if (!userState?.user?.isAdmin && userHaiku) {
+            useUser.setState({
+              haikus: userHaikus,
+            });
+          }
+
+          return reject(res.statusText);
+        }
+
+        const data = await res.json();
+        const actedOn = data.haiku;
+
+        trackEvent(event, {
+          id: actedOn.id,
+          userId: actedOn.updatedBy,
+          value,
+        });
+
+        return resolve(actedOn);
+      });
+    });
+  },
 
 })));
 

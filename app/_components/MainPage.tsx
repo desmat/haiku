@@ -39,11 +39,13 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     saveUser,
     incUserUsage,
     getUserToken,
+    userHaikus,
   ] = useUser((state: any) => [
     state.user,
     state.save,
     state.incUserUsage,
     state.getToken,
+    state.haikus,
   ]);
 
   const [
@@ -68,6 +70,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     deleteHaiku,
     nextDailyHaikuId,
     createDailyHaiku,
+    haikuAction,
   ] = useHaikus((state: any) => [
     state.loaded(haikuId),
     state.load,
@@ -78,6 +81,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     state.delete,
     state.nextDailyHaikuId,
     state.createDailyHaiku,
+    state.action,
   ]);
 
   const [
@@ -489,7 +493,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     } else {
       trackEvent("cancelled-generate-haiku", {
         userId: user?.id,
-      });  
+      });
     }
   }
 
@@ -608,7 +612,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     trackEvent("haiku-selected", {
       userId: user?.id,
       haikuId: id,
-    });  
+    });
 
     setHaikuId(id);
     window.history.replaceState(null, '', `/${id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
@@ -673,6 +677,15 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     }
   }
 
+  const likeHaiku = () => {
+    // console.log('>> app._components.MainPage.likeHaiku()', { haikuId });
+
+    const userHaiku = userHaikus[haiku.id];
+    const value = userHaiku.likedAt ? undefined : moment().valueOf();
+
+    return haikuAction(haikuId, "like", value);
+  }
+
   if (!loaded || loading || loadingUI || generating) {
     // return <LoadingPage mode={mode} /* haiku={haiku} */ />
     return (
@@ -693,7 +706,10 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       <NavOverlay
         mode={mode}
         lang={lang}
-        haiku={haikudleSolved ? solvedHaikudleHaiku : haiku}
+        haiku={{
+          ...(haikudleSolved ? solvedHaikudleHaiku : haiku),
+          ...userHaikus[haiku.id],
+        }}
         refreshDelay={_refreshDelay}
         backupInProgress={backupInProgress}
         styles={textStyles.slice(0, textStyles.length - 3)}
@@ -719,6 +735,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         onBackup={startBackup}
         onCopyHaiku={(haikudleMode && haikudleSolved || !haikudleMode) && copyHaiku}
         onCopyLink={(haikudleMode && haikudleSolved || !haikudleMode) && copyLink}
+        onLikeHaiku={(haikudleMode && haikudleSolved || !haikudleMode) && likeHaiku}
       />
 
       {isPuzzleMode &&

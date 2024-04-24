@@ -7,7 +7,7 @@ import { IoHelpCircle, IoLogoGithub } from 'react-icons/io5';
 import { MdHome } from "react-icons/md";
 import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg, BsDatabaseFillUp } from "react-icons/bs";
 import useUser from '@/app/_hooks/user';
-import { Haiku } from '@/types/Haiku';
+import { UserHaiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
 import { formatTimeFromNow } from '@/utils/format';
@@ -52,7 +52,7 @@ export default function SidePanel({
     state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
   ]);
   const onboarding = !!(onboardingElement && ["side-panel", "side-panel-and-bottom-links"].includes(onboardingElement));
-  // console.log(">> app._component.Nav.SidePanel.render()", { user, userUser, userState, panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles, userHaikus });
+  // console.log(">> app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles });
 
   const toggleMenuOpened = () => {
     // console.log(">> app._component.SidePanel.toggleMenuOpened", {});
@@ -91,7 +91,7 @@ export default function SidePanel({
   };
 
   const byGeneratedOrSolvedOrViewedDesc = (a: any, b: any) => {
-    return (b.generatedAt || b.solvedAt || b.viewedAt || 0) - (a.generatedAt || a.solvedAt || a.viewedAt || 0)
+    return (b.generatedAt || b.solvedAt || b.viewedAt || 0) - (a.generatedAt || a.solvedAt || a.likedAt || a.viewedAt || 0)
   }
 
   useEffect(() => {
@@ -231,7 +231,7 @@ export default function SidePanel({
               // .filter((h: Haiku) => h.createdBy == user.id)
               .sort(user.isAdmin ? byCreatedAtDesc : byGeneratedOrSolvedOrViewedDesc)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
-              .map((h: Haiku, i: number) => (
+              .map((h: UserHaiku, i: number) => (
                 <StyledLayers key={i} styles={altStyles}>
                   <Link
                     href={`/${h.haikuId || h.id}`}
@@ -243,7 +243,7 @@ export default function SidePanel({
                   >
                     <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>
                     {user?.isAdmin &&
-                      <span className="font-normal"> generated {formatTimeFromNow(h.createdAt)} by {h.createdBy == user?.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
+                      <span className="font-normal"> generated {formatTimeFromNow(h.createdAt || 0)} by {h.createdBy == user?.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
                     }
                     {!user?.isAdmin && h.generatedAt &&
                       <span className="font-normal"> generated {formatTimeFromNow(h.generatedAt)}</span>
@@ -251,7 +251,10 @@ export default function SidePanel({
                     {!user?.isAdmin && !h.generatedAt && h.solvedAt &&
                       <span className="font-normal"> solved {formatTimeFromNow(h.solvedAt)}{h.moves ? ` in ${h.moves} move${h.moves > 1 ? "s" : ""}` : ""}</span>
                     }
-                    {!user?.isAdmin && !h.generatedAt && !h.solvedAt && h.viewedAt &&
+                    {!user?.isAdmin && !h.generatedAt && !h.solvedAt && h.likedAt &&
+                      <span className="font-normal"> liked {formatTimeFromNow(h.likedAt || 0)}</span>
+                    }
+                    {!user?.isAdmin && !h.generatedAt && !h.solvedAt && !h.likedAt && h.viewedAt &&
                       <span className="font-normal"> viewed {formatTimeFromNow(h.viewedAt)}</span>
                     }
                   </Link>

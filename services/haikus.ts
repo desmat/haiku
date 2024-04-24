@@ -71,7 +71,8 @@ export async function getUserHaikus(user: User): Promise<Haiku[]> {
 
     const userHaikuLookup = new Map(userHaikus
       .map((uh: UserHaiku) => [uh.haikuId, {
-        viewedAt: uh.updatedAt || uh.createdAt
+        viewedAt: uh.createdAt,
+        likedAt: uh.likedAt,
       }]));
 
     const userHaikudleLookup = new Map(userHaikudles
@@ -110,6 +111,7 @@ export async function getUserHaikus(user: User): Promise<Haiku[]> {
       generatedAt: haiku.generatedAt,
       solvedAt: haiku.solvedAt,
       viewedAt: haiku.viewedAt,
+      likedAt: haiku.likedAt,
       theme: haiku.theme,
       moves: haiku.moves,
     };
@@ -334,7 +336,7 @@ export async function getUserHaiku(userId: string, haikuId: string): Promise<Use
   return new Promise((resolve, reject) => resolve(userHaiku));
 }
 
-export async function createUserHaiku(userId: string, haikuId: string): Promise<UserHaiku | undefined> {
+export async function createUserHaiku(userId: string, haikuId: string): Promise<UserHaiku> {
   console.log(`>> services.haiku.createUserHaiku`, { userId, haikuId });
 
   const id = `${userId}:${haikuId}`
@@ -348,6 +350,15 @@ export async function createUserHaiku(userId: string, haikuId: string): Promise<
 
   console.log(`>> services.haiku.createUserHaiku`, { userHaiku: createdUserHaiku });
   return new Promise((resolve, reject) => resolve(createdUserHaiku));
+}
+
+export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<UserHaiku> {
+  console.log(`>> services.haiku.saveUserHaiku`, { userHaiku });
+
+  const savedUserHaiku = await store.userHaikus.update(user.id, userHaiku);
+
+  console.log(`>> services.haiku.saveUserHaiku`, { savedUserHaiku });
+  return new Promise((resolve, reject) => resolve(savedUserHaiku));
 }
 
 export async function getDailyHaiku(id: string): Promise<DailyHaiku | undefined> {

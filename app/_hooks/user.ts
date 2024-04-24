@@ -6,7 +6,7 @@ import { decodeJWT, encodeJWT } from '@/utils/jwt';
 import { listToMap, uuid } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from './alert';
-import { DailyHaiku, Haiku } from '@/types/Haiku';
+import { DailyHaiku, UserHaiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 
 const useUser: any = create(devtools((set: any, get: any) => ({
@@ -17,7 +17,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   // loading: false, // guard against signin in many times anonymously
 
   // populate the side panel
-  haikus: {} as { number: Haiku },
+  haikus: {} as { number: UserHaiku },
   dailyHaikus: {} as { string: DailyHaiku },
   dailyHaikudles: {} as { string: DailyHaikudle },
   nextDailyHaikuId: undefined as string | undefined,
