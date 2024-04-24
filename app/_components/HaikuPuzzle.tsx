@@ -90,7 +90,7 @@ export default function HaikuPuzzle({
                               {...provided.dragHandleProps}
                               onMouseDown={() => !w?.correct && handleClickWord(w, i, j)}
                             >
-                              <StyledLayers key={i} styles={w?.correct ? styles : [styles[styles.length - 1]]}>
+                              <StyledLayers key={i} styles={w?.correct ? styles : [styles[0]]}>
                                 <div
                                   className={`px-1 ${w?.correct ? "" : "m-1"} transition-all ${!w?.correct && "draggable-notsure-why-cant-inline"}`}
                                   style={{
@@ -100,9 +100,9 @@ export default function HaikuPuzzle({
                                     filter: w?.correct
                                       ? undefined
                                       : snapshot.isDragging
-                                        ? `drop-shadow(0px 1px 3px rgb(0 0 0 / 0.9))`
+                                        ? `drop-shadow(0px 1px 5px rgb(0 0 0 / 0.9))`
                                         : selectedWord?.word?.id == w?.id
-                                          ? `drop-shadow(0px 1px 2px rgb(0 0 0 / 0.9))`
+                                          ? `drop-shadow(0px 1px 3px rgb(0 0 0 / 0.9))`
                                           : selectedWord
                                             ? `drop-shadow(0px 1px 1px rgb(0 0 0 / 0.5))`
                                             : `drop-shadow(0px 1px 1px rgb(0 0 0 / 0.2))`,

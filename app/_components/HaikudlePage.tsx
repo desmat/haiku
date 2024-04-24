@@ -14,13 +14,15 @@ export default function HaikudlePage({
   haiku,
   styles,
   regenerating,
+  onboardingElement,
 }: {
   mode: string,
   haiku?: Haiku,
   styles: any[],
   regenerating?: boolean,
+  onboardingElement?: string | undefined,
 }) {
-  // console.log('>> app._components.HaikudlePage.render()', { mode, id: haiku.id, haiku });
+  // console.log('>> app._components.HaikudlePage.render()', { mode, id: haiku.id, haiku, onboardingElement});
 
   const [user] = useUser((state: any) => [state.user]);
   // TODO move to hook store
@@ -99,7 +101,7 @@ export default function HaikudlePage({
         onDragEnd={handleDragEnd}
       >
         <div
-          className="bar fixed top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0 opacity-100"
+          className="_bg-pink-200 absolute top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0 opacity-100"
           style={{
             backgroundImage: `url("${haiku?.bgImage}")`,
             backgroundPosition: "center",
@@ -108,7 +110,7 @@ export default function HaikudlePage({
             transition: "filter 0.5s ease-out",
           }}
         />
-        <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] fixed top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-10 transition-all `}>
+        <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[18pt] absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit ${onboardingElement && ["puzzle"].includes(onboardingElement) ? "z-50" : "z-10"} transition-all `}>
           {regenerating &&
             <div className="relative opacity-50">
               <StyledLayers styles={styles}>
@@ -120,7 +122,10 @@ export default function HaikudlePage({
             </div>
           }
           {!regenerating &&
-            <div className="_bg-pink-200 relative">
+            <div className="_bg-pink-200 onboarding-container">
+              {onboardingElement == "puzzle" &&
+                <div className="onboarding-focus" />
+              }
               <HaikuPuzzle
                 haiku={haiku}
                 styles={styles}

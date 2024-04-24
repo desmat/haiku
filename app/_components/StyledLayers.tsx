@@ -1,7 +1,14 @@
 
 
-export function StyledLayers({ styles, children }: { styles: any[], children?: any }) {
+export function StyledLayers({ styles, disabled, children }: { styles: any[], disabled?: boolean, children?: any }) {
   // console.log("StyledLayers", { styles });
+  if (disabled) {
+    return (
+      <>
+        {children}
+      </>
+    )
+  }
   return (
     <div style={styles[0]}>
       {styles.length > 0 &&
