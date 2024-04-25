@@ -35,9 +35,9 @@ export default function SidePanel({
   onShowAbout?: any,
   onSelectHaiku?: any,
 }) {
-  const [panelOpened, setPanelOpened] = useState(true);
+  const [panelOpened, setPanelOpened] = useState(false);
   const [panelAnimating, setPanelAnimating] = useState(false);
-  const [panelPinned, setPanelPinned] = useState(true);
+  const [panelPinned, setPanelPinned] = useState(false);
   const pageSize = 20;
   const [numPages, setNumPages] = useState(1);
   const [listMode, setListMode] = useState<"haiku" | "dailyHaiku" | "dailyHaikudle">("haiku");
