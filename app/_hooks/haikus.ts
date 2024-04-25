@@ -599,17 +599,15 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       },
     });
 
-    if (!userState?.user?.isAdmin && userHaiku) {
-      useUser.setState({
-        haikus: {
-          ...userState.haikus,
-          [haikuId]: {
-            ...userHaiku,
-            [`${action}dAt`]: value,
-          }
+    userHaiku && useUser.setState({
+      haikus: {
+        ...userState.haikus,
+        [haikuId]: {
+          ...userHaiku,
+          [`${action}dAt`]: value,
         }
-      })
-    }
+      }
+    });
 
     return new Promise(async (resolve, reject) => {
       fetch(`/api/haikus/${haiku.id}/${action}`, {

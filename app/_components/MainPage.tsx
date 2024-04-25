@@ -681,7 +681,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     // console.log('>> app._components.MainPage.likeHaiku()', { haikuId });
 
     const userHaiku = userHaikus[haiku.id];
-    const value = userHaiku.likedAt ? undefined : moment().valueOf();
+    const value = userHaiku?.likedAt ? undefined : moment().valueOf();
 
     return haikuAction(haikuId, "like", value);
   }

@@ -43,11 +43,11 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
   return new Promise((resolve, reject) => resolve(haikus.filter(Boolean)));
 }
 
-export async function getUserHaikus(user: User): Promise<Haiku[]> {
+export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]> {
   console.log(`>> services.haiku.getUserHaikus`, { user });
 
   let haikus = await store.haikus.find();
-  if (!user.isAdmin) {
+  if (!all) {
     // find all haikus that user solved corresponding haikudle
     const [generatedHaikus, userHaikus, userHaikudles] = await Promise.all([
       store.haikus.find({
@@ -115,9 +115,9 @@ export async function getUserHaikus(user: User): Promise<Haiku[]> {
       theme: haiku.theme,
       moves: haiku.moves,
     };
-  });
+  }).filter(Boolean);
 
-  return new Promise((resolve, reject) => resolve(haikus.filter(Boolean)));
+  return haikus;
 }
 
 export async function getHaiku(id: string, hashPoem?: boolean): Promise<Haiku | undefined> {

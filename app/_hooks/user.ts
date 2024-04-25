@@ -18,6 +18,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
   // populate the side panel
   haikus: {} as { number: UserHaiku },
+  allHaikus: {} as { number: UserHaiku },
   dailyHaikus: {} as { string: DailyHaiku },
   dailyHaikudles: {} as { string: DailyHaikudle },
   nextDailyHaikuId: undefined as string | undefined,
@@ -47,7 +48,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
     const { user: localUser, token } = await loadLocal();
     const remoteRes = await loadRemote(token);
-    const { user: remoteUser, haikus, dailyHaikus, dailyHaikudles, nextDailyHaikuId } = remoteRes;
+    const { user: remoteUser, haikus, allHaikus, dailyHaikus, dailyHaikudles, nextDailyHaikuId } = remoteRes;
     // console.log(">> hooks.user.load()", { remoteRes });
 
     user = {
@@ -62,6 +63,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       token,
       loaded: true,
       haikus: haikus ? listToMap(haikus, { keyFn: (e: any) => e.haikuId }) : {},
+      allHaikus: allHaikus ? listToMap(allHaikus, { keyFn: (e: any) => e.haikuId }) : {},
       dailyHaikus: dailyHaikus ? listToMap(dailyHaikus, { keyFn: (e: any) => e.haikuId }) : {},
       dailyHaikudles: dailyHaikudles ? listToMap(dailyHaikudles, { keyFn: (e: any) => e.haikuId }) : {},
       nextDailyHaikuId,

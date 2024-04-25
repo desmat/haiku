@@ -43,17 +43,20 @@ export default function SidePanel({
   const [listMode, setListMode] = useState<"haiku" | "dailyHaiku" | "dailyHaikudle">("haiku");
   type FilterType = "generated" | "liked" | "viewed"
   const [filter, setFilter] = useState<FilterType | undefined>();
+  const onboarding = !!(onboardingElement && ["side-panel", "side-panel-and-bottom-links"].includes(onboardingElement));
 
   const [
     userHaikus,
     userDailyHaikus,
     userDailyHaikudles,
   ] = useUser((state: any) => [
-    state.haikus ? Object.values(state.haikus) : [],
+    user.isAdmin && !filter 
+      ? state.allHaikus ? Object.values(state.allHaikus) : []
+      : state.haikus ? Object.values(state.haikus) : [],
     state.dailyHaikus ? Object.values(state.dailyHaikus) : [],
     state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
   ]);
-  const onboarding = !!(onboardingElement && ["side-panel", "side-panel-and-bottom-links"].includes(onboardingElement));
+
   // console.log(">> app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles });
 
   const toggleMenuOpened = () => {
@@ -212,44 +215,22 @@ export default function SidePanel({
           </div>
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
             <div className="py-2">
-              {user?.isAdmin && listMode == "haiku" &&
-                <div
-                  className="cursor-pointer"
-                  title="Show daily haikudles"
-                  onClick={() => setListMode("dailyHaiku")}
-                >
-                  <StyledLayers styles={styles}>
-                    Latest Haikus
-                  </StyledLayers>
-                </div>
-              }
-              {user?.isAdmin && listMode == "dailyHaiku" &&
-                <div
-                  className="cursor-pointer"
-                  title="Show daily haikudles"
-                  onClick={() => setListMode("dailyHaikudle")}
-                >
-                  <StyledLayers styles={styles}>
-                    Daily Haikus
-                  </StyledLayers>
-                </div>
-              }
-              {user?.isAdmin && listMode == "dailyHaikudle" &&
-                <div
-                  className="cursor-pointer"
-                  title="Show Haikus"
-                  onClick={() => setListMode("haiku")}
-                >
-                  <StyledLayers styles={styles}>
-                    Daily Haikudles
-                  </StyledLayers>
-                </div>
-              }
-              {!user.isAdmin &&
+              {(!user.isAdmin || listMode == "haiku") &&
                 <div className="flex flex-row gap-3 group">
-                  <StyledLayers styles={styles}>
-                    Your Haikus
-                  </StyledLayers>
+                  {user.isAdmin &&
+                    <div
+                      className="cursor-pointer"
+                      title="Show daily haikus"
+                      onClick={() => setListMode("dailyHaiku")}
+                    >
+                      <StyledLayers styles={styles}>
+                        All Haikus
+                      </StyledLayers>
+                    </div>
+                  }
+                  {!user.isAdmin &&
+                    "Your Haikus"
+                  }
                   <StyledLayers styles={styles.slice(0, 1)} className="my-auto">
                     <div className="flex flex-row gap-1 my-auto pt-[0.1rem]">
                       <div
@@ -277,6 +258,28 @@ export default function SidePanel({
                         <IoEyeSharp />
                       </div>
                     </div>
+                  </StyledLayers>
+                </div>
+              }
+              {user?.isAdmin && listMode == "dailyHaiku" &&
+                <div
+                  className="cursor-pointer"
+                  title="Show daily haikudles"
+                  onClick={() => setListMode("dailyHaikudle")}
+                >
+                  <StyledLayers styles={styles}>
+                    Daily Haikus
+                  </StyledLayers>
+                </div>
+              }
+              {user?.isAdmin && listMode == "dailyHaikudle" &&
+                <div
+                  className="cursor-pointer"
+                  title="Show Haikus"
+                  onClick={() => setListMode("haiku")}
+                >
+                  <StyledLayers styles={styles}>
+                    Daily Haikudles
                   </StyledLayers>
                 </div>
               }
