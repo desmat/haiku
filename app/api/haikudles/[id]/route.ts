@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { getHaikudle, deleteHaikudle, saveHaikudle, saveUserHaikudle, getUserHaikudle, createHaikudle, getDailyHaikudles, getNextDailyHaikudleId } from '@/services/haikudles';
+import { getHaikudle, deleteHaikudle, saveUserHaikudle, getUserHaikudle, createHaikudle, getDailyHaikudles } from '@/services/haikudles';
 import { userSession } from '@/services/users';
 import { createUserHaiku, getHaiku, getUserHaiku } from '@/services/haikus';
 import { DailyHaikudle } from '@/types/Haikudle';
@@ -21,10 +21,12 @@ export async function GET(
   const dailyHaikudle = dailyHaikudles
     .filter((dh: DailyHaikudle) => dh.id < todaysDateCode && dh.haikudleId == params.id)[0];
 
-  let [haiku, haikudle, nextDailyHaikudleId] = await Promise.all([
+  let [
+    haiku,
+    haikudle
+  ] = await Promise.all([
     getHaiku(params.id, !dailyHaikudle?.id),
     getHaikudle(params.id),
-    getNextDailyHaikudleId(),
   ]);
   const myHaiku = !user.isAdmin && haiku?.createdBy == user.id && await getHaiku(params.id);
   // console.log('>> app.api.haikudles.GET', { haiku, haikudle, dailyHaikudle, myHaiku });
@@ -52,18 +54,12 @@ export async function GET(
     createUserHaiku(user?.id, haikudle?.haikuId);
   }
 
-  const ret = {
+  return NextResponse.json({
     ...haikudle,
     ...userHaikudle?.haikudle,
     previousDailyHaikudleId: dailyHaikudle?.id,
     haiku: myHaiku || haiku,
-  };
-
-  return NextResponse.json(
-    nextDailyHaikudleId && user.isAdmin
-      ? { haikudle: ret, nextDailyHaikudleId }
-      : { haikudle: ret }
-  );
+  });
 }
 
 export async function PUT(

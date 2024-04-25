@@ -39,11 +39,15 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     saveUser,
     incUserUsage,
     getUserToken,
+    nextDailyHaikuId,
+    nextDailyHaikudleId,
   ] = useUser((state: any) => [
     state.user,
     state.save,
     state.incUserUsage,
     state.getToken,
+    state.nextDailyHaikuId,
+    state.nextDailyHaikudleId,
   ]);
 
   const [
@@ -66,7 +70,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     regenerateHaiku,
     resetHaikus,
     deleteHaiku,
-    nextDailyHaikuId,
     createDailyHaiku,
   ] = useHaikus((state: any) => [
     state.loaded(haikuId),
@@ -76,7 +79,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     state.regenerate,
     state.reset,
     state.delete,
-    state.nextDailyHaikuId,
     state.createDailyHaiku,
   ]);
 
@@ -89,7 +91,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     createHaikudle,
     haikudleInProgress,
     previousDailyHaikudleId,
-    nextDailyHaikudleId,
     haikudleSolved,
     haikudleSolvedJustNow,
   ] = useHaikudle((state: any) => [
@@ -101,7 +102,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     state.create,
     state.inProgress,
     state.previousDailyHaikudleId,
-    state.nextDailyHaikudleId,
     state.solved,
     state.solvedJustNow,
   ]);
@@ -489,7 +489,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     } else {
       trackEvent("cancelled-generate-haiku", {
         userId: user?.id,
-      });  
+      });
     }
   }
 
@@ -608,7 +608,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     trackEvent("haiku-selected", {
       userId: user?.id,
       haikuId: id,
-    });  
+    });
 
     setHaikuId(id);
     window.history.replaceState(null, '', `/${id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);

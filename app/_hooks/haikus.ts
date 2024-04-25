@@ -63,13 +63,6 @@ const initialState = {
   // and query is stringyfied json from loaded
   // list of haikus
   _loaded: <StatusMap>{},
-
-  userHaikus: <HaikuMap>{},
-
-  // TODO move to user hook and end-points
-  dailyHaikus: <any>{},
-  dailyHaikudles: <any>{},
-  nextDailyHaikuId: <string | undefined>undefined,
 }
 
 const useHaikus: any = create(devtools((set: any, get: any) => ({
@@ -552,20 +545,18 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         method: "POST",
         body: JSON.stringify({ dateCode, haikuId }),
       }).then(async (res) => {
-        const { _haikus } = get();
-
         if (res.status != 200) {
           handleErrorResponse(res, "create-daily-haiku", haikuId, `Error creating daily haiku`);
           return reject(res.statusText);
         }
 
-        const data = await res.json();
-        const dailyHaiku = data.dailyHaiku;
-
-        set({
-          dailyHaikus: {
-            ...get().dailyHaikus,
-            [dailyHaiku.id]: dailyHaiku,
+        const { dailyHaiku, nextDailyHaikuId } = await res.json();
+        
+        // update side panel content
+        useUser.setState((state: any) => {
+          return {
+            dailyHaikus: { ...state.dailyHaikus, [dailyHaiku.id]: dailyHaiku },
+            nextDailyHaikuId,
           }
         });
 

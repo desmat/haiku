@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getHaiku, saveDailyHaiku } from '@/services/haikus';
+import { getHaiku, getNextDailyHaikuId, saveDailyHaiku } from '@/services/haikus';
 import { userSession } from '@/services/users';
 
 // export const maxDuration = 300;
@@ -32,6 +32,7 @@ export async function POST(request: Request) {
   }
 
   const dailyHaiku = await saveDailyHaiku(user, dateCode, haikuId);
+  const nextDailyHaikuId = await getNextDailyHaikuId();
 
-  return NextResponse.json({ dailyHaiku });
+  return NextResponse.json({ dailyHaiku, nextDailyHaikuId });
 }
