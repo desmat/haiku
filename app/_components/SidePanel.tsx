@@ -3,7 +3,7 @@
 import moment from 'moment';
 import Link from 'next/link'
 import { useEffect, useState } from 'react';
-import { IoHelpCircle, IoLogoGithub } from 'react-icons/io5';
+import { IoEyeSharp, IoHeartSharp, IoHelpCircle, IoLogoGithub, IoSparkles } from 'react-icons/io5';
 import { MdHome } from "react-icons/md";
 import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg, BsDatabaseFillUp } from "react-icons/bs";
 import useUser from '@/app/_hooks/user';
@@ -11,7 +11,7 @@ import { UserHaiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
 import { formatTimeFromNow } from '@/utils/format';
-import { byCreatedAtDesc } from '@/utils/sort';
+import * as sort from '@/utils/sort';
 import { StyledLayers } from './StyledLayers';
 import PopOnClick from './PopOnClick';
 import trackEvent from '@/utils/trackEvent';
@@ -35,12 +35,14 @@ export default function SidePanel({
   onShowAbout?: any,
   onSelectHaiku?: any,
 }) {
-  const [panelOpened, setPanelOpened] = useState(false);
+  const [panelOpened, setPanelOpened] = useState(true);
   const [panelAnimating, setPanelAnimating] = useState(false);
-  const [panelPinned, setPanelPinned] = useState(false);
+  const [panelPinned, setPanelPinned] = useState(true);
   const pageSize = 20;
   const [numPages, setNumPages] = useState(1);
   const [listMode, setListMode] = useState<"haiku" | "dailyHaiku" | "dailyHaikudle">("haiku");
+  type FilterType = "generated" | "liked" | "viewed"
+  const [filter, setFilter] = useState<FilterType | undefined>();
 
   const [
     userHaikus,
@@ -90,8 +92,25 @@ export default function SidePanel({
     return ret;
   };
 
-  const byGeneratedOrSolvedOrViewedDesc = (a: any, b: any) => {
-    return (b.generatedAt || b.solvedAt || b.viewedAt || 0) - (a.generatedAt || a.solvedAt || a.likedAt || a.viewedAt || 0)
+  const sortByAllFields = (a: any, b: any) => {
+    return (b.generatedAt || b.solvedAt || a.likedAt || b.viewedAt || 0) - (a.generatedAt || a.solvedAt || a.likedAt || a.viewedAt || 0)
+  }
+
+  const filterBy = (haiku: UserHaiku) => {
+    switch (filter) {
+      case "generated":
+        return !!haiku.generatedAt;
+      case "liked":
+        return !!haiku.likedAt;
+      case "viewed":
+        return !haiku.likedAt && !!haiku.viewedAt;
+    }
+
+    return true;
+  }
+
+  const handleClickedFilter = (filterType: FilterType) => {
+    setFilter(filter == filterType ? undefined : filterType);
   }
 
   useEffect(() => {
@@ -193,43 +212,79 @@ export default function SidePanel({
           </div>
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
             <div className="py-2">
-              <StyledLayers styles={styles}>
-                {user?.isAdmin && listMode == "haiku" &&
-                  <div
-                    className="cursor-pointer"
-                    title="Show daily haikudles"
-                    onClick={() => setListMode("dailyHaiku")}
-                  >
+              {user?.isAdmin && listMode == "haiku" &&
+                <div
+                  className="cursor-pointer"
+                  title="Show daily haikudles"
+                  onClick={() => setListMode("dailyHaiku")}
+                >
+                  <StyledLayers styles={styles}>
                     Latest Haikus
-                  </div>
-                }
-                {user?.isAdmin && listMode == "dailyHaiku" &&
-                  <div
-                    className="cursor-pointer"
-                    title="Show daily haikudles"
-                    onClick={() => setListMode("dailyHaikudle")}
-                  >
+                  </StyledLayers>
+                </div>
+              }
+              {user?.isAdmin && listMode == "dailyHaiku" &&
+                <div
+                  className="cursor-pointer"
+                  title="Show daily haikudles"
+                  onClick={() => setListMode("dailyHaikudle")}
+                >
+                  <StyledLayers styles={styles}>
                     Daily Haikus
-                  </div>
-                }
-                {user?.isAdmin && listMode == "dailyHaikudle" &&
-                  <div
-                    className="cursor-pointer"
-                    title="Show Haikus"
-                    onClick={() => setListMode("haiku")}
-                  >
+                  </StyledLayers>
+                </div>
+              }
+              {user?.isAdmin && listMode == "dailyHaikudle" &&
+                <div
+                  className="cursor-pointer"
+                  title="Show Haikus"
+                  onClick={() => setListMode("haiku")}
+                >
+                  <StyledLayers styles={styles}>
                     Daily Haikudles
-                  </div>
-                }
-                {!user.isAdmin &&
-                  <>Your haikus</>
-                }
-              </StyledLayers>
+                  </StyledLayers>
+                </div>
+              }
+              {!user.isAdmin &&
+                <div className="flex flex-row gap-3 group">
+                  <StyledLayers styles={styles}>
+                    Your Haikus
+                  </StyledLayers>
+                  <StyledLayers styles={styles.slice(0, 1)} className="my-auto">
+                    <div className="flex flex-row gap-1 my-auto pt-[0.1rem]">
+                      <div
+                        title="Filter haikus generated by you"
+                        className={`cursor-pointer ${filter == "generated" ? "" : "opacity-40"} group-hover:opacity-100`}
+                        style={{ color: filter == "generated" ? bgColor : "" }}
+                        onClick={() => handleClickedFilter("generated")}
+                      >
+                        <IoSparkles className="mt-[-0.1rem]" />
+                      </div>
+                      <div
+                        title="Filter liked haikus"
+                        className={`cursor-pointer ${filter == "liked" ? "" : "opacity-40"} group-hover:opacity-100`}
+                        style={{ color: filter == "liked" ? bgColor : "" }}
+                        onClick={() => handleClickedFilter("liked")}
+                      >
+                        <IoHeartSharp />
+                      </div>
+                      <div
+                        title="Filter viewed haikus"
+                        className={`cursor-pointer ${filter == "viewed" ? "" : "opacity-40"} group-hover:opacity-100`}
+                        style={{ color: filter == "viewed" ? bgColor : "" }}
+                        onClick={() => handleClickedFilter("viewed")}
+                      >
+                        <IoEyeSharp />
+                      </div>
+                    </div>
+                  </StyledLayers>
+                </div>
+              }
             </div>
             {/* note: don't render when not opened to save on resources */}
             {listMode == "haiku" && (panelAnimating || panelOpened) && userHaikus
-              // .filter((h: Haiku) => h.createdBy == user.id)
-              .sort(user.isAdmin ? byCreatedAtDesc : byGeneratedOrSolvedOrViewedDesc)
+              .filter(filterBy)
+              .sort(user.isAdmin ? sort.byCreatedAtDesc : sortByAllFields)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
               .map((h: UserHaiku, i: number) => (
                 <StyledLayers key={i} styles={altStyles}>
