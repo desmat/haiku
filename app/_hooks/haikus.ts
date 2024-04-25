@@ -306,8 +306,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           return reject(res.statusText);
         }
 
-        const data = await res.json();
-        const created = data.haiku;
+        const { haiku: created } = await res.json();
 
         trackEvent("haiku-created", {
           id: created.id,
@@ -408,8 +407,8 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           return reject(res.statusText);
         }
 
-        const data = await res.json();
-        const generated = data.haiku;
+        const { haiku: generated, reachedUsageLimit } = await res.json();
+        console.log(">> hooks.haiku.create", { generated, reachedUsageLimit });
 
         trackEvent("haiku-generated", {
           id: generated.id,
@@ -430,6 +429,10 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           generatedAt: generated.createdAt,
           theme: generated.theme,
         });
+
+        if (reachedUsageLimit) {
+          useAlert.getState().warning("Daily limit reached: you can create more haikus tomorrow.");
+        }
 
         return resolve(generated);
       });
@@ -461,8 +464,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           return reject(res.statusText);
         }
 
-        const data = await res.json();
-        const regenerated = data.haiku;
+        const { haiku: regenerated, reachedUsageLimit } = await res.json();
 
         trackEvent("haiku-regenerated", {
           id: regenerated.id,
@@ -476,6 +478,10 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         });
         // also sync up haikudle store 
         useHaikudle.setState({ haiku: regenerated });
+
+        if (reachedUsageLimit) {
+          useAlert.getState().warning("Daily limit reached: you can re-generate more haikus tomorrow.");
+        }
 
         return resolve(regenerated);
       });
