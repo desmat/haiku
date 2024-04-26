@@ -125,6 +125,7 @@ export async function POST(request: Request) {
   console.log('>> app.api.haiku.POST', { lang, subject, mood });
 
   const { user } = await userSession(request);
+  let reachedUsageLimit = false; // actually _will_ reach usage limit shortly
 
   if (!user.isAdmin) {
     const usage = await userUsage(user);
@@ -135,10 +136,12 @@ export async function POST(request: Request) {
         { success: false, message: 'exceeded daily limit' },
         { status: 429 }
       );
+    } else if (haikusCreated && haikusCreated == USAGE_LIMIT.DAILY_CREATE_HAIKU - 1) {
+      reachedUsageLimit = true;
     }
   }
 
   const updatedHaiku = await generateHaiku(user, lang, subject, mood);
 
-  return NextResponse.json({ haiku: updatedHaiku });
+  return NextResponse.json({ haiku: updatedHaiku, reachedUsageLimit });
 }

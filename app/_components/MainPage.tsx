@@ -40,12 +40,16 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     incUserUsage,
     getUserToken,
     userHaikus,
+    nextDailyHaikuId,
+    nextDailyHaikudleId,
   ] = useUser((state: any) => [
     state.user,
     state.save,
     state.incUserUsage,
     state.getToken,
     state.haikus,
+    state.nextDailyHaikuId,
+    state.nextDailyHaikudleId,
   ]);
 
   const [
@@ -68,7 +72,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     regenerateHaiku,
     resetHaikus,
     deleteHaiku,
-    nextDailyHaikuId,
     createDailyHaiku,
     haikuAction,
   ] = useHaikus((state: any) => [
@@ -79,7 +82,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     state.regenerate,
     state.reset,
     state.delete,
-    state.nextDailyHaikuId,
     state.createDailyHaiku,
     state.action,
   ]);
@@ -93,7 +95,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     createHaikudle,
     haikudleInProgress,
     previousDailyHaikudleId,
-    nextDailyHaikudleId,
     haikudleSolved,
     haikudleSolvedJustNow,
   ] = useHaikudle((state: any) => [
@@ -105,7 +106,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     state.create,
     state.inProgress,
     state.previousDailyHaikudleId,
-    state.nextDailyHaikudleId,
     state.solved,
     state.solvedJustNow,
   ]);

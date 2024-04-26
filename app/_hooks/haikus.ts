@@ -64,13 +64,6 @@ const initialState = {
   // and query is stringyfied json from loaded
   // list of haikus
   _loaded: <StatusMap>{},
-
-  userHaikus: <HaikuMap>{},
-
-  // TODO move to user hook and end-points
-  dailyHaikus: <any>{},
-  dailyHaikudles: <any>{},
-  nextDailyHaikuId: <string | undefined>undefined,
 }
 
 const useHaikus: any = create(devtools((set: any, get: any) => ({
@@ -314,8 +307,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           return reject(res.statusText);
         }
 
-        const data = await res.json();
-        const created = data.haiku;
+        const { haiku: created } = await res.json();
 
         trackEvent("haiku-created", {
           id: created.id,
@@ -416,8 +408,8 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           return reject(res.statusText);
         }
 
-        const data = await res.json();
-        const generated = data.haiku;
+        const { haiku: generated, reachedUsageLimit } = await res.json();
+        console.log(">> hooks.haiku.create", { generated, reachedUsageLimit });
 
         trackEvent("haiku-generated", {
           id: generated.id,
@@ -438,6 +430,10 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           generatedAt: generated.createdAt,
           theme: generated.theme,
         });
+
+        if (reachedUsageLimit) {
+          useAlert.getState().warning("Daily limit reached: you can create more haikus tomorrow.");
+        }
 
         return resolve(generated);
       });
@@ -469,8 +465,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           return reject(res.statusText);
         }
 
-        const data = await res.json();
-        const regenerated = data.haiku;
+        const { haiku: regenerated, reachedUsageLimit } = await res.json();
 
         trackEvent("haiku-regenerated", {
           id: regenerated.id,
@@ -484,6 +479,10 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         });
         // also sync up haikudle store 
         useHaikudle.setState({ haiku: regenerated });
+
+        if (reachedUsageLimit) {
+          useAlert.getState().warning("Daily limit reached: you can re-generate more haikus tomorrow.");
+        }
 
         return resolve(regenerated);
       });
@@ -553,20 +552,18 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         method: "POST",
         body: JSON.stringify({ dateCode, haikuId }),
       }).then(async (res) => {
-        const { _haikus } = get();
-
         if (res.status != 200) {
           handleErrorResponse(res, "create-daily-haiku", haikuId, `Error creating daily haiku`);
           return reject(res.statusText);
         }
 
-        const data = await res.json();
-        const dailyHaiku = data.dailyHaiku;
-
-        set({
-          dailyHaikus: {
-            ...get().dailyHaikus,
-            [dailyHaiku.id]: dailyHaiku,
+        const { dailyHaiku, nextDailyHaikuId } = await res.json();
+        
+        // update side panel content
+        useUser.setState((state: any) => {
+          return {
+            dailyHaikus: { ...state.dailyHaikus, [dailyHaiku.id]: dailyHaiku },
+            nextDailyHaikuId,
           }
         });
 

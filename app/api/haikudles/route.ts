@@ -37,14 +37,17 @@ export async function GET(request: NextRequest, params?: any) {
     todaysHaikudle = await saveDailyHaikudle(user, todaysDateCode, randomHaikudle.haikuId, randomHaikudle.id);
   }
 
-  let [haiku, haikudle, userHaikudle, nextDailyHaikudleId] = await Promise.all([
+  let [
+    haiku,
+    haikudle,
+    userHaikudle
+  ] = await Promise.all([
     getHaiku(user, todaysHaikudle.haikuId, true),
     getHaikudle(user, todaysHaikudle.haikuId),
     getUserHaikudle(user?.id, todaysHaikudle?.haikuId),
-    getNextDailyHaikudleId(),
   ]);
 
-  console.log('>> app.api.haikudles.GET', { haiku, haikudle, userHaikudle, nextDailyHaikudleId });
+  console.log('>> app.api.haikudles.GET', { haiku, haikudle, userHaikudle });
 
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
@@ -89,6 +92,11 @@ export async function POST(request: Request) {
     await createHaikudle(user, haikudle),
     await saveDailyHaikudle(user, haikudle.dateCode, haikudle.haikuId, haikudle.id),
   ]);
+  const nextDailyHaikudleId = await getNextDailyHaikudleId();
 
-  return NextResponse.json({ haikudle: createdHaikudle });
+  return NextResponse.json({
+    haikudle: createdHaikudle,
+    dailyHaikudle: createdDailyHaikudle,
+    nextDailyHaikudleId
+  });
 }
