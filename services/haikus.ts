@@ -1,7 +1,7 @@
 import chroma from 'chroma-js';
 import moment from 'moment';
 import { put } from '@vercel/blob';
-import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
+import { DailyHaiku, Haiku, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
 import { Store } from "@/types/Store";
 import { User } from '@/types/User';
 import { hashCode, mapToList, normalizeWord, uuid } from '@/utils/misc';
@@ -43,11 +43,11 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
   return new Promise((resolve, reject) => resolve(haikus.filter(Boolean)));
 }
 
-export async function getUserHaikus(user: User): Promise<Haiku[]> {
+export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]> {
   console.log(`>> services.haiku.getUserHaikus`, { user });
 
   let haikus = await store.haikus.find();
-  if (!user.isAdmin) {
+  if (!all) {
     // find all haikus that user solved corresponding haikudle
     const [generatedHaikus, userHaikus, userHaikudles] = await Promise.all([
       store.haikus.find({
@@ -71,7 +71,8 @@ export async function getUserHaikus(user: User): Promise<Haiku[]> {
 
     const userHaikuLookup = new Map(userHaikus
       .map((uh: UserHaiku) => [uh.haikuId, {
-        viewedAt: uh.updatedAt || uh.createdAt
+        viewedAt: uh.createdAt,
+        likedAt: uh.likedAt,
       }]));
 
     const userHaikudleLookup = new Map(userHaikudles
@@ -110,15 +111,16 @@ export async function getUserHaikus(user: User): Promise<Haiku[]> {
       generatedAt: haiku.generatedAt,
       solvedAt: haiku.solvedAt,
       viewedAt: haiku.viewedAt,
+      likedAt: haiku.likedAt,
       theme: haiku.theme,
       moves: haiku.moves,
     };
-  });
+  }).filter(Boolean);
 
-  return new Promise((resolve, reject) => resolve(haikus.filter(Boolean)));
+  return haikus;
 }
 
-export async function getHaiku(id: string, hashPoem?: boolean): Promise<Haiku | undefined> {
+export async function getHaiku(user: User, id: string, hashPoem?: boolean): Promise<Haiku | undefined> {
   console.log(`>> services.haiku.getHaiku`, { id, hashPoem });
 
   let haiku = await store.haikus.get(id);
@@ -130,6 +132,12 @@ export async function getHaiku(id: string, hashPoem?: boolean): Promise<Haiku | 
         .map((line: string) => line.split(/\s+/)
           .map((word: string) => hashCode(normalizeWord(word)))),
     }
+  }
+
+  if (user.isAdmin) {
+    haiku.numLikes = (await store.userHaikus.find({ haikuId: id }))
+      .filter((uh: UserHaiku) => uh.likedAt)
+      .length;
   }
 
   console.log(`>> services.haiku.getHaiku`, { id, haiku });
@@ -167,7 +175,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
   console.log(">> services.haiku.regenerateHaikuPoem", { poem, generatedSubject, generatedMood });
 
   // delete corresponding haikudle 
-  getHaikudle(haiku.id).then(async (haikudle: Haikudle) => {
+  getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
     console.log(">> services.haiku.regenerateHaikuPoem", { haikudle });
     if (haikudle) {
       deleteHaikudle(user, haikudle.id);
@@ -203,7 +211,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
   console.log(">> services.haiku.completeHaikuPoem", { completedPoem, generatedSubject, generatedMood });
 
   // delete corresponding haikudle 
-  getHaikudle(haiku.id).then(async (haikudle: Haikudle) => {
+  getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
     console.log(">> services.haiku.regenerateHaikuPoem", { haikudle });
     if (haikudle) {
       deleteHaikudle(user, haikudle.id);
@@ -297,7 +305,7 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
     throw `Cannot delete haiku with null id`;
   }
 
-  const haiku = await getHaiku(id);
+  const haiku = await getHaiku(user, id);
   if (!haiku) {
     throw `Haiku not found: ${id}`;
   }
@@ -334,7 +342,7 @@ export async function getUserHaiku(userId: string, haikuId: string): Promise<Use
   return new Promise((resolve, reject) => resolve(userHaiku));
 }
 
-export async function createUserHaiku(userId: string, haikuId: string): Promise<UserHaiku | undefined> {
+export async function createUserHaiku(userId: string, haikuId: string): Promise<UserHaiku> {
   console.log(`>> services.haiku.createUserHaiku`, { userId, haikuId });
 
   const id = `${userId}:${haikuId}`
@@ -344,10 +352,19 @@ export async function createUserHaiku(userId: string, haikuId: string): Promise<
     haikuId,
   };
 
-  const createdUserHaiku = await store.userHaikus.create(userId, userHaiku);
+  const createdUserHaiku = await store.userHaikus.create(userId, userHaiku, UserHaikuSaveOptions);
 
   console.log(`>> services.haiku.createUserHaiku`, { userHaiku: createdUserHaiku });
   return new Promise((resolve, reject) => resolve(createdUserHaiku));
+}
+
+export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<UserHaiku> {
+  console.log(`>> services.haiku.saveUserHaiku`, { userHaiku });
+
+  const savedUserHaiku = await store.userHaikus.update(user.id, userHaiku, UserHaikuSaveOptions);
+
+  console.log(`>> services.haiku.saveUserHaiku`, { savedUserHaiku });
+  return new Promise((resolve, reject) => resolve(savedUserHaiku));
 }
 
 export async function getDailyHaiku(id: string): Promise<DailyHaiku | undefined> {

@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   let reachedUsageLimit = false; // actually _will_ reach usage limit shortly
 
   if (!user.isAdmin) {
-    const h = await getHaiku(haiku.id);
+    const h = await getHaiku(user, haiku.id);
     
     // only owners and admins can update
     if (!user.isAdmin && h.createdBy != haiku.createdBy) {

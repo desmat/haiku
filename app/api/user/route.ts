@@ -19,16 +19,18 @@ export async function GET(request: NextRequest, params?: any) {
   // console.log('>> app.api.user.GET', { usage });
 
   let userHaikus = {
-    haikus: await getUserHaikus(user)
+    haikus: await getUserHaikus(user), 
   } as any;
 
   if (user.isAdmin) {
     const [
-      dailyHaikus, 
-      dailyHaikudles, 
-      nextDailyHaikuId, 
-      nextDailyHaikudleId
+      allHaikus,
+      dailyHaikus,
+      dailyHaikudles,
+      nextDailyHaikuId,
+      nextDailyHaikudleId,
     ] = await Promise.all([
+      await getUserHaikus(user, true),
       await getDailyHaikus(),
       await getDailyHaikudles(),
       await getNextDailyHaikuId(),
@@ -37,10 +39,11 @@ export async function GET(request: NextRequest, params?: any) {
 
     userHaikus = {
       ...userHaikus,
-      dailyHaikus, 
-      dailyHaikudles, 
+      allHaikus,
+      dailyHaikus,
+      dailyHaikudles,
       nextDailyHaikuId,
-      nextDailyHaikudleId
+      nextDailyHaikudleId,
     }
   }
 

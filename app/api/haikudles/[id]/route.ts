@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { getHaikudle, deleteHaikudle, saveUserHaikudle, getUserHaikudle, createHaikudle, getDailyHaikudles } from '@/services/haikudles';
+import { getHaikudle, deleteHaikudle, saveUserHaikudle, getUserHaikudle, createHaikudle, getDailyHaikudles, getNextDailyHaikudleId } from '@/services/haikudles';
 import { userSession } from '@/services/users';
 import { createUserHaiku, getHaiku, getUserHaiku } from '@/services/haikus';
 import { DailyHaikudle } from '@/types/Haikudle';
@@ -23,12 +23,14 @@ export async function GET(
 
   let [
     haiku,
-    haikudle
+    haikudle,
+    nextDailyHaikudleId
   ] = await Promise.all([
-    getHaiku(params.id, !dailyHaikudle?.id),
-    getHaikudle(params.id),
+    getHaiku(user, params.id, !dailyHaikudle?.id),
+    getHaikudle(user, params.id),
+    getNextDailyHaikudleId(),
   ]);
-  const myHaiku = !user.isAdmin && haiku?.createdBy == user.id && await getHaiku(params.id);
+  const myHaiku = !user.isAdmin && haiku?.createdBy == user.id && await getHaiku(user, params.id);
   // console.log('>> app.api.haikudles.GET', { haiku, haikudle, dailyHaikudle, myHaiku });
 
   if (!haiku) {
@@ -74,7 +76,7 @@ export async function PUT(
 
   // TODO pull Haikudle and User Haikudle and figure out the rest
 
-  const haikudle = await getHaikudle(params.id);
+  const haikudle = await getHaikudle(user, params.id);
 
   if (!haikudle) {
     return NextResponse.json({ haiku: {} }, { status: 404 });

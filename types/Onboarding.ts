@@ -44,8 +44,8 @@ export const haikuOnboardingSteps = [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>Find all your haikus in the side panel to the left.</div>
-        <div>To learn about me, access the source code, copy or share this haiku see the buttons at the bottom.</div>
-        <div>For the best mobile experience hit the 'Add to Home Screen' under the Share or three-dot menu icon.</div>
+        <div>To learn about me, access the source code, <b>like</b>, <b>copy</b> or <b>share</b> this haiku see the buttons at the bottom.</div>
+        <div>For the best mobile experience hit the <b>Add to Home Screen</b> under the <b>Share</b> or <b>three-dot menu icon</b>.</div>
         <div>Enjoy <b>Haiku Genius!</b></div>        
       </div>
     `,

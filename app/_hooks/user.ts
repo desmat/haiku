@@ -6,7 +6,7 @@ import { decodeJWT, encodeJWT } from '@/utils/jwt';
 import { listToMap, uuid } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from './alert';
-import { DailyHaiku, Haiku } from '@/types/Haiku';
+import { DailyHaiku, UserHaiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 
 const useUser: any = create(devtools((set: any, get: any) => ({
@@ -17,7 +17,8 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   // loading: false, // guard against signin in many times anonymously
 
   // populate the side panel
-  haikus: {} as { number: Haiku },
+  haikus: {} as { number: UserHaiku },
+  allHaikus: {} as { number: UserHaiku },
   dailyHaikus: {} as { string: DailyHaiku },
   dailyHaikudles: {} as { string: DailyHaikudle },
   nextDailyHaikuId: undefined as string | undefined,
@@ -50,14 +51,16 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       user: localUser,
       token
     } = await loadLocal();
+    const remoteRes = await loadRemote(token);
     const {
       user: remoteUser,
       haikus,
+      allHaikus,
       dailyHaikus,
       dailyHaikudles,
       nextDailyHaikuId,
-      nextDailyHaikudleId
-    } = await loadRemote(token);
+      nextDailyHaikudleId,
+    } = remoteRes;
     // console.log(">> hooks.user.load()", { remoteRes });
 
     user = {
@@ -72,6 +75,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       token,
       loaded: true,
       haikus: haikus ? listToMap(haikus, { keyFn: (e: any) => e.haikuId }) : {},
+      allHaikus: allHaikus ? listToMap(allHaikus, { keyFn: (e: any) => e.haikuId }) : {},
       dailyHaikus: dailyHaikus ? listToMap(dailyHaikus, { keyFn: (e: any) => e.haikuId }) : {},
       dailyHaikudles: dailyHaikudles ? listToMap(dailyHaikudles, { keyFn: (e: any) => e.haikuId }) : {},
       nextDailyHaikuId,
