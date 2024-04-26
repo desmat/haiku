@@ -55,10 +55,12 @@ export async function GET(
   }
 
   return NextResponse.json({
-    ...haikudle,
-    ...userHaikudle?.haikudle,
-    previousDailyHaikudleId: dailyHaikudle?.id,
-    haiku: myHaiku || haiku,
+    haikudle: {
+      ...haikudle,
+      ...userHaikudle?.haikudle,
+      previousDailyHaikudleId: dailyHaikudle?.id,
+      haiku: myHaiku || haiku,
+    }
   });
 }
 
