@@ -113,6 +113,11 @@ export default function SidePanel({
   }
 
   const handleClickedFilter = (filterType: FilterType) => {
+    trackEvent("clicked-filter", {
+      userId: user.id,
+      value: filter,
+    });
+
     setFilter(filter == filterType ? undefined : filterType);
   }
 
