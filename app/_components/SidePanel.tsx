@@ -50,7 +50,7 @@ export default function SidePanel({
     userDailyHaikus,
     userDailyHaikudles,
   ] = useUser((state: any) => [
-    user.isAdmin && !filter 
+    user.isAdmin && !filter
       ? state.allHaikus ? Object.values(state.allHaikus) : []
       : state.haikus ? Object.values(state.haikus) : [],
     state.dailyHaikus ? Object.values(state.dailyHaikus) : [],
@@ -341,7 +341,9 @@ export default function SidePanel({
                 </StyledLayers>
               ))
             }
-            {(Object.values(listMode == "haiku" ? userHaikus : userDailyHaikudles).length > numPages * pageSize) &&
+            {((listMode == "haiku" ? userHaikus : userDailyHaikudles)
+              .filter(filterBy)
+              .length > numPages * pageSize) &&
               <div
                 className="py-2 cursor-pointer"
                 onClick={loadMore}
