@@ -38,8 +38,8 @@ export async function GET(request: NextRequest, params?: any) {
   }
 
   let [haiku, haikudle, userHaikudle, nextDailyHaikudleId] = await Promise.all([
-    getHaiku(todaysHaikudle.haikuId, true),
-    getHaikudle(todaysHaikudle.haikuId),
+    getHaiku(user, todaysHaikudle.haikuId, true),
+    getHaikudle(user, todaysHaikudle.haikuId),
     getUserHaikudle(user?.id, todaysHaikudle?.haikuId),
     getNextDailyHaikudleId(),
   ]);

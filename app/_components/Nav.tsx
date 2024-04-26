@@ -239,10 +239,15 @@ function BottomLinks({
           >
             <div
               key="heart"
-              title={haiku.likedAt ? "Un-like this haiku" : "Like this haiku"}
-              className="cursor-pointer"
+              title={`${haiku.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user.isAdmin ? `(${haiku.numLikes} like${!haiku.numLikes || haiku.numLikes > 1 ? "s" : ""})` : ""}`}
+              className="cursor-pointer relative"
               onClick={onLikeHaiku}
             >
+              {user.isAdmin && haiku?.numLikes > 0 &&
+                <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-red-600">
+                  {/* <span className="relative text-white text-[4pt] p-[0.2rem]">{haiku?.numLikes}</span> */}
+                </div>
+              }
               <PopOnClick color={haiku?.bgColor} >
                 <IoHeartSharp className="text-xl" />
               </PopOnClick>

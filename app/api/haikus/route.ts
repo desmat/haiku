@@ -66,7 +66,7 @@ export async function GET(request: NextRequest, params?: any) {
 
   const todaysDateCode = moment().format("YYYYMMDD");
   let todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
-  let todaysHaiku = await getHaiku(todaysDailyHaiku?.haikuId || "");
+  let todaysHaiku = await getHaiku(user, todaysDailyHaiku?.haikuId || "");
   console.log('>> app.api.haiku.GET', { todaysDateCode, todaysDailyHaiku, todaysHaiku });
 
   if (!todaysDailyHaiku) {

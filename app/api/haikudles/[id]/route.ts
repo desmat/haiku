@@ -22,11 +22,11 @@ export async function GET(
     .filter((dh: DailyHaikudle) => dh.id < todaysDateCode && dh.haikudleId == params.id)[0];
 
   let [haiku, haikudle, nextDailyHaikudleId] = await Promise.all([
-    getHaiku(params.id, !dailyHaikudle?.id),
-    getHaikudle(params.id),
+    getHaiku(user, params.id, !dailyHaikudle?.id),
+    getHaikudle(user, params.id),
     getNextDailyHaikudleId(),
   ]);
-  const myHaiku = !user.isAdmin && haiku?.createdBy == user.id && await getHaiku(params.id);
+  const myHaiku = !user.isAdmin && haiku?.createdBy == user.id && await getHaiku(user, params.id);
   // console.log('>> app.api.haikudles.GET', { haiku, haikudle, dailyHaikudle, myHaiku });
 
   if (!haiku) {
@@ -76,7 +76,7 @@ export async function PUT(
 
   // TODO pull Haikudle and User Haikudle and figure out the rest
 
-  const haikudle = await getHaikudle(params.id);
+  const haikudle = await getHaikudle(user, params.id);
 
   if (!haikudle) {
     return NextResponse.json({ haiku: {} }, { status: 404 });

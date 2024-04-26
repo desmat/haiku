@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
   console.log('>> app.api.haikus.[id].daily POST', { dateCode, haikuId });
 
-  const haiku = await getHaiku(haikuId);
+  const haiku = await getHaiku(user, haikuId);
 
   if (!haiku) {
     return NextResponse.json(

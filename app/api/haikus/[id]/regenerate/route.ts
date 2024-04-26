@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   const { user } = await userSession(request);
 
   if (!user.isAdmin) {
-    const h = await getHaiku(haiku.id);
+    const h = await getHaiku(user, haiku.id);
     
     // only owners and admins can update
     if (!user.isAdmin && h.createdBy != haiku.createdBy) {

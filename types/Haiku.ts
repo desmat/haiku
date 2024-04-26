@@ -24,6 +24,13 @@ export type UserHaiku = {
   likedAt?: number,
 };
 
+export const UserHaikuSaveOptions = {
+  indices: {
+    haikuId: "string",
+    likedAt: "number",
+  }
+};
+
 export type DailyHaiku = {
   id: string,
   haikuId: string,

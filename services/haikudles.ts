@@ -32,8 +32,8 @@ export async function getHaikudles(query?: any): Promise<Haikudle[]> {
   return new Promise((resolve, reject) => resolve(haikudles.filter(Boolean)));
 }
 
-async function createInProgress(haikudle: Haikudle): Promise<Haikudle> {
-  const haiku = await getHaiku(haikudle.haikuId);
+async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudle> {
+  const haiku = await getHaiku(user, haikudle.haikuId);
   console.log(`>> services.haikudle.createInProgress`, { haiku });
 
   let words = haiku.poem
@@ -73,14 +73,14 @@ async function createInProgress(haikudle: Haikudle): Promise<Haikudle> {
   return haikudle;
 }
 
-export async function getHaikudle(id: string): Promise<Haikudle | undefined> {
+export async function getHaikudle(user: User, id: string): Promise<Haikudle | undefined> {
   console.log(`>> services.haikudle.getHaikudle`, { id });
 
   let haikudle = await store.haikudles.get(id);
   console.log(`>> services.haikudle.getHaikudle`, { id, haikudle });
 
   if (haikudle && !haikudle.inProgress) {
-    haikudle = await createInProgress(haikudle);
+    haikudle = await createInProgress(user, haikudle);
   }
 
   console.log(`>> services.haikudle.getHaikudle`, { haikudle });
@@ -101,7 +101,7 @@ export async function createHaikudle(user: User, haikudle: Haikudle): Promise<Ha
   } as Haikudle;
 
   if (!haikudle.inProgress) {
-    newHaikudle = await createInProgress(newHaikudle);
+    newHaikudle = await createInProgress(user, newHaikudle);
   }
 
   return store.haikudles.create(user.id, newHaikudle);
@@ -114,7 +114,7 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
     throw `Cannot delete haikudle with null id`;
   }
 
-  const haikudle = await getHaikudle(id);
+  const haikudle = await getHaikudle(user, id);
   if (!haikudle) {
     throw `Haikudle not found: ${id}`;
   }

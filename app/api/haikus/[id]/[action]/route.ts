@@ -13,11 +13,11 @@ export async function POST(
   console.log(`>> app.api.haiku.[id].[action].POST`, { params });
 
   if (params.action == "like") {
-    const [data, { user }, haiku] = await Promise.all([
+    const [data, { user }] = await Promise.all([
       request.json(),
       userSession(request),
-      getHaiku(params.id),
     ]);
+    const haiku = getHaiku(user, params.id);
 
     if (!haiku) {
       return NextResponse.json(
