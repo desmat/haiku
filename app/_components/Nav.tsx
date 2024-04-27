@@ -593,11 +593,11 @@ function SidePanel({
                 <StyledLayers key={i} styles={altStyles}>
                   <Link
                     href={`/${h.haikuId || h.id}`}
-                    onClick={(e: any) => {
-                      e.preventDefault();
-                      /* !panelPinned && */ toggleMenuOpened();
-                      onSelectHaiku && onSelectHaiku(h.haikuId || h.id);
-                    }}
+                    // onClick={(e: any) => {
+                    //   e.preventDefault();
+                    //   /* !panelPinned && */ toggleMenuOpened();
+                    //   onSelectHaiku && onSelectHaiku(h.haikuId || h.id);
+                    // }}
                   >
                     <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>
                     {user?.isAdmin &&

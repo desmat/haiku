@@ -79,7 +79,9 @@ export default async function MainClientSideLoadHaikuPage({ mode, id, lang, refr
 
   const opts = await fetchOpts();
   if (opts) {
-    const res = await fetch(`/api/haikus${params}`, opts) //.then(async (res: any) => {
+    const res = await fetch(id 
+      ? `/api/haikus/${id}${params}`
+      : `/api/haikus${params}`, opts) //.then(async (res: any) => {
 
     if (res.status != 200) {
       // const errorHaiku = await handleErrorResponse(res, "fetch-haikus", undefined, `Error fetching haikus`);

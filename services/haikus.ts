@@ -46,7 +46,9 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
 export async function getUserHaikus(user: User): Promise<Haiku[]> {
   console.log(`>> services.haiku.getUserHaikus`, { user });
 
-  let haikus = await store.haikus.find();
+  let haikus = (await store.haikus.find())
+    .filter((haiku: Haiku) => !haiku.deprecated);
+
   if (!user.isAdmin) {
     // find all haikus that user solved corresponding haikudle
     const [generatedHaikus, userHaikus, userHaikudles] = await Promise.all([
@@ -315,6 +317,23 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
   if (!(haiku.createdBy == user.id || user.isAdmin)) {
     throw `Unauthorized`;
   }
+
+  const original = await store.haikus.get(haiku.id);
+
+  if (!original) {
+    throw `Not found`;
+  }
+
+  const version = (original.version || 0);
+  store.haikus.create(user.id, {
+    ...original,
+    id: `${original.id}:${version}`,
+    version,
+    deprecated: true,
+  });
+
+  // edge case where we're editing a previous version
+  delete haiku.deprecated;
 
   const poem = haiku.poem.join("/");
   if (poem.includes("...") || poem.includes("…")) {
