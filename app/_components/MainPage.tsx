@@ -19,7 +19,7 @@ import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
 
-export default function MainPage({ mode, id, lang, refreshDelay }: { mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
+export default function MainPage({ mode, id, version, lang, refreshDelay }: { mode: string, id?: string, version?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
   // console.log('>> app.MainPage.render()', { mode, id, lang });
 
   const haikuMode = mode == "haiku";
@@ -205,7 +205,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
             setHaiku(loadedHaikudle?.haiku);
             setHaikuId(loadedHaikudle?.haiku?.id);
           })
-        : loadHaikus(haikuId || (random ? { random: true, lang } : { lang }), mode)
+        : loadHaikus(haikuId || (random ? { random: true, lang } : { lang }), mode, version)
           .then((haikus: Haiku | Haiku[]) => {
             // console.log('>> app.MainPage.loadPage loadHaikus.then', { haikus });
             const loadedHaiku = haikus[0] || haikus;
@@ -537,7 +537,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
           setHaiku(loadedHaikudle?.haiku);
           setHaikuId(loadedHaikudle?.haiku?.id);
         })
-      : loadHaikus({ random: true, lang }, mode)
+      : loadHaikus({ random: true, lang }, mode, version)
         .then((haikus: Haiku | Haiku[]) => {
           // console.log('>> app.MainPage.loadPage loadRandom.then', { haikus });
           const loadedHaiku = haikus[0] || haikus;

@@ -24,7 +24,7 @@ export async function GET(
   }
 
   const [haiku, userHaiku, userHaikudle] = await Promise.all([
-    getHaiku(user, params.id, query.mode == "haikudle"),
+    getHaiku(user, params.id, query.mode == "haikudle", query.version),
     getUserHaiku(user.id, params.id),
     getUserHaikudle(user?.id, params.id),
   ]);

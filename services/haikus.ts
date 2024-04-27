@@ -120,12 +120,19 @@ export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]>
   return haikus;
 }
 
-export async function getHaiku(user: User, id: string, hashPoem?: boolean): Promise<Haiku | undefined> {
+export async function getHaiku(user: User, id: string, hashPoem?: boolean, version?: string): Promise<Haiku | undefined> {
   console.log(`>> services.haiku.getHaiku`, { id, hashPoem });
 
-  let haiku = await store.haikus.get(id);
+  const versionedId = version ? `${id}:${version}` : id;
+  let haiku = await store.haikus.get(versionedId);
 
-  if (haiku && hashPoem) {
+  if (!haiku) return;
+
+  if (version) {
+    haiku = { ...haiku, id };
+  }
+
+  if (hashPoem) {
     haiku = {
       ...haiku,
       poem: haiku.poem
@@ -141,7 +148,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean): Prom
   }
 
   console.log(`>> services.haiku.getHaiku`, { id, haiku });
-  return new Promise((resolve, reject) => resolve(haiku));
+  return haiku;
 }
 
 export async function createHaiku(user: User): Promise<Haiku> {

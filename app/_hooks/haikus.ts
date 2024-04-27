@@ -160,7 +160,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     }
   },
 
-  load: async (queryOrId?: object | string, mode?: string): Promise<Haiku | Haiku[]> => {
+  load: async (queryOrId?: object | string, mode?: string, version?: string): Promise<Haiku | Haiku[]> => {
     const { setLoaded, _mode } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
@@ -168,7 +168,8 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
     return new Promise(async (resolve, reject) => {
       if (id) {
-        fetch(`/api/haikus/${id}${mode ? `?mode=${mode || _mode}` : ""}`, await fetchOpts()).then(async (res) => {
+        const params = mapToSearchParams({ mode, version});
+        fetch(`/api/haikus/${id}${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();
 
           if (res.status != 200) {
