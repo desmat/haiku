@@ -324,12 +324,19 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
     throw `Unauthorized`;
   }
 
+  const version = (haiku.version || 0);
+  store.haikus.create(user.id, {
+    ...haiku,
+    version,
+    id: `${haiku.id}:${version}`,
+  });
+
   const poem = haiku.poem.join("/");
   if (poem.includes("...") || poem.includes("…")) {
     return completeHaikuPoem(user, haiku);
   }
 
-  return store.haikus.update(user.id, haiku);
+  return store.haikus.update(user.id, { ...haiku, version: version + 1 });
 }
 
 export async function getUserHaiku(userId: string, haikuId: string): Promise<UserHaiku | undefined> {
