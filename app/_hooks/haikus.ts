@@ -441,7 +441,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     });
   },
 
-  regenerate: async (user: User, haiku: Haiku) => {
+  regenerate: async (user: User, haiku: Haiku, part: undefined | "poem" | "image") => {
     // console.log(">> hooks.haiku.regenerate", { haiku });
     const { _haikus } = get();
 
@@ -457,7 +457,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       fetch(`/api/haikus/${haiku.id}/regenerate`, {
         ...await fetchOpts(),
         method: "POST",
-        body: JSON.stringify({ haiku }),
+        body: JSON.stringify({ haiku, part }),
       }).then(async (res) => {
         const { _haikus } = get();
 
@@ -470,8 +470,9 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
         trackEvent("haiku-regenerated", {
           id: regenerated.id,
-          name: regenerated.name,
+          theme: regenerated.theme,
           userId: regenerated.updatedBy,
+          part,
         });
 
         // replace optimistic 

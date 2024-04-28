@@ -239,6 +239,56 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
   });
 }
 
+export async function regenerateHaikuImage(user: any, haiku: Haiku): Promise<Haiku> {
+  console.log(">> services.haiku.regenerateHaikuImage", { user, haiku });
+  const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
+
+  const {
+    url: openaiUrl,
+    prompt: imagePrompt,
+    revisedPrompt: imageRevisedPrompt
+  } = await openai.generateBackgroundImage(haiku.theme, haiku.mood);
+
+  const imageRet = await fetch(openaiUrl);
+  // console.log(">> services.haiku.regenerateHaikuImage", { imageRet });
+
+  const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+  console.log(">> services.haiku.generateHaiku", { imageBuffer });
+
+  const getColors = require('get-image-colors')
+
+  const colors = await getColors(imageBuffer, 'image/png');
+  console.log(">> services.haiku.generateHaiku", { colors });
+
+  // sort by darkness and pick darkest for foreground, lightest for background
+  const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
+
+  const haikuId = uuid();
+  const filename = `haiku-${haikuId}-${haiku.theme?.replaceAll(/\W/g, "_").toLowerCase()}-${(haiku.version || 0) + 1}.png`;
+  const blob = !debugOpenai && await put(filename, imageBuffer, {
+    access: 'public',
+    addRandomSuffix: false,
+  });
+  // console.log(">> services.haiku.generateHaiku", { subject, filename, blob });
+
+  let updatedHaiku = {
+    ...haiku,
+    imagePrompt,
+    imageRevisedPrompt,
+    // @ts-ignore
+    bgImage: debugOpenai ? openaiUrl : blob.url,
+    color: sortedColors[0].darken(0.5).hex(),
+    bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
+    colorPalette: sortedColors.map((c: any) => c.hex()),
+  } as Haiku;
+
+  if (!user.isAdmin) {
+    incUserUsage(user, "haikusCreated");
+  }
+
+  return saveHaiku(user, updatedHaiku);
+}
+
 export async function generateHaiku(user: any, lang?: LanguageType, subject?: string, mood?: string): Promise<Haiku> {
   console.log(">> services.haiku.generateHaiku", { lang, subject, mood, user });
   const language = supportedLanguages[lang || "en"].name;

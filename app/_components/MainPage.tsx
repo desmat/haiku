@@ -503,9 +503,23 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
     if (user?.isAdmin || haiku?.createdBy == user.id) {
       resetAlert();
       setRegenerating(true);
-      const ret = await regenerateHaiku(user, haiku);
+      const ret = await regenerateHaiku(user, haiku, "poem");
       // console.log('>> app.page.startRegenerateHaiku()', { ret });
       incUserUsage(user, "haikusRegenerated");
+      setHaiku(ret);
+      setRegenerating(false);
+    }
+  }
+
+  const startRegenerateHaikuImage = async () => {
+    // console.log('>> app.page.startRegenerateHaiku()');
+
+    if (user?.isAdmin || haiku?.createdBy == user.id) {
+      resetAlert();
+      setRegenerating(true);
+      const ret = await regenerateHaiku(user, haiku, "image");
+      // console.log('>> app.page.startRegenerateHaiku()', { ret });
+      incUserUsage(user, "haikusCreated"); // TODO haikuImageRegenerated?
       setHaiku(ret);
       setRegenerating(false);
     }
@@ -758,7 +772,8 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
           regenerating={regenerating}
           onboardingElement={onboardingElement}
           refresh={loadRandom}
-          regenerateHaiku={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku()}
+          regeneratePoem={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku()}
+          regenerateImage={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage()}
           copyHaiku={copyHaiku}
         />
       }

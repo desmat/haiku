@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { regenerateHaikuPoem, getHaiku } from '@/services/haikus';
+import { regenerateHaikuPoem, getHaiku, regenerateHaikuImage } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { userUsage } from '@/services/usage';
 import { USAGE_LIMIT } from '@/types/Usage';
@@ -11,10 +11,10 @@ export const maxDuration = 300;
 export async function POST(request: Request) {
   console.log('>> app.api.haiku.POST', {});
 
-  const data: any = await request.json();
-  const haiku = data.haiku;
+  let { haiku, part }: any = await request.json();
+  part = part || "poem";
 
-  console.log('>> app.api.haiku.regenerate.POST', { haiku });
+  console.log('>> app.api.haiku.regenerate.POST', { haiku, part });
 
   const { user } = await userSession(request);
   let reachedUsageLimit = false; // actually _will_ reach usage limit shortly
@@ -44,7 +44,11 @@ export async function POST(request: Request) {
     }
   }
 
-  const updatedHaiku = await regenerateHaikuPoem(user, haiku);
+  if (!["image", "poem"].includes(part))throw `Regenerate part not supported: ${part}`;
 
+  const updatedHaiku = part == "image"
+    ? await regenerateHaikuImage(user, haiku)
+    : await regenerateHaikuPoem(user, haiku);
+      
   return NextResponse.json({ haiku: updatedHaiku, reachedUsageLimit });
 }

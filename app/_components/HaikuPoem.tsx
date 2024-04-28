@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { syllable } from "syllable";
 import { FaEdit } from "react-icons/fa";
+import { TbReload } from "react-icons/tb";
 import useAlert from "@/app/_hooks/alert";
 import useHaikus from "@/app/_hooks/haikus";
 import { Haiku } from "@/types/Haiku";
@@ -114,7 +115,8 @@ export default function HaikuPoem({
   styles,
   altStyles,
   onboardingElement,
-  regenerate,
+  regeneratePoem,
+  regenerateImage,
   refresh,
   copyHaiku
 }: {
@@ -125,7 +127,8 @@ export default function HaikuPoem({
   styles: any[],
   altStyles?: any[],
   onboardingElement?: string,
-  regenerate?: any,
+  regeneratePoem?: any,
+  regenerateImage?: any,
   refresh?: any,
   copyHaiku?: any,
 }) {
@@ -149,8 +152,10 @@ export default function HaikuPoem({
   const canCopy = copyAllowed && !editing && !saving;
   const editAllowed = !showcaseMode && (user?.isAdmin || haiku.createdBy == user?.id) && saveHaiku;
   const canEdit = editAllowed && !saving && !onboarding;
-  const regenerateAllowed = (user?.isAdmin || haiku.createdBy == user?.id) && regenerate;
-  const canRegenerate = regenerateAllowed && !editing && !saving;
+  const regeneratePoemAllowed = (user?.isAdmin || haiku.createdBy == user?.id) && regeneratePoem;
+  const regenerateImageAllowed = (user?.isAdmin || haiku.createdBy == user?.id) && regenerateImage;
+  const canRegeneratePoem = regeneratePoemAllowed && !editing && !saving;
+  const canRegenerateImage = regenerateImageAllowed && !editing && !saving;
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { haiku, updatedPoem, editingPoemLine });
 
   const handleClickHaiku = (e: any) => {
@@ -469,7 +474,7 @@ export default function HaikuPoem({
                   </StyledLayers>
                 </div>
 
-                {!showcaseMode && (copyAllowed || editAllowed || regenerateAllowed) &&
+                {!showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed) &&
                   <div
                     className="onboarding-container group/actions _bg-yellow-200 flex flex-row gap-2 mt-auto md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.2rem] sm:pb-[0.5rem] pb-[0.4rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
                   >
@@ -510,7 +515,7 @@ export default function HaikuPoem({
                         </StyledLayers>
                       </Link>
                     }
-                    {regenerateAllowed &&
+                    {regeneratePoemAllowed &&
                       <div className="_bg-pink-200">
                         {!user?.isAdmin && (user.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
                           <span title="Exceeded daily limit: try again later">
@@ -526,11 +531,39 @@ export default function HaikuPoem({
                           <span title="Regenerate this haiku with the same theme">
                             <StyledLayers styles={altStyles || []}>
                               <GenerateIcon
-                                onClick={() => canRegenerate && regenerate()}
+                                onClick={() => canRegeneratePoem && regeneratePoem()}
                                 sizeOverwrite={`
                                   h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 
                                   ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"} 
-                                  ${canRegenerate ? "group-hover/actions:opacity-100 cursor-pointer" : "cursor-default"}
+                                  ${canRegeneratePoem ? "group-hover/actions:opacity-100 cursor-pointer" : "cursor-default"}
+                                `}
+                              />
+                            </StyledLayers>
+                          </span>
+                        }
+                      </div>
+                    }
+                    {regenerateImageAllowed &&
+                      <div className="_bg-pink-200">
+                        {!user?.isAdmin && (user.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
+                          <span title="Exceeded daily limit: try again later">
+                            <StyledLayers styles={altStyles || []}>
+                              <TbReload className={`
+                                h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 
+                                ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"}
+                              `} />
+                            </StyledLayers>
+                          </span>
+                        }
+                        {(user?.isAdmin || (user.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
+                          <span title="Regenerate this haiku's art with the same theme">
+                            <StyledLayers styles={altStyles || []}>
+                              <TbReload
+                                onClick={() => canRegenerateImage && regenerateImage()}
+                                className={`
+                                  h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 ml-[-0.1rem]
+                                  ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"} 
+                                  ${canRegenerateImage ? "group-hover/actions:opacity-100 cursor-pointer" : "cursor-default"}
                                 `}
                               />
                             </StyledLayers>
