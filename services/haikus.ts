@@ -174,6 +174,8 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
   const language = supportedLanguages[lang].name;
 
   const {
+    prompt: poemPrompt,
+    languageModel,
     response: {
       haiku: poem,
       subject: generatedSubject,
@@ -181,7 +183,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
     }
   } = await openai.generateHaiku(language, subject, mood);
   // console.log(">> services.haiku.regenerateHaikuPoem", { ret });
-  console.log(">> services.haiku.regenerateHaikuPoem", { poem, generatedSubject, generatedMood });
+  console.log(">> services.haiku.regenerateHaikuPoem", { poem, generatedSubject, generatedMood, poemPrompt });
 
   // delete corresponding haikudle 
   getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
@@ -200,6 +202,8 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
     poem,
     theme: generatedSubject,
     mood: generatedMood,
+    poemPrompt,
+    languageModel,
   });
 }
 
@@ -239,15 +243,16 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
   });
 }
 
-export async function regenerateHaikuImage(user: any, haiku: Haiku): Promise<Haiku> {
+export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: string): Promise<Haiku> {
   console.log(">> services.haiku.regenerateHaikuImage", { user, haiku });
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
 
   const {
     url: openaiUrl,
     prompt: imagePrompt,
-    revisedPrompt: imageRevisedPrompt
-  } = await openai.generateBackgroundImage(haiku.theme, haiku.mood);
+    artStyle: selectedArtStyle,
+    imageModel,
+  } = await openai.generateBackgroundImage(haiku.theme, haiku.mood, artStyle);
 
   const imageRet = await fetch(openaiUrl);
   // console.log(">> services.haiku.regenerateHaikuImage", { imageRet });
@@ -273,8 +278,9 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku): Promise<Hai
 
   let updatedHaiku = {
     ...haiku,
+    artStyle: selectedArtStyle,
     imagePrompt,
-    imageRevisedPrompt,
+    imageModel,
     // @ts-ignore
     bgImage: debugOpenai ? openaiUrl : blob.url,
     color: sortedColors[0].darken(0.5).hex(),
@@ -289,12 +295,14 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku): Promise<Hai
   return saveHaiku(user, updatedHaiku);
 }
 
-export async function generateHaiku(user: any, lang?: LanguageType, subject?: string, mood?: string): Promise<Haiku> {
+export async function generateHaiku(user: any, lang?: LanguageType, subject?: string, mood?: string, artStyle?: string): Promise<Haiku> {
   console.log(">> services.haiku.generateHaiku", { lang, subject, mood, user });
   const language = supportedLanguages[lang || "en"].name;
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
 
   const {
+    prompt: poemPrompt,
+    languageModel,
     response: {
       haiku: poem,
       subject: generatedSubject,
@@ -302,13 +310,14 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
     }
   } = await openai.generateHaiku(language, subject, mood);
   // console.log(">> services.haiku.generateHaiku", { ret });
-  console.log(">> services.haiku.generateHaiku", { poem, generatedSubject });
+  console.log(">> services.haiku.generateHaiku", { poem, generatedSubject, generatedMood, poemPrompt });
 
   const {
     url: openaiUrl,
     prompt: imagePrompt,
-    revisedPrompt: imageRevisedPrompt
-  } = await openai.generateBackgroundImage(subject || generatedSubject, mood || generatedMood);
+    artStyle: selectedArtStyle,
+    imageModel,
+  } = await openai.generateBackgroundImage(subject || generatedSubject, mood || generatedMood, artStyle);
 
   const imageRet = await fetch(openaiUrl);
   // console.log(">> services.haiku.generateHaiku", { imageRet });
@@ -340,8 +349,11 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
     status: "created",
     theme: generatedSubject,
     mood: generatedMood,
+    artStyle: selectedArtStyle,
+    poemPrompt,
+    languageModel,
     imagePrompt,
-    imageRevisedPrompt,
+    imageModel,
     // @ts-ignore
     bgImage: debugOpenai ? openaiUrl : blob.url,
     color: sortedColors[0].darken(0.5).hex(),

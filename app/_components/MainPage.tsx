@@ -14,7 +14,7 @@ import useUser from '@/app/_hooks/user';
 import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
 import { Haikudle } from '@/types/Haikudle';
-import { haikuGeneratedOnboardingSteps, haikuOnboardingSteps, haikudleOnboardingSteps } from '@/types/Onboarding';
+import { haikuGeneratedOnboardingSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleOnboardingSteps } from '@/types/Onboarding';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
@@ -468,20 +468,27 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
     );
   }
 
+  const showHaikuDetails = () => {
+    startOnboarding(
+      haikuPromptSteps(haiku),
+      // () => saveUser({ ...user, preferences: { ...user.preferences, onboardedGenerated: true } })
+    );
+  }
+
   const startGenerateHaiku = async () => {
     // console.log('>> app.page.startGenerateHaiku()');
     trackEvent("clicked-generate-haiku", {
       userId: user?.id,
     });
 
-    const subject = true // user?.isAdmin
-      ? prompt(`Haiku's theme or subject? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test poem)" : "(For example 'nature', 'cherry blossoms', or leave blank)"}`)
-      : "";
+    const subject = prompt(`Haiku's theme or subject? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test poem)" : "(For example 'nature', 'cherry blossoms', or leave blank)"}`)
 
     if (typeof (subject) == "string") {
+      const artStyle = ""; //prompt(`Art style? (For example 'watercolor', 'Japanese woodblock print', 'abstract oil painting with large strokes', or leave blank for a style picked at random)"`);
+
       resetAlert();
       setGenerating(true);
-      const ret = await generateHaiku(user, { lang, subject });
+      const ret = await generateHaiku(user, { lang, subject, artStyle });
       // console.log('>> app.page.startGenerateHaiku()', { ret });
 
       if (ret?.id) {
@@ -500,6 +507,10 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
   const startRegenerateHaiku = async () => {
     // console.log('>> app.page.startRegenerateHaiku()');
 
+    trackEvent("clicked-regenerate-haiku", {
+      userId: user?.id,
+    });
+
     if (user?.isAdmin || haiku?.createdBy == user.id) {
       resetAlert();
       setRegenerating(true);
@@ -514,14 +525,25 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
   const startRegenerateHaikuImage = async () => {
     // console.log('>> app.page.startRegenerateHaiku()');
 
+    trackEvent("clicked-regenerate-image", {
+      userId: user?.id,
+    });
+
     if (user?.isAdmin || haiku?.createdBy == user.id) {
-      resetAlert();
-      setRegenerating(true);
-      const ret = await regenerateHaiku(user, haiku, "image");
-      // console.log('>> app.page.startRegenerateHaiku()', { ret });
-      incUserUsage(user, "haikusCreated"); // TODO haikuImageRegenerated?
-      setHaiku(ret);
-      setRegenerating(false);
+      const artStyle = prompt(`Art style? (For example 'watercolor', 'Japanese woodblock print', 'abstract oil painting with large strokes', or leave blank for a style picked at random)"`, haiku.artStyle);
+      if (typeof (artStyle) == "string") {
+        resetAlert();
+        setRegenerating(true);
+        const ret = await regenerateHaiku(user, haiku, "image", { artStyle });
+        // console.log('>> app.page.startRegenerateHaiku()', { ret });
+        incUserUsage(user, "haikusCreated"); // TODO haikuImageRegenerated?
+        setHaiku(ret);
+        setRegenerating(false);
+      } else {
+        trackEvent("cancelled-regenerate-image", {
+          userId: user?.id,
+        });
+      }
     }
   }
 
@@ -736,13 +758,15 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
         onDelete={doDelete}
         onSaveDailyHaiku={saveDailyHaiku}
         onShowAbout={
-          userGeneratedHaiku
-            ? showAboutGenerated
-            : haikudleMode
-              ? previousDailyHaikudleId
-                ? showAboutPreviousDaily // with onboarding?
-                : startFirstVisitHaikudleOnboarding
-              : startFirstVisitOnboarding
+          user?.isAdmin
+            ? showHaikuDetails
+            : userGeneratedHaiku
+              ? showAboutGenerated
+              : haikudleMode
+                ? previousDailyHaikudleId
+                  ? showAboutPreviousDaily // with onboarding?
+                  : startFirstVisitHaikudleOnboarding
+                : startFirstVisitOnboarding
         }
         onSelectHaiku={selectHaiku}
         onChangeRefreshDelay={changeRefreshDelay}

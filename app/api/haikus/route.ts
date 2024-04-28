@@ -115,14 +115,14 @@ export async function POST(request: Request) {
   console.log('>> app.api.haiku.POST', {});
 
   const data: any = await request.json();
-  let { subject, lang } = data.request;
+  let { subject, lang, artStyle } = data.request;
   let mood;
   if (subject.indexOf(",") > -1) {
     const split = subject.split(",");
     subject = split[0];
     mood = split[1];
   }
-  console.log('>> app.api.haiku.POST', { lang, subject, mood });
+  console.log('>> app.api.haiku.POST', { lang, subject, mood, artStyle });
 
   const { user } = await userSession(request);
   let reachedUsageLimit = false; // actually _will_ reach usage limit shortly
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const updatedHaiku = await generateHaiku(user, lang, subject, mood);
+  const updatedHaiku = await generateHaiku(user, lang, subject, mood, artStyle);
 
   return NextResponse.json({ haiku: updatedHaiku, reachedUsageLimit });
 }
