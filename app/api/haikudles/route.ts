@@ -37,21 +37,25 @@ export async function GET(request: NextRequest, params?: any) {
     todaysHaikudle = await saveDailyHaikudle(user, todaysDateCode, randomHaikudle.haikuId, randomHaikudle.id);
   }
 
-  const [haiku, haikudle, userHaikudle, nextDailyHaikudleId] = await Promise.all([
-    getHaiku(todaysHaikudle.haikuId, true),
-    getHaikudle(todaysHaikudle.haikuId),
+  let [
+    haiku,
+    haikudle,
+    userHaikudle
+  ] = await Promise.all([
+    getHaiku(user, todaysHaikudle.haikuId, true),
+    getHaikudle(user, todaysHaikudle.haikuId),
     getUserHaikudle(user?.id, todaysHaikudle?.haikuId),
-    getNextDailyHaikudleId(),
   ]);
 
-  console.log('>> app.api.haikudles.GET', { haiku, haikudle, userHaikudle, nextDailyHaikudleId });
+  console.log('>> app.api.haikudles.GET', { haiku, haikudle, userHaikudle });
 
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
 
   if (!haikudle) {
-    return NextResponse.json({ haikudle: {} }, { status: 404 });
+    // no puzzle for this haiku yet: create one
+    haikudle = await createHaikudle(user, { id: haiku.id, haikuId: haiku.id });
   }
 
   const ret = {
@@ -60,19 +64,22 @@ export async function GET(request: NextRequest, params?: any) {
     haiku,
   }
 
-  return NextResponse.json(
-    nextDailyHaikudleId && user.isAdmin
-      ? { haikudles: [ret], nextDailyHaikudleId }
-      : { haikudles: [ret] }
-  );
+  return NextResponse.json({ haikudles: [ret] });
 }
 
 export async function POST(request: Request) {
   console.log('>> app.api.haikudles.POST');
 
+  // TODO: move this to api/haikudle/id/daily to follow haiku pattern
+
   const { user } = await userSession(request);
 
-  // TODO lock down to admins
+  if (!user.isAdmin) {
+    return NextResponse.json(
+      { success: false, message: 'authorization failed' },
+      { status: 403 }
+    );
+  }
 
   const data: any = await request.json();
   const haikudle = data.haikudle;
@@ -85,6 +92,11 @@ export async function POST(request: Request) {
     await createHaikudle(user, haikudle),
     await saveDailyHaikudle(user, haikudle.dateCode, haikudle.haikuId, haikudle.id),
   ]);
+  const nextDailyHaikudleId = await getNextDailyHaikudleId();
 
-  return NextResponse.json({ haikudle: createdHaikudle });
+  return NextResponse.json({
+    haikudle: createdHaikudle,
+    dailyHaikudle: createdDailyHaikudle,
+    nextDailyHaikudleId
+  });
 }

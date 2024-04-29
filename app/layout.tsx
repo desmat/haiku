@@ -10,16 +10,33 @@ const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 const inter = Inter({ subsets: ['latin'] });
 
 const appName = isHaikudleMode
-  ? "hAIkudle"
-  : "hAIku";
+  ? "Solve the puzzle to reveal today's haiku, generate and share haiku poems paired and beautiful generative art with Haikudle - AI-powered haiku poetry, puzzles and visual art"
+  : "Compose and share your haiku creations with Haiku Genius - AI-powered haiku poetry and generative art";
 
 const appDescription = isHaikudleMode
-  ? "AI-generated art and daily haiku puzzles"
-  : "AI-generated art and haiku poems";
+  ? "Solve the daily puzzles, generate new haikus, enjoy beautiful generative art and share with the world - no signup required. " +
+    "Haikudle integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
+    "Generate haiku poems and share AI-generated creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
+    "Explore daily haiku puzzles and discover the limitless poetic and artistic possibilities with Haikudle."
+  : "Create and share your haiku masterpieces with beautiful generated art — no signup required. " +
+    "Haiku Genius integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
+    "Craft haiku poems seamlessly with our AI assistant and share your creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
+    "Explore daily featured haikus and experience AI-assisted creativity and discover the limitless possibilities of poetic exploration with Haiku Genius.";
 
 const metaUrl = isHaikudleMode
   ? "https://haikudle.art/"
   : "https://haikugenius.io/";
+
+const haikuGeniusMetaImages = [
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_98b222c0_mountains.png",
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_39044b38_loading_2.png",
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_b124ba3a_blue_sky2.png",
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_bf50dd69_nature.png",
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_c16c1871_spring_morning_scropped.png",
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_f8de7f46_nature.png",
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_39044b38_loading_3.png",
+  "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_f8de7f46_nature_2.png",
+];
 
 let metaImages: string[];
 
@@ -40,7 +57,7 @@ if (isHaikudleMode) {
   ];
 } else {
   metaImages = [
-    "https://haikugenius.io/social_img_haiku.png"
+    haikuGeniusMetaImages[Math.floor(Math.random() * haikuGeniusMetaImages.length)]
   ];
 }
 

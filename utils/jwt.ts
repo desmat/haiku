@@ -9,11 +9,11 @@ const publicKeyStr = process.env.AUTH_PUBLIC_KEY || "NO_KEY";
 export async function encodeJWT(payload: any) {
   console.log(">> utils.jwt.encodeJWT", { payload, encode: process.env.SESSION_ENCODE });
 
-  if (process.env.SESSION_ENCODE == "btoa") {
+  // if (process.env.SESSION_ENCODE == "btoa") {
     console.warn(">> utils.jwt.encodeJWT ALTERNATIVE ENCODING", { encode: process.env.SESSION_ENCODE });
     // workaround safari 12 issue
     return btoa(JSON.stringify(payload));
-  }
+  // }
 
   throw 'Encoding not supported: ' + process.env.SESSION_ENCODE;
   
@@ -43,11 +43,11 @@ export async function encodeJWT(payload: any) {
 export async function decodeJWT(token: string) {
   console.log(">> utils.jwt.decodeJWT", { token: token, encode: process.env.SESSION_ENCODE });
 
-  if (process.env.SESSION_ENCODE == "btoa") {
+  // if (process.env.SESSION_ENCODE == "btoa") {
     console.warn(">> utils.jwt.decodeJWT ALTERNATIVE DECODING", { encode: process.env.SESSION_ENCODE });
     // workaround safari 12 issue
     return JSON.parse(atob(token));
-  }
+  // }
 
   throw 'Encoding not supported: ' + process.env.SESSION_ENCODE;
 

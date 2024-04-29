@@ -1,18 +1,49 @@
 import moment from 'moment';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { Haiku } from '@/types/Haiku';
+import { Haiku, HaikuAction } from '@/types/Haiku';
 import { User } from '@/types/User';
 import { listToMap, mapToList, mapToSearchParams, uuid } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from "./alert";
 import useHaikudle from './haikudle';
 import useUser from './user';
+import { error429Haiku, error4xxHaiku, notFoundHaiku, serverErrorHaiku } from '@/services/stores/samples';
+import { formatActionInProgress, formatPastAction } from '@/utils/format';
 
 async function fetchOpts() {
   const token = await useUser.getState().getToken();
   // console.log(">> hooks.haiku.fetchOpts", { token });
   return token && { headers: { Authorization: `Bearer ${token}` } } || {};
+}
+
+async function handleErrorResponse(res: any, resourceType: string, resourceId: string | undefined, message?: string) {
+  trackEvent("error", {
+    type: resourceType,
+    code: res.status,
+    userId: (await useUser.getState()).user.id,
+    id: resourceId,
+  });
+
+  // smooth out the the alert pop-up
+  setTimeout(
+    res.status == 429
+      ? () => useAlert.getState().warning(`Exceeded daily limit: please try again later`)
+      : res.status == 404
+        ? () => useAlert.getState().warning(`${message || "An error occured"}: ${res.status} (${res.statusText || "Unknown Error"})`)
+        : () => useAlert.getState().error(`${message || "An error occured"}: ${res.status} (${res.statusText || "Unknown Error"})`)
+    , 500);
+
+  const errorHaiku =
+    res.status == 404
+      ? notFoundHaiku
+      : res.status == 429
+        ? error429Haiku
+        : res.status >= 400 && res.status < 500
+          ? error4xxHaiku(res.status, res.statusText)
+          : serverErrorHaiku(res.status, res.statusText);
+
+  return errorHaiku;
 }
 
 type HaikuMap = { [key: string]: Haiku | undefined; };
@@ -33,9 +64,6 @@ const initialState = {
   // and query is stringyfied json from loaded
   // list of haikus
   _loaded: <StatusMap>{},
-
-  userHaikus: <HaikuMap>{},
-  dailyHaikudles: <any>{},
 }
 
 const useHaikus: any = create(devtools((set: any, get: any) => ({
@@ -132,7 +160,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     }
   },
 
-  load: async (queryOrId?: object | string, mode?: string): Promise<Haiku | Haiku[]> => {
+  load: async (queryOrId?: object | string, mode?: string, version?: string): Promise<Haiku | Haiku[]> => {
     const { setLoaded, _mode } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
@@ -140,24 +168,36 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
     return new Promise(async (resolve, reject) => {
       if (id) {
-        fetch(`/api/haikus/${id}?mode=${mode || _mode}`, await fetchOpts()).then(async (res) => {
+        const params = mapToSearchParams({ mode, version});
+        fetch(`/api/haikus/${id}${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();
 
           if (res.status != 200) {
-            setLoaded(id);
-            trackEvent("error", {
-              type: "fetch-haiku",
-              code: res.status,
-              userId: (await useUser.getState()).user.id,
-              id,
-            });
-            // smooth out the the alert pop-up
-            setTimeout(() => useAlert.getState().error(`Error fetching haiku ${id}: ${res.status} (${res.statusText})`), 500);
-            return resolve(res.statusText);
+            const errorHaiku = await handleErrorResponse(res, "fetch-haiku", id, `Error fetching haiku ${id}`);
+            useHaikus.setState({ _haikus: { [errorHaiku.id]: errorHaiku } });
+            setLoaded(errorHaiku.id);
+            return resolve(errorHaiku);
           }
 
           const data = await res.json();
           const haiku = data.haiku;
+
+          // race condition: /api/haikus/:id returned a haiku but /api/user 
+          // didn't see that haiku as viewed yet: fake it locally
+          if (haiku) {
+            const userState = await useUser.getState();
+            if (!userState?.user?.isAdmin && !userState.haikus[haiku.id]) {
+              useUser.setState({
+                haikus: {
+                  ...userState.haikus,
+                  [haiku.id]: {
+                    ...haiku,
+                    viewedAt: moment().valueOf(),
+                  }
+                }
+              })
+            }
+          }
 
           set({
             mode: mode || _mode,
@@ -168,50 +208,63 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           resolve(haiku);
         });
       } else {
-        const params = query && mapToSearchParams(query);
-        fetch(`/api/haikus${params ? `?${params}${params && "&"}mode=${mode || _mode}` : ""}`, await fetchOpts()).then(async (res) => {
+        const modeParams = mode && `mode=${mode || _mode}`;
+        const queryParams = query && mapToSearchParams(query);
+        const params = `${queryParams || modeParams ? "?" : ""}${queryParams}${queryParams && modeParams ? "&" : ""}${modeParams}`;
+
+        fetch(`/api/haikus${params}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();
           setLoaded(query);
 
           if (res.status != 200) {
-            trackEvent("error", {
-              type: "fetch-haikus",
-              code: res.status,
-              userId: (await useUser.getState()).user.id,
-              query: JSON.stringify(query),
-            });
-            useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);
-            return resolve(res.statusText);
+            const errorHaiku = await handleErrorResponse(res, "fetch-haikus", undefined, `Error fetching haikus`);
+            useHaikus.setState({ _haikus: { [errorHaiku.id]: errorHaiku } });
+            setLoaded(errorHaiku.id);
+            return resolve(errorHaiku);
           }
 
           const data = await res.json();
           const haikus = data.haikus;
+          setLoaded(haikus);
 
+          // special case for random fetch: only keep the last one
           // @ts-ignore
-          if (query.mine) {
-            // special case: these were partially loaded for the side bar: don't setLoaded
+          if (query.random) {
+            // race condition: make sure that initial load we have at least have the one haiku in the side panel
+            const { userHaikus } = get();
+            const viewedHaiku = {
+              ...haikus[0],
+              viewedAt: moment().valueOf(),
+            };
+
             set({
               mode: mode || _mode,
-              userHaikus: listToMap(haikus),
-              dailyHaikudles: data.dailyHaikudles && listToMap(data.dailyHaikudles),
+              _haikus: { ..._haikus, ...listToMap(haikus) },
+              userHaikus: { ...userHaikus, ...listToMap([viewedHaiku]) },
             });
+            return resolve(haikus[0]);
           } else {
-            setLoaded(haikus);
-
-            // special case for random fetch: only keep the last one
-            // @ts-ignore
-            if (query.random) {
-              set({
-                mode: mode || _mode,
-                _haikus: { ..._haikus ,...listToMap(haikus) },
-              });
-              return resolve(haikus[0]);
-            } else {
-              set({
-                mode: mode || _mode,
-                _haikus: { ..._haikus, ...listToMap(haikus) },
-              });
+            // race condition: /api/haikus returned today's haiku but /api/user 
+            // didn't see today's haiku as viewed yet: fake it locally
+            if (haikus.length == 1) {
+              const userState = await useUser.getState();
+              if (!userState?.user?.isAdmin && !userState.haikus[haikus[0].id]) {
+                useUser.setState({
+                  haikus: {
+                    ...userState.haikus,
+                    [haikus[0].id]: {
+                      ...haikus[0],
+                      viewedAt: moment().valueOf(),
+                    }
+                  }
+                })
+              }
             }
+
+            set({
+              mode: mode || _mode,
+              _haikus: { ..._haikus, ...listToMap(haikus) },
+            });
           }
 
           resolve(haikus);
@@ -248,25 +301,19 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         const { _haikus } = get();
 
         if (res.status != 200) {
-          trackEvent("error", {
-            type: "create-haiku",
-            code: res.status,
-            userId: (await useUser.getState()).user.id,
-          });
-          useAlert.getState().error(`Error adding haiku: ${res.status} (${res.statusText})`);
+          handleErrorResponse(res, "create-haiku", creating.id, `Error adding haiku`);
           set({
             _haikus: { ..._haikus, [creating.id]: undefined },
           });
           return reject(res.statusText);
         }
 
-        const data = await res.json();
-        const created = data.haiku;
+        const { haiku: created } = await res.json();
 
         trackEvent("haiku-created", {
           id: created.id,
-          name: created.name,
           userId: created.createdBy,
+          theme: created.theme,
         });
 
         // replace optimistic 
@@ -303,13 +350,13 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         const { _haikus } = get();
 
         if (res.status != 200) {
+          handleErrorResponse(res, "save-haiku", haiku.id, `Error saving haiku`);
           trackEvent("error", {
             type: "save-haiku",
             code: res.status,
             userId: (await useUser.getState()).user.id,
             id: haiku.id,
           });
-          useAlert.getState().error(`Error saving haiku: ${res.status} (${res.statusText})`);
           // revert
           set({
             _haikus: { ..._haikus, [haiku.id]: haiku },
@@ -319,6 +366,11 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
         const data = await res.json();
         const saved = data.haiku;
+
+        trackEvent("haiku-updated", {
+          id: saved.id,
+          userId: saved.createdBy,
+        });
 
         set({
           _haikus: { ..._haikus, [saved.id]: saved },
@@ -353,28 +405,17 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         const { _haikus } = get();
 
         if (res.status != 200) {
-          trackEvent("error", {
-            type: "generate-haiku",
-            code: res.status,
-            userId: (await useUser.getState()).user.id,
-          });
-
-          if (res.status == 429) {
-            useAlert.getState().error(`Exceeded daily limit: try again later.`);
-          } else {
-            useAlert.getState().error(`Error generating haiku: ${res.status} (${res.statusText})`);
-          }
-
+          handleErrorResponse(res, "generate-haiku", undefined, `Error generating haiku`);
           return reject(res.statusText);
         }
 
-        const data = await res.json();
-        const generated = data.haiku;
+        const { haiku: generated, reachedUsageLimit } = await res.json();
+        console.log(">> hooks.haiku.create", { generated, reachedUsageLimit });
 
         trackEvent("haiku-generated", {
           id: generated.id,
-          name: generated.name,
           userId: generated.createdBy,
+          theme: generated.theme,
         });
 
         // replace optimistic 
@@ -391,12 +432,16 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           theme: generated.theme,
         });
 
+        if (reachedUsageLimit) {
+          useAlert.getState().warning("Daily limit reached: you can create more haikus tomorrow.");
+        }
+
         return resolve(generated);
       });
     });
   },
 
-  regenerate: async (user: User, haiku: Haiku) => {
+  regenerate: async (user: User, haiku: Haiku, part: undefined | "poem" | "image", options: any = {}) => {
     // console.log(">> hooks.haiku.regenerate", { haiku });
     const { _haikus } = get();
 
@@ -412,33 +457,22 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       fetch(`/api/haikus/${haiku.id}/regenerate`, {
         ...await fetchOpts(),
         method: "POST",
-        body: JSON.stringify({ haiku }),
+        body: JSON.stringify({ haiku, part, ...options }),
       }).then(async (res) => {
         const { _haikus } = get();
 
         if (res.status != 200) {
-          trackEvent("error", {
-            type: "regenerate-haiku",
-            code: res.status,
-            userId: (await useUser.getState()).user.id,
-          });
-
-          if (res.status == 429) {
-            useAlert.getState().error(`Exceeded daily limit: try again later.`);
-          } else {
-            useAlert.getState().error(`Error regenerating haiku: ${res.status} (${res.statusText})`);
-          }
-
+          handleErrorResponse(res, "regenerate-haiku", haiku.id, `Error regenerating haiku`);
           return reject(res.statusText);
         }
 
-        const data = await res.json();
-        const regenerated = data.haiku;
+        const { haiku: regenerated, reachedUsageLimit } = await res.json();
 
         trackEvent("haiku-regenerated", {
           id: regenerated.id,
-          name: regenerated.name,
+          theme: regenerated.theme,
           userId: regenerated.updatedBy,
+          part,
         });
 
         // replace optimistic 
@@ -447,6 +481,10 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         });
         // also sync up haikudle store 
         useHaikudle.setState({ haiku: regenerated });
+
+        if (reachedUsageLimit) {
+          useAlert.getState().warning("Daily limit reached: you can re-generate more haikus tomorrow.");
+        }
 
         return resolve(regenerated);
       });
@@ -481,20 +519,15 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     });
 
     if (res.status != 200) {
+      handleErrorResponse(res, "delete-haiku", deleting.id, `Error deleting haiku`);
       const { _haikus, _deleted } = get();
-      trackEvent("error", {
-        type: "delete-haiku",
-        code: res.status,
-        userId: (await useUser.getState()).user.id,
-        id,
-      });
-      useAlert.getState().error(`Error deleting haikus ${id}: ${res.status} (${res.statusText})`);
       // revert
       set({
         _haikus: { ..._haikus, [id]: deleting },
         _deleted: { ..._deleted, [id]: false },
         userHaikus: { ...userHaikus, [id]: deleting },
       });
+      return deleting;
     }
 
     const data = await res.json();
@@ -509,6 +542,106 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
     set({
       userHaikus: { ...userHaikus, [userHaiku.id]: userHaiku },
+    });
+  },
+
+  createDailyHaiku: async (dateCode: string, haikuId: string) => {
+    // console.log(">> hooks.haiku.createDailyHaiku", { dateCode, haikuId });
+
+    return new Promise(async (resolve, reject) => {
+      fetch(`/api/haikus/${haikuId}/daily`, {
+        ...await fetchOpts(),
+        method: "POST",
+        body: JSON.stringify({ dateCode, haikuId }),
+      }).then(async (res) => {
+        if (res.status != 200) {
+          handleErrorResponse(res, "create-daily-haiku", haikuId, `Error creating daily haiku`);
+          return reject(res.statusText);
+        }
+
+        const { dailyHaiku, nextDailyHaikuId } = await res.json();
+        
+        // update side panel content
+        useUser.setState((state: any) => {
+          return {
+            dailyHaikus: { ...state.dailyHaikus, [dailyHaiku.id]: dailyHaiku },
+            nextDailyHaikuId,
+          }
+        });
+
+        return resolve(dailyHaiku);
+      });
+    });
+  },
+
+  action: async (haikuId: string, action: HaikuAction, value?: any) => {
+    // console.log(">> hooks.haiku.action", { haikuId, action, value });
+    const { _haikus } = get();
+    const haiku = _haikus[haikuId];
+    const userState = await useUser.getState();
+    const userHaikus = userState.haikus
+    const userHaiku = userHaikus[haikuId];
+
+    // const userHaiku = userHaikus[haikuId] || { haikuId };
+
+    if (!haiku) {
+      console.error(">> hooks.haiku.action: haiku not found", { haikuId, action, value });
+    }
+
+    set({
+      _haikus: {
+        ..._haikus,
+        [haikuId]: {
+          ...haiku,
+          [`${action}dAt`]: value,
+        }
+      },
+    });
+
+    userHaiku && useUser.setState({
+      haikus: {
+        ...userState.haikus,
+        [haikuId]: {
+          ...userHaiku,
+          [`${action}dAt`]: value,
+        }
+      }
+    });
+
+    return new Promise(async (resolve, reject) => {
+      fetch(`/api/haikus/${haiku.id}/${action}`, {
+        ...await fetchOpts(),
+        method: "POST",
+        body: JSON.stringify({ value }),
+      }).then(async (res) => {
+        const event = `haiku-${formatPastAction(action, !value)}`;
+        const actionVerb = formatActionInProgress(action, !value);
+
+        if (res.status != 200) {
+          handleErrorResponse(res, event, haikuId, `Error ${actionVerb} haiku`);
+
+          // roll back optimistic
+          set({ _haikus });
+          if (!userState?.user?.isAdmin && userHaiku) {
+            useUser.setState({
+              haikus: userHaikus,
+            });
+          }
+
+          return reject(res.statusText);
+        }
+
+        const data = await res.json();
+        const actedOn = data.haiku;
+
+        trackEvent(event, {
+          id: actedOn.id,
+          userId: actedOn.updatedBy,
+          value,
+        });
+
+        return resolve(actedOn);
+      });
     });
   },
 

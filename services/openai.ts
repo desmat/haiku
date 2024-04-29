@@ -12,26 +12,44 @@ const languageModel = "gpt-4";
 const imageModel = "dall-e-3";
 // const imageModel = "dall-e-2";
 
-export async function generateBackgroundImage(subject?: string, mood?: string): Promise<any> {
-  console.log(`>> services.openai.generateBackgroundImage`, { subject, mood });
+export async function generateBackgroundImage(subject?: string, mood?: string, artStyle?: string): Promise<any> {
+  console.log(`>> services.openai.generateBackgroundImage`, { subject, mood, artStyle });
   const imageTypes = [
     // "charcoal drawing", 
     // "pencil drawing",
-    "painting",
-    "watercolor painting",
-    "oil painting",
-    "oil painting with large paint strokes",
-    "oil painting with natural paint strokes",
-    "abstract painting",
-    "impressionist painting",
-    "expressionist painting",
-    "landscape painting"
+    "Painting",
+    "Watercolor painting",
+    "Oil painting",
+    "Oil painting with large paint strokes",
+    "Oil painting with natural paint strokes",
+    "Abstract painting",
+    "Impressionist painting",
+    "Expressionist painting",
+    "Landscape painting",
+    "Chinene Shan Shui painting",
+    "Chinese-style ink wash painting",
+    "Old-school Japanese-style painting",
+    "Japanese woodblock print",
+    "Japanese-style ink wash painting",
+    "Japanese Ukiyo-e style woodblock print or painting",
+    "Japanese Hanga style woodblock print",
+    "Japanese Sosaku-Hanga woodblock print",
+    "Japanese Shin-Hanga woodblock print",
+    "Japanese Sumi-e style ink painting",
+    "Japanese Yamato-e style painting",
+    "Japanese Nihonga style painting",
+    "Japanese Rimpa style painting",
+    "japanese style ink painting with very few simple large brush strokes",
+    "Japanese style watercolor with few large brush strokes and a minimal palete of colors",
   ];
+  const selectedArtStyle = artStyle || imageTypes[Math.floor(Math.random() * imageTypes.length)];
   const prompt = `
     Respond with an extremely muted, almost monochromatic colors, 
-    old-school japanese-style ${imageTypes[Math.floor(Math.random() * imageTypes.length)]}
+    ${selectedArtStyle}
     on the theme of ${subject || "any"}${mood ? ` with a mood of ${mood}` : ""}.
-    Make the art low-key with negative space in the middle, so that a haiku poem can be overlayed afterwards.
+    Make the art low-key with negative space in the middle, 
+    so that a haiku poem can be overlayed.
+    The image should not contain any characters of any kind.
   `;
 
   // for testing
@@ -52,9 +70,10 @@ export async function generateBackgroundImage(subject?: string, mood?: string): 
     }
 
     return {
-      prompt: prompt,
-      revisedPrompt: res.data[0]["revised_prompt"],
-      url: res.data[0].url
+      artStyle: selectedArtStyle,
+      prompt: res.data[0]["revised_prompt"],
+      url: res.data[0].url,
+      imageModel,
     };
   }
 
@@ -70,8 +89,10 @@ export async function generateBackgroundImage(subject?: string, mood?: string): 
   try {
     console.log(">> services.openai.generateBackgroundImage RESULTS FROM API", { response });
     return {
+      artStyle: selectedArtStyle,
       prompt: (response.data[0]["revised_prompt"] || prompt),
-      url: response.data[0].url
+      imageModel,
+      url: response.data[0].url,
     };
   } catch (error) {
     console.error("Error reading results", { error, response });
@@ -103,15 +124,17 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
     };
   }
 
+  const systemPrompt = `Given a topic (or "any", meaning you pick) and optionally mood, please generate a haiku in ${language || "English"} and respond in JSON where each response is an array of 3 strings.
+    Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
+    Also include in the response, in fewest number of words, what were the subject and mood of the haiku. Please only include keys "haiku", "subject" and "mood".
+    `;
   // @ts-ignore
   const completion = await openai.chat.completions.create({
     model: languageModel,
     messages: [
       {
         role: 'system',
-        content: `Given a topic (or "any", meaning you pick) and optionally mood, please generate a haiku in ${language || "English"} and respond in JSON where each response is an array of 3 strings.
-          Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
-          Also include in the response, in fewest number of words, what were the subject and mood of the haiku. Please only include keys "haiku", "subject" and "mood"`
+        content: systemPrompt
       },
       {
         role: 'user',
@@ -124,7 +147,68 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
   try {
     // console.log(">> services.openai.generateHaiku RESULTS FROM API", completion);
     response = JSON.parse(completion.choices[0].message.content || "{}");
-    console.log(">> services.openai.generateHaiku RESULTS FROM API", { response });
+    console.log(">> services.openai.generateHaiku RESULTS FROM API", { completion, response });
+    return {
+      prompt: systemPrompt + "\n" + prompt,
+      languageModel,
+      response,
+    };
+  } catch (error) {
+    console.error("Error reading results", { error, response, completion });
+  }
+}
+
+export async function completeHaiku(poem: string[], language?: string, subject?: string, mood?: string): Promise<any> {
+  const prompt = `Haiku to complete: "${poem.join(" / ")}"
+  ${subject ? `Topic: "${subject}"` : ""}
+  ${mood ? ` Mood: "${mood}"` : ""}`;
+
+  console.log(`>> services.openai.completeHaiku`, { language, subject, mood, prompt });
+
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
+    console.warn(`>> services.openai.completeHaiku: DEBUG mode: returning dummy response`);
+    // await delay(3000);
+    return {
+      response: {
+        prompt,
+        haiku: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "_") : line),
+        subject: subject || "test subject",
+        mood: mood || "test mood",
+      }
+    };
+  }
+
+  // @ts-ignore
+  const completion = await openai.chat.completions.create({
+    model: languageModel,
+    messages: [
+      {
+        role: 'system',
+        content: `
+          Given an incomplete haiku please complete the haiku. 
+          Characters "..." or "…" will be used to indicate a placeholder, please keep the existing word(s) and fill the rest.
+          If a line looks like this: "<some one or more words> ..." then keep the word(s) at the beginning and fill the rest.          If a line looks like this: "... <one or more words>" then keep the word(s) at the end and fill the rest.
+          If a line looks like this: "... <one or more words> ..." then keep the word(s) together and fill the rest.
+          Additionally, if a line looks obviously incomplete even without "..." characters please complete it.
+          Optionally a topic (or "any", meaning you pick) and/or mood may be included.
+          Please generate a haiku in ${language || "English"} and respond in JSON where each response is an array of 3 strings.
+          Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
+          Also, please fix up any extraneous white spaces, punctuation, incorrect capitalized words, typos or incorrectly words.
+          Also include in the response, in fewest number of words, what were the subject and mood of the haiku. Please only include keys "haiku", "subject" and "mood"`
+      },
+      {
+        role: 'user',
+        content: prompt,
+      }
+    ],
+  });
+
+  let response;
+  try {
+    // console.log(">> services.openai.completeHaiku RESULTS FROM API", { completion });
+    response = JSON.parse(completion.choices[0].message.content || "{}");
+    console.log(">> services.openai.completeHaiku RESULTS FROM API", { response });
     return { prompt, response };
   } catch (error) {
     console.error("Error reading results", { error, response, completion });

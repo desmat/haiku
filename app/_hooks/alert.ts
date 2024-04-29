@@ -3,99 +3,142 @@ import { devtools } from 'zustand/middleware'
 import { AlertType } from '@/types/Alert';
 import moment from 'moment';
 
-const useAlert: any = create(devtools((set: any, get: any) => ({
+export type CustomAction = {
+  label: string,
+  action?: () => void | "close" | undefined,
+  disabled?: boolean,
+};
+
+const initialState = {
   message: undefined as string | undefined,
   type: undefined as AlertType | undefined,
-  onDissmiss: () => undefined,
+  onDismiss: () => undefined,
   closeLabel: undefined as string | undefined,
   closeTimeout: undefined as any,
   closedTimestamp: undefined as number | undefined,
+  style: undefined as any | undefined,
+  customActions: undefined as CustomAction[] | undefined,
+}
 
-  reset: async () => {
-    // console.log(">> hooks.alert.reset", {});
+const useAlert: any = create(devtools((set: any, get: any) => ({
+  ...initialState,
+
+  reset: () => {
+    set(initialState);
+  },
+
+  _alert: async (type: AlertType, message: string, {
+    onDismiss,
+    closeLabel,
+    closeDelay,
+    style,
+    customActions,
+  }: {
+    onDismiss?: () => undefined,
+    closeLabel?: string,
+    closeDelay?: number,
+    style?: any,
+    customActions?: any,
+  } = {}) => {
+    // console.log(">> hooks.alert.error", { message });
+    if (closeDelay) {
+      const { setCloseTimeout } = get();
+      setCloseTimeout(closeDelay);
+    }
+
     set({
-      message: undefined,
-      type: undefined,
-      onDismiss: undefined,
-      closeLabel: undefined,
-      closeTimeout: undefined,
-      closedTimestamp: undefined,
+      message,
+      type: message && type,
+      onDismiss,
+      closeLabel,
+      style,
+      customActions
     });
   },
 
   error: async (message: string, {
-    onDissmiss, closeLabel, closeDelay
+    onDismiss,
+    closeLabel,
+    closeDelay,
+    style,
+    customActions,
   }: {
-    onDissmiss?: () => undefined,
+    onDismiss?: () => undefined,
     closeLabel?: string,
-    closeDelay?: number
+    closeDelay?: number,
+    style?: any,
+    customActions?: any,
   } = {}) => {
-    // console.log(">> hooks.alert.error", { message });
-    set({ message, type: message && "error", onDissmiss, closeLabel });
+    // console.log(">> hooks.alert.error", { message, closeDelay });
+    get()._alert("error", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
   warning: async (message: string, {
-    onDissmiss, closeLabel, closeDelay
+    onDismiss,
+    closeLabel,
+    closeDelay,    
+    style,
+    customActions,
   }: {
-    onDissmiss?: () => undefined,
+    onDismiss?: () => undefined,
     closeLabel?: string,
-    closeDelay?: number
+    closeDelay?: number,
+    style?: any,
+    customActions?: any,
   } = {}) => {
     // console.log(">> hooks.alert.warning", { message, closeDelay });
-    if (closeDelay) {
-      const { setCloseTimeout } = get();
-      setCloseTimeout(closeDelay);
-    }
-
-    set({ message, type: message && "warning", onDissmiss, closeLabel });
+    get()._alert("warning", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
   info: async (message: string, {
-    onDissmiss, closeLabel, closeDelay
+    onDismiss,
+    closeLabel,
+    closeDelay,
+    style,
+    customActions,
   }: {
-    onDissmiss?: () => undefined,
+    onDismiss?: () => undefined,
     closeLabel?: string,
-    closeDelay?: number
+    closeDelay?: number,
+    style?: any,
+    customActions?: any,
   } = {}) => {
     // console.log(">> hooks.alert.info", { message });
-    if (closeDelay) {
-      const { setCloseTimeout } = get();
-      setCloseTimeout(closeDelay);
-    }
-
-    set({ message, type: message && "info", onDissmiss, closeLabel });
+    get()._alert("info", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
   success: async (message: string, {
-    onDissmiss, closeLabel, closeDelay
+    onDismiss,
+    closeLabel,
+    closeDelay,
+    style,
+    customActions,
   }: {
-    onDissmiss?: () => undefined,
+    onDismiss?: () => undefined,
     closeLabel?: string,
-    closeDelay?: number
+    closeDelay?: number,
+    style?: any,
+    customActions?: any,
   } = {}) => {
     // console.log(">> hooks.alert.success", { message });
-    if (closeDelay) {
-      const { setCloseTimeout } = get();
-      setCloseTimeout(closeDelay);
-    }
-
-    set({ message, type: message && "success", onDissmiss, closeLabel });
+    get()._alert("success", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
   plain: async (message: string, {
-    onDissmiss, closeLabel, closeDelay
+    onDismiss,
+    closeLabel,
+    closeDelay,
+    style,
+    customActions,
   }: {
-    onDissmiss?: () => undefined,
+    onDismiss?: () => undefined,
     closeLabel?: string,
-    closeDelay?: number
+    closeDelay?: number,
+    style?: any,
+    customActions?: any
   } = {}) => {
-    // console.log(">> hooks.alert.plain", { message, onDissmiss, closeLabel, closeDelay });
-    if (closeDelay) {
-      const { setCloseTimeout } = get();
-      setCloseTimeout(closeDelay);
-    }
-
-    set({ message, type: message && "plain", onDissmiss, closeLabel });
+    // console.log(">> hooks.alert.plain", { message, onDismiss, closeLabel, closeDelay, style });
+    get()._alert("plain", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
   setCloseTimeout: async (closeDelayMs: number) => {

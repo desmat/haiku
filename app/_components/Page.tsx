@@ -54,7 +54,7 @@ export default function Page({
         </div>
       }
       {(bottomLinks || links) &&
-        <div className={`fixed bottom-3 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center`}>
+        <div className={`absolute bottom-3 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center`}>
           <PageLinks loading={loading}>
             {bottomLinks || links}
           </PageLinks>
