@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, generateHaiku, getUserHaikus, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, createHaiku, saveDailyHaiku, getNextDailyHaikuId, getHaiku } from '@/services/haikus';
+import { getHaikus, generateHaiku, getUserHaikus, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, createHaiku, saveDailyHaiku, getNextDailyHaikuId, getHaiku, generateLimerick } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { listToMap, mapToList, searchParamsToMap } from '@/utils/misc';
 import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const updatedHaiku = await generateHaiku(user, lang, subject, mood, artStyle);
+  const updatedHaiku = await generateLimerick(user, lang, subject);
 
   return NextResponse.json({ haiku: updatedHaiku, reachedUsageLimit });
 }

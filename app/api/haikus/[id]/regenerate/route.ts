@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { regenerateHaikuPoem, getHaiku, regenerateHaikuImage } from '@/services/haikus';
+import { regenerateHaikuPoem, getHaiku, regenerateHaikuImage, regenerateLimerickImage } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { userUsage } from '@/services/usage';
 import { USAGE_LIMIT } from '@/types/Usage';
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
   if (!["image", "poem"].includes(part))throw `Regenerate part not supported: ${part}`;
 
   const updatedHaiku = part == "image"
-    ? await regenerateHaikuImage(user, haiku, artStyle)
+    ? await regenerateLimerickImage(user, haiku, artStyle)
     : await regenerateHaikuPoem(user, haiku);
       
   return NextResponse.json({ haiku: updatedHaiku, reachedUsageLimit });
