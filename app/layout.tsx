@@ -49,9 +49,10 @@ if (isHaikudleMode) {
   // console.log("==> layout: metaImages", { dateCode, dateCodes });
 
   metaImages = [
-    `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${moment().format("YYYYMMDD")}.png`,
-    `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${dateCode}.png`,
-    "https://haikudle.art/social_img_haikudle.png",
+    // `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${moment().format("YYYYMMDD")}.png`,
+    // `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${dateCode}.png`,
+    // "https://haikudle.art/social_img_haikudle.png",
+    "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limerick/limeick_5069ddc0.png",
   ];
 } else {
   metaImages = [
