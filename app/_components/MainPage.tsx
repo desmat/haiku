@@ -14,7 +14,7 @@ import useUser from '@/app/_hooks/user';
 import NotFound from '@/app/not-found';
 import { LanguageType } from '@/types/Languages';
 import { Haikudle } from '@/types/Haikudle';
-import { haikuGeneratedOnboardingSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleOnboardingSteps } from '@/types/Onboarding';
+import { haikuGeneratedOnboardingSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleOnboardingSteps, limerickPromptSteps } from '@/types/Onboarding';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
@@ -290,9 +290,9 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
             }
           }
         }
-        else if (process.env.OPENAI_API_KEY != "DEBUG" && user?.isAdmin && mode == "haiku" && haiku?.poem) {
-          checkHaiku();
-        }
+        // else if (process.env.OPENAI_API_KEY != "DEBUG" && user?.isAdmin && mode == "haiku" && haiku?.poem) {
+        //   checkHaiku();
+        // }
       } else { // !loading && !loaded
         loadPage();
       }
@@ -471,6 +471,13 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
   const showHaikuDetails = () => {
     startOnboarding(
       haikuPromptSteps(haiku),
+      // () => saveUser({ ...user, preferences: { ...user.preferences, onboardedGenerated: true } })
+    );
+  }
+
+  const showLimerickDetails = () => {
+    startOnboarding(
+      limerickPromptSteps(haiku),
       // () => saveUser({ ...user, preferences: { ...user.preferences, onboardedGenerated: true } })
     );
   }
@@ -698,14 +705,14 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
   const copyHaiku = () => {
     if (haikudleMode && haikudleSolved || !haikudleMode) {
       navigator.clipboard.writeText(formatHaikuText(haikudleSolved ? solvedHaikudleHaiku : haiku, mode));
-      plainAlert(`Haiku poem copied to clipboard`, { closeDelay: 750 });
+      plainAlert(`Limerick copied to clipboard`, { closeDelay: 750 });
     }
   }
 
   const copyLink = () => {
     if (haikudleMode && haikudleSolved || !haikudleMode) {
-      navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : "https://haikugenius.io"}/${haiku.id}`);
-      plainAlert(`Link to this haiku copied to clipboard`, { closeDelay: 750 });
+      navigator.clipboard.writeText(`https://limerick.desmat.ca/${haiku.id}`);
+      plainAlert(`Link to this limerick copied to clipboard`, { closeDelay: 750 });
       trackEvent("haiku-shared", {
         userId: user.id,
         id: haiku.id,
@@ -758,15 +765,16 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
         onDelete={doDelete}
         onSaveDailyHaiku={saveDailyHaiku}
         onShowAbout={
-          user?.isAdmin
-            ? showHaikuDetails
-            : userGeneratedHaiku
-              ? showAboutGenerated
-              : haikudleMode
-                ? previousDailyHaikudleId
-                  ? showAboutPreviousDaily // with onboarding?
-                  : startFirstVisitHaikudleOnboarding
-                : startFirstVisitOnboarding
+          showLimerickDetails
+          // user?.isAdmin
+          //   ? showHaikuDetails
+          //   : userGeneratedHaiku
+          //     ? showAboutGenerated
+          //     : haikudleMode
+          //       ? previousDailyHaikudleId
+          //         ? showAboutPreviousDaily // with onboarding?
+          //         : startFirstVisitHaikudleOnboarding
+          //       : startFirstVisitOnboarding
         }
         onSelectHaiku={selectHaiku}
         onChangeRefreshDelay={changeRefreshDelay}

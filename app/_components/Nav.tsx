@@ -87,14 +87,8 @@ export function Logo({
             ? styles.slice(0, 1)
             : styles
           }
-        >h</StyledLayers>
+        >Limerick</StyledLayers>
         {styledAi}
-        <StyledLayers
-          styles={onboardingElement && !onboardingElement.startsWith("logo")
-            ? styles.slice(0, 1)
-            : styles
-          }
-        >{isHaikudleMode /* || isSocialImgMode */ ? "kudle" : "kuGenius"}</StyledLayers>
       </div>
     </Link>
   )

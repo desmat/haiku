@@ -23,9 +23,7 @@ const appDescription = isHaikudleMode
     "Craft haiku poems seamlessly with our AI assistant and share your creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
     "Explore daily featured haikus and experience AI-assisted creativity and discover the limitless possibilities of poetic exploration with Haiku Genius.";
 
-const metaUrl = isHaikudleMode
-  ? "https://haikudle.art/"
-  : "https://haikugenius.io/";
+const metaUrl = "https://limerick.desmat.ca/";
 
 const haikuGeniusMetaImages = [
   "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_98b222c0_mountains.png",
