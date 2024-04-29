@@ -295,6 +295,81 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   return saveHaiku(user, updatedHaiku);
 }
 
+export async function regenerateLimerickPoem(user: any, haiku: Haiku): Promise<Haiku> {
+  const lang = (haiku.lang || "en") as LanguageType;
+  const startingWith = haiku.startingWith;
+  console.log(">> services.haiku.regenerateLimerickPoem", { lang, startingWith, user });
+  const language = supportedLanguages[lang].name;
+
+  const {
+    prompt: poemPrompt,
+    languageModel,
+    response: {
+      limerick: poem,
+      title,
+    }
+  } = await openai.generateLimerick({ language, startingWith });
+  console.log(">> services.haiku.regenerateLimerick", { poem, title, poemPrompt });
+
+  // delete corresponding haikudle 
+  // getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
+  //   console.log(">> services.haiku.regenerateHaikuPoem", { haikudle });
+  //   if (haikudle) {
+  //     deleteHaikudle(user, haikudle.id);
+  //   }
+  // });
+
+  // if (!user.isAdmin) {
+  //   incUserUsage(user, "haikusRegenerated");
+  // }
+
+  return saveHaiku(user, {
+    ...haiku,
+    poem,
+    theme: title,
+    poemPrompt,
+    languageModel,
+  });
+}
+
+export async function completeHLimerickuPoem(user: any, haiku: Haiku): Promise<Haiku> {
+  const lang = (haiku.lang || "en") as LanguageType;
+  const subject = haiku.theme;
+  const mood = haiku.mood;
+  const language = supportedLanguages[lang].name;
+  console.log(">> services.haiku.completeHLimerickuPoem", { language, subject, mood, user });
+
+  const {
+    response: {
+      limerick: completedPoem,
+      title,
+      // subject: generatedSubject,
+      // mood: generatedMood,
+    }
+  } = await openai.completeLimerick(haiku.poem);
+  console.log(">> services.haiku.completeHLimerickuPoem", { completedPoem, title });
+
+  // // delete corresponding haikudle 
+  // getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
+  //   console.log(">> services.haiku.completeHLimerickuPoem", { haikudle });
+  //   if (haikudle) {
+  //     deleteHaikudle(user, haikudle.id);
+  //   }
+  // });
+
+  if (!user.isAdmin) {
+    incUserUsage(user, "haikusRegenerated");
+  }
+
+  return store.haikus.update(user.id, {
+    ...haiku,
+    poem: completedPoem,
+    title,
+    // theme: generatedSubject,
+    // mood: generatedMood,
+  });
+}
+
 export async function regenerateLimerickImage(user: any, haiku: Haiku, artStyle?: string): Promise<Haiku> {
   console.log(">> services.haiku.regenerateLimerickImage", { user, haiku });
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
@@ -538,7 +613,7 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
 
   const poem = haiku.poem.join("/");
   if (poem.includes("...") || poem.includes("…")) {
-    return completeHaikuPoem(user, haiku);
+    return completeHLimerickuPoem(user, haiku);
   }
 
   return store.haikus.update(user.id, { ...haiku, version: version + 1 });

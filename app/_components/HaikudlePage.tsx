@@ -115,7 +115,6 @@ export default function HaikudlePage({
             <div className="relative opacity-50">
               <StyledLayers styles={styles}>
                 <div className="animate-pulse flex flex-col items-center">
-                  <div>読込</div>
                   <div>Loading</div>
                 </div>
               </StyledLayers>

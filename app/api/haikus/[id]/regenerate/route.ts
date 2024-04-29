@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { regenerateHaikuPoem, getHaiku, regenerateHaikuImage, regenerateLimerickImage } from '@/services/haikus';
+import { getHaiku, regenerateLimerickImage, regenerateLimerickPoem } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { userUsage } from '@/services/usage';
 import { USAGE_LIMIT } from '@/types/Usage';
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
   const updatedHaiku = part == "image"
     ? await regenerateLimerickImage(user, haiku, artStyle)
-    : await regenerateHaikuPoem(user, haiku);
+    : await regenerateLimerickPoem(user, haiku);
       
   return NextResponse.json({ haiku: updatedHaiku, reachedUsageLimit });
 }

@@ -289,6 +289,65 @@ export async function generateLimerick({ startingWith, language }: { startingWit
   }
 }
 
+export async function completeLimerick(poem: string[], language?: string, subject?: string, mood?: string): Promise<any> {
+  const prompt = `Limerick to complete: "${poem.join(" / ")}"
+  ${subject ? `Topic: "${subject}"` : ""}
+  ${mood ? ` Mood: "${mood}"` : ""}`;
+
+  console.log(`>> services.openai.completeLimerick`, { poem, language, subject, mood, prompt });
+
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
+    console.warn(`>> services.openai.completeLimerick: DEBUG mode: returning dummy response`);
+    // await delay(3000);
+    return {
+      response: {
+        prompt,
+        limerick: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "_") : line),
+        // subject: subject || "test subject",
+        // mood: mood || "test mood",
+        title: "test title",
+      }
+    };
+  }
+
+  // @ts-ignore
+  const completion = await openai.chat.completions.create({
+    model: languageModel,
+    messages: [
+      {
+        role: 'system',
+        content: `
+          Given an incomplete limerick please complete the limerick. 
+          Characters "..." or "…" will be used to indicate a placeholder, please keep the existing word(s) and fill the rest.
+          If a line looks like this: "<some one or more words> ..." then keep the word(s) at the beginning and fill the rest.
+          If a line looks like this: "... <one or more words> ..." then keep the word(s) together and fill the rest.
+          Any empty or missing lines should be filled in or added so that we end up with 5 lines.
+          Additionally, if a line looks obviously incomplete even without "..." characters please complete it.
+          Optionally a topic (or "any", meaning you pick) and/or mood may be included.
+          Make sure the limerick include innuendos.
+          Respond in JSON where the response is an array of strings.
+          Also include in the response, in fewest number of words, a title for this limeric. 
+          Please only include keys "limerick" and "title".`
+      },
+      {
+        role: 'user',
+        content: prompt,
+      }
+    ],
+  });
+
+  let response;
+  try {
+    // console.log(">> services.openai.completeHaiku RESULTS FROM API", { completion });
+    response = JSON.parse(completion.choices[0].message.content || "{}");
+    console.log(">> services.openai.completeHaiku RESULTS FROM API", { response });
+    return { prompt, response };
+  } catch (error) {
+    console.error("Error reading results", { error, response, completion });
+  }
+}
+
 export async function generateLimerickImage(limerick?: string, subject?: string, mood?: string, artStyle?: string): Promise<any> {
   console.log(`>> services.openai.generateLimerickImage`, { limerick, subject, mood, artStyle });
   const imageTypes = [
