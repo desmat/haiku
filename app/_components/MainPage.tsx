@@ -299,25 +299,25 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
     }
   }, [haikuId, haiku?.id, loading, loaded]);
 
-  useEffect(() => {
-    // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
-    // @ts-ignore
-    let timeoutId;
-    if (user && (haikudleMode && haikudleReady || !haikudleMode)) {
-      if (previousDailyHaikudleId && !user?.preferences?.onboardedPreviousDaily) {
-        timeoutId = setTimeout(showAboutPreviousDaily, 2000);
-      } else if (userGeneratedHaiku && !user?.preferences?.onboardedGenerated) {
-        timeoutId = setTimeout(showAboutGenerated, 2000);
-      } else if ((haikuMode || haikudleMode) && !previousDailyHaikudleId && !user?.preferences?.onboarded) {
-        timeoutId = setTimeout(haikudleMode ? startFirstVisitHaikudleOnboarding : startFirstVisitOnboarding, 2000);
-      }
-    }
+  // useEffect(() => {
+  //   // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
+  //   // @ts-ignore
+  //   let timeoutId;
+  //   if (user && (haikudleMode && haikudleReady || !haikudleMode)) {
+  //     if (previousDailyHaikudleId && !user?.preferences?.onboardedPreviousDaily) {
+  //       timeoutId = setTimeout(showAboutPreviousDaily, 2000);
+  //     } else if (userGeneratedHaiku && !user?.preferences?.onboardedGenerated) {
+  //       timeoutId = setTimeout(showAboutGenerated, 2000);
+  //     } else if ((haikuMode || haikudleMode) && !previousDailyHaikudleId && !user?.preferences?.onboarded) {
+  //       timeoutId = setTimeout(haikudleMode ? startFirstVisitHaikudleOnboarding : startFirstVisitOnboarding, 2000);
+  //     }
+  //   }
 
-    return () => {
-      // @ts-ignore
-      timeoutId && clearTimeout(timeoutId);
-    }
-  }, [user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku]);
+  //   return () => {
+  //     // @ts-ignore
+  //     timeoutId && clearTimeout(timeoutId);
+  //   }
+  // }, [user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku]);
 
   useEffect(() => {
     // console.log('>> app.page useEffect [haiku?.id, loadingUI, isShowcaseMode, _refreshDelay]', { haiku_id: haiku?.id, loadingUI, isShowcaseMode, _refreshDelay });
