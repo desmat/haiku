@@ -361,7 +361,7 @@ export async function generateLimerickImage(limerick?: string, subject?: string,
     Please read this limerick: ${limerick}
     Respond with an image that would complement, hint at, and/or capture the essence that limerick.
     Make the art low-key with negative space in the middle, so that the limerick can be overlayed.
-    The image should not contain any letters, numbers or characters of any kind.
+    The image SHOULD NOT contain any writing, letters, numbers or characters of any kind.
     ${selectedArtStyle ? "Additional instructions for the image: " + selectedArtStyle + "." : ""}
   `;
 
