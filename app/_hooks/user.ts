@@ -1,12 +1,12 @@
 import moment from 'moment';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { User } from '@/types/User';
-import { listToMap, uuid } from '@/utils/misc';
-import trackEvent from '@/utils/trackEvent';
-import useAlert from './alert';
 import { DailyHaiku, UserHaiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
+import { User } from '@/types/User';
+import { listToMap } from '@/utils/misc';
+import trackEvent from '@/utils/trackEvent';
+import useAlert from './alert';
 
 const useUser: any = create(devtools((set: any, get: any) => ({
   user: undefined as User | undefined,
@@ -47,10 +47,26 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     let user;
     console.log(">> hooks.user.load()", {});
 
-    const {
-      user: createdUser,
-      token
-    } = await loadLocal();
+    let createdUser: User | undefined;
+    let token = window?.localStorage && window.localStorage.getItem("session");
+    
+    if (!token) {
+      const ret = await get().createRemote(user);
+      createdUser = ret.user;
+      token = ret.token;
+
+      if (!createdUser || !token) {
+        useAlert.getState().error(`Unable to create session user and/or token: (unknown)`);
+        return;
+      }
+
+      window?.localStorage && window.localStorage.setItem("session", token || "");
+      trackEvent("user-session-created", {
+        userId: createdUser.id,
+        isAdmin: createdUser.isAdmin,
+        isAnonymous: createdUser.isAnonymous,
+      });
+    } 
     
     const {
       user: remoteUser,
@@ -107,68 +123,6 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     };
   },
 
-  loadLocal: async () => {
-    let user;
-    let token = window?.localStorage && window.localStorage.getItem("session");
-    console.log(">> hooks.user.loadLocal()", { token });
-
-    if (token) {
-      // user = (await decodeJWT(token)).user as User;
-      // // @ts-ignore
-      // if ((process.env.ADMIN_USER_IDS || "").split(",").includes(user.id)) {
-      //   user.isAdmin = true;
-      // }
-
-      // trackEvent("user-session-loaded", {
-      //   userId: user.id,
-      //   isAdmin: user.isAdmin,
-      //   isAnonymous: user.isAnonymous,
-      //   // token, 
-      // });
-    } else {
-      // console.log('>> hooks.user.load() creating session', { onboardingUserId: process.env.ONBOARDING_USER_ID });
-      // if (process.env.ONBOARDING_USER_ID) {
-      //   console.warn('>> hooks.user.load() CREATING SESSION WITH ONBOARDING USER ID', { onboardingUserId: process.env.ONBOARDING_USER_ID });
-      // }
-
-      // user = {
-      //   id: process.env.ONBOARDING_USER_ID || uuid(),
-      //   isAnonymous: true,
-      //   isAdmin: false,
-      //   preferences: {}
-      // };
-
-      // token = await encodeJWT({ user });
-      const ret = await get().createRemote(user);
-      user = ret.user;
-      token = ret.token;
-
-      window?.localStorage && window.localStorage.setItem("session", token || "");
-    }
-
-    return { user, token };
-  },
-
-  loadRemote: async (token: string) => {
-    console.log(">> hooks.user.loadRemote()", { token });
-
-    const res = await fetch(`/api/user`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    if (res.status != 200) {
-      trackEvent("error", {
-        type: "fetch-user",
-        code: res.status,
-        token,
-      });
-      useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);
-      return {};
-    }
-
-    return res.json();
-  },
-
   update: async (user: any) => {
     set({ user });
   },
@@ -206,6 +160,25 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     return { user: savedUser, token: savedToken };
   },
 
+  loadRemote: async (token: string) => {
+    console.log(">> hooks.user.loadRemote()", { token });
+
+    const res = await fetch(`/api/user`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (res.status != 200) {
+      trackEvent("error", {
+        type: "fetch-user",
+        code: res.status,
+        token,
+      });
+      useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);
+      return {};
+    }
+
+    return res.json();
+  },
 
   createRemote: async (user: any) => {
     console.log(">> hooks.user.createRemote()", { user });
