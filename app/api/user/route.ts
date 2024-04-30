@@ -75,21 +75,21 @@ export async function POST(
   console.log('>> app.api.user.POST', {});
 
   const [
-    { user: userFromSession },
+    // { user: userFromSession },
     { user: userFromRequest },
   ] = await Promise.all([
-    userSession(request),
+    // userSession(request),
     request.json(),
   ]);
 
-  console.log('>> app.api.user.POST', { userFromSession, userFromRequest });
+  console.log('>> app.api.user.POST', { userFromRequest });
 
-  if (userFromSession) {
-    return NextResponse.json(
-      { success: false, message: 'user session provided but not expected' },
-      { status: 400 }
-    );
-  }
+  // if (userFromSession) {
+  //   return NextResponse.json(
+  //     { success: false, message: 'user session provided but not expected' },
+  //     { status: 400 }
+  //   );
+  // }
 
   // NOTE: nothing required from the client side at this time
   // if (!userFromRequest) {
