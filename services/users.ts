@@ -43,12 +43,17 @@ export async function userSession(request: any) {
   }
 
   const decodedToken = token && await decodeJWT(token);
-  // console.log(">> services.users.userSession", { decodedToken, adminUserIds: process.env.ADMIN_USER_IDS });
+  const user = decodedToken.user && await loadUser(decodedToken.user.id);
+  console.log(">> services.users.userSession", { decodedToken, user, adminUserIds: process.env.ADMIN_USER_IDS });
   
-  // @ts-ignore
-  decodedToken.user.isAdmin = ((process.env.ADMIN_USER_IDS || "").split(",").includes(decodedToken.user.id));
-
-  return decodedToken;
+  return {
+    ...decodedToken,
+    user: {
+      ...decodedToken.user,
+      ...user,
+      isAdmin: user?.isAdmin || ((process.env.ADMIN_USER_IDS || "").split(",").includes(decodedToken.user.id))
+    }
+  };
 }
 
 export async function loadUser(userId: string) {
