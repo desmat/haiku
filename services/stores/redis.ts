@@ -22,6 +22,7 @@ import { GenericStore, Store } from "@/types/Store";
 import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
+import { User } from "@/types/User";
 
 const jsonNotDeletedExpression = "(@.deletedAt > 0) == false";
 const jsonEqualsExpression = (key: string, val: string) => {
@@ -246,5 +247,6 @@ export function create(): Store {
     userHaikudles: new RedisStore<UserHaikudle>("userhaikudle"),
     userHaikus: new RedisStore<UserHaiku>("userhaiku"),
     userUsage: new RedisStore<UserUsage>("userusage"),
+    user: new RedisStore<User>("user"),
   }
 }

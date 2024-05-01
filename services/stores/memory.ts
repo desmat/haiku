@@ -4,6 +4,7 @@ import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
 import { GenericStore, Store } from "@/types/Store";
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
+import { User } from "@/types/User";
 
 type MenoryStoreEntry = {
   id?: string,
@@ -153,5 +154,6 @@ export function create(): Store {
     userHaikudles: new MemoryStore<UserHaikudle>("userhaikudle"),
     userHaikus: new MemoryStore<UserHaiku>("userhaiku"),
     userUsage: new MemoryStore<UserUsage>("userusage"),
+    user: new MemoryStore<User>("user"),
   }
 }
