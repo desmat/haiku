@@ -75,9 +75,18 @@ export const haikuPromptSteps = (haiku: Haiku) => [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
       <div>Haiku theme and mood: <i>${haiku.theme}</i> and <i>${haiku.mood}</i></div>      
-      <div>Image type: <i>${haiku.artStyle || "N/A"}</i></div>      
+      <div>Image style: <i>${haiku.artStyle || "N/A"}</i></div>      
       <!-- <div>Poem prompt: <i>${haiku.poemPrompt || "N/A"}</i></div> -->
       <div>Image prompt: <i>${haiku.imagePrompt || "N/A"}</i></div>
+      ${haiku.version || haiku.deprecated
+        ? `<div>Version: ${haiku.version}
+          ${haiku.version
+          ? ` <a href="/${haiku.id}?version=${haiku.version - 1}">(Load previous)</a>`
+          : ""}
+          ${haiku.deprecated
+          ? ` <a href="/${haiku.id}">(Load current)</a>`
+          : ""}</div>`
+        : ""}    
       </div>`,
     style: { bottom: "50%", transform: "translateY(50%)" },
   },

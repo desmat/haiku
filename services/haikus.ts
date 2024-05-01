@@ -235,7 +235,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
     incUserUsage(user, "haikusRegenerated");
   }
 
-  return store.haikus.update(user.id, {
+  return saveHaiku(user, {
     ...haiku,
     poem: completedPoem,
     theme: generatedSubject,
@@ -395,6 +395,11 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
     throw `Unauthorized`;
   }
 
+  const poem = haiku.poem.join("/");
+  if (poem.includes("...") || poem.includes("…")) {
+    return completeHaikuPoem(user, haiku);
+  }
+
   const original = await store.haikus.get(haiku.id);
 
   if (!original) {
@@ -402,6 +407,7 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
   }
 
   const version = (original.version || 0);
+
   store.haikus.create(user.id, {
     ...original,
     id: `${original.id}:${version}`,
@@ -411,11 +417,6 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
 
   // edge case where we're editing a previous version
   delete haiku.deprecated;
-
-  const poem = haiku.poem.join("/");
-  if (poem.includes("...") || poem.includes("…")) {
-    return completeHaikuPoem(user, haiku);
-  }
 
   return store.haikus.update(user.id, { ...haiku, version: version + 1 });
 }

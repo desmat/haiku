@@ -16,6 +16,7 @@ export default function HaikuPage({
   loading,
   onboardingElement,
   refresh,
+  saveHaiku,
   regeneratePoem,
   regenerateImage,
   copyHaiku,
@@ -29,6 +30,7 @@ export default function HaikuPage({
   loading?: boolean,
   onboardingElement?: string,
   refresh?: any,
+  saveHaiku?: any
   regeneratePoem?: any,
   regenerateImage?: any,
   copyHaiku?: any
@@ -75,6 +77,7 @@ export default function HaikuPage({
               regeneratePoem={regeneratePoem}
               regenerateImage={regenerateImage}
               refresh={refresh}
+              saveHaiku={saveHaiku}
               copyHaiku={copyHaiku}
             />
           </div>
