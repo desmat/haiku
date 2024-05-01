@@ -354,7 +354,8 @@ export async function generateLimerickImage(limerick?: string, subject?: string,
     // "charcoal drawing", 
     // "pencil drawing",
     // "Painting",
-    "funny and whimsical painting with large brush strokes, in a style often seen in irish or english pubs"
+    "funny and whimsical painting with large brush strokes, in a style often seen in irish or english pubs",
+    "funny and whimsical quick wobbly sketch, colored hastily with watercolors",
   ];
   const selectedArtStyle = artStyle || imageTypes[Math.floor(Math.random() * imageTypes.length)];
   const prompt = `
