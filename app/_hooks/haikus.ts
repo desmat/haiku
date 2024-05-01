@@ -636,7 +636,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
         trackEvent(event, {
           id: actedOn.id,
-          userId: actedOn.updatedBy,
+          userId: userState?.user?.id,
           value,
         });
 

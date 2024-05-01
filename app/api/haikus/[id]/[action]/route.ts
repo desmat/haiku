@@ -17,7 +17,7 @@ export async function POST(
       request.json(),
       userSession(request),
     ]);
-    const haiku = getHaiku(user, params.id);
+    const haiku = await getHaiku(user, params.id);
 
     if (!haiku) {
       return NextResponse.json(
