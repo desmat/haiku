@@ -74,6 +74,7 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
     deleteHaiku,
     createDailyHaiku,
     haikuAction,
+    saveHaiku,
   ] = useHaikus((state: any) => [
     state.loaded(haikuId),
     state.load,
@@ -84,6 +85,7 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
     state.delete,
     state.createDailyHaiku,
     state.action,
+    state.save,
   ]);
 
   const [
@@ -297,7 +299,7 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
         loadPage();
       }
     }
-  }, [haikuId, haiku?.id, loading, loaded]);
+  }, [haikuId, haiku?.id, haiku?.version, loading, loaded]);
 
   // useEffect(() => {
   //   // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
@@ -709,6 +711,16 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
     }
   }
 
+  const doSaveHaiku = async (haiku: Haiku) => {
+    // console.log(">> app.MainPage.doSaveHaiku", { haiku });
+    const savedHaiku = await saveHaiku(user, haiku);
+    // console.log(">> app.MainPage.doSaveHaiku", { savedHaiku });
+    setHaiku(savedHaiku);
+    setHaikuId(savedHaiku?.id);
+
+    return savedHaiku;
+  }
+
   const copyLink = () => {
     if (haikudleMode && haikudleSolved || !haikudleMode) {
       navigator.clipboard.writeText(`https://limerick.desmat.ca/${haiku.id}`);
@@ -804,6 +816,7 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
           regenerating={regenerating}
           onboardingElement={onboardingElement}
           refresh={loadRandom}
+          saveHaiku={doSaveHaiku}
           regeneratePoem={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku()}
           regenerateImage={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage()}
           copyHaiku={copyHaiku}

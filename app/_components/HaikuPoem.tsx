@@ -118,6 +118,7 @@ export default function HaikuPoem({
   regeneratePoem,
   regenerateImage,
   refresh,
+  saveHaiku,
   copyHaiku
 }: {
   user: User,
@@ -130,6 +131,7 @@ export default function HaikuPoem({
   regeneratePoem?: any,
   regenerateImage?: any,
   refresh?: any,
+  saveHaiku?: any,
   copyHaiku?: any,
 }) {
   // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku.status, popPoem, haiku });
@@ -145,7 +147,6 @@ export default function HaikuPoem({
   const [saving, setSaving] = useState(false);
   const [select, setSelection] = useState(false);
   const [alert] = useAlert((state: any) => [state.plain]);
-  const [saveHaiku] = useHaikus((state: any) => [state.save]);
   const editing = typeof (editingLine) == "number";
   const aboutToEdit = typeof (aboutToEditLine) == "number";
   const copyAllowed = true;
@@ -223,14 +224,12 @@ export default function HaikuPoem({
       });
 
     try {
-      const saved = await saveHaiku(user, {
+      await saveHaiku({
         ...haiku,
         originalPoem: haiku.originalPoem || haiku.poem,
         poem: updatedOpen,
       });
-
-      // console.log('>> app._components.HaikuPoem.finishEdit()', { saved });
-      haiku.poem = saved.poem;
+      // console.log('>> app._components.HaikuPoem.finishEdit()', {});
     } catch (error: any) {
       // console.log('>> app._components.HaikuPoem.finishEdit()', { error });
       // assumption that saveHaiku store showed an error alert
