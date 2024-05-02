@@ -21,20 +21,6 @@ import { StyledLayers } from './StyledLayers';
 import SidePanel from './SidePanel';
 import PopOnClick from './PopOnClick';
 
-export function Loading({ onClick }: { onClick?: any }) {
-  const defaultOnClick = () => document.location.href = "/";
-  return (
-    <div
-      onClick={onClick || defaultOnClick}
-      className='_bg-pink-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-dark-2 opacity-5 animate-pulse cursor-pointer z-50'
-    >
-      <div className="animate-pulse flex flex-col items-center">
-        <div>Loading</div>
-      </div>
-    </div>
-  );
-}
-
 export function Logo({
   mode,
   href,

@@ -4,7 +4,8 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { syllable } from 'syllable';
 import { Haiku } from "@/types/Haiku";
-import { Loading, NavOverlay } from '@/app/_components/Nav';
+import { NavOverlay } from '@/app/_components/Nav';
+import Loading from "@/app/_components/Loading";
 import HaikuPage from '@/app/_components/HaikuPage';
 import useAlert from '@/app/_hooks/alert';
 import useHaikus from "@/app/_hooks/haikus";
@@ -742,11 +743,10 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
   }
 
   if (!loaded || loading || loadingUI || generating) {
-    // return <LoadingPage mode={mode} /* haiku={haiku} */ />
     return (
       <div>
         <NavOverlay loading={true} mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} onClickLogo={loadHomePage} />
-        <Loading onClick={showcaseMode && loadRandom} />
+        <Loading styles={textStyles} />
         {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}
       </div>
     )

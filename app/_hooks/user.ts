@@ -33,7 +33,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   getToken: async () => {
-    console.log(">> hooks.user.getToken()", {});
+    // console.log(">> hooks.user.getToken()", {});
     const { loaded, token, load } = get();
     if (!loaded) {
       return (await load()).token;
@@ -45,7 +45,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   load: async () => {
     const { loadLocal, loadRemote } = get();
     let user;
-    console.log(">> hooks.user.load()", {});
+    // console.log(">> hooks.user.load()", {});
 
     let createdUser: User | undefined;
     let token = window?.localStorage && window.localStorage.getItem("session");
@@ -78,7 +78,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       nextDailyHaikudleId,
     } = await loadRemote(token);
 
-    console.log(">> hooks.user.load()", { createdUser, remoteUser });
+    // console.log(">> hooks.user.load()", { createdUser, remoteUser });
 
     if (createdUser) {
       trackEvent("user-session-created", {
@@ -147,11 +147,11 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   save: async (user: any) => {
-    console.log(">> hooks.user.save()", { user });
+    // console.log(">> hooks.user.save()", { user });
 
     // save remote
     const { user: savedUser, token: savedToken } = await get().saveRemote(user);
-    console.log(">> hooks.user.save()", { savedUser, savedToken });
+    // console.log(">> hooks.user.save()", { savedUser, savedToken });
 
     // save local
     window?.localStorage && window.localStorage.setItem("session", savedToken || "");
@@ -161,7 +161,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   loadRemote: async (token: string) => {
-    console.log(">> hooks.user.loadRemote()", { token });
+    // console.log(">> hooks.user.loadRemote()", { token });
 
     const res = await fetch(`/api/user`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -181,7 +181,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   createRemote: async (user: any) => {
-    console.log(">> hooks.user.createRemote()", { user });
+    // console.log(">> hooks.user.createRemote()", { user });
 
     const res = await fetch(`/api/user`, {
       // ...await fetchOpts(),
@@ -199,13 +199,13 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     }
 
     const { user: updatedUser, token: updatedToken } = await res.json();
-    console.log(">> hooks.user.createRemote()", { updatedToken, updatedUser });
+    // console.log(">> hooks.user.createRemote()", { updatedToken, updatedUser });
 
     return { user: updatedUser, token: updatedToken };
   },  
 
   saveRemote: async (user: any) => {
-    console.log(">> hooks.user.saveRemote()", { user });
+    // console.log(">> hooks.user.saveRemote()", { user });
 
     const token = await get().getToken();
     const opts = token && { headers: { Authorization: `Bearer ${token}` } } || {};
@@ -226,7 +226,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     }
 
     const { user: updatedUser, token: updatedToken } = await res.json();
-    console.log(">> hooks.user.saveRemote()", { updatedToken, updatedUser });
+    // console.log(">> hooks.user.saveRemote()", { updatedToken, updatedUser });
 
     return { user: updatedUser, token: updatedToken };
   },  

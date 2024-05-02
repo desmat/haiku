@@ -410,7 +410,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         }
 
         const { haiku: generated, reachedUsageLimit } = await res.json();
-        console.log(">> hooks.haiku.create", { generated, reachedUsageLimit });
+        // console.log(">> hooks.haiku.create", { generated, reachedUsageLimit });
 
         trackEvent("haiku-generated", {
           id: generated.id,
@@ -585,7 +585,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     // const userHaiku = userHaikus[haikuId] || { haikuId };
 
     if (!haiku) {
-      console.error(">> hooks.haiku.action: haiku not found", { haikuId, action, value });
+      // console.error(">> hooks.haiku.action: haiku not found", { haikuId, action, value });
     }
 
     set({
