@@ -48,7 +48,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
     state.incUserUsage,
     state.getToken,
   ]);
-
+  
   const [
     resetAlert,
     plainAlert,
@@ -717,7 +717,10 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
       <NavOverlay
         mode={mode}
         lang={lang}
-        haiku={haikudleSolved ? solvedHaikudleHaiku : haiku}
+        haiku={{
+          ...(haikudleSolved ? solvedHaikudleHaiku : haiku),
+          likedAt: userHaikus[haiku.id]?.likedAt,
+        }}
         refreshDelay={_refreshDelay}
         backupInProgress={backupInProgress}
         styles={textStyles.slice(0, textStyles.length - 3)}
