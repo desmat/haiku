@@ -37,7 +37,8 @@ export default function Loading({ styles = [] }: { styles?: any }) {
   return (
     <Link
       href="/"
-      className={`${font.architects_daughter.className} _bg-pink-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-dark-2 opacity-50 z-50 md:text-[26pt] sm:text-[22pt] text-[16pt]`}
+      className={`${font.architects_daughter.className} _bg-pink-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full p-2 opacity-50 z-50 md:text-[26pt] sm:text-[22pt] text-[16pt]`}
+      style={{ textDecoration: "none" }}
     >
       <StyledLayers styles={styles}>
         <div className="animate-pulse flex flex-col items-center">
