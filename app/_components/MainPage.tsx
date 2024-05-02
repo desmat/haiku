@@ -51,7 +51,7 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
     state.nextDailyHaikuId,
     state.nextDailyHaikudleId,
   ]);
-
+  
   const [
     resetAlert,
     plainAlert,
@@ -756,7 +756,7 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
         lang={lang}
         haiku={{
           ...(haikudleSolved ? solvedHaikudleHaiku : haiku),
-          ...userHaikus[haiku.id],
+          likedAt: userHaikus[haiku.id]?.likedAt,
         }}
         refreshDelay={_refreshDelay}
         backupInProgress={backupInProgress}
