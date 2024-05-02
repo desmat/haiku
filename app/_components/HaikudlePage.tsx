@@ -7,7 +7,7 @@ import useUser from "@/app/_hooks/user";
 import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
 import HaikuPuzzle from "./HaikuPuzzle";
-import { StyledLayers } from "./StyledLayers";
+import Loading from "./Loading";
 
 export default function HaikudlePage({
   mode,
@@ -112,14 +112,7 @@ export default function HaikudlePage({
         />
         <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[18pt] absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit ${onboardingElement && ["puzzle"].includes(onboardingElement) ? "z-50" : "z-10"} transition-all `}>
           {regenerating &&
-            <div className="relative opacity-50">
-              <StyledLayers styles={styles}>
-                <div className="animate-pulse flex flex-col items-center">
-                  <div>読込</div>
-                  <div>Loading</div>
-                </div>
-              </StyledLayers>
-            </div>
+            <Loading styles={styles} />
           }
           {!regenerating &&
             <div className="_bg-pink-200 onboarding-container">

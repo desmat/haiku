@@ -5,6 +5,7 @@ import * as font from "@/app/font";
 import { Haiku } from "@/types/Haiku";
 import { StyledLayers } from "./StyledLayers";
 import HaikuPoem from "./HaikuPoem";
+import Loading from "./Loading";
 
 export default function HaikuPage({
   mode,
@@ -55,14 +56,7 @@ export default function HaikuPage({
       />
       <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}>
         {(regenerating || loading) &&
-          <div className="relative opacity-50">
-            <StyledLayers styles={styles}>
-              <div className="animate-pulse flex flex-col items-center">
-                <div>読込</div>
-                <div>Loading</div>
-              </div>
-            </StyledLayers>
-          </div>
+          <Loading styles={styles} />
         }
         {!regenerating && !loading && mode != "social-img" && 
           <div className="_bg-pink-200 relative">
