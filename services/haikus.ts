@@ -21,7 +21,8 @@ import(`@/services/stores/${process.env.STORE_TYPE}`)
 
 export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[]> {
   console.log(">> services.haikus.getHaikus", { query, hashPoem })
-  let haikus = await store.haikus.find(query);
+  let haikus = (await store.haikus.find(query))
+    .filter((haiku: Haiku) => haiku && !haiku.deprecated);
 
   if (!haikus?.length && (!query || JSON.stringify(query) == "{}")) {
     // empty db, populate with samples
@@ -40,7 +41,7 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
       })
   }
 
-  return new Promise((resolve, reject) => resolve(haikus.filter(Boolean)));
+  return new Promise((resolve, reject) => resolve(haikus));
 }
 
 export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]> {
