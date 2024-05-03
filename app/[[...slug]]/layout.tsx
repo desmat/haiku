@@ -78,13 +78,11 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
   params,
-  searchParams,
 }: {
   children: React.ReactNode,
   params?: any,
-  searchParams?: any,
 }) {
-  console.log('>> app.layout.render()', { slug: params.slug, params, searchParams });
+  console.log('>> app.layout.render()', { slug: params.slug, params });
 
   metadata = { 
     ...metadata,
