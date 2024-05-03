@@ -500,17 +500,19 @@ export default function HaikuPoem({
                         }}
                       >
                         <StyledLayers styles={altStyles || []}>
-                          <FaEdit className={`
+                          <PopOnClick>
+                            <FaEdit className={`
                             h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 
                             ${editing || onboardingElement == "poem-actions"
-                              ? "opacity-100"
-                              : saving || !canEdit
-                                ? "opacity-60"
-                                : canEdit
-                                  ? "opacity-60 group-hover/edit:opacity-100 group-hover/actions:opacity-100"
-                                  : ""
-                            }
+                                ? "opacity-100"
+                                : saving || !canEdit
+                                  ? "opacity-60"
+                                  : canEdit
+                                    ? "opacity-100"
+                                    : ""
+                              }
                           `} />
+                          </PopOnClick>
                         </StyledLayers>
                       </Link>
                     }
@@ -529,14 +531,15 @@ export default function HaikuPoem({
                         {(user?.isAdmin || (user.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
                           <span title="Regenerate this haiku with the same theme">
                             <StyledLayers styles={altStyles || []}>
-                              <GenerateIcon
-                                onClick={() => canRegeneratePoem && regeneratePoem()}
-                                sizeOverwrite={`
+                              <PopOnClick>
+                                <GenerateIcon
+                                  onClick={() => canRegeneratePoem && regeneratePoem()}
+                                  sizeOverwrite={`
                                   h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 
-                                  ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"} 
-                                  ${canRegeneratePoem ? "group-hover/actions:opacity-100 cursor-pointer" : "cursor-default"}
+                                  ${canRegeneratePoem || onboardingElement == "poem-actions" ? "cursor-pointer opacity-100" : "opacity-60"} 
                                 `}
-                              />
+                                />
+                              </PopOnClick>
                             </StyledLayers>
                           </span>
                         }
@@ -557,14 +560,15 @@ export default function HaikuPoem({
                         {(user?.isAdmin || (user.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
                           <span title="Regenerate this haiku's art with the same theme">
                             <StyledLayers styles={altStyles || []}>
-                              <TbReload
-                                onClick={() => canRegenerateImage && regenerateImage()}
-                                className={`
-                                  h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 ml-[-0.1rem]
-                                  ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"} 
-                                  ${canRegenerateImage ? "group-hover/actions:opacity-100 cursor-pointer" : "cursor-default"}
+                              <PopOnClick>
+                                <TbReload
+                                  onClick={() => canRegenerateImage && regenerateImage()}
+                                  className={`
+                                  h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 
+                                  ${canRegeneratePoem || onboardingElement == "poem-actions" ? "cursor-pointer opacity-100" : "opacity-60"} 
                                 `}
-                              />
+                                />
+                              </PopOnClick>
                             </StyledLayers>
                           </span>
                         }
