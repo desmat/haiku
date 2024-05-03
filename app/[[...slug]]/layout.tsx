@@ -82,17 +82,18 @@ export default async function RootLayout({
   children: React.ReactNode,
   params?: any,
 }) {
-  console.log('>> app.layout.render()', { slug: params.slug, params });
+  const haikuId = params?.slug ? params.slug[0] : "default";
+  console.log('>> app.layout.render()', { haikuId, slug: params.slug, params });
 
   metadata = { 
     ...metadata,
     openGraph: {
-      title: appName,
+      title: `${haikuId} - appName`,
       type: "website",
-      description: appDescription,
+      description: `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_haiku/haiku_${haikuId}.png`,
       url: metaUrl,
       images: [
-        `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_haiku/haiku_${params?.slug[0]}.png`,
+        `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_haiku/haiku_${haikuId}.png`,
         // ...metaImages,
       ]
     }
