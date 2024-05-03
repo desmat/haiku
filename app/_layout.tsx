@@ -1,11 +1,10 @@
-import '../globals.css'
+import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react';
 import Alert from '@/app/_components/Alert';
 import type { Viewport } from 'next'
 import moment from 'moment';
-import { getHaiku } from '@/services/haikus';
 
 const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 const inter = Inter({ subsets: ['latin'] });
@@ -16,13 +15,13 @@ const appName = isHaikudleMode
 
 const appDescription = isHaikudleMode
   ? "Solve the daily puzzles, generate new haikus, enjoy beautiful generative art and share with the world - no signup required. " +
-  "Haikudle integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
-  "Generate haiku poems and share AI-generated creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
-  "Explore daily haiku puzzles and discover the limitless poetic and artistic possibilities with Haikudle."
+    "Haikudle integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
+    "Generate haiku poems and share AI-generated creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
+    "Explore daily haiku puzzles and discover the limitless poetic and artistic possibilities with Haikudle."
   : "Create and share your haiku masterpieces with beautiful generated art — no signup required. " +
-  "Haiku Genius integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
-  "Craft haiku poems seamlessly with our AI assistant and share your creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
-  "Explore daily featured haikus and experience AI-assisted creativity and discover the limitless possibilities of poetic exploration with Haiku Genius.";
+    "Haiku Genius integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
+    "Craft haiku poems seamlessly with our AI assistant and share your creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
+    "Explore daily featured haikus and experience AI-assisted creativity and discover the limitless possibilities of poetic exploration with Haiku Genius.";
 
 const metaUrl = isHaikudleMode
   ? "https://haikudle.art/"
@@ -62,7 +61,7 @@ if (isHaikudleMode) {
   ];
 }
 
-export let metadata: Metadata = {
+export const metadata: Metadata = {
   title: `${appName} - ${appDescription}`,
   description: appDescription,
 }
@@ -75,7 +74,7 @@ export const viewport: Viewport = {
   userScalable: false,
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
   params,
   searchParams,
@@ -86,59 +85,33 @@ export default async function RootLayout({
 }) {
   console.log('>> app.layout.render()', { slug: params.slug, params, searchParams });
 
-  metadata = { 
-    ...metadata,
-    openGraph: {
-      title: appName,
-      type: "website",
-      description: appDescription,
-      url: metaUrl,
-      images: [
-        `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_haiku/haiku_${params?.slug[0]}.png`,
-        ...metaImages,
-      ]
-    }
-  }
-
   return (
-    <section className={inter.className}>
-      <div className="flex flex-col lg:flex-row">
-        <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
-          {children}
+    <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link
+          rel="canonical"
+          href={metaUrl}
+          key="canonical"
+        />
+        <meta property="og:title" content={appName} />
+        <meta property="og:type" content="website" />
+        <meta property="og:description" content={appDescription} />
+        <meta property="og:url" content={metaUrl} />
+        {metaImages.map((image: string, i: number) => (
+          <meta key={i} property="og:image" content={image} />
+        ))}
+        <meta property="fb:app_id" content={process.env.FB_APP_ID} />
+      </head>
+      <body className={inter.className}>
+        <div className="flex flex-col lg:flex-row">
+          <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
+            {children}
+          </div>
         </div>
-      </div>
-      <Analytics />
-      <Alert />
-    </section>
+        <Analytics />
+        <Alert />
+      </body>
+    </html>
   )
-
-  // return (
-  //   <html lang="en">
-  //     <head>
-  //       <link rel="icon" href="/favicon.ico" sizes="any" />
-  //       <link
-  //         rel="canonical"
-  //         href={metaUrl}
-  //         key="canonical"
-  //       />
-  //       <meta property="og:title" content={appName} />
-  //       <meta property="og:type" content="website" />
-  //       <meta property="og:description" content={appDescription} />
-  //       <meta property="og:url" content={metaUrl} />
-  //       {metaImages.map((image: string, i: number) => (
-  //         <meta key={i} property="og:image" content={image} />
-  //       ))}
-  //       <meta property="fb:app_id" content={process.env.FB_APP_ID} />
-  //     </head>
-  //     <body className={inter.className}>
-  //       <div className="flex flex-col lg:flex-row">
-  //         <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
-  //           {children}
-  //         </div>
-  //       </div>
-  //       <Analytics />
-  //       <Alert />
-  //     </body>
-  //   </html>
-  // )
 }
