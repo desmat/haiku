@@ -93,7 +93,7 @@ export default async function RootLayout({
       url: metaUrl,
       images: [
         `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_haiku/haiku_${params?.slug[0]}.png`,
-        ...metaImages,
+        // ...metaImages,
       ]
     }
   }
