@@ -88,7 +88,7 @@ export default async function RootLayout({
   metadata = { 
     ...metadata,
     openGraph: {
-      title: `${haikuId} - appName`,
+      title: `${haikuId} - ${appName}`,
       type: "website",
       description: `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_haiku/haiku_${haikuId}.png`,
       url: metaUrl,
