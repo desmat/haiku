@@ -165,7 +165,7 @@ export default function HaikuPoem({
       return refresh && refresh(e);
     }
 
-    if (!canEdit && copyHaiku) {
+    if (/* !canEdit && */ copyHaiku) {
       trackEvent("haiku-copied", {
         userId: user.id,
         id: haiku.id,
@@ -292,7 +292,7 @@ export default function HaikuPoem({
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative px-[2rem] ">
       {/* allow editors to click out and finish */}
       <div
         className={`_bg-pink-100 absolute top-0 left-0 w-[100vw] h-[100vh]${saving ? " opacity-50" : ""}`}
@@ -311,7 +311,7 @@ export default function HaikuPoem({
           force={popPoem}
           disabled={editing || canEdit || showcaseMode}
         >
-          <div className={`_bg-pink-200 ${canEdit ? "group/edit" : ""} p-2 ${saving ? "animate-pulse" : ""}`}>
+          <div className={`_bg-pink-200 ${canEdit ? "_group/edit" : ""} p-2 ${saving ? "animate-pulse" : ""}`}>
             <div
               className="_bg-purple-200 flex flex-col gap-[2rem] _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
               onClick={handleClickHaiku}
@@ -338,14 +338,14 @@ export default function HaikuPoem({
                             : styles
                     }>
                       <div
-                        className="relative m-[0rem] transition-all"
+                        className="_bg-yellow-200 relative m-[0rem] transition-all"
                         onKeyDown={(e: any) => canEdit && handlePoemLineKeyDown(e, i)}
-                        onMouseOver={() => canEdit && setAboutToEditLine(i)}
-                        onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
-                        onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
+                        // onMouseOver={() => canEdit && setAboutToEditLine(i)}
+                        // onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
+                        // onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
                       >
                         {/* set the width while editing */}
-                        {editAllowed &&
+                        {editing /* editAllowed */ &&
                           <>
                             <div
                               className="_bg-pink-200 invisible px-[0.5rem] h-[2.2rem] sm:h-[2.6rem] md:h-[3.2rem]"
@@ -409,9 +409,9 @@ export default function HaikuPoem({
                             </div>
                           </>
                         }
-                        {!editAllowed &&
+                        {!editing /* editAllowed */ &&
                           <div
-                            className={`_bg-purple-400 my-[0.05rem] ${showcaseMode ? "cursor-pointer" : "cursor-copy"}`}
+                            className={`_bg-purple-100 my-[0.05rem] px-[0rem] py-[0.4rem] leading-6 ${showcaseMode ? "cursor-pointer" : "cursor-copy"}`}
                           >
                             {upperCaseFirstLetter(poemLine)}
                           </div>
@@ -475,7 +475,7 @@ export default function HaikuPoem({
 
                 {!showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed) &&
                   <div
-                    className="onboarding-container group/actions _bg-yellow-200 flex flex-row gap-2 mt-auto md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.2rem] sm:pb-[0.5rem] pb-[0.4rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
+                    className="onboarding-container _group/actions _bg-yellow-200 flex flex-row gap-2 mt-auto md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.2rem] sm:pb-[0.5rem] pb-[0.4rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
                   >
                     {onboardingElement && ["poem-actions"].includes(onboardingElement) &&
                       <div className="onboarding-focus" />
