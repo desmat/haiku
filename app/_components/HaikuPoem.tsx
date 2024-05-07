@@ -315,7 +315,7 @@ export default function HaikuPoem({
             <div
               className="_bg-purple-200 flex flex-col gap-[2rem] _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
               onClick={handleClickHaiku}
-              title={showcaseMode ? "Refresh" : "Click to edit"}
+              title={showcaseMode ? "Refresh" : "Copy to clipboard"}
               style={{
                 cursor: showcaseMode ? "pointer" : ""
               }}
