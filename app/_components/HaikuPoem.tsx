@@ -411,7 +411,7 @@ export default function HaikuPoem({
                         }
                         {!editing /* editAllowed */ &&
                           <div
-                            className={`_bg-purple-100 my-[0.05rem] px-[0rem] py-[0.4rem] leading-6 ${showcaseMode ? "cursor-pointer" : "cursor-copy"}`}
+                            className={`_bg-purple-100 my-[0.05rem] px-[0rem] py-[0.3rem] md:leading-9 sm:leading-8 leading-6 ${showcaseMode ? "cursor-pointer" : "cursor-copy"}`}
                           >
                             {upperCaseFirstLetter(poemLine)}
                           </div>
