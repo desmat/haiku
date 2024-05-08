@@ -16,7 +16,7 @@ export async function GET(
   const { user } = await userSession(request);
   console.log('>> app.api.haiku.[id].GET', { params });
 
-  if (query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
+  if (query.mode != "showcase" && query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
     return NextResponse.json(
       { success: false, message: 'authorization failed' },
       { status: 403 }
