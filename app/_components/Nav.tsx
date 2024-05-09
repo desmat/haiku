@@ -42,18 +42,20 @@ const haikuThemeSuggestions = [
 export function GenerateIcon({
   onClick,
   sizeOverwrite,
+  style,
   children,
 }: {
   onClick?: any,
   sizeOverwrite?: string,
+  style?: any
   children?: React.ReactNode,
 }) {
-  const icon = <IoSparkles className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />;
+  const icon = <IoSparkles style={style} className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />;
 
   return (
     <Link
       className="generate-icon flex flex-row m-auto gap-2 hover:no-underline"
-      style={{ cursor: onClick ? "pointer" : "default" }}
+      style={{ cursor: style || onClick ? "pointer" : "default" }}
       href="#"
       onClick={(e: any) => {
         e.preventDefault();
@@ -98,6 +100,8 @@ export function GenerateInput({
   // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
 
   const onboarding = onboardingElement == "generate";
+  const dateCode = moment().format("YYYYMMDD");
+  const exceededUsageLimit = !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU;
 
   const handleChange = (e: any) => {
     setActive(true);
@@ -116,7 +120,7 @@ export function GenerateInput({
       // @ts-ignore
       ref.current.blur();
     } else if (e.key == "Enter") {
-      handleClickedGenerate();
+      !exceededUsageLimit && handleClickedGenerate && handleClickedGenerate();
     }
   }
 
@@ -154,7 +158,7 @@ export function GenerateInput({
   return (
     <div
       onMouseOver={() => {
-        setActive(true);
+        !exceededUsageLimit && setActive(true);
       }}
       onMouseOut={() => {
         // @ts-ignore
@@ -228,6 +232,7 @@ export function GenerateInput({
                   ref={ref}
                   maxLength={36}
                   placeholder={`Create a haiku about... ${haikuTheme}`}
+                  disabled={exceededUsageLimit}
                   // value={value || ""}
                   onChange={handleChange}
                   onFocus={() => {
@@ -239,22 +244,30 @@ export function GenerateInput({
                   onBlur={() => (typeof (value) == "undefined") && setActive(false)}
                   onKeyDown={handleKeyDown}
                   className={`w-full absolute top-0 left-0
-                  pt-[0.1rem] pr-[2.5rem] pb-[0.1rem] pl-[0.7rem] md:pr-[3rem]
-                  mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0 md:mt-[0.1rem] md:mr-[0rem]      
-              `}
+                    pt-[0.1rem] pr-[2.5rem] pb-[0.1rem] pl-[0.7rem] md:pr-[3rem]
+                    mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0 md:mt-[0.1rem] md:mr-[0rem]      
+                  `}
+                  style={{cursor: exceededUsageLimit ? "not-allowed" : "pointer"}}
+                  title={exceededUsageLimit 
+                    ? "Exceeded daily limit: try again later" 
+                    : "Enter theme, subject or leave blank, and click the button to create a new haiku"
+                  }
                 />
               </div>
             </div>
             <div className="relative w-0">
               <div
-                className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-20 cursor-pointer"
-                style={{ opacity: active ? "1" : "0.3" }}
+                className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-20"
+                style={{ 
+                  opacity: active ? "1" : "0.3",
+                }}
                 onMouseDown={() => setClickingGenerate(true)}
                 onMouseUp={() => clickingGenerate && handleClickedGenerate()}
+                title={exceededUsageLimit ? "Exceeded daily limit: try again later" : "Create a new haiku"}
               >
                 <PopOnClick>
                   <StyledLayers styles={active ? altStyles.slice(0, 2) : styles.slice(0, 1)}>
-                    <GenerateIcon onClick={() => undefined}>
+                    <GenerateIcon style={{cursor: exceededUsageLimit ? "not-allowed" : "pointer"}}>
                       {/* Create */}
                     </GenerateIcon>
                   </StyledLayers>
