@@ -20,7 +20,7 @@ import { StyledLayers } from "./StyledLayers";
 const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
   return [
     `"${capitalize(haiku.theme)}", `,
-    `${mode == "haikudle" ? "haikudle.art" : "haikugenius.io"}/${haiku.id}`
+    `limerick.desmat.ca/${haiku.id}`
   ];
 }
 
