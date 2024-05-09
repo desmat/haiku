@@ -49,12 +49,16 @@ export function ControlledInput({
   id,
   activeId,
   value,
+  placeholder,
+  className,
   select,
   onChange,
 }: {
   id: number,
   activeId?: number,
   value?: string,
+  placeholder?: string,
+  className?: string,
   select?: boolean,
   onChange: any,
 }) {
@@ -97,11 +101,13 @@ export function ControlledInput({
     <input
       //@ts-ignore
       ref={ref}
-      className="w-full absolute top-0 left-[-0.01rem] px-[0.5rem]"
+      maxLength={50}
+      className={className || "w-full absolute top-0 left-[-0.01rem] px-[0.5rem]"}
       onChange={(e: any) => {
         setLocalValue(e.target.value);
         onChange(e.target.value);
       }}
+      placeholder={placeholder}
       value={localValue}
     />
   )
@@ -301,10 +307,10 @@ export default function HaikuPoem({
 
       <div className="onboarding-container">
         {onboardingElement && ["poem"].includes(onboardingElement) &&
-          <div className="onboarding-focus" />
+          <div className="onboarding-focus double" />
         }
         {onboardingElement && ["poem-and-poem-actions"].includes(onboardingElement) &&
-          <div className="onboarding-focus double" />
+          <div className="onboarding-focus" />
         }
         <PopOnClick
           color={haiku.bgColor}

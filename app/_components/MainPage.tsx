@@ -478,13 +478,15 @@ export default function MainPage({ mode, id, version, lang, refreshDelay }: { mo
     );
   }
 
-  const startGenerateHaiku = async () => {
+  const startGenerateHaiku = async (theme?: string) => {
     // console.log('>> app.page.startGenerateHaiku()');
     trackEvent("clicked-generate-haiku", {
       userId: user?.id,
     });
 
-    const subject = prompt(`Haiku's theme or subject? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test poem)" : "(For example 'nature', 'cherry blossoms', or leave blank)"}`)
+    const subject = typeof(theme) == "undefined"
+      ? prompt(`Haiku's theme or subject? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test poem)" : "(For example 'nature', 'cherry blossoms', or leave blank)"}`)
+      : theme;
 
     if (typeof (subject) == "string") {
       const artStyle = ""; //prompt(`Art style? (For example 'watercolor', 'Japanese woodblock print', 'abstract oil painting with large strokes', or leave blank for a style picked at random)"`);

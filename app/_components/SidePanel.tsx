@@ -3,18 +3,21 @@
 import moment from 'moment';
 import Link from 'next/link'
 import { useEffect, useState } from 'react';
-import { IoEyeSharp, IoHeartSharp, IoHelpCircle, IoLogoGithub, IoSparkles } from 'react-icons/io5';
+import { IoEyeSharp, IoHeartSharp, IoHelpCircle, IoLogoGithub, IoSparkles, IoMenu } from 'react-icons/io5';
+import { BsArrowBarLeft } from "react-icons/bs";
 import { MdHome } from "react-icons/md";
 import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg, BsDatabaseFillUp } from "react-icons/bs";
+import * as font from "@/app/font";
 import useUser from '@/app/_hooks/user';
 import { UserHaiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
 import { formatTimeFromNow } from '@/utils/format';
 import * as sort from '@/utils/sort';
-import { StyledLayers } from './StyledLayers';
-import PopOnClick from './PopOnClick';
 import trackEvent from '@/utils/trackEvent';
+import PopOnClick from './PopOnClick';
+import { StyledLayers } from './StyledLayers';
+import { Logo } from './Logo';
 
 export default function SidePanel({
   user,
@@ -25,6 +28,7 @@ export default function SidePanel({
   onboardingElement,
   onShowAbout,
   onSelectHaiku,
+  onClickLogo,
 }: {
   user: User,
   mode?: string
@@ -34,6 +38,7 @@ export default function SidePanel({
   onboardingElement?: string,
   onShowAbout?: any,
   onSelectHaiku?: any,
+  onClickLogo?: any,
 }) {
   const [panelOpened, setPanelOpened] = useState(false);
   const [panelAnimating, setPanelAnimating] = useState(false);
@@ -144,6 +149,26 @@ export default function SidePanel({
         >
         </div>
       }
+      {/* button to open side panel */}
+      {true && //(!panelOpened && !panelAnimating) &&
+        <div
+          className={`_bg-pink-200 open-side-panel-icon ${font.architects_daughter.className} absolute top-0 left-0 md:p-[0.8rem] md:mt-[-0.2rem] p-[0.6rem] ${onboardingElement && ["logo", "logo-and-generate", "_generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} cursor-pointer`}
+          onClick={() => {
+            trackEvent("clicked-open-side-panel", {
+              userId: user?.id,
+            });
+            !panelOpened && !panelPinned && setPanelPinned(true);
+            toggleMenuOpened();
+          }}
+        >
+          <StyledLayers styles={styles}>
+            <PopOnClick>
+              <IoMenu className="h-6 w-6 md:h-8 md:w-8" />
+            </PopOnClick>
+          </StyledLayers>
+        </div>
+      }
+
       <div
         className={`_bg-pink-200 absolute top-0 h-full w-[27rem] max-w-[90vw] ${onboarding ? "z-50" : "z-20"} ${!onboarding && "transition-all"} _blur-[10px]`}
         style={{
@@ -154,6 +179,7 @@ export default function SidePanel({
         onMouseLeave={() => panelOpened && !panelPinned && toggleMenuOpened()}
       >
         <div className="_bg-pink-400 flex flex-col h-[100vh]">
+          
           {/* hotspot to open the side panel on mouse hover */}
           <div
             className="_bg-red-400 group absolute top-[4rem] right-0 w-[1rem] mr-[-1rem] h-[calc(100vh-4rem)] z-90"
@@ -161,7 +187,9 @@ export default function SidePanel({
             onClick={() => panelOpened && toggleMenuOpened()}
           >
           </div>
-          <div
+          
+          {/* floating button to open/close side bar */}
+          {/* <div
             className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[22pt] _md:text-[36pt] bold py-5 _opacity-40 hover:opacity-100 transition-all"
             onClick={() => {
               if (!panelOpened) {
@@ -174,7 +202,7 @@ export default function SidePanel({
             }}
             style={{
               // filter: `drop-shadow(0px 0px 16px ${bgColor})`, // what does this even do?!
-              marginRight: panelOpened ? "-0.2rem" : "-1.7rem",
+              marginRight: "-0.2rem", //panelOpened ? "-0.2rem" : "-1.7rem",
               display: panelAnimating ? "none" : "block",
               transitionDuration: "80ms",
             }}
@@ -214,9 +242,43 @@ export default function SidePanel({
                 </StyledLayers>
               </PopOnClick>
             </div>
-          </div>
-          {/* Spacer for the logo to punch trough */}
+          </div> */}
+          
+          {/* Logo */}
           <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">
+            <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
+              <PopOnClick color={bgColor} active={onboardingElement == "logo"}>
+                {/* TODO: href to support multi-language */}
+                <Logo
+                  styles={styles}
+                  altStyles={altStyles}
+                  mode={mode || "haiku"}
+                  href={`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`}
+                onClick={onClickLogo}
+                // onboardingElement={onboardingElement}
+                />
+              </PopOnClick>
+            </div>
+            
+            {/* Close side bar button */}
+            <div
+              className={`${font.architects_daughter.className} absolute top-[0.1rem] md:top-[0.2rem] right-0 md:right-[0.2rem] p-2 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}
+              title="Hide side panel"
+              onClick={() => {
+                if (panelOpened) {
+                  trackEvent("clicked-close-side-panel", {
+                    userId: user?.id,
+                  });
+                }
+                toggleMenuOpened();
+              }}
+            >
+              <StyledLayers styles={styles.slice(0, 2)}>
+                <PopOnClick color={bgColor} active={onboardingElement == "logo"}>
+                  <BsArrowBarLeft className="h-6 w-6 md:h-8 md:w-8 cursor-pointer" />
+                </PopOnClick>
+              </StyledLayers>
+            </div>
           </div>
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
             <div className="py-2">
@@ -373,7 +435,6 @@ export default function SidePanel({
                       userId: user?.id,
                       location: "side-panel",
                     });
-                    toggleMenuOpened();
                     onShowAbout && onShowAbout();
                   }}
                 >
@@ -390,7 +451,6 @@ export default function SidePanel({
                       userId: user?.id,
                       location: "side-panel",
                     });
-                    toggleMenuOpened();
                   }}
                 >
                   <IoLogoGithub className="text-xl mt-[0.2rem]" />
@@ -406,7 +466,6 @@ export default function SidePanel({
                       userId: user?.id,
                       location: "side-panel",
                     });
-                    toggleMenuOpened();
                   }}
                 >
                   <MdHome className="text-2xl" />
@@ -417,6 +476,6 @@ export default function SidePanel({
           </div>
         </div>
       </div>
-    </div>
+    </div >
   )
 }

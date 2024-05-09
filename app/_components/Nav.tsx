@@ -2,7 +2,7 @@
 
 import moment from 'moment';
 import Link from 'next/link'
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation'
 import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub, IoHeartSharp } from 'react-icons/io5';
 import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
@@ -15,75 +15,13 @@ import useAlert from '@/app/_hooks/alert';
 import useUser from '@/app/_hooks/user';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { Haiku } from '@/types/Haiku';
-import { USAGE_LIMIT } from '@/types/Usage';
 import trackEvent from '@/utils/trackEvent';
+import { USAGE_LIMIT } from '@/types/Usage';
 import { StyledLayers } from './StyledLayers';
-import SidePanel from './SidePanel';
+import { Logo } from './Logo';
 import PopOnClick from './PopOnClick';
-
-export function Logo({
-  mode,
-  href,
-  onClick,
-  styles,
-  altStyles,
-  onboardingElement,
-}: {
-  mode: string,
-  href?: string,
-  onClick?: any,
-  styles?: any,
-  altStyles?: any,
-  onboardingElement?: string,
-}) {
-  const isHaikudleMode = mode == "haikudle";
-  const isSocialImgMode = mode == "social-img";
-
-  const ai = (
-    <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode ? "text-[80pt]" : "text-[22pt] md:text-[28pt]"} font-semibold`}>
-      AI
-    </span>
-  );
-
-  const styledAi = altStyles
-    ? (
-      <StyledLayers
-        styles={onboardingElement && !onboardingElement.startsWith("logo")
-          ? altStyles.slice(0, 1)
-          : altStyles
-        }
-      >
-        {ai}
-      </StyledLayers>
-    )
-    : (
-      <div>{ai}</div>
-    );
-
-  return (
-    <Link
-      onClick={onClick}
-      href={href || "/"}
-      className={`logo hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
-    >
-      <div className={`${font.architects_daughter.className} flex flex-row`}>
-        <StyledLayers
-          styles={onboardingElement && !onboardingElement.startsWith("logo")
-            ? styles.slice(0, 1)
-            : styles
-          }
-        >h</StyledLayers>
-        {styledAi}
-        <StyledLayers
-          styles={onboardingElement && !onboardingElement.startsWith("logo")
-            ? styles.slice(0, 1)
-            : styles
-          }
-        >{isHaikudleMode /* || isSocialImgMode */ ? "kudle" : "kuGenius"}</StyledLayers>
-      </div>
-    </Link>
-  )
-}
+import SidePanel from './SidePanel';
+import { User } from '@/types/User';
 
 export function GenerateIcon({
   onClick,
@@ -103,7 +41,7 @@ export function GenerateIcon({
       href="#"
       onClick={(e: any) => {
         e.preventDefault();
-        onClick && onClick();
+        onClick && onClick(e);
       }}
     >
       {children &&
@@ -115,6 +53,190 @@ export function GenerateIcon({
         {icon}
       </div>
     </Link>
+  )
+}
+
+export function GenerateInput({
+  user,
+  color,
+  bgColor,
+  styles,
+  altStyles,
+  generate,
+  onboardingElement,
+}: {
+  user: User,
+  color?: any,
+  bgColor?: any,
+  styles?: any,
+  altStyles?: any,
+  generate?: any,
+  onboardingElement?: string | undefined,
+}) {
+  const [value, setValue] = useState<string | undefined>();
+  const [active, setActive] = useState(false);
+  const [clickingGenerate, setClickingGenerate] = useState(false);
+  const ref = useRef();
+  // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
+
+  const onboarding = onboardingElement == "generate";
+
+  const handleChange = (e: any) => {
+    setActive(true);
+    // setValue(e.target.value);
+  }
+
+  const handleKeyDown = (e: any) => {
+    // console.log(">> app._components.Nav.GenerateInput.handleKeyDown()", { e, key: e.key });
+    if (e.key == "Escape") {
+      trackEvent("cancelled-generate-haiku", {
+        userId: user?.id,
+      });  
+      setActive(false);
+      // @ts-ignore
+      ref.current.value = "";
+      // @ts-ignore
+      ref.current.blur();
+    } else if (e.key == "Enter") {
+      handleClickedGenerate();
+    }
+  }
+
+  const handleClickedGenerate = () => {
+    // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate()', { ref, active: document.activeElement == ref.current });
+
+    // if (!active) {
+    //   setActive(true);
+    //   // @ts-ignore
+    //   ref.current.focus();
+    //   return;
+    // }
+
+    setActive(false);
+    setClickingGenerate(false);
+    setValue(undefined);
+    // @ts-ignore
+    ref.current.blur();
+
+    // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate() generate');
+    // @ts-ignore
+    generate && generate(ref.current.value || "");
+  };
+
+  return (
+    <div
+      onMouseOver={() => {
+        setActive(true);
+      }}
+      onMouseOut={() => {
+        // @ts-ignore
+        if (!ref.current.value) {
+          setActive(false);
+        }
+      }}
+      className={`GenerateInput _bg-pink-200 absolute
+        top-[0.6rem] md:top-[0.5rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
+        w-[calc(100vw-3.6rem)] md:w-[550px]
+      `}
+      style={{ zIndex: onboarding ? "50" : "20" }}
+    >
+      <div className="onboarding-container" style={{ width: "auto" }}>
+        {onboarding &&
+          <div className="onboarding-focus double" />
+        }
+        <StyledLayers styles={onboarding ? styles.slice(0, 3) : styles.slice(0, 2) }>
+          <div className="bg-yellow-200 flex flex-row gap-0">
+            <div className={`_bg-yellow-200 haiku-theme-input flex-grow text-[12pt] md:text-[16pt]`}>
+              {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
+              <style
+                dangerouslySetInnerHTML={{
+                  __html: `
+                  .haiku-theme-input input {
+                    background: none;
+                    _background: pink; /* for debugging */
+                    outline: 2px solid ${bgColor || ""}44;
+                    background-color: ${bgColor || "white"}22;
+                    caret-color: ${color || "black"};
+                    border-radius: 5px;
+                    height: auto;
+                    WebkitTextStroke: 0.5px ${bgColor};
+                    -webkit-text-stroke: 1.25px ${color}66;
+                    text-stroke: 1.0px ${color}66;
+                  }
+                  .haiku-theme-input.poem-line-${/* !editing && */ /* !saving &&  !onboarding && aboutToEditLine */ 42} input {
+                    outline: none;
+                    background-color: ${bgColor || "white"}44;  
+                  }
+                  ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus"} {
+                    outline: 2px solid ${bgColor || ""}66;
+                    background-color: ${bgColor || "white"}66;
+                  }
+                  ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus::placeholder"} {
+                    opacity: 0;
+                  }
+                  .haiku-theme-input input::selection { 
+                    background: ${color || "black"}66 
+                  }
+                  .haiku-theme-input input::placeholder {
+                    color: ${color || "black"};
+                    -webkit-text-stroke: 1px ${color};
+                    text-stroke: 1px ${color};
+                    opacity: 0.3;
+                    text-align: center; 
+                  }
+                  .haiku-theme-input input::-ms-input-placeholder { /* Edge 12 -18 */
+                    color: ${color || "black"};
+                    text-stroke: 1px ${color};
+                    opacity: 0.3;
+                    text-align: center; 
+                  }`
+                }}
+              >
+              </style>
+              <div className="relative">
+                {/* <StyledLayers styles={styles.slice(0, 2)}> */}
+                <input
+                  //@ts-ignore
+                  ref={ref}
+                  maxLength={36}
+                  placeholder="Create haiku with theme or surprise me!"
+                  // value={value || ""}
+                  onChange={handleChange}
+                  onFocus={() => {
+                    trackEvent("clicked-generate-haiku-input", {
+                      userId: user?.id,
+                    });                
+                    setActive(true);
+                  }}
+                  onBlur={() => (typeof (value) == "undefined") && setActive(false)}
+                  onKeyDown={handleKeyDown}
+                  className={`w-full absolute top-0 left-0
+                  pt-[0.1rem] pr-[2.5rem] pb-[0.1rem] pl-[0.7rem] md:pr-[3rem]
+                  mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0 md:mt-[0.1rem] md:mr-[0rem]      
+              `}
+                />
+              </div>
+            </div>
+            <div className="relative w-0">
+              <div
+                className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-20 cursor-pointer"
+                style={{ opacity: active ? "1" : "0.3" }}
+                onMouseDown={() => setClickingGenerate(true)}
+                onMouseUp={() => clickingGenerate && handleClickedGenerate()}
+              >
+                <PopOnClick>
+                  <StyledLayers styles={active ? altStyles.slice(0, 2) : styles.slice(0, 1)}>
+                    <GenerateIcon onClick={() => undefined}>
+                      {/* Create */}
+                    </GenerateIcon>
+                  </StyledLayers>
+                </PopOnClick>
+              </div>
+            </div>
+          </div>
+        </StyledLayers>
+      </div>
+    </div>
   )
 }
 
@@ -475,13 +597,25 @@ export function NavOverlay({
 
   return (
     <div className="_bg-pink-200 nav-overlay relative h-full w-full z-1">
-      {["haikudle", "haiku"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
+      {!loading && ["haikudle", "haiku"].includes(mode) &&
+        <GenerateInput
+          user={user}
+          color={haiku?.color || "black"}
+          bgColor={haiku?.bgColor || "white"}
+          styles={styles}
+          altStyles={altStyles}
+          generate={onClickGenerate}
+          onboardingElement={onboardingElement}
+        />
+      }
+
+      {false && ["haikudle", "haiku"].includes(mode) &&
+        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-40"}`}>
           <div className="onboarding-container">
-            {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement) &&
+            {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement || "") &&
               <div className="onboarding-focus" />
             }
-            {onboardingElement && ["_logo", "logo-and-generate"].includes(onboardingElement) &&
+            {onboardingElement && ["_logo", "logo-and-generate"].includes(onboardingElement || "") &&
               <div className="onboarding-focus double" />
             }
             <PopOnClick color={haiku?.bgColor} active={onboardingElement == "logo"}>
@@ -518,13 +652,13 @@ export function NavOverlay({
       {["haikudle", "haiku"].includes(mode) &&
         <div className={`fixed top-2.5 right-2.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
-            {onboardingElement && onboardingElement == "logo" &&
+            {/* {onboardingElement && onboardingElement == "logo" &&
               <div className="onboarding-focus" />
             }
             {onboardingElement && onboardingElement == "logo-and-generate" &&
               <div className="onboarding-focus double" />
-            }
-            {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+            } */}
+            {/* {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
                 <StyledLayers styles={altStyles}>
                   <GenerateIcon>
@@ -532,8 +666,8 @@ export function NavOverlay({
                   </GenerateIcon>
                 </StyledLayers>
               </div>
-            }
-            {onClickGenerate && (user?.isAdmin || (user?.usage[dateCode]?.haikusCreated || 0) < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+            } */}
+            {/* {onClickGenerate && (user?.isAdmin || (user?.usage[dateCode]?.haikusCreated || 0) < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div title="Generate a new haiku">
                 <PopOnClick color={haiku?.bgColor} active={!!onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement)}>
                   <StyledLayers styles={altStyles}>
@@ -543,7 +677,7 @@ export function NavOverlay({
                   </StyledLayers>
                 </PopOnClick>
               </div>
-            }
+            } */}
           </div>
         </div>
       }
@@ -637,6 +771,7 @@ export function NavOverlay({
           onboardingElement={onboardingElement}
           onShowAbout={onShowAbout}
           onSelectHaiku={onSelectHaiku}
+          onClickLogo={onClickLogo}
         />
       }
     </div>
