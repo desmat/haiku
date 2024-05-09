@@ -321,7 +321,7 @@ export default function HaikuPoem({
             <div
               className={`_bg-purple-200 flex flex-col gap-[2rem] _transition-all 
                 ${showcaseMode 
-                  ? "md:text-[39pt] sm:text-[33pt] text-[27pt]"
+                  ? "md:text-[32pt] sm:text-[28pt] text-[22pt]"
                   : "md:text-[26pt] sm:text-[22pt] text-[18pt]"
                 }`
               }
@@ -437,7 +437,7 @@ export default function HaikuPoem({
             <div
               className={`_bg-pink-200 relative md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]
                 ${showcaseMode
-                  ? "md:text-[24pt] sm:text-[21pt] text-[18pt]"
+                  ? "md:text-[20pt] sm:text-[18pt] text-[15pt]"
                   : "md:text-[16pt] sm:text-[14pt] text-[12pt]"
                 }`
               }
