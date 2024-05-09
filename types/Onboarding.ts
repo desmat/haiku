@@ -33,8 +33,8 @@ export const haikuOnboardingSteps = [
     focus: "generate",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div>A new haiku will be featured every day, maybe one of yours! Click on the logo to see today's, come back tomorrow for more.</div>
-        <div>To create your own haiku hit the <b>Create</b> button at the top of the screen and pick a theme: AI will get you started and the rest is up to!</div>
+        <div>A new haiku will be featured every day, maybe one of yours! Click on the logo in the side panel to see today's, come back tomorrow for more.</div>
+        <div>To create your own haiku hit the <b>Create</b> button at the top of the screen, maybe pick a theme and AI will get you started. The rest is up to!</div>
       </div>
     `,
     style: { bottom: "10%" },
