@@ -151,7 +151,7 @@ export function GenerateInput({
       }}
       className={`GenerateInput _bg-pink-200 absolute
         top-[0.6rem] md:top-[0.5rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
-        w-[calc(100vw-3.6rem)] md:w-[500px]
+        w-[calc(100vw-3.6rem)] md:w-[550px]
       `}
       style={{ zIndex: onboarding ? "50" : "20" }}
     >
@@ -214,7 +214,7 @@ export function GenerateInput({
                   //@ts-ignore
                   ref={ref}
                   maxLength={36}
-                  placeholder="Create with theme or surprise me!"
+                  placeholder="Create haiku with theme or surprise me!"
                   // value={value || ""}
                   onChange={handleChange}
                   onFocus={() => {
@@ -241,7 +241,7 @@ export function GenerateInput({
               >
                 <PopOnClick>
                   <StyledLayers styles={active ? altStyles.slice(0, 2) : styles.slice(0, 1)}>
-                    <GenerateIcon >
+                    <GenerateIcon onClick={() => undefined}>
                       {/* Create */}
                     </GenerateIcon>
                   </StyledLayers>
