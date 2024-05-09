@@ -16,6 +16,7 @@ import trackEvent from "@/utils/trackEvent";
 import { GenerateIcon } from "./Nav";
 import PopOnClick from "./PopOnClick";
 import { StyledLayers } from "./StyledLayers";
+import { DialogDemo } from "./RegenerateImageDialog";
 
 const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
   return [
@@ -320,7 +321,7 @@ export default function HaikuPoem({
           <div className={`_bg-pink-200 ${canEdit ? "group/edit" : ""} p-2 ${saving ? "animate-pulse" : ""}`}>
             <div
               className={`_bg-purple-200 flex flex-col gap-[2rem] _transition-all 
-                ${showcaseMode 
+                ${showcaseMode
                   ? "md:text-[32pt] sm:text-[28pt] text-[22pt]"
                   : "md:text-[26pt] sm:text-[22pt] text-[18pt]"
                 }`
@@ -590,6 +591,14 @@ export default function HaikuPoem({
                         }
                       </div>
                     }
+
+
+                    {regenerateImageAllowed &&
+                      <DialogDemo />
+                    }
+
+
+
                   </div>
                 }
               </div>

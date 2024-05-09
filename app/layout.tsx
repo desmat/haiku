@@ -1,13 +1,20 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { Inter as FontSans } from "next/font/google"
 import { Analytics } from '@vercel/analytics/react';
 import Alert from '@/app/_components/Alert';
+import { cn } from "@/lib/utils"
 import type { Viewport } from 'next'
 import moment from 'moment';
 
 const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 const inter = Inter({ subsets: ['latin'] });
+
+const fontSans = FontSans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+})
 
 const appName = isHaikudleMode
   ? "Solve the puzzle to reveal today's haiku, generate and share haiku poems paired and beautiful generative art with Haikudle - AI-powered haiku poetry, puzzles and visual art"
@@ -99,7 +106,14 @@ export default function RootLayout({
         ))}
         <meta property="fb:app_id" content={process.env.FB_APP_ID} />
       </head>
-      <body className={inter.className}>
+      <body className={
+        // inter.className
+        cn(
+          "min-h-screen bg-background font-sans antialiased",
+          fontSans.variable
+        )
+
+      }>
         <div className="flex flex-col lg:flex-row">
           <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
             {children}
