@@ -23,6 +23,22 @@ import PopOnClick from './PopOnClick';
 import SidePanel from './SidePanel';
 import { User } from '@/types/User';
 
+const haikuThemeSuggestions = [
+  "Nature",
+  "Mountains",
+  "Cherry blossoms",
+  "Spring",
+  "Autumn",
+  "Flowers",
+  "Summer in Paris",
+  "City at night",
+  "Springtime in Kyoto",
+  "Anything (leave blank)",
+  "Rainy morning",
+  "Sunset on the ocean",
+  "Sunrise on the lake",
+];
+
 export function GenerateIcon({
   onClick,
   sizeOverwrite,
@@ -76,6 +92,8 @@ export function GenerateInput({
   const [value, setValue] = useState<string | undefined>();
   const [active, setActive] = useState(false);
   const [clickingGenerate, setClickingGenerate] = useState(false);
+  const [haikuTheme, setHaikuTheme] = useState(haikuThemeSuggestions[Math.floor(Math.random() * haikuThemeSuggestions.length)])
+  const [intervalId, setIntervalId] = useState<any | undefined>();
   const ref = useRef();
   // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
 
@@ -91,7 +109,7 @@ export function GenerateInput({
     if (e.key == "Escape") {
       trackEvent("cancelled-generate-haiku", {
         userId: user?.id,
-      });  
+      });
       setActive(false);
       // @ts-ignore
       ref.current.value = "";
@@ -123,6 +141,16 @@ export function GenerateInput({
     generate && generate(ref.current.value || "");
   };
 
+  useEffect(() => {
+    !intervalId && setIntervalId(
+      setInterval(() => {
+        setHaikuTheme(haikuThemeSuggestions[Math.floor(Math.random() * haikuThemeSuggestions.length)]);
+      }, 5000)
+    );
+
+    return () => intervalId && clearInterval(intervalId);
+  }, []);
+
   return (
     <div
       onMouseOver={() => {
@@ -144,7 +172,7 @@ export function GenerateInput({
         {onboarding &&
           <div className="onboarding-focus double" />
         }
-        <StyledLayers styles={onboarding ? styles.slice(0, 3) : styles.slice(0, 2) }>
+        <StyledLayers styles={onboarding ? styles.slice(0, 3) : styles.slice(0, 2)}>
           <div className="bg-yellow-200 flex flex-row gap-0">
             <div className={`_bg-yellow-200 haiku-theme-input flex-grow text-[12pt] md:text-[16pt]`}>
               {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
@@ -199,13 +227,13 @@ export function GenerateInput({
                   //@ts-ignore
                   ref={ref}
                   maxLength={36}
-                  placeholder="Create haiku with theme or surprise me!"
+                  placeholder={`Create a haiku about... ${haikuTheme}`}
                   // value={value || ""}
                   onChange={handleChange}
                   onFocus={() => {
                     trackEvent("clicked-generate-haiku-input", {
                       userId: user?.id,
-                    });                
+                    });
                     setActive(true);
                   }}
                   onBlur={() => (typeof (value) == "undefined") && setActive(false)}
