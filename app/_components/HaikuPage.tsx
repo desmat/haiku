@@ -74,7 +74,7 @@ export default function HaikuPage({
               regenerateImage={regenerateImage}
               refresh={refresh}
               saveHaiku={saveHaiku}
-              copyHaiku={copyHaiku}
+              // copyHaiku={copyHaiku}
             />
           </div>
         }
