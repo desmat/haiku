@@ -1,13 +1,12 @@
 import moment from 'moment';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import { DailyHaiku, UserHaiku } from '@/types/Haiku';
+import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
-import { decodeJWT, encodeJWT } from '@/utils/jwt';
-import { listToMap, uuid } from '@/utils/misc';
+import { listToMap } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from './alert';
-import { DailyHaiku, Haiku } from '@/types/Haiku';
-import { DailyHaikudle } from '@/types/Haikudle';
 
 const useUser: any = create(devtools((set: any, get: any) => ({
   user: undefined as User | undefined,
@@ -17,10 +16,12 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   // loading: false, // guard against signin in many times anonymously
 
   // populate the side panel
-  haikus: {} as { number: Haiku },
+  haikus: {} as { number: UserHaiku },
+  allHaikus: {} as { number: UserHaiku },
   dailyHaikus: {} as { string: DailyHaiku },
   dailyHaikudles: {} as { string: DailyHaikudle },
   nextDailyHaikuId: undefined as string | undefined,
+  nextDailyHaikudleId: undefined as string | undefined,
 
   getUser: async () => {
     const { loaded, user, load } = get();
@@ -32,6 +33,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   getToken: async () => {
+    // console.log(">> hooks.user.getToken()", {});
     const { loaded, token, load } = get();
     if (!loaded) {
       return (await load()).token;
@@ -45,16 +47,57 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     let user;
     // console.log(">> hooks.user.load()", {});
 
-    const { user: localUser, token } = await loadLocal();
-    const remoteRes = await loadRemote(token);
-    const { user: remoteUser, haikus, dailyHaikus, dailyHaikudles, nextDailyHaikuId } = remoteRes;
-    // console.log(">> hooks.user.load()", { remoteRes });
+    let createdUser: User | undefined;
+    let token = window?.localStorage && window.localStorage.getItem("session");
+    
+    if (!token) {
+      const ret = await get().createRemote(user);
+      createdUser = ret.user;
+      token = ret.token;
+
+      if (!createdUser || !token) {
+        useAlert.getState().error(`Unable to create session user and/or token: (unknown)`);
+        return;
+      }
+
+      window?.localStorage && window.localStorage.setItem("session", token || "");
+      trackEvent("user-session-created", {
+        userId: createdUser.id,
+        isAdmin: createdUser.isAdmin,
+        isAnonymous: createdUser.isAnonymous,
+      });
+    } 
+    
+    const {
+      user: remoteUser,
+      haikus,
+      allHaikus,
+      dailyHaikus,
+      dailyHaikudles,
+      nextDailyHaikuId,
+      nextDailyHaikudleId,
+    } = await loadRemote(token);
+
+    // console.log(">> hooks.user.load()", { createdUser, remoteUser });
+
+    if (createdUser) {
+      trackEvent("user-session-created", {
+        userId: createdUser.id,
+        isAdmin: createdUser.isAdmin,
+        isAnonymous: createdUser.isAnonymous,
+      });
+    } else {
+      trackEvent("user-session-loaded", {
+        userId: remoteUser.id,
+        isAdmin: remoteUser.isAdmin,
+        isAnonymous: remoteUser.isAnonymous,
+        // token, 
+      });
+    }
 
     user = {
-      ...localUser,
-      isAdmin: remoteUser?.isAdmin,
-      isAnonymous: remoteUser?.isAnonymous,
-      usage: remoteUser?.usage,
+      ...createdUser,
+      ...remoteUser,
     }
 
     set({
@@ -62,78 +105,22 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       token,
       loaded: true,
       haikus: haikus ? listToMap(haikus, { keyFn: (e: any) => e.haikuId }) : {},
+      allHaikus: allHaikus ? listToMap(allHaikus, { keyFn: (e: any) => e.haikuId }) : {},
       dailyHaikus: dailyHaikus ? listToMap(dailyHaikus, { keyFn: (e: any) => e.haikuId }) : {},
       dailyHaikudles: dailyHaikudles ? listToMap(dailyHaikudles, { keyFn: (e: any) => e.haikuId }) : {},
       nextDailyHaikuId,
+      nextDailyHaikudleId,
     });
 
-    return { user, token, haikus, dailyHaikus, dailyHaikudles, nextDailyHaikuId };
-  },
-
-  loadLocal: async () => {
-    let user;
-    let token = window?.localStorage && window.localStorage.getItem("session");
-    // console.log(">> hooks.user.loadLocal()", { token });
-
-    if (token) {
-      user = (await decodeJWT(token)).user as User;
-      // @ts-ignore
-      if ((process.env.ADMIN_USER_IDS || "").split(",").includes(user.id)) {
-        user.isAdmin = true;
-      }
-
-      trackEvent("user-session-loaded", {
-        userId: user.id,
-        isAdmin: user.isAdmin,
-        isAnonymous: user.isAnonymous,
-        // token, 
-      });
-    } else {
-      // console.log('>> hooks.user.load() creating session', { onboardingUserId: process.env.ONBOARDING_USER_ID });
-      if (process.env.ONBOARDING_USER_ID) {
-        console.warn('>> hooks.user.load() CREATING SESSION WITH ONBOARDING USER ID', { onboardingUserId: process.env.ONBOARDING_USER_ID });
-      }
-
-      user = {
-        id: process.env.ONBOARDING_USER_ID || uuid(),
-        isAnonymous: true,
-        isAdmin: false,
-        preferences: {}
-      };
-
-      token = await encodeJWT({ user });
-
-      window?.localStorage && window.localStorage.setItem("session", token || "");
-
-      trackEvent("user-session-created", {
-        userId: user.id,
-        isAdmin: user.isAdmin,
-        isAnonymous: user.isAnonymous,
-        // token, 
-      });
-    }
-
-    return { user, token };
-  },
-
-  loadRemote: async (token: string) => {
-    // console.log(">> hooks.user.loadRemote()", { token });
-
-    const res = await fetch(`/api/user`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    if (res.status != 200) {
-      trackEvent("error", {
-        type: "fetch-user",
-        code: res.status,
-        token,
-      });
-      useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);
-      return {};
-    }
-
-    return res.json();
+    return {
+      user,
+      token,
+      haikus,
+      dailyHaikus,
+      dailyHaikudles,
+      nextDailyHaikuId,
+      nextDailyHaikudleId
+    };
   },
 
   update: async (user: any) => {
@@ -161,10 +148,88 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
   save: async (user: any) => {
     // console.log(">> hooks.user.save()", { user });
-    const token = await encodeJWT({ user });
-    window?.localStorage && window.localStorage.setItem("session", token || "");
-    set({ user });
+
+    // save remote
+    const { user: savedUser, token: savedToken } = await get().saveRemote(user);
+    // console.log(">> hooks.user.save()", { savedUser, savedToken });
+
+    // save local
+    window?.localStorage && window.localStorage.setItem("session", savedToken || "");
+    set({ user: savedUser, token: savedToken });
+
+    return { user: savedUser, token: savedToken };
   },
+
+  loadRemote: async (token: string) => {
+    // console.log(">> hooks.user.loadRemote()", { token });
+
+    const res = await fetch(`/api/user`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (res.status != 200) {
+      trackEvent("error", {
+        type: "fetch-user",
+        code: res.status,
+        token,
+      });
+      useAlert.getState().error(`Error fetching haikus: ${res.status} (${res.statusText})`);
+      return {};
+    }
+
+    return res.json();
+  },
+
+  createRemote: async (user: any) => {
+    // console.log(">> hooks.user.createRemote()", { user });
+
+    const res = await fetch(`/api/user`, {
+      // ...await fetchOpts(),
+      method: "POST",
+      body: JSON.stringify({ user })
+    });
+
+    if (res.status != 200) {
+      trackEvent("error", {
+        type: "post-user",
+        code: res.status,
+      });
+      useAlert.getState().error(`Error posting user session: ${res.status} (${res.statusText})`);
+      return {};
+    }
+
+    const { user: updatedUser, token: updatedToken } = await res.json();
+    // console.log(">> hooks.user.createRemote()", { updatedToken, updatedUser });
+
+    return { user: updatedUser, token: updatedToken };
+  },  
+
+  saveRemote: async (user: any) => {
+    // console.log(">> hooks.user.saveRemote()", { user });
+
+    const token = await get().getToken();
+    const opts = token && { headers: { Authorization: `Bearer ${token}` } } || {};
+  
+    const res = await fetch(`/api/user/${user.id}`, {
+      ...opts,
+      method: "PUT",
+      body: JSON.stringify({ user })
+    });
+
+    if (res.status != 200) {
+      trackEvent("error", {
+        type: "put-user",
+        code: res.status,
+      });
+      useAlert.getState().error(`Error saving user session: ${res.status} (${res.statusText})`);
+      return {};
+    }
+
+    const { user: updatedUser, token: updatedToken } = await res.json();
+    // console.log(">> hooks.user.saveRemote()", { updatedToken, updatedUser });
+
+    return { user: updatedUser, token: updatedToken };
+  },  
 })));
 
 export default useUser;

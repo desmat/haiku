@@ -4,7 +4,7 @@ import moment from 'moment';
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation'
-import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub } from 'react-icons/io5';
+import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub, IoHeartSharp } from 'react-icons/io5';
 import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
 import { HiSwitchVertical } from "react-icons/hi";
 import { MdHome, MdDelete } from "react-icons/md";
@@ -22,21 +22,6 @@ import { Logo } from './Logo';
 import PopOnClick from './PopOnClick';
 import SidePanel from './SidePanel';
 import { User } from '@/types/User';
-
-export function Loading({ onClick }: { onClick?: any }) {
-  const defaultOnClick = () => document.location.href = "/";
-  return (
-    <div
-      onClick={onClick || defaultOnClick}
-      className='_bg-pink-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-dark-2 opacity-5 animate-pulse cursor-pointer z-50'
-    >
-      <div className="animate-pulse flex flex-col items-center">
-        <div>読込</div>
-        <div>Loading</div>
-      </div>
-    </div>
-  );
-}
 
 export function GenerateIcon({
   onClick,
@@ -260,6 +245,7 @@ function BottomLinks({
   haiku,
   lang,
   styles,
+  altStyles,
   backupInProgress,
   onboardingElement,
   onRefresh,
@@ -270,11 +256,13 @@ function BottomLinks({
   onBackup,
   onCopyHaiku,
   onCopyLink,
+  onLikeHaiku,
 }: {
   mode: string,
   haiku?: Haiku,
   lang?: LanguageType,
   styles?: any,
+  altStyles?: any
   backupInProgress?: boolean,
   onboardingElement?: string | undefined,
   onRefresh: any,
@@ -285,8 +273,9 @@ function BottomLinks({
   onBackup?: any,
   onCopyHaiku?: any,
   onCopyLink?: any,
+  onLikeHaiku?: any,
 }) {
-  // console.log("BottomLinks", { lang })
+  // console.log("BottomLinks", { lang, haiku })
   const router = useRouter();
   const user = useUser((state: any) => state.user);
   const [alert] = useAlert((state: any) => [state.plain]);
@@ -351,6 +340,32 @@ function BottomLinks({
         >
           <MdMail className="text-xl" />
         </Link> */}
+        {haiku?.id && onLikeHaiku &&
+          <StyledLayers
+            styles={haiku.likedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
+          >
+            <div
+              key="heart"
+              title={`${haiku.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user.isAdmin ? `(${haiku.numLikes} like${!haiku.numLikes || haiku.numLikes > 1 ? "s" : ""})` : ""}`}
+              className="cursor-pointer relative"
+              onClick={onLikeHaiku}
+            >
+              {user.isAdmin && haiku?.numLikes > 0 &&
+                <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-red-600">
+                  {/* <span className="relative text-white text-[4pt] p-[0.2rem]">{haiku?.numLikes}</span> */}
+                </div>
+              }
+              <PopOnClick color={haiku?.bgColor} >
+                <IoHeartSharp className="text-xl" />
+              </PopOnClick>
+            </div>
+          </StyledLayers>
+        }
+        {(!haiku?.id || !onLikeHaiku) &&
+          <div className="opacity-40">
+            <IoHeartSharp className="text-xl" />
+          </div>
+        }
         <div
           key="copy"
           className={haiku?.id && onCopyHaiku ? "cursor-copy" : "opacity-40"}
@@ -524,6 +539,7 @@ export function NavOverlay({
   onBackup,
   onCopyHaiku,
   onCopyLink,
+  onLikeHaiku,
 }: {
   mode: string,
   loading?: boolean,
@@ -546,6 +562,7 @@ export function NavOverlay({
   onBackup?: any,
   onCopyHaiku?: any,
   onCopyLink?: any,
+  onLikeHaiku?: any,
 }) {
   const dateCode = moment().format("YYYYMMDD");
   const [user] = useUser((state: any) => [state.user]);
@@ -699,6 +716,7 @@ export function NavOverlay({
                   lang={lang}
                   haiku={haiku}
                   styles={styles}
+                  altStyles={altStyles}
                   backupInProgress={backupInProgress}
                   onboardingElement={onboardingElement}
                   onRefresh={onClickRandom}
@@ -709,6 +727,7 @@ export function NavOverlay({
                   onBackup={onBackup}
                   onCopyHaiku={onCopyHaiku}
                   onCopyLink={onCopyLink}
+                  onLikeHaiku={onLikeHaiku}
                 />
               </StyledLayers>
             </PopOnClick>

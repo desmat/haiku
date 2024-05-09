@@ -12,15 +12,17 @@
     json.get things '$[?(@.id ~= "(ID1)|(ID2)")]
     json.set thing:UUID '$.foos[5].bar' '{"car": 42}'
     json.set thing:UUID '$.foos[1].bar.car' '42'
+    json.get userhaikus '$[?(@.haikuId == "ID" && (@.likedAt > 0) == true)]'
 */
 
 import moment from "moment";
 import { kv } from "@vercel/kv";
-import { uuid } from "@/utils/misc";
+import { kvArrayToObject, uuid } from "@/utils/misc";
 import { GenericStore, Store } from "@/types/Store";
 import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
+import { User } from "@/types/User";
 
 const jsonNotDeletedExpression = "(@.deletedAt > 0) == false";
 const jsonEqualsExpression = (key: string, val: string) => {
@@ -70,7 +72,7 @@ type RedisStoreEntry = {
   deletedAt?: number,
   deletedBy?: string,
   lang?: string,
-}
+};
 
 class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   key: string;
@@ -108,7 +110,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     } else {
       list = await kv.json.get(this.listKey(), jsonGetNotDeleted);
     }
-    
+
     const keys = list && list
       .filter((entry: any) => !entry.deletedAt)
       .map((value: T) => value.id && this.valueKey(value.id))
@@ -128,13 +130,22 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       throw `Cannot save with null id`;
     }
 
+    const additionalListValues = kvArrayToObject(
+      Object.entries(options?.indices || {})
+        // @ts-ignore
+        .map(([key, val]: [key: string, val: any]) => [key, value[key]])
+    );
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { additionalListValues });
+
     const createdListValue = {
       id: value.id || uuid(),
       createdAt: moment().valueOf(),
       createdBy: userId,
       name: value.name,
       lang: value.lang,
+      ...additionalListValues,
     };
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { createdListValue });
 
     const createdValue = {
       ...value,
@@ -164,10 +175,34 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       throw `Cannot update ${this.key}: does not exist: ${value.id}`;
     }
 
-    const updatedValue = { ...value, updatedAt: moment().valueOf(), updatedBy: userId }
+    const updatedValue = {
+      ...value,
+      updatedAt: moment().valueOf(),
+      updatedBy: userId
+    };
+
+    // TODO prefer kv.json.mset but not available here; figure out an alternative
+    const listKeys = Object
+      .entries({
+        ...(options?.indices || {}),
+        updatedAt: "number",
+        updatedBy: "string",
+      })
+      .map(([key, val]: [key: string, val: any]) => {
+        switch (val) {
+          case "string":
+            // @ts-ignore
+            return kv.json.set(this.listKey(), `${jsonGetBy("id", value.id || "")}.${key}`, `"${updatedValue[`${key}`]}"`)
+          case "number":
+            // @ts-ignore
+            return kv.json.set(this.listKey(), `${jsonGetBy("id", value.id || "")}.${key}`, updatedValue[`${key}`] || 0);
+          default:
+            throw `Unrecongnized index data type: ${val}`
+        }
+      });
+
     const response = await Promise.all([
-      kv.json.set(this.listKey(), `${jsonGetBy("id", value.id)}.updatedAt`, updatedValue.updatedAt),
-      kv.json.set(this.listKey(), `${jsonGetBy("id", value.id)}.updatedBy`, `"${updatedValue.updatedBy}"`),
+      ...listKeys,
       kv.json.set(this.valueKey(value.id), "$", updatedValue),
       (options.expire ? kv.expire(this.valueKey(value.id), options.expire) : undefined),
     ]);
@@ -194,7 +229,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedAt`, value.deletedAt),
       kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedBy`, `"${userId}"`),
       // kv.json.del(this.valueKey(id), "$")
-      kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf()}),
+      kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf() }),
     ]);
 
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { response });
@@ -212,5 +247,6 @@ export function create(): Store {
     userHaikudles: new RedisStore<UserHaikudle>("userhaikudle"),
     userHaikus: new RedisStore<UserHaiku>("userhaiku"),
     userUsage: new RedisStore<UserUsage>("userusage"),
+    user: new RedisStore<User>("user"),
   }
 }

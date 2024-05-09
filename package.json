@@ -32,6 +32,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^4.10.1",
+    "seedrandom": "^3.0.5",
     "syllable": "^5.0.1",
     "tailwindcss": "3.3.3",
     "typescript": "5.1.6",
@@ -42,6 +43,7 @@
   "devDependencies": {
     "@types/chroma-js": "^2.4.3",
     "@types/react-beautiful-dnd": "^13.1.8",
+    "@types/seedrandom": "^3.0.5",
     "@types/uuid": "^9.0.7",
     "encoding": "^0.1.13"
   }

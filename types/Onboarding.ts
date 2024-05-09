@@ -44,8 +44,8 @@ export const haikuOnboardingSteps = [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>Find all your haikus in the side panel to the left.</div>
-        <div>To learn about me, access the source code, copy or share this haiku see the buttons at the bottom.</div>
-        <div>For the best mobile experience hit the 'Add to Home Screen' under the Share or three-dot menu icon.</div>
+        <div>To learn about me, access the source code, <b>like</b>, <b>copy</b> or <b>share</b> this haiku see the buttons at the bottom.</div>
+        <div>For the best mobile experience hit the <b>Add to Home Screen</b> under the <b>Share</b> or <b>three-dot menu icon</b>.</div>
         <div>Enjoy <b>Haiku Genius!</b></div>        
       </div>
     `,
@@ -58,11 +58,37 @@ export const haikuGeneratedOnboardingSteps = (haiku: Haiku) => [
     focus: "poem-actions",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div>This haiku was initially generated on the theme <i>${haiku?.theme}</i>${haiku?.mood ? ` with a <i>${haiku?.mood}</i> mood using <b>ChatGPT</b>` : ""}. Both were used to generate art using <b>DALL-E</b> with a curated prompt to harmonize together.</div>
-        <div>Try the buttons next to the poem to edit or regenerate. Use your mouse, keyboard, arrow keys, Tab, Escape and Enter keys to <b>edit, cancel or save.</b></div>
+        <div>
+          This haiku was${haiku?.version ? " initially" : ""} generated on the theme <i>${haiku?.theme}</i>${haiku?.mood ? ` with a <i>${haiku?.mood}</i> mood using <b>ChatGPT</b>` : ""}. 
+          Both theme and mood were used to generate the art using <b>DALL-E</b> with a curated prompt to harmonize with the poem, with specific instructions: <i>${haiku.artStyle}</i>.
+        </div>
+        <div>Try the buttons next to the poem to edit or regenerate the poem, or generate another image with the same theme and mood. Use your mouse, keyboard, arrow keys, Tab, Escape and Enter keys to <b>edit, cancel or save.</b></div>
         <div>Level up your creativity with AI! save with empty or incomplete lines, or use "..." placeholders for <b>AI to fill in.</b>
       </div>`,
     style: { top: "0.5rem" },
+  },
+];
+
+export const haikuPromptSteps = (haiku: Haiku) => [
+  {
+    focus: "poem",
+    message: `
+      <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+      <div>Haiku theme and mood: <i>${haiku.theme}</i> and <i>${haiku.mood}</i></div>      
+      <div>Image style: <i>${haiku.artStyle || "N/A"}</i></div>      
+      <!-- <div>Poem prompt: <i>${haiku.poemPrompt || "N/A"}</i></div> -->
+      <div>Image prompt: <i>${haiku.imagePrompt || "N/A"}</i></div>
+      ${haiku.version || haiku.deprecated
+        ? `<div>Version: ${haiku.version}
+          ${haiku.version
+          ? ` <a href="/${haiku.id}?version=${haiku.version - 1}">(Load previous)</a>`
+          : ""}
+          ${haiku.deprecated
+          ? ` <a href="/${haiku.id}">(Load current)</a>`
+          : ""}</div>`
+        : ""}    
+      </div>`,
+    style: { bottom: "50%", transform: "translateY(50%)" },
   },
 ];
 

@@ -85,6 +85,11 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link
+          rel="canonical"
+          href={metaUrl}
+          key="canonical"
+        />
         <meta property="og:title" content={appName} />
         <meta property="og:type" content="website" />
         <meta property="og:description" content={appDescription} />

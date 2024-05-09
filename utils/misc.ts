@@ -21,7 +21,7 @@ export function normalizeWord(word: string): string {
   return word && word.replace(/[.,]/, "").toLowerCase();
 }
 
-function kvArrayToObject(array: any[]) {
+export function kvArrayToObject(array: any[]) {
   return array.reduce((o, [k, v]) => Object.assign(o, { [k]: v }), {});
 }
 
