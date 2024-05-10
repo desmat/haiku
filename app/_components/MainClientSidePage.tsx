@@ -20,8 +20,8 @@ import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
 import delay from '@/utils/delay';
 
-export default function MainClientSidePage({ haiku, mode, id, lang, refreshDelay }: { haiku: Haiku, mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
-  // console.log('>> app.MainClientSidePage.render()', { mode, id, lang });
+export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refreshDelay }: { haiku: Haiku, mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
+  console.log('>> app.MainClientSidePage.render()', { mode, id, lang, _haiku });
 
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
@@ -71,7 +71,8 @@ export default function MainClientSidePage({ haiku, mode, id, lang, refreshDelay
     createDailyHaiku,
   ] = useHaikus((state: any) => [
     state.loaded(haikuId),
-    () => undefined,// state.load,
+    // () => undefined,
+    state.load,
     state.get,
     state.generate,
     state.regenerate,
@@ -115,10 +116,10 @@ export default function MainClientSidePage({ haiku, mode, id, lang, refreshDelay
     state.start,
   ]);
 
-  const loaded = true; // haikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
+  const loaded = haikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
   let [loading, setLoading] = useState(false);
   let [loadingUI, setLoadingUI] = useState(false);
-  let [_haiku, setHaiku] = useState<Haiku | undefined>();
+  let [haiku, setHaiku] = useState<Haiku | undefined>(_haiku);
   let solvedHaikudleHaiku = {
     ...haiku,
     poem: haikudleInProgress
@@ -490,7 +491,7 @@ export default function MainClientSidePage({ haiku, mode, id, lang, refreshDelay
     } else {
       trackEvent("cancelled-generate-haiku", {
         userId: user?.id,
-      });  
+      });
     }
   }
 
@@ -602,14 +603,14 @@ export default function MainClientSidePage({ haiku, mode, id, lang, refreshDelay
   }
 
   const selectHaiku = (id: string) => {
-    // console.log('>> app._components.MainPage.selectHaiku()', { id, loading, loaded, haikuId, haiku_id: haiku?.id });
+    console.log('>> app._components.MainPage.selectHaiku()', { id, loading, loaded, haikuId, haiku_id: haiku?.id });
 
     if (id == haikuId) return;
 
     trackEvent("haiku-selected", {
       userId: user?.id,
       haikuId: id,
-    });  
+    });
 
     setHaikuId(id);
     window.history.replaceState(null, '', `/${id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
@@ -681,7 +682,18 @@ export default function MainClientSidePage({ haiku, mode, id, lang, refreshDelay
   // await delay(2000);
   // return <div>RENDERED CLIENT SIDE PAGE</div>
 
-  if (!loaded || loading || loadingUI || generating) {
+  // if (!loaded || loading || loadingUI || generating) {
+  //   // return <LoadingPage mode={mode} /* haiku={haiku} */ />
+  //   return (
+  //     <div>
+  //       <NavOverlay loading={true} mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} onClickLogo={loadHomePage} />
+  //       <Loading onClick={showcaseMode && loadRandom} />
+  //       {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}
+  //     </div>
+  //   )
+  // }
+
+  if (/* loadingUI || */ generating) {
     // return <LoadingPage mode={mode} /* haiku={haiku} */ />
     return (
       <div>

@@ -43,7 +43,7 @@ export default async function LoadingPage({
   return (
     <div>
       <NavOverlay mode={_mode} styles={textStyles} altStyles={altTextStyles} />
-      <Loading />
+      LOADING STATIC PAGE
       {/* <HaikuPage mode={_mode} loading={true} haiku={haiku || loadingHaiku} styles={textStyles} />       */}
     </div>
   )

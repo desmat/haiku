@@ -4,9 +4,10 @@ import { NavOverlay } from '@/app/_components/Nav';
 import HaikuPage from '@/app/_components/HaikuPage';
 import { LanguageType } from '@/types/Languages';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
+import { Haiku } from '@/types/Haiku';
 
-export default async function MainServerSidePage({ mode, id, lang, refreshDelay }: { mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
-  console.log('>> app.MainServerSidePage.render()', { mode, id, lang });
+export default async function MainServerSidePage({ haiku, mode, id, lang, refreshDelay }: { haiku: Haiku, mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
+  console.log('>> app.MainServerSidePage.render()', { mode, id, lang, haiku });
 
   const isHaikuMode = mode == "haiku";
   const isHaikudleMode = mode == "haikudle";
@@ -15,17 +16,17 @@ export default async function MainServerSidePage({ mode, id, lang, refreshDelay 
   // console.log('>> app.MainServerSidePage.render()', { haikuId });
 
   // TODO load user
-  const getTodaysHaiku = async () => {
-    const todaysDateCode = moment().format("YYYYMMDD");
-    const todaysHaiku = await getDailyHaiku(todaysDateCode);
-    if (todaysHaiku?.haikuId) {
-      return getHaiku(todaysHaiku?.haikuId);
-    }
-  }
+  // const getTodaysHaiku = async () => {
+  //   const todaysDateCode = moment().format("YYYYMMDD");
+  //   const todaysHaiku = await getDailyHaiku(todaysDateCode);
+  //   if (todaysHaiku?.haikuId) {
+  //     return getHaiku(todaysHaiku?.haikuId);
+  //   }
+  // }
 
-  const haiku = id 
-  ? await getHaiku(id)
-  : await getTodaysHaiku()
+  // const haiku = id 
+  // ? await getHaiku(id)
+  // : await getTodaysHaiku()
   const fontColor = haiku?.color || "#555555";
   const bgColor = haiku?.bgColor || "lightgrey";
 

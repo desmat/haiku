@@ -593,11 +593,11 @@ function SidePanel({
                 <StyledLayers key={i} styles={altStyles}>
                   <Link
                     href={`/${h.haikuId || h.id}`}
-                    // onClick={(e: any) => {
-                    //   e.preventDefault();
-                    //   /* !panelPinned && */ toggleMenuOpened();
-                    //   onSelectHaiku && onSelectHaiku(h.haikuId || h.id);
-                    // }}
+                    onClick={(e: any) => {
+                      e.preventDefault();
+                      /* !panelPinned && */ toggleMenuOpened();
+                      onSelectHaiku && onSelectHaiku(h.haikuId || h.id);
+                    }}
                   >
                     <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>
                     {user?.isAdmin &&
@@ -835,7 +835,7 @@ export function NavOverlay({
             {onboardingElement && onboardingElement == "logo-and-generate" &&
               <div className="onboarding-focus double" />
             }
-            {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+            {(!onClickGenerate || !user?.isAdmin && (user?.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
                 <StyledLayers styles={altStyles}>
                   <GenerateIcon>

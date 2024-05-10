@@ -719,7 +719,7 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         lang={lang}
         haiku={{
           ...(haikudleSolved ? solvedHaikudleHaiku : haiku),
-          likedAt: userHaikus[haiku.id]?.likedAt,
+          // likedAt: userHaikus[haiku.id]?.likedAt,
         }}
         refreshDelay={_refreshDelay}
         backupInProgress={backupInProgress}

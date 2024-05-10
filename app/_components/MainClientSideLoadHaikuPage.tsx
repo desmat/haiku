@@ -8,7 +8,7 @@ import useUser from '../_hooks/user';
 import { mapToSearchParams } from '@/utils/misc';
 import { Suspense, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import MainClientSidePage from './MainClientSidePage';
+// import MainClientSidePage from './MainClientSidePage';
 import { SafeHydrate } from './SafeHydrate';
 import MainClientSideSafeHydratePage from './MainClientSideSafeHydratePage';
 import MainServerSidePage from './MainServerSidePage';
@@ -16,6 +16,38 @@ import { del } from '@vercel/blob';
 import delay from '@/utils/delay';
 import useHaikus from '../_hooks/haikus';
 
+async function loadHaiku(id?: string, mode?: string) {
+
+  let haiku;
+  const token = await useUser.getState().getToken();
+  // const user = await useUser.getState().getUser();
+
+  // console.log(">> hooks.haiku.fetchOpts", { token });
+  if (token) {
+    const opts = token && { headers: { Authorization: `Bearer ${token || ""}` } } || {};
+    const params = mapToSearchParams(mode ? { mode } : {});
+    const res = await fetch(id 
+      ? `/api/haikus/${id}${params ? "?" : ""}${params}`
+      : `/api/haikus${params ? "?" : ""}${params}`, opts) //.then(async (res: any) => {
+
+    if (res.status != 200) {
+      // const errorHaiku = await handleErrorResponse(res, "fetch-haikus", undefined, `Error fetching haikus`);
+      // useHaikus.setState({ _haikus: { [errorHaiku.id]: errorHaiku } });
+      // setLoaded(errorHaiku.id);
+      // return resolve(errorHaiku);
+      console.error(`Error fetching haikus`, { res });
+      // return <div>Error fetching haikus</div>
+    }
+
+    const data = await res.json();
+    const haikus = data.haiku || data.haikus;
+    haiku = haikus[0] || haikus;
+    // setHaiku(haiku);
+  }
+  // }
+
+  return haiku;
+}
 
 export default async function MainClientSideLoadHaikuPage({ mode, id, lang, refreshDelay }: { mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
   console.log('>> app.MainClientSideLoadHaikuPage.render()', { mode, id, lang });
@@ -41,6 +73,9 @@ export default async function MainClientSideLoadHaikuPage({ mode, id, lang, refr
   // let [haiku, setHaiku] = useState<any>();
   let haiku;
 
+  console.log('>> app.MainClientSideLoadHaikuPage.render()', { mode, id, lang, haiku });
+
+
   // if (!mounted) return <div>nope</div> //<MainServerSidePage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
   // if (!mounted) await delay(5000);
   // await new Promise((resolve: any) => {
@@ -55,62 +90,54 @@ export default async function MainClientSideLoadHaikuPage({ mode, id, lang, refr
 
 
 
-  
-  const fetchOpts = async () => {
-    const token = await useUser.getState().getToken();
-
-    // console.log(">> hooks.haiku.fetchOpts", { token });
-    return token && { headers: { Authorization: `Bearer ${token || "ASDF"}` } } || {};
-  }
 
 
+// setLoading(true);
 
+  // const token = await useUser.getState().getToken();
+  // // const user = await useUser.getState().getUser();
 
+  // // console.log(">> hooks.haiku.fetchOpts", { token });
+  // if (token) {
+  //   const opts = token && { headers: { Authorization: `Bearer ${token || ""}` } } || {};
+  //   const params = mapToSearchParams(mode ? { mode } : {});
+  //   const res = await fetch(id 
+  //     ? `/api/haikus/${id}${params ? "?" : ""}${params}`
+  //     : `/api/haikus${params ? "?" : ""}${params}`, opts) //.then(async (res: any) => {
 
+  //   if (res.status != 200) {
+  //     // const errorHaiku = await handleErrorResponse(res, "fetch-haikus", undefined, `Error fetching haikus`);
+  //     // useHaikus.setState({ _haikus: { [errorHaiku.id]: errorHaiku } });
+  //     // setLoaded(errorHaiku.id);
+  //     // return resolve(errorHaiku);
+  //     console.error(`Error fetching haikus`, { res });
+  //     // return <div>Error fetching haikus</div>
+  //   }
 
-
-  const queryOrId = id;
-  const query = {} // typeof (queryOrId) == "object" && queryOrId;
-  // const id = typeof (queryOrId) == "string" && queryOrId;
-
-  const modeParams = mode && `mode=${mode}`;
-  const queryParams = query && mapToSearchParams(query);
-  const params = `${queryParams || modeParams ? "?" : ""}${queryParams}${queryParams && modeParams ? "&" : ""}${modeParams}`;
-
-  const opts = await fetchOpts();
-  if (opts) {
-    const res = await fetch(id 
-      ? `/api/haikus/${id}${params}`
-      : `/api/haikus${params}`, opts) //.then(async (res: any) => {
-
-    if (res.status != 200) {
-      // const errorHaiku = await handleErrorResponse(res, "fetch-haikus", undefined, `Error fetching haikus`);
-      // useHaikus.setState({ _haikus: { [errorHaiku.id]: errorHaiku } });
-      // setLoaded(errorHaiku.id);
-      // return resolve(errorHaiku);
-      console.error(`Error fetching haikus`, { res });
-      // return <div>Error fetching haikus</div>
-    }
-
-    const data = await res.json();
-    const haikus = data.haiku || data.haikus;
-    haiku = haikus[0] || haikus;
-    // setHaiku(haiku);
-  }
+  //   const data = await res.json();
+  //   const haikus = data.haiku || data.haikus;
+  //   haiku = haikus[0] || haikus;
+  //   // setHaiku(haiku);
   // }
+  // // }
 
 
 
+  haiku = await loadHaiku(id, mode);
 
-  // const haikus = await useHaikus.getState().load(id || "");
+
+  // await useUser.getState()
+  // const [haikus] = await Promise.all([
+  //   // useUser.getState().getUser(),
+  //   // useHaikus.getState().load(id || { random: true }),
+  //   undefined,
+  // ]);
+
   // haiku = haikus[0] || haikus;
 
-
-
-
-
   return (haiku
-    ? <MainClientSidePage haiku={haiku} mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
+    ? <div>haiku {haiku.theme}</div>
+    // <MainClientSidePage haiku={haiku} mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
     : <div>no haiku</div>
   )
 }

@@ -1,3 +1,4 @@
+import React from 'react';
 import MainPage from '@/app/_components/MainPage';
 import NotFound from '@/app/not-found';
 import { LanguageType, isSupportedLanguage } from '@/types/Languages';
@@ -9,6 +10,9 @@ import { SafeHydrate } from '../_components/SafeHydrate';
 import MainClientSideSafeHydratePage from '../_components/MainClientSideSafeHydratePage';
 import MainClientSideSafeulyHydrateLoadHaikuPage from '../_components/MainClientSideSafeulyHydrateLoadHaikuPage';
 import { NoSsr } from '../_components/NoSsr';
+import moment from 'moment';
+import { getDailyHaiku, getHaiku } from '@/services/haikus';
+
 
 export default async function Page({
   params,
@@ -47,18 +51,47 @@ export default async function Page({
 
   const user = getUser();
 
-  if (mode == "haikudle") {
-    return <MainPage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
+  // if (mode == "haikudle") {
+  //   return <MainPage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
+  // }
+
+  // if (!user?.isAdmin || mode == "showcase") {
+  //   return <MainServerSidePage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
+  // }
+
+  // return <NoSsr><Component /></NoSsr>
+
+  const getTodaysHaiku = async () => {
+    const todaysDateCode = moment().format("YYYYMMDD");
+    const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
+    if (todaysDailyHaiku?.haikuId) {
+      return getHaiku(todaysDailyHaiku?.haikuId);
+    }
   }
 
-  if (!user?.isAdmin || mode == "showcase") {
-    return <MainServerSidePage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
-  }
+  const haiku = id
+    ? await getHaiku(id)
+    : await getTodaysHaiku();
 
   return (
-    <Suspense fallback={
-      <MainServerSidePage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
-    }>
+    <Suspense
+      fallback={
+        <MainServerSidePage haiku={haiku} mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
+      }
+    >
+      <NoSsr>
+        <MainClientSidePage haiku={haiku} mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
+      </NoSsr>
+    </Suspense>
+  )
+
+
+  return (
+    <Suspense
+    // fallback={
+    //   <MainServerSidePage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
+    // }
+    >
       {/* <MainPage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} /> */}
       {/* <MainClientSideLoadHaikuPage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} /> */}
       {/* <SafeHydrate>

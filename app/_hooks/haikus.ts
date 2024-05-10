@@ -216,9 +216,14 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         // const modeParams = mode && `mode=${mode || _mode}`;
         // const queryParams = query && mapToSearchParams(query);
         // const params = `${queryParams || modeParams ? "?" : ""}${queryParams}${queryParams && modeParams ? "&" : ""}${modeParams}`;
-        const params = "?mode=haiku";
+        // const params = // "?mode=haiku";
 
-        fetch(`/api/haikus${params}`, await fetchOpts()).then(async (res) => {
+        const params = mapToSearchParams({
+          ...query
+          // ..._mode(mode ? { mode } : {}),
+        });
+
+        fetch(`/api/haikus${params ? "?" : ""}${params}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();
           setLoaded(query);
 
