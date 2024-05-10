@@ -120,6 +120,7 @@ export default function HaikuPoem({
   popPoem,
   styles,
   altStyles,
+  fontSize,
   onboardingElement,
   regeneratePoem,
   regenerateImage,
@@ -133,6 +134,7 @@ export default function HaikuPoem({
   popPoem?: boolean,
   styles: any[],
   altStyles?: any[],
+  fontSize?: string | undefined,
   onboardingElement?: string,
   regeneratePoem?: any,
   regenerateImage?: any,
@@ -319,16 +321,12 @@ export default function HaikuPoem({
         >
           <div className={`_bg-pink-200 ${canEdit ? "group/edit" : ""} p-2 ${saving ? "animate-pulse" : ""}`}>
             <div
-              className={`_bg-purple-200 flex flex-col gap-[2rem] _transition-all 
-                ${showcaseMode 
-                  ? "md:text-[32pt] sm:text-[28pt] text-[22pt]"
-                  : "md:text-[26pt] sm:text-[22pt] text-[18pt]"
-                }`
-              }
+              className="_bg-purple-200 flex flex-col gap-[2rem] _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
               onClick={handleClickHaiku}
               title={showcaseMode ? "Refresh" : "Click to edit"}
               style={{
-                cursor: showcaseMode ? "pointer" : ""
+                cursor: showcaseMode ? "pointer" : "",
+                fontSize,
               }}
             >
               <PopOnClick
@@ -435,12 +433,7 @@ export default function HaikuPoem({
             </div>
 
             <div
-              className={`_bg-pink-200 relative md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]
-                ${showcaseMode
-                  ? "md:text-[20pt] sm:text-[18pt] text-[15pt]"
-                  : "md:text-[16pt] sm:text-[14pt] text-[12pt]"
-                }`
-              }
+              className="_bg-pink-200 relative md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem] md:text-[16pt] sm:text-[14pt] text-[12pt]"
               style={{
                 // background: "pink",
                 height: haikudleMode
@@ -449,7 +442,8 @@ export default function HaikuPoem({
                     ? "" //"8rem" // maybelooks better when pushed up a bit
                     : haiku.theme?.length > maxHaikuTheme
                       ? "2.6rem"
-                      : "1.3rem"
+                      : "1.3rem",
+                fontSize: "60%",
               }}
             >
               <div
@@ -457,6 +451,7 @@ export default function HaikuPoem({
                   ? "_bg-yellow-200 fixed bottom-4 right-8 w-max flex flex-row"
                   : "_bg-orange-200 flex flex-row absolute w-max ml-[0.5rem] mt-[0.1rem]"
                 }
+                style={{ fontSize }}
               >
                 <div
                   className="transition-all _bg-pink-400"

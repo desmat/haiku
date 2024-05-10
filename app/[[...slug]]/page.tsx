@@ -14,6 +14,7 @@ export default function Page({
   const lang = searchParams && searchParams["lang"] as LanguageType || "en";
   const mode = searchParams &&  searchParams["mode"] || process.env.EXPERIENCE_MODE || "haiku";
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
+  const fontSize = searchParams && searchParams["fontSize"];  
   // console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
   if (!isSupportedLanguage(lang)) {
@@ -25,5 +26,5 @@ export default function Page({
     id = undefined;
   }
   
-  return <MainPage mode={mode} id={id} version={version} lang={lang} refreshDelay={refreshDelay} />
+  return <MainPage mode={mode} id={id} version={version} lang={lang} refreshDelay={refreshDelay} fontSize={fontSize} />
 }
