@@ -549,7 +549,10 @@ export default function MainPage({
     });
 
     if (user?.isAdmin || haiku?.createdBy == user.id) {
-      const artStyle = prompt(`Art style? (For example 'watercolor', 'Japanese woodblock print', 'abstract oil painting with large strokes', or leave blank for a style picked at random)"`, haiku.artStyle);
+      const artStyle = user.isAdmin
+        ? prompt(`Art style? (For example 'watercolor', 'Japanese woodblock print', 'abstract oil painting with large strokes', or leave blank for a style picked at random)"`, haiku.artStyle)
+        : "";
+        
       if (typeof (artStyle) == "string") {
         resetAlert();
         setRegenerating(true);
