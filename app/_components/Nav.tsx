@@ -24,6 +24,10 @@ import SidePanel from './SidePanel';
 import { User } from '@/types/User';
 
 const haikuThemeSuggestions = [
+  "Anything (leave empty)",
+  "Anything (leave empty)",
+  "Anything (leave empty)",
+  "Anything (leave empty)",
   "Nature",
   "Mountains",
   "Cherry blossoms",
@@ -33,7 +37,6 @@ const haikuThemeSuggestions = [
   "Summer in Paris",
   "City at night",
   "Springtime in Kyoto",
-  "Anything (leave blank)",
   "Rainy morning",
   "Sunset on the ocean",
   "Sunrise on the lake",
@@ -94,7 +97,7 @@ export function GenerateInput({
   const [value, setValue] = useState<string | undefined>();
   const [active, setActive] = useState(false);
   const [clickingGenerate, setClickingGenerate] = useState(false);
-  const [haikuTheme, setHaikuTheme] = useState(haikuThemeSuggestions[Math.floor(Math.random() * haikuThemeSuggestions.length)])
+  const [haikuTheme, setHaikuTheme] = useState("");
   const [intervalId, setIntervalId] = useState<any | undefined>();
   const ref = useRef();
   // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
@@ -186,8 +189,8 @@ export function GenerateInput({
                   .haiku-theme-input input {
                     background: none;
                     _background: pink; /* for debugging */
-                    outline: 2px solid ${bgColor || ""}44;
-                    background-color: ${bgColor || "white"}22;
+                    outline: 2px solid ${bgColor || ""}88;
+                    background-color: ${bgColor || "white"}44;
                     caret-color: ${color || "black"};
                     border-radius: 5px;
                     height: auto;
@@ -200,7 +203,7 @@ export function GenerateInput({
                     background-color: ${bgColor || "white"}44;  
                   }
                   ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus"} {
-                    outline: 2px solid ${bgColor || ""}66;
+                    outline: 2px solid ${bgColor || ""}88;
                     background-color: ${bgColor || "white"}66;
                   }
                   ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus::placeholder"} {
@@ -213,13 +216,13 @@ export function GenerateInput({
                     color: ${color || "black"};
                     -webkit-text-stroke: 1px ${color};
                     text-stroke: 1px ${color};
-                    opacity: 0.3;
+                    opacity: 0.4;
                     text-align: center; 
                   }
                   .haiku-theme-input input::-ms-input-placeholder { /* Edge 12 -18 */
                     color: ${color || "black"};
                     text-stroke: 1px ${color};
-                    opacity: 0.3;
+                    opacity: 0.4;
                     text-align: center; 
                   }`
                 }}
@@ -247,9 +250,9 @@ export function GenerateInput({
                     pt-[0.1rem] pr-[2.5rem] pb-[0.1rem] pl-[0.7rem] md:pr-[3rem]
                     mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0 md:mt-[0.1rem] md:mr-[0rem]      
                   `}
-                  style={{cursor: exceededUsageLimit ? "not-allowed" : "pointer"}}
-                  title={exceededUsageLimit 
-                    ? "Exceeded daily limit: try again later" 
+                  style={{ cursor: exceededUsageLimit ? "not-allowed" : "pointer" }}
+                  title={exceededUsageLimit
+                    ? "Exceeded daily limit: try again later"
                     : "Enter theme, subject or leave blank, and click the button to create a new haiku"
                   }
                 />
@@ -258,16 +261,16 @@ export function GenerateInput({
             <div className="relative w-0">
               <div
                 className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-20"
-                style={{ 
-                  opacity: active ? "1" : "0.3",
+                style={{
+                  opacity: active ? "1" : "0.6",
                 }}
                 onMouseDown={() => setClickingGenerate(true)}
                 onMouseUp={() => clickingGenerate && handleClickedGenerate()}
                 title={exceededUsageLimit ? "Exceeded daily limit: try again later" : "Create a new haiku"}
               >
                 <PopOnClick>
-                  <StyledLayers styles={active ? altStyles.slice(0, 2) : styles.slice(0, 1)}>
-                    <GenerateIcon style={{cursor: exceededUsageLimit ? "not-allowed" : "pointer"}}>
+                  <StyledLayers styles={altStyles.slice(0, 2)}>
+                    <GenerateIcon style={{ cursor: exceededUsageLimit ? "not-allowed" : "pointer" }}>
                       {/* Create */}
                     </GenerateIcon>
                   </StyledLayers>
