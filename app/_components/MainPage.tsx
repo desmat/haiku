@@ -341,7 +341,8 @@ export default function MainPage({
 
     if (showcaseMode && !loadingUI && _refreshDelay) {
       window.history.replaceState(null, '', `/${haiku?.id || ""}?mode=showcase${_refreshDelay ? `&refreshDelay=${_refreshDelay}` : ""}${fontSize ? `&fontSize=${encodeURIComponent(fontSize)}` : ""}`);
-      setRefreshTimeout(setTimeout(loadRandom, _refreshDelay));
+      // setRefreshTimeout(setTimeout(loadRandom, _refreshDelay));
+      setRefreshTimeout(setTimeout(loadHomePage, _refreshDelay));
     }
 
     // in case we're in showcase mode and refresh didn't work:
