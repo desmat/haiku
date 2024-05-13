@@ -90,9 +90,10 @@ export async function GET(request: NextRequest, params?: any) {
 
   if (user.isAdmin) {
     // TODO: there's a bit of inconsistent redundancy: we sometimes add dailyHaikudleId when a daily is created...
+    // TODO also we should have that info on the front-end, let's get rid of this code here
     const [dailyHaikus, dailyHaikudles] = await Promise.all([
-      await getDailyHaikus(),
-      await getDailyHaikudles(),
+      getDailyHaikus(),
+      getDailyHaikudles(),
     ]);
 
     todaysHaiku.dailyHaikuId = dailyHaikus

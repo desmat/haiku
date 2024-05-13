@@ -482,10 +482,13 @@ export async function getDailyHaiku(id: string): Promise<DailyHaiku | undefined>
 export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
   const dailyHaikus = (await store.dailyHaikus.find(query))
     .filter(Boolean);
+  const dailyHaikuIds = dailyHaikus
+    .map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
+
   // lookup theme; 
   // at some point we won't need to do this since we're now 
-  // saving the them with th daily haiku record  
-  const haikus = await store.haikus.find(query);
+  // saving them with the daily haiku record  
+  const haikus = await store.haikus.find({ id: dailyHaikuIds });
   const themeLookup = new Map(haikus
     .map((haiku: Haiku) => [haiku.id, haiku.theme]));
 
@@ -503,9 +506,8 @@ export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
     .sort((a: any, b: any) => a.id - b.id);
 }
 
-export async function getNextDailyHaikuId(): Promise<string> {
-  const dailyHaikus = await getDailyHaikus();
-  const ids = dailyHaikus
+export async function getNextDailyHaikuId(dailyHaikus?: DailyHaiku[]): Promise<string> {
+  const ids = (dailyHaikus || await getDailyHaikus())
     .map((dh: DailyHaiku) => dh.id)
     .sort()
     .reverse();
