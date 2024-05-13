@@ -101,17 +101,18 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   }
 
   async find(query?: any): Promise<T[]> {
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { query, jsonGetNotDeleted });
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { query });
 
-    let list, keys;
-
+    let keys;
     const queryEntry = query && Object.entries(query)[0];
+
     if (query && queryEntry[0] == "id" && Array.isArray(queryEntry[1])) {
       // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find special case: query is for IDs`, { ids: queryEntry[1] });
       keys = queryEntry[1]
         .map((id: string) => id && this.valueKey(id))
         .filter(Boolean);
     } else {
+      let list;
       if (queryEntry?.length > 0) {
         const jsonFindByQuery = jsonFindBy(queryEntry[0], `${queryEntry[1]}`, false);
         // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { jsonFindByQuery });
@@ -119,18 +120,33 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       } else {
         list = await kv.json.get(this.listKey(), jsonGetNotDeleted);
       }
-
-      console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { list });
+      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { list });
 
       keys = list && list
-        .filter((entry: any) => !entry.deletedAt)
         .map((value: T) => value.id && this.valueKey(value.id))
         .filter(Boolean);
     }
 
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
 
-    const values = keys && keys.length > 0 && (await kv.json.mget(keys, "$")).filter(Boolean).flat() || [];
+    // don't mget too many at once otherwise 💥
+    const blockSize = 512;
+    const blocks = keys && keys.length && Array
+      .apply(null, Array(Math.ceil(keys.length / blockSize)))
+      .map((v: any, block: number) => keys
+        .slice(blockSize * block, blockSize * (block + 1)));
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { blocks });
+
+    const values = blocks && blocks.length > 0
+      ? (await Promise.all(
+        blocks
+          .map(async (keys: string[]) => (await kv.json.mget(keys, "$"))
+            .filter(Boolean)
+            .flat())))
+        .flat()
+      : [];
+
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { values });
 
     return values as T[];
   }
