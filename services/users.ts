@@ -44,7 +44,7 @@ export async function userSession(request: any) {
 
   const decodedToken = token && await decodeJWT(token);
   const user = decodedToken.user && await loadUser(decodedToken.user.id);
-  console.log(">> services.users.userSession", { decodedToken, user, adminUserIds: process.env.ADMIN_USER_IDS });
+  // console.log(">> services.users.userSession", { decodedToken, user, adminUserIds: process.env.ADMIN_USER_IDS });
   
   return {
     ...decodedToken,

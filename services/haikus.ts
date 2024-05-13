@@ -23,7 +23,7 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
   console.log(">> services.haikus.getHaikus", { query, hashPoem })
   let haikus = (await store.haikus.find(query))
     .filter((haiku: Haiku) => haiku && !haiku.deprecated && !haiku.deprecatedAt);
-    // note that we startd with .deprecated but moved to .deprecatedAt
+  // note that we startd with .deprecated but moved to .deprecatedAt
 
   if (!haikus?.length && (!query || JSON.stringify(query) == "{}")) {
     // empty db, populate with samples
@@ -48,10 +48,13 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
 export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]> {
   console.log(`>> services.haiku.getUserHaikus`, { user });
 
-  let haikus = (await store.haikus.find())
-    .filter((haiku: Haiku) => haiku && !haiku.deprecated && !haiku.deprecatedAt);
+  let haikus;
 
-  if (!all) {
+  if (all) {
+    // for admins: get all haikus
+    haikus = (await store.haikus.find())
+      .filter((haiku: Haiku) => haiku && !haiku.deprecated && !haiku.deprecatedAt);
+  } else {
     // find all haikus that user solved corresponding haikudle
     const [generatedHaikus, userHaikus, userHaikudles] = await Promise.all([
       store.haikus.find({
@@ -67,6 +70,14 @@ export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]>
     ]);
 
     console.log(`>> services.haiku.getUserHaikus`, { userHaikus, userHaikudles, generatedHaikus });
+
+    const haikuIds = Array.from(new Set([
+      ...generatedHaikus.map((haiku: Haiku) => haiku.id),
+      ...userHaikus.map((haiku: Haiku) => haiku.haikuId),
+      ...userHaikudles.map((haiku: Haiku) => haiku.haikuId),
+    ]));
+    haikus = await store.haikus.find({ id: haikuIds });
+    console.log(`>> services.haiku.getUserHaikus`, { haikuIds, justThoseHaikus: haikus });
 
     const generatedHaikuLookup = new Map(generatedHaikus
       .map((h: Haiku) => [h.id, {
@@ -89,11 +100,6 @@ export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]>
     console.log(`>> services.haiku.getUserHaikus`, { userHaikuLookup, userHaikudleLookup, generatedHaikuLookup });
 
     haikus = haikus
-      .filter((haiku: Haiku) => {
-        return generatedHaikuLookup.get(haiku.id) ||
-          userHaikuLookup.get(haiku.id) ||
-          userHaikudleLookup.get(haiku.id)
-      })
       .map((haiku: Haiku) => {
         return {
           ...haiku,
@@ -105,21 +111,23 @@ export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]>
   }
 
   // strip down to just the basics
-  haikus = haikus.map((haiku: Haiku) => {
-    return {
-      id: `${user.id}:${haiku.id}`,
-      haikuId: haiku.id,
-      userId: user.id,
-      createdBy: haiku.createdBy,
-      createdAt: haiku.createdAt,
-      generatedAt: haiku.generatedAt,
-      solvedAt: haiku.solvedAt,
-      viewedAt: haiku.viewedAt,
-      likedAt: haiku.likedAt,
-      theme: haiku.theme,
-      moves: haiku.moves,
-    };
-  }).filter(Boolean);
+  haikus = haikus
+    .map((haiku: Haiku) => {
+      return {
+        id: `${user.id}:${haiku.id}`,
+        haikuId: haiku.id,
+        userId: user.id,
+        createdBy: haiku.createdBy,
+        createdAt: haiku.createdAt,
+        generatedAt: haiku.generatedAt,
+        solvedAt: haiku.solvedAt,
+        viewedAt: haiku.viewedAt,
+        likedAt: haiku.likedAt,
+        theme: haiku.theme,
+        moves: haiku.moves,
+      };
+    })
+    .filter(Boolean);
 
   return haikus;
 }

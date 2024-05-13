@@ -103,20 +103,30 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   async find(query?: any): Promise<T[]> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { query, jsonGetNotDeleted });
 
-    let list;
-    const entry = query && Object.entries(query)[0];
-    if (entry?.length > 0) {
-      list = await kv.json.get(this.listKey(), jsonFindBy(entry[0], `${entry[1]}`, false));
+    let list, keys;
+
+    const queryEntry = query && Object.entries(query)[0];
+    if (query && queryEntry[0] == "id" && Array.isArray(queryEntry[1])) {
+      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find special case: query is for IDs`, { ids: queryEntry[1] });
+      keys = queryEntry[1]
+        .map((id: string) => id && this.valueKey(id))
+        .filter(Boolean);
     } else {
-      list = await kv.json.get(this.listKey(), jsonGetNotDeleted);
+      if (queryEntry?.length > 0) {
+        const jsonFindByQuery = jsonFindBy(queryEntry[0], `${queryEntry[1]}`, false);
+        // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { jsonFindByQuery });
+        list = await kv.json.get(this.listKey(), jsonFindByQuery);
+      } else {
+        list = await kv.json.get(this.listKey(), jsonGetNotDeleted);
+      }
+
+      console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { list });
+
+      keys = list && list
+        .filter((entry: any) => !entry.deletedAt)
+        .map((value: T) => value.id && this.valueKey(value.id))
+        .filter(Boolean);
     }
-
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { list });
-
-    const keys = list && list
-      .filter((entry: any) => !entry.deletedAt)
-      .map((value: T) => value.id && this.valueKey(value.id))
-      .filter(Boolean);
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
 
