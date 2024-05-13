@@ -103,7 +103,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   async find(query?: any): Promise<T[]> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { query });
 
-    let keys;
+    let keys: string[] | undefined;
     const queryEntry = query && Object.entries(query)[0];
 
     if (query && queryEntry[0] == "id" && Array.isArray(queryEntry[1])) {
@@ -133,7 +133,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     const blockSize = 512;
     const blocks = keys && keys.length && Array
       .apply(null, Array(Math.ceil(keys.length / blockSize)))
-      .map((v: any, block: number) => keys
+      .map((v: any, block: number) => (keys || [])
         .slice(blockSize * block, blockSize * (block + 1)));
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { blocks });
 
