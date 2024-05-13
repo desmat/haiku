@@ -24,7 +24,7 @@ import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
 import { User } from "@/types/User";
 
-const jsonNotDeletedExpression = "(@.deletedAt > 0) == false";
+const jsonNotDeletedExpression = "(@.deletedAt > 0) == false && (@.deprecatedAt > 0) == false";
 const jsonEqualsExpression = (key: string, val: string) => {
   return `@.${key} == ${typeof (val) == "number" ? val : `"${val}"`}`;
 }
@@ -101,7 +101,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   }
 
   async find(query?: any): Promise<T[]> {
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { query });
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { query, jsonGetNotDeleted });
 
     let list;
     const entry = query && Object.entries(query)[0];
@@ -111,12 +111,14 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       list = await kv.json.get(this.listKey(), jsonGetNotDeleted);
     }
 
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { list });
+
     const keys = list && list
       .filter((entry: any) => !entry.deletedAt)
       .map((value: T) => value.id && this.valueKey(value.id))
       .filter(Boolean);
 
-    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
 
     const values = keys && keys.length > 0 && (await kv.json.mget(keys, "$")).filter(Boolean).flat() || [];
 
@@ -124,7 +126,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   }
 
   async create(userId: string, value: T, options: any = {}): Promise<T> {
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { userId, value });
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { userId, value, options });
 
     if (!value.id) {
       throw `Cannot save with null id`;
@@ -135,7 +137,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
         // @ts-ignore
         .map(([key, val]: [key: string, val: any]) => [key, value[key]])
     );
-    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { additionalListValues });
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { additionalListValues });
 
     const createdListValue = {
       id: value.id || uuid(),
@@ -145,7 +147,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       lang: value.lang,
       ...additionalListValues,
     };
-    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { createdListValue });
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { createdListValue });
 
     const createdValue = {
       ...value,

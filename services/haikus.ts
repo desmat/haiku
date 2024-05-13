@@ -22,7 +22,8 @@ import(`@/services/stores/${process.env.STORE_TYPE}`)
 export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[]> {
   console.log(">> services.haikus.getHaikus", { query, hashPoem })
   let haikus = (await store.haikus.find(query))
-    .filter((haiku: Haiku) => haiku && !haiku.deprecated);
+    .filter((haiku: Haiku) => haiku && !haiku.deprecated && !haiku.deprecatedAt);
+    // note that we startd with .deprecated but moved to .deprecatedAt
 
   if (!haikus?.length && (!query || JSON.stringify(query) == "{}")) {
     // empty db, populate with samples
@@ -48,7 +49,7 @@ export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]>
   console.log(`>> services.haiku.getUserHaikus`, { user });
 
   let haikus = (await store.haikus.find())
-    .filter((haiku: Haiku) => !haiku.deprecated);
+    .filter((haiku: Haiku) => haiku && !haiku.deprecated && !haiku.deprecatedAt);
 
   if (!all) {
     // find all haikus that user solved corresponding haikudle
@@ -413,11 +414,16 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
     ...original,
     id: `${original.id}:${version}`,
     version,
-    deprecated: true,
+    deprecatedAt: moment().valueOf(),
+  }, {
+    indices: {
+      deprecatedAt: "number"
+    }
   });
 
   // edge case where we're editing a previous version
   delete haiku.deprecated;
+  delete haiku.deprecatedAt;
 
   return store.haikus.update(user.id, { ...haiku, version: version + 1 });
 }

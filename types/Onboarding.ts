@@ -79,12 +79,12 @@ export const haikuPromptSteps = (haiku: Haiku) => [
         <div>Image style: <i>${haiku.artStyle || "N/A"}</i></div>      
         <!-- <div>Poem prompt: <i>${haiku.poemPrompt || "N/A"}</i></div> -->
         <div>Image prompt: <i>${haiku.imagePrompt || "N/A"}</i></div>
-        ${haiku.version || haiku.deprecated
+        ${haiku.version || haiku.deprecated || haiku.deprecatedAt
           ? `<div>Version: ${haiku.version}
             ${haiku.version
             ? ` <a href="/${haiku.id}?version=${haiku.version - 1}">(Load previous)</a>`
             : ""}
-            ${haiku.deprecated
+            ${haiku.deprecated || haiku.deprecatedAt
             ? ` <a href="/${haiku.id}">(Load current)</a>`
             : ""}</div>`
           : ""}    
