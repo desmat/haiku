@@ -185,7 +185,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
 
   const {
     prompt: poemPrompt,
-    languageModel,
+    model: languageModel,
     response: {
       haiku: poem,
       subject: generatedSubject,
@@ -229,7 +229,9 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
       haiku: completedPoem,
       subject: generatedSubject,
       mood: generatedMood,
-    }
+    }, 
+    model: languageModel,
+    prompt: poemPrompt,
   } = await openai.completeHaiku(haiku.poem, language, subject, mood);
   console.log(">> services.haiku.completeHaikuPoem", { completedPoem, generatedSubject, generatedMood });
 
@@ -250,6 +252,8 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
     poem: completedPoem,
     theme: generatedSubject,
     mood: generatedMood,
+    languageModel,
+    poemPrompt,
   });
 }
 
@@ -261,7 +265,7 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
     url: openaiUrl,
     prompt: imagePrompt,
     artStyle: selectedArtStyle,
-    imageModel,
+    model: imageModel,
   } = await openai.generateBackgroundImage(haiku.theme, haiku.mood, artStyle);
 
   const imageRet = await fetch(openaiUrl);
@@ -312,7 +316,7 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
 
   const {
     prompt: poemPrompt,
-    languageModel,
+    model: languageModel,
     response: {
       haiku: poem,
       subject: generatedSubject,
@@ -326,7 +330,7 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
     url: openaiUrl,
     prompt: imagePrompt,
     artStyle: selectedArtStyle,
-    imageModel,
+    model: imageModel,
   } = await openai.generateBackgroundImage(subject || generatedSubject, mood || generatedMood, artStyle);
 
   const imageRet = await fetch(openaiUrl);
