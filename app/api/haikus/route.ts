@@ -1,11 +1,11 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, generateHaiku, getUserHaikus, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, createHaiku, saveDailyHaiku, getNextDailyHaikuId, getHaiku } from '@/services/haikus';
+import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku } from '@/services/haikus';
 import { userSession } from '@/services/users';
-import { listToMap, mapToList, searchParamsToMap } from '@/utils/misc';
+import { searchParamsToMap } from '@/utils/misc';
 import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
 import { userUsage } from '@/services/usage';
-import { DailyHaiku, Haiku, UserHaiku } from '@/types/Haiku';
+import { DailyHaiku, Haiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 import shuffleArray from '@/utils/shuffleArray';
 import { USAGE_LIMIT } from '@/types/Usage';
@@ -90,9 +90,10 @@ export async function GET(request: NextRequest, params?: any) {
 
   if (user.isAdmin) {
     // TODO: there's a bit of inconsistent redundancy: we sometimes add dailyHaikudleId when a daily is created...
+    // TODO also we should have that info on the front-end, let's get rid of this code here
     const [dailyHaikus, dailyHaikudles] = await Promise.all([
-      await getDailyHaikus(),
-      await getDailyHaikudles(),
+      getDailyHaikus(),
+      getDailyHaikudles(),
     ]);
 
     todaysHaiku.dailyHaikuId = dailyHaikus

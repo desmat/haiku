@@ -168,7 +168,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
     return new Promise(async (resolve, reject) => {
       if (id) {
-        const params = mapToSearchParams({ mode, version});
+        const params = mapToSearchParams({ mode, version });
         fetch(`/api/haikus/${id}${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();
 
@@ -402,7 +402,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         method: "POST",
         body: JSON.stringify({ request }),
       }).then(async (res) => {
-        const { _haikus } = get();
+        const { _haikus, addUserHaiku } = get();
 
         if (res.status != 200) {
           handleErrorResponse(res, "generate-haiku", undefined, `Error generating haiku`);
@@ -424,7 +424,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         });
 
         // also update the side bar
-        (await useHaikus.getState()).addUserHaiku({
+        addUserHaiku({
           id: generated.id,
           createdBy: generated.createdBy,
           createdAt: generated.createdAt,
@@ -537,11 +537,18 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   addUserHaiku: async (userHaiku: any) => {
-    // console.log(">> hooks.haiku.addUserHaiku", { userHaiku });
-    const { userHaikus } = get();
+    const { user, haikus, allHaikus } = useUser.getState();
+    // console.log(">> hooks.haiku.addUserHaiku", { userHaiku, user });
 
-    set({
-      userHaikus: { ...userHaikus, [userHaiku.id]: userHaiku },
+    useUser.setState({
+      haikus: {
+        ...haikus,
+        [userHaiku.id]: userHaiku,
+      },
+      allHaikus: user.isAdmin && {
+        ...allHaikus,
+        [userHaiku.id]: userHaiku
+      },
     });
   },
 
@@ -560,7 +567,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         }
 
         const { dailyHaiku, nextDailyHaikuId } = await res.json();
-        
+
         // update side panel content
         useUser.setState((state: any) => {
           return {
