@@ -240,8 +240,8 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     return new Promise((resolve) => resolve(updatedValue));
   }
 
-  async delete(userId: string, id: string): Promise<T> {
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { id });
+  async delete(userId: string, id: string, options: any = {}): Promise<T> {
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { id, options });
 
     if (!id) {
       throw `Cannot delete ${this.key}: null id`;
@@ -256,8 +256,9 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     const response = await Promise.all([
       kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedAt`, value.deletedAt),
       kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedBy`, `"${userId}"`),
-      // kv.json.del(this.valueKey(id), "$")
-      kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf() }),
+      options.hardDelete 
+        ? kv.json.del(this.valueKey(id), "$")
+        : kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf() }),
     ]);
 
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { response });

@@ -123,6 +123,21 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
     throw `Unauthorized`;
   }
 
+  // remove daily haikudle and this user's userhaikudle (leave the others alone)
+  const userHaikudleId = `${id}-${user.id}`;
+  const [
+    dailyHaikudles, 
+    userHaikudle
+  ] = await Promise.all([
+    store.dailyHaikudles.find(),
+    store.userHaikudles.get(userHaikudleId),
+  ]);
+  const dailyHaikudle = dailyHaikudles
+    .filter((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikudleId == id)[0];
+
+  dailyHaikudle && store.dailyHaikudles.delete(user.id, dailyHaikudle.id);
+  userHaikudle && store.userHaikudles.delete(user.id, userHaikudle.id);
+
   return store.haikudles.delete(user.id, id);
 }
 

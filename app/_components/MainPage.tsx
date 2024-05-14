@@ -107,6 +107,7 @@ export default function MainPage({
     haikudleReady,
     haikudleLoaded,
     loadHaikudle,
+    deleteHaikudle,
     haikudleHaiku,
     resetHaikudles,
     createHaikudle,
@@ -118,6 +119,7 @@ export default function MainPage({
     state.ready,
     state.loaded(haikuId || { lang }),
     state.load,
+    state.delete,
     state.haiku,
     state.reset,
     state.create,
@@ -553,7 +555,7 @@ export default function MainPage({
       const artStyle = user.isAdmin
         ? prompt(`Art style? (For example 'watercolor', 'Japanese woodblock print', 'abstract oil painting with large strokes', or leave blank for a style picked at random)"`, haiku.artStyle)
         : "";
-        
+
       if (typeof (artStyle) == "string") {
         resetAlert();
         setRegenerating(true);
@@ -636,10 +638,18 @@ export default function MainPage({
 
   const doDelete = async () => {
     // console.log('>> app.page.doDelete()', {});
-    if (haiku?.id && confirm("Delete this Haiku?")) {
-      window.history.replaceState(null, '', `/`);
-      deleteHaiku(haiku.id); // don't wait
-      loadHomePage();
+    if (haikudleMode) {
+      if (haiku?.id && confirm("Delete this Haikudle?")) {
+        window.history.replaceState(null, '', `/`);
+        deleteHaikudle(haiku.id); // don't wait
+        loadHomePage();
+      }
+    } else {
+      if (haiku?.id && confirm("Delete this Haiku (and any associated Haikudle)?")) {
+        window.history.replaceState(null, '', `/`);
+        deleteHaiku(haiku.id); // don't wait
+        loadHomePage();
+      }
     }
   }
 

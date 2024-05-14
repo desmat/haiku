@@ -395,6 +395,22 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
     throw `Unauthorized`;
   }
 
+  // remove daily haiku and all user haikus in addition to the actual haiku
+  const [
+    dailyHaikus,
+    userHaikus
+  ] = await Promise.all([
+    store.dailyHaikus.find(),
+    store.userHaikus.find(),
+  ]);
+  const dailyHaiku = dailyHaikus
+    .filter((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId == id)[0];
+
+  dailyHaiku && store.dailyHaikus.delete(user.id, dailyHaiku.id);
+  userHaikus
+    .filter((userHaiku: UserHaiku) => userHaiku.haikuId == id)
+    .map((userHaiku: UserHaiku) => store.userHaikus.delete(user.id, userHaiku.id));
+
   return store.haikus.delete(user.id, id);
 }
 

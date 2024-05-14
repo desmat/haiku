@@ -100,8 +100,6 @@ export async function DELETE(
     throw `Cannot delete haiku with null id`;
   }
 
-  // TODO LOCK DOWN TO ONLY ADMINS (or owners?)
-
   const haikudle = await deleteHaikudle(user, params.id);
   return NextResponse.json({ haikudle });
 }

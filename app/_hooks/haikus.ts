@@ -498,7 +498,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       throw `Cannot delete haiku with null id`;
     }
 
-    const { _haikus, _deleted, userHaikus, get: _get } = get();
+    const { _haikus, _deleted, get: _get } = get();
     const deleting = _get(id);
 
     if (!deleting) {
@@ -510,7 +510,6 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     set({
       _haikus: { ..._haikus, [id]: undefined },
       _deleted: { ..._deleted, [id]: true },
-      userHaikus: { ...userHaikus, [id]: undefined },
     });
 
     const res = await fetch(`/api/haikus/${id}`, {
@@ -525,13 +524,26 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       set({
         _haikus: { ..._haikus, [id]: deleting },
         _deleted: { ..._deleted, [id]: false },
-        userHaikus: { ...userHaikus, [id]: deleting },
       });
       return deleting;
     }
 
     const data = await res.json();
     const deleted = data.haiku;
+
+    // update side panel
+    const { haikus: userHaikus, allHaikus, dailyHaikus, dailyHaikudles } = useUser.getState();
+    delete userHaikus[id];
+    delete allHaikus[id];
+    delete dailyHaikus[id];
+    delete dailyHaikudles[id];
+  
+    useUser.setState({
+      haikus: userHaikus,
+      allHaikus,
+      dailyHaikus,
+      dailyHaikudles,
+    });    
 
     return deleted;
   },

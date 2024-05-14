@@ -98,20 +98,14 @@ export async function DELETE(
 
   const { user } = await userSession(request)
 
-  // TODO LOCK DOWN TO ONLY ADMINS (or owners?)
-
   if (!params.id) {
     throw `Cannot delete haiku with null id`;
   }
-
-  // can't do that
-  // const dailyHaikudle = getDailyHaikudles({ haikuId: params.id });
 
   const [haiku, haikudle] = await Promise.all([
     deleteHaiku(user, params.id),
     getHaikudle(user, params.id)
       .then((haikudle: Haikudle) => haikudle && deleteHaikudle(user, params.id)),
-    // dailyHaikudle && deleteDailyHaikudle(user, params.id),
   ]);
 
   return NextResponse.json({ haiku, haikudle });

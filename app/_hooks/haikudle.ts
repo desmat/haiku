@@ -515,6 +515,38 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     });
   },
 
+  delete: async (id: string) => {
+    // console.log(">> hooks.haikudle.delete id:", id);
+
+    if (!id) {
+      throw `Cannot delete haikudle with null id`;
+    }
+
+    const res = await fetch(`/api/haikudles/${id}`, {
+      ...await fetchOpts(),
+      method: "DELETE",
+    });
+
+    if (res.status != 200) {
+      trackEvent("error", {
+        type: "delete-haikudle",
+        code: res.status,
+        userId: (await useUser.getState()).user.id,
+      });
+      useAlert.getState().error(`Error deleting haikudle: ${res.status} (${res.statusText})`);
+    }
+
+    const data = await res.json();
+    const deleted = data.haikudle;
+
+    // remove from side panel
+    const { dailyHaikudles } = useUser.getState();
+    delete dailyHaikudles[id];
+    useUser.setState({ dailyHaikudles });
+
+    return deleted;
+  },
+
 })));
 
 export default useHaikudle;
