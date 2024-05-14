@@ -104,7 +104,7 @@ export function GenerateInput({
 
   const onboarding = onboardingElement == "generate";
   const dateCode = moment().format("YYYYMMDD");
-  const exceededUsageLimit = !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU;
+  const exceededUsageLimit = !user?.isAdmin && (user?.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU;
 
   const handleChange = (e: any) => {
     setActive(true);
@@ -390,11 +390,11 @@ function BottomLinks({
           >
             <div
               key="heart"
-              title={`${haiku.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user.isAdmin ? `(${haiku.numLikes} like${!haiku.numLikes || haiku.numLikes > 1 ? "s" : ""})` : ""}`}
+              title={`${haiku.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user?.isAdmin ? `(${haiku.numLikes} like${!haiku.numLikes || haiku.numLikes > 1 ? "s" : ""})` : ""}`}
               className="cursor-pointer relative"
               onClick={onLikeHaiku}
             >
-              {user.isAdmin && haiku?.numLikes > 0 &&
+              {user?.isAdmin && haiku?.numLikes > 0 &&
                 <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-red-600">
                   {/* <span className="relative text-white text-[4pt] p-[0.2rem]">{haiku?.numLikes}</span> */}
                 </div>
@@ -417,7 +417,7 @@ function BottomLinks({
           onClick={() => {
             if (onCopyHaiku) {
               trackEvent("haiku-copied", {
-                userId: user.id,
+                userId: user?.id,
                 id: haiku.id,
                 location: "bottom-links",
               });
