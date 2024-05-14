@@ -1,23 +1,23 @@
+import { getReasonPhrase } from 'http-status-codes';
 import moment from 'moment';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import { error429Haiku, error4xxHaiku, notFoundHaiku, serverErrorHaiku } from '@/services/stores/samples';
 import { Haiku, HaikuAction } from '@/types/Haiku';
 import { User } from '@/types/User';
+import { formatActionInProgress, formatPastAction } from '@/utils/format';
 import { listToMap, mapToList, mapToSearchParams, uuid } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from "./alert";
 import useHaikudle from './haikudle';
 import useUser from './user';
-import { error429Haiku, error4xxHaiku, notFoundHaiku, serverErrorHaiku } from '@/services/stores/samples';
-import { formatActionInProgress, formatPastAction } from '@/utils/format';
-
 async function fetchOpts() {
   const token = await useUser.getState().getToken();
   // console.log(">> hooks.haiku.fetchOpts", { token });
   return token && { headers: { Authorization: `Bearer ${token}` } } || {};
 }
 
-async function handleErrorResponse(res: any, resourceType: string, resourceId: string | undefined, message?: string) {
+async function handleErrorResponse(res: any, resourceType: string, resourceId: string | undefined, message?: string | undefined) {
   trackEvent("error", {
     type: resourceType,
     code: res.status,
@@ -30,8 +30,8 @@ async function handleErrorResponse(res: any, resourceType: string, resourceId: s
     res.status == 429
       ? () => useAlert.getState().warning(`Exceeded daily limit: please try again later`)
       : res.status == 404
-        ? () => useAlert.getState().warning(`${message || "An error occured"}: ${res.status} (${res.statusText || "Unknown Error"})`)
-        : () => useAlert.getState().error(`${message || "An error occured"}: ${res.status} (${res.statusText || "Unknown Error"})`)
+        ? () => useAlert.getState().warning(`${message || "An error occured"}: ${res.status} (${res.statusText || getReasonPhrase(res.status)})`)
+        : () => useAlert.getState().error(`${message || "An error occured"}: ${res.status} (${res.statusText || getReasonPhrase(res.status)})`)
     , 500);
 
   const errorHaiku =
@@ -40,8 +40,8 @@ async function handleErrorResponse(res: any, resourceType: string, resourceId: s
       : res.status == 429
         ? error429Haiku
         : res.status >= 400 && res.status < 500
-          ? error4xxHaiku(res.status, res.statusText)
-          : serverErrorHaiku(res.status, res.statusText);
+          ? error4xxHaiku(res.status, res.statusText || getReasonPhrase(res.status))
+          : serverErrorHaiku(res.status, res.statusText || getReasonPhrase(res.status));
 
   return errorHaiku;
 }

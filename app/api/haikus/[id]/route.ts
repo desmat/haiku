@@ -86,6 +86,14 @@ export async function PUT(
     );
   }
 
+  const haikudle = await getHaikudle(user, params.id);
+  if (haikudle) {
+    return NextResponse.json(
+      { success: false, message: 'haiku has associated haikudle' },
+      { status: 423 }
+    );
+  }
+
   const savedHaiku = await saveHaiku(user, haikuToSave);
   return NextResponse.json({ haiku: savedHaiku });
 }
