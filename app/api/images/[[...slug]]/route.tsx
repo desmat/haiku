@@ -23,10 +23,15 @@ export async function PUT(
     );
   }
 
-  const imageBuffer = Buffer.from(await request.arrayBuffer());
-  // console.log(">> app.api.images.[[slug]].PUT", { imageBuffer });
+  const formData = await request.formData();
+  console.log(">> app.api.images.[[slug]].PUT", { formData });
+  
+  const parts: File[] = [];
+  formData.forEach((part: FormDataEntryValue) => parts.push(part as File));
+  console.log(">> app.api.images.[[slug]].PUT", { parts });
+
   const filename = params.slug.join("/")
-  const blob = await put(filename, imageBuffer, {
+  const blob = await put(filename, parts[0], {
     access: 'public',
     addRandomSuffix: false,
   });
