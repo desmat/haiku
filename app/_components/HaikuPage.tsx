@@ -39,7 +39,7 @@ export default function HaikuPage({
   copyHaiku?: any
 }) {
   // console.log('>> app._components.HaikuPage.render()', { mode, id: haiku.id, popPoem, haiku });
-
+  const showcaseMode = mode == "showcase";
   const [user] = useUser((state: any) => [state.user]);
   const blurValue = loading ? 8 : 0
   const saturateValue = loading ? 0.7 : 1
@@ -69,7 +69,7 @@ export default function HaikuPage({
               popPoem={popPoem}
               styles={styles}
               altStyles={altStyles}
-              fontSize={fontSize ? fontSize : mode == "showcase" ? "130%" : undefined}
+              fontSize={fontSize ? fontSize : showcaseMode ? "110%" : undefined}
               onboardingElement={onboardingElement}
               regeneratePoem={regeneratePoem}
               regenerateImage={regenerateImage}
