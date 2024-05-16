@@ -30,9 +30,6 @@ export const metaUrl = isHaikudleMode
 export const metadata: Metadata = {
   title: appName,
   description: appDescription,
-  other: {
-    ["fb:app_id"]: process.env.FB_APP_ID || "",
-  }
 }
 
 export const viewport: Viewport = {
@@ -55,6 +52,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="canonical" href={metaUrl} key="canonical" />
+        <meta property="fb:app_id" content={process.env.FB_APP_ID}></meta>
       </head>
       <body className={inter.className}>
         {children}
