@@ -16,7 +16,7 @@ export async function GET(
   const { user } = await userSession(request);
   console.log('>> app.api.haiku.[id].GET', { params });
 
-  if (query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
+  if (query.mode != "showcase" && query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
     return NextResponse.json(
       { success: false, message: 'authorization failed' },
       { status: 403 }
@@ -86,6 +86,14 @@ export async function PUT(
     );
   }
 
+  const haikudle = await getHaikudle(user, params.id);
+  if (haikudle) {
+    return NextResponse.json(
+      { success: false, message: 'haiku has associated haikudle' },
+      { status: 423 }
+    );
+  }
+
   const savedHaiku = await saveHaiku(user, haikuToSave);
   return NextResponse.json({ haiku: savedHaiku });
 }
@@ -98,20 +106,14 @@ export async function DELETE(
 
   const { user } = await userSession(request)
 
-  // TODO LOCK DOWN TO ONLY ADMINS (or owners?)
-
   if (!params.id) {
     throw `Cannot delete haiku with null id`;
   }
-
-  // can't do that
-  // const dailyHaikudle = getDailyHaikudles({ haikuId: params.id });
 
   const [haiku, haikudle] = await Promise.all([
     deleteHaiku(user, params.id),
     getHaikudle(user, params.id)
       .then((haikudle: Haikudle) => haikudle && deleteHaikudle(user, params.id)),
-    // dailyHaikudle && deleteDailyHaikudle(user, params.id),
   ]);
 
   return NextResponse.json({ haiku, haikudle });

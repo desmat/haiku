@@ -8,7 +8,7 @@ export interface GenericStore<T> {
   find: (query?: any) => Promise<T[]>,
   create: (userId: string, value: T, options?: any) => Promise<T>,
   update: (userId: string, value: T, options?: any) => Promise<T>,
-  delete: (userId: string, id: string) => Promise<T>,
+  delete: (userId: string, id: string, options?: any) => Promise<T>,
 }
 
 export type Store = {

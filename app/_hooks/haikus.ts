@@ -1,23 +1,23 @@
+import { getReasonPhrase } from 'http-status-codes';
 import moment from 'moment';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import { error429Haiku, error4xxHaiku, notFoundHaiku, serverErrorHaiku } from '@/services/stores/samples';
 import { Haiku, HaikuAction } from '@/types/Haiku';
 import { User } from '@/types/User';
+import { formatActionInProgress, formatPastAction } from '@/utils/format';
 import { listToMap, mapToList, mapToSearchParams, uuid } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from "./alert";
 import useHaikudle from './haikudle';
 import useUser from './user';
-import { error429Haiku, error4xxHaiku, notFoundHaiku, serverErrorHaiku } from '@/services/stores/samples';
-import { formatActionInProgress, formatPastAction } from '@/utils/format';
-
 async function fetchOpts() {
   const token = await useUser.getState().getToken();
   // console.log(">> hooks.haiku.fetchOpts", { token });
   return token && { headers: { Authorization: `Bearer ${token}` } } || {};
 }
 
-async function handleErrorResponse(res: any, resourceType: string, resourceId: string | undefined, message?: string) {
+async function handleErrorResponse(res: any, resourceType: string, resourceId: string | undefined, message?: string | undefined) {
   trackEvent("error", {
     type: resourceType,
     code: res.status,
@@ -30,8 +30,8 @@ async function handleErrorResponse(res: any, resourceType: string, resourceId: s
     res.status == 429
       ? () => useAlert.getState().warning(`Exceeded daily limit: please try again later`)
       : res.status == 404
-        ? () => useAlert.getState().warning(`${message || "An error occured"}: ${res.status} (${res.statusText || "Unknown Error"})`)
-        : () => useAlert.getState().error(`${message || "An error occured"}: ${res.status} (${res.statusText || "Unknown Error"})`)
+        ? () => useAlert.getState().warning(`${message || "An error occured"}: ${res.status} (${res.statusText || getReasonPhrase(res.status)})`)
+        : () => useAlert.getState().error(`${message || "An error occured"}: ${res.status} (${res.statusText || getReasonPhrase(res.status)})`)
     , 500);
 
   const errorHaiku =
@@ -40,8 +40,8 @@ async function handleErrorResponse(res: any, resourceType: string, resourceId: s
       : res.status == 429
         ? error429Haiku
         : res.status >= 400 && res.status < 500
-          ? error4xxHaiku(res.status, res.statusText)
-          : serverErrorHaiku(res.status, res.statusText);
+          ? error4xxHaiku(res.status, res.statusText || getReasonPhrase(res.status))
+          : serverErrorHaiku(res.status, res.statusText || getReasonPhrase(res.status));
 
   return errorHaiku;
 }
@@ -168,7 +168,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
     return new Promise(async (resolve, reject) => {
       if (id) {
-        const params = mapToSearchParams({ mode, version});
+        const params = mapToSearchParams({ mode, version });
         fetch(`/api/haikus/${id}${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();
 
@@ -402,7 +402,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         method: "POST",
         body: JSON.stringify({ request }),
       }).then(async (res) => {
-        const { _haikus } = get();
+        const { _haikus, addUserHaiku } = get();
 
         if (res.status != 200) {
           handleErrorResponse(res, "generate-haiku", undefined, `Error generating haiku`);
@@ -424,7 +424,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         });
 
         // also update the side bar
-        (await useHaikus.getState()).addUserHaiku({
+        addUserHaiku({
           id: generated.id,
           createdBy: generated.createdBy,
           createdAt: generated.createdAt,
@@ -498,7 +498,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       throw `Cannot delete haiku with null id`;
     }
 
-    const { _haikus, _deleted, userHaikus, get: _get } = get();
+    const { _haikus, _deleted, get: _get } = get();
     const deleting = _get(id);
 
     if (!deleting) {
@@ -510,7 +510,6 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     set({
       _haikus: { ..._haikus, [id]: undefined },
       _deleted: { ..._deleted, [id]: true },
-      userHaikus: { ...userHaikus, [id]: undefined },
     });
 
     const res = await fetch(`/api/haikus/${id}`, {
@@ -525,7 +524,6 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       set({
         _haikus: { ..._haikus, [id]: deleting },
         _deleted: { ..._deleted, [id]: false },
-        userHaikus: { ...userHaikus, [id]: deleting },
       });
       return deleting;
     }
@@ -533,15 +531,36 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const data = await res.json();
     const deleted = data.haiku;
 
+    // update side panel
+    const { haikus: userHaikus, allHaikus, dailyHaikus, dailyHaikudles } = useUser.getState();
+    delete userHaikus[id];
+    delete allHaikus[id];
+    delete dailyHaikus[id];
+    delete dailyHaikudles[id];
+  
+    useUser.setState({
+      haikus: userHaikus,
+      allHaikus,
+      dailyHaikus,
+      dailyHaikudles,
+    });    
+
     return deleted;
   },
 
   addUserHaiku: async (userHaiku: any) => {
-    // console.log(">> hooks.haiku.addUserHaiku", { userHaiku });
-    const { userHaikus } = get();
+    const { user, haikus, allHaikus } = useUser.getState();
+    // console.log(">> hooks.haiku.addUserHaiku", { userHaiku, user });
 
-    set({
-      userHaikus: { ...userHaikus, [userHaiku.id]: userHaiku },
+    useUser.setState({
+      haikus: {
+        ...haikus,
+        [userHaiku.id]: userHaiku,
+      },
+      allHaikus: user.isAdmin && {
+        ...allHaikus,
+        [userHaiku.id]: userHaiku
+      },
     });
   },
 
@@ -560,7 +579,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         }
 
         const { dailyHaiku, nextDailyHaikuId } = await res.json();
-        
+
         // update side panel content
         useUser.setState((state: any) => {
           return {

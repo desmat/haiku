@@ -123,6 +123,21 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
     throw `Unauthorized`;
   }
 
+  // remove daily haikudle and this user's userhaikudle (leave the others alone)
+  const userHaikudleId = `${id}-${user.id}`;
+  const [
+    dailyHaikudles, 
+    userHaikudle
+  ] = await Promise.all([
+    store.dailyHaikudles.find(),
+    store.userHaikudles.get(userHaikudleId),
+  ]);
+  const dailyHaikudle = dailyHaikudles
+    .filter((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikudleId == id)[0];
+
+  dailyHaikudle && store.dailyHaikudles.delete(user.id, dailyHaikudle.id);
+  userHaikudle && store.userHaikudles.delete(user.id, userHaikudle.id);
+
   return store.haikudles.delete(user.id, id);
 }
 
@@ -179,10 +194,13 @@ export async function getDailyHaikudle(id: string): Promise<DailyHaikudle | unde
 export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
   const dailyHaikudles = (await store.dailyHaikudles.find(query))
     .filter(Boolean);
+  const dailyHaikudleIds = dailyHaikudles
+    .map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
+
   // lookup theme; 
   // at some point we won't need to do this since we're now 
-  // saving the them with th daily haikudle record  
-  const haikus = await store.haikus.find(query);
+  // saving them with the daily haikudle record  
+  const haikus = await store.haikus.find({ id: dailyHaikudleIds });
   const themeLookup = new Map(haikus
     .map((haiku: Haiku) => [haiku.id, haiku.theme]));
 
@@ -200,9 +218,8 @@ export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
     .sort((a: any, b: any) => a.id - b.id);
 }
 
-export async function getNextDailyHaikudleId(): Promise<string> {
-  const dailyHaikudles = await getDailyHaikudles();
-  const ids = dailyHaikudles
+export async function getNextDailyHaikudleId(dailyHaikudles?: DailyHaikudle[]): Promise<string> {
+  const ids = (dailyHaikudles || await getDailyHaikudles())
     .map((dh: DailyHaikudle) => dh.id)
     .sort()
     .reverse();

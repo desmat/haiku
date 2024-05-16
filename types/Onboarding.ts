@@ -1,3 +1,4 @@
+import { formatTimeFromNow } from "@/utils/format";
 import { Haiku } from "./Haiku";
 
 export type OnboardingStep = {
@@ -30,11 +31,11 @@ export const haikuOnboardingSteps = [
     style: { bottom: "10%" },
   },
   {
-    focus: "logo-and-generate",
+    focus: "generate",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div>A new haiku will be featured every day, maybe one of yours! Click on the logo to see today's, come back tomorrow for more.</div>
-        <div>To create your own haiku hit the <b>Create</b> button at the top of the screen and pick a theme: AI will get you started and the rest is up to!</div>
+        <div>A new haiku will be featured every day, maybe one of yours! Click on the logo in the side panel to see today's, come back tomorrow for more.</div>
+        <div>To create your own haiku hit the <b>Create</b> button at the top of the screen, maybe pick a theme and AI will get you started. The rest is up to!</div>
       </div>
     `,
     style: { bottom: "10%" },
@@ -74,19 +75,21 @@ export const haikuPromptSteps = (haiku: Haiku) => [
     focus: "poem",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-      <div>Haiku theme and mood: <i>${haiku.theme}</i> and <i>${haiku.mood}</i></div>      
-      <div>Image style: <i>${haiku.artStyle || "N/A"}</i></div>      
-      <!-- <div>Poem prompt: <i>${haiku.poemPrompt || "N/A"}</i></div> -->
-      <div>Image prompt: <i>${haiku.imagePrompt || "N/A"}</i></div>
-      ${haiku.version || haiku.deprecated
-        ? `<div>Version: ${haiku.version}
-          ${haiku.version
-          ? ` <a href="/${haiku.id}?version=${haiku.version - 1}">(Load previous)</a>`
-          : ""}
-          ${haiku.deprecated
-          ? ` <a href="/${haiku.id}">(Load current)</a>`
-          : ""}</div>`
-        : ""}    
+        <div>Theme and mood: <i>${haiku.theme}</i> and <i>${haiku.mood}</i></div>      
+        <div>Image style: <i>${haiku.artStyle || "N/A"}</i></div>      
+        <!-- <div>Poem prompt: <i>${haiku.poemPrompt || "N/A"}</i></div> -->
+        <div>Image prompt: <i>${haiku.imagePrompt || "N/A"}</i></div>
+        ${haiku.version || haiku.deprecated || haiku.deprecatedAt
+          ? `<div>Version: ${haiku.version}
+            ${haiku.version
+            ? ` <a href="/${haiku.id}?version=${haiku.version - 1}">(Load previous)</a>`
+            : ""}
+            ${haiku.deprecated || haiku.deprecatedAt
+            ? ` <a href="/${haiku.id}">(Load current)</a>`
+            : ""}</div>`
+          : ""}    
+        <div>Created by: user ${haiku.createdBy} ${formatTimeFromNow(haiku.createdAt || 0)}</div>      
+        ${haiku.updatedBy ? `<div>Updated by: user ${haiku.updatedBy} ${formatTimeFromNow(haiku.updatedAt || 0)}</div>` : ""} 
       </div>`,
     style: { bottom: "50%", transform: "translateY(50%)" },
   },
@@ -119,7 +122,7 @@ export const haikudleOnboardingSteps = [
     focus: "logo-and-generate",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div>A new haiku puzzle will be featured every day. Click on the logo to return to today's, and come back to tomorrow for a new puzzle!</div>
+        <div>A new haiku puzzle will be featured every day. Click on the logo in the side panel to return to today's, and come back to tomorrow for a new puzzle!</div>
         <div>To create your very own haikus hit the <b>Create</b> button at the top of the screen and pick a theme or subject: AI will get you started writing a poem and will generate art work to match.</div>
       </div>
     `,

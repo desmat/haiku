@@ -32,7 +32,9 @@ export async function GET(request: NextRequest, params?: any) {
   };
 
   let userHaikus = {
-    haikus: await getUserHaikus(user), 
+    haikus: user.isAdmin
+      ? [] // don't need to pull the admin's haikus because we pull all of them later
+      : await getUserHaikus(user),
   } as any;
 
   if (user.isAdmin) {
@@ -40,14 +42,18 @@ export async function GET(request: NextRequest, params?: any) {
       allHaikus,
       dailyHaikus,
       dailyHaikudles,
+    ] = await Promise.all([
+      getUserHaikus(user, true),
+      getDailyHaikus(),
+      getDailyHaikudles(),
+    ]);
+
+    const [
       nextDailyHaikuId,
       nextDailyHaikudleId,
     ] = await Promise.all([
-      await getUserHaikus(user, true),
-      await getDailyHaikus(),
-      await getDailyHaikudles(),
-      await getNextDailyHaikuId(),
-      await getNextDailyHaikudleId(),      
+      getNextDailyHaikuId(dailyHaikus),
+      getNextDailyHaikudleId(dailyHaikudles),
     ]);
 
     userHaikus = {

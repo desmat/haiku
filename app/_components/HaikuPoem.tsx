@@ -49,12 +49,16 @@ export function ControlledInput({
   id,
   activeId,
   value,
+  placeholder,
+  className,
   select,
   onChange,
 }: {
   id: number,
   activeId?: number,
   value?: string,
+  placeholder?: string,
+  className?: string,
   select?: boolean,
   onChange: any,
 }) {
@@ -97,11 +101,13 @@ export function ControlledInput({
     <input
       //@ts-ignore
       ref={ref}
-      className="w-full absolute top-0 left-[-0.01rem] px-[0.5rem]"
+      maxLength={50}
+      className={className || "w-full absolute top-0 left-[-0.01rem] px-[0.5rem]"}
       onChange={(e: any) => {
         setLocalValue(e.target.value);
         onChange(e.target.value);
       }}
+      placeholder={placeholder}
       value={localValue}
     />
   )
@@ -114,6 +120,7 @@ export default function HaikuPoem({
   popPoem,
   styles,
   altStyles,
+  fontSize,
   onboardingElement,
   regeneratePoem,
   regenerateImage,
@@ -127,6 +134,7 @@ export default function HaikuPoem({
   popPoem?: boolean,
   styles: any[],
   altStyles?: any[],
+  fontSize?: string | undefined,
   onboardingElement?: string,
   regeneratePoem?: any,
   regenerateImage?: any,
@@ -301,10 +309,10 @@ export default function HaikuPoem({
 
       <div className="onboarding-container">
         {onboardingElement && ["poem"].includes(onboardingElement) &&
-          <div className="onboarding-focus" />
+          <div className="onboarding-focus double" />
         }
         {onboardingElement && ["poem-and-poem-actions"].includes(onboardingElement) &&
-          <div className="onboarding-focus double" />
+          <div className="onboarding-focus" />
         }
         <PopOnClick
           color={haiku.bgColor}
@@ -317,7 +325,8 @@ export default function HaikuPoem({
               onClick={handleClickHaiku}
               title={showcaseMode ? "Refresh" : "Click to edit"}
               style={{
-                cursor: showcaseMode ? "pointer" : ""
+                cursor: showcaseMode ? "pointer" : "",
+                fontSize,
               }}
             >
               <PopOnClick
@@ -424,7 +433,7 @@ export default function HaikuPoem({
             </div>
 
             <div
-              className="_bg-pink-200 relative md:text-[16pt] sm:text-[14pt] text-[12pt] md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem]"
+              className="_bg-pink-200 relative md:mt-[-0.3rem] sm:mt-[-0.2rem] mt-[-0.1rem] md:text-[16pt] sm:text-[14pt] text-[12pt]"
               style={{
                 // background: "pink",
                 height: haikudleMode
@@ -433,14 +442,16 @@ export default function HaikuPoem({
                     ? "" //"8rem" // maybelooks better when pushed up a bit
                     : haiku.theme?.length > maxHaikuTheme
                       ? "2.6rem"
-                      : "1.3rem"
+                      : "1.3rem",
+                fontSize: "60%",
               }}
             >
               <div
                 className={showcaseMode
-                  ? "_bg-yellow-200 fixed bottom-2 right-4 w-max flex flex-row"
+                  ? "_bg-yellow-200 fixed bottom-4 right-8 w-max flex flex-row"
                   : "_bg-orange-200 flex flex-row absolute w-max ml-[0.5rem] mt-[0.1rem]"
                 }
+                style={{ fontSize }}
               >
                 <div
                   className="transition-all _bg-pink-400"

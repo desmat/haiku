@@ -118,8 +118,8 @@ class MemoryStore<T extends MenoryStoreEntry> implements GenericStore<T> {
     // return new Promise((resolve) => resolve(updatedValue));
   }
 
-  async delete(userId: string, id: string): Promise<T> {
-    console.log(`>> services.stores.memory.MemoryStore<${this.key}>.delete`, { id });
+  async delete(userId: string, id: string, options: any = {}): Promise<T> {
+    console.log(`>> services.stores.memory.MemoryStore<${this.key}>.delete`, { id, options });
 
     throw "Not implemented";
 

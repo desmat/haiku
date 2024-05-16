@@ -7,10 +7,21 @@ const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const languageModel = "gpt-4";
+const languageModel = "gpt-4o";
+// const languageModel = "gpt-4";
 // const languageModel = "gpt-3.5-turbo";
 const imageModel = "dall-e-3";
 // const imageModel = "dall-e-2";
+
+function parseJson(input: string) {
+  // response from openai api sometimes returns ```json\n ... ```
+  const matches = input.replaceAll(`\n`, "").match(/\s*(?:```json)?\s*(\{\s*.*\s*\})\s*(?:```)?\s*/);
+  if (matches && matches.length > 1) {
+    return JSON.parse(matches[1])
+  }
+
+  return undefined;
+}
 
 export async function generateBackgroundImage(subject?: string, mood?: string, artStyle?: string): Promise<any> {
   console.log(`>> services.openai.generateBackgroundImage`, { subject, mood, artStyle });
@@ -73,7 +84,7 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
       artStyle: selectedArtStyle,
       prompt: res.data[0]["revised_prompt"],
       url: res.data[0].url,
-      imageModel,
+      model: "debug",
     };
   }
 
@@ -91,7 +102,7 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     return {
       artStyle: selectedArtStyle,
       prompt: (response.data[0]["revised_prompt"] || prompt),
-      imageModel,
+      model: imageModel,
       url: response.data[0].url,
     };
   } catch (error) {
@@ -120,6 +131,7 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
           ] : sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].poem,
         subject: subject || "test subject",
         mood: mood || "test mood",
+        model: "debug",
       }
     };
   }
@@ -145,12 +157,12 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
 
   let response;
   try {
-    // console.log(">> services.openai.generateHaiku RESULTS FROM API", completion);
-    response = JSON.parse(completion.choices[0].message.content || "{}");
-    console.log(">> services.openai.generateHaiku RESULTS FROM API", { completion, response });
+    console.log(">> services.openai.generateHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
+    response = parseJson(completion.choices[0].message.content);
+    console.log(">> services.openai.generateHaiku RESULTS FROM API", { response });
     return {
       prompt: systemPrompt + "\n" + prompt,
-      languageModel,
+      model: completion.model,
       response,
     };
   } catch (error) {
@@ -175,6 +187,7 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
         haiku: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "_") : line),
         subject: subject || "test subject",
         mood: mood || "test mood",
+        model: "debug",
       }
     };
   }
@@ -206,10 +219,10 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
 
   let response;
   try {
-    // console.log(">> services.openai.completeHaiku RESULTS FROM API", { completion });
-    response = JSON.parse(completion.choices[0].message.content || "{}");
+    console.log(">> services.openai.completeHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
+    response = parseJson(completion.choices[0].message.content);
     console.log(">> services.openai.completeHaiku RESULTS FROM API", { response });
-    return { prompt, response };
+    return { prompt, response, model: completion.model };
   } catch (error) {
     console.error("Error reading results", { error, response, completion });
   }
