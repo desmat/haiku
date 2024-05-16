@@ -63,7 +63,7 @@ if (isHaikudleMode) {
 }
 
 export let metadata: Metadata = {
-  title: `${appName} - ${appDescription}`,
+  title: appName,
   description: appDescription,
 }
 
@@ -85,15 +85,17 @@ export default async function RootLayout({
   const haikuId = params?.slug ? params.slug[0] : "default";
   console.log('>> app.layout.render()', { haikuId, slug: params.slug, params });
 
-  metadata = { 
+  metadata = {
     ...metadata,
     openGraph: {
-      title: `${haikuId} - ${appName}`,
+      title: appName,
+      description: appDescription,
       type: "website",
-      description: `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_haiku/haiku_${haikuId}.png`,
       url: metaUrl,
       images: [
-        `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_haiku/haiku_${haikuId}.png`,
+        isHaikudleMode
+          ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`
+          : `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}.png`,
         ...metaImages,
       ]
     }
