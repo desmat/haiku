@@ -43,10 +43,10 @@ export async function GET(
     ]);
 
     haiku.dailyHaikuId = dailyHaikus
-      .filter((dh: DailyHaiku) => dh.haikuId == haiku.id)[0]?.id;
+      .filter((dh: DailyHaiku) => dh?.haikuId == haiku.id)[0]?.id;
 
     haiku.dailyHaikudleId = dailyHaikudles
-      .filter((dhle: DailyHaikudle) => dhle.haikuId == haiku.id)[0]?.id;
+      .filter((dhle: DailyHaikudle) => dhle?.haikuId == haiku.id)[0]?.id;
   }
 
   if (!user.isAdmin && haiku?.createdBy != user.id && !userHaiku && !userHaikudle) {

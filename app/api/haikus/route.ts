@@ -96,10 +96,10 @@ export async function GET(request: NextRequest, params?: any) {
     ]);
 
     todaysHaiku.dailyHaikuId = dailyHaikus
-      .filter((dh: DailyHaiku) => dh.haikuId == todaysHaiku.id)[0]?.id;
+      .filter((dh: DailyHaiku) => dh?.haikuId == todaysHaiku.id)[0]?.id;
 
     todaysHaiku.dailyHaikudleId = dailyHaikudles
-      .filter((dhle: DailyHaikudle) => dhle.haikuId == todaysHaiku.id)[0]?.id;
+      .filter((dhle: DailyHaikudle) => dhle?.haikuId == todaysHaiku.id)[0]?.id;
   } else {
     const userHaiku = await getUserHaiku(user.id, todaysHaiku.id);
     if (!userHaiku) {

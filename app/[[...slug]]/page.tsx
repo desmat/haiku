@@ -84,24 +84,4 @@ export default async function Page({
       </NoSsr>
     </Suspense>
   )
-
-
-  return (
-    <Suspense
-    // fallback={
-    //   <MainServerSidePage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
-    // }
-    >
-      {/* <MainPage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} /> */}
-      {/* <MainClientSideLoadHaikuPage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} /> */}
-      {/* <SafeHydrate>
-        <MainClientSideLoadHaikuPage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
-      </SafeHydrate> */}
-      <NoSsr>
-        <MainClientSideLoadHaikuPage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
-      </NoSsr>
-      {/* <MainClientSideSafeHydratePage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} /> */}
-      {/* <MainClientSideSafeulyHydrateLoadHaikuPage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} /> */}
-    </Suspense>
-  )
 }

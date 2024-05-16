@@ -188,7 +188,7 @@ export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refr
   // console.log('>> app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
 
   const loadPage = async (random?: boolean | undefined) => {
-    // console.log('>> app.MainPage.loadPage', { haikuId, mode, random, loaded, loading, user, haiku });
+    console.log('>> app.MainPage.loadPage', { haikuId, mode, random, loaded, loading, user, haiku });
 
     if (!loading) {
       loading = true; // race condition at initial load
@@ -292,6 +292,7 @@ export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refr
           checkHaiku();
         }
       } else { // !loading && !loaded
+        console.log('>> app.page useEffect [haikuId, haiku?.id, loading, loaded] about to loadPage', { haiku });
         loadPage();
       }
     }
