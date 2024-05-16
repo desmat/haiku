@@ -1,34 +1,14 @@
-import '../globals.css'
+import moment from 'moment';
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react';
 import Alert from '@/app/_components/Alert';
-import type { Viewport } from 'next'
-import moment from 'moment';
+import '@/app/globals.css';
+import { appDescription, appName, metaUrl } from '@/app/layout';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
 import { getDailyHaikudle } from '@/services/haikudles';
 import { User } from '@/types/User';
 
 const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
-const inter = Inter({ subsets: ['latin'] });
-
-const appName = isHaikudleMode
-  ? "Solve the puzzle to reveal today's haiku, generate and share haiku poems paired and beautiful generative art with Haikudle - AI-powered haiku poetry, puzzles and visual art"
-  : "Compose and share your haiku creations with Haiku Genius - AI-powered haiku poetry and generative art";
-
-const appDescription = isHaikudleMode
-  ? "Solve the daily puzzles, generate new haikus, enjoy beautiful generative art and share with the world - no signup required. " +
-  "Haikudle integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
-  "Generate haiku poems and share AI-generated creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
-  "Explore daily haiku puzzles and discover the limitless poetic and artistic possibilities with Haikudle."
-  : "Create and share your haiku masterpieces with beautiful generated art — no signup required. " +
-  "Haiku Genius integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
-  "Craft haiku poems seamlessly with our AI assistant and share your creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
-  "Explore daily featured haikus and experience AI-assisted creativity and discover the limitless possibilities of poetic exploration with Haiku Genius.";
-
-const metaUrl = isHaikudleMode
-  ? "https://haikudle.art/"
-  : "https://haiku.desmat.ca/";
 
 const haikuGeniusMetaImages = [
   "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_98b222c0_mountains.png",
@@ -65,19 +45,11 @@ if (isHaikudleMode) {
 }
 
 export let metadata: Metadata = {
-  title: appName,
+  title: `${isHaikudleMode ? "Haikudle" : "HaikuGenius"} - ${appName}`,
   description: appDescription,
 }
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  minimumScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-}
-
-export default async function RootLayout({
+export default async function Layout({
   children,
   params,
 }: {
@@ -122,7 +94,7 @@ export default async function RootLayout({
   }
 
   return (
-    <section className={inter.className}>
+    <section>
       <style
         dangerouslySetInnerHTML={{
           __html: `
