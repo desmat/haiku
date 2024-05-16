@@ -5,6 +5,7 @@ import { DragDropContext } from "@hello-pangea/dnd";
 import useHaikudle from '@/app/_hooks/haikudle';
 import useUser from "@/app/_hooks/user";
 import * as font from "@/app/font";
+import { ExperienceMode } from "@/types/ExperienceMode";
 import { Haiku } from "@/types/Haiku";
 import HaikuPuzzle from "./HaikuPuzzle";
 import Loading from "./Loading";
@@ -16,7 +17,7 @@ export default function HaikudlePage({
   regenerating,
   onboardingElement,
 }: {
-  mode: string,
+  mode: ExperienceMode,
   haiku?: Haiku,
   styles: any[],
   regenerating?: boolean,

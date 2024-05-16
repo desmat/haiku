@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import * as font from "@/app/font";
+import { ExperienceMode } from '@/types/ExperienceMode';
 import { StyledLayers } from './StyledLayers';
 
 export function Logo({
@@ -10,7 +11,7 @@ export function Logo({
   altStyles,
   onboardingElement,
 }: {
-  mode: string,
+  mode: ExperienceMode,
   href?: string,
   onClick?: any,
   styles?: any,
@@ -19,9 +20,10 @@ export function Logo({
 }) {
   const isHaikudleMode = mode == "haikudle";
   const isSocialImgMode = mode == "social-img";
+  const isHaikudleSocialImgMode = mode == "haikudle-social-img";
 
   const ai = (
-    <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode ? "text-[80pt]" : "text-[22pt] md:text-[28pt]"} font-semibold`}>
+    <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[80pt]" : "text-[22pt] md:text-[28pt]"} font-semibold`}>
       AI
     </span>
   );
@@ -45,7 +47,7 @@ export function Logo({
     <Link
       onClick={onClick}
       href={href || "/"}
-      className={`logo hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
+      className={`logo hover:no-underline ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
     >
       <div className={`${font.architects_daughter.className} flex flex-row`}>
         <StyledLayers
@@ -60,7 +62,7 @@ export function Logo({
             ? styles.slice(0, 1)
             : styles
           }
-        >{isHaikudleMode /* || isSocialImgMode */ ? "kudle" : "kuGenius"}</StyledLayers>
+        >{isHaikudleMode || isHaikudleSocialImgMode /* || isSocialImgMode */ ? "kudle" : "kuGenius"}</StyledLayers>
       </div>
     </Link>
   )
