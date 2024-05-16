@@ -5,7 +5,7 @@ import { Analytics } from '@vercel/analytics/react';
 import Alert from '@/app/_components/Alert';
 import type { Viewport } from 'next'
 import moment from 'moment';
-import { getHaiku } from '@/services/haikus';
+import { getDailyHaiku, getHaiku } from '@/services/haikus';
 
 const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 const inter = Inter({ subsets: ['latin'] });
@@ -78,12 +78,27 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
   params,
+  searchParams,
 }: {
   children: React.ReactNode,
   params?: any,
+  searchParams?: { [key: string]: string | undefined },
 }) {
-  const haikuId = params?.slug ? params.slug[0] : "default";
-  console.log('>> app.layout.render()', { haikuId, slug: params.slug, params });
+  let haikuId = params?.slug && params.slug[0];
+  console.log('>> app.[[..slug]].layout.render()', { haikuId, slug: params?.slug, params });
+
+  if (!haikuId) {
+    const mode = searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE || "haiku";
+
+    if (mode == "haikudle") {
+
+    } else {
+      const todaysDateCode = moment().format("YYYYMMDD");
+      const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
+      console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaiku });
+      haikuId = todaysDailyHaiku?.haikuId;
+    }
+  }
 
   metadata = {
     ...metadata,

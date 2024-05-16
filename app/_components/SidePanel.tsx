@@ -55,7 +55,7 @@ export default function SidePanel({
     userDailyHaikus,
     userDailyHaikudles,
   ] = useUser((state: any) => [
-    user.isAdmin && !filter
+    user?.isAdmin && !filter
       ? state.allHaikus ? Object.values(state.allHaikus) : []
       : state.haikus ? Object.values(state.haikus) : [],
     state.dailyHaikus ? Object.values(state.dailyHaikus) : [],
@@ -119,7 +119,7 @@ export default function SidePanel({
 
   const handleClickedFilter = (filterType: FilterType) => {
     trackEvent("clicked-filter", {
-      userId: user.id,
+      userId: user?.id,
       value: filter,
     });
 
@@ -282,9 +282,9 @@ export default function SidePanel({
           </div>
           <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
             <div className="py-2">
-              {(!user.isAdmin || listMode == "haiku") &&
+              {(!user?.isAdmin || listMode == "haiku") &&
                 <div className="flex flex-row gap-3 group">
-                  {user.isAdmin &&
+                  {user?.isAdmin &&
                     <div
                       className="cursor-pointer"
                       title="Show daily haikus"
@@ -295,7 +295,7 @@ export default function SidePanel({
                       </StyledLayers>
                     </div>
                   }
-                  {!user.isAdmin &&
+                  {!user?.isAdmin &&
                     "Your Haikus"
                   }
                   <StyledLayers styles={styles.slice(0, 1)} className="my-auto">
@@ -354,7 +354,7 @@ export default function SidePanel({
             {/* note: don't render when not opened to save on resources */}
             {listMode == "haiku" && (panelAnimating || panelOpened) && userHaikus
               .filter(filterBy)
-              .sort(user.isAdmin ? sort.byCreatedAtDesc : sortByAllFields)
+              .sort(user?.isAdmin ? sort.byCreatedAtDesc : sortByAllFields)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
               .map((h: UserHaiku, i: number) => (
                 <StyledLayers key={i} styles={altStyles}>
@@ -387,7 +387,7 @@ export default function SidePanel({
               ))
             }
             {["dailyHaiku", "dailyHaikudle"].includes(listMode) && user?.isAdmin && (panelAnimating || panelOpened) && (listMode == "dailyHaiku" && userDailyHaikus || userDailyHaikudles)
-              // .filter((h: Haiku) => h.createdBy == user.id)
+              // .filter((h: Haiku) => h.createdBy == user?.id)
               .sort((a: any, b: any) => b.id - a.id)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
               .map((dh: DailyHaikudle, i: number) => (
