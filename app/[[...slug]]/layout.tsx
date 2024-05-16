@@ -6,6 +6,7 @@ import Alert from '@/app/_components/Alert';
 import type { Viewport } from 'next'
 import moment from 'moment';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
+import { getDailyHaikudle } from '@/services/haikudles';
 
 const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 const inter = Inter({ subsets: ['latin'] });
@@ -78,20 +79,19 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
   params,
-  searchParams,
 }: {
   children: React.ReactNode,
   params?: any,
-  searchParams?: { [key: string]: string | undefined },
 }) {
   let haikuId = params?.slug && params.slug[0];
   console.log('>> app.[[..slug]].layout.render()', { haikuId, slug: params?.slug, params });
 
   if (!haikuId) {
-    const mode = searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE || "haiku";
-
-    if (mode == "haikudle") {
-
+    if (process.env.EXPERIENCE_MODE == "haikudle") {
+      const todaysDateCode = moment().format("YYYYMMDD");
+      const todaysDailyHaikudle = await getDailyHaikudle(todaysDateCode);
+      console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaikudle });
+      haikuId = todaysDailyHaikudle?.haikuId;
     } else {
       const todaysDateCode = moment().format("YYYYMMDD");
       const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
