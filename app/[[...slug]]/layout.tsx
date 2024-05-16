@@ -7,6 +7,7 @@ import type { Viewport } from 'next'
 import moment from 'moment';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
 import { getDailyHaikudle } from '@/services/haikudles';
+import { User } from '@/types/User';
 
 const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 const inter = Inter({ subsets: ['latin'] });
@@ -100,6 +101,10 @@ export default async function RootLayout({
     }
   }
 
+  const user = {} as User;
+  const haiku = await getHaiku(user, haikuId);
+  console.log('>> app.[[..slug]].layout.render()', { haiku });
+
   metadata = {
     ...metadata,
     openGraph: {
@@ -118,6 +123,15 @@ export default async function RootLayout({
 
   return (
     <section className={inter.className}>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            body {
+              background-color: ${haiku.bgColor || "lightgrey"};
+            }`
+        }}
+      >
+      </style>
       <div className="flex flex-col lg:flex-row">
         <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
           {children}
@@ -125,36 +139,6 @@ export default async function RootLayout({
       </div>
       <Analytics />
       <Alert />
-    </section>
+    </section >
   )
-
-  // return (
-  //   <html lang="en">
-  //     <head>
-  //       <link rel="icon" href="/favicon.ico" sizes="any" />
-  //       <link
-  //         rel="canonical"
-  //         href={metaUrl}
-  //         key="canonical"
-  //       />
-  //       <meta property="og:title" content={appName} />
-  //       <meta property="og:type" content="website" />
-  //       <meta property="og:description" content={appDescription} />
-  //       <meta property="og:url" content={metaUrl} />
-  //       {metaImages.map((image: string, i: number) => (
-  //         <meta key={i} property="og:image" content={image} />
-  //       ))}
-  //       <meta property="fb:app_id" content={process.env.FB_APP_ID} />
-  //     </head>
-  //     <body className={inter.className}>
-  //       <div className="flex flex-col lg:flex-row">
-  //         <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
-  //           {children}
-  //         </div>
-  //       </div>
-  //       <Analytics />
-  //       <Alert />
-  //     </body>
-  //   </html>
-  // )
 }
