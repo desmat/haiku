@@ -9,6 +9,7 @@ import { MdHome } from "react-icons/md";
 import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg, BsDatabaseFillUp } from "react-icons/bs";
 import * as font from "@/app/font";
 import useUser from '@/app/_hooks/user';
+import { ExperienceMode } from '@/types/ExperienceMode';
 import { UserHaiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
@@ -31,7 +32,7 @@ export default function SidePanel({
   onClickLogo,
 }: {
   user: User,
-  mode?: string
+  mode?: ExperienceMode,
   styles: any[],
   altStyles: any[],
   bgColor: string,
