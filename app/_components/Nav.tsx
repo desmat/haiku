@@ -13,8 +13,9 @@ import { FaRandom } from "react-icons/fa";
 import * as font from "@/app/font";
 import useAlert from '@/app/_hooks/alert';
 import useUser from '@/app/_hooks/user';
-import { LanguageType, supportedLanguages } from '@/types/Languages';
+import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haiku } from '@/types/Haiku';
+import { LanguageType, supportedLanguages } from '@/types/Languages';
 import trackEvent from '@/utils/trackEvent';
 import { USAGE_LIMIT } from '@/types/Usage';
 import { StyledLayers } from './StyledLayers';
@@ -302,7 +303,7 @@ function BottomLinks({
   onCopyLink,
   onLikeHaiku,
 }: {
-  mode: string,
+  mode: ExperienceMode,
   haiku?: Haiku,
   lang?: LanguageType,
   styles?: any,
@@ -585,7 +586,7 @@ export function NavOverlay({
   onCopyLink,
   onLikeHaiku,
 }: {
-  mode: string,
+  mode: ExperienceMode,
   loading?: boolean,
   styles: any[],
   altStyles: any[],
@@ -676,7 +677,7 @@ export function NavOverlay({
           </div>
         </div>
       }
-      {mode == "social-img" &&
+      {["social-img", "haikudle-social-img"].includes(mode) &&
         <div className={`${font.architects_daughter.className} absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}>
           <PopOnClick color={haiku?.bgColor}>
             {/* TODO: href to support multi-language */}

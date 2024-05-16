@@ -2,8 +2,8 @@
 
 import useUser from "@/app/_hooks/user";
 import * as font from "@/app/font";
+import { ExperienceMode } from "@/types/ExperienceMode";
 import { Haiku } from "@/types/Haiku";
-import { StyledLayers } from "./StyledLayers";
 import HaikuPoem from "./HaikuPoem";
 import Loading from "./Loading";
 
@@ -23,7 +23,7 @@ export default function HaikuPage({
   regenerateImage,
   copyHaiku,
 }: {
-  mode: string,
+  mode: ExperienceMode,
   haiku?: Haiku,
   styles: any[],
   altStyles?: any[],
@@ -60,7 +60,7 @@ export default function HaikuPage({
         {(regenerating || loading) &&
           <Loading styles={styles} />
         }
-        {!regenerating && !loading && mode != "social-img" && 
+        {!regenerating && !loading && mode != "social-img" && mode != "haikudle-social-img" && 
           <div className="_bg-pink-200 relative">
             <HaikuPoem
               user={user}

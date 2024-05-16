@@ -7,7 +7,7 @@ import { syllable } from "syllable";
 import { FaEdit } from "react-icons/fa";
 import { TbReload } from "react-icons/tb";
 import useAlert from "@/app/_hooks/alert";
-import useHaikus from "@/app/_hooks/haikus";
+import { ExperienceMode } from "@/types/ExperienceMode";
 import { Haiku } from "@/types/Haiku";
 import { USAGE_LIMIT } from "@/types/Usage";
 import { User } from "@/types/User";
@@ -129,7 +129,7 @@ export default function HaikuPoem({
   copyHaiku
 }: {
   user: User,
-  mode: string,
+  mode: ExperienceMode,
   haiku: Haiku,
   popPoem?: boolean,
   styles: any[],

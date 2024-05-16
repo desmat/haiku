@@ -13,8 +13,9 @@ import useHaikudle from '@/app/_hooks/haikudle';
 import useOnboarding from '@/app/_hooks/onboarding';
 import useUser from '@/app/_hooks/user';
 import NotFound from '@/app/not-found';
-import { LanguageType } from '@/types/Languages';
+import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haikudle } from '@/types/Haikudle';
+import { LanguageType } from '@/types/Languages';
 import { haikuGeneratedOnboardingSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleOnboardingSteps } from '@/types/Onboarding';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
@@ -28,7 +29,7 @@ export default function MainPage({
   refreshDelay,
   fontSize,
 }: {
-  mode: string,
+  mode: ExperienceMode,
   id?: string,
   version?: string,
   lang?: undefined | LanguageType,
