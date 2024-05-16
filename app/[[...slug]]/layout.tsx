@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/react';
 import Alert from '@/app/_components/Alert';
 import '@/app/globals.css';
-import { appDescription, appName, metaUrl } from '@/app/layout';
+import { metadata as rootMetadata, metaUrl } from '@/app/layout';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
 import { getDailyHaikudle } from '@/services/haikudles';
 import { User } from '@/types/User';
@@ -45,8 +45,8 @@ if (isHaikudleMode) {
 }
 
 export let metadata: Metadata = {
-  title: `${isHaikudleMode ? "Haikudle" : "HaikuGenius"} - ${appName}`,
-  description: appDescription,
+  ...rootMetadata,
+  title: `${isHaikudleMode ? "Haikudle" : "HaikuGenius"} - ${rootMetadata.title}`,
 }
 
 export default async function Layout({
@@ -80,8 +80,8 @@ export default async function Layout({
   metadata = {
     ...metadata,
     openGraph: {
-      title: appName,
-      description: appDescription,
+      title: rootMetadata.title || "",
+      description: rootMetadata.description || "",
       type: "website",
       url: metaUrl,
       images: [
@@ -102,8 +102,7 @@ export default async function Layout({
               background-color: ${haiku.bgColor || "lightgrey"};
             }`
         }}
-      >
-      </style>
+      />
       <div className="flex flex-col lg:flex-row">
         <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
           {children}

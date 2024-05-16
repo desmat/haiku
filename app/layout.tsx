@@ -28,7 +28,7 @@ export const metaUrl = isHaikudleMode
   : "https://haikugenius.io/";
 
 export const metadata: Metadata = {
-  title: `${appName} - ${appDescription}`,
+  title: appName,
   description: appDescription,
   other: {
     "fb:app_id": process.env.FB_APP_ID || "",
