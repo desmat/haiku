@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   title: appName,
   description: appDescription,
   other: {
-    "fb:app_id": process.env.FB_APP_ID || "",
+    ["fb:app_id"]: process.env.FB_APP_ID || "",
   }
 }
 
