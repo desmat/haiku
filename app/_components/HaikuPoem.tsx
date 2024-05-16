@@ -504,7 +504,7 @@ export default function HaikuPoem({
                     }
                     {regenerateAllowed &&
                       <div className="_bg-pink-200">
-                        {!user?.isAdmin && (user.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
+                        {!user?.isAdmin && (user?.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
                           <span title="Exceeded daily limit: try again later">
                             <StyledLayers styles={altStyles || []}>
                               <GenerateIcon sizeOverwrite={`
@@ -514,7 +514,7 @@ export default function HaikuPoem({
                             </StyledLayers>
                           </span>
                         }
-                        {(user?.isAdmin || (user.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
+                        {(user?.isAdmin || (user?.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
                           <span title="Regenerate this haiku with the same theme">
                             <StyledLayers styles={altStyles || []}>
                               <GenerateIcon

@@ -62,8 +62,8 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       token,
       loaded: true,
       haikus: haikus ? listToMap(haikus, { keyFn: (e: any) => e.haikuId }) : {},
-      dailyHaikus: dailyHaikus ? listToMap(dailyHaikus, { keyFn: (e: any) => e.haikuId }) : {},
-      dailyHaikudles: dailyHaikudles ? listToMap(dailyHaikudles, { keyFn: (e: any) => e.haikuId }) : {},
+      dailyHaikus: dailyHaikus ? listToMap(dailyHaikus, { keyFn: (e: any) => e?.haikuId }) : {},
+      dailyHaikudles: dailyHaikudles ? listToMap(dailyHaikudles, { keyFn: (e: any) => e?.haikuId }) : {},
       nextDailyHaikuId,
     });
 

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, params?: any) {
   const { user } = await userSession(request);
   console.log('>> app.api.haikus.GET', { query, searchParams: request.nextUrl.searchParams.toString(), user });
 
-  if (query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
+  if (query.mode && query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
     return NextResponse.json(
       { success: false, message: 'authorization failed' },
       { status: 403 }
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, params?: any) {
   if (query.random) {
     const mode = query.mode;
 
-    if (mode != "haiku" && !user.isAdmin) {
+    if (mode && mode != "haiku" && !user.isAdmin) {
       return NextResponse.json(
         { success: false, message: 'authorization failed' },
         { status: 403 }
