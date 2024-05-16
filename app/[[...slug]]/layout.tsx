@@ -100,7 +100,8 @@ export default async function Layout({
           __html: `
             body {
               background-color: ${haiku.bgColor || "lightgrey"};
-            }`
+            }
+          `
         }}
       />
       <div className="flex flex-col lg:flex-row">
