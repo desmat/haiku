@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, params?: any) {
   if (query.random) {
     const mode = query.mode;
 
-    if (!["haiku", "showcase"].includes(query.mode) && !user.isAdmin) {
+    if (!["haiku", "showcase", "social-img"].includes(query.mode) && !user.isAdmin) {
       return NextResponse.json(
         { success: false, message: 'authorization failed' },
         { status: 403 }
