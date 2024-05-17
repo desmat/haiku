@@ -11,7 +11,6 @@ import dynamic from 'next/dynamic';
 // import MainClientSidePage from './MainClientSidePage';
 import { SafeHydrate } from './SafeHydrate';
 import MainClientSideSafeHydratePage from './MainClientSideSafeHydratePage';
-import MainServerSidePage from './MainServerSidePage';
 import { del } from '@vercel/blob';
 import delay from '@/utils/delay';
 import useHaikus from '../_hooks/haikus';
@@ -76,7 +75,6 @@ export default async function MainClientSideLoadHaikuPage({ mode, id, lang, refr
   console.log('>> app.MainClientSideLoadHaikuPage.render()', { mode, id, lang, haiku });
 
 
-  // if (!mounted) return <div>nope</div> //<MainServerSidePage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
   // if (!mounted) await delay(5000);
   // await new Promise((resolve: any) => {
   //   if (mounted) resolve(true);

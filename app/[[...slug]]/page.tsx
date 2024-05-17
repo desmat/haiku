@@ -2,17 +2,22 @@ import React from 'react';
 import MainPage from '@/app/_components/MainPage';
 import NotFound from '@/app/not-found';
 import { LanguageType, isSupportedLanguage } from '@/types/Languages';
-import MainServerSidePage from '../_components/MainServerSidePage';
 import { Suspense } from 'react';
-import MainClientSidePage from '../_components/MainClientSidePage';
-import MainClientSideLoadHaikuPage from '../_components/MainClientSideLoadHaikuPage';
-import { SafeHydrate } from '../_components/SafeHydrate';
-import MainClientSideSafeHydratePage from '../_components/MainClientSideSafeHydratePage';
-import MainClientSideSafeulyHydrateLoadHaikuPage from '../_components/MainClientSideSafeulyHydrateLoadHaikuPage';
+import MainClientSidePage from '@/app/_components/MainClientSidePage';
 import { NoSsr } from '../_components/NoSsr';
 import moment from 'moment';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
+import HaikuPage from '../_components/HaikuPage';
+import { NavOverlay } from '../_components/Nav';
+import { haikuStyles } from '@/types/Haiku';
 
+const todaysHaiku = async () => {
+  const todaysDateCode = moment().format("YYYYMMDD");
+  const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
+  if (todaysDailyHaiku?.haikuId) {
+    return getHaiku(todaysDailyHaiku?.haikuId);
+  }
+}
 
 export default async function Page({
   params,
@@ -36,51 +41,37 @@ export default async function Page({
     id = undefined;
   }
 
-  // if (id) {
-  // return <MainServerSidePage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
-  // } else {
-  // return <MainPage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
-  // }
-
-  const getUser = () => {
-    return {
-      id: "dummy",
-      isAdmin: true,
-    }
-  }
-
-  const user = getUser();
-
-  // if (mode == "haikudle") {
-  //   return <MainPage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
-  // }
-
-  // if (!user?.isAdmin || mode == "showcase") {
-  //   return <MainServerSidePage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
-  // }
-
-  // return <NoSsr><Component /></NoSsr>
-
-  const getTodaysHaiku = async () => {
-    const todaysDateCode = moment().format("YYYYMMDD");
-    const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
-    if (todaysDailyHaiku?.haikuId) {
-      return getHaiku(todaysDailyHaiku?.haikuId);
-    }
-  }
-
-  const haiku = id
-    ? await getHaiku(id)
-    : await getTodaysHaiku();
+  const haiku = id ? await getHaiku(id) : await todaysHaiku();
+  const { textStyles, altTextStyles } = haikuStyles(haiku);
 
   return (
     <Suspense
       fallback={
-        <MainServerSidePage haiku={haiku} mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
+        <div className="main-page">
+          <NavOverlay
+            haiku={haiku}
+            mode={mode}
+            lang={lang}
+            styles={textStyles.slice(0, textStyles.length - 3)}
+            altStyles={altTextStyles}
+          />
+          <HaikuPage
+            haiku={haiku}
+            mode={mode}
+            styles={textStyles}
+            altStyles={altTextStyles}
+          />
+        </div>
       }
     >
       <NoSsr>
-        <MainClientSidePage haiku={haiku} mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
+        <MainClientSidePage
+          id={id}
+          haiku={haiku}
+          mode={mode}
+          lang={lang}
+          refreshDelay={refreshDelay}
+        />
       </NoSsr>
     </Suspense>
   )

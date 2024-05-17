@@ -19,7 +19,6 @@ import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
 import { useMounted } from '../_hooks/mounted';
-import MainServerSidePage from './MainServerSidePage';
 
 export default function MainPage({ mode, id, lang, refreshDelay }: { mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
   console.log('>> app.MainPage.render()', { mode, id, lang });
@@ -698,13 +697,6 @@ export default function MainPage({ mode, id, lang, refreshDelay }: { mode: strin
         <Loading onClick={showcaseMode && loadRandom} />
         {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}
       </div>
-      
-      // <Suspense />
-
-      // <Suspense fallback={mounted
-      //   ? <div>client side</div>
-      //   : <div>server side</div> //<MainServerSidePage mode={mode} id={id} lang={lang} refreshDelay={refreshDelay} />
-      // } />
     )
   }
 

@@ -3,7 +3,7 @@
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { syllable } from 'syllable';
-import { Haiku } from "@/types/Haiku";
+import { Haiku, haikuStyles } from "@/types/Haiku";
 import { Loading, NavOverlay } from '@/app/_components/Nav';
 import HaikuPage from '@/app/_components/HaikuPage';
 import useAlert from '@/app/_hooks/alert';
@@ -136,54 +136,7 @@ export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refr
     (!previousDailyHaikudleId || user?.isAdmin) &&
     (!(haiku?.createdBy == user?.id) || user?.isAdmin);
 
-  const fontColor = haiku?.color || "#555555";
-  const bgColor = haiku?.bgColor || "lightgrey";
-
-  const textStyles = [
-    {
-      color: fontColor,
-      bgColor,
-      filter: `drop-shadow(0px 0px 8px ${bgColor})`,
-      WebkitTextStroke: `1px ${fontColor}`,
-      fontWeight: 300,
-    },
-    {
-      filter: `drop-shadow(0px 0px 2px ${bgColor})`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 4px ${bgColor}99)`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 8px ${bgColor}66)`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 12px ${bgColor}33)`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 18px ${bgColor}22)`,
-    },
-  ];
-
-  const altTextStyles = [
-    {
-      color: bgColor,
-      filter: `drop-shadow(0px 0px 3px ${fontColor})`,
-      WebkitTextStroke: `0.5px ${bgColor}`,
-      fontWeight: 300,
-    },
-    {
-      filter: `drop-shadow(0px 0px 1px ${fontColor})`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 8px ${bgColor}55)`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 12px ${bgColor}33)`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 18px ${bgColor}11)`,
-    },
-  ];
+  const { textStyles, altTextStyles } = haikuStyles(haiku);
 
   // console.log('>> app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
 
