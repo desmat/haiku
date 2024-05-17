@@ -22,7 +22,7 @@ export default function Page({
     return <NotFound mode={mode} />
   }
 
-  // not sure what's going on here
+  // not sure what's going on here (only when deployed to vercel)
   if (id == "index") {
     id = undefined;
   }

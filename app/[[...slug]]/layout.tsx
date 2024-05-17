@@ -57,6 +57,12 @@ export default async function Layout({
   params?: any,
 }) {
   let haikuId = params?.slug && params.slug[0];
+
+  // not sure what's going on here (only when deployed to vercel)
+  if (haikuId == "index") {
+    haikuId = undefined;
+  }
+
   console.log('>> app.[[..slug]].layout.render()', { haikuId, slug: params?.slug, params });
 
   if (!haikuId) {
