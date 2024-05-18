@@ -105,7 +105,7 @@ export default async function Layout({
         dangerouslySetInnerHTML={{
           __html: `
             body {
-              background-color: ${haiku.bgColor || "lightgrey"};
+              background-color: ${haiku?.bgColor || "lightgrey"};
             }
           `
         }}
