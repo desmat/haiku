@@ -775,7 +775,7 @@ export default function MainPage({
             dangerouslySetInnerHTML={{
               __html: `
                 body {
-                  background-color: ${haiku.bgColor};         
+                  background-color: ${haiku?.bgColor};         
                 }
               `
             }}
