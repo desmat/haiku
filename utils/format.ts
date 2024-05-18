@@ -1,5 +1,6 @@
 import moment from "moment";
 import { round } from "./misc";
+import trackEvent from "./trackEvent";
 
 export function formatRange(range: string | number | any[], formatFn: any, unit?: string, unitMany?: string): string | undefined {
   // for convenience
@@ -44,7 +45,7 @@ export function formatTimeFromNow(v: number): string {
   const then = moment(v);
   const seconds = now.diff(then, "seconds");
   // console.log("utils.format.formatTimeFromNow", { seconds });
-  
+
   return seconds >= 0 && seconds < 40
     ? "just now"
     : seconds < 0 && seconds > -40
@@ -86,7 +87,14 @@ export function capitalize(s: string) {
 
 export function upperCaseFirstLetter(s: string) {
   console.log("utils.misc.upperCaseFirstLetter()", { s });
-  if (!s || typeof(s) != "string") return "";
+  if (s && typeof (s) != "string") {
+    trackEvent("assertion-failed", {
+      type: "upperCaseFirstLetter",
+      typeof: typeof (s),
+      value: JSON.stringify(s)
+    });
+  }
+  if (!s || typeof (s) != "string") return "";
   return s.substring(0, 1).toUpperCase() + s.substring(1);
 }
 
