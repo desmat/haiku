@@ -73,8 +73,8 @@ export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]>
 
     const haikuIds = Array.from(new Set([
       ...generatedHaikus.map((haiku: Haiku) => haiku.id),
-      ...userHaikus.map((haiku: Haiku) => haiku.haikuId),
-      ...userHaikudles.map((haiku: Haiku) => haiku.haikuId),
+      ...userHaikus.map((userHaiku: UserHaiku) => userHaiku.haikuId),
+      ...userHaikudles.map((userHaikudle: UserHaikudle) => userHaikudle.haikudle?.haikuId),
     ]));
     haikus = await store.haikus.find({ id: haikuIds });
     console.log(`>> services.haiku.getUserHaikus`, { haikuIds, justThoseHaikus: haikus });
@@ -163,17 +163,18 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   return haiku;
 }
 
-export async function createHaiku(user: User): Promise<Haiku> {
+export async function createHaiku(user: User, haiku: Haiku): Promise<Haiku> {
   console.log(">> services.haiku.createHaiku", { user });
 
-  let haiku = {
-    id: uuid(),
+  let create = {
+    ...haiku,
+    id: haiku.id || uuid(),
     createdBy: user.id,
     createdAt: moment().valueOf(),
     status: "created",
   } as Haiku;
 
-  return store.haikus.create(user.id, haiku);
+  return store.haikus.create(user.id, create);
 }
 
 export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haiku> {

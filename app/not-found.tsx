@@ -1,6 +1,7 @@
 import HaikuPage from '@/app/_components/HaikuPage';
 import { NavOverlay } from '@/app/_components/Nav';
 import { notFoundHaiku } from "@/services/stores/samples";
+import { ExperienceMode } from '@/types/ExperienceMode';
 import { LanguageType } from '@/types/Languages';
 
 export default function NotFound({
@@ -9,7 +10,7 @@ export default function NotFound({
   onClickGenerate,
   onClickLogo,
 }: {
-  mode: string,
+  mode: ExperienceMode,
   lang?: undefined | LanguageType,
   onClickGenerate?: any,
   onClickLogo?: any

@@ -13,8 +13,9 @@ import useHaikudle from '@/app/_hooks/haikudle';
 import useOnboarding from '@/app/_hooks/onboarding';
 import useUser from '@/app/_hooks/user';
 import NotFound from '@/app/not-found';
-import { LanguageType } from '@/types/Languages';
+import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haikudle } from '@/types/Haikudle';
+import { LanguageType } from '@/types/Languages';
 import { haikuGeneratedOnboardingSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleOnboardingSteps } from '@/types/Onboarding';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
@@ -28,7 +29,7 @@ export default function MainPage({
   refreshDelay,
   fontSize,
 }: {
-  mode: string,
+  mode: ExperienceMode,
   id?: string,
   version?: string,
   lang?: undefined | LanguageType,
@@ -587,7 +588,7 @@ export default function MainPage({
     setLoading(true);
     setLoadingUI(true);
     // loadingUI = true;
-    setHaiku(undefined);
+    // setHaiku(undefined); // keep the old one around to smooth out style transition
     setHaikuId(undefined);
 
     haikudleMode
@@ -620,7 +621,7 @@ export default function MainPage({
 
     resetAlert();
     setLoadingUI(true);
-    setHaiku(undefined);
+    // setHaiku(undefined); // keep the old one around to smooth out style transition
     setHaikuId(undefined);
     // loadPage(); //useEffect will kick off
   }
@@ -629,6 +630,7 @@ export default function MainPage({
     // console.log('>> app.page.switchMode()', { mode, newMode });
     const url = newMode
       ? `/${haikuId || ""}?mode=${newMode}`
+      // @ts-ignore
       : `/${haikuId || ""}?mode=${mode == "haiku" ? "haikudle" : mode != "haiku" ? "haiku" : process.env.EXPERIENCE_MODE}`
 
     setLoadingUI(true);
@@ -768,6 +770,17 @@ export default function MainPage({
   if (!loaded || loading || loadingUI || generating) {
     return (
       <div>
+        {haiku?.bgColor &&
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+                body {
+                  background-color: ${haiku?.bgColor};         
+                }
+              `
+            }}
+          />
+        }
         <NavOverlay loading={true} mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} onClickLogo={loadHomePage} />
         <Loading styles={textStyles} />
         {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}

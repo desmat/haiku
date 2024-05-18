@@ -2,6 +2,7 @@ import HaikuPage from "@/app/_components/HaikuPage";
 import { NavOverlay } from "@/app/_components/Nav";
 import Loading from "@/app/_components/Loading";
 import { loadingHaiku } from "@/services/stores/samples";
+import { ExperienceMode } from "@/types/ExperienceMode";
 import { Haiku } from "@/types/Haiku";
 
 export default async function LoadingPage({
@@ -13,7 +14,7 @@ export default async function LoadingPage({
 }) {
   // console.log('>> app.loading.render()', { mode, haikuId: haiku?.id });
 
-  const _mode = mode || process.env.EXPERIENCE_MODE || "haiku";
+  const _mode = (mode || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const fontColor = "#555555";
   const bgColor = "lightgrey";
   const textStyles = [
