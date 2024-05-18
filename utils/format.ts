@@ -79,7 +79,7 @@ export function formatBytes(bytes: number, decimals = 2) {
 export function capitalize(s: string) {
   return s && s
     .split(/\s+/)
-    .map((s: string) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
+    .map((s: string) => s && `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
     .join(" ");
 }
 
