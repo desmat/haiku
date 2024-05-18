@@ -396,6 +396,12 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     //   _haikus: { ..._haikus, [haiku.id ]: generating },
     // });
 
+    // sometimes we don't get the haiku-generated event...
+    trackEvent("generate-haiku", {
+      userId: user.id,
+      request: JSON.stringify(request),
+    });
+
     return new Promise(async (resolve, reject) => {
       fetch(`/api/haikus`, {
         ...await fetchOpts(),
