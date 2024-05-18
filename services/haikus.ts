@@ -73,8 +73,8 @@ export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]>
 
     const haikuIds = Array.from(new Set([
       ...generatedHaikus.map((haiku: Haiku) => haiku.id),
-      ...userHaikus.map((haiku: Haiku) => haiku.haikuId),
-      ...userHaikudles.map((haiku: Haiku) => haiku.haikuId),
+      ...userHaikus.map((userHaiku: UserHaiku) => userHaiku.haikuId),
+      ...userHaikudles.map((userHaikudle: UserHaikudle) => userHaikudle.haikudle?.haikuId),
     ]));
     haikus = await store.haikus.find({ id: haikuIds });
     console.log(`>> services.haiku.getUserHaikus`, { haikuIds, justThoseHaikus: haikus });
