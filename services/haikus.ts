@@ -163,17 +163,18 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   return haiku;
 }
 
-export async function createHaiku(user: User): Promise<Haiku> {
+export async function createHaiku(user: User, haiku: Haiku): Promise<Haiku> {
   console.log(">> services.haiku.createHaiku", { user });
 
-  let haiku = {
-    id: uuid(),
+  let create = {
+    ...haiku,
+    id: haiku.id || uuid(),
     createdBy: user.id,
     createdAt: moment().valueOf(),
     status: "created",
   } as Haiku;
 
-  return store.haikus.create(user.id, haiku);
+  return store.haikus.create(user.id, create);
 }
 
 export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haiku> {

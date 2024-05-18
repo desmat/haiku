@@ -588,7 +588,7 @@ export default function MainPage({
     setLoading(true);
     setLoadingUI(true);
     // loadingUI = true;
-    setHaiku(undefined);
+    // setHaiku(undefined); // keep the old one around to smooth out style transition
     setHaikuId(undefined);
 
     haikudleMode
@@ -621,7 +621,7 @@ export default function MainPage({
 
     resetAlert();
     setLoadingUI(true);
-    setHaiku(undefined);
+    // setHaiku(undefined); // keep the old one around to smooth out style transition
     setHaikuId(undefined);
     // loadPage(); //useEffect will kick off
   }
@@ -770,6 +770,17 @@ export default function MainPage({
   if (!loaded || loading || loadingUI || generating) {
     return (
       <div>
+        {haiku?.bgColor &&
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+                body {
+                  background-color: ${haiku.bgColor};         
+                }
+              `
+            }}
+          />
+        }
         <NavOverlay loading={true} mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} onClickLogo={loadHomePage} />
         <Loading styles={textStyles} />
         {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}

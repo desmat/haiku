@@ -3,13 +3,13 @@ import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { LanguageType, isSupportedLanguage } from '@/types/Languages';
 
-export default function Page({ 
+export default function Page({
   params,
   searchParams,
-}: { 
-  params: { slug: any } 
+}: {
+  params: { slug: any }
   searchParams?: { [key: string]: string | undefined },
- }) {
+}) {
   let id = searchParams && searchParams["id"] || params.slug && params.slug[0];
   const version = searchParams && searchParams["version"];
   const lang = searchParams && searchParams["lang"] as LanguageType || "en";
@@ -22,7 +22,7 @@ export default function Page({
     return <NotFound mode={mode} />
   }
 
-  // not sure what's going on here
+  // not sure what's going on here (only when deployed to vercel)
   if (id == "index") {
     id = undefined;
   }
