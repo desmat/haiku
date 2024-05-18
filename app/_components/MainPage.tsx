@@ -497,9 +497,10 @@ export default function MainPage({
   }
 
   const startGenerateHaiku = async (theme?: string) => {
-    // console.log('>> app.page.startGenerateHaiku()');
+    // console.log('>> app.page.startGenerateHaiku()', { theme });
     trackEvent("clicked-generate-haiku", {
       userId: user?.id,
+      theme,
     });
 
     const subject = typeof (theme) == "undefined"

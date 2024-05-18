@@ -30,20 +30,20 @@ const haikuThemeSuggestions = [
   "",
   "",
   "",
-  "Nature",
-  "Mountains",
-  "Cherry blossoms",
-  "Spring",
-  "Summer",
-  "Autumn",
-  "Winter",
-  "Flowers",
-  "Summer in Paris",
-  "City at night",
-  "Springtime in Kyoto",
-  "Rainy morning",
-  "Sunset on the ocean",
-  "Sunrise on the lake",
+  "nature",
+  "mountains",
+  "cherry blossoms",
+  "spring",
+  "summer",
+  "autumn",
+  "winter",
+  "flowers",
+  "summer in Paris",
+  "city at night",
+  "springtime in Kyoto",
+  "rainy morning",
+  "sunset on the ocean",
+  "sunrise on the lake",
 ];
 
 export function GenerateIcon({
@@ -57,7 +57,7 @@ export function GenerateIcon({
   style?: any
   children?: React.ReactNode,
 }) {
-  const icon = <IoSparkles style={style} className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8 md:mt-[-0.6rem] sm:mt-[-0.6rem] mt-[-0.4rem]"}`} />;
+  const icon = <IoSparkles style={style} className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-5 w-5 md:h-7 md:w-7 md:mt-[-0.3rem] mt-[-0.4rem]"}`} />;
 
   return (
     <Link
@@ -70,7 +70,7 @@ export function GenerateIcon({
       }}
     >
       {children &&
-        <div className={`${font.architects_daughter.className} _bg-yellow-200 md:mt-[-0.4rem] sm:mt-[-0.6rem] mt-[-0.4rem] md:text-[24pt] sm:text-[22pt] text-[18pt]`}>
+        <div className={`${font.architects_daughter.className} _bg-yellow-200 md:mt-[-0.2rem] mt-[-0.2rem] md:text-[20pt] text-[16pt]`}>
           {children}
         </div>
       }
@@ -100,6 +100,7 @@ export function GenerateInput({
 }) {
   const [value, setValue] = useState<string | undefined>();
   const [active, setActive] = useState(false);
+  const [focus, setFocus] = useState(false);
   const [clickingGenerate, setClickingGenerate] = useState(false);
   const [haikuTheme, setHaikuTheme] = useState("");
   const [intervalId, setIntervalId] = useState<any | undefined>();
@@ -131,17 +132,34 @@ export function GenerateInput({
     }
   }
 
-  const handleClickedGenerate = () => {
-    // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate()', { ref, active: document.activeElement == ref.current });
+  const handleFocus = () => {
+    trackEvent("clicked-generate-haiku-input", {
+      userId: user?.id,
+    });
 
-    // if (!active) {
-    //   setActive(true);
-    //   // @ts-ignore
-    //   ref.current.focus();
-    //   return;
-    // }
+    setActive(true);
+    setFocus(true);
+
+    // @ts-ignore
+    if (!ref.current.value) {
+      // @ts-ignore
+      ref.current.value = haikuTheme;
+      // @ts-ignore
+      ref.current.select();
+    }
+  }
+
+  const handleBlur = () => {
+    setActive(false);
+    setFocus(false);
+  }
+
+  const handleClickedGenerate = () => {
+    // @ts-ignore
+    // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate()', { ref, active, value: ref.current.value, focus });
 
     setActive(false);
+    setFocus(false);
     setClickingGenerate(false);
     setValue(undefined);
     // @ts-ignore
@@ -149,7 +167,9 @@ export function GenerateInput({
 
     // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate() generate');
     // @ts-ignore
-    generate && generate(ref.current.value || "");
+    generate && generate(focus || ref.current.value ? ref.current.value : haikuTheme);
+    // @ts-ignore
+    ref.current.value = "";
   };
 
   useEffect(() => {
@@ -240,15 +260,10 @@ export function GenerateInput({
                   maxLength={46}
                   placeholder={`A haiku about... ${haikuTheme}`}
                   disabled={exceededUsageLimit}
-                  // value={value || ""}
+                  value={undefined}
                   onChange={handleChange}
-                  onFocus={() => {
-                    trackEvent("clicked-generate-haiku-input", {
-                      userId: user?.id,
-                    });
-                    setActive(true);
-                  }}
-                  onBlur={() => (typeof (value) == "undefined") && setActive(false)}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
                   onKeyDown={handleKeyDown}
                   className={`w-full absolute top-0 left-0
                     pt-[0.1rem] pr-[7.8rem]  md:pr-[10rem] pb-[0.1rem] pl-[0.7rem]
