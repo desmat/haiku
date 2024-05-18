@@ -25,15 +25,18 @@ import SidePanel from './SidePanel';
 import { User } from '@/types/User';
 
 const haikuThemeSuggestions = [
-  "Anything (leave empty)",
-  "Anything (leave empty)",
-  "Anything (leave empty)",
-  "Anything (leave empty)",
+  "",
+  "",
+  "",
+  "",
+  "",
   "Nature",
   "Mountains",
   "Cherry blossoms",
   "Spring",
+  "Summer",
   "Autumn",
+  "Winter",
   "Flowers",
   "Summer in Paris",
   "City at night",
@@ -54,7 +57,7 @@ export function GenerateIcon({
   style?: any
   children?: React.ReactNode,
 }) {
-  const icon = <IoSparkles style={style} className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />;
+  const icon = <IoSparkles style={style} className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8 md:mt-[-0.6rem] sm:mt-[-0.6rem] mt-[-0.4rem]"}`} />;
 
   return (
     <Link
@@ -67,7 +70,7 @@ export function GenerateIcon({
       }}
     >
       {children &&
-        <div className={`${font.architects_daughter.className} _bg-yellow-200 my-[-0.3rem] md:text-[24pt] sm:text-[22pt] text-[18pt]`}>
+        <div className={`${font.architects_daughter.className} _bg-yellow-200 md:mt-[-0.4rem] sm:mt-[-0.6rem] mt-[-0.4rem] md:text-[24pt] sm:text-[22pt] text-[18pt]`}>
           {children}
         </div>
       }
@@ -234,8 +237,8 @@ export function GenerateInput({
                 <input
                   //@ts-ignore
                   ref={ref}
-                  maxLength={36}
-                  placeholder={`Create a haiku about... ${haikuTheme}`}
+                  maxLength={46}
+                  placeholder={`A haiku about... ${haikuTheme}`}
                   disabled={exceededUsageLimit}
                   // value={value || ""}
                   onChange={handleChange}
@@ -248,7 +251,7 @@ export function GenerateInput({
                   onBlur={() => (typeof (value) == "undefined") && setActive(false)}
                   onKeyDown={handleKeyDown}
                   className={`w-full absolute top-0 left-0
-                    pt-[0.1rem] pr-[2.5rem] pb-[0.1rem] pl-[0.7rem] md:pr-[3rem]
+                    pt-[0.1rem] pr-[7.8rem]  md:pr-[10rem] pb-[0.1rem] pl-[0.7rem]
                     mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0 md:mt-[0.1rem] md:mr-[0rem]      
                   `}
                   style={{ cursor: exceededUsageLimit ? "not-allowed" : "pointer" }}
@@ -272,7 +275,7 @@ export function GenerateInput({
                 <PopOnClick>
                   <StyledLayers styles={altStyles.slice(0, 2)}>
                     <GenerateIcon style={{ cursor: exceededUsageLimit ? "not-allowed" : "pointer" }}>
-                      {/* Create */}
+                      Create
                     </GenerateIcon>
                   </StyledLayers>
                 </PopOnClick>
