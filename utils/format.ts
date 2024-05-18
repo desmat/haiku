@@ -86,7 +86,7 @@ export function capitalize(s: string) {
 
 export function upperCaseFirstLetter(s: string) {
   console.log("utils.misc.upperCaseFirstLetter()", { s });
-  if (!s || s.length == 0) return "";
+  if (!s || typeof(s) != "string") return "";
   return s.substring(0, 1).toUpperCase() + s.substring(1);
 }
 
