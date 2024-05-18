@@ -77,6 +77,7 @@ export function formatBytes(bytes: number, decimals = 2) {
 }
 
 export function capitalize(s: string) {
+  console.log("utils.misc.capitalize()", { s });
   return s && s
     .split(/\s+/)
     .map((s: string) => s && `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
@@ -84,14 +85,17 @@ export function capitalize(s: string) {
 }
 
 export function upperCaseFirstLetter(s: string) {
+  console.log("utils.misc.upperCaseFirstLetter()", { s });
   if (!s || s.length == 0) return "";
   return s.substring(0, 1).toUpperCase() + s.substring(1);
 }
 
 export function formatActionInProgress(action: string, negative: boolean = false) {
+  console.log("utils.misc.formatActionInProgress()", { action, negative });
   return `${negative ? "un-" : ""}${action.endsWith("e") ? action.substring(0, action.length - 1) : action}ing`;
 }
 
 export function formatPastAction(action: string, negative: boolean = false) {
+  console.log("utils.misc.formatPastAction()", { action, negative });
   return `${negative ? "un-" : ""}${action.endsWith("e") ? action.substring(0, action.length - 1) : action}ed`;
 }
