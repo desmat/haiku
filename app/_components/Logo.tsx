@@ -45,7 +45,7 @@ export function Logo({
 
   return (
     <Link
-      onClick={onClick}
+      onClick={() => onClick && onClick()}
       href={href || "/"}
       className={`logo hover:no-underline ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
     >

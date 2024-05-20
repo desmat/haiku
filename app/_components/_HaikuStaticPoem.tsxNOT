@@ -96,7 +96,7 @@ export default function HaikuPoem({
   saveHaiku,
   copyHaiku
 }: {
-  user: User,
+  user?: User,
   mode: ExperienceMode,
   haiku: Haiku,
   popPoem?: boolean,
@@ -387,7 +387,7 @@ export default function HaikuPoem({
                     }
                     {regenerateImageAllowed &&
                       <div className="_bg-pink-200">
-                        {!user?.isAdmin && (user.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
+                        {!user?.isAdmin && (user?.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
                           <span title="Exceeded daily limit: try again later">
                             <StyledLayers styles={altStyles || []}>
                               <TbReload className={`
@@ -397,7 +397,7 @@ export default function HaikuPoem({
                             </StyledLayers>
                           </span>
                         }
-                        {(user?.isAdmin || (user.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
+                        {(user?.isAdmin || (user?.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
                           <span title="Regenerate this haiku's art with the same theme">
                             <StyledLayers styles={altStyles || []}>
                               <PopOnClick>

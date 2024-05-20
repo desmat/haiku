@@ -9,7 +9,7 @@ import MainClientSidePage from '@/app/_components/MainClientSidePage';
 import { NoSsr } from '../_components/NoSsr';
 import moment from 'moment';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
-import HaikuPage from '../_components/HaikuStaticPage';
+// import HaikuPage from '../_components/HaikuStaticPage';
 import { NavOverlay } from '../_components/Nav';
 import { Haiku, haikuStyles } from '@/types/Haiku';
 import { User } from '@/types/User';

@@ -743,7 +743,13 @@ export function NavOverlay({
                 altStyles={altStyles}
                 mode={mode}
                 href={`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`}
-                onClick={onClickLogo}
+                onClick={() => {
+                  trackEvent("clicked-logo", {
+                    userId: user?.id,
+                  });
+                  
+                  onClickLogo && onClickLogo();
+                }}
                 onboardingElement={onboardingElement}
               />
             </PopOnClick>

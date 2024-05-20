@@ -29,7 +29,7 @@ export default function SidePanel({
   onboardingElement,
   onShowAbout,
   onSelectHaiku,
-  onClickLogo,
+  onClickLogo: _onClickLogo,
 }: {
   user: User,
   mode?: ExperienceMode,
@@ -63,7 +63,12 @@ export default function SidePanel({
     state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
   ]);
 
-  // console.log(">> app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles });
+  console.log(">> app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles });
+
+  const onClickLogo = () => {
+    toggleMenuOpened();
+    _onClickLogo && _onClickLogo();
+  }
 
   const toggleMenuOpened = () => {
     // console.log(">> app._component.SidePanel.toggleMenuOpened", {});
@@ -135,10 +140,6 @@ export default function SidePanel({
       document.body.removeEventListener('keydown', handleKeyDown)
     }
   }, []);
-
-  if (!userHaikus.length) {
-    return <></>
-  }
 
   return (
     <div className="side-panel">

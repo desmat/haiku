@@ -427,7 +427,7 @@ export default function HaikuPoem({
             <div
               className="_bg-purple-200 flex flex-col _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
               onClick={handleClickHaiku}
-              title={showcaseMode ? "Refresh" : "Click to edit"}
+              title={showcaseMode ? "Refresh" : canEdit ? "Click to edit" : "Click to copy haiku poem"}
               style={{
                 cursor: showcaseMode ? "pointer" : "",
                 fontSize,

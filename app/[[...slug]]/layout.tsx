@@ -65,22 +65,22 @@ export default async function Layout({
 
   console.log('>> app.[[..slug]].layout.render()', { haikuId, slug: params?.slug, params });
 
-  if (!haikuId) {
-    if (process.env.EXPERIENCE_MODE == "haikudle") {
-      const todaysDateCode = moment().format("YYYYMMDD");
-      const todaysDailyHaikudle = await getDailyHaikudle(todaysDateCode);
-      console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaikudle });
-      haikuId = todaysDailyHaikudle?.haikuId;
-    } else {
-      const todaysDateCode = moment().format("YYYYMMDD");
-      const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
-      console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaiku });
-      haikuId = todaysDailyHaiku?.haikuId;
-    }
-  }
+  // if (!haikuId) {
+  //   if (process.env.EXPERIENCE_MODE == "haikudle") {
+  //     const todaysDateCode = moment().format("YYYYMMDD");
+  //     const todaysDailyHaikudle = await getDailyHaikudle(todaysDateCode);
+  //     console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaikudle });
+  //     haikuId = todaysDailyHaikudle?.haikuId;
+  //   } else {
+  //     const todaysDateCode = moment().format("YYYYMMDD");
+  //     const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
+  //     console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaiku });
+  //     haikuId = todaysDailyHaiku?.haikuId;
+  //   }
+  // }
 
   const user = {} as User;
-  const haiku = await getHaiku(user, haikuId);
+  const haiku = undefined;  //await getHaiku(user, haikuId);
   console.log('>> app.[[..slug]].layout.render()', { haiku });
 
   metadata = {
@@ -101,7 +101,7 @@ export default async function Layout({
 
   return (
     <section>
-      <style
+      {/* <style
         dangerouslySetInnerHTML={{
           __html: `
             body {
@@ -109,7 +109,7 @@ export default async function Layout({
             }
           `
         }}
-      />
+      /> */}
       <div className="flex flex-col lg:flex-row">
         <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
           {children}

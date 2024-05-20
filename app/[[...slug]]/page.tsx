@@ -3,16 +3,12 @@ import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { LanguageType, isSupportedLanguage } from '@/types/Languages';
 import { Suspense } from 'react';
-import MainClientSidePage from '@/app/_components/MainClientSidePage';
-import { NoSsr } from '../_components/NoSsr';
 import moment from 'moment';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
-import HaikuPage from '../_components/HaikuStaticPage';
+import HaikuPage from '../_components/HaikuPage';
 import { NavOverlay } from '../_components/Nav';
-import { Haiku, haikuStyles } from '@/types/Haiku';
+import { haikuStyles } from '@/types/Haiku';
 import { User } from '@/types/User';
-import delay from '@/utils/delay';
-import ClientSidePage from '../_components/ClientSidePage';
 
 const todaysHaiku = async () => {
   const todaysDateCode = moment().format("YYYYMMDD");
@@ -46,36 +42,13 @@ export default async function Page({
     id = undefined;
   }
 
-  const user = {} as User;
   const haiku = id ? await getHaiku({} as User, id) : await todaysHaiku();
 
-  // if (!haiku) {
-  //   return <NotFound mode={mode} />
-  // }
+  if (!haiku) {
+    return <NotFound mode={mode} />
+  }
 
   const { textStyles, altTextStyles } = haikuStyles(haiku);
-
-  // return <MainPage mode={mode} id={id} version={version} lang={lang} refreshDelay={refreshDelay} fontSize={fontSize} />
-
-  // return (
-  //   <div className="main-page">
-  //         {/* <NavOverlay
-  //           haiku={haiku}
-  //           mode={mode}
-  //           lang={lang}
-  //           styles={textStyles.slice(0, textStyles.length - 3)}
-  //           altStyles={altTextStyles}
-  //         /> */}
-  //         <HaikuPage
-  //           user={user}
-  //           haiku={haiku}
-  //           mode={mode}
-  //           styles={textStyles}
-  //           altStyles={altTextStyles}
-  //           fontSize={fontSize}
-  //         />
-  //       </div>
-  // )
 
   return (
     <Suspense
@@ -98,7 +71,6 @@ export default async function Page({
             altStyles={altTextStyles}
           />
           <HaikuPage
-            user={user}
             haiku={haiku}
             mode={mode}
             styles={textStyles}
@@ -108,78 +80,13 @@ export default async function Page({
         </div>
       }
     >
-      {/* <ClientSidePage
-        // user={user}
-        haiku={haiku}
-        mode={mode}
-        fontSize={fontSize}
-      /> */}
-      <MainClientSidePage
-        // id={id}
+      <MainPage
         haiku={haiku}
         mode={mode}
         lang={lang}
         refreshDelay={refreshDelay}
         fontSize={fontSize}
       />      
-    </Suspense>
-  )
-
-  return (
-    <Suspense
-      fallback={
-        <div className="main-page _bg-yellow-400">
-          <style
-            dangerouslySetInnerHTML={{
-              __html: `
-                body {
-                  background-color: orange /* ${haiku?.bgColor || "red"} */;
-                }
-              `
-            }}
-          />
-
-          STATIC
-          {/* <NavOverlay
-            haiku={haiku}
-            mode={mode}
-            lang={lang}
-            styles={textStyles.slice(0, textStyles.length - 3)}
-            altStyles={altTextStyles}
-          /> */}
-          {/* <HaikuPage
-            user={user}
-            haiku={haiku}
-            mode={mode}
-            styles={textStyles}
-            altStyles={altTextStyles}
-            fontSize={fontSize}
-          /> */}
-        </div>
-      }
-    >
-      {/* <NoSsr>
-        <MainClientSidePage
-          id={id}
-          haiku={haiku}
-          mode={mode}
-          lang={lang}
-          refreshDelay={refreshDelay}
-          fontSize={fontSize}
-        />
-      </NoSsr> */}
-      <div className="main-page _bg-yellow-400">
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-                body {
-                  background-color: pink /* ${haiku?.bgColor || "red"} */;
-                }
-              `
-          }}
-        />
-        CLIENT
-      </div>
     </Suspense>
   )
 }
