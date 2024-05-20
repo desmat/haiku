@@ -45,7 +45,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   load: async () => {
     const { loadLocal, loadRemote } = get();
     let user;
-    console.log(">> hooks.user.load()", {});
+    // console.log(">> hooks.user.load()", {});
 
     let createdUser: User | undefined;
     let token = window?.localStorage && window.localStorage.getItem("session");

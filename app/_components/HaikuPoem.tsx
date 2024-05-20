@@ -65,7 +65,7 @@ export function ControlledInput({
   const maxLength = 100; // kinda unreasonable for a haiku line but won't break the UI
   const [active, setActive] = useState(false);
   const ref = useRef();
-  console.log('>> app._components.PoemLineInput.render()', { id, activeId, select, value });
+  // console.log('>> app._components.PoemLineInput.render()', { id, activeId, select, value });
 
   // https://stackoverflow.com/questions/6139107/programmatically-select-text-in-a-contenteditable-html-element
   function selectElementContents(el: any) {
@@ -211,7 +211,7 @@ export default function HaikuPoem({
   saveHaiku?: any,
   copyHaiku?: any,
 }) {
-  console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
+  // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
   const haikudleMode = mode == "haikudle";
   const showcaseMode = mode == "showcase";
   const onboarding = typeof (onboardingElement) == "string"

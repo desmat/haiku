@@ -45,6 +45,8 @@ export default async function Page({
 
   const haiku = id ? await getHaiku({} as User, id) : await todaysHaiku();
 
+  // TODO mark this haiku as viewed
+
   if (!haiku) {
     return <NotFound mode={mode} />
   }
