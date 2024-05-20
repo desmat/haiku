@@ -6,8 +6,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation'
 import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub, IoHeartSharp } from 'react-icons/io5';
 import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
+import { BiLogoInstagramAlt } from "react-icons/bi";
+import { RiTwitterFill } from "react-icons/ri";
 import { HiSwitchVertical } from "react-icons/hi";
-import { MdHome, MdDelete } from "react-icons/md";
+import { MdHome, MdDelete, MdFacebook } from "react-icons/md";
 import { BsDatabaseFillUp } from "react-icons/bs";
 import { FaRandom } from "react-icons/fa";
 import * as font from "@/app/font";
@@ -341,7 +343,7 @@ function BottomLinks({
   // console.log("BottomLinks", { lang, haiku })
   const router = useRouter();
   const user = useUser((state: any) => state.user);
-  const [alert] = useAlert((state: any) => [state.plain]);
+  const haikuMode = mode == "haiku";
 
   return (
     <div
@@ -366,7 +368,7 @@ function BottomLinks({
             <IoHelpCircle className="text-2xl" />
           </PopOnClick>
         </div>
-        <Link
+        {/* <Link
           key="github"
           href="https://github.com/desmat/haiku"
           target="_blank"
@@ -380,22 +382,75 @@ function BottomLinks({
           <PopOnClick color={haiku?.bgColor}>
             <IoLogoGithub className="text-xl" />
           </PopOnClick>
-        </Link>
+        </Link> */}
+        {!user?.isAdmin &&
+          <Link
+            key="web"
+            href="https://www.desmat.ca"
+            target="_blank"
+            onClick={() => {
+              trackEvent("clicked-web", {
+                userId: user?.id,
+                location: "bottom-links",
+              });
+            }}
+          >
+            <PopOnClick color={haiku?.bgColor}>
+              <MdHome className="text-2xl" />
+            </PopOnClick>
+          </Link>
+        }
+        {haikuMode && !user?.isAdmin &&
         <Link
-          key="web"
-          href="https://www.desmat.ca"
+          key="twitter"
+          href="https://x.com/haiku_genius"
           target="_blank"
           onClick={() => {
-            trackEvent("clicked-web", {
+            trackEvent("clicked-twitter", {
               userId: user?.id,
               location: "bottom-links",
             });
           }}
         >
           <PopOnClick color={haiku?.bgColor}>
-            <MdHome className="text-2xl" />
+            <RiTwitterFill className="text-2xl" />
           </PopOnClick>
         </Link>
+        }
+        {haikuMode && !user?.isAdmin &&
+        <Link
+          key="facebook"
+          href="https://www.facebook.com/haikugenius"
+          target="_blank"
+          onClick={() => {
+            trackEvent("clicked-facebook", {
+              userId: user?.id,
+              location: "bottom-links",
+            });
+          }}
+        >
+          <PopOnClick color={haiku?.bgColor}>
+            <MdFacebook className="text-2xl" />
+          </PopOnClick>
+        </Link>
+        }
+        {haikuMode && !user?.isAdmin && 
+        <Link
+          key="instagram"
+          href="https://www.instagram.com/haiku_genius/"
+          target="_blank"
+          onClick={() => {
+            trackEvent("clicked-instagram", {
+              userId: user?.id,
+              location: "bottom-links",
+            });
+          }}
+        >
+          <PopOnClick color={haiku?.bgColor}>
+            <BiLogoInstagramAlt className="text-2xl" />
+          </PopOnClick>
+        </Link>
+        }
         {/* <Link
           key="email"
           href={`mailto:haiku${mode == "haikudle" ? "dle" : ""}@desmat.ca`}
@@ -721,7 +776,7 @@ export function NavOverlay({
             {onboardingElement && onboardingElement == "logo-and-generate" &&
               <div className="onboarding-focus double" />
             } */}
-            {/* {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+            {/* {(!onClickGenerate || !user?.isAdmin && (user?.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
                 <StyledLayers styles={altStyles}>
                   <GenerateIcon>
