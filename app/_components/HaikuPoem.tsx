@@ -69,75 +69,75 @@ export function ControlledInput({
 
   // https://stackoverflow.com/questions/6139107/programmatically-select-text-in-a-contenteditable-html-element
   function selectElementContents(el: any) {
-    var range = document.createRange();
-    range.selectNodeContents(el);
-    var sel = window.getSelection();
-    // @ts-ignore
-    sel.removeAllRanges();
-    // @ts-ignore
-    sel.addRange(range);
+    // var range = document.createRange();
+    // range.selectNodeContents(el);
+    // var sel = window.getSelection();
+    // // @ts-ignore
+    // sel.removeAllRanges();
+    // // @ts-ignore
+    // sel.addRange(range);
   }
 
   // https://codepen.io/feketegy/pen/RwGBgyq
   function getCaret(el: any) {
-    let caretAt = 0;
-    const sel = window.getSelection();
+    // let caretAt = 0;
+    // const sel = window.getSelection();
 
-    if (sel?.rangeCount == 0) { return caretAt; }
+    // if (sel?.rangeCount == 0) { return caretAt; }
 
-    // @ts-ignore
-    const range = sel.getRangeAt(0);
-    const preRange = range.cloneRange();
-    preRange.selectNodeContents(el);
-    preRange.setEnd(range.endContainer, range.endOffset);
-    caretAt = preRange.toString().length;
+    // // @ts-ignore
+    // const range = sel.getRangeAt(0);
+    // const preRange = range.cloneRange();
+    // preRange.selectNodeContents(el);
+    // preRange.setEnd(range.endContainer, range.endOffset);
+    // caretAt = preRange.toString().length;
 
-    return caretAt;
+    // return caretAt;
   }
 
   function setCaret(el: any, offset: number) {
-    let sel = window.getSelection();
-    let range = document.createRange();
-    let start = el.childNodes[0];
-    if (!start) return;
+    // let sel = window.getSelection();
+    // let range = document.createRange();
+    // let start = el.childNodes[0];
+    // if (!start) return;
 
-    range.setStart(start, offset);
-    range.collapse(true);
-    // @ts-ignore
-    sel.removeAllRanges();
-    // @ts-ignore
-    sel.addRange(range);
+    // range.setStart(start, offset);
+    // range.collapse(true);
+    // // @ts-ignore
+    // sel.removeAllRanges();
+    // // @ts-ignore
+    // sel.addRange(range);
   }
 
   function handleInput(e: any) {
-    const caret = getCaret(ref.current) || 0;
-    let val = e.target.innerText.replaceAll(/\n/g, ""); // remove newlines
+    // const caret = getCaret(ref.current) || 0;
+    // let val = e.target.innerText.replaceAll(/\n/g, ""); // remove newlines
 
-    if (val.length > maxLength) {
-      // somehow handleKeyDown didn't catch (ex: pasted long text)
-      val = val.slice(0, maxLength);
-      e.target.innerText = val;
-      setCaret(ref.current, maxLength);
-      return onChange(val);
-    }
+    // if (val.length > maxLength) {
+    //   // somehow handleKeyDown didn't catch (ex: pasted long text)
+    //   val = val.slice(0, maxLength);
+    //   e.target.innerText = val;
+    //   setCaret(ref.current, maxLength);
+    //   return onChange(val);
+    // }
 
-    e.target.innerText = val;
-    setCaret(ref.current, Math.min(caret, maxLength));
-    return onChange(val);
+    // e.target.innerText = val;
+    // setCaret(ref.current, Math.min(caret, maxLength));
+    // return onChange(val);
   }
 
   function handleKeyDown(e: any) {
-    // console.log('>> app._components.PoemLineInput.handleKeyDown()', { e, key: e.key, selection: window.getSelection(), ref });
-    const val = e.target.innerText;
-    if (["Delete", "Backspace", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key) || e.metaKey) {
-      // always allow
-      return true;
-    }
+    // // console.log('>> app._components.PoemLineInput.handleKeyDown()', { e, key: e.key, selection: window.getSelection(), ref });
+    // const val = e.target.innerText;
+    // if (["Delete", "Backspace", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key) || e.metaKey) {
+    //   // always allow
+    //   return true;
+    // }
 
-    if (val.length >= maxLength && window.getSelection()?.type != "Range") {
-      e.preventDefault();
-      return false;
-    }
+    // if (val.length >= maxLength && window.getSelection()?.type != "Range") {
+    //   e.preventDefault();
+    //   return false;
+    // }
   }
 
   useEffect(() => {
