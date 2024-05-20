@@ -52,7 +52,6 @@ const initialState = {
   haiku: undefined,
   haikudleId: undefined,
   previousDailyHaikudle: undefined,
-  nextDailyHaikudleId: undefined,
   solution: [[], [], []],
   inProgress: [[], [], []],
   solved: false,
@@ -434,12 +433,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           const data = await res.json();
           // const haikus = data.haikus;
           const haikudles = data.haikudles; // TODO fix this junk
-          const nextDailyHaikudleId = data.nextDailyHaikudleId;
 
-          set({
-            _haikudles: { ..._haikudles, ...listToMap(haikudles) },
-            nextDailyHaikudleId,
-          });
+          set({ _haikudles: { ..._haikudles, ...listToMap(haikudles) }});
           setLoaded(haikudles);
 
           // TODO bleh
@@ -489,8 +484,11 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           return reject(res.statusText);
         }
 
-        const data = await res.json();
-        const created = data.haikudle;
+        const { 
+          haikudle: created, 
+          dailyHaikudle,
+          nextDailyHaikudleId
+        } = await res.json();
 
         trackEvent("haikudle-created", {
           id: created.id,
@@ -504,9 +502,49 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         set({
           _haikudles: { ..._haikudles, [creating.id]: undefined, [created.id]: created },
         });
+        // also update side panel content
+        useUser.setState((state: any) => {
+          return {
+            dailyHaikudles: { ...state.dailyHaikudles, [dailyHaikudle.id]: dailyHaikudle },
+            nextDailyHaikudleId,
+          }
+        });
+        
         return resolve(created);
       });
     });
+  },
+
+  delete: async (id: string) => {
+    // console.log(">> hooks.haikudle.delete id:", id);
+
+    if (!id) {
+      throw `Cannot delete haikudle with null id`;
+    }
+
+    const res = await fetch(`/api/haikudles/${id}`, {
+      ...await fetchOpts(),
+      method: "DELETE",
+    });
+
+    if (res.status != 200) {
+      trackEvent("error", {
+        type: "delete-haikudle",
+        code: res.status,
+        userId: (await useUser.getState()).user.id,
+      });
+      useAlert.getState().error(`Error deleting haikudle: ${res.status} (${res.statusText})`);
+    }
+
+    const data = await res.json();
+    const deleted = data.haikudle;
+
+    // remove from side panel
+    const { dailyHaikudles } = useUser.getState();
+    delete dailyHaikudles[id];
+    useUser.setState({ dailyHaikudles });
+
+    return deleted;
   },
 
 })));

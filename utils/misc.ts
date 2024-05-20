@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 export function uuid(): string {
+  // console.log("utils.misc.uuid()");
   return uuidv4().substring(0, 8);
 }
 
@@ -21,7 +22,7 @@ export function normalizeWord(word: string): string {
   return word && word.replace(/[.,]/, "").toLowerCase();
 }
 
-function kvArrayToObject(array: any[]) {
+export function kvArrayToObject(array: any[]) {
   return array.reduce((o, [k, v]) => Object.assign(o, { [k]: v }), {});
 }
 

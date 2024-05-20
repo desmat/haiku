@@ -1,6 +1,8 @@
 import HaikuPage from "@/app/_components/HaikuPage";
-import { Loading, NavOverlay } from "@/app/_components/Nav";
+import { NavOverlay } from "@/app/_components/Nav";
+import Loading from "@/app/_components/Loading";
 import { loadingHaiku } from "@/services/stores/samples";
+import { ExperienceMode } from "@/types/ExperienceMode";
 import { Haiku } from "@/types/Haiku";
 
 export default async function LoadingPage({
@@ -12,7 +14,7 @@ export default async function LoadingPage({
 }) {
   // console.log('>> app.loading.render()', { mode, haikuId: haiku?.id });
 
-  const _mode = mode || process.env.EXPERIENCE_MODE || "haiku";
+  const _mode = (mode || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const fontColor = "#555555";
   const bgColor = "lightgrey";
   const textStyles = [
@@ -43,7 +45,7 @@ export default async function LoadingPage({
   return (
     <div>
       <NavOverlay mode={_mode} styles={textStyles} altStyles={altTextStyles} />
-      LOADING STATIC PAGE
+      <Loading styles={textStyles} />
       {/* <HaikuPage mode={_mode} loading={true} haiku={haiku || loadingHaiku} styles={textStyles} />       */}
     </div>
   )

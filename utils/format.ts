@@ -1,5 +1,6 @@
 import moment from "moment";
 import { round } from "./misc";
+import trackEvent from "./trackEvent";
 
 export function formatRange(range: string | number | any[], formatFn: any, unit?: string, unitMany?: string): string | undefined {
   // for convenience
@@ -44,9 +45,9 @@ export function formatTimeFromNow(v: number): string {
   const then = moment(v);
   const seconds = now.diff(then, "seconds");
   // console.log("utils.format.formatTimeFromNow", { seconds });
-  
+
   return seconds >= 0 && seconds < 40
-    ? "jost now"
+    ? "just now"
     : seconds < 0 && seconds > -40
       ? "now"
       : moment(v).fromNow();
@@ -77,13 +78,36 @@ export function formatBytes(bytes: number, decimals = 2) {
 }
 
 export function capitalize(s: string) {
+  // console.log("utils.misc.capitalize()", { s });
   return s && s
     .split(/\s+/)
-    .map((s: string) => `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
+    .map((s: string) => s && `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`)
     .join(" ");
 }
 
 export function upperCaseFirstLetter(s: string) {
-  if (!s || s.length == 0) return "";
+  // console.log("utils.misc.upperCaseFirstLetter()", { s });
+  
+  // trying to track down a bug I don't quite undestand
+  if (s && typeof (s) != "string") {
+    trackEvent("assertion-failed", {
+      type: "upperCaseFirstLetter",
+      typeof: typeof (s),
+      value: JSON.stringify(s)
+    });
+  }
+
+  if (!s || typeof (s) != "string") return "";
+  
   return s.substring(0, 1).toUpperCase() + s.substring(1);
+}
+
+export function formatActionInProgress(action: string, negative: boolean = false) {
+  // console.log("utils.misc.formatActionInProgress()", { action, negative });
+  return `${negative ? "un-" : ""}${action.endsWith("e") ? action.substring(0, action.length - 1) : action}ing`;
+}
+
+export function formatPastAction(action: string, negative: boolean = false) {
+  // console.log("utils.misc.formatPastAction()", { action, negative });
+  return `${negative ? "un-" : ""}${action.endsWith("e") ? action.substring(0, action.length - 1) : action}ed`;
 }

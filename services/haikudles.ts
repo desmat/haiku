@@ -32,8 +32,8 @@ export async function getHaikudles(query?: any): Promise<Haikudle[]> {
   return new Promise((resolve, reject) => resolve(haikudles.filter(Boolean)));
 }
 
-async function createInProgress(haikudle: Haikudle): Promise<Haikudle> {
-  const haiku = await getHaiku(haikudle.haikuId);
+async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudle> {
+  const haiku = await getHaiku(user, haikudle.haikuId);
   console.log(`>> services.haikudle.createInProgress`, { haiku });
 
   let words = haiku.poem
@@ -73,14 +73,14 @@ async function createInProgress(haikudle: Haikudle): Promise<Haikudle> {
   return haikudle;
 }
 
-export async function getHaikudle(id: string): Promise<Haikudle | undefined> {
+export async function getHaikudle(user: User, id: string): Promise<Haikudle | undefined> {
   console.log(`>> services.haikudle.getHaikudle`, { id });
 
   let haikudle = await store.haikudles.get(id);
   console.log(`>> services.haikudle.getHaikudle`, { id, haikudle });
 
   if (haikudle && !haikudle.inProgress) {
-    haikudle = await createInProgress(haikudle);
+    haikudle = await createInProgress(user, haikudle);
   }
 
   console.log(`>> services.haikudle.getHaikudle`, { haikudle });
@@ -101,7 +101,7 @@ export async function createHaikudle(user: User, haikudle: Haikudle): Promise<Ha
   } as Haikudle;
 
   if (!haikudle.inProgress) {
-    newHaikudle = await createInProgress(newHaikudle);
+    newHaikudle = await createInProgress(user, newHaikudle);
   }
 
   return store.haikudles.create(user.id, newHaikudle);
@@ -114,7 +114,7 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
     throw `Cannot delete haikudle with null id`;
   }
 
-  const haikudle = await getHaikudle(id);
+  const haikudle = await getHaikudle(user, id);
   if (!haikudle) {
     throw `Haikudle not found: ${id}`;
   }
@@ -122,6 +122,21 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
   if (!(haikudle.createdBy == user.id || user.isAdmin)) {
     throw `Unauthorized`;
   }
+
+  // remove daily haikudle and this user's userhaikudle (leave the others alone)
+  const userHaikudleId = `${id}-${user.id}`;
+  const [
+    dailyHaikudles, 
+    userHaikudle
+  ] = await Promise.all([
+    store.dailyHaikudles.find(),
+    store.userHaikudles.get(userHaikudleId),
+  ]);
+  const dailyHaikudle = dailyHaikudles
+    .filter((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikudleId == id)[0];
+
+  dailyHaikudle && store.dailyHaikudles.delete(user.id, dailyHaikudle.id);
+  userHaikudle && store.userHaikudles.delete(user.id, userHaikudle.id);
 
   return store.haikudles.delete(user.id, id);
 }
@@ -179,10 +194,13 @@ export async function getDailyHaikudle(id: string): Promise<DailyHaikudle | unde
 export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
   const dailyHaikudles = (await store.dailyHaikudles.find(query))
     .filter(Boolean);
+  const dailyHaikudleIds = dailyHaikudles
+    .map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
+
   // lookup theme; 
   // at some point we won't need to do this since we're now 
-  // saving the them with th daily haikudle record  
-  const haikus = await store.haikus.find(query);
+  // saving them with the daily haikudle record  
+  const haikus = await store.haikus.find({ id: dailyHaikudleIds });
   const themeLookup = new Map(haikus
     .map((haiku: Haiku) => [haiku.id, haiku.theme]));
 
@@ -200,9 +218,8 @@ export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
     .sort((a: any, b: any) => a.id - b.id);
 }
 
-export async function getNextDailyHaikudleId(): Promise<string> {
-  const dailyHaikudles = await getDailyHaikudles();
-  const ids = dailyHaikudles
+export async function getNextDailyHaikudleId(dailyHaikudles?: DailyHaikudle[]): Promise<string> {
+  const ids = (dailyHaikudles || await getDailyHaikudles())
     .map((dh: DailyHaikudle) => dh.id)
     .sort()
     .reverse();

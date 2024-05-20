@@ -1,6 +1,7 @@
 import React from 'react';
 import MainPage from '@/app/_components/MainPage';
 import NotFound from '@/app/not-found';
+import { ExperienceMode } from '@/types/ExperienceMode';
 import { LanguageType, isSupportedLanguage } from '@/types/Languages';
 import { Suspense } from 'react';
 import MainClientSidePage from '@/app/_components/MainClientSidePage';
@@ -27,22 +28,26 @@ export default async function Page({
   searchParams?: { [key: string]: string | undefined },
 }) {
   let id = searchParams && searchParams["id"] || params.slug && params.slug[0];
+  const version = searchParams && searchParams["version"];
   const lang = searchParams && searchParams["lang"] as LanguageType || "en";
-  const mode = searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE || "haiku";
+  const mode = (searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
-  console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, lang, mode });
+  const fontSize = searchParams && searchParams["fontSize"];  
+  console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
   if (!isSupportedLanguage(lang)) {
     return <NotFound mode={mode} />
   }
 
-  // not sure what's going on here
+  // not sure what's going on here (only when deployed to vercel)
   if (id == "index") {
     id = undefined;
   }
 
   const haiku = id ? await getHaiku(id) : await todaysHaiku();
   const { textStyles, altTextStyles } = haikuStyles(haiku);
+
+  // return <MainPage mode={mode} id={id} version={version} lang={lang} refreshDelay={refreshDelay} fontSize={fontSize} />
 
   return (
     <Suspense
@@ -58,6 +63,7 @@ export default async function Page({
           <HaikuPage
             haiku={haiku}
             mode={mode}
+            version={version}
             styles={textStyles}
             altStyles={altTextStyles}
           />

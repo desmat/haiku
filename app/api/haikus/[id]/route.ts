@@ -16,17 +16,15 @@ export async function GET(
   const { user } = await userSession(request);
   console.log('>> app.api.haiku.[id].GET', { params });
 
-  if (query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
+  if (!["showcase", "social-img", "haikudle-social-img"].includes(query.mode) && query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
     return NextResponse.json(
       { success: false, message: 'authorization failed' },
       { status: 403 }
     );
   }
 
-  const [haiku, dailyHaikus, dailyHaikudles, userHaiku, userHaikudle] = await Promise.all([
-    getHaiku(params.id, query.mode == "haikudle"),
-    getDailyHaikus(),
-    getDailyHaikudles(),
+  const [haiku, userHaiku, userHaikudle] = await Promise.all([
+    getHaiku(user, params.id, query.mode == "haikudle", query.version),
     getUserHaiku(user.id, params.id),
     getUserHaikudle(user?.id, params.id),
   ]);
@@ -65,7 +63,7 @@ export async function PUT(
   console.log('>> app.api.haiku.[id].PUT', { params });
 
   const { user } = await userSession(request)
-  const haiku = await getHaiku(params.id);
+  const haiku = await getHaiku(user, params.id);
 
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
@@ -88,6 +86,14 @@ export async function PUT(
     );
   }
 
+  const haikudle = await getHaikudle(user, params.id);
+  if (haikudle) {
+    return NextResponse.json(
+      { success: false, message: 'haiku has associated haikudle' },
+      { status: 423 }
+    );
+  }
+
   const savedHaiku = await saveHaiku(user, haikuToSave);
   return NextResponse.json({ haiku: savedHaiku });
 }
@@ -100,20 +106,14 @@ export async function DELETE(
 
   const { user } = await userSession(request)
 
-  // TODO LOCK DOWN TO ONLY ADMINS (or owners?)
-
   if (!params.id) {
     throw `Cannot delete haiku with null id`;
   }
 
-  // can't do that
-  // const dailyHaikudle = getDailyHaikudles({ haikuId: params.id });
-
   const [haiku, haikudle] = await Promise.all([
     deleteHaiku(user, params.id),
-    getHaikudle(params.id)
+    getHaikudle(user, params.id)
       .then((haikudle: Haikudle) => haikudle && deleteHaikudle(user, params.id)),
-    // dailyHaikudle && deleteDailyHaikudle(user, params.id),
   ]);
 
   return NextResponse.json({ haiku, haikudle });

@@ -4,6 +4,7 @@ import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
 import { GenericStore, Store } from "@/types/Store";
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
+import { User } from "@/types/User";
 
 type MenoryStoreEntry = {
   id?: string,
@@ -117,8 +118,8 @@ class MemoryStore<T extends MenoryStoreEntry> implements GenericStore<T> {
     // return new Promise((resolve) => resolve(updatedValue));
   }
 
-  async delete(userId: string, id: string): Promise<T> {
-    console.log(`>> services.stores.memory.MemoryStore<${this.key}>.delete`, { id });
+  async delete(userId: string, id: string, options: any = {}): Promise<T> {
+    console.log(`>> services.stores.memory.MemoryStore<${this.key}>.delete`, { id, options });
 
     throw "Not implemented";
 
@@ -153,5 +154,6 @@ export function create(): Store {
     userHaikudles: new MemoryStore<UserHaikudle>("userhaikudle"),
     userHaikus: new MemoryStore<UserHaiku>("userhaiku"),
     userUsage: new MemoryStore<UserUsage>("userusage"),
+    user: new MemoryStore<User>("user"),
   }
 }

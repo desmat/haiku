@@ -1,3 +1,4 @@
+import { formatTimeFromNow } from "@/utils/format";
 import { Haiku } from "./Haiku";
 
 export type OnboardingStep = {
@@ -30,11 +31,11 @@ export const haikuOnboardingSteps = [
     style: { bottom: "10%" },
   },
   {
-    focus: "logo-and-generate",
+    focus: "generate",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div>A new haiku will be featured every day, maybe one of yours! Click on the logo to see today's, come back tomorrow for more.</div>
-        <div>To create your own haiku hit the <b>Create</b> button at the top of the screen and pick a theme: AI will get you started and the rest is up to!</div>
+        <div>A new haiku will be featured every day, maybe one of yours! Click on the logo in the side panel to see today's, come back tomorrow for more.</div>
+        <div>To create your own haiku hit the <b>Create</b> button at the top of the screen, maybe pick a theme and AI will get you started. The rest is up to!</div>
       </div>
     `,
     style: { bottom: "10%" },
@@ -44,8 +45,8 @@ export const haikuOnboardingSteps = [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>Find all your haikus in the side panel to the left.</div>
-        <div>To learn about me, access the source code, copy or share this haiku see the buttons at the bottom.</div>
-        <div>For the best mobile experience hit the 'Add to Home Screen' under the Share or three-dot menu icon.</div>
+        <div>To learn about me, access the source code, <b>like</b>, <b>copy</b> or <b>share</b> this haiku see the buttons at the bottom.</div>
+        <div>For the best mobile experience hit the <b>Add to Home Screen</b> under the <b>Share</b> or <b>three-dot menu icon</b>.</div>
         <div>Enjoy <b>Haiku Genius!</b></div>        
       </div>
     `,
@@ -58,12 +59,39 @@ export const haikuGeneratedOnboardingSteps = (haiku: Haiku) => [
     focus: "poem-actions",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div>This haiku was initially generated on the theme <i>${haiku?.theme}</i>${haiku?.mood ? ` with a <i>${haiku?.mood}</i> mood using <b>ChatGPT</b>` : ""}. Both were used to generate art using <b>DALL-E</b> with a curated prompt to harmonize together.</div>
-        <div>Curious about those prompts? See <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L106-L108" target="_blank">here</a></b> and <b><a href="https://github.com/desmat/haiku/blob/main/services/openai.ts#L17-L31" target="_blank">here</a></b> in the source code.</b></div>
-        <div>Try the buttons next to the poem to edit or regenerate. Use your mouse, keyboard, arrow keys, Tab, Escape and Enter keys to edit, cancel or save.</div>
-        <div>Level up your creativity with our AI assistant: save with empty or incomplete lines, or "..." as placeholders for to fill in.
+        <div>
+          This haiku was${haiku?.version ? " initially" : ""} generated on the theme <i>${haiku?.theme}</i>${haiku?.mood ? ` with a <i>${haiku?.mood}</i> mood using <b>ChatGPT</b>` : ""}. 
+          Both theme and mood were used to generate the art using <b>DALL-E</b> with a curated prompt to harmonize with the poem, with specific instructions: <i>${haiku.artStyle}</i>.
+        </div>
+        <div>Try the buttons next to the poem to edit or regenerate the poem, or generate another image with the same theme and mood. Use your mouse, keyboard, arrow keys, Tab, Escape and Enter keys to <b>edit, cancel or save.</b></div>
+        <div>Level up your creativity with AI! save with empty or incomplete lines, or use "..." placeholders for <b>AI to fill in.</b>
       </div>`,
-    style: { bottom: "50%" },
+    style: { top: "0.5rem" },
+  },
+];
+
+export const haikuPromptSteps = (haiku: Haiku) => [
+  {
+    focus: "poem",
+    message: `
+      <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+        <div>Theme and mood: <i>${haiku.theme}</i> and <i>${haiku.mood}</i></div>      
+        <div>Image style: <i>${haiku.artStyle || "N/A"}</i></div>      
+        <!-- <div>Poem prompt: <i>${haiku.poemPrompt || "N/A"}</i></div> -->
+        <div>Image prompt: <i>${haiku.imagePrompt || "N/A"}</i></div>
+        ${haiku.version || haiku.deprecated || haiku.deprecatedAt
+          ? `<div>Version: ${haiku.version}
+            ${haiku.version
+            ? ` <a href="/${haiku.id}?version=${haiku.version - 1}">(Load previous)</a>`
+            : ""}
+            ${haiku.deprecated || haiku.deprecatedAt
+            ? ` <a href="/${haiku.id}">(Load current)</a>`
+            : ""}</div>`
+          : ""}    
+        <div>Created by: user ${haiku.createdBy} ${formatTimeFromNow(haiku.createdAt || 0)}</div>      
+        ${haiku.updatedBy ? `<div>Updated by: user ${haiku.updatedBy} ${formatTimeFromNow(haiku.updatedAt || 0)}</div>` : ""} 
+      </div>`,
+    style: { bottom: "50%", transform: "translateY(50%)" },
   },
 ];
 
@@ -94,7 +122,7 @@ export const haikudleOnboardingSteps = [
     focus: "logo-and-generate",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div>A new haiku puzzle will be featured every day. Click on the logo to return to today's, and come back to tomorrow for a new puzzle!</div>
+        <div>A new haiku puzzle will be featured every day. Click on the logo in the side panel to return to today's, and come back to tomorrow for a new puzzle!</div>
         <div>To create your very own haikus hit the <b>Create</b> button at the top of the screen and pick a theme or subject: AI will get you started writing a poem and will generate art work to match.</div>
       </div>
     `,

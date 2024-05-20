@@ -2,130 +2,77 @@
 
 import moment from 'moment';
 import Link from 'next/link'
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation'
-import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub } from 'react-icons/io5';
+import { IoSparkles, IoAddCircle, IoHelpCircle, IoLogoGithub, IoHeartSharp } from 'react-icons/io5';
 import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
+import { BiLogoInstagramAlt } from "react-icons/bi";
+import { RiTwitterFill } from "react-icons/ri";
 import { HiSwitchVertical } from "react-icons/hi";
-import { MdMail, MdHome, MdDelete } from "react-icons/md";
-import { BsChevronCompactRight, BsChevronCompactLeft, BsDashLg, BsDatabaseFillUp } from "react-icons/bs";
+import { MdHome, MdDelete, MdFacebook } from "react-icons/md";
+import { BsDatabaseFillUp } from "react-icons/bs";
 import { FaRandom } from "react-icons/fa";
 import * as font from "@/app/font";
 import useAlert from '@/app/_hooks/alert';
 import useUser from '@/app/_hooks/user';
-import { LanguageType, supportedLanguages } from '@/types/Languages';
+import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haiku } from '@/types/Haiku';
-import { DailyHaikudle } from '@/types/Haikudle';
-import { User } from '@/types/User';
-import { formatTimeFromNow } from '@/utils/format';
-import { byCreatedAtDesc } from '@/utils/sort';
+import { LanguageType, supportedLanguages } from '@/types/Languages';
+import trackEvent from '@/utils/trackEvent';
 import { USAGE_LIMIT } from '@/types/Usage';
 import { StyledLayers } from './StyledLayers';
+import { Logo } from './Logo';
 import PopOnClick from './PopOnClick';
-import trackEvent from '@/utils/trackEvent';
+import SidePanel from './SidePanel';
+import { User } from '@/types/User';
 
-export function Loading({ onClick }: { onClick?: any }) {
-  const defaultOnClick = () => document.location.href = "/";
-  return (
-    <div
-      onClick={onClick || defaultOnClick}
-      className='_bg-pink-200 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-dark-2 opacity-5 animate-pulse cursor-pointer z-50'
-    >
-      <div className="animate-pulse flex flex-col items-center">
-        <div>読込</div>
-        <div>Loading</div>
-      </div>
-    </div>
-  );
-}
-
-export function Logo({
-  mode,
-  href,
-  onClick,
-  styles,
-  altStyles,
-  onboardingElement,
-}: {
-  mode: string,
-  href?: string,
-  onClick?: any,
-  styles?: any,
-  altStyles?: any,
-  onboardingElement?: string,
-}) {
-  const isHaikudleMode = mode == "haikudle";
-  const isSocialImgMode = mode == "social-img";
-
-  const ai = (
-    <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode ? "text-[80pt]" : "text-[22pt] md:text-[28pt]"} font-semibold`}>
-      AI
-    </span>
-  );
-
-  const styledAi = altStyles
-    ? (
-      <StyledLayers
-        styles={onboardingElement && !onboardingElement.startsWith("logo")
-          ? altStyles.slice(0, 1)
-          : altStyles
-        }
-      >
-        {ai}
-      </StyledLayers>
-    )
-    : (
-      <div>{ai}</div>
-    );
-
-  return (
-    <Link
-      onClick={onClick}
-      href={href || "/"}
-      className={`logo hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
-    >
-      <div className={`${font.architects_daughter.className} flex flex-row`}>
-        <StyledLayers
-          styles={onboardingElement && !onboardingElement.startsWith("logo")
-            ? styles.slice(0, 1)
-            : styles
-          }
-        >h</StyledLayers>
-        {styledAi}
-        <StyledLayers
-          styles={onboardingElement && !onboardingElement.startsWith("logo")
-            ? styles.slice(0, 1)
-            : styles
-          }
-        >{isHaikudleMode /* || isSocialImgMode */ ? "kudle" : "kuGenius"}</StyledLayers>
-      </div>
-    </Link>
-  )
-}
+const haikuThemeSuggestions = [
+  "",
+  "",
+  "",
+  "",
+  "",
+  "nature",
+  "mountains",
+  "cherry blossoms",
+  "spring",
+  "summer",
+  "autumn",
+  "winter",
+  "flowers",
+  "summer in Paris",
+  "city at night",
+  "springtime in Kyoto",
+  "rainy morning",
+  "sunset on the ocean",
+  "sunrise on the lake",
+];
 
 export function GenerateIcon({
   onClick,
   sizeOverwrite,
+  style,
   children,
 }: {
   onClick?: any,
   sizeOverwrite?: string,
+  style?: any
   children?: React.ReactNode,
 }) {
-  const icon = <IoSparkles className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-6 w-6 md:h-8 md:w-8"}`} />;
+  const icon = <IoSparkles style={style} className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-5 w-5 md:h-7 md:w-7 md:mt-[-0.3rem] mt-[-0.4rem]"}`} />;
 
   return (
     <Link
       className="generate-icon flex flex-row m-auto gap-2 hover:no-underline"
-      style={{ cursor: onClick ? "pointer" : "default" }}
+      style={{ cursor: style || onClick ? "pointer" : "default" }}
       href="#"
       onClick={(e: any) => {
         e.preventDefault();
-        onClick && onClick();
+        onClick && onClick(e);
       }}
     >
       {children &&
-        <div className={`${font.architects_daughter.className} _bg-yellow-200 my-[-0.3rem] md:text-[24pt] sm:text-[22pt] text-[18pt]`}>
+        <div className={`${font.architects_daughter.className} _bg-yellow-200 md:mt-[-0.2rem] mt-[-0.2rem] md:text-[20pt] text-[16pt]`}>
           {children}
         </div>
       }
@@ -136,11 +83,234 @@ export function GenerateIcon({
   )
 }
 
+export function GenerateInput({
+  user,
+  color,
+  bgColor,
+  styles,
+  altStyles,
+  generate,
+  onboardingElement,
+}: {
+  user: User,
+  color?: any,
+  bgColor?: any,
+  styles?: any,
+  altStyles?: any,
+  generate?: any,
+  onboardingElement?: string | undefined,
+}) {
+  const [value, setValue] = useState<string | undefined>();
+  const [active, setActive] = useState(false);
+  const [focus, setFocus] = useState(false);
+  const [clickingGenerate, setClickingGenerate] = useState(false);
+  const [haikuTheme, setHaikuTheme] = useState("");
+  const [intervalId, setIntervalId] = useState<any | undefined>();
+  const ref = useRef();
+  // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
+
+  const onboarding = onboardingElement == "generate";
+  const dateCode = moment().format("YYYYMMDD");
+  const exceededUsageLimit = !user?.isAdmin && (user?.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU;
+
+  const handleChange = (e: any) => {
+    setActive(true);
+    // setValue(e.target.value);
+  }
+
+  const handleKeyDown = (e: any) => {
+    // console.log(">> app._components.Nav.GenerateInput.handleKeyDown()", { e, key: e.key });
+    if (e.key == "Escape") {
+      trackEvent("cancelled-generate-haiku", {
+        userId: user?.id,
+      });
+      setActive(false);
+      // @ts-ignore
+      ref.current.value = "";
+      // @ts-ignore
+      ref.current.blur();
+    } else if (e.key == "Enter") {
+      !exceededUsageLimit && handleClickedGenerate && handleClickedGenerate();
+    }
+  }
+
+  const handleFocus = () => {
+    trackEvent("clicked-generate-haiku-input", {
+      userId: user?.id,
+    });
+
+    setActive(true);
+    setFocus(true);
+
+    // @ts-ignore
+    if (!ref.current.value) {
+      // @ts-ignore
+      ref.current.value = haikuTheme;
+      // @ts-ignore
+      ref.current.select();
+    }
+  }
+
+  const handleBlur = () => {
+    setActive(false);
+    setFocus(false);
+  }
+
+  const handleClickedGenerate = () => {
+    // @ts-ignore
+    // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate()', { ref, active, value: ref.current.value, focus });
+
+    setActive(false);
+    setFocus(false);
+    setClickingGenerate(false);
+    setValue(undefined);
+    // @ts-ignore
+    ref.current.blur();
+
+    // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate() generate');
+    // @ts-ignore
+    generate && generate(focus || ref.current.value ? ref.current.value : haikuTheme);
+    // @ts-ignore
+    ref.current.value = "";
+  };
+
+  useEffect(() => {
+    !intervalId && setIntervalId(
+      setInterval(() => {
+        setHaikuTheme(haikuThemeSuggestions[Math.floor(Math.random() * haikuThemeSuggestions.length)]);
+      }, 5000)
+    );
+
+    return () => intervalId && clearInterval(intervalId);
+  }, []);
+
+  return (
+    <div
+      onMouseOver={() => {
+        !exceededUsageLimit && setActive(true);
+      }}
+      onMouseOut={() => {
+        // @ts-ignore
+        if (!ref.current.value) {
+          setActive(false);
+        }
+      }}
+      className={`GenerateInput _bg-pink-200 absolute
+        top-[0.6rem] md:top-[0.5rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
+        w-[calc(100vw-3.6rem)] md:w-[550px]
+      `}
+      style={{ zIndex: onboarding ? "50" : "20" }}
+    >
+      <div className="onboarding-container" style={{ width: "auto" }}>
+        {onboarding &&
+          <div className="onboarding-focus double" />
+        }
+        <StyledLayers styles={onboarding ? styles.slice(0, 3) : styles.slice(0, 2)}>
+          <div className="bg-yellow-200 flex flex-row gap-0">
+            <div className={`_bg-yellow-200 haiku-theme-input flex-grow text-[12pt] md:text-[16pt]`}>
+              {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
+              <style
+                dangerouslySetInnerHTML={{
+                  __html: `
+                  .haiku-theme-input input {
+                    background: none;
+                    _background: pink; /* for debugging */
+                    outline: 2px solid ${bgColor || ""}88;
+                    background-color: ${bgColor || "white"}44;
+                    caret-color: ${color || "black"};
+                    border-radius: 5px;
+                    height: auto;
+                    WebkitTextStroke: 0.5px ${bgColor};
+                    -webkit-text-stroke: 1.25px ${color}66;
+                    text-stroke: 1.0px ${color}66;
+                  }
+                  .haiku-theme-input.poem-line-${/* !editing && */ /* !saving &&  !onboarding && aboutToEditLine */ 42} input {
+                    outline: none;
+                    background-color: ${bgColor || "white"}44;  
+                  }
+                  ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus"} {
+                    outline: 2px solid ${bgColor || ""}88;
+                    background-color: ${bgColor || "white"}66;
+                  }
+                  ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus::placeholder"} {
+                    opacity: 0;
+                  }
+                  .haiku-theme-input input::selection { 
+                    background: ${color || "black"}66 
+                  }
+                  .haiku-theme-input input::placeholder {
+                    color: ${color || "black"};
+                    -webkit-text-stroke: 1px ${color};
+                    text-stroke: 1px ${color};
+                    opacity: 0.4;
+                    text-align: center; 
+                  }
+                  .haiku-theme-input input::-ms-input-placeholder { /* Edge 12 -18 */
+                    color: ${color || "black"};
+                    text-stroke: 1px ${color};
+                    opacity: 0.4;
+                    text-align: center; 
+                  }`
+                }}
+              >
+              </style>
+              <div className="relative">
+                {/* <StyledLayers styles={styles.slice(0, 2)}> */}
+                <input
+                  //@ts-ignore
+                  ref={ref}
+                  maxLength={46}
+                  placeholder={`A haiku about... ${haikuTheme}`}
+                  disabled={exceededUsageLimit}
+                  value={undefined}
+                  onChange={handleChange}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  className={`w-full absolute top-0 left-0
+                    pt-[0.1rem] pr-[7.8rem]  md:pr-[10rem] pb-[0.1rem] pl-[0.7rem]
+                    mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0 md:mt-[0.1rem] md:mr-[0rem]      
+                  `}
+                  style={{ cursor: exceededUsageLimit ? "not-allowed" : "pointer" }}
+                  title={exceededUsageLimit
+                    ? "Exceeded daily limit: try again later"
+                    : "Enter theme, subject or leave blank, and click the button to create a new haiku"
+                  }
+                />
+              </div>
+            </div>
+            <div className="relative w-0">
+              <div
+                className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-20"
+                style={{
+                  opacity: active ? "1" : "0.6",
+                }}
+                onMouseDown={() => setClickingGenerate(true)}
+                onMouseUp={() => clickingGenerate && handleClickedGenerate()}
+                title={exceededUsageLimit ? "Exceeded daily limit: try again later" : "Create a new haiku"}
+              >
+                <PopOnClick>
+                  <StyledLayers styles={altStyles.slice(0, 2)}>
+                    <GenerateIcon style={{ cursor: exceededUsageLimit ? "not-allowed" : "pointer" }}>
+                      Create
+                    </GenerateIcon>
+                  </StyledLayers>
+                </PopOnClick>
+              </div>
+            </div>
+          </div>
+        </StyledLayers>
+      </div>
+    </div>
+  )
+}
+
 function BottomLinks({
   mode,
   haiku,
   lang,
   styles,
+  altStyles,
   backupInProgress,
   onboardingElement,
   onRefresh,
@@ -151,11 +321,13 @@ function BottomLinks({
   onBackup,
   onCopyHaiku,
   onCopyLink,
+  onLikeHaiku,
 }: {
-  mode: string,
+  mode: ExperienceMode,
   haiku?: Haiku,
   lang?: LanguageType,
   styles?: any,
+  altStyles?: any
   backupInProgress?: boolean,
   onboardingElement?: string | undefined,
   onRefresh: any,
@@ -166,11 +338,12 @@ function BottomLinks({
   onBackup?: any,
   onCopyHaiku?: any,
   onCopyLink?: any,
+  onLikeHaiku?: any,
 }) {
-  // console.log("BottomLinks", { lang })
+  // console.log("BottomLinks", { lang, haiku })
   const router = useRouter();
   const user = useUser((state: any) => state.user);
-  const [alert] = useAlert((state: any) => [state.plain]);
+  const haikuMode = mode == "haiku";
 
   return (
     <div
@@ -195,7 +368,7 @@ function BottomLinks({
             <IoHelpCircle className="text-2xl" />
           </PopOnClick>
         </div>
-        <Link
+        {/* <Link
           key="github"
           href="https://github.com/desmat/haiku"
           target="_blank"
@@ -209,22 +382,75 @@ function BottomLinks({
           <PopOnClick color={haiku?.bgColor}>
             <IoLogoGithub className="text-xl" />
           </PopOnClick>
-        </Link>
+        </Link> */}
+        {!user?.isAdmin &&
+          <Link
+            key="web"
+            href="https://www.desmat.ca"
+            target="_blank"
+            onClick={() => {
+              trackEvent("clicked-web", {
+                userId: user?.id,
+                location: "bottom-links",
+              });
+            }}
+          >
+            <PopOnClick color={haiku?.bgColor}>
+              <MdHome className="text-2xl" />
+            </PopOnClick>
+          </Link>
+        }
+        {haikuMode && !user?.isAdmin &&
         <Link
-          key="web"
-          href="https://www.desmat.ca"
+          key="twitter"
+          href="https://x.com/haiku_genius"
           target="_blank"
           onClick={() => {
-            trackEvent("clicked-web", {
+            trackEvent("clicked-twitter", {
               userId: user?.id,
               location: "bottom-links",
             });
           }}
         >
           <PopOnClick color={haiku?.bgColor}>
-            <MdHome className="text-2xl" />
+            <RiTwitterFill className="text-2xl" />
           </PopOnClick>
         </Link>
+        }
+        {haikuMode && !user?.isAdmin &&
+        <Link
+          key="facebook"
+          href="https://www.facebook.com/haikugenius"
+          target="_blank"
+          onClick={() => {
+            trackEvent("clicked-facebook", {
+              userId: user?.id,
+              location: "bottom-links",
+            });
+          }}
+        >
+          <PopOnClick color={haiku?.bgColor}>
+            <MdFacebook className="text-2xl" />
+          </PopOnClick>
+        </Link>
+        }
+        {haikuMode && !user?.isAdmin && 
+        <Link
+          key="instagram"
+          href="https://www.instagram.com/haiku_genius/"
+          target="_blank"
+          onClick={() => {
+            trackEvent("clicked-instagram", {
+              userId: user?.id,
+              location: "bottom-links",
+            });
+          }}
+        >
+          <PopOnClick color={haiku?.bgColor}>
+            <BiLogoInstagramAlt className="text-2xl" />
+          </PopOnClick>
+        </Link>
+        }
         {/* <Link
           key="email"
           href={`mailto:haiku${mode == "haikudle" ? "dle" : ""}@desmat.ca`}
@@ -232,11 +458,46 @@ function BottomLinks({
         >
           <MdMail className="text-xl" />
         </Link> */}
+        {haiku?.id && onLikeHaiku &&
+          <StyledLayers
+            styles={haiku.likedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
+          >
+            <div
+              key="heart"
+              title={`${haiku.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user?.isAdmin ? `(${haiku.numLikes} like${!haiku.numLikes || haiku.numLikes > 1 ? "s" : ""})` : ""}`}
+              className="cursor-pointer relative"
+              onClick={onLikeHaiku}
+            >
+              {user?.isAdmin && haiku?.numLikes > 0 &&
+                <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-red-600">
+                  {/* <span className="relative text-white text-[4pt] p-[0.2rem]">{haiku?.numLikes}</span> */}
+                </div>
+              }
+              <PopOnClick color={haiku?.bgColor} >
+                <IoHeartSharp className="text-xl" />
+              </PopOnClick>
+            </div>
+          </StyledLayers>
+        }
+        {(!haiku?.id || !onLikeHaiku) &&
+          <div className="opacity-40">
+            <IoHeartSharp className="text-xl" />
+          </div>
+        }
         <div
           key="copy"
           className={haiku?.id && onCopyHaiku ? "cursor-copy" : "opacity-40"}
           title="Copy haiku poem "
-          onClick={() => onCopyHaiku && onCopyHaiku()}
+          onClick={() => {
+            if (onCopyHaiku) {
+              trackEvent("haiku-copied", {
+                userId: user?.id,
+                id: haiku.id,
+                location: "bottom-links",
+              });
+              onCopyHaiku();
+            }
+          }}
         >
           <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onCopyHaiku}>
             <FaCopy className="text-xl" />
@@ -374,340 +635,6 @@ function BottomLinks({
   )
 }
 
-function SidePanel({
-  user,
-  mode,
-  styles,
-  altStyles,
-  bgColor,
-  onboardingElement,
-  onShowAbout,
-  onSelectHaiku,
-}: {
-  user: User,
-  mode?: string
-  styles: any[],
-  altStyles: any[],
-  bgColor: string,
-  onboardingElement?: string,
-  onShowAbout?: any,
-  onSelectHaiku?: any,
-}) {
-  const [panelOpened, setPanelOpened] = useState(false);
-  const [panelAnimating, setPanelAnimating] = useState(false);
-  const [panelPinned, setPanelPinned] = useState(false);
-  const pageSize = 20;
-  const [numPages, setNumPages] = useState(1);
-  const [listMode, setListMode] = useState<"haiku" | "dailyHaiku" | "dailyHaikudle">("haiku");
-
-  const [
-    userHaikus,
-    userDailyHaikus,
-    userDailyHaikudles,
-  ] = useUser((state: any) => [
-    state.haikus ? Object.values(state.haikus) : [],
-    state.dailyHaikus ? Object.values(state.dailyHaikus) : [],
-    state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
-  ]);
-  const onboarding = !!(onboardingElement && ["side-panel", "side-panel-and-bottom-links"].includes(onboardingElement));
-  // console.log(">> app._component.Nav.SidePanel.render()", { user, userUser, userState, panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles, userHaikus });
-
-  const toggleMenuOpened = () => {
-    // console.log(">> app._component.SidePanel.toggleMenuOpened", {});
-    if (onboardingElement) return;
-
-    setPanelAnimating(true);
-    setTimeout(() => setPanelAnimating(false), 100);
-
-    if (!panelOpened) {
-      trackEvent("side-panel-opened", {
-        userId: user?.id,
-      });
-    }
-
-    if (panelOpened) setPanelPinned(false);
-    setPanelOpened(!panelOpened);
-  }
-
-  const loadMore = (e: any) => {
-    e.preventDefault();
-    setNumPages(numPages * 2);
-  };
-
-  const handleKeyDown = async (e: any) => {
-    // console.log(">> app._component.SidePanel.handleKeyDown", { panelOpened, panelAnimating });
-    if (e.key == "Escape") {
-      setPanelOpened(false);
-    }
-  };
-
-  const isUserAdmin = (userId?: string): boolean => {
-    // @ts-ignore
-    const ret = (process.env.ADMIN_USER_IDS || "").split(",").includes(userId);
-    // console.log(">> app._component.SidePanel.isUserAdmin", { userId, adminUserIds: process.env.ADMIN_USER_IDS, isUserAdmin: ret });
-    return ret;
-  };
-
-  const byGeneratedOrSolvedOrViewedDesc = (a: any, b: any) => {
-    return (b.generatedAt || b.solvedAt || b.viewedAt || 0) - (a.generatedAt || a.solvedAt || a.viewedAt || 0)
-  }
-
-  useEffect(() => {
-    // console.log(">> app._component.Nav.useEffect", { mode, haiku });
-    document.body.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.body.removeEventListener('keydown', handleKeyDown)
-    }
-  }, []);
-
-  if (!userHaikus.length) {
-    return <></>
-  }
-
-  return (
-    <div className="side-panel">
-      {/* Area behind side panel but in front of main content to allow users to click and close the panel */}
-      {panelOpened &&
-        <div
-          className="_bg-blue-400 absolute top-0 left-0 w-[100vw] h-[100vh] z-20"
-          onClick={() => panelOpened && toggleMenuOpened()}
-        >
-        </div>
-      }
-      <div
-        className={`_bg-pink-200 absolute top-0 h-full w-[27rem] max-w-[90vw] ${onboarding ? "z-50" : "z-20"} ${!onboarding && "transition-all"} _blur-[10px]`}
-        style={{
-          backgroundColor: `${styles[styles.length - 1]?.color ? styles[styles.length - 1]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
-          backdropFilter: "blur(10px)",
-          left: panelOpened ? 0 : "-27rem"
-        }}
-        onMouseLeave={() => panelOpened && !panelPinned && toggleMenuOpened()}
-      >
-        <div className="_bg-pink-400 flex flex-col h-[100vh]">
-          {/* hotspot to open the side panel on mouse hover */}
-          <div
-            className="_bg-red-400 group absolute top-[4rem] right-0 w-[1rem] mr-[-1rem] h-[calc(100vh-4rem)] z-90"
-            onMouseEnter={() => !panelOpened && !panelAnimating && toggleMenuOpened()}
-            onClick={() => panelOpened && toggleMenuOpened()}
-          >
-          </div>
-          <div
-            className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[22pt] _md:text-[36pt] bold py-5 _opacity-40 hover:opacity-100 transition-all"
-            onClick={() => {
-              if (!panelOpened) {
-                trackEvent("clicked-open-side-panel", {
-                  userId: user?.id,
-                });
-              }
-              !panelOpened && !panelPinned && setPanelPinned(true);
-              toggleMenuOpened();
-            }}
-            style={{
-              // filter: `drop-shadow(0px 0px 16px ${bgColor})`, // what does this even do?!
-              marginRight: panelOpened ? "-0.2rem" : "-1.7rem",
-              display: panelAnimating ? "none" : "block",
-              transitionDuration: "80ms",
-            }}
-            title={panelOpened ? "Hide side panel" : "Show side panel"}
-          >
-            <div className="onboarding-container">
-              {onboardingElement && ["side-panel", "_side-panel-and-bottom-links"].includes(onboardingElement) &&
-                <div className="onboarding-focus" />
-              }
-              {onboardingElement && ["_side-panel", "side-panel-and-bottom-links"].includes(onboardingElement) &&
-                <div className="onboarding-focus double" />
-              }
-              <PopOnClick
-                active={!!(onboardingElement && onboardingElement.includes("side-panel"))}
-              >
-                <StyledLayers
-                  styles={onboardingElement && !onboardingElement.includes("side-panel")
-                    ? styles.slice(0, 1)
-                    : styles
-                  }
-                >
-                  <div className="_bg-orange-400 rotate-90 group-hover:hidden ml-[-1rem]">
-                    <BsDashLg />
-                  </div>
-                  <div className="hidden group-hover:block">
-                    {panelOpened &&
-                      <div className="mr-[0.1rem] _md:mr-[0.3rem]">
-                        <BsChevronCompactLeft />
-                      </div>
-                    }
-                    {!panelOpened &&
-                      <div className="_bg-orange-400 mr-[-0.2rem] ml-[-0.8rem] _md:mr-[-0.3rem]">
-                        <BsChevronCompactRight />
-                      </div>
-                    }
-                  </div>
-                </StyledLayers>
-              </PopOnClick>
-            </div>
-          </div>
-          {/* Spacer for the logo to punch trough */}
-          <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">
-          </div>
-          <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
-            <div className="py-2">
-              <StyledLayers styles={styles}>
-                {user?.isAdmin && listMode == "haiku" &&
-                  <div
-                    className="cursor-pointer"
-                    title="Show daily haikudles"
-                    onClick={() => setListMode("dailyHaiku")}
-                  >
-                    Latest Haikus
-                  </div>
-                }
-                {user?.isAdmin && listMode == "dailyHaiku" &&
-                  <div
-                    className="cursor-pointer"
-                    title="Show daily haikudles"
-                    onClick={() => setListMode("dailyHaikudle")}
-                  >
-                    Daily Haikus
-                  </div>
-                }
-                {user?.isAdmin && listMode == "dailyHaikudle" &&
-                  <div
-                    className="cursor-pointer"
-                    title="Show Haikus"
-                    onClick={() => setListMode("haiku")}
-                  >
-                    Daily Haikudles
-                  </div>
-                }
-                {!user.isAdmin &&
-                  <>Your haikus</>
-                }
-              </StyledLayers>
-            </div>
-            {/* note: don't render when not opened to save on resources */}
-            {listMode == "haiku" && (panelAnimating || panelOpened) && userHaikus
-              // .filter((h: Haiku) => h.createdBy == user.id)
-              .sort(user.isAdmin ? byCreatedAtDesc : byGeneratedOrSolvedOrViewedDesc)
-              .slice(0, numPages * pageSize) // more than that and things blow up on safari
-              .map((h: Haiku, i: number) => (
-                <StyledLayers key={i} styles={altStyles}>
-                  <Link
-                    href={`/${h.haikuId || h.id}`}
-                    onClick={(e: any) => {
-                      e.preventDefault();
-                      /* !panelPinned && */ toggleMenuOpened();
-                      onSelectHaiku && onSelectHaiku(h.haikuId || h.id);
-                    }}
-                  >
-                    <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>
-                    {user?.isAdmin &&
-                      <span className="font-normal"> generated {formatTimeFromNow(h.createdAt)} by {h.createdBy == user?.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
-                    }
-                    {!user?.isAdmin && h.generatedAt &&
-                      <span className="font-normal"> generated {formatTimeFromNow(h.generatedAt)}</span>
-                    }
-                    {!user?.isAdmin && !h.generatedAt && h.solvedAt &&
-                      <span className="font-normal"> solved {formatTimeFromNow(h.solvedAt)}{h.moves ? ` in ${h.moves} move${h.moves > 1 ? "s" : ""}` : ""}</span>
-                    }
-                    {!user?.isAdmin && !h.generatedAt && !h.solvedAt && h.viewedAt &&
-                      <span className="font-normal"> viewed {formatTimeFromNow(h.viewedAt)}</span>
-                    }
-                  </Link>
-                </StyledLayers>
-              ))
-            }
-            {["dailyHaiku", "dailyHaikudle"].includes(listMode) && user?.isAdmin && (panelAnimating || panelOpened) && (listMode == "dailyHaiku" && userDailyHaikus || userDailyHaikudles)
-              // .filter((h: Haiku) => h.createdBy == user.id)
-              .sort((a: any, b: any) => b.id - a.id)
-              .slice(0, numPages * pageSize) // more than that and things blow up on safari
-              .map((dh: DailyHaikudle, i: number) => (
-                <StyledLayers key={i} styles={altStyles}>
-                  <Link
-                    href={`/${dh.haikuId}`}
-                    onClick={(e: any) => {
-                      if (onSelectHaiku) {
-                        e.preventDefault();
-                        /* !panelPinned && */ toggleMenuOpened();
-                        onSelectHaiku(dh.haikuId);
-                      }
-                    }}
-                  >
-                    <span className="capitalize font-semibold">&quot;{dh.theme}&quot;</span>
-                    <span className="font-normal"> {dh.id == moment().format("YYYYMMDD") ? "Today" : moment(dh.id).format('MMMM Do YYYY')}</span>
-                  </Link>
-                </StyledLayers>
-              ))
-            }
-            {(Object.values(listMode == "haiku" ? userHaikus : userDailyHaikudles).length > numPages * pageSize) &&
-              <div
-                className="py-2 cursor-pointer"
-                onClick={loadMore}
-              >
-                <StyledLayers styles={styles}>
-                  Load more
-                </StyledLayers>
-              </div>
-            }
-          </div>
-          <div className="_bg-purple-400 flex flex-row justify-center px-2 pt-4 pb-2 h-fit w-full">
-            <StyledLayers styles={styles}>
-              <div className="_bg-purple-200 flex flex-row gap-3">
-                <Link
-                  key="about"
-                  className="flex flex-row"
-                  href="#"
-                  title="About"
-                  onClick={(e: any) => {
-                    e.preventDefault();
-                    trackEvent("clicked-about", {
-                      userId: user?.id,
-                      location: "side-panel",
-                    });
-                    onShowAbout && onShowAbout();
-                  }}
-                >
-                  <IoHelpCircle className="text-2xl" />
-                  About
-                </Link>
-                <Link
-                  key="github"
-                  className="flex flex-row gap-1"
-                  href="https://github.com/desmat/haiku"
-                  target="_blank"
-                  onClick={() => {
-                    trackEvent("clicked-github", {
-                      userId: user?.id,
-                      location: "side-panel",
-                    });
-                  }}
-                >
-                  <IoLogoGithub className="text-xl mt-[0.2rem]" />
-                  github.com/desmat
-                </Link>
-                <Link
-                  key="web"
-                  className="flex flex-row gap-1"
-                  href="https://www.desmat.ca"
-                  target="_blank"
-                  onClick={() => {
-                    trackEvent("clicked-web", {
-                      userId: user?.id,
-                      location: "side-panel",
-                    });
-                  }}
-                >
-                  <MdHome className="text-2xl" />
-                  www.desmat.ca
-                </Link>
-              </div>
-            </StyledLayers>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export function NavOverlay({
   mode,
   loading,
@@ -730,8 +657,9 @@ export function NavOverlay({
   onBackup,
   onCopyHaiku,
   onCopyLink,
+  onLikeHaiku,
 }: {
-  mode: string,
+  mode: ExperienceMode,
   loading?: boolean,
   styles: any[],
   altStyles: any[],
@@ -752,6 +680,7 @@ export function NavOverlay({
   onBackup?: any,
   onCopyHaiku?: any,
   onCopyLink?: any,
+  onLikeHaiku?: any,
 }) {
   const dateCode = moment().format("YYYYMMDD");
   const [user] = useUser((state: any) => [state.user]);
@@ -786,13 +715,25 @@ export function NavOverlay({
 
   return (
     <div className="_bg-pink-200 nav-overlay relative h-full w-full z-1">
-      {["haikudle", "haiku"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} fixed top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
+      {!loading && ["haikudle", "haiku"].includes(mode) &&
+        <GenerateInput
+          user={user}
+          color={haiku?.color || "black"}
+          bgColor={haiku?.bgColor || "white"}
+          styles={styles}
+          altStyles={altStyles}
+          generate={onClickGenerate}
+          onboardingElement={onboardingElement}
+        />
+      }
+
+      {false && ["haikudle", "haiku"].includes(mode) &&
+        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-40"}`}>
           <div className="onboarding-container">
-            {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement) &&
+            {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement || "") &&
               <div className="onboarding-focus" />
             }
-            {onboardingElement && ["_logo", "logo-and-generate"].includes(onboardingElement) &&
+            {onboardingElement && ["_logo", "logo-and-generate"].includes(onboardingElement || "") &&
               <div className="onboarding-focus double" />
             }
             <PopOnClick color={haiku?.bgColor} active={onboardingElement == "logo"}>
@@ -809,7 +750,7 @@ export function NavOverlay({
           </div>
         </div>
       }
-      {mode == "social-img" &&
+      {["social-img", "haikudle-social-img"].includes(mode) &&
         <div className={`${font.architects_daughter.className} absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}>
           <PopOnClick color={haiku?.bgColor}>
             {/* TODO: href to support multi-language */}
@@ -829,13 +770,13 @@ export function NavOverlay({
       {["haikudle", "haiku"].includes(mode) &&
         <div className={`fixed top-2.5 right-2.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
-            {onboardingElement && onboardingElement == "logo" &&
+            {/* {onboardingElement && onboardingElement == "logo" &&
               <div className="onboarding-focus" />
             }
             {onboardingElement && onboardingElement == "logo-and-generate" &&
               <div className="onboarding-focus double" />
             }
-            {(!onClickGenerate || !user?.isAdmin && (user?.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+            {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
                 <StyledLayers styles={altStyles}>
                   <GenerateIcon>
@@ -843,8 +784,8 @@ export function NavOverlay({
                   </GenerateIcon>
                 </StyledLayers>
               </div>
-            }
-            {onClickGenerate && (user?.isAdmin || (user?.usage[dateCode]?.haikusCreated || 0) < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+            } */}
+            {/* {onClickGenerate && (user?.isAdmin || (user?.usage[dateCode]?.haikusCreated || 0) < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div title="Generate a new haiku">
                 <PopOnClick color={haiku?.bgColor} active={!!onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement)}>
                   <StyledLayers styles={altStyles}>
@@ -854,7 +795,7 @@ export function NavOverlay({
                   </StyledLayers>
                 </PopOnClick>
               </div>
-            }
+            } */}
           </div>
         </div>
       }
@@ -893,6 +834,7 @@ export function NavOverlay({
                   lang={lang}
                   haiku={haiku}
                   styles={styles}
+                  altStyles={altStyles}
                   backupInProgress={backupInProgress}
                   onboardingElement={onboardingElement}
                   onRefresh={onClickRandom}
@@ -903,6 +845,7 @@ export function NavOverlay({
                   onBackup={onBackup}
                   onCopyHaiku={onCopyHaiku}
                   onCopyLink={onCopyLink}
+                  onLikeHaiku={onLikeHaiku}
                 />
               </StyledLayers>
             </PopOnClick>
@@ -946,6 +889,7 @@ export function NavOverlay({
           onboardingElement={onboardingElement}
           onShowAbout={onShowAbout}
           onSelectHaiku={onSelectHaiku}
+          onClickLogo={onClickLogo}
         />
       }
     </div>

@@ -2,37 +2,44 @@
 
 import useUser from "@/app/_hooks/user";
 import * as font from "@/app/font";
+import { ExperienceMode } from "@/types/ExperienceMode";
 import { Haiku } from "@/types/Haiku";
-import { StyledLayers } from "./StyledLayers";
 import HaikuPoem from "./HaikuPoem";
+import Loading from "./Loading";
 
 export default function HaikuPage({
   mode,
   haiku,
   styles,
   altStyles,
+  fontSize,
   popPoem,
   regenerating,
   loading,
   onboardingElement,
   refresh,
-  regenerateHaiku,
+  saveHaiku,
+  regeneratePoem,
+  regenerateImage,
   copyHaiku,
 }: {
-  mode: string,
+  mode: ExperienceMode,
   haiku?: Haiku,
   styles: any[],
   altStyles?: any[],
+  fontSize?: string | undefined,
   popPoem?: boolean,
   regenerating?: boolean,
   loading?: boolean,
   onboardingElement?: string,
   refresh?: any,
-  regenerateHaiku?: any,
+  saveHaiku?: any
+  regeneratePoem?: any,
+  regenerateImage?: any,
   copyHaiku?: any
 }) {
   // console.log('>> app._components.HaikuPage.render()', { mode, id: haiku.id, popPoem, haiku });
-
+  const showcaseMode = mode == "showcase";
   const [user] = useUser((state: any) => [state.user]);
   const blurValue = loading ? 8 : 0
   const saturateValue = loading ? 0.7 : 1
@@ -51,16 +58,9 @@ export default function HaikuPage({
       />
       <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}>
         {(regenerating || loading) &&
-          <div className="relative opacity-50">
-            <StyledLayers styles={styles}>
-              <div className="animate-pulse flex flex-col items-center">
-                <div>読込</div>
-                <div>Loading</div>
-              </div>
-            </StyledLayers>
-          </div>
+          <Loading styles={styles} />
         }
-        {!regenerating && !loading && mode != "social-img" && 
+        {!regenerating && !loading && mode != "social-img" && mode != "haikudle-social-img" && 
           <div className="_bg-pink-200 relative">
             <HaikuPoem
               user={user}
@@ -69,9 +69,12 @@ export default function HaikuPage({
               popPoem={popPoem}
               styles={styles}
               altStyles={altStyles}
+              fontSize={fontSize ? fontSize : showcaseMode ? "110%" : undefined}
               onboardingElement={onboardingElement}
-              regenerate={regenerateHaiku}
+              regeneratePoem={regeneratePoem}
+              regenerateImage={regenerateImage}
               refresh={refresh}
+              saveHaiku={saveHaiku}
               copyHaiku={copyHaiku}
             />
           </div>

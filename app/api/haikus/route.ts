@@ -1,11 +1,11 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, generateHaiku, getUserHaikus, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, createHaiku, saveDailyHaiku, getNextDailyHaikuId, getHaiku } from '@/services/haikus';
+import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku } from '@/services/haikus';
 import { userSession } from '@/services/users';
-import { listToMap, mapToList, searchParamsToMap } from '@/utils/misc';
+import { searchParamsToMap } from '@/utils/misc';
 import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
 import { userUsage } from '@/services/usage';
-import { DailyHaiku, Haiku, UserHaiku } from '@/types/Haiku';
+import { DailyHaiku, Haiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 import shuffleArray from '@/utils/shuffleArray';
 import { USAGE_LIMIT } from '@/types/Usage';
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, params?: any) {
   const { user } = await userSession(request);
   console.log('>> app.api.haikus.GET', { query, searchParams: request.nextUrl.searchParams.toString(), user });
 
-  if (query.mode && query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
+  if (!["showcase", "social-img", "haikudle-social-img"].includes(query.mode) && query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
     return NextResponse.json(
       { success: false, message: 'authorization failed' },
       { status: 403 }
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, params?: any) {
   if (query.random) {
     const mode = query.mode;
 
-    if (mode && mode != "haiku" && !user.isAdmin) {
+    if (!["haiku", "showcase", "social-img", "haikudle-social-img"].includes(query.mode) && !user.isAdmin) {
       return NextResponse.json(
         { success: false, message: 'authorization failed' },
         { status: 403 }
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest, params?: any) {
 
   const todaysDateCode = moment().format("YYYYMMDD");
   let todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
-  let todaysHaiku = await getHaiku(todaysDailyHaiku?.haikuId || "");
+  let todaysHaiku = await getHaiku(user, todaysDailyHaiku?.haikuId || "");
   console.log('>> app.api.haiku.GET', { todaysDateCode, todaysDailyHaiku, todaysHaiku });
 
   if (!todaysDailyHaiku) {
@@ -90,9 +90,10 @@ export async function GET(request: NextRequest, params?: any) {
 
   if (user.isAdmin) {
     // TODO: there's a bit of inconsistent redundancy: we sometimes add dailyHaikudleId when a daily is created...
+    // TODO also we should have that info on the front-end, let's get rid of this code here
     const [dailyHaikus, dailyHaikudles] = await Promise.all([
-      await getDailyHaikus(),
-      await getDailyHaikudles(),
+      getDailyHaikus(),
+      getDailyHaikudles(),
     ]);
 
     todaysHaiku.dailyHaikuId = dailyHaikus
@@ -115,16 +116,17 @@ export async function POST(request: Request) {
   console.log('>> app.api.haiku.POST', {});
 
   const data: any = await request.json();
-  let { subject, lang } = data.request;
+  let { subject, lang, artStyle } = data.request;
   let mood;
   if (subject.indexOf(",") > -1) {
     const split = subject.split(",");
     subject = split[0];
     mood = split[1];
   }
-  console.log('>> app.api.haiku.POST', { lang, subject, mood });
+  console.log('>> app.api.haiku.POST', { lang, subject, mood, artStyle });
 
   const { user } = await userSession(request);
+  let reachedUsageLimit = false; // actually _will_ reach usage limit shortly
 
   if (!user.isAdmin) {
     const usage = await userUsage(user);
@@ -135,10 +137,12 @@ export async function POST(request: Request) {
         { success: false, message: 'exceeded daily limit' },
         { status: 429 }
       );
+    } else if (haikusCreated && haikusCreated == USAGE_LIMIT.DAILY_CREATE_HAIKU - 1) {
+      reachedUsageLimit = true;
     }
   }
 
-  const updatedHaiku = await generateHaiku(user, lang, subject, mood);
+  const updatedHaiku = await generateHaiku(user, lang, subject, mood, artStyle);
 
-  return NextResponse.json({ haiku: updatedHaiku });
+  return NextResponse.json({ haiku: updatedHaiku, reachedUsageLimit });
 }

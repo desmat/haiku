@@ -12,17 +12,19 @@
     json.get things '$[?(@.id ~= "(ID1)|(ID2)")]
     json.set thing:UUID '$.foos[5].bar' '{"car": 42}'
     json.set thing:UUID '$.foos[1].bar.car' '42'
+    json.get userhaikus '$[?(@.haikuId == "ID" && (@.likedAt > 0) == true)]'
 */
 
 import moment from "moment";
 import { kv } from "@vercel/kv";
-import { uuid } from "@/utils/misc";
+import { kvArrayToObject, uuid } from "@/utils/misc";
 import { GenericStore, Store } from "@/types/Store";
 import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
+import { User } from "@/types/User";
 
-const jsonNotDeletedExpression = "(@.deletedAt > 0) == false";
+const jsonNotDeletedExpression = "(@.deletedAt > 0) == false && (@.deprecatedAt > 0) == false";
 const jsonEqualsExpression = (key: string, val: string) => {
   return `@.${key} == ${typeof (val) == "number" ? val : `"${val}"`}`;
 }
@@ -70,7 +72,7 @@ type RedisStoreEntry = {
   deletedAt?: number,
   deletedBy?: string,
   lang?: string,
-}
+};
 
 class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   key: string;
@@ -101,32 +103,67 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   async find(query?: any): Promise<T[]> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { query });
 
-    let list;
-    const entry = query && Object.entries(query)[0];
-    if (entry?.length > 0) {
-      list = await kv.json.get(this.listKey(), jsonFindBy(entry[0], `${entry[1]}`, false));
+    let keys: string[] | undefined;
+    const queryEntry = query && Object.entries(query)[0];
+
+    if (query && queryEntry[0] == "id" && Array.isArray(queryEntry[1])) {
+      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find special case: query is for IDs`, { ids: queryEntry[1] });
+      keys = queryEntry[1]
+        .map((id: string) => id && this.valueKey(id))
+        .filter(Boolean);
     } else {
-      list = await kv.json.get(this.listKey(), jsonGetNotDeleted);
+      let list;
+      if (queryEntry?.length > 0) {
+        const jsonFindByQuery = jsonFindBy(queryEntry[0], `${queryEntry[1]}`, false);
+        // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { jsonFindByQuery });
+        list = await kv.json.get(this.listKey(), jsonFindByQuery);
+      } else {
+        list = await kv.json.get(this.listKey(), jsonGetNotDeleted);
+      }
+      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { list });
+
+      keys = list && list
+        .map((value: T) => value.id && this.valueKey(value.id))
+        .filter(Boolean);
     }
-    
-    const keys = list && list
-      .filter((entry: any) => !entry.deletedAt)
-      .map((value: T) => value.id && this.valueKey(value.id))
-      .filter(Boolean);
 
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
 
-    const values = keys && keys.length > 0 && (await kv.json.mget(keys, "$")).filter(Boolean).flat() || [];
+    // don't mget too many at once otherwise 💥
+    const blockSize = 512;
+    const blocks = keys && keys.length && Array
+      .apply(null, Array(Math.ceil(keys.length / blockSize)))
+      .map((v: any, block: number) => (keys || [])
+        .slice(blockSize * block, blockSize * (block + 1)));
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { blocks });
+
+    const values = blocks && blocks.length > 0
+      ? (await Promise.all(
+        blocks
+          .map(async (keys: string[]) => (await kv.json.mget(keys, "$"))
+            .filter(Boolean)
+            .flat())))
+        .flat()
+      : [];
+
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { values });
 
     return values as T[];
   }
 
   async create(userId: string, value: T, options: any = {}): Promise<T> {
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { userId, value });
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { userId, value, options });
 
     if (!value.id) {
       throw `Cannot save with null id`;
     }
+
+    const additionalListValues = kvArrayToObject(
+      Object.entries(options?.indices || {})
+        // @ts-ignore
+        .map(([key, val]: [key: string, val: any]) => [key, value[key]])
+    );
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { additionalListValues });
 
     const createdListValue = {
       id: value.id || uuid(),
@@ -134,7 +171,9 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       createdBy: userId,
       name: value.name,
       lang: value.lang,
+      ...additionalListValues,
     };
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { createdListValue });
 
     const createdValue = {
       ...value,
@@ -164,10 +203,34 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       throw `Cannot update ${this.key}: does not exist: ${value.id}`;
     }
 
-    const updatedValue = { ...value, updatedAt: moment().valueOf(), updatedBy: userId }
+    const updatedValue = {
+      ...value,
+      updatedAt: moment().valueOf(),
+      updatedBy: userId
+    };
+
+    // TODO prefer kv.json.mset but not available here; figure out an alternative
+    const listKeys = Object
+      .entries({
+        ...(options?.indices || {}),
+        updatedAt: "number",
+        updatedBy: "string",
+      })
+      .map(([key, val]: [key: string, val: any]) => {
+        switch (val) {
+          case "string":
+            // @ts-ignore
+            return kv.json.set(this.listKey(), `${jsonGetBy("id", value.id || "")}.${key}`, `"${updatedValue[`${key}`]}"`)
+          case "number":
+            // @ts-ignore
+            return kv.json.set(this.listKey(), `${jsonGetBy("id", value.id || "")}.${key}`, updatedValue[`${key}`] || 0);
+          default:
+            throw `Unrecongnized index data type: ${val}`
+        }
+      });
+
     const response = await Promise.all([
-      kv.json.set(this.listKey(), `${jsonGetBy("id", value.id)}.updatedAt`, updatedValue.updatedAt),
-      kv.json.set(this.listKey(), `${jsonGetBy("id", value.id)}.updatedBy`, `"${updatedValue.updatedBy}"`),
+      ...listKeys,
       kv.json.set(this.valueKey(value.id), "$", updatedValue),
       (options.expire ? kv.expire(this.valueKey(value.id), options.expire) : undefined),
     ]);
@@ -177,8 +240,8 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     return new Promise((resolve) => resolve(updatedValue));
   }
 
-  async delete(userId: string, id: string): Promise<T> {
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { id });
+  async delete(userId: string, id: string, options: any = {}): Promise<T> {
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { id, options });
 
     if (!id) {
       throw `Cannot delete ${this.key}: null id`;
@@ -193,8 +256,9 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     const response = await Promise.all([
       kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedAt`, value.deletedAt),
       kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedBy`, `"${userId}"`),
-      // kv.json.del(this.valueKey(id), "$")
-      kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf()}),
+      options.hardDelete 
+        ? kv.json.del(this.valueKey(id), "$")
+        : kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf() }),
     ]);
 
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { response });
@@ -212,5 +276,6 @@ export function create(): Store {
     userHaikudles: new RedisStore<UserHaikudle>("userhaikudle"),
     userHaikus: new RedisStore<UserHaiku>("userhaiku"),
     userUsage: new RedisStore<UserUsage>("userusage"),
+    user: new RedisStore<User>("user"),
   }
 }
