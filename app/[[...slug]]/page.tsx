@@ -9,6 +9,7 @@ import HaikuPage from '../_components/HaikuPage';
 import { NavOverlay } from '../_components/Nav';
 import { haikuStyles } from '@/types/Haiku';
 import { User } from '@/types/User';
+import { NoSsr } from '../_components/NoSsr';
 
 const todaysHaiku = async () => {
   const todaysDateCode = moment().format("YYYYMMDD");
@@ -80,13 +81,15 @@ export default async function Page({
         </div>
       }
     >
-      <MainPage
-        haiku={haiku}
-        mode={mode}
-        lang={lang}
-        refreshDelay={refreshDelay}
-        fontSize={fontSize}
-      />      
+      <NoSsr>
+        <MainPage
+          haiku={haiku}
+          mode={mode}
+          lang={lang}
+          refreshDelay={refreshDelay}
+          fontSize={fontSize}
+        />
+      </NoSsr>
     </Suspense>
   )
 }
