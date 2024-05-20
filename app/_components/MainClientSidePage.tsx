@@ -25,24 +25,24 @@ import Loading from './Loading';
 export default function MainClientSidePage({
   haiku: _haiku,
   mode,
-  id,
+  // id,
   lang,
   refreshDelay,
   fontSize,
 }: {
   haiku: Haiku,
   mode: ExperienceMode,
-  id?: string,
+  // id?: string,
   lang?: undefined | LanguageType,
   refreshDelay?: number,
   fontSize?: string | undefined,
 }) {
-  console.log('>> app.MainClientSidePage.render()', { mode, id, lang, _haiku });
+  console.log('>> app.MainClientSidePage.render()', { mode, id: undefined, lang, _haiku });
 
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
   const showcaseMode = mode == "showcase";
-  let [haikuId, setHaikuId] = useState(id);
+  let [haikuId, setHaikuId] = useState(_haiku?.id);
   const [generating, setGenerating] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [_refreshDelay, setRefreshDelay] = useState(refreshDelay || 24 * 60 * 60 * 1000); // every day
@@ -443,7 +443,7 @@ export default function MainClientSidePage({
   }
 
   const startGenerateHaiku = async () => {
-    // console.log('>> app.page.startGenerateHaiku()');
+    console.log('>> app.page.startGenerateHaiku()');
     trackEvent("clicked-generate-haiku", {
       userId: user?.id,
     });
@@ -456,11 +456,12 @@ export default function MainClientSidePage({
       resetAlert();
       setGenerating(true);
       const ret = await generateHaiku(user, { lang, subject });
-      // console.log('>> app.page.startGenerateHaiku()', { ret });
+      console.log('>> app.page.startGenerateHaiku()', { ret });
 
       if (ret?.id) {
         incUserUsage(user, "haikusCreated");
         setHaikuId(ret.id);
+        setHaiku(ret);
         window.history.replaceState(null, '', `/${ret.id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
         setGenerating(false);
       }
@@ -731,7 +732,7 @@ export default function MainClientSidePage({
         dangerouslySetInnerHTML={{
           __html: `
             body {
-              background-color: red /* ${haiku?.bgColor || "red"} */;
+              background-color: ${haiku?.bgColor || "lightgrey"};
             }
           `
         }}

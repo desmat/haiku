@@ -810,6 +810,7 @@ export default function MainPage({
 
       {!isPuzzleMode &&
         <HaikuPage
+          user={user}
           mode={mode}
           haiku={haikudleSolved ? solvedHaikudleHaiku : haiku}
           styles={textStyles}

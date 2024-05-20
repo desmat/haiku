@@ -4,7 +4,7 @@
 import * as font from "@/app/font";
 import { ExperienceMode } from "@/types/ExperienceMode";
 import { Haiku } from "@/types/Haiku";
-import HaikuPoem from "./HaikuPoem";
+import HaikuPoem from "./HaikuStaticPoem";
 import Loading from "./Loading";
 import { User } from "@/types/User";
 
@@ -25,7 +25,7 @@ export default function HaikuPage({
   regenerateImage,
   copyHaiku,
 }: {
-  user?: User,
+  user: User,
   mode: ExperienceMode,
   haiku?: Haiku,
   styles: any[],
@@ -41,7 +41,7 @@ export default function HaikuPage({
   regenerateImage?: any,
   copyHaiku?: any
 }) {
-  console.log('>> app._components.HaikuPage.render()', { mode, id: haiku?.id, popPoem, haiku });
+  console.log('>> app._components.HaikuStaticPage.render()', { mode, id: haiku.id, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   // const [user] = useUser((state: any) => [state.user]);
   const blurValue = loading ? 8 : 0
