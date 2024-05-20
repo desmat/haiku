@@ -45,6 +45,7 @@ export default async function Page({
     id = undefined;
   }
 
+  const user = {} as User;
   const haiku = id ? await getHaiku({} as User, id) : await todaysHaiku();
 
   if (!haiku) {
@@ -55,18 +56,39 @@ export default async function Page({
 
   // return <MainPage mode={mode} id={id} version={version} lang={lang} refreshDelay={refreshDelay} fontSize={fontSize} />
 
+  // return (
+  //   <div className="main-page">
+  //         {/* <NavOverlay
+  //           haiku={haiku}
+  //           mode={mode}
+  //           lang={lang}
+  //           styles={textStyles.slice(0, textStyles.length - 3)}
+  //           altStyles={altTextStyles}
+  //         /> */}
+  //         <HaikuPage
+  //           user={user}
+  //           haiku={haiku}
+  //           mode={mode}
+  //           styles={textStyles}
+  //           altStyles={altTextStyles}
+  //           fontSize={fontSize}
+  //         />
+  //       </div>
+  // )
+
   return (
     <Suspense
       fallback={
-        <div className="main-page">
-          <NavOverlay
+        <div className="main-page bg-yellow-400">
+          {/* <NavOverlay
             haiku={haiku}
             mode={mode}
             lang={lang}
             styles={textStyles.slice(0, textStyles.length - 3)}
             altStyles={altTextStyles}
-          />
+          /> */}
           <HaikuPage
+            user={user}
             haiku={haiku}
             mode={mode}
             styles={textStyles}

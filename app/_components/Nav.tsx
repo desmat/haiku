@@ -685,7 +685,7 @@ export function NavOverlay({
   const dateCode = moment().format("YYYYMMDD");
   const [user] = useUser((state: any) => [state.user]);
   const onboarding = !!(onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement));
-  // console.log(">> app._component.Nav.render", { mode, haikuId: haiku?.id });
+  console.log(">> app._component.Nav.render", { mode, haikuId: haiku?.id });
 
   const handleKeyDown = async (e: any) => {
     // console.log(">> app._component.Nav.handleKeyDown", { mode });

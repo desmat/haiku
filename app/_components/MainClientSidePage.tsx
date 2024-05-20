@@ -725,9 +725,17 @@ export default function MainClientSidePage({
     return <NotFound mode={mode} lang={lang} onClickGenerate={startGenerateHaiku} onClickLogo={loadHomePage} />
   }
 
-
   return (
     <div className="_bg-yellow-200 main-page relative h-[100vh] w-[100vw]">
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            body {
+              background-color: red /* ${haiku?.bgColor || "red"} */;
+            }
+          `
+        }}
+      />      
       <NavOverlay
         mode={mode}
         lang={lang}
@@ -772,6 +780,7 @@ export default function MainClientSidePage({
 
       {!isPuzzleMode &&
         <HaikuPage
+          user={user}
           mode={mode}
           haiku={haikudleSolved ? solvedHaikudleHaiku : haiku}
           styles={textStyles}

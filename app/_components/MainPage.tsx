@@ -3,7 +3,7 @@
 import moment from 'moment';
 import { Suspense, useEffect, useState } from 'react';
 import { syllable } from 'syllable';
-import { Haiku } from "@/types/Haiku";
+import { Haiku, haikuStyles } from "@/types/Haiku";
 import { NavOverlay } from '@/app/_components/Nav';
 import Loading from "@/app/_components/Loading";
 import HaikuPage from '@/app/_components/HaikuPage';
@@ -23,6 +23,7 @@ import { formatHaikuText } from './HaikuPoem';
 import { useMounted } from '../_hooks/mounted';
 
 export default function MainPage({
+  haiku: _haiku,
   mode,
   id,
   version,
@@ -30,6 +31,7 @@ export default function MainPage({
   refreshDelay,
   fontSize,
 }: {
+  haiku: Haiku,
   mode: ExperienceMode,
   id?: string,
   version?: string,
@@ -37,7 +39,7 @@ export default function MainPage({
   refreshDelay?: number,
   fontSize?: string | undefined,
 }) {
-  // console.log('>> app.MainPage.render()', { mode, id, lang });
+  // console.log('>> app.MainPage.render()', { mode, id, lang, _haiku });
 
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
@@ -68,7 +70,7 @@ export default function MainPage({
     state.nextDailyHaikuId,
     state.nextDailyHaikudleId,
   ]);
-  
+
   const [
     resetAlert,
     plainAlert,
@@ -142,14 +144,14 @@ export default function MainPage({
   const loaded = haikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
   let [loading, setLoading] = useState(false);
   let [loadingUI, setLoadingUI] = useState(false);
-  let [haiku, setHaiku] = useState<Haiku | undefined>();
+  let [haiku, setHaiku] = useState<Haiku | undefined>(_haiku);
 
-  // const haikus = await loadHaikus(id);
-  // const haiku = haikus?.haikus[0];
-  loadHaikus(id).then((haikus: any) => {
-    console.log("FDSFASS");
-    setHaiku(haikus[0]);
-  })
+  // // const haikus = await loadHaikus(id);
+  // // const haiku = haikus?.haikus[0];
+  // loadHaikus(id).then((haikus: any) => {
+  //   console.log("FDSFASS");
+  //   setHaiku(haikus[0]);
+  // })
 
   let solvedHaikudleHaiku = {
     ...haiku,
@@ -167,60 +169,13 @@ export default function MainPage({
     (!previousDailyHaikudleId || user?.isAdmin) &&
     (!(haiku?.createdBy == user?.id) || user?.isAdmin);
 
-  const fontColor = haiku?.color || "#555555";
-  const bgColor = haiku?.bgColor || "lightgrey";
-
-  const textStyles = [
-    {
-      color: fontColor,
-      bgColor,
-      filter: `drop-shadow(0px 0px 8px ${bgColor})`,
-      WebkitTextStroke: `1px ${fontColor}`,
-      fontWeight: 300,
-    },
-    {
-      filter: `drop-shadow(0px 0px 2px ${bgColor})`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 4px ${bgColor}99)`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 8px ${bgColor}66)`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 12px ${bgColor}33)`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 18px ${bgColor}22)`,
-    },
-  ];
-
-  const altTextStyles = [
-    {
-      color: bgColor,
-      filter: `drop-shadow(0px 0px 3px ${fontColor})`,
-      WebkitTextStroke: `0.5px ${bgColor}`,
-      fontWeight: 300,
-    },
-    {
-      filter: `drop-shadow(0px 0px 1px ${fontColor})`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 8px ${bgColor}55)`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 12px ${bgColor}33)`,
-    },
-    {
-      filter: `drop-shadow(0px 0px 18px ${bgColor}11)`,
-    },
-  ];
+  const { textStyles, altTextStyles } = haikuStyles(haiku);
 
   // console.log('>> app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
 
   const loadPage = async (random?: boolean | undefined) => {
     // console.log('>> app.MainPage.loadPage', { haikuId, mode, random, loaded, loading, user, haiku });
-    return;
+    // return;
 
     if (!loading) {
       loading = true; // race condition at initial load
@@ -354,7 +309,6 @@ export default function MainPage({
 
     if (showcaseMode && !loadingUI && _refreshDelay) {
       window.history.replaceState(null, '', `/${haiku?.id || ""}?mode=showcase${_refreshDelay ? `&refreshDelay=${_refreshDelay}` : ""}${fontSize ? `&fontSize=${encodeURIComponent(fontSize)}` : ""}`);
-      // setRefreshTimeout(setTimeout(loadRandom, _refreshDelay));
       setRefreshTimeout(setTimeout(loadHomePage, _refreshDelay));
     }
 
@@ -585,7 +539,7 @@ export default function MainPage({
   }
 
   const loadRandom = () => {
-    return;
+    // return;
     // console.log('>> app.page.loadRandom()', {});
 
     if (/* haikudleMode && */ !user.isAdmin) {
@@ -779,7 +733,8 @@ export default function MainPage({
     return haikuAction(haikuId, "like", value);
   }
 
-  if (!loaded || loading || loadingUI || generating) {
+  // if (!loaded || loading || loadingUI || generating) {
+  if (/* loadingUI || */ generating) {
     return (
       <div>
         {haiku?.bgColor &&
@@ -835,7 +790,7 @@ export default function MainPage({
                   : startFirstVisitHaikudleOnboarding
                 : startFirstVisitOnboarding
         }
-        onSelectHaiku={selectHaiku}
+        // onSelectHaiku={selectHaiku}
         onChangeRefreshDelay={changeRefreshDelay}
         onBackup={startBackup}
         onCopyHaiku={(haikudleMode && haikudleSolved || !haikudleMode) && copyHaiku}
