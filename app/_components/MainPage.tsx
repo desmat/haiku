@@ -76,9 +76,9 @@ export default function MainPage({
     state.load,
   ]);
 
-  // if (!userLoaded) {
-  //   loadUser();
-  // }
+  if (!userLoaded) {
+    loadUser();
+  }
 
   const [
     resetAlert,

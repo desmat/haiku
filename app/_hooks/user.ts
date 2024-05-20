@@ -48,7 +48,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     console.log(">> hooks.user.load()", {});
 
     let createdUser: User | undefined;
-    let token = undefined; // window?.localStorage && window.localStorage.getItem("session");
+    let token = window?.localStorage && window.localStorage.getItem("session");
     
     if (!token) {
       const ret = await get().createRemote(user);
@@ -60,7 +60,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         return;
       }
 
-      //window?.localStorage && window.localStorage.setItem("session", token || "");
+      window?.localStorage && window.localStorage.setItem("session", token || "");
       trackEvent("user-session-created", {
         userId: createdUser.id,
         isAdmin: createdUser.isAdmin,
@@ -154,7 +154,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     // console.log(">> hooks.user.save()", { savedUser, savedToken });
 
     // save local
-    //window?.localStorage && window.localStorage.setItem("session", savedToken || "");
+    window?.localStorage && window.localStorage.setItem("session", savedToken || "");
     set({ user: savedUser, token: savedToken });
 
     return { user: savedUser, token: savedToken };
