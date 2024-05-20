@@ -11,12 +11,13 @@ import { getDailyHaiku, getHaiku } from '@/services/haikus';
 import HaikuPage from '../_components/HaikuPage';
 import { NavOverlay } from '../_components/Nav';
 import { haikuStyles } from '@/types/Haiku';
+import { User } from '@/types/User';
 
 const todaysHaiku = async () => {
   const todaysDateCode = moment().format("YYYYMMDD");
   const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
   if (todaysDailyHaiku?.haikuId) {
-    return getHaiku(todaysDailyHaiku?.haikuId);
+    return getHaiku({} as User, todaysDailyHaiku?.haikuId);
   }
 }
 
@@ -32,7 +33,7 @@ export default async function Page({
   const lang = searchParams && searchParams["lang"] as LanguageType || "en";
   const mode = (searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
-  const fontSize = searchParams && searchParams["fontSize"];  
+  const fontSize = searchParams && searchParams["fontSize"];
   console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
   if (!isSupportedLanguage(lang)) {
@@ -44,7 +45,12 @@ export default async function Page({
     id = undefined;
   }
 
-  const haiku = id ? await getHaiku(id) : await todaysHaiku();
+  const haiku = id ? await getHaiku({} as User, id) : await todaysHaiku();
+
+  if (!haiku) {
+    return <NotFound mode={mode} />
+  }
+
   const { textStyles, altTextStyles } = haikuStyles(haiku);
 
   // return <MainPage mode={mode} id={id} version={version} lang={lang} refreshDelay={refreshDelay} fontSize={fontSize} />
@@ -63,9 +69,9 @@ export default async function Page({
           <HaikuPage
             haiku={haiku}
             mode={mode}
-            version={version}
             styles={textStyles}
             altStyles={altTextStyles}
+            fontSize={fontSize}
           />
         </div>
       }
@@ -77,6 +83,7 @@ export default async function Page({
           mode={mode}
           lang={lang}
           refreshDelay={refreshDelay}
+          fontSize={fontSize}
         />
       </NoSsr>
     </Suspense>

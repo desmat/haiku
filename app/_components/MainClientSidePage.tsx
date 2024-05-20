@@ -4,7 +4,7 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { syllable } from 'syllable';
 import { Haiku, haikuStyles } from "@/types/Haiku";
-import { Loading, NavOverlay } from '@/app/_components/Nav';
+import { NavOverlay } from '@/app/_components/Nav';
 import HaikuPage from '@/app/_components/HaikuPage';
 import useAlert from '@/app/_hooks/alert';
 import useHaikus from "@/app/_hooks/haikus";
@@ -19,8 +19,24 @@ import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
 import delay from '@/utils/delay';
+import { ExperienceMode } from '@/types/ExperienceMode';
+import Loading from './Loading';
 
-export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refreshDelay }: { haiku: Haiku, mode: string, id?: string, lang?: undefined | LanguageType, refreshDelay?: number }) {
+export default function MainClientSidePage({
+  haiku: _haiku,
+  mode,
+  id,
+  lang,
+  refreshDelay,
+  fontSize,
+}: {
+  haiku: Haiku,
+  mode: ExperienceMode,
+  id?: string,
+  lang?: undefined | LanguageType,
+  refreshDelay?: number,
+  fontSize?: string | undefined,
+}) {
   console.log('>> app.MainClientSidePage.render()', { mode, id, lang, _haiku });
 
   const haikuMode = mode == "haiku";
@@ -40,11 +56,13 @@ export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refr
     saveUser,
     incUserUsage,
     getUserToken,
+    userHaikus,
   ] = useUser((state: any) => [
     state.user,
     state.save,
     state.incUserUsage,
     state.getToken,
+    state.haikus,
   ]);
 
   const [
@@ -69,6 +87,8 @@ export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refr
     deleteHaiku,
     nextDailyHaikuId,
     createDailyHaiku,
+    haikuAction,
+    saveHaiku,
   ] = useHaikus((state: any) => [
     state.loaded(haikuId),
     // () => undefined,
@@ -80,6 +100,8 @@ export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refr
     state.delete,
     state.nextDailyHaikuId,
     state.createDailyHaiku,
+    state.action,
+    state.save,
   ]);
 
   const [
@@ -463,6 +485,34 @@ export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refr
     }
   }
 
+  const startRegenerateHaikuImage = async () => {
+    // console.log('>> app.page.startRegenerateHaiku()');
+
+    trackEvent("clicked-regenerate-image", {
+      userId: user?.id,
+    });
+
+    if (user?.isAdmin || haiku?.createdBy == user.id) {
+      const artStyle = user.isAdmin
+        ? prompt(`Art style? (For example 'watercolor', 'Japanese woodblock print', 'abstract oil painting with large strokes', or leave blank for a style picked at random)"`, haiku.artStyle)
+        : "";
+
+      if (typeof (artStyle) == "string") {
+        resetAlert();
+        setRegenerating(true);
+        const ret = await regenerateHaiku(user, haiku, "image", { artStyle });
+        // console.log('>> app.page.startRegenerateHaiku()', { ret });
+        incUserUsage(user, "haikusCreated"); // TODO haikuImageRegenerated?
+        setHaiku(ret);
+        setRegenerating(false);
+      } else {
+        trackEvent("cancelled-regenerate-image", {
+          userId: user?.id,
+        });
+      }
+    }
+  }
+
   const loadRandom = () => {
     // console.log('>> app.page.loadRandom()', {});
 
@@ -520,6 +570,7 @@ export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refr
     // console.log('>> app.page.switchMode()', { mode, newMode });
     const url = newMode
       ? `/${haikuId || ""}?mode=${newMode}`
+      // @ts-ignore
       : `/${haikuId || ""}?mode=${mode == "haiku" ? "haikudle" : mode != "haiku" ? "haiku" : process.env.EXPERIENCE_MODE}`
 
     setLoadingUI(true);
@@ -633,6 +684,15 @@ export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refr
     }
   }
 
+  const likeHaiku = () => {
+    // console.log('>> app._components.MainPage.likeHaiku()', { haikuId });
+
+    const userHaiku = userHaikus[haiku.id];
+    const value = userHaiku?.likedAt ? undefined : moment().valueOf();
+
+    return haikuAction(haikuId, "like", value);
+  }
+
   // await delay(2000);
   // return <div>RENDERED CLIENT SIDE PAGE</div>
 
@@ -652,7 +712,10 @@ export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refr
     return (
       <div>
         <NavOverlay loading={true} mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} onClickLogo={loadHomePage} />
-        <Loading onClick={showcaseMode && loadRandom} />
+        <Loading
+          // onClick={showcaseMode && loadRandom}
+          styles={textStyles}
+        />
         {/* <HaikuPage mode={mode} loading={true} haiku={loadingHaiku} styles={textStyles} />       */}
       </div>
     )
@@ -689,11 +752,12 @@ export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refr
                 : startFirstVisitHaikudleOnboarding
               : startFirstVisitOnboarding
         }
-        onSelectHaiku={selectHaiku}
+        // onSelectHaiku={selectHaiku}
         onChangeRefreshDelay={changeRefreshDelay}
         onBackup={startBackup}
         onCopyHaiku={(haikudleMode && haikudleSolved || !haikudleMode) && copyHaiku}
         onCopyLink={(haikudleMode && haikudleSolved || !haikudleMode) && copyLink}
+        onLikeHaiku={(haikudleMode && haikudleSolved || !haikudleMode) && likeHaiku}
       />
 
       {isPuzzleMode &&
@@ -716,7 +780,8 @@ export default function MainClientSidePage({ haiku: _haiku, mode, id, lang, refr
           regenerating={regenerating}
           onboardingElement={onboardingElement}
           refresh={loadRandom}
-          regenerateHaiku={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku()}
+          regeneratePoem={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku()}
+          regenerateImage={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage()}
           copyHaiku={copyHaiku}
         />
       }

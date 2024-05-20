@@ -180,7 +180,7 @@ export default function SidePanel({
         onMouseLeave={() => panelOpened && !panelPinned && toggleMenuOpened()}
       >
         <div className="_bg-pink-400 flex flex-col h-[100vh]">
-          
+
           {/* hotspot to open the side panel on mouse hover */}
           <div
             className="_bg-red-400 group absolute top-[4rem] right-0 w-[1rem] mr-[-1rem] h-[calc(100vh-4rem)] z-90"
@@ -188,7 +188,7 @@ export default function SidePanel({
             onClick={() => panelOpened && toggleMenuOpened()}
           >
           </div>
-          
+
           {/* floating button to open/close side bar */}
           {/* <div
             className="_bg-yellow-200 group absolute right-0 top-1/2 -translate-y-1/2 z-30 cursor-pointer text-[22pt] _md:text-[36pt] bold py-5 _opacity-40 hover:opacity-100 transition-all"
@@ -244,7 +244,7 @@ export default function SidePanel({
               </PopOnClick>
             </div>
           </div> */}
-          
+
           {/* Logo */}
           <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">
             <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
@@ -255,12 +255,12 @@ export default function SidePanel({
                   altStyles={altStyles}
                   mode={mode || "haiku"}
                   href={`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`}
-                onClick={onClickLogo}
+                  onClick={onClickLogo}
                 // onboardingElement={onboardingElement}
                 />
               </PopOnClick>
             </div>
-            
+
             {/* Close side bar button */}
             <div
               className={`${font.architects_daughter.className} absolute top-[0.1rem] md:top-[0.2rem] right-0 md:right-[0.2rem] p-2 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}
@@ -362,9 +362,11 @@ export default function SidePanel({
                   <Link
                     href={`/${h.haikuId || h.id}`}
                     onClick={(e: any) => {
-                      e.preventDefault();
+                      if (onSelectHaiku) {
+                        e.preventDefault();
                       /* !panelPinned && */ toggleMenuOpened();
-                      onSelectHaiku && onSelectHaiku(h.haikuId || h.id);
+                        onSelectHaiku(h.haikuId || h.id);
+                      }
                     }}
                   >
                     <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>

@@ -10,7 +10,7 @@ import { Suspense, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 // import MainClientSidePage from './MainClientSidePage';
 import { SafeHydrate } from './SafeHydrate';
-import MainClientSideSafeHydratePage from './MainClientSideSafeHydratePage';
+import MainClientSideSafeHydratePage from './_MainClientSideSafeHydratePage.tsxNOT';
 import { del } from '@vercel/blob';
 import delay from '@/utils/delay';
 import useHaikus from '../_hooks/haikus';

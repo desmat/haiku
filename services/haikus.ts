@@ -442,34 +442,12 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
 
   // edge case where we're editing a previous version
   delete haiku.deprecated;
+  delete haiku.deprecatedAt;
 
   const poem = haiku.poem.join("/");
   if (poem.includes("...") || poem.includes("…")) {
     return completeHaikuPoem(user, haiku);
   }
-
-  const original = await store.haikus.get(haiku.id);
-
-  if (!original) {
-    throw `Not found`;
-  }
-
-  const version = (original.version || 0);
-
-  store.haikus.create(user.id, {
-    ...original,
-    id: `${original.id}:${version}`,
-    version,
-    deprecatedAt: moment().valueOf(),
-  }, {
-    indices: {
-      deprecatedAt: "number"
-    }
-  });
-
-  // edge case where we're editing a previous version
-  delete haiku.deprecated;
-  delete haiku.deprecatedAt;
 
   return store.haikus.update(user.id, { ...haiku, version: version + 1 });
 }
