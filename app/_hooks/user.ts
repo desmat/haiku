@@ -181,7 +181,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   createRemote: async (user: any) => {
-    // console.log(">> hooks.user.createRemote()", { user });
+    console.log(">> hooks.user.createRemote()", { user });
 
     const res = await fetch(`/api/user`, {
       // ...await fetchOpts(),

@@ -7,7 +7,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const method = request.method;
   const thing = request.nextUrl.toString();
-  // console.log("*** middleware", { path, thing });
+  console.log("*** middleware", { path, thing });
 
   if (path == "/api/user" && method == "POST") {
     // allow new users to create a new session
