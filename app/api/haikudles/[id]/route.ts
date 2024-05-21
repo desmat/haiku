@@ -53,7 +53,7 @@ export async function GET(
 
   if (!user.isAdmin && !userHaikudle && haiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
     // console.log('>> app.api.haikudles.GET createUserHaiku');
-    createUserHaiku(user?.id, haikudle?.haikuId);
+    createUserHaiku(user, haiku);
   }
 
   return NextResponse.json({

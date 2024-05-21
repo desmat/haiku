@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { DailyHaiku, UserHaiku } from '@/types/Haiku';
+import { DailyHaiku, Haiku, UserHaiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
 import { listToMap } from '@/utils/misc';
@@ -229,6 +229,43 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     // console.log(">> hooks.user.saveRemote()", { updatedToken, updatedUser });
 
     return { user: updatedUser, token: updatedToken };
+  },  
+
+  addUserHaiku: async (haiku: Haiku, action?: "viewed" | "generated") => {
+    const { user, haikus, allHaikus } = get();
+    console.log(">> hooks.user.addUserHaiku", { haiku, action, user });
+
+    const token = await get().getToken();
+    const opts = token && { headers: { Authorization: `Bearer ${token}` } } || {};
+
+    const res = await fetch(`/api/user/${user.id}/haikus`, {
+      ...opts,
+      method: "POST",
+      body: JSON.stringify({ haiku, action })
+    });
+
+    if (res.status != 200) {
+      trackEvent("error", {
+        type: "put-user",
+        code: res.status,
+      });
+      useAlert.getState().error(`Error saving user session: ${res.status} (${res.statusText})`);
+      return {};
+    }
+
+    const { userHaiku } = await res.json();
+    console.log(">> hooks.user.addUserHaiku", { userHaiku });
+
+    useUser.setState({
+      haikus: {
+        ...haikus,
+        [haiku.id]: userHaiku,
+      },
+      allHaikus: user.isAdmin && {
+        ...allHaikus,
+        [haiku.id]: userHaiku
+      },
+    });
   },  
 })));
 

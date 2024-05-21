@@ -58,35 +58,19 @@ export async function GET(request: NextRequest, params?: any) {
     }
 
     if (!user.isAdmin && randomHaiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
-      createUserHaiku(user.id, randomHaiku.id);
+      createUserHaiku(user, randomHaiku);
     }
 
     return NextResponse.json({ haikus: [randomHaiku] });
   }
 
-  const todaysDateCode = moment().format("YYYYMMDD");
-  let todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
-  let todaysHaiku = await getHaiku(user, todaysDailyHaiku?.haikuId || "");
-  console.log('>> app.api.haiku.GET', { todaysDateCode, todaysDailyHaiku, todaysHaiku });
-
-  if (!todaysDailyHaiku) {
-    // create daily haiku if none for today
-    const previousDailyHaikus = await getDailyHaikus();
-    const previousDailyHaikuIds = previousDailyHaikus.map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
-    const haikus = await getHaikus(query, process.env.EXPERIENCE_MODE == "haikudle");
-    const nonDailyhaikus = haikus.filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
-    const randomHaikuId = shuffleArray(nonDailyhaikus)[0].id;
-    const randomHaiku = haikus[randomHaikuId];
-    console.log('>> app.api.haikus.GET creating daily haiku', { randomHaikuId, randomHaiku, previousDailyHaikus, haikus });
-
-    todaysDailyHaiku = await saveDailyHaiku(user, todaysDateCode, randomHaikuId);
-    todaysHaiku = haikus.filter((haiku: Haiku) => haiku.id == todaysDailyHaiku?.haikuId)[0];
-  }
+  const todaysDailyHaiku = await getDailyHaiku();
+  const todaysHaiku = await getHaiku(user, todaysDailyHaiku?.haikuId || "");
+  console.log('>> app.api.haiku.GET', { todaysDailyHaiku, todaysHaiku });
 
   if (!todaysHaiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
-
 
   if (user.isAdmin) {
     // TODO: there's a bit of inconsistent redundancy: we sometimes add dailyHaikudleId when a daily is created...
@@ -105,7 +89,7 @@ export async function GET(request: NextRequest, params?: any) {
     const userHaiku = await getUserHaiku(user.id, todaysHaiku.id);
     if (!userHaiku) {
       // user viewed today's featured haiku for the first
-      createUserHaiku(user.id, todaysHaiku.id);
+      createUserHaiku(user, todaysHaiku);
     }
   }
 

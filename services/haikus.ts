@@ -11,6 +11,7 @@ import { Haikudle, UserHaikudle } from '@/types/Haikudle';
 import { deleteHaikudle, getHaikudle } from './haikudles';
 import * as openai from './openai';
 import { incUserUsage } from './usage';
+import shuffleArray from '@/utils/shuffleArray';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -462,17 +463,23 @@ export async function getUserHaiku(userId: string, haikuId: string): Promise<Use
   return new Promise((resolve, reject) => resolve(userHaiku));
 }
 
-export async function createUserHaiku(userId: string, haikuId: string): Promise<UserHaiku> {
-  console.log(`>> services.haiku.createUserHaiku`, { userId, haikuId });
+export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed" | "generated"): Promise<UserHaiku> {
+  console.log(`>> services.haiku.createUserHaiku`, { user, haiku });
 
-  const id = `${userId}:${haikuId}`
+  const id = `${user.id}:${haiku.id}`;
+  const now = moment().valueOf();
+  const actionKV = action ? { [`${action}At`]: now } : {};
   const userHaiku = {
     id,
-    userId,
-    haikuId,
+    userId: user.id,
+    createdBy: user.id,
+    createdAt: now,
+    haikuId: haiku.id,
+    theme: haiku.theme,
+    ...actionKV,
   };
 
-  const createdUserHaiku = await store.userHaikus.create(userId, userHaiku, UserHaikuSaveOptions);
+  const createdUserHaiku = await store.userHaikus.create(id, userHaiku, UserHaikuSaveOptions);
 
   console.log(`>> services.haiku.createUserHaiku`, { userHaiku: createdUserHaiku });
   return new Promise((resolve, reject) => resolve(createdUserHaiku));
@@ -487,11 +494,27 @@ export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<U
   return new Promise((resolve, reject) => resolve(savedUserHaiku));
 }
 
-export async function getDailyHaiku(id: string): Promise<DailyHaiku | undefined> {
+export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined> {
   console.log(`>> services.haiku.getDailyHaiku`, { id });
 
-  const dailyHaiku = await store.dailyHaikus.get(id);
+  if (!id) id = moment().format("YYYYMMDD");
+
+  let dailyHaiku = await store.dailyHaikus.get(id);
   console.log(`>> services.haiku.getDailyHaiku`, { id, dailyHaiku });
+
+  if (!dailyHaiku) {
+    // create daily haiku if none for today
+    const previousDailyHaikus = await getDailyHaikus();
+    const previousDailyHaikuIds = previousDailyHaikus.map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
+    const haikus = await getHaikus();
+    const nonDailyhaikus = haikus.filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
+    const randomHaikuId = shuffleArray(nonDailyhaikus)[0].id;
+    const randomHaiku = haikus[randomHaikuId];
+    console.log('>> app.api.haikus.GET creating daily haiku', { randomHaikuId, randomHaiku, previousDailyHaikus, haikus });
+
+    dailyHaiku = await saveDailyHaiku({ id: "(system)" } as User, id, randomHaikuId);
+  }
+
   return new Promise((resolve, reject) => resolve(dailyHaiku));
 }
 

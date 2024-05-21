@@ -17,10 +17,10 @@ import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haikudle } from '@/types/Haikudle';
 import { LanguageType } from '@/types/Languages';
 import { haikuGeneratedOnboardingSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleOnboardingSteps } from '@/types/Onboarding';
+import { User } from '@/types/User';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
-import { useMounted } from '../_hooks/mounted';
 
 export default function MainPage({
   haiku: _haiku,
@@ -64,6 +64,7 @@ export default function MainPage({
     nextDailyHaikudleId,
     userLoaded,
     loadUser,
+    addUserHaiku,
   ] = useUser((state: any) => [
     state.user,
     state.save,
@@ -74,10 +75,13 @@ export default function MainPage({
     state.nextDailyHaikudleId,
     state.loaded,
     state.load,
+    state.addUserHaiku,
   ]);
 
   if (!userLoaded) {
-    loadUser();
+    loadUser().then((user: User) => 
+      // make sure the current haiku at least shows up in side bar as viewed
+      addUserHaiku(_haiku, "viewed"));
   }
 
   const [
@@ -283,9 +287,10 @@ export default function MainPage({
   //           }
   //         }
   //       }
-  //       else if (process.env.OPENAI_API_KEY != "DEBUG" && user?.isAdmin && mode == "haiku" && haiku?.poem) {
+  //       else 
+  if (process.env.OPENAI_API_KEY != "DEBUG" && user?.isAdmin && mode == "haiku" && haiku?.poem) {
           checkHaiku();
-  //       }
+        }
   //     } else { // !loading && !loaded
   //       loadPage();
   //     }

@@ -12,8 +12,7 @@ import { User } from '@/types/User';
 import { NoSsr } from '../_components/NoSsr';
 
 const todaysHaiku = async () => {
-  const todaysDateCode = moment().format("YYYYMMDD");
-  const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
+  const todaysDailyHaiku = await getDailyHaiku();
   if (todaysDailyHaiku?.haikuId) {
     return getHaiku({} as User, todaysDailyHaiku?.haikuId);
   }
