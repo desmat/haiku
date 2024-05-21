@@ -160,8 +160,23 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     }
   },
 
+  init: async (haiku: Haiku, queryOrId?: object | string, mode?: string): Promise<Haiku | Haiku[]> => {
+    const query = typeof (queryOrId) == "object" && queryOrId;
+    const id = typeof (queryOrId) == "string" && queryOrId;
+    console.log(">> hooks.haiku.init", { mode, id, query: JSON.stringify(query) });
+
+    const { setLoaded, _mode, _haikus } = get();
+    set({
+      mode: mode || _mode,
+      _haikus: { ..._haikus, [haiku.id]: haiku },
+    });
+    setLoaded(id);
+
+    return haiku;
+  },
+
   load: async (queryOrId?: object | string, mode?: string, version?: string): Promise<Haiku | Haiku[]> => {
-    const { setLoaded, _mode } = get();
+    const { setLoaded, _mode, init } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
     console.log(">> hooks.haiku.load", { mode, id, query: JSON.stringify(query) });
@@ -199,12 +214,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
             }
           }
 
-          set({
-            mode: mode || _mode,
-            _haikus: { ..._haikus, [haiku.id]: haiku },
-          });
-          setLoaded(id);
-
+          init(haiku, queryOrId, mode);
           resolve(haiku);
         });
       } else {
@@ -544,13 +554,13 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     delete allHaikus[id];
     delete dailyHaikus[id];
     delete dailyHaikudles[id];
-  
+
     useUser.setState({
       haikus: userHaikus,
       allHaikus,
       dailyHaikus,
       dailyHaikudles,
-    });    
+    });
 
     return deleted;
   },

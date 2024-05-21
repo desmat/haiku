@@ -97,6 +97,7 @@ export default function MainPage({
     createDailyHaiku,
     haikuAction,
     saveHaiku,
+    initHaiku,
   ] = useHaikus((state: any) => [
     state.loaded(haikuId),
     state.load,
@@ -108,6 +109,7 @@ export default function MainPage({
     state.createDailyHaiku,
     state.action,
     state.save,
+    state.init,
   ]);
 
   const [
@@ -147,13 +149,6 @@ export default function MainPage({
   const loaded = haikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
   let [loading, setLoading] = useState(false);
   let [loadingUI, setLoadingUI] = useState(false);
-
-  // // const haikus = await loadHaikus(id);
-  // // const haiku = haikus?.haikus[0];
-  // loadHaikus(id).then((haikus: any) => {
-  //   console.log("FDSFASS");
-  //   setHaiku(haikus[0]);
-  // })
 
   let solvedHaikudleHaiku = {
     ...haiku,
@@ -661,9 +656,19 @@ export default function MainPage({
   }, [haiku?.id, loadingUI, showcaseMode, _refreshDelay]);
 
   if (!userLoaded) {
-    loadUser().then((user: User) =>
+    loadUser().then((user: User) => {
+      haiku
+        ? initHaiku(haiku, haiku.id, mode)
+        : loadHaikus(haikuId || { lang }).then((haikus: Haiku | Haiku[]) => {
+          // console.log('>> app.MainPage loadHaikus.then', { haikus });
+          const loadedHaiku = haikus[0] || haikus;
+          setHaiku(loadedHaiku);
+          setHaikuId(loadedHaiku?.id);
+        });
+
       // make sure the current haiku at least shows up in side bar as viewed
-      !isPuzzleMode && addUserHaiku(_haiku, "viewed"));
+      !isPuzzleMode && addUserHaiku(_haiku, "viewed")
+    });
   }
 
   if (haikudleMode && !haikudleLoaded) {

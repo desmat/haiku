@@ -154,11 +154,11 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     }
   }
 
-  if (user.isAdmin) {
+  // if (user.isAdmin) {
     haiku.numLikes = (await store.userHaikus.find({ haikuId: id }))
       .filter((uh: UserHaiku) => uh.likedAt)
       .length;
-  }
+  // }
 
   console.log(`>> services.haiku.getHaiku`, { id, haiku });
   return haiku;
