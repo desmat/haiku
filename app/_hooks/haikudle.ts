@@ -58,15 +58,20 @@ const initialState = {
   solvedJustNow: false,
   moves: 0,
   onSolved: async (id: string, moves: number) => {
-    // anticipate instead
-    const currentHaiku = (await useHaikudle.getState()).haiku;
-    (await useHaikus.getState()).addUserHaiku({
-      id: currentHaiku.id,
-      createdBy: currentHaiku.createdBy,
-      createdAt: currentHaiku.createdAt,
-      solvedAt: moment().valueOf(),
-      theme: currentHaiku.theme,
-    });
+    // add solved haiku to side panel (backend record already created) 
+    const currentHaiku = useHaikudle.getState().haiku;
+    const { haikus: userHaikus } = useUser.getState(); // .addUserHaiku(currentHaiku, "generated");
+    useUser.setState({
+      haikus: {
+        ...userHaikus,
+        [currentHaiku.id]: {
+          ...userHaikus[currentHaiku.id],
+          theme: currentHaiku.theme,
+          solvedAt: moment().valueOf(),
+          moves,
+        }
+      }
+    })
 
     setTimeout(() => {
       const shareContent = "Solved today\\'s haiku puzzle in " + moves + " moves! https://haikudle.art/\\n\\n"

@@ -414,7 +414,8 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         method: "POST",
         body: JSON.stringify({ request }),
       }).then(async (res) => {
-        const { _haikus, addUserHaiku } = get();
+        const { _haikus } = get();
+        const { addUserHaiku } = useUser.getState();
 
         if (res.status != 200) {
           handleErrorResponse(res, "generate-haiku", undefined, `Error generating haiku`);
@@ -436,13 +437,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         });
 
         // also update the side bar
-        addUserHaiku({
-          id: generated.id,
-          createdBy: generated.createdBy,
-          createdAt: generated.createdAt,
-          generatedAt: generated.createdAt,
-          theme: generated.theme,
-        });
+        addUserHaiku(generated, "generated");
 
         if (reachedUsageLimit) {
           useAlert.getState().warning("Daily limit reached: you can create more haikus tomorrow.");
@@ -558,22 +553,6 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     });    
 
     return deleted;
-  },
-
-  addUserHaiku: async (userHaiku: any) => {
-    const { user, haikus, allHaikus } = useUser.getState();
-    // console.log(">> hooks.haiku.addUserHaiku", { userHaiku, user });
-
-    useUser.setState({
-      haikus: {
-        ...haikus,
-        [userHaiku.id]: userHaiku,
-      },
-      allHaikus: user.isAdmin && {
-        ...allHaikus,
-        [userHaiku.id]: userHaiku
-      },
-    });
   },
 
   createDailyHaiku: async (dateCode: string, haikuId: string) => {

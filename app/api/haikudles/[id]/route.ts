@@ -24,11 +24,9 @@ export async function GET(
   let [
     haiku,
     haikudle,
-    nextDailyHaikudleId
   ] = await Promise.all([
     getHaiku(user, params.id, !dailyHaikudle?.id),
     getHaikudle(user, params.id),
-    getNextDailyHaikudleId(),
   ]);
   const myHaiku = !user.isAdmin && haiku?.createdBy == user.id && await getHaiku(user, params.id);
   // console.log('>> app.api.haikudles.GET', { haiku, haikudle, dailyHaikudle, myHaiku });
@@ -45,16 +43,7 @@ export async function GET(
     });
   }
 
-  const [userHaiku, userHaikudle] = await Promise.all([
-    getUserHaiku(user?.id, haikudle?.haikuId),
-    getUserHaikudle(user?.id, haikudle?.haikuId),
-  ]);
-  // console.log('>> app.api.haikudles.GET', { userHaikudle, haikudle });
-
-  if (!user.isAdmin && !userHaikudle && haiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
-    // console.log('>> app.api.haikudles.GET createUserHaiku');
-    createUserHaiku(user, haiku);
-  }
+  const userHaikudle = await getUserHaikudle(user?.id, haikudle?.haikuId);
 
   return NextResponse.json({
     haikudle: {

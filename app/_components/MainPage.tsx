@@ -663,7 +663,7 @@ export default function MainPage({
   if (!userLoaded) {
     loadUser().then((user: User) =>
       // make sure the current haiku at least shows up in side bar as viewed
-      addUserHaiku(_haiku, "viewed"));
+      !isPuzzleMode && addUserHaiku(_haiku, "viewed"));
   }
 
   if (haikudleMode && !haikudleLoaded) {
