@@ -655,7 +655,7 @@ export default function MainPage({
     }
   }, [haiku?.id, loadingUI, showcaseMode, _refreshDelay]);
 
-  if (!userLoaded) {
+  if (!haikudleMode && !userLoaded) {
     loadUser().then((user: User) => {
       haiku
         ? initHaiku(haiku, haiku.id, mode)
