@@ -42,7 +42,7 @@ export default async function Page({
     id = undefined;
   }
 
-  const haiku = id ? await getHaiku({} as User, id) : await todaysHaiku();
+  const haiku = id ? await getHaiku({} as User, id, false, version) : await todaysHaiku();
 
   // TODO mark this haiku as viewed
 
