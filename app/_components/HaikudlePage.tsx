@@ -45,8 +45,8 @@ export default function HaikudlePage({
 
   // console.log('>> app._components.HaikudlePage.render()', { solved, haiku, inProgress });
 
-  const blurCurve = [0, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10];
-  const saturateCurve = [1];
+  const blurCurve = [0, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20];
+  const saturateCurve = [1, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6];
 
   const numWords = inProgress.flat().length;
   let numCorrectWords = previousDailyHaikudleId

@@ -44,8 +44,8 @@ export default function HaikuPage({
   console.log('>> app._components.HaikuPage.render()', { mode, id: haiku?.id, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   // const [user] = useUser((state: any) => [state.user]);
-  const blurValue = loading ? 8 : 0
-  const saturateValue = loading ? 0.7 : 1
+  const blurValue = loading ? 20 : 0
+  const saturateValue = loading ? 0.6 : 1
 
   return (
     <div>
