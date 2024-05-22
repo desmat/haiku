@@ -1,17 +1,12 @@
 import moment from 'moment';
 import { syllable } from 'syllable';
-import { put } from '@vercel/blob';
+import { DailyHaiku, Haiku } from '@/types/Haiku';
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { Store } from "@/types/Store";
 import { User } from '@/types/User';
-import { mapToList, uuid } from '@/utils/misc';
-import * as samples from '@/services/stores/samples';
-import * as openai from './openai';
-import chroma from 'chroma-js';
-import { LanguageType, supportedLanguages } from '@/types/Languages';
+import { uuid } from '@/utils/misc';
 import shuffleArray from '@/utils/shuffleArray';
-import { getHaiku } from './haikus';
-import { Haiku } from '@/types/Haiku';
+import { getDailyHaikus, getHaiku, getHaikus } from './haikus';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -126,7 +121,7 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
   // remove daily haikudle and this user's userhaikudle (leave the others alone)
   const userHaikudleId = `${id}-${user.id}`;
   const [
-    dailyHaikudles, 
+    dailyHaikudles,
     userHaikudle
   ] = await Promise.all([
     store.dailyHaikudles.find(),
@@ -183,12 +178,49 @@ export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<H
   return store.userHaikudles.create(user.id, userHaikudle);
 }
 
-export async function getDailyHaikudle(id: string): Promise<DailyHaikudle | undefined> {
+export async function getDailyHaikudle(id?: string): Promise<DailyHaikudle | undefined> {
   console.log(`>> services.haikudle.getDailyHaikudle`, { id });
 
-  const dailyHaikudle = await store.dailyHaikudles.get(id);
+  if (!id) id = moment().format("YYYYMMDD");
+
+  let dailyHaikudle = await store.dailyHaikudles.get(id);
   console.log(`>> services.haikudle.getDailyHaikudle`, { id, dailyHaikudle });
-  return new Promise((resolve, reject) => resolve(dailyHaikudle));
+
+  if (!dailyHaikudle) {
+    const systemUser = { id: "(system)" } as User;
+    // create a new haikudle and dailyhaikudle combo: 
+    // first pull from daily haikus, else from the rest
+    const [
+      previousDailyHaikudles,
+      haikudles,
+      dailyHaikus,
+    ] = await Promise.all([
+      getDailyHaikudles(),
+      getHaikudles(),
+      getDailyHaikus(),
+    ]);
+
+    const previousDailyHaikuIds = previousDailyHaikudles.map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
+    let nonDailyhaikus = dailyHaikus.filter((dailyHaiku: DailyHaiku) => !previousDailyHaikuIds.includes(dailyHaiku.haikuId));
+
+    let randomHaikuId;
+    if (nonDailyhaikus.length) {
+      randomHaikuId = shuffleArray(nonDailyhaikus)[0].haikuId;
+    } else {
+      // didn't find any daily haikus that hasn't been a daily haikudle already
+      const haikus = await getHaikus();
+      nonDailyhaikus = haikus.filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
+      randomHaikuId = shuffleArray(nonDailyhaikus)[0].id;
+    }
+
+    const randomHaikudle = await createHaikudle(systemUser, { id: randomHaikuId, haikuId: randomHaikuId });
+
+    console.log('>> app.api.haikudles.GET', { randomHaikuId, randomHaikudle, previousDailyHaikudles, haikudles });
+
+    dailyHaikudle = await saveDailyHaikudle(systemUser, id, randomHaikudle.haikuId, randomHaikudle.id);
+  }
+
+  return dailyHaikudle;
 }
 
 export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {

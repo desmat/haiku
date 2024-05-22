@@ -3,8 +3,8 @@ import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { LanguageType, isSupportedLanguage } from '@/types/Languages';
 import { Suspense } from 'react';
-import moment from 'moment';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
+import { getDailyHaikudle, getHaikudle } from '@/services/haikudles';
 import HaikuPage from '../_components/HaikuPage';
 import { NavOverlay } from '../_components/Nav';
 import { haikuStyles } from '@/types/Haiku';
@@ -15,6 +15,13 @@ const todaysHaiku = async () => {
   const todaysDailyHaiku = await getDailyHaiku();
   if (todaysDailyHaiku?.haikuId) {
     return getHaiku({} as User, todaysDailyHaiku?.haikuId);
+  }
+}
+
+const todaysHaikudle = async () => {
+  const todaysDailyHaikudle = await getDailyHaikudle();
+  if (todaysDailyHaikudle?.haikudleId) {
+    return getHaikudle({} as User, todaysDailyHaikudle?.haikudleId);
   }
 }
 
@@ -42,9 +49,21 @@ export default async function Page({
     id = undefined;
   }
 
-  const haiku = id ? await getHaiku({} as User, id, false, version) : await todaysHaiku();
+  const haikudle = mode == "haikudle"
+    ? id
+      ? await getHaikudle({} as User, id)
+      : await todaysHaikudle()
+    : undefined
 
-  // TODO mark this haiku as viewed
+  if (mode == "haikudle" && !haikudle) {
+    return <NotFound mode={mode} />
+  }
+
+  const haiku = haikudle
+    ? await getHaiku({} as User, haikudle.haikuId, true, version)
+    : id
+      ? await getHaiku({} as User, id, false, version)
+      : await todaysHaiku();
 
   if (!haiku) {
     return <NotFound mode={mode} />
@@ -78,6 +97,7 @@ export default async function Page({
             styles={textStyles}
             altStyles={altTextStyles}
             fontSize={fontSize}
+            loading={mode == "haikudle"}
           />
         </div>
       }

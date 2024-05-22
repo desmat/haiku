@@ -152,6 +152,7 @@ export default function MainPage({
 
   let solvedHaikudleHaiku = {
     ...haiku,
+    poemHashed: false,
     poem: haikudleInProgress
       .map((line: any) => line
         .map((word: any) => word.word)

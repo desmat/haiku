@@ -148,6 +148,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   if (hashPoem) {
     haiku = {
       ...haiku,
+      poemHashed: true,
       poem: haiku.poem
         .map((line: string) => line.split(/\s+/)
           .map((word: string) => hashCode(normalizeWord(word)))),
