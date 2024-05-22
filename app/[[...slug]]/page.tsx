@@ -103,6 +103,7 @@ export default async function Page({
       <NoSsr>
         <MainPage
           haiku={haiku}
+          haikudle={haikudle}
           mode={mode}
           lang={lang}
           refreshDelay={refreshDelay}

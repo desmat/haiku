@@ -24,18 +24,20 @@ import { formatHaikuText } from './HaikuPoem';
 
 export default function MainPage({
   haiku: _haiku,
+  haikudle: _haikudle,
   mode,
   lang,
   refreshDelay,
   fontSize,
 }: {
   haiku: Haiku,
+  haikudle?: Haikudle,
   mode: ExperienceMode,
   lang?: undefined | LanguageType,
   refreshDelay?: number,
   fontSize?: string | undefined,
 }) {
-  // console.log('>> app.MainPage.render()', { mode, id, lang, _haiku });
+  console.log('>> app.MainPage.render()', { mode, lang, _haiku, _haikudle });
 
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
@@ -116,9 +118,9 @@ export default function MainPage({
     state.init,
   ]);
 
-  const [
+  let [
     haikudleReady,
-    haikudleLoaded,
+    _haikudleLoaded,
     loadHaikudle,
     deleteHaikudle,
     haikudleHaiku,
@@ -128,10 +130,11 @@ export default function MainPage({
     previousDailyHaikudleId,
     haikudleSolved,
     haikudleSolvedJustNow,
+    initHaikudle,
   ] = useHaikudle((state: any) => [
     state.ready,
     state.loaded(haikuId || { lang }),
-    state.load,
+    () => state.load(haikuId || { lang }),
     state.delete,
     state.haiku,
     state.reset,
@@ -140,7 +143,10 @@ export default function MainPage({
     state.previousDailyHaikudleId,
     state.solved,
     state.solvedJustNow,
+    state.init,
   ]);
+
+  let [haikudleLoaded, setHaikudleLoaded] = useState(false);
 
   const [
     onboardingElement,
@@ -153,6 +159,8 @@ export default function MainPage({
   const loaded = haikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
   let [loading, setLoading] = useState(false);
   let [loadingUI, setLoadingUI] = useState(false);
+
+  console.log('>> app.MainPage.render()', { loadingUI, generating });
 
   let solvedHaikudleHaiku = {
     ...haiku,
@@ -684,14 +692,20 @@ export default function MainPage({
     });
   }
 
+  // if (haikudleMode && !haikudleLoaded) {
+  //   loadHaikudle().then((haikudles: Haikudle | Haikudle[]) => {
+  //     console.log('>> app.MainPage.loadPage loadHaikudle.then', { haikudles });
+  //     const loadedHaikudle = haikudles[0] || haikudles;
+  //     setHaiku(loadedHaikudle?.haiku);
+  //     setHaikuId(loadedHaikudle?.haiku?.id);
+  //   });
+  // }
+
   if (haikudleMode && !haikudleLoaded) {
-    loadHaikudle(haikuId || { lang })
-      .then((haikudles: Haikudle | Haikudle[]) => {
-        // console.log('>> app.MainPage.loadPage loadHaikudle.then', { haikudles });
-        const loadedHaikudle = haikudles[0] || haikudles;
-        setHaiku(loadedHaikudle?.haiku);
-        setHaikuId(loadedHaikudle?.haiku?.id);
-      })
+    initHaikudle({ ..._haikudle, haiku }, !haiku.poemHashed).then(() => {
+      haikudleLoaded = true;
+      setHaikudleLoaded(haikudleLoaded);
+    });
   }
 
   if (loadingUI || generating || haikudleMode && !haikudleLoaded) {

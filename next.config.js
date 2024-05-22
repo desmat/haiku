@@ -3,6 +3,7 @@ const nextConfig = {
     // experimental: {
     //     serverActions: false,
     // },
+    reactStrictMode: false,
     env: {
         AUTH_PRIVATE_KEY: process.env.AUTH_PRIVATE_KEY,
         AUTH_PUBLIC_KEY: process.env.AUTH_PUBLIC_KEY,
