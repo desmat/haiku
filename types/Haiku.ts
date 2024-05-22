@@ -45,7 +45,7 @@ export type HaikuAction = "like";
 
 export function haikuStyles(haiku: Haiku) {
   const fontColor = haiku?.color || "#555555";
-  const bgColor = haiku?.bgColor || "lightgrey";
+  const bgColor = haiku?.bgColor || "#aaaaaa";
 
   return {
     textStyles: [

@@ -25,13 +25,17 @@ async function handleErrorResponse(res: any, resourceType: string, resourceId: s
     id: resourceId,
   });
 
+  const errorMessage = res.status == 429
+    ? `Exceeded daily limit: please try again later`
+    : res.status == 404
+      ? `${message || "An error occured"}: ${res.status} (${res.statusText || getReasonPhrase(res.status)})`
+      : `${message || "An error occured"}: ${res.status} (${res.statusText || getReasonPhrase(res.status)})`;
+
   // smooth out the the alert pop-up
   setTimeout(
-    res.status == 429
-      ? () => useAlert.getState().warning(`Exceeded daily limit: please try again later`)
-      : res.status == 404
-        ? () => useAlert.getState().warning(`${message || "An error occured"}: ${res.status} (${res.statusText || getReasonPhrase(res.status)})`)
-        : () => useAlert.getState().error(`${message || "An error occured"}: ${res.status} (${res.statusText || getReasonPhrase(res.status)})`)
+    [429, 404].includes(res.status)
+      ? () => useAlert.getState().warning(errorMessage)
+      : () => useAlert.getState().error(errorMessage)
     , 500);
 
   const errorHaiku =
@@ -42,6 +46,8 @@ async function handleErrorResponse(res: any, resourceType: string, resourceId: s
         : res.status >= 400 && res.status < 500
           ? error4xxHaiku(res.status, res.statusText || getReasonPhrase(res.status))
           : serverErrorHaiku(res.status, res.statusText || getReasonPhrase(res.status));
+
+  errorHaiku.error = errorMessage;
 
   return errorHaiku;
 }

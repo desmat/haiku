@@ -1,15 +1,16 @@
+import { Suspense } from 'react';
+import HaikuPage from '@/app/_components/HaikuPage';
 import MainPage from '@/app/_components/MainPage';
+import { NavOverlay } from '@/app/_components/Nav';
+import { NoSsr } from '@/app/_components/NoSsr';
 import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { LanguageType, isSupportedLanguage } from '@/types/Languages';
-import { Suspense } from 'react';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
 import { getDailyHaikudle, getHaikudle } from '@/services/haikudles';
-import HaikuPage from '../_components/HaikuPage';
-import { NavOverlay } from '../_components/Nav';
+import { notFoundHaiku } from '@/services/stores/samples';
 import { haikuStyles } from '@/types/Haiku';
 import { User } from '@/types/User';
-import { NoSsr } from '../_components/NoSsr';
 
 const todaysHaiku = async () => {
   const todaysDailyHaiku = await getDailyHaiku();
@@ -59,16 +60,13 @@ export default async function Page({
     return <NotFound mode={mode} />
   }
 
-  const haiku = haikudle
+  let haiku = haikudle
     ? await getHaiku({} as User, haikudle.haikuId, true, version)
     : id
       ? await getHaiku({} as User, id, false, version)
       : await todaysHaiku();
 
-  if (!haiku) {
-    return <NotFound mode={mode} />
-  }
-
+  haiku = haiku || notFoundHaiku;
   const { textStyles, altTextStyles } = haikuStyles(haiku);
 
   return (
@@ -79,7 +77,7 @@ export default async function Page({
             dangerouslySetInnerHTML={{
               __html: `
                   body {
-                    background-color: ${haiku?.bgColor || "lightgrey"};
+                    background-color: ${haiku?.bgColor || "#aaaaaa"};
                   }
                 `
             }}

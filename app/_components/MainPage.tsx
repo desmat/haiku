@@ -78,12 +78,14 @@ export default function MainPage({
     resetAlert,
     plainAlert,
     warningAlert,
-    infoAlert
+    infoAlert,
+    errorAlert,
   ] = useAlert((state: any) => [
     state.reset,
     state.plain,
     state.warning,
-    state.info
+    state.info,
+    state.error,
   ]);
 
   const [
@@ -331,6 +333,13 @@ export default function MainPage({
       haikuGeneratedOnboardingSteps(haiku),
       () => saveUser({ ...user, preferences: { ...user?.preferences, onboardedGenerated: true } })
     );
+  }
+
+  const showHaikuError = () => {
+    //@ts-ignore
+    ["404notfound", "429error"].includes(haiku.id)
+      ? warningAlert(haiku.error)
+      : errorAlert(haiku.error);
   }
 
   const showHaikuDetails = () => {
@@ -730,18 +739,20 @@ export default function MainPage({
           loadHaiku();
         }}
         onSwitchMode={switchMode}
-        onDelete={doDelete}
-        onSaveDailyHaiku={saveDailyHaiku}
+        onDelete={!haiku?.error && doDelete}
+        onSaveDailyHaiku={!haiku?.error && saveDailyHaiku}
         onShowAbout={
-          user?.isAdmin
-            ? showHaikuDetails
-            : userGeneratedHaiku
-              ? showAboutGenerated
-              : haikudleMode
-                ? previousDailyHaikudleId
-                  ? showAboutPreviousDaily // with onboarding?
-                  : startFirstVisitHaikudleOnboarding
-                : startFirstVisitOnboarding
+          haiku.error
+            ? showHaikuError
+            : user?.isAdmin
+              ? showHaikuDetails
+              : userGeneratedHaiku
+                ? showAboutGenerated
+                : haikudleMode
+                  ? previousDailyHaikudleId
+                    ? showAboutPreviousDaily // with onboarding?
+                    : startFirstVisitHaikudleOnboarding
+                  : startFirstVisitOnboarding
         }
         onSelectHaiku={(id: string) => {
           trackEvent("haiku-selected", {
@@ -750,11 +761,11 @@ export default function MainPage({
           });
           loadHaiku(id);
         }}
-        onChangeRefreshDelay={changeRefreshDelay}
-        onBackup={startBackup}
-        onCopyHaiku={(haikudleMode && haikudleSolved || !haikudleMode) && copyHaiku}
-        onCopyLink={(haikudleMode && haikudleSolved || !haikudleMode) && copyLink}
-        onLikeHaiku={(haikudleMode && haikudleSolved || !haikudleMode) && likeHaiku}
+        onChangeRefreshDelay={!haiku?.error && changeRefreshDelay}
+        onBackup={!haiku?.error && startBackup}
+        onCopyHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyHaiku}
+        onCopyLink={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyLink}
+        onLikeHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && likeHaiku}
       />
 
       {isPuzzleMode &&
@@ -778,11 +789,11 @@ export default function MainPage({
           popPoem={haikudleMode && haikudleSolvedJustNow}
           regenerating={regenerating}
           onboardingElement={onboardingElement}
-          refresh={loadRandom}
-          saveHaiku={doSaveHaiku}
-          regeneratePoem={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku()}
-          regenerateImage={() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage()}
-          copyHaiku={copyHaiku}
+          refresh={!haiku?.error && loadRandom}
+          saveHaiku={!haiku?.error && doSaveHaiku}
+          regeneratePoem={!haiku?.error && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
+          regenerateImage={!haiku?.error && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
+          copyHaiku={!haiku?.error && copyHaiku}
         />
       }
     </div>

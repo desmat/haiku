@@ -82,15 +82,23 @@ export default function SidePanel({
     userHaikus,
     userDailyHaikus,
     userDailyHaikudles,
+    userLoaded,
+    loadUser,
   ] = useUser((state: any) => [
     user?.isAdmin && !filter
       ? state.allHaikus ? Object.values(state.allHaikus) : []
       : state.haikus ? Object.values(state.haikus) : [],
     state.dailyHaikus ? Object.values(state.dailyHaikus) : [],
     state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
+    state.loaded,
+    state.load,
   ]);
 
-  console.log(">> app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles });
+  if (!userLoaded) {
+    loadUser().then((u: User) => user = u);
+  }
+
+  console.log(">> app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles, styles, altStyles });
 
   const onClickLogo = () => {
     toggleMenuOpened();

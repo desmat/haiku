@@ -226,12 +226,12 @@ export default function HaikuPoem({
   const [alert] = useAlert((state: any) => [state.plain]);
   const editing = typeof (editingLine) == "number";
   const aboutToEdit = typeof (aboutToEditLine) == "number";
-  const copyAllowed = true;
+  const copyAllowed = copyHaiku;
   const canCopy = copyAllowed && !editing && !saving;
-  const editAllowed = !showcaseMode && (user?.isAdmin || haiku?.createdBy == user?.id) && saveHaiku;
+  const editAllowed = !showcaseMode && saveHaiku && (user?.isAdmin || haiku?.createdBy == user?.id) && saveHaiku;
   const canEdit = editAllowed && !saving && !onboarding;
-  const regeneratePoemAllowed = (user?.isAdmin || haiku?.createdBy == user?.id) && regeneratePoem;
-  const regenerateImageAllowed = (user?.isAdmin || haiku?.createdBy == user?.id) && regenerateImage;
+  const regeneratePoemAllowed = regeneratePoem && (user?.isAdmin || haiku?.createdBy == user?.id) && regeneratePoem;
+  const regenerateImageAllowed = regenerateImage && (user?.isAdmin || haiku?.createdBy == user?.id) && regenerateImage;
   const canRegeneratePoem = regeneratePoemAllowed && !editing && !saving;
   const canRegenerateImage = regenerateImageAllowed && !editing && !saving;
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { haiku, updatedPoem, editingPoemLine });
@@ -383,7 +383,7 @@ export default function HaikuPoem({
             .poem-line-input div {
               background: none;
               _background: pink; /* for debugging */
-              caret-color: ${haiku?.color || "black"};
+              caret-color: ${haiku?.color || "#000000"};
               border-radius: 0.4rem;
               height: auto;
               padding: 0.15rem 0.5rem;
@@ -391,14 +391,14 @@ export default function HaikuPoem({
             }
             .poem-line-input.poem-line-${/* !editing && */ !saving && !onboarding && aboutToEditLine} div {
               outline: 1px solid ${haiku?.bgColor || ""}66;
-              background-color: ${haiku?.bgColor || "white"}44;  
+              background-color: ${haiku?.bgColor || "#ffffff"}44;  
             }
             .poem-line-input div:focus {
               outline: 1px solid ${haiku?.bgColor || ""}66;
-              background: ${haiku?.bgColor || "white"}66;
+              background: ${haiku?.bgColor || "#ffffff"}66;
             }
             .poem-line-input div::selection { 
-              background: ${haiku?.color || "black"}66;
+              background: ${haiku?.color || "#000000"}66;
             }`
         }}
       >
@@ -475,7 +475,7 @@ export default function HaikuPoem({
                         }
                         {!editAllowed &&
                           <div
-                            className={`_bg-purple-400 my-[0.05rem] ${showcaseMode ? "cursor-pointer" : "cursor-copy"}`}
+                            className={`_bg-purple-400 my-[0.05rem] ${showcaseMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
                           >
                             {upperCaseFirstLetter(poemLine)}
                           </div>
@@ -515,7 +515,7 @@ export default function HaikuPoem({
                   style={{
                     cursor: showcaseMode
                       ? "pointer"
-                      : !editAllowed && canCopy
+                      : !canEdit && canCopy
                         ? "copy"
                         : ""
                   }}
