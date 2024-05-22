@@ -96,9 +96,9 @@ export default function SidePanel({
     state.load,
   ]);
 
-  if (!user && !userLoaded && !userLoading) {
-    loadUser().then((u: User) => user = u);
-  }
+  // if (!user && !userLoaded && !userLoading) {
+  //   loadUser().then((u: User) => user = u);
+  // }
 
   console.log(">> app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles, styles, altStyles });
 
