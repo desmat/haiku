@@ -83,6 +83,7 @@ export default function SidePanel({
     userDailyHaikus,
     userDailyHaikudles,
     userLoaded,
+    userLoading,
     loadUser,
   ] = useUser((state: any) => [
     user?.isAdmin && !filter
@@ -91,10 +92,11 @@ export default function SidePanel({
     state.dailyHaikus ? Object.values(state.dailyHaikus) : [],
     state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
     state.loaded,
+    state.loading,
     state.load,
   ]);
 
-  if (!userLoaded) {
+  if (!user && !userLoaded && !userLoading) {
     loadUser().then((u: User) => user = u);
   }
 

@@ -59,6 +59,7 @@ export default function MainPage({
     nextDailyHaikuId,
     nextDailyHaikudleId,
     userLoaded,
+    userLoading,
     loadUser,
     addUserHaiku,
   ] = useUser((state: any) => [
@@ -70,6 +71,7 @@ export default function MainPage({
     state.nextDailyHaikuId,
     state.nextDailyHaikudleId,
     state.loaded,
+    state.loading,
     state.load,
     state.addUserHaiku,
   ]);
@@ -665,8 +667,9 @@ export default function MainPage({
     }
   }, [haiku?.id, loadingUI, showcaseMode, _refreshDelay]);
 
-  if (!haikudleMode && !userLoaded) {
+  if (!haikudleMode && !userLoaded && !userLoading) {
     loadUser().then((user: User) => {
+      // TODO: clean this up
       haiku
         ? initHaiku(haiku, haiku.id, mode)
         : loadHaikus(haikuId || { lang }).then((haikus: Haiku | Haiku[]) => {

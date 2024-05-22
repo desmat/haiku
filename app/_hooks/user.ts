@@ -13,6 +13,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   // session: undefined,
   token: undefined,
   loaded: false,
+  loading: false,
   // loading: false, // guard against signin in many times anonymously
 
   // populate the side panel
@@ -43,6 +44,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   load: async () => {
+    set({ loading: true });
     const { loadLocal, loadRemote } = get();
     let user;
     // console.log(">> hooks.user.load()", {});
@@ -57,6 +59,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
       if (!createdUser || !token) {
         useAlert.getState().error(`Unable to create session user and/or token: (unknown)`);
+        set({ loading: false });
         return;
       }
 
@@ -104,6 +107,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       user,
       token,
       loaded: true,
+      loading: false,
       haikus: haikus ? listToMap(haikus, { keyFn: (e: any) => e.haikuId }) : {},
       allHaikus: allHaikus ? listToMap(allHaikus, { keyFn: (e: any) => e.haikuId }) : {},
       dailyHaikus: dailyHaikus ? listToMap(dailyHaikus, { keyFn: (e: any) => e.haikuId }) : {},
