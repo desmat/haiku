@@ -133,6 +133,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       solved,
       moves: haikudle?.moves || 0,
     });
+
+    return haikudle;
   },
 
   solve: () => {

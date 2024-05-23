@@ -54,7 +54,12 @@ export default function RootLayout({
         <link rel="canonical" href={metaUrl} key="canonical" />
         <meta property="fb:app_id" content={process.env.FB_APP_ID}></meta>
       </head>
-      <body className={inter.className}>
+      <body
+        className={inter.className}
+        style={{
+          backgroundColor: "#aaaaaa"
+        }}
+      >
         {children}
         <Analytics />
         <Alert />

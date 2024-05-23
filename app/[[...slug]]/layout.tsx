@@ -80,7 +80,7 @@ export default async function Layout({
   // }
 
   const user = {} as User;
-  const haiku = undefined;  //await getHaiku(user, haikuId);
+  const haiku = { bgColor: "" };  //await getHaiku(user, haikuId);
   console.log('>> app.[[..slug]].layout.render()', { haiku });
 
   metadata = {
@@ -101,15 +101,15 @@ export default async function Layout({
 
   return (
     <section>
-      {/* <style
+      <style
         dangerouslySetInnerHTML={{
           __html: `
             body {
-              background-color: ${haiku?.bgColor || "lightgrey"};
+              background-color: ${haiku?.bgColor || "#aaaaaa"};
             }
           `
         }}
-      /> */}
+      />
       <div className="flex flex-col lg:flex-row">
         <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
           {children}

@@ -74,7 +74,14 @@ export async function getHaikudle(user: User, id: string): Promise<Haikudle | un
   let haikudle = await store.haikudles.get(id);
   console.log(`>> services.haikudle.getHaikudle`, { id, haikudle });
 
-  if (haikudle && !haikudle.inProgress) {
+  if (!haikudle) {
+    haikudle = await createHaikudle(user, {
+      id,
+      haikuId: id,
+    });
+  }
+
+  if (!haikudle.inProgress) {
     haikudle = await createInProgress(user, haikudle);
   }
 

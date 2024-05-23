@@ -120,7 +120,7 @@ export default function MainPage({
 
   let [
     haikudleReady,
-    _haikudleLoaded,
+    haikudleLoaded,
     loadHaikudle,
     deleteHaikudle,
     haikudleHaiku,
@@ -146,7 +146,7 @@ export default function MainPage({
     state.init,
   ]);
 
-  let [haikudleLoaded, setHaikudleLoaded] = useState(false);
+  // let [haikudleLoaded, setHaikudleLoaded] = useState(false);
 
   const [
     onboardingElement,
@@ -160,7 +160,7 @@ export default function MainPage({
   let [loading, setLoading] = useState(false);
   let [loadingUI, setLoadingUI] = useState(false);
 
-  console.log('>> app.MainPage.render()', { loadingUI, generating });
+  console.log('>> app.MainPage.render()', { loadingUI, generating, haikudleLoaded, haikudleReady });
 
   let solvedHaikudleHaiku = {
     ...haiku,
@@ -675,40 +675,34 @@ export default function MainPage({
     }
   }, [haiku?.id, loadingUI, showcaseMode, _refreshDelay]);
 
-  if (!haikudleMode && !userLoaded && !userLoading) {
+  if (!userLoaded && !userLoading) {
+    console.log('>> app.MainPage init', {});
     loadUser().then((user: User) => {
-      // TODO: clean this up
-      haiku
-        ? initHaiku(haiku, haiku.id, mode)
-        : loadHaikus(haikuId || { lang }).then((haikus: Haiku | Haiku[]) => {
-          // console.log('>> app.MainPage loadHaikus.then', { haikus });
-          const loadedHaiku = haikus[0] || haikus;
-          setHaiku(loadedHaiku);
-          setHaikuId(loadedHaiku?.id);
+      console.log('>> app.MainPage init loadUser.then', { user });
+      if (haikudleMode) {
+        initHaikudle({ ..._haikudle, haiku }, !haiku.poemHashed).then((haikudle: Haikudle) => {
+          console.log('>> app.MainPage init initHaikudle.then', { haikudle });
         });
+      } else {
+        // TODO: clean this up
+        haiku
+          ? initHaiku(haiku, haiku.id, mode).then((haikus: Haiku | Haiku[]) => {
+            console.log('>> app.MainPage init initHaiku.then', { haikus });
+          })
+          : loadHaikus(haikuId || { lang }).then((haikus: Haiku | Haiku[]) => {
+            console.log('>> app.MainPage init loadHaikus.then', { haikus });
+            const loadedHaiku = haikus[0] || haikus;
+            setHaiku(loadedHaiku);
+            setHaikuId(loadedHaiku?.id);
+          });
 
-      // make sure the current haiku at least shows up in side bar as viewed
-      !isPuzzleMode && addUserHaiku(_haiku, "viewed")
+        // make sure the current haiku at least shows up in side bar as viewed
+        !isPuzzleMode && addUserHaiku(_haiku, "viewed")
+      }
     });
   }
 
-  // if (haikudleMode && !haikudleLoaded) {
-  //   loadHaikudle().then((haikudles: Haikudle | Haikudle[]) => {
-  //     console.log('>> app.MainPage.loadPage loadHaikudle.then', { haikudles });
-  //     const loadedHaikudle = haikudles[0] || haikudles;
-  //     setHaiku(loadedHaikudle?.haiku);
-  //     setHaikuId(loadedHaikudle?.haiku?.id);
-  //   });
-  // }
-
-  if (haikudleMode && !haikudleLoaded) {
-    initHaikudle({ ..._haikudle, haiku }, !haiku.poemHashed).then(() => {
-      haikudleLoaded = true;
-      setHaikudleLoaded(haikudleLoaded);
-    });
-  }
-
-  if (loadingUI || generating || haikudleMode && !haikudleLoaded) {
+  if (loadingUI || generating || haikudleMode && !haikudleReady) {
     return (
       <div>
         {haiku?.bgColor &&

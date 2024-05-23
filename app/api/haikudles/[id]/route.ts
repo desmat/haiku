@@ -36,11 +36,7 @@ export async function GET(
   }
 
   if (!haikudle) {
-    haikudle = await createHaikudle(user, {
-      id: params.id,
-      haikuId: params.id,
-      // inProgress: haikudle.inProgress,
-    });
+    return NextResponse.json({ haikudle: {} }, { status: 404 });
   }
 
   const userHaikudle = await getUserHaikudle(user?.id, haikudle?.haikuId);
