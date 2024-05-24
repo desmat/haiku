@@ -529,7 +529,7 @@ export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
 
 export async function getNextDailyHaikuId(dailyHaikus?: DailyHaiku[]): Promise<string> {
   const ids = (dailyHaikus || await getDailyHaikus())
-    .map((dh: DailyHaiku) => dh.id)
+    .map((dh: DailyHaiku) => dh?.id)
     .sort()
     .reverse();
   const todays = moment().format("YYYYMMDD");

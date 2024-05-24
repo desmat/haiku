@@ -220,7 +220,7 @@ export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
 
 export async function getNextDailyHaikudleId(dailyHaikudles?: DailyHaikudle[]): Promise<string> {
   const ids = (dailyHaikudles || await getDailyHaikudles())
-    .map((dh: DailyHaikudle) => dh.id)
+    .map((dh: DailyHaikudle) => dh?.id)
     .sort()
     .reverse();
   const todays = moment().format("YYYYMMDD");
