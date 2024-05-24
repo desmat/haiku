@@ -6,6 +6,8 @@ import { put } from '@vercel/blob';
 import { formatBytes } from '@/utils/format';
 import { UserHaikuSaveOptions } from '@/types/Haiku';
 
+export const maxDuration = 300;
+
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
   .then((s: any) => {
@@ -113,7 +115,7 @@ export async function restore(user: User, url: string) {
     })
   );
 
-  // console.log('>> app.services.admin.restore >>>RESULTS<<<', { result });
+  console.log('>> app.services.admin.restore >>>RESULTS<<<', { result });
 
   return result;
 }
