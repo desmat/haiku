@@ -18,7 +18,20 @@ export async function GET(request: NextRequest, params?: any) {
   const { user } = await userSession(request);
   console.log('>> app.api.haikus.GET', { query, searchParams: request.nextUrl.searchParams.toString(), user });
 
-  if (!["showcase", "social-img", "haikudle-social-img"].includes(query.mode) && query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
+  /* 
+    allowed: 
+      admin
+      (no change)
+      * -> showcase, social-img, haikudle-social-img
+      showcase -> haiku
+  */
+
+  if (!(
+    user.isAdmin ||
+    (query.mode == process.env.EXPERIENCE_MODE) ||
+    (query.mode != process.env.EXPERIENCE_MODE && ["showcase", "social-img", "haikudle-social-img"].includes(query.mode)) ||
+    (process.env.EXPERIENCE_MODE == "showcase" && query.mode == "haiku")
+  )) {
     return NextResponse.json(
       { success: false, message: 'authorization failed' },
       { status: 403 }
@@ -26,15 +39,14 @@ export async function GET(request: NextRequest, params?: any) {
   }
 
   if (query.random) {
-    const mode = query.mode;
-
-    if (!["haiku", "showcase", "social-img", "haikudle-social-img"].includes(query.mode) && !user.isAdmin) {
+    if (process.env.EXPERIENCE_MODE != "showcase" && !user.isAdmin) {
       return NextResponse.json(
         { success: false, message: 'authorization failed' },
         { status: 403 }
       );
     }
 
+    const mode = query.mode;
     delete query.mode;
     delete query.random;
     if (!query.lang) {

@@ -600,7 +600,7 @@ function BottomLinks({
             </PopOnClick>
           </Link>
         }
-        {user?.isAdmin &&
+        {(user?.isAdmin || mode == "haiku" && process.env.EXPERIENCE_MODE == "showcase") &&
           <Link
             key="socialImgMode"
             href={`/${haiku ? haiku?.id : ""}?mode=showcase`}

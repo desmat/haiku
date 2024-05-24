@@ -16,7 +16,20 @@ export async function GET(
   const { user } = await userSession(request);
   console.log('>> app.api.haiku.[id].GET', { params });
 
-  if (!["showcase", "social-img", "haikudle-social-img"].includes(query.mode) && query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin) {
+  /* 
+    allowed: 
+      admin
+      (no change)
+      * -> showcase, social-img, haikudle-social-img
+      showcase -> haiku
+  */
+
+  if (!(
+    user.isAdmin ||
+    (query.mode == process.env.EXPERIENCE_MODE) ||
+    (query.mode != process.env.EXPERIENCE_MODE && ["showcase", "social-img", "haikudle-social-img"].includes(query.mode)) ||
+    (process.env.EXPERIENCE_MODE == "showcase" && query.mode == "haiku")
+  )) {
     return NextResponse.json(
       { success: false, message: 'authorization failed' },
       { status: 403 }
