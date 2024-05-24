@@ -68,7 +68,7 @@ export default function SidePanel({
   onSelectHaiku?: any,
   onClickLogo?: any,
 }) {
-  const [panelOpened, setPanelOpened] = useState(true);
+  const [panelOpened, setPanelOpened] = useState(false);
   const [panelAnimating, setPanelAnimating] = useState(false);
   const [panelPinned, setPanelPinned] = useState(false);
   const pageSize = 20;
