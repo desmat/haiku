@@ -167,18 +167,20 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
     const createdListValue = {
       id: value.id || uuid(),
-      createdAt: moment().valueOf(),
-      createdBy: userId,
+      createdAt: value.createdAt || moment().valueOf(),
+      createdBy: value.createdBy || userId,
       name: value.name,
       lang: value.lang,
       ...additionalListValues,
     };
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { createdListValue });
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { createdListValue });
 
     const createdValue = {
       ...value,
       ...createdListValue,
     };
+
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { createdValue });
 
     await checkKey(this.listKey());
     const responses = await Promise.all([

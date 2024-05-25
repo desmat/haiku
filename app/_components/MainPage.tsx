@@ -712,7 +712,10 @@ export default function MainPage({
 
     const token = await getUserToken();
     setBackupInProgress(true);
-    const res = await fetch("/api/admin/backup", {
+      // const filename = prompt("File url to restore?");
+      // if (!filename) return;
+      // const res = await fetch(`/api/admin/restore?filename=${filename}`, {
+      const res = await fetch("/api/admin/backup", {
       headers: { Authorization: `Bearer ${token}` },
       method: "POST",
     });
