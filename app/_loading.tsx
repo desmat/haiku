@@ -16,7 +16,7 @@ export default async function LoadingPage({
 
   const _mode = (mode || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const fontColor = "#555555";
-  const bgColor = "lightgrey";
+  const bgColor = "#aaaaaa";
   const textStyles = [
     {
       color: fontColor,

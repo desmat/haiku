@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 export default function PopOnClick({
-  color = "white",
+  color = "#ffffff",
   active,
   disabled,
   force,

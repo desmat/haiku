@@ -56,7 +56,7 @@ export default function SidePanel({
   onboardingElement,
   onShowAbout,
   onSelectHaiku,
-  onClickLogo,
+  onClickLogo: _onClickLogo,
 }: {
   user: User,
   mode?: ExperienceMode,
@@ -82,15 +82,30 @@ export default function SidePanel({
     userHaikus,
     userDailyHaikus,
     userDailyHaikudles,
+    userLoaded,
+    userLoading,
+    loadUser,
   ] = useUser((state: any) => [
     user?.isAdmin && !filter
       ? state.allHaikus ? Object.values(state.allHaikus) : []
       : state.haikus ? Object.values(state.haikus) : [],
     state.dailyHaikus ? Object.values(state.dailyHaikus) : [],
     state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
+    state.loaded,
+    state.loading,
+    state.load,
   ]);
 
-  // console.log(">> app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles });
+  // if (!user && !userLoaded && !userLoading) {
+  //   loadUser().then((u: User) => user = u);
+  // }
+
+  console.log(">> app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles, styles, altStyles });
+
+  const onClickLogo = () => {
+    toggleMenuOpened();
+    _onClickLogo && _onClickLogo();
+  }
 
   const toggleMenuOpened = () => {
     // console.log(">> app._component.SidePanel.toggleMenuOpened", {});
@@ -171,10 +186,6 @@ export default function SidePanel({
     }
   }, []);
 
-  if (!userHaikus.length) {
-    return <></>
-  }
-
   return (
     <div className="side-panel">
       {/* Area behind side panel but in front of main content to allow users to click and close the panel */}
@@ -205,6 +216,7 @@ export default function SidePanel({
         onMouseLeave={() => panelOpened && !panelPinned && toggleMenuOpened()}
       >
         <div className="_bg-pink-400 flex flex-col h-[100vh]">
+
 
           {/* hotspot to open the side panel on mouse hover */}
           <div
@@ -319,9 +331,11 @@ export default function SidePanel({
                   <Link
                     href={`/${h.haikuId || h.id}`}
                     onClick={(e: any) => {
-                      e.preventDefault();
+                      if (onSelectHaiku) {
+                        e.preventDefault();
                       /* !panelPinned && */ toggleMenuOpened();
-                      onSelectHaiku && onSelectHaiku(h.haikuId || h.id);
+                        onSelectHaiku(h.haikuId || h.id);
+                      }
                     }}
                   >
                     <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>

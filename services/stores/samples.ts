@@ -1,11 +1,12 @@
 import { Haiku } from "@/types/Haiku";
 
 export const notFoundHaiku = {
+  error: "Haiku not found",
   id: "404notfound",
   theme: "404 not found",
   bgImage: "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/haiku-404notfound-md.png",
   color: "#4a5247",
-  bgColor: "#ffffff",
+  bgColor: "#e1ddce",
   colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
   poem: [
     "Quest ends in silence,",
@@ -15,11 +16,12 @@ export const notFoundHaiku = {
 }
 
 export const error429Haiku = {
+  error: "Too Many Requests",
   id: "429error",
   theme: "429 Too Many Requests",
   bgImage: "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/haiku-404notfound-md.png",
   color: "#4a5247",
-  bgColor: "#ffffff",
+  bgColor: "#e1ddce",
   colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
   poem: [
     "Requests flood, cascade",
@@ -31,11 +33,12 @@ export const error429Haiku = {
 export const error4xxHaiku = (code: number, message?: string) => {
   const errorStr = `${code} ${message || "Unknown Error"}`;
   return {
+    error: "4xx Server Error",
     id: "4xxerror",
     theme: errorStr,
     bgImage: "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/haiku-404notfound-md.png",
     color: "#4a5247",
-    bgColor: "#ffffff",
+    bgColor: "#e1ddce",
     colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
     poem: [
       "Seeking resources,",
@@ -48,11 +51,12 @@ export const error4xxHaiku = (code: number, message?: string) => {
 export const serverErrorHaiku = (code: number, message?: string) => {
   const errorStr = `${code} ${message || "Unknown Error"}`;
   return {
+    error: "500 Server Error",
     id: "servererror",
     theme: errorStr,
     bgImage: "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/haiku-404notfound-md.png",
     color: "#4a5247",
-    bgColor: "#ffffff",
+    bgColor: "#e1ddce",
     colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
     poem: [
       "Server falls in strife",

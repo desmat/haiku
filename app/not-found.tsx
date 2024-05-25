@@ -2,6 +2,7 @@ import HaikuPage from '@/app/_components/HaikuPage';
 import { NavOverlay } from '@/app/_components/Nav';
 import { notFoundHaiku } from "@/services/stores/samples";
 import { ExperienceMode } from '@/types/ExperienceMode';
+import { haikuStyles } from '@/types/Haiku';
 import { LanguageType } from '@/types/Languages';
 
 export default function NotFound({
@@ -16,38 +17,23 @@ export default function NotFound({
   onClickLogo?: any
 }) {
   // console.log('>> app.NotFound.render()');
-
-  const fontColor = notFoundHaiku?.color || "#555555";
-  const bgColor = notFoundHaiku?.bgColor || "lightgrey";
-  const textStyles = [
-    {
-      color: fontColor,
-      filter: `drop-shadow(0px 0px 8px ${bgColor})`,
-      WebkitTextStroke: `1.5px ${fontColor}`,
-      fontWeight: 300,
-    },
-    {
-      color: fontColor,
-      filter: `drop-shadow(0px 0px 2px ${bgColor})`,
-    }
-  ];
-  const altTextStyles = [
-    {
-      color: bgColor,
-      filter: `drop-shadow(0px 0px 3px ${fontColor})`,
-      WebkitTextStroke: `0.5px ${bgColor}`,
-      fontWeight: 300,
-    },
-    {
-      color: bgColor,
-      filter: `drop-shadow(0px 0px 1px ${fontColor})`,
-    }
-  ];
+  const { textStyles, altTextStyles } = haikuStyles(notFoundHaiku);
 
   return (
-    <div>
-      <NavOverlay mode={mode} styles={textStyles} altStyles={altTextStyles} onClickGenerate={onClickGenerate} onClickLogo={onClickLogo} />
-      <HaikuPage mode={mode} haiku={notFoundHaiku} styles={textStyles} />
+    <div className="_bg-yellow-200 _main-page relative h-[100vh] w-[100vw]">
+      <NavOverlay
+        mode={mode}
+        styles={textStyles.slice(0, textStyles.length - 3)}
+        altStyles={altTextStyles}
+        onClickGenerate={onClickGenerate}
+        onClickLogo={onClickLogo}
+      />
+      <HaikuPage
+        mode={mode}
+        haiku={notFoundHaiku}
+        styles={textStyles}
+        altStyles={altTextStyles}
+      />
     </div>
   )
 }
