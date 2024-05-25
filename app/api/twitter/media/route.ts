@@ -5,7 +5,7 @@ import OAuth from 'oauth-1.0a';
 import crypto from 'crypto';
 
 
-export async function GET(request: NextRequest, params?: any) {
+export async function POST(request: NextRequest) {
   const { user: sessionUser } = await userSession(request);
   console.log('>> app.api.twitter.oauth1.GET', { sessionUser });
 
