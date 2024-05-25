@@ -15,7 +15,7 @@ import useHaikus from './haikus';
 
 async function fetchOpts() {
   const token = await useUser.getState().getToken();
-  console.log(">> hooks.haiku.fetchOpts", { token });
+  // console.log(">> hooks.haiku.fetchOpts", { token });
   return token && { headers: { Authorization: `Bearer ${token}` } } || {};
 }
 
@@ -111,7 +111,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   init: async (haikudle: Haikudle, hashSolution?: boolean) => {
     const haiku = haikudle?.haiku;
-    console.log(">> hooks.haikudle.init", { haiku, haikudle, hashSolution });
+    // console.log(">> hooks.haikudle.init", { haiku, haikudle, hashSolution });
 
     const solution = hashSolution && haiku.poem
       .map((line: string) => line.split(/\s+/)
@@ -369,7 +369,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     const { setLoaded } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    console.log(">> hooks.haikudle.load", { id, query: JSON.stringify(query) });
+    // console.log(">> hooks.haikudle.load", { id, query: JSON.stringify(query) });
 
     // setLoaded([]);
     // return get().init();    

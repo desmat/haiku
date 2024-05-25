@@ -47,7 +47,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     set({ loading: true });
     const { loadLocal, loadRemote } = get();
     let user;
-    console.log(">> hooks.user.load()", {});
+    // console.log(">> hooks.user.load()", {});
 
     let createdUser: User | undefined;
     let token = window?.localStorage && window.localStorage.getItem("session");
@@ -237,7 +237,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
   addUserHaiku: async (haiku: Haiku, action?: "viewed" | "generated") => {
     const { user, haikus, allHaikus } = get();
-    console.log(">> hooks.user.addUserHaiku", { haiku, action, user });
+    // console.log(">> hooks.user.addUserHaiku", { haiku, action, user });
 
     const token = await get().getToken();
     const opts = token && { headers: { Authorization: `Bearer ${token}` } } || {};
@@ -258,7 +258,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     }
 
     const { userHaiku } = await res.json();
-    console.log(">> hooks.user.addUserHaiku", { userHaiku });
+    // console.log(">> hooks.user.addUserHaiku", { userHaiku });
 
     useUser.setState({
       haikus: {

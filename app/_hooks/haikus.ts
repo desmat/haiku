@@ -171,12 +171,12 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   init: async (haiku: Haiku, queryOrId?: object | string, mode?: string): Promise<Haiku | Haiku[]> => {
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    console.log(">> hooks.haiku.init", { mode, id, query: JSON.stringify(query), haiku });
+    // console.log(">> hooks.haiku.init", { mode, id, query: JSON.stringify(query), haiku });
 
     const { setLoaded, _mode, _haikus } = get();
     const { dailyHaikus, dailyHaikudles } = useUser.getState();
 
-    console.log(">> hooks.haiku.init", { dailyHaikus, dailyHaikudles });
+    // console.log(">> hooks.haiku.init", { dailyHaikus, dailyHaikudles });
 
     haiku.dailyHaikuId = dailyHaikus[haiku.id]?.id;
     haiku.dailyHaikudleId = dailyHaikudles[haiku.id]?.id;
@@ -202,7 +202,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const { setLoaded, _mode, init } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    console.log(">> hooks.haiku.load", { mode, id, query: JSON.stringify(query) });
+    // console.log(">> hooks.haiku.load", { mode, id, query: JSON.stringify(query) });
 
     return new Promise(async (resolve, reject) => {
       if (id) {

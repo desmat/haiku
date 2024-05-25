@@ -63,7 +63,7 @@ export default async function Layout({
     haikuId = undefined;
   }
 
-  console.log('>> app.[[..slug]].layout.render()', { haikuId, slug: params?.slug, params });
+  // console.log('>> app.[[..slug]].layout.render()', { haikuId, slug: params?.slug, params });
 
   // if (!haikuId) {
   //   if (process.env.EXPERIENCE_MODE == "haikudle") {
@@ -81,7 +81,7 @@ export default async function Layout({
 
   const user = {} as User;
   const haiku = { bgColor: "" };  //await getHaiku(user, haikuId);
-  console.log('>> app.[[..slug]].layout.render()', { haiku });
+  // console.log('>> app.[[..slug]].layout.render()', { haiku });
 
   metadata = {
     ...metadata,

@@ -37,7 +37,7 @@ export default function MainPage({
   refreshDelay?: number,
   fontSize?: string | undefined,
 }) {
-  console.log('>> app.MainPage.render()', { mode, lang, _haiku, _haikudle });
+  // console.log('>> app.MainPage.render()', { mode, lang, _haiku, _haikudle });
 
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
@@ -160,7 +160,7 @@ export default function MainPage({
   let [loading, setLoading] = useState(false);
   let [loadingUI, setLoadingUI] = useState(false);
 
-  console.log('>> app.MainPage.render()', { loadingUI, generating, haikudleLoaded, haikudleReady });
+  // console.log('>> app.MainPage.render()', { loadingUI, generating, haikudleLoaded, haikudleReady });
 
   let solvedHaikudleHaiku = {
     ...haiku,
@@ -401,7 +401,7 @@ export default function MainPage({
 
   const loadRandom = () => {
     // return;
-    console.log('>> app.page.loadRandom()', {});
+    // console.log('>> app.page.loadRandom()', {});
 
     if (/* haikudleMode && */ !user?.isAdmin) {
       return loadHaiku();
@@ -633,24 +633,24 @@ export default function MainPage({
   }, [haiku?.id, loadingUI, showcaseMode, _refreshDelay]);
 
   if (!userLoaded && !userLoading) {
-    console.log('>> app.MainPage init', {});
+    // console.log('>> app.MainPage init', {});
     loadUser().then((user: User) => {
-      console.log('>> app.MainPage init loadUser.then', { user });
+      // console.log('>> app.MainPage init loadUser.then', { user });
       if (haikudleMode) {
         initHaikudle({ ..._haikudle, haiku }, !haiku.poemHashed).then((haikudle: Haikudle) => {
-          console.log('>> app.MainPage init initHaikudle.then', { haikudle });
+          // console.log('>> app.MainPage init initHaikudle.then', { haikudle });
         });
       } else {
         // TODO: clean this up
         haiku
           ? initHaiku(haiku, haiku.id, mode).then((haikus: Haiku | Haiku[]) => {
-            console.log('>> app.MainPage init initHaiku.then', { haikus });
+            // console.log('>> app.MainPage init initHaiku.then', { haikus });
             const initializedHaiku = haikus[0] || haikus;
             setHaiku(initializedHaiku);
             setHaikuId(initializedHaiku?.id);
           })
           : loadHaikus(haikuId || { lang }).then((haikus: Haiku | Haiku[]) => {
-            console.log('>> app.MainPage init loadHaikus.then', { haikus });
+            // console.log('>> app.MainPage init loadHaikus.then', { haikus });
             const loadedHaiku = haikus[0] || haikus;
             setHaiku(loadedHaiku);
             setHaikuId(loadedHaiku?.id);

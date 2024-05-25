@@ -100,7 +100,7 @@ export default function SidePanel({
   //   loadUser().then((u: User) => user = u);
   // }
 
-  console.log(">> app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles, styles, altStyles });
+  // console.log(">> app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles, styles, altStyles });
 
   const onClickLogo = () => {
     toggleMenuOpened();
