@@ -171,7 +171,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   init: async (haiku: Haiku, queryOrId?: object | string, mode?: string): Promise<Haiku | Haiku[]> => {
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    console.log(">> hooks.haiku.init", { mode, id, query: JSON.stringify(query) });
+    console.log(">> hooks.haiku.init", { mode, id, query: JSON.stringify(query), haiku });
 
     const { setLoaded, _mode, _haikus } = get();
     const { dailyHaikus, dailyHaikudles } = useUser.getState();
@@ -305,7 +305,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
             });
           }
 
-          return resolve(init(haikus, queryOrId, mode));
+          return resolve(init(haikus[0], queryOrId, mode));
         });
       }
     });
