@@ -90,6 +90,9 @@ export const haikuPromptSteps = (haiku: Haiku) => [
           : ""}    
         <div>Created by: user ${haiku.createdBy} ${formatTimeFromNow(haiku.createdAt || 0)}</div>      
         ${haiku.updatedBy ? `<div>Updated by: user ${haiku.updatedBy} ${formatTimeFromNow(haiku.updatedAt || 0)}</div>` : ""} 
+        ${haiku.dailyHaikuId ? `<div>Daily haiku: ${haiku.dailyHaikuId}</div>` : ""} 
+        ${haiku.dailyHaikudleId ? `<div>Daily haikudle: ${haiku.dailyHaikudleId}</div>` : ""} 
+        ${haiku.isIncorrect ? `<div>Incorrect haiku: ${haiku.isIncorrect}</div>` : ""} 
       </div>`,
     style: { bottom: "50%", transform: "translateY(50%)" },
   },

@@ -183,45 +183,6 @@ export default function MainPage({
 
   // console.log('>> app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
 
-  const checkHaiku = () => {
-    console.log('>> app.MainPage.checkHaiku', { user, haiku });
-
-    const syllables = haiku.poem
-      .map((line: string) => line.split(/\s/)
-        .map((word: string) => syllable(word))
-        .reduce((a: number, v: number) => a + v, 0))
-    const isCorrect = syllables[0] == 5 && syllables[1] == 7 && syllables[2] == 5
-
-    if (haiku.dailyHaikuId && haiku.dailyHaikudleId) {
-      infoAlert(`This haiku is featured as both daily haiku and haikudle: ${haiku.dailyHaikuId} and ${haiku.dailyHaikudleId}`, {
-        closeDelay: 3000
-      });
-      return;
-    }
-
-    if (haiku.dailyHaikuId) {
-      infoAlert(`This haiku is featured as a daily haiku: ${haiku.dailyHaikuId}`, {
-        closeDelay: 3000
-      });
-      return;
-    }
-
-    if (haiku.dailyHaikudleId) {
-      infoAlert(`This haiku is featured as a daily haikudle: ${haiku.dailyHaikudleId}`, {
-        closeDelay: 3000
-      });
-      return;
-    }
-
-    if (haiku.status == "created" && !isCorrect) {
-      warningAlert(`This haiku doesn't follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`, {
-        closeDelay: 3000
-      });
-      return;
-    }
-
-  }
-
   // TODO update haikudle onboarding with this variation
   const showAboutPreviousDaily = () => {
     const previousDailyHaikudleDate = moment(previousDailyHaikudleId, "YYYYMMDD")
@@ -626,13 +587,6 @@ export default function MainPage({
   }
 
   useEffect(() => {
-    console.log('>> app.page useEffect [haikuId, haiku?.id, haiku?.version, loadingUI, mode]', { haikuId, haiku, user, loadingUI, mode });
-    if (!loadingUI && process.env.OPENAI_API_KEY != "DEBUG" && user && user?.isAdmin && mode == "haiku" && haiku?.poem) {
-      checkHaiku();
-    }
-  }, [haikuId, haiku, user, loadingUI, mode]);
-
-  useEffect(() => {
     // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
     // @ts-ignore
     let timeoutId;
@@ -691,6 +645,9 @@ export default function MainPage({
         haiku
           ? initHaiku(haiku, haiku.id, mode).then((haikus: Haiku | Haiku[]) => {
             console.log('>> app.MainPage init initHaiku.then', { haikus });
+            const initializedHaiku = haikus[0] || haikus;
+            setHaiku(initializedHaiku);
+            setHaikuId(initializedHaiku?.id);
           })
           : loadHaikus(haikuId || { lang }).then((haikus: Haiku | Haiku[]) => {
             console.log('>> app.MainPage init loadHaikus.then', { haikus });

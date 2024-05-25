@@ -355,7 +355,7 @@ function BottomLinks({
         {onShowAbout &&
           <div
             key="about"
-            className="cursor-pointer"
+            className="cursor-pointer relative"
             title="About"
             onClick={() => {
               trackEvent("clicked-about", {
@@ -365,6 +365,9 @@ function BottomLinks({
               onShowAbout && onShowAbout();
             }}
           >
+            {user?.isAdmin && (haiku?.dailyHaikuId ||haiku?.dailyHaikudleId || haiku.isIncorrect) &&
+              <div className={`absolute top-[-0rem] right-[-0rem] rounded-full w-[0.6rem] h-[0.6rem] ${haiku.isIncorrect ? "bg-red-600" : "bg-blue-600"}`} />
+            }
             <PopOnClick color={haiku?.bgColor}>
               <IoHelpCircle className="text-2xl" />
             </PopOnClick>
@@ -476,9 +479,7 @@ function BottomLinks({
               onClick={onLikeHaiku}
             >
               {user?.isAdmin && haiku?.numLikes > 0 &&
-                <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-red-600">
-                  {/* <span className="relative text-white text-[4pt] p-[0.2rem]">{haiku?.numLikes}</span> */}
-                </div>
+                <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.6rem] h-[0.6rem] bg-red-600" />
               }
               <PopOnClick color={haiku?.bgColor} >
                 <IoHeartSharp className="text-xl" />
