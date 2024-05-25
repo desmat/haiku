@@ -16,61 +16,23 @@ export async function GET(request: NextRequest, params?: any) {
     );
   }
 
-  // THIS WORKS
-  /*
-  // @ts-ignore
-  const oauth = OAuth({
-    consumer: {
-      key: 'U7RZKRXNwYjVsY8wd3eoCEDzu',
-      secret: 'FH4w8TWrKJIScpRh8K7EuHFMfdr0OxpTH3WBz9hSHEmB2CyAy7',
-    },
-    signature_method: 'HMAC-SHA1',
-    hash_function(base_string: any, key: any) {
-      return crypto
-        .createHmac('sha1', key)
-        .update(base_string)
-        .digest('base64')
-    },
-  })
+  const mediaUrl = request.nextUrl.searchParams.get("mediaUrl");
 
-  // Note: The token is optional for some requests
-  const token = {
-    key: '1780677049809580032-hAMKTlqRihDjWT6oW1FlHJnVBvM4d3',
-    secret: 'wz1wxxFbpv3QA2HFY1DEPaFxR5OTrEaR8pXX8T9XWheUu',
+  if (!mediaUrl) {
+    return NextResponse.json(
+      { success: false, message: 'missing required parameter: mediaUrl' },
+      { status: 400 }
+    );
   }
 
-  const request_data = {
-    url: 'https://api.twitter.com/2/tweets',
-    method: 'POST',
-    body: {
-      "text": "Hello World!"
-    },
+  const imageRes = await fetch(mediaUrl || "");
+
+  if (!imageRes) {
+    return NextResponse.json(
+      { success: false, message: 'unable to pull image from mediaUrl' },
+      { status: 400 }
+    );
   }
-
-  const header = oauth.toHeader(oauth.authorize(request_data, token));
-
-  const res = await fetch(request_data.url, {
-    headers: {
-      ...header,
-      "content-type": "application/json",
-    },
-    method: request_data.method,
-    body: JSON.stringify(request_data.body),
-  });
-  console.log('>> app.api.twitter.oauth1.GET', { res });
-
-  if (res.status != 200) {
-    console.error(`Error posting '${request_data.url}': ${res.statusText} (${res.status})`)
-  }
-
-  */
-
-
-
-
-
-
-  const imageRes = await fetch("https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haiku/742a87ef.png");
 
   const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
   console.log(">> app.api.twitter.oauth1.GET", { imageBuffer });
@@ -84,8 +46,8 @@ export async function GET(request: NextRequest, params?: any) {
   // @ts-ignore
   const oauth = OAuth({
     consumer: {
-      key: 'U7RZKRXNwYjVsY8wd3eoCEDzu',
-      secret: 'FH4w8TWrKJIScpRh8K7EuHFMfdr0OxpTH3WBz9hSHEmB2CyAy7',
+      key: process.env.TWITTER_CONSUMER_KEY,
+      secret: process.env.TWITTER_CONSUMER_SECRET,
     },
     signature_method: 'HMAC-SHA1',
     hash_function(base_string: any, key: any) {
@@ -98,8 +60,8 @@ export async function GET(request: NextRequest, params?: any) {
 
   // Note: The token is optional for some requests
   const token = {
-    key: '1780677049809580032-hAMKTlqRihDjWT6oW1FlHJnVBvM4d3',
-    secret: 'wz1wxxFbpv3QA2HFY1DEPaFxR5OTrEaR8pXX8T9XWheUu',
+    key: process.env.TWITTER_ACCESS_TOKEN,
+    secret: process.env.TWITTER_TOKEN_SECRET,
   }
 
   const request_data = {
