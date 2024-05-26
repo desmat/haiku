@@ -216,8 +216,8 @@ export function GenerateInput({
                     background: none;
                     _background: pink; /* for debugging */
                     outline: 2px solid ${bgColor || ""}88;
-                    background-color: ${bgColor || "white"}44;
-                    caret-color: ${color || "black"};
+                    background-color: ${bgColor || "#ffffff"}44;
+                    caret-color: ${color || "#000000"};
                     border-radius: 5px;
                     height: auto;
                     WebkitTextStroke: 0.5px ${bgColor};
@@ -226,27 +226,27 @@ export function GenerateInput({
                   }
                   .haiku-theme-input.poem-line-${/* !editing && */ /* !saving &&  !onboarding && aboutToEditLine */ 42} input {
                     outline: none;
-                    background-color: ${bgColor || "white"}44;  
+                    background-color: ${bgColor || "#ffffff"}44;  
                   }
                   ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus"} {
                     outline: 2px solid ${bgColor || ""}88;
-                    background-color: ${bgColor || "white"}66;
+                    background-color: ${bgColor || "#ffffff"}66;
                   }
                   ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus::placeholder"} {
                     opacity: 0;
                   }
                   .haiku-theme-input input::selection { 
-                    background: ${color || "black"}66 
+                    background: ${color || "#000000"}66 
                   }
                   .haiku-theme-input input::placeholder {
-                    color: ${color || "black"};
+                    color: ${color || "#000000"};
                     -webkit-text-stroke: 1px ${color};
                     text-stroke: 1px ${color};
                     opacity: 0.4;
                     text-align: center; 
                   }
                   .haiku-theme-input input::-ms-input-placeholder { /* Edge 12 -18 */
-                    color: ${color || "black"};
+                    color: ${color || "#000000"};
                     text-stroke: 1px ${color};
                     opacity: 0.4;
                     text-align: center; 
@@ -352,22 +352,32 @@ function BottomLinks({
       <div
         className="relative flex flex-row gap-2 items-center justify-center _font-semibold"
       >
-        <div
-          key="about"
-          className="cursor-pointer"
-          title="About"
-          onClick={() => {
-            trackEvent("clicked-about", {
-              userId: user?.id,
-              location: "bottom-links",
-            });
-            onShowAbout && onShowAbout();
-          }}
-        >
-          <PopOnClick color={haiku?.bgColor}>
+        {onShowAbout &&
+          <div
+            key="about"
+            className="cursor-pointer relative"
+            title="About"
+            onClick={() => {
+              trackEvent("clicked-about", {
+                userId: user?.id,
+                location: "bottom-links",
+              });
+              onShowAbout && onShowAbout();
+            }}
+          >
+            {user?.isAdmin && (haiku?.dailyHaikuId ||haiku?.dailyHaikudleId || haiku.isIncorrect) &&
+              <div className={`absolute top-[-0rem] right-[-0rem] rounded-full w-[0.6rem] h-[0.6rem] ${haiku.isIncorrect ? "bg-red-600" : "bg-blue-600"}`} />
+            }
+            <PopOnClick color={haiku?.bgColor}>
+              <IoHelpCircle className="text-2xl" />
+            </PopOnClick>
+          </div>
+        }
+        {!onShowAbout &&
+          <div className="opacity-40">
             <IoHelpCircle className="text-2xl" />
-          </PopOnClick>
-        </div>
+          </div>
+        }
         {/* <Link
           key="github"
           href="https://github.com/desmat/haiku"
@@ -401,55 +411,55 @@ function BottomLinks({
           </Link>
         }
         {haikuMode && !user?.isAdmin &&
-        <Link
-          key="twitter"
-          href="https://x.com/haiku_genius"
-          target="_blank"
-          onClick={() => {
-            trackEvent("clicked-twitter", {
-              userId: user?.id,
-              location: "bottom-links",
-            });
-          }}
-        >
-          <PopOnClick color={haiku?.bgColor}>
-            <RiTwitterFill className="text-2xl" />
-          </PopOnClick>
-        </Link>
+          <Link
+            key="twitter"
+            href="https://x.com/haiku_genius"
+            target="_blank"
+            onClick={() => {
+              trackEvent("clicked-twitter", {
+                userId: user?.id,
+                location: "bottom-links",
+              });
+            }}
+          >
+            <PopOnClick color={haiku?.bgColor}>
+              <RiTwitterFill className="text-2xl" />
+            </PopOnClick>
+          </Link>
         }
         {haikuMode && !user?.isAdmin &&
-        <Link
-          key="facebook"
-          href="https://www.facebook.com/haikugenius"
-          target="_blank"
-          onClick={() => {
-            trackEvent("clicked-facebook", {
-              userId: user?.id,
-              location: "bottom-links",
-            });
-          }}
-        >
-          <PopOnClick color={haiku?.bgColor}>
-            <MdFacebook className="text-2xl" />
-          </PopOnClick>
-        </Link>
+          <Link
+            key="facebook"
+            href="https://www.facebook.com/haikugenius"
+            target="_blank"
+            onClick={() => {
+              trackEvent("clicked-facebook", {
+                userId: user?.id,
+                location: "bottom-links",
+              });
+            }}
+          >
+            <PopOnClick color={haiku?.bgColor}>
+              <MdFacebook className="text-2xl" />
+            </PopOnClick>
+          </Link>
         }
-        {haikuMode && !user?.isAdmin && 
-        <Link
-          key="instagram"
-          href="https://www.instagram.com/haiku_genius/"
-          target="_blank"
-          onClick={() => {
-            trackEvent("clicked-instagram", {
-              userId: user?.id,
-              location: "bottom-links",
-            });
-          }}
-        >
-          <PopOnClick color={haiku?.bgColor}>
-            <BiLogoInstagramAlt className="text-2xl" />
-          </PopOnClick>
-        </Link>
+        {haikuMode && !user?.isAdmin &&
+          <Link
+            key="instagram"
+            href="https://www.instagram.com/haiku_genius/"
+            target="_blank"
+            onClick={() => {
+              trackEvent("clicked-instagram", {
+                userId: user?.id,
+                location: "bottom-links",
+              });
+            }}
+          >
+            <PopOnClick color={haiku?.bgColor}>
+              <BiLogoInstagramAlt className="text-2xl" />
+            </PopOnClick>
+          </Link>
         }
         {/* <Link
           key="email"
@@ -469,9 +479,7 @@ function BottomLinks({
               onClick={onLikeHaiku}
             >
               {user?.isAdmin && haiku?.numLikes > 0 &&
-                <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-red-600">
-                  {/* <span className="relative text-white text-[4pt] p-[0.2rem]">{haiku?.numLikes}</span> */}
-                </div>
+                <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.6rem] h-[0.6rem] bg-red-600" />
               }
               <PopOnClick color={haiku?.bgColor} >
                 <IoHeartSharp className="text-xl" />
@@ -718,8 +726,8 @@ export function NavOverlay({
       {!loading && ["haikudle", "haiku"].includes(mode) &&
         <GenerateInput
           user={user}
-          color={haiku?.color || "black"}
-          bgColor={haiku?.bgColor || "white"}
+          color={haiku?.color || "#000000"}
+          bgColor={haiku?.bgColor || "#ffffff"}
           styles={styles}
           altStyles={altStyles}
           generate={onClickGenerate}
@@ -743,7 +751,13 @@ export function NavOverlay({
                 altStyles={altStyles}
                 mode={mode}
                 href={`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`}
-                onClick={onClickLogo}
+                onClick={() => {
+                  trackEvent("clicked-logo", {
+                    userId: user?.id,
+                  });
+
+                  onClickLogo && onClickLogo();
+                }}
                 onboardingElement={onboardingElement}
               />
             </PopOnClick>
@@ -775,8 +789,8 @@ export function NavOverlay({
             }
             {onboardingElement && onboardingElement == "logo-and-generate" &&
               <div className="onboarding-focus double" />
-            } */}
-            {/* {(!onClickGenerate || !user?.isAdmin && (user?.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
+            }
+            {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
               <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
                 <StyledLayers styles={altStyles}>
                   <GenerateIcon>
@@ -803,7 +817,7 @@ export function NavOverlay({
       <div
         className={`absolute top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-10`}
         style={{
-          background: `radial-gradient(circle at center, white, #868686 35%, ${styles[0]?.color || "black"} 70%)`,
+          background: `radial-gradient(circle at center, white, #868686 35%, ${styles[0]?.color || "#000000"} 70%)`,
           opacity: 0.2,
         }}
       />

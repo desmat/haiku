@@ -58,15 +58,20 @@ const initialState = {
   solvedJustNow: false,
   moves: 0,
   onSolved: async (id: string, moves: number) => {
-    // anticipate instead
-    const currentHaiku = (await useHaikudle.getState()).haiku;
-    (await useHaikus.getState()).addUserHaiku({
-      id: currentHaiku.id,
-      createdBy: currentHaiku.createdBy,
-      createdAt: currentHaiku.createdAt,
-      solvedAt: moment().valueOf(),
-      theme: currentHaiku.theme,
-    });
+    // add solved haiku to side panel (backend record already created) 
+    const currentHaiku = useHaikudle.getState().haiku;
+    const { haikus: userHaikus } = useUser.getState(); // .addUserHaiku(currentHaiku, "generated");
+    useUser.setState({
+      haikus: {
+        ...userHaikus,
+        [currentHaiku.id]: {
+          ...userHaikus[currentHaiku.id],
+          theme: currentHaiku.theme,
+          solvedAt: moment().valueOf(),
+          moves,
+        }
+      }
+    })
 
     setTimeout(() => {
       const shareContent = "Solved today\\'s haiku puzzle in " + moves + " moves! https://haikudle.art/\\n\\n"
@@ -128,6 +133,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       solved,
       moves: haikudle?.moves || 0,
     });
+
+    return haikudle;
   },
 
   solve: () => {
@@ -364,6 +371,9 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     const id = typeof (queryOrId) == "string" && queryOrId;
     // console.log(">> hooks.haikudle.load", { id, query: JSON.stringify(query) });
 
+    // setLoaded([]);
+    // return get().init();    
+
     return new Promise(async (resolve, reject) => {
       if (id) {
         fetch(`/api/haikudles/${id}`, await fetchOpts()).then(async (res) => {
@@ -434,7 +444,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           // const haikus = data.haikus;
           const haikudles = data.haikudles; // TODO fix this junk
 
-          set({ _haikudles: { ..._haikudles, ...listToMap(haikudles) }});
+          set({ _haikudles: { ..._haikudles, ...listToMap(haikudles) } });
           setLoaded(haikudles);
 
           // TODO bleh
@@ -484,8 +494,8 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
           return reject(res.statusText);
         }
 
-        const { 
-          haikudle: created, 
+        const {
+          haikudle: created,
           dailyHaikudle,
           nextDailyHaikudleId
         } = await res.json();
@@ -509,7 +519,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
             nextDailyHaikudleId,
           }
         });
-        
+
         return resolve(created);
       });
     });

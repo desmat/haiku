@@ -14,43 +14,12 @@ export async function GET(request: NextRequest, params?: any) {
 
   const { user } = await userSession(request);
 
-  const todaysDateCode = moment().format("YYYYMMDD");
-  let todaysHaikudle = await getDailyHaikudle(todaysDateCode);
+  let todaysHaikudle = await getDailyHaikudle();
 
-  console.log('>> app.api.haikudles.GET', { todaysDateCode, todaysHaikudle });
+  console.log('>> app.api.haikudles.GET', { todaysHaikudle });
 
   if (!todaysHaikudle) {
-    // create a new haikudle and dailyhaikudle combo: 
-    // first pull from daily haikus, else from the rest
-
-    const [
-      previousDailyHaikudles, 
-      haikudles, 
-      dailyHaikus,
-    ] = await Promise.all([
-      getDailyHaikudles(),
-      getHaikudles(),
-      getDailyHaikus(),
-    ]);
-    
-    const previousDailyHaikuIds = previousDailyHaikudles.map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
-    let nonDailyhaikus = dailyHaikus.filter((dailyHaiku: DailyHaiku) => !previousDailyHaikuIds.includes(dailyHaiku.haikuId));
-
-    let randomHaikuId;
-    if (nonDailyhaikus.length) {
-      randomHaikuId = shuffleArray(nonDailyhaikus)[0].haikuId;
-    } else {
-      // didn't find any daily haikus that hasn't been a daily haikudle already
-      const haikus = await getHaikus();
-      nonDailyhaikus = haikus.filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
-      randomHaikuId = shuffleArray(nonDailyhaikus)[0].id;
-    }
-
-    const randomHaikudle = await createHaikudle(user, { id: randomHaikuId, haikuId: randomHaikuId });
-
-    console.log('>> app.api.haikudles.GET', { randomHaikuId, randomHaikudle, previousDailyHaikudles, haikudles });
-
-    todaysHaikudle = await saveDailyHaikudle(user, todaysDateCode, randomHaikudle.haikuId, randomHaikudle.id);
+    return NextResponse.json({ todaysHaikudle: {} }, { status: 404 });
   }
 
   let [

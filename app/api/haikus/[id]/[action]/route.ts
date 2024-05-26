@@ -28,7 +28,7 @@ export async function POST(
 
     const userHaiku =
       (await getUserHaiku(user.id, params.id)) ||
-      (await createUserHaiku(user.id, params.id));
+      (await createUserHaiku(user, haiku));
 
     const savedUserHaiku = await saveUserHaiku(user, {
       ...userHaiku,

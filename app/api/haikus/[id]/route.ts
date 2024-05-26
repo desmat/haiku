@@ -41,14 +41,14 @@ export async function GET(
     ]);
 
     haiku.dailyHaikuId = dailyHaikus
-      .filter((dh: DailyHaiku) => dh.haikuId == haiku.id)[0]?.id;
+      .filter((dh: DailyHaiku) => dh?.haikuId == haiku.id)[0]?.id;
 
     haiku.dailyHaikudleId = dailyHaikudles
-      .filter((dhle: DailyHaikudle) => dhle.haikuId == haiku.id)[0]?.id;
+      .filter((dhle: DailyHaikudle) => dhle?.haikuId == haiku.id)[0]?.id;
   }
 
   if (!user.isAdmin && haiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
-    createUserHaiku(user.id, haiku.id);
+    createUserHaiku(user, haiku);
   }
 
   console.log('>> app.api.haikus.GET', { haiku, userHaiku });
@@ -86,13 +86,14 @@ export async function PUT(
     );
   }
 
-  const haikudle = await getHaikudle(user, params.id);
-  if (haikudle) {
-    return NextResponse.json(
-      { success: false, message: 'haiku has associated haikudle' },
-      { status: 423 }
-    );
-  }
+  // TODO UNCRIPPLE (note that we're creating haikudles when we should not)
+  // const haikudle = await getHaikudle(user, params.id);
+  // if (haikudle) {
+  //   return NextResponse.json(
+  //     { success: false, message: 'haiku has associated haikudle' },
+  //     { status: 423 }
+  //   );
+  // }
 
   const savedHaiku = await saveHaiku(user, haikuToSave);
   return NextResponse.json({ haiku: savedHaiku });

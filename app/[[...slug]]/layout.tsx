@@ -63,25 +63,25 @@ export default async function Layout({
     haikuId = undefined;
   }
 
-  console.log('>> app.[[..slug]].layout.render()', { haikuId, slug: params?.slug, params });
+  // console.log('>> app.[[..slug]].layout.render()', { haikuId, slug: params?.slug, params });
 
-  if (!haikuId) {
-    if (process.env.EXPERIENCE_MODE == "haikudle") {
-      const todaysDateCode = moment().format("YYYYMMDD");
-      const todaysDailyHaikudle = await getDailyHaikudle(todaysDateCode);
-      console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaikudle });
-      haikuId = todaysDailyHaikudle?.haikuId;
-    } else {
-      const todaysDateCode = moment().format("YYYYMMDD");
-      const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
-      console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaiku });
-      haikuId = todaysDailyHaiku?.haikuId;
-    }
-  }
+  // if (!haikuId) {
+  //   if (process.env.EXPERIENCE_MODE == "haikudle") {
+  //     const todaysDateCode = moment().format("YYYYMMDD");
+  //     const todaysDailyHaikudle = await getDailyHaikudle(todaysDateCode);
+  //     console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaikudle });
+  //     haikuId = todaysDailyHaikudle?.haikuId;
+  //   } else {
+  //     const todaysDateCode = moment().format("YYYYMMDD");
+  //     const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
+  //     console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaiku });
+  //     haikuId = todaysDailyHaiku?.haikuId;
+  //   }
+  // }
 
   const user = {} as User;
-  const haiku = await getHaiku(user, haikuId);
-  console.log('>> app.[[..slug]].layout.render()', { haiku });
+  const haiku = { bgColor: "" };  //await getHaiku(user, haikuId);
+  // console.log('>> app.[[..slug]].layout.render()', { haiku });
 
   metadata = {
     ...metadata,
@@ -105,7 +105,7 @@ export default async function Layout({
         dangerouslySetInnerHTML={{
           __html: `
             body {
-              background-color: ${haiku?.bgColor || "lightgrey"};
+              background-color: ${haiku?.bgColor || "#aaaaaa"};
             }
           `
         }}

@@ -117,7 +117,8 @@ export async function POST(
     preferences: {},
   };
 
-  const savedUser = await saveUser(newUser);
+  // TODO: uncripple
+  const savedUser = newUser; //await saveUser(newUser);
   const token = await createToken(savedUser);
 
   return NextResponse.json({ user: savedUser, token });
