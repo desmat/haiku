@@ -156,9 +156,9 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   }
 
   // if (user.isAdmin) {
-    haiku.numLikes = (await store.userHaikus.find({ haikuId: id }))
-      .filter((uh: UserHaiku) => uh.likedAt)
-      .length;
+  haiku.numLikes = (await store.userHaikus.find({ haikuId: id }))
+    .filter((uh: UserHaiku) => uh.likedAt)
+    .length;
   // }
 
   console.log(`>> services.haiku.getHaiku`, { id, haiku });
@@ -506,12 +506,25 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
   if (!dailyHaiku) {
     // create daily haiku if none for today
     const previousDailyHaikus = await getDailyHaikus();
-    const previousDailyHaikuIds = previousDailyHaikus.map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
-    const haikus = await getHaikus();
-    const nonDailyhaikus = haikus.filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
-    const randomHaikuId = shuffleArray(nonDailyhaikus)[0].id;
+    const previousDailyHaikuIds = previousDailyHaikus
+      .map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
+    const [
+      likedHaikus,
+      haikus
+    ] = await Promise.all([
+      getLikedHaikus(),
+      getHaikus(),
+    ]);
+
+    const nonDailyLikedhaikus = likedHaikus
+      .filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
+    const nonDailyhaikus = haikus
+    .filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
+
+    // pick from liked haikus, else all haikus
+    const randomHaikuId = shuffleArray(nonDailyLikedhaikus || nonDailyhaikus)[0].id;
     const randomHaiku = haikus[randomHaikuId];
-    console.log('>> app.api.haikus.GET creating daily haiku', { randomHaikuId, randomHaiku, previousDailyHaikus, haikus });
+    console.log('>> app.api.haikus.GET creating daily haiku', { randomHaikuId, randomHaiku, previousDailyHaikus, likedHaikus, haikus });
 
     dailyHaiku = await saveDailyHaiku({ id: "(system)" } as User, id, randomHaikuId);
   }
@@ -589,4 +602,12 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
     haikuId,
     theme: haiku.theme,
   });
+}
+
+export async function getLikedHaikus(): Promise<DailyHaiku[]> {
+  const likedUserHaikuIds = (await store.userHaikus.find())
+    .filter((userHaiku: UserHaiku) => userHaiku.likedAt)
+    .map((userHaiku: UserHaiku) => userHaiku.haikuId);
+
+  return (await store.haikus.find({ id: likedUserHaikuIds })).filter((haiku: Haiku) => !haiku.deletedAt);
 }
