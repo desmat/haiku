@@ -583,7 +583,9 @@ export default function MainPage({
     const userHaiku = userHaikus[haiku.id];
     const value = userHaiku?.likedAt ? undefined : moment().valueOf();
 
-    return haikuAction(haikuId, "like", value);
+    haikuAction(haikuId, "like", value).then((haiku: Haiku) => {
+      setHaiku(haiku);
+    })
   }
 
   useEffect(() => {
