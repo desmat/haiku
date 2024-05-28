@@ -411,55 +411,55 @@ function BottomLinks({
           </Link>
         }
         {haikuMode && !user?.isAdmin &&
-        <Link
-          key="twitter"
-          href="https://x.com/haiku_genius"
-          target="_blank"
-          onClick={() => {
-            trackEvent("clicked-twitter", {
-              userId: user?.id,
-              location: "bottom-links",
-            });
-          }}
-        >
-          <PopOnClick color={haiku?.bgColor}>
-            <RiTwitterFill className="text-2xl" />
-          </PopOnClick>
-        </Link>
+          <Link
+            key="twitter"
+            href="https://x.com/haiku_genius"
+            target="_blank"
+            onClick={() => {
+              trackEvent("clicked-twitter", {
+                userId: user?.id,
+                location: "bottom-links",
+              });
+            }}
+          >
+            <PopOnClick color={haiku?.bgColor}>
+              <RiTwitterFill className="text-2xl" />
+            </PopOnClick>
+          </Link>
         }
         {haikuMode && !user?.isAdmin &&
-        <Link
-          key="facebook"
-          href="https://www.facebook.com/haikugenius"
-          target="_blank"
-          onClick={() => {
-            trackEvent("clicked-facebook", {
-              userId: user?.id,
-              location: "bottom-links",
-            });
-          }}
-        >
-          <PopOnClick color={haiku?.bgColor}>
-            <MdFacebook className="text-2xl" />
-          </PopOnClick>
-        </Link>
+          <Link
+            key="facebook"
+            href="https://www.facebook.com/haikugenius"
+            target="_blank"
+            onClick={() => {
+              trackEvent("clicked-facebook", {
+                userId: user?.id,
+                location: "bottom-links",
+              });
+            }}
+          >
+            <PopOnClick color={haiku?.bgColor}>
+              <MdFacebook className="text-2xl" />
+            </PopOnClick>
+          </Link>
         }
-        {haikuMode && !user?.isAdmin && 
-        <Link
-          key="instagram"
-          href="https://www.instagram.com/haiku_genius/"
-          target="_blank"
-          onClick={() => {
-            trackEvent("clicked-instagram", {
-              userId: user?.id,
-              location: "bottom-links",
-            });
-          }}
-        >
-          <PopOnClick color={haiku?.bgColor}>
-            <BiLogoInstagramAlt className="text-2xl" />
-          </PopOnClick>
-        </Link>
+        {haikuMode && !user?.isAdmin &&
+          <Link
+            key="instagram"
+            href="https://www.instagram.com/haiku_genius/"
+            target="_blank"
+            onClick={() => {
+              trackEvent("clicked-instagram", {
+                userId: user?.id,
+                location: "bottom-links",
+              });
+            }}
+          >
+            <PopOnClick color={haiku?.bgColor}>
+              <BiLogoInstagramAlt className="text-2xl" />
+            </PopOnClick>
+          </Link>
         }
         {/* <Link
           key="email"
