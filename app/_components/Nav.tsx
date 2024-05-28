@@ -352,22 +352,32 @@ function BottomLinks({
       <div
         className="relative flex flex-row gap-2 items-center justify-center _font-semibold"
       >
-        <div
-          key="about"
-          className="cursor-pointer"
-          title="About"
-          onClick={() => {
-            trackEvent("clicked-about", {
-              userId: user?.id,
-              location: "bottom-links",
-            });
-            onShowAbout && onShowAbout();
-          }}
-        >
-          <PopOnClick color={haiku?.bgColor}>
+        {onShowAbout &&
+          <div
+            key="about"
+            className="cursor-pointer relative"
+            title="About"
+            onClick={() => {
+              trackEvent("clicked-about", {
+                userId: user?.id,
+                location: "bottom-links",
+              });
+              onShowAbout && onShowAbout();
+            }}
+          >
+            {user?.isAdmin && (haiku?.dailyHaikuId || haiku?.dailyHaikudleId || haiku.isIncorrect) &&
+              <div className={`absolute top-[-0rem] right-[-0rem] rounded-full w-[0.6rem] h-[0.6rem] ${haiku.isIncorrect ? "bg-red-600" : "bg-blue-600"}`} />
+            }
+            <PopOnClick color={haiku?.bgColor}>
+              <IoHelpCircle className="text-2xl" />
+            </PopOnClick>
+          </div>
+        }
+        {!onShowAbout &&
+          <div className="opacity-40">
             <IoHelpCircle className="text-2xl" />
-          </PopOnClick>
-        </div>
+          </div>
+        }
         {/* <Link
           key="github"
           href="https://github.com/desmat/haiku"
@@ -458,7 +468,7 @@ function BottomLinks({
         >
           <MdMail className="text-xl" />
         </Link> */}
-        {haiku?.id && onLikeHaiku &&
+        {user?.isAdmin && haiku?.id && onLikeHaiku &&
           <StyledLayers
             styles={haiku.likedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
           >
@@ -479,30 +489,32 @@ function BottomLinks({
             </div>
           </StyledLayers>
         }
-        {(!haiku?.id || !onLikeHaiku) &&
+        {user?.isAdmin && (!haiku?.id || !onLikeHaiku) &&
           <div className="opacity-40">
             <IoHeartSharp className="text-xl" />
           </div>
         }
-        <div
-          key="copy"
-          className={haiku?.id && onCopyHaiku ? "cursor-copy" : "opacity-40"}
-          title="Copy haiku poem "
-          onClick={() => {
-            if (onCopyHaiku) {
-              trackEvent("haiku-copied", {
-                userId: user?.id,
-                id: haiku.id,
-                location: "bottom-links",
-              });
-              onCopyHaiku();
-            }
-          }}
-        >
-          <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onCopyHaiku}>
-            <FaCopy className="text-xl" />
-          </PopOnClick>
-        </div>
+        {user?.isAdmin &&
+          <div
+            key="copy"
+            className={haiku?.id && onCopyHaiku ? "cursor-copy" : "opacity-40"}
+            title="Copy haiku poem "
+            onClick={() => {
+              if (onCopyHaiku) {
+                trackEvent("haiku-copied", {
+                  userId: user?.id,
+                  id: haiku.id,
+                  location: "bottom-links",
+                });
+                onCopyHaiku();
+              }
+            }}
+          >
+            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onCopyHaiku}>
+              <FaCopy className="text-xl" />
+            </PopOnClick>
+          </div>
+        }
         {haiku?.id && onCopyLink &&
           <div className="onboarding-container">
             {onboardingElement == "bottom-links-share" &&
@@ -682,7 +694,6 @@ export function NavOverlay({
   onCopyLink?: any,
   onLikeHaiku?: any,
 }) {
-  const dateCode = moment().format("YYYYMMDD");
   const [user] = useUser((state: any) => [state.user]);
   const onboarding = !!(onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement));
   // console.log(">> app._component.Nav.render", { mode, haikuId: haiku?.id });
