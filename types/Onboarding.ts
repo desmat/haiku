@@ -64,7 +64,7 @@ export const haikuGeneratedOnboardingSteps = (haiku: Haiku) => [
           Both theme and mood were used to generate the art using <b>DALL-E</b> with a curated prompt to harmonize with the poem, with specific instructions: <i>${haiku.artStyle}</i>.
         </div>
         <div>Try the buttons next to the poem to edit or regenerate the poem, or generate another image with the same theme and mood. Use your mouse, keyboard, arrow keys, Tab, Escape and Enter keys to <b>edit, cancel or save.</b></div>
-        <div>Level up your creativity with AI! save with empty or incomplete lines, or use "..." placeholders for <b>AI to fill in.</b>
+        <div>Level up your creativity with AI! Save with empty or incomplete lines, or use "..." placeholders for <b>AI to fill in.</b>
       </div>`,
     style: { top: "0.5rem" },
   },
