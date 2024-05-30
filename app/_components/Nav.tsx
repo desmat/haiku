@@ -197,7 +197,7 @@ export function GenerateInput({
       }}
       className={`GenerateInput _bg-pink-200 absolute
         top-[0.6rem] md:top-[0.5rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
-        w-[calc(100vw-3.6rem)] md:w-[550px]
+        w-[calc(100vw-3.6rem)] md:w-[500px]
       `}
       style={{ zIndex: onboarding ? "50" : "20" }}
     >
@@ -259,8 +259,8 @@ export function GenerateInput({
                 <input
                   //@ts-ignore
                   ref={ref}
-                  maxLength={46}
-                  placeholder={`A haiku about... ${haikuTheme}`}
+                  maxLength={146}
+                  placeholder={`Create a haiku about... ${haikuTheme}`}
                   disabled={exceededUsageLimit}
                   value={undefined}
                   onChange={handleChange}
@@ -268,7 +268,7 @@ export function GenerateInput({
                   onBlur={handleBlur}
                   onKeyDown={handleKeyDown}
                   className={`w-full absolute top-0 left-0
-                    pt-[0.1rem] pr-[7.8rem]  md:pr-[10rem] pb-[0.1rem] pl-[0.7rem]
+                    pt-[0.1rem] pr-[2rem]  md:pr-[2.6rem] pb-[0.1rem] pl-[0.7rem]
                     mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0 md:mt-[0.1rem] md:mr-[0rem]      
                   `}
                   style={{ cursor: exceededUsageLimit ? "not-allowed" : "pointer" }}
@@ -281,7 +281,7 @@ export function GenerateInput({
             </div>
             <div className="relative w-0">
               <div
-                className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-20"
+                className="_bg-pink-200 p-[0.5rem] absolute md:top-[0.1rem] _top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-20"
                 style={{
                   opacity: active ? "1" : "0.6",
                 }}
@@ -292,7 +292,6 @@ export function GenerateInput({
                 <PopOnClick>
                   <StyledLayers styles={altStyles.slice(0, 2)}>
                     <GenerateIcon style={{ cursor: exceededUsageLimit ? "not-allowed" : "pointer" }}>
-                      Create
                     </GenerateIcon>
                   </StyledLayers>
                 </PopOnClick>
