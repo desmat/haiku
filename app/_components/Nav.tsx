@@ -196,8 +196,8 @@ export function GenerateInput({
         }
       }}
       className={`GenerateInput _bg-pink-200 absolute
-        top-[0.6rem] md:top-[0.5rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
-        w-[calc(100vw-3.6rem)] md:w-[500px]
+        top-[0.8rem] md:top-[0.8rem] right-[3.2rem] md:right-[3.8rem] lg:left-1/2 lg:transform lg:-translate-x-1/2
+        w-[calc(100vw-6.5rem)] sm:w-[calc(100vw-16.4rem)] md:w-[calc(100vw-20rem)] _md:w-[400px] lg:w-[500px]
       `}
       style={{ zIndex: onboarding ? "50" : "20" }}
     >
@@ -259,7 +259,7 @@ export function GenerateInput({
                 <input
                   //@ts-ignore
                   ref={ref}
-                  maxLength={146}
+                  maxLength={46}
                   placeholder={`Create a haiku about... ${haikuTheme}`}
                   disabled={exceededUsageLimit}
                   value={undefined}
@@ -735,8 +735,8 @@ export function NavOverlay({
         />
       }
 
-      {false && ["haikudle", "haiku"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-40"}`}>
+      {["haikudle", "haiku"].includes(mode) &&
+        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
             {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement || "") &&
               <div className="onboarding-focus" />

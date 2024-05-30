@@ -10,6 +10,7 @@ export function Logo({
   styles,
   altStyles,
   onboardingElement,
+  forceFull,
 }: {
   mode: ExperienceMode,
   href?: string,
@@ -17,6 +18,7 @@ export function Logo({
   styles?: any,
   altStyles?: any,
   onboardingElement?: string,
+  forceFull?: boolean,
 }) {
   const isHaikudleMode = mode == "haikudle";
   const isSocialImgMode = mode == "social-img";
@@ -50,19 +52,23 @@ export function Logo({
       className={`logo hover:no-underline ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
     >
       <div className={`${font.architects_daughter.className} flex flex-row`}>
-        <StyledLayers
-          styles={onboardingElement && !onboardingElement.startsWith("logo")
-            ? styles.slice(0, 1)
-            : styles
-          }
-        >h</StyledLayers>
-        {styledAi}
-        <StyledLayers
-          styles={onboardingElement && !onboardingElement.startsWith("logo")
-            ? styles.slice(0, 1)
-            : styles
-          }
-        >{isHaikudleMode || isHaikudleSocialImgMode /* || isSocialImgMode */ ? "kudle" : "kuGenius"}</StyledLayers>
+        <span className={forceFull ? "" : "hidden sm:block"}>
+          <StyledLayers
+            styles={onboardingElement && !onboardingElement.startsWith("logo")
+              ? styles.slice(0, 1)
+              : styles
+            }
+          >h</StyledLayers>
+        </span>
+        <span className="mt-[0.1rem] sm:mt-[0rem]">{styledAi}</span>
+        <span className={forceFull ? "" : "hidden sm:block"}>
+          <StyledLayers
+            styles={onboardingElement && !onboardingElement.startsWith("logo")
+              ? styles.slice(0, 1)
+              : styles
+            }
+          >{isHaikudleMode || isHaikudleSocialImgMode /* || isSocialImgMode */ ? "kudle" : "kuGenius"}</StyledLayers>
+        </span>
       </div>
     </Link>
   )
