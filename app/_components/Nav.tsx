@@ -369,13 +369,13 @@ function BottomLinks({
               <div className={`absolute top-[-0rem] right-[-0rem] rounded-full w-[0.6rem] h-[0.6rem] ${haiku.isIncorrect ? "bg-red-600" : "bg-blue-600"}`} />
             }
             <PopOnClick color={haiku?.bgColor}>
-              <IoHelpCircle className="text-2xl" />
+              <IoHelpCircle className="text-[2rem] md:text-[2.25rem]" />
             </PopOnClick>
           </div>
         }
         {!onShowAbout &&
           <div className="opacity-40">
-            <IoHelpCircle className="text-2xl" />
+            <IoHelpCircle className="text-[2rem] md:text-[2.25rem]" />
           </div>
         }
         {/* <Link
@@ -390,7 +390,7 @@ function BottomLinks({
           }}
         >
           <PopOnClick color={haiku?.bgColor}>
-            <IoLogoGithub className="text-xl" />
+            <IoLogoGithub className="text-[1.5rem] md:text-[1.75rem]" />
           </PopOnClick>
         </Link> */}
         {!user?.isAdmin &&
@@ -406,7 +406,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor}>
-              <MdHome className="text-2xl" />
+              <MdHome className="text-[2rem] md:text-[2.25rem]" />
             </PopOnClick>
           </Link>
         }
@@ -423,7 +423,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor}>
-              <RiTwitterFill className="text-2xl" />
+              <RiTwitterFill className="text-[2rem] md:text-[2.25rem]" />
             </PopOnClick>
           </Link>
         }
@@ -440,7 +440,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor}>
-              <MdFacebook className="text-2xl" />
+              <MdFacebook className="text-[2rem] md:text-[2.25rem]" />
             </PopOnClick>
           </Link>
         }
@@ -457,7 +457,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor}>
-              <BiLogoInstagramAlt className="text-2xl" />
+              <BiLogoInstagramAlt className="text-[2rem] md:text-[2.25rem]" />
             </PopOnClick>
           </Link>
         }
@@ -466,7 +466,7 @@ function BottomLinks({
           href={`mailto:haiku${mode == "haikudle" ? "dle" : ""}@desmat.ca`}
           target="_blank"
         >
-          <MdMail className="text-xl" />
+          <MdMail className="text-[1.5rem] md:text-[1.75rem]" />
         </Link> */}
         {user?.isAdmin && haiku?.id && onLikeHaiku &&
           <StyledLayers
@@ -482,14 +482,14 @@ function BottomLinks({
                 <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.6rem] h-[0.6rem] bg-red-600" />
               }
               <PopOnClick color={haiku?.bgColor} >
-                <IoHeartSharp className="text-xl" />
+                <IoHeartSharp className="text-[1.75rem] md:text-[2rem]" />
               </PopOnClick>
             </div>
           </StyledLayers>
         }
         {user?.isAdmin && (!haiku?.id || !onLikeHaiku) &&
           <div className="opacity-40">
-            <IoHeartSharp className="text-xl" />
+            <IoHeartSharp className="text-[1.5rem] md:text-[1.75rem]" />
           </div>
         }
         {user?.isAdmin &&
@@ -509,7 +509,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onCopyHaiku}>
-              <FaCopy className="text-xl" />
+              <FaCopy className="text-[1.5rem] md:text-[1.75rem]" />
             </PopOnClick>
           </div>
         }
@@ -533,7 +533,7 @@ function BottomLinks({
                 }}
               >
                 <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
-                  <FaShare className="text-xl" />
+                  <FaShare className="text-[1.5rem] md:text-[1.75rem]" />
                 </PopOnClick>
               </Link>
             </StyledLayers>
@@ -541,7 +541,7 @@ function BottomLinks({
         }
         {(!haiku?.id || !onCopyLink) &&
           <div className="opacity-40">
-            <FaShare className="text-xl" />
+            <FaShare className="text-[1.5rem] md:text-[1.75rem]" />
           </div>
         }
         {user?.isAdmin &&
@@ -552,7 +552,7 @@ function BottomLinks({
             title="Load random"
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
-              <FaRandom className="text-xl" />
+              <FaRandom className="text-[1.5rem] md:text-[1.75rem]" />
             </PopOnClick>
           </div>
         }
@@ -564,7 +564,7 @@ function BottomLinks({
             title="Delete"
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
-              <MdDelete className="text-xl" />
+              <MdDelete className="text-[1.75rem] md:text-[2rem]" />
             </PopOnClick>
           </div>
         }
@@ -576,7 +576,7 @@ function BottomLinks({
             title={`Save as daily ${mode}`}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
-              <IoAddCircle className="text-xl" />
+              <IoAddCircle className="text-[1.5rem] md:text-[1.75rem]" />
             </PopOnClick>
 
           </div>
@@ -589,7 +589,7 @@ function BottomLinks({
             className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
           >
             <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
-              <BsDatabaseFillUp className="text-xl" />
+              <BsDatabaseFillUp className="text-[1.5rem] md:text-[1.75rem]" />
             </PopOnClick>
           </div>
         }
@@ -606,7 +606,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
-              <HiSwitchVertical className="text-xl" />
+              <HiSwitchVertical className="text-[1.75rem] md:text-[2rem]" />
             </PopOnClick>
           </Link>
         }
@@ -621,7 +621,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
-              <FaExpand className="text-xl" />
+              <FaExpand className="text-[1.5rem] md:text-[1.75rem]" />
             </PopOnClick>
           </Link>
         }

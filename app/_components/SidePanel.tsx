@@ -393,10 +393,10 @@ export default function SidePanel({
           </div>
           <div className="_bg-purple-400 flex flex-row justify-center px-2 pt-4 pb-2 h-fit w-full">
             <StyledLayers styles={styles}>
-              <div className="_bg-purple-200 flex flex-row gap-3">
+              <div className="_bg-purple-200 flex flex-row gap-4">
                 <Link
                   key="about"
-                  className="flex flex-row"
+                  className="flex flex-row gap-1"
                   href="#"
                   title="About"
                   onClick={(e: any) => {
@@ -408,11 +408,8 @@ export default function SidePanel({
                     onShowAbout && onShowAbout();
                   }}
                 >
-                  <IoHelpCircle className="text-2xl" />
-                  <div className="sm:block hidden">
-                    About
-                  </div>
-                  <div className="block md:hidden">
+                  <IoHelpCircle className="mt-[-0.2rem] md:mt-[-0.3rem] text-[2rem] md:text-[2.1rem]" />
+                  <div>
                     About
                   </div>
                 </Link>
@@ -428,7 +425,7 @@ export default function SidePanel({
                     });
                   }}
                 >
-                  <IoLogoGithub className="text-xl mt-[0.2rem]" />
+                  <IoLogoGithub className="mt-[0rem] md:mt-[-0.1rem] text-[1.7rem] md:text-[1.8rem]" />
                   <div className="sm:block hidden">
                     github/desmat
                   </div>
@@ -448,7 +445,7 @@ export default function SidePanel({
                     });
                   }}
                 >
-                  <MdHome className="text-2xl" />
+                  <MdHome className="mt-[-0.2rem] md:mt-[-0.3rem] text-[2rem] md:text-[2.1rem]" />
                   desmat.ca
                 </Link>
               </div>

@@ -491,20 +491,13 @@ export default function HaikuPoem({
               className="_bg-pink-200 relative md:mt-[-0.3rem] sm:mt-[-0.2rem] my-[-0.15rem] md:text-[16pt] sm:text-[14pt] text-[12pt]"
               style={{
                 // background: "pink",
-                height: haikudleMode
-                  ? ""
-                  : showcaseMode
-                    ? "" //"8rem" // maybelooks better when pushed up a bit
-                    : haiku?.theme?.length > maxHaikuTheme
-                      ? "2.6rem"
-                      : "1.3rem",
                 fontSize: "60%",
               }}
             >
               <div
                 className={showcaseMode
                   ? "_bg-yellow-200 fixed bottom-4 right-8 w-max flex flex-row"
-                  : "_bg-orange-200 flex flex-row absolute w-max ml-[0.5rem] mt-[0.1rem]"
+                  : "_bg-orange-200 flex flex-row w-max ml-[0.5rem] mt-[0.1rem] leading-5"
                 }
                 style={{ fontSize }}
               >
