@@ -65,21 +65,20 @@ export default async function Layout({
 
   // console.log('>> app.[[..slug]].layout.render()', { haikuId, slug: params?.slug, params });
 
-  // if (!haikuId) {
-  //   if (process.env.EXPERIENCE_MODE == "haikudle") {
-  //     const todaysDateCode = moment().format("YYYYMMDD");
-  //     const todaysDailyHaikudle = await getDailyHaikudle(todaysDateCode);
-  //     console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaikudle });
-  //     haikuId = todaysDailyHaikudle?.haikuId;
-  //   } else {
-  //     const todaysDateCode = moment().format("YYYYMMDD");
-  //     const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
-  //     console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaiku });
-  //     haikuId = todaysDailyHaiku?.haikuId;
-  //   }
-  // }
+  if (!haikuId) {
+    if (process.env.EXPERIENCE_MODE == "haikudle") {
+      const todaysDateCode = moment().format("YYYYMMDD");
+      const todaysDailyHaikudle = await getDailyHaikudle(todaysDateCode);
+      console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaikudle });
+      haikuId = todaysDailyHaikudle?.haikuId;
+    } else {
+      const todaysDateCode = moment().format("YYYYMMDD");
+      const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
+      console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaiku });
+      haikuId = todaysDailyHaiku?.haikuId;
+    }
+  }
 
-  const user = {} as User;
   const haiku = { bgColor: "" };  //await getHaiku(user, haikuId);
   // console.log('>> app.[[..slug]].layout.render()', { haiku });
 
