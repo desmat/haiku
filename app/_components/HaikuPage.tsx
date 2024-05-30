@@ -44,8 +44,9 @@ export default function HaikuPage({
   // console.log('>> app._components.HaikuPage.render()', { mode, id: haiku?.id, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   // const [user] = useUser((state: any) => [state.user]);
-  const blurValue = loading ? 50 : 0
-  const saturateValue = loading ? 0 : 1
+  const blurValue = loading ? 50 : 0;
+  const saturateValue = loading ? 0 : 1;
+  const tallBottomClassName = showcaseMode ? "tall:bottom-[15vh]" : "tall:bottom-[12vh]";
 
   return (
     <div>
@@ -59,7 +60,7 @@ export default function HaikuPage({
           transition: loading ? "filter 0.2s ease-out" : "filter 0.1s ease-out",
         }}
       />
-      <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 bottom-[0vh] ${showcaseMode ? "tall:bottom-[15vh]" : "tall:bottom-[12vh]"} xtall:bottom-[18vh] m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}>
+      <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 bottom-[0vh] ${tallBottomClassName} xtall:bottom-[18vh] m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}>
         {(regenerating || loading) &&
           <Loading styles={styles} />
         }
