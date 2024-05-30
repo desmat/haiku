@@ -65,7 +65,7 @@ export default function HaikuPage({
           <Loading styles={styles} />
         }
         {!regenerating && !loading && mode != "social-img" && mode != "haikudle-social-img" && !haiku.poemHashed && 
-          <div className="_xtall:bg-orange-400 _tall:bg-pink-200 _wide:bg-yellow-200 relative">
+          <div className="xtall:bg-orange-400 tall:bg-pink-200 wide:bg-yellow-200 relative">
             <HaikuPoem
               user={user}
               mode={mode}
