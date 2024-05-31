@@ -225,8 +225,8 @@ export default function SidePanel({
           </div>
 
           {/* close button and logo */}
-          <div className="block sm:hidden">
-            <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">
+          <div className="block _sm:hidden">
+            <div className="_bg-orange-400 flex flex-col h-[3rem]">
               {/* Logo */}
               <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-0 w-full ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
                 <div className="flex flex-row justify-center">
