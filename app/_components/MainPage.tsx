@@ -715,7 +715,7 @@ export default function MainPage({
         onDelete={!haiku?.error && doDelete}
         onSaveDailyHaiku={!haiku?.error && saveDailyHaiku}
         onShowAbout={
-          haiku.error
+          haiku.error && user?.isAdmin
             ? showHaikuError
             : user?.isAdmin
               ? showHaikuDetails

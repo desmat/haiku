@@ -343,6 +343,7 @@ function BottomLinks({
   const router = useRouter();
   const user = useUser((state: any) => state.user);
   const haikuMode = mode == "haiku";
+  const haikudleMode = mode == "haikudle";
 
   return (
     <div
@@ -351,7 +352,7 @@ function BottomLinks({
       <div
         className="relative flex flex-row gap-2 items-center justify-center _font-semibold"
       >
-        {onShowAbout &&
+        {onShowAbout && (haikudleMode || user?.isAdmin) &&
           <div
             key="about"
             className="cursor-pointer relative"
@@ -747,6 +748,7 @@ export function NavOverlay({
             <PopOnClick color={haiku?.bgColor} active={onboardingElement == "logo"}>
               {/* TODO: href to support multi-language */}
               <Logo
+                iconOnly={true}
                 styles={styles}
                 altStyles={altStyles}
                 mode={mode}

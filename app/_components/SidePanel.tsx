@@ -238,7 +238,6 @@ export default function SidePanel({
                       mode={mode || "haiku"}
                       href={`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`}
                       onClick={onClickLogo}
-                      forceFull={true}
                     // onboardingElement={onboardingElement}
                     />
                   </PopOnClick>
@@ -423,8 +422,23 @@ export default function SidePanel({
                   </div>
                 </Link>
                 <Link
-                  key="github"
+                  key="web"
                   className="flex flex-row gap-1"
+                  href="https://www.desmat.ca"
+                  target="_blank"
+                  onClick={() => {
+                    trackEvent("clicked-web", {
+                      userId: user?.id,
+                      location: "side-panel",
+                    });
+                  }}
+                >
+                  <MdHome className="mt-[-0.2rem] md:mt-[-0.3rem] text-[2rem] md:text-[2.1rem]" />
+                  desmat.ca
+                </Link>
+                <Link
+                  key="github"
+                  className="flex flex-row gap-2"
                   href="https://github.com/desmat/haiku"
                   target="_blank"
                   onClick={() => {
@@ -441,21 +455,6 @@ export default function SidePanel({
                   <div className="block sm:hidden">
                     github
                   </div>
-                </Link>
-                <Link
-                  key="web"
-                  className="flex flex-row gap-1"
-                  href="https://www.desmat.ca"
-                  target="_blank"
-                  onClick={() => {
-                    trackEvent("clicked-web", {
-                      userId: user?.id,
-                      location: "side-panel",
-                    });
-                  }}
-                >
-                  <MdHome className="mt-[-0.2rem] md:mt-[-0.3rem] text-[2rem] md:text-[2.1rem]" />
-                  desmat.ca
                 </Link>
               </div>
             </StyledLayers>
