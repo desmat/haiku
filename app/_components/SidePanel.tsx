@@ -209,6 +209,7 @@ export default function SidePanel({
         style={{
           backgroundColor: `${styles[styles.length - 1]?.color ? styles[styles.length - 1]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
           backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
           right: panelOpened ? 0 : "-27rem"
         }}
         onMouseLeave={() => panelOpened && !panelPinned && toggleMenuOpened()}
@@ -272,7 +273,9 @@ export default function SidePanel({
                     </div>
                   }
                   {!user?.isAdmin &&
-                    "Your Haikus"
+                    <StyledLayers styles={styles}>
+                      "Your Haikus"
+                    </StyledLayers>
                   }
                   {/* <StyledLayers styles={styles.slice(0, 1)} className="my-auto">
                     <div className="flex flex-row gap-1 my-auto pt-[0.1rem]">
