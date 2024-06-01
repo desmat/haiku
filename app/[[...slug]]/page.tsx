@@ -50,7 +50,7 @@ const getTheHaikudle = async (id: string) => {
     ...haikudle,
     previousDailyHaikudleId: dailyHaikudle?.id,
     haiku: haiku,
-  }  
+  }
 }
 
 export default async function Page({
@@ -93,7 +93,10 @@ export default async function Page({
       ? await getHaiku({} as User, id, false, version)
       : await todaysHaiku();
 
-  haiku = haiku || notFoundHaiku;
+  haiku = {
+    ...(haiku || notFoundHaiku),
+    previousDailyHaikudleId: haikudle.previousDailyHaikudleId,
+  };
   const { textStyles, altTextStyles } = haikuStyles(haiku);
 
   return (
