@@ -88,14 +88,14 @@ export default async function Page({
   }
 
   let haiku = haikudle
-    ? await getHaiku({} as User, haikudle.haikuId, !haikudle.previousDailyHaikudleId, version)
+    ? await getHaiku({} as User, haikudle.haikuId, !haikudle?.previousDailyHaikudleId, version)
     : id
       ? await getHaiku({} as User, id, false, version)
       : await todaysHaiku();
 
   haiku = {
     ...(haiku || notFoundHaiku),
-    previousDailyHaikudleId: haikudle.previousDailyHaikudleId,
+    previousDailyHaikudleId: haikudle?.previousDailyHaikudleId,
   };
   const { textStyles, altTextStyles } = haikuStyles(haiku);
 
