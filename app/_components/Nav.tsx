@@ -13,7 +13,6 @@ import { MdHome, MdDelete, MdFacebook } from "react-icons/md";
 import { BsDatabaseFillUp } from "react-icons/bs";
 import { FaRandom } from "react-icons/fa";
 import * as font from "@/app/font";
-import useAlert from '@/app/_hooks/alert';
 import useUser from '@/app/_hooks/user';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haiku } from '@/types/Haiku';
@@ -109,7 +108,7 @@ export function GenerateInput({
   const ref = useRef();
   // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
 
-  const onboarding = onboardingElement == "generate";
+  const onboarding = onboardingElement && onboardingElement.includes("generate");
   const dateCode = moment().format("YYYYMMDD");
   const exceededUsageLimit = !user?.isAdmin && (user?.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU;
 

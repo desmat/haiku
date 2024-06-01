@@ -29,16 +29,22 @@ function OpenCloseButton({
   onboardingElement?: string,
   onClick?: any,
 }) {
+  const onboarding = false; //onboardingElement && onboardingElement.includes("side-panel");
 
   return (
     <div
-      className={`_bg-pink-200 open-side-panel-icon ${font.architects_daughter.className} absolute top-0 right-0 md:p-[0.8rem] mt-[0.1rem] md:mt-[0.1rem] p-[0.6rem] ${onboardingElement && ["logo", "logo-and-generate", "_generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} cursor-pointer`}
+      className={`_bg-pink-200 open-side-panel-icon ${font.architects_daughter.className} absolute top-0 right-0 md:p-[0.8rem] mt-[0.1rem] md:mt-[0.1rem] p-[0.6rem] ${onboarding ? "z-50" : "z-20"} cursor-pointer`}
       onClick={onClick}
       title={title}
     >
       <StyledLayers styles={styles}>
         <PopOnClick>
-          <IoMenu className="h-7 w-7 md:h-8 md:w-8" />
+          <div className="onboarding-container" style={{ width: "auto" }}>
+            {onboarding &&
+              <div className="onboarding-focus" />
+            }
+            <IoMenu className="h-7 w-7 md:h-8 md:w-8" />
+          </div>
         </PopOnClick>
       </StyledLayers>
     </div>
@@ -231,7 +237,7 @@ export default function SidePanel({
               {/* Logo */}
               <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-0 w-full ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
                 <div className="flex flex-row justify-center">
-                  <PopOnClick color={bgColor} active={onboardingElement == "logo"}>
+                  <PopOnClick color={bgColor} active={onboarding}>
                     {/* TODO: href to support multi-language */}
                     <Logo
                       styles={styles}
@@ -416,6 +422,7 @@ export default function SidePanel({
                       userId: user?.id,
                       location: "side-panel",
                     });
+                    toggleMenuOpened();
                     onShowAbout && onShowAbout();
                   }}
                 >
@@ -434,6 +441,7 @@ export default function SidePanel({
                       userId: user?.id,
                       location: "side-panel",
                     });
+                    toggleMenuOpened();
                   }}
                 >
                   <MdHome className="mt-[-0.2rem] md:mt-[-0.3rem] text-[2rem] md:text-[2.1rem]" />
@@ -449,6 +457,7 @@ export default function SidePanel({
                       userId: user?.id,
                       location: "side-panel",
                     });
+                    toggleMenuOpened();
                   }}
                 >
                   <IoLogoGithub className="mt-[0rem] md:mt-[-0.1rem] text-[1.7rem] md:text-[1.8rem]" />

@@ -34,7 +34,7 @@ export const haikuOnboardingSteps = [
     focus: "generate",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div>A new haiku will be featured every day, maybe one of yours! Click on the logo in the side panel to see today's, come back tomorrow for more.</div>
+        <div>A new haiku will be featured every day, maybe one of yours! Click on the logo to see today's haiku, come back tomorrow for more.</div>
         <div>To create your own haiku hit the <b>✨</b> button at the top of the screen, maybe pick a theme and AI will get you started. The rest is up to!</div>
       </div>
     `,
@@ -44,7 +44,7 @@ export const haikuOnboardingSteps = [
     focus: "side-panel-and-bottom-links",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div>Find all your haikus in the side panel to the left.</div>
+        <div>Find all your haikus in the side panel to the right.</div>
         <div>To learn <b>about me</b>, access Haiku Genius' social home, or <b>share</b> this haiku see the buttons at the bottom.</div>
         <div>For the best experience on mobile hit the <b>Add to Home Screen</b> under the <b>Share</b> or <b>three-dot menu icon</b>.</div>
         <div>Enjoy <b>Haiku Genius!</b></div>        
