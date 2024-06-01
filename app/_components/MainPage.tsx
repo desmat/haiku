@@ -601,7 +601,7 @@ export default function MainPage({
   }
 
   useEffect(() => {
-    console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
+    // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
     // @ts-ignore
     let timeoutId;
     if (user && (haikudleMode && (previousDailyHaikudleId || haikudleReady) || !haikudleMode)) {
@@ -647,12 +647,12 @@ export default function MainPage({
   }, [haiku?.id, loadingUI, showcaseMode, _refreshDelay]);
 
   if (!userLoaded && !userLoading) {
-    console.log('>> app.MainPage init', { haiku });
+    // console.log('>> app.MainPage init', { haiku });
     loadUser().then((user: User) => {
-      console.log('>> app.MainPage init loadUser.then', { user });
+      // console.log('>> app.MainPage init loadUser.then', { user });
       if (haikudleMode && !previousDailyHaikudleId) {
         loadHaikudle(haikuId || { lang }).then((haikudles: any) => {
-          console.log('>> app.MainPage init loadHaikudle.then', { haikudles });
+          // console.log('>> app.MainPage init loadHaikudle.then', { haikudles });
           const loadedHaikudle = haikudles[0] || haikudles;
           setHaiku(loadedHaikudle?.haiku);
           setHaikuId(loadedHaikudle?.haiku?.id);

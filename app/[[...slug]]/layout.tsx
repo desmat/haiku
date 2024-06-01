@@ -69,12 +69,12 @@ export default async function Layout({
     if (process.env.EXPERIENCE_MODE == "haikudle") {
       const todaysDateCode = moment().format("YYYYMMDD");
       const todaysDailyHaikudle = await getDailyHaikudle(todaysDateCode);
-      console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaikudle });
+      // console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaikudle });
       haikuId = todaysDailyHaikudle?.haikuId;
     } else {
       const todaysDateCode = moment().format("YYYYMMDD");
       const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
-      console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaiku });
+      // console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaiku });
       haikuId = todaysDailyHaiku?.haikuId;
     }
   }

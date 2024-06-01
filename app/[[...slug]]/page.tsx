@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { Suspense } from 'react';
 import HaikuPage from '@/app/_components/HaikuPage';
 import MainPage from '@/app/_components/MainPage';
@@ -10,9 +11,8 @@ import { getDailyHaiku, getHaiku } from '@/services/haikus';
 import { getDailyHaikudle, getDailyHaikudles, getHaikudle } from '@/services/haikudles';
 import { notFoundHaiku } from '@/services/stores/samples';
 import { haikuStyles } from '@/types/Haiku';
-import { User } from '@/types/User';
-import moment from 'moment';
 import { DailyHaikudle } from '@/types/Haikudle';
+import { User } from '@/types/User';
 
 const user = {} as User;
 
