@@ -175,6 +175,7 @@ export default function MainPage({
   // console.log('>> app.MainPage.render()', { loading, loaded, haikuId, haiku_Id: haiku?.id, getHaiku: getHaiku(haikuId), haikudleHaiku });
 
   const isPuzzleMode = haikudleMode &&
+    !_haikudle?.previousDailyHaikudleId &&
     !haikudleSolved &&
     (!previousDailyHaikudleId || user?.isAdmin) &&
     (!(haiku?.createdBy == user?.id) || user?.isAdmin);
@@ -648,14 +649,13 @@ export default function MainPage({
     console.log('>> app.MainPage init', {});
     loadUser().then((user: User) => {
       // console.log('>> app.MainPage init loadUser.then', { user });
-      if (haikudleMode) {
+      if (haikudleMode && !_haikudle?.previousDailyHaikudleId) {
         loadHaikudle(haikuId || { lang }).then((haikudles: any) => {
           // console.log('>> app.MainPage init loadHaikudle.then', { haikudles });
           const loadedHaikudle = haikudles[0] || haikudles;
           setHaiku(loadedHaikudle?.haiku);
           setHaikuId(loadedHaikudle?.haiku?.id);
         });
-
       } else {
         // TODO: clean this up
         haiku
@@ -680,7 +680,7 @@ export default function MainPage({
 
   // console.log('>> app.MainPage.render() loading page?', { loadingUI, generating, haikudleMode, haikudleLoaded, haikudleReady, thing: haikudleMode && !haikudleLoaded && !haikudleReady });
 
-  if (loadingUI || generating || haikudleMode && !haikudleReady) {
+  if (loadingUI || generating || haikudleMode && !_haikudle?.previousDailyHaikudleId && !haikudleReady) {
     // console.log('>> app.MainPage.render() loading page? YUP!', { loadingUI, generating, haikudleMode, haikudleLoaded, haikudleReady, thing: haikudleMode && !haikudleLoaded && !haikudleReady });
     return (
       <div>
