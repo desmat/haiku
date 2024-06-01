@@ -36,15 +36,11 @@ const getTheHaikudle = async (id: string) => {
   const dailyHaikudle = dailyHaikudles
     .filter((dh: DailyHaikudle) => dh.id < todaysDateCode && dh.haikudleId == id)[0];
 
-  const [
-    haiku,
-    haikudle,
-  ] = await Promise.all([
-    getHaiku(user, id, !dailyHaikudle?.id),
-    getHaikudle(user, id),
-  ]);
+  const haiku = await getHaiku(user, id, !dailyHaikudle?.id);
+  if (!haiku) return;
 
-  if (!haiku || !haikudle) return;
+  const haikudle = await getHaikudle(user, id);
+  if (!haikudle) return;
 
   return {
     ...haikudle,
