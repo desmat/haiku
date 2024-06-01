@@ -50,7 +50,7 @@ export default function MainPage({
   const [refreshTimeout, setRefreshTimeout] = useState<any>();
   const [backupInProgress, setBackupInProgress] = useState(false);
 
-  // console.log('>> app.MainPage.render()', { haikuId });
+  // console.log('>> app.MainPage.render()', { theme: haiku?.theme });
 
   const [
     user,
@@ -134,7 +134,7 @@ export default function MainPage({
   ] = useHaikudle((state: any) => [
     state.ready,
     state.loaded(haikuId || { lang }),
-    () => state.load(haikuId || { lang }),
+    state.load,
     state.delete,
     state.haiku,
     state.reset,
@@ -178,6 +178,7 @@ export default function MainPage({
     !haikudleSolved &&
     (!previousDailyHaikudleId || user?.isAdmin) &&
     (!(haiku?.createdBy == user?.id) || user?.isAdmin);
+  // console.log('>> app.MainPage.render()', { isPuzzleMode, haikudleSolved, previousDailyHaikudleId, user_isAdmin: user?.isAdmin, haiku_createdBy: haiku?.createdBy });
 
   const { textStyles, altTextStyles } = haikuStyles(haiku);
 
@@ -442,18 +443,27 @@ export default function MainPage({
     // console.log('>> app.page.loadHaiku()', { mode, haikuId });
     resetAlert();
     setLoadingUI(true);
-    // setHaiku(undefined); // keep the old one around to smooth out style transition
     setHaikuId(undefined);
-    // TODO what about haikudle?
-    loadHaikus(haikuId || { lang }, mode)
-      .then((haikus: Haiku | Haiku[]) => {
-        // console.log('>> app.MainPage.loadHaiku loadHaikus.then', { haikus });
-        const loadedHaiku = haikus[0] || haikus;
-        setHaiku(loadedHaiku);
-        setHaikuId(loadedHaiku?.id);
+    setHaiku({ ...haiku, poem: undefined }); // keep parts of the old one around to smooth out style transition
+
+    haikudleMode
+      ? loadHaikudle(haikuId || { lang }).then((haikudles: any) => {
+        // console.log('>> app.MainPage.loadHaiku loadHaikudle.then', { haikudles });
+        const loadedHaikudle = haikudles[0] || haikudles;
+        setHaiku(loadedHaikudle?.haiku);
+        setHaikuId(loadedHaikudle?.haiku?.id);
         setLoadingUI(false);
-        window.history.replaceState(null, '', `/${loadedHaiku?.id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
-      });
+        window.history.replaceState(null, '', `/${haikuId || ""}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
+      })
+      : loadHaikus(haikuId || { lang }, mode)
+        .then((haikus: Haiku | Haiku[]) => {
+          // console.log('>> app.MainPage.loadHaiku loadHaikus.then', { haikus });
+          const loadedHaiku = haikus[0] || haikus;
+          setHaiku(loadedHaiku);
+          setHaikuId(loadedHaiku?.id);
+          setLoadingUI(false);
+          window.history.replaceState(null, '', `/${haikuId || ""}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
+        });
   }
 
   const switchMode = async (newMode?: string) => {
@@ -527,10 +537,10 @@ export default function MainPage({
 
     const token = await getUserToken();
     setBackupInProgress(true);
-      // const filename = prompt("File url to restore?");
-      // if (!filename) return;
-      // const res = await fetch(`/api/admin/restore?filename=${filename}`, {
-      const res = await fetch("/api/admin/backup", {
+    // const filename = prompt("File url to restore?");
+    // if (!filename) return;
+    // const res = await fetch(`/api/admin/restore?filename=${filename}`, {
+    const res = await fetch("/api/admin/backup", {
       headers: { Authorization: `Bearer ${token}` },
       method: "POST",
     });
@@ -635,13 +645,17 @@ export default function MainPage({
   }, [haiku?.id, loadingUI, showcaseMode, _refreshDelay]);
 
   if (!userLoaded && !userLoading) {
-    // console.log('>> app.MainPage init', {});
+    console.log('>> app.MainPage init', {});
     loadUser().then((user: User) => {
       // console.log('>> app.MainPage init loadUser.then', { user });
       if (haikudleMode) {
-        initHaikudle({ ..._haikudle, haiku }, !haiku.poemHashed).then((haikudle: Haikudle) => {
-          // console.log('>> app.MainPage init initHaikudle.then', { haikudle });
+        loadHaikudle(haikuId || { lang }).then((haikudles: any) => {
+          // console.log('>> app.MainPage init loadHaikudle.then', { haikudles });
+          const loadedHaikudle = haikudles[0] || haikudles;
+          setHaiku(loadedHaikudle?.haiku);
+          setHaikuId(loadedHaikudle?.haiku?.id);
         });
+
       } else {
         // TODO: clean this up
         haiku
@@ -664,7 +678,10 @@ export default function MainPage({
     });
   }
 
+  // console.log('>> app.MainPage.render() loading page?', { loadingUI, generating, haikudleMode, haikudleLoaded, haikudleReady, thing: haikudleMode && !haikudleLoaded && !haikudleReady });
+
   if (loadingUI || generating || haikudleMode && !haikudleReady) {
+    // console.log('>> app.MainPage.render() loading page? YUP!', { loadingUI, generating, haikudleMode, haikudleLoaded, haikudleReady, thing: haikudleMode && !haikudleLoaded && !haikudleReady });
     return (
       <div>
         {haiku?.bgColor &&

@@ -90,7 +90,10 @@ export default async function Page({
             altStyles={altTextStyles}
           />
           <HaikuPage
-            haiku={haiku}
+            haiku={mode == "haikudle"
+              ? { ...haiku, poem: undefined }
+              : haiku
+            }
             mode={mode}
             styles={textStyles}
             altStyles={altTextStyles}

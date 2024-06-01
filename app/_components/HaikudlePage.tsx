@@ -23,7 +23,7 @@ export default function HaikudlePage({
   regenerating?: boolean,
   onboardingElement?: string | undefined,
 }) {
-  // console.log('>> app._components.HaikudlePage.render()', { mode, id: haiku.id, haiku, onboardingElement});
+  // console.log('>> app._components.HaikudlePage.render()', { mode, id: haiku.id, poem: haiku.poem, haiku, onboardingElement});
 
   const [user] = useUser((state: any) => [state.user]);
   // TODO move to hook store
