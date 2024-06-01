@@ -41,7 +41,7 @@ export default function HaikuPage({
   regenerateImage?: any,
   copyHaiku?: any
 }) {
-  // console.log('>> app._components.HaikuPage.render()', { mode, id: haiku?.id, popPoem, haiku });
+  // console.log('>> app._components.HaikuPage.render()', { loading, mode, id: haiku?.id, poem: haiku?.poem, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   // const [user] = useUser((state: any) => [state.user]);
   const blurValue = loading ? 50 : 0;

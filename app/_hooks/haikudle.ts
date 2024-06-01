@@ -60,18 +60,7 @@ const initialState = {
   onSolved: async (id: string, moves: number) => {
     // add solved haiku to side panel (backend record already created) 
     const currentHaiku = useHaikudle.getState().haiku;
-    const { haikus: userHaikus } = useUser.getState(); // .addUserHaiku(currentHaiku, "generated");
-    useUser.setState({
-      haikus: {
-        ...userHaikus,
-        [currentHaiku.id]: {
-          ...userHaikus[currentHaiku.id],
-          theme: currentHaiku.theme,
-          solvedAt: moment().valueOf(),
-          moves,
-        }
-      }
-    })
+    useUser.getState().addUserHaiku(currentHaiku, "solved");
 
     setTimeout(() => {
       const shareContent = "Solved today\\'s haiku puzzle in " + moves + " moves! https://haikudle.art/\\n\\n"
@@ -371,8 +360,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     const id = typeof (queryOrId) == "string" && queryOrId;
     // console.log(">> hooks.haikudle.load", { id, query: JSON.stringify(query) });
 
-    // setLoaded([]);
-    // return get().init();    
+    set({ ready: false});
 
     return new Promise(async (resolve, reject) => {
       if (id) {

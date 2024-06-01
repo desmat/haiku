@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { Suspense } from 'react';
 import HaikuPage from '@/app/_components/HaikuPage';
 import MainPage from '@/app/_components/MainPage';
@@ -7,22 +8,48 @@ import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { LanguageType, isSupportedLanguage } from '@/types/Languages';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
-import { getDailyHaikudle, getHaikudle } from '@/services/haikudles';
+import { getDailyHaikudle, getDailyHaikudles, getHaikudle } from '@/services/haikudles';
 import { notFoundHaiku } from '@/services/stores/samples';
 import { haikuStyles } from '@/types/Haiku';
+import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
+
+const user = {} as User;
 
 const todaysHaiku = async () => {
   const todaysDailyHaiku = await getDailyHaiku();
   if (todaysDailyHaiku?.haikuId) {
-    return getHaiku({} as User, todaysDailyHaiku?.haikuId);
+    return getHaiku(user, todaysDailyHaiku?.haikuId);
   }
 }
 
 const todaysHaikudle = async () => {
   const todaysDailyHaikudle = await getDailyHaikudle();
   if (todaysDailyHaikudle?.haikudleId) {
-    return getHaikudle({} as User, todaysDailyHaikudle?.haikudleId);
+    return getHaikudle(user, todaysDailyHaikudle?.haikudleId);
+  }
+}
+
+const getTheHaikudle = async (id: string) => {
+  const todaysDateCode = moment().format("YYYYMMDD");
+  const dailyHaikudles = await getDailyHaikudles();
+  const dailyHaikudle = dailyHaikudles
+    .filter((dh: DailyHaikudle) => dh.id < todaysDateCode && dh.haikudleId == id)[0];
+
+  const [
+    haiku,
+    haikudle,
+  ] = await Promise.all([
+    getHaiku(user, id, !dailyHaikudle?.id),
+    getHaikudle(user, id),
+  ]);
+
+  if (!haiku || !haikudle) return;
+
+  return {
+    ...haikudle,
+    previousDailyHaikudleId: dailyHaikudle?.id,
+    haiku: haiku,
   }
 }
 
@@ -52,7 +79,7 @@ export default async function Page({
 
   const haikudle = mode == "haikudle"
     ? id
-      ? await getHaikudle({} as User, id)
+      ? await getTheHaikudle(id)
       : await todaysHaikudle()
     : undefined
 
@@ -61,12 +88,15 @@ export default async function Page({
   }
 
   let haiku = haikudle
-    ? await getHaiku({} as User, haikudle.haikuId, true, version)
+    ? await getHaiku({} as User, haikudle.haikuId, !haikudle?.previousDailyHaikudleId, version)
     : id
       ? await getHaiku({} as User, id, false, version)
       : await todaysHaiku();
 
-  haiku = haiku || notFoundHaiku;
+  haiku = {
+    ...(haiku || notFoundHaiku),
+    previousDailyHaikudleId: haikudle?.previousDailyHaikudleId,
+  };
   const { textStyles, altTextStyles } = haikuStyles(haiku);
 
   return (
@@ -90,12 +120,15 @@ export default async function Page({
             altStyles={altTextStyles}
           />
           <HaikuPage
-            haiku={haiku}
+            haiku={mode == "haikudle" && !haikudle.previousDailyHaikudleId
+              ? { ...haiku, poem: undefined }
+              : haiku
+            }
             mode={mode}
             styles={textStyles}
             altStyles={altTextStyles}
             fontSize={fontSize}
-            loading={mode == "haikudle"}
+            loading={mode == "haikudle" && !haikudle.previousDailyHaikudleId}
           />
         </div>
       }

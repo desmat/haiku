@@ -28,7 +28,7 @@ export async function GET(
     getHaiku(user, params.id, !dailyHaikudle?.id),
     getHaikudle(user, params.id),
   ]);
-  const myHaiku = !user.isAdmin && haiku?.createdBy == user.id && await getHaiku(user, params.id);
+  const myHaiku = undefined; //!user.isAdmin && haiku?.createdBy == user.id && await getHaiku(user, params.id);
   // console.log('>> app.api.haikudles.GET', { haiku, haikudle, dailyHaikudle, myHaiku });
 
   if (!haiku) {
