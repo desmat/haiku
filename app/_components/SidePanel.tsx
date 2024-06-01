@@ -32,13 +32,13 @@ function OpenCloseButton({
 
   return (
     <div
-      className={`_bg-pink-200 open-side-panel-icon ${font.architects_daughter.className} absolute top-0 left-0 md:p-[0.8rem] md:mt-[-0.2rem] p-[0.6rem] ${onboardingElement && ["logo", "logo-and-generate", "_generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} cursor-pointer`}
+      className={`_bg-pink-200 open-side-panel-icon ${font.architects_daughter.className} absolute top-0 right-0 md:p-[0.8rem] mt-[0.1rem] md:mt-[0.1rem] p-[0.6rem] ${onboardingElement && ["logo", "logo-and-generate", "_generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} cursor-pointer`}
       onClick={onClick}
       title={title}
     >
       <StyledLayers styles={styles}>
         <PopOnClick>
-          <IoMenu className="h-6 w-6 md:h-8 md:w-8" />
+          <IoMenu className="h-7 w-7 md:h-8 md:w-8" />
         </PopOnClick>
       </StyledLayers>
     </div>
@@ -189,7 +189,7 @@ export default function SidePanel({
       {/* Area behind side panel but in front of main content to allow users to click and close the panel */}
       {panelOpened &&
         <div
-          className="_bg-blue-400 absolute top-0 left-0 w-[100vw] h-[100vh] z-20"
+          className="_bg-blue-400 close-side-panel-hotspot absolute top-0 right-0 w-[100vw] h-[100vh] z-20"
           onClick={() => panelOpened && toggleMenuOpened()}
         >
         </div>
@@ -209,47 +209,56 @@ export default function SidePanel({
         style={{
           backgroundColor: `${styles[styles.length - 1]?.color ? styles[styles.length - 1]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
           backdropFilter: "blur(10px)",
-          left: panelOpened ? 0 : "-27rem"
+          WebkitBackdropFilter: "blur(10px)",
+          right: panelOpened ? 0 : "-27rem"
         }}
         onMouseLeave={() => panelOpened && !panelPinned && toggleMenuOpened()}
       >
         <div className="_bg-pink-400 flex flex-col h-[100vh]">
 
-
           {/* hotspot to open the side panel on mouse hover */}
           <div
-            className="_bg-red-400 group absolute top-[4rem] right-0 w-[1rem] mr-[-1rem] h-[calc(100vh-4rem)] z-90"
+            className="_bg-red-400 open-side-panel-hoverspot group absolute top-[4rem] left-[-1rem] w-[1rem] mr-[1rem] h-[calc(100vh-4rem)] _z-50"
+            style={{ zIndex: 99 }}
             onMouseEnter={() => !panelOpened && !panelAnimating && toggleMenuOpened()}
             onClick={() => panelOpened && toggleMenuOpened()}
           >
           </div>
 
           {/* close button and logo */}
-          <div className="_bg-orange-400 flex flex-col h-[3rem] md:h-[4rem]">
-            {/* Close side bar button */}
+          <div className="block _sm:hidden">
+            <div className="_bg-orange-400 flex flex-col h-[3rem]">
+              {/* Logo */}
+              <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-0 w-full ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
+                <div className="flex flex-row justify-center">
+                  <PopOnClick color={bgColor} active={onboardingElement == "logo"}>
+                    {/* TODO: href to support multi-language */}
+                    <Logo
+                      styles={styles}
+                      altStyles={altStyles}
+                      mode={mode || "haiku"}
+                      href={`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`}
+                      onClick={onClickLogo}
+                    // onboardingElement={onboardingElement}
+                    />
+                  </PopOnClick>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Close button inside panel */}
+          <div className="absolute top-0 right-0 z-50">
             <OpenCloseButton
               styles={styles}
               title="Close side panel"
               onboardingElement={onboardingElement}
               onClick={handleClickedOpenCloseButton}
             />
-            {/* Logo */}
-            <div className={`${font.architects_daughter.className} absolute top-[-0.3rem] left-[2.8rem] md:left-[3.6rem] ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-40"}`}>
-              <PopOnClick color={bgColor} active={onboardingElement == "logo"}>
-                {/* TODO: href to support multi-language */}
-                <Logo
-                  styles={styles}
-                  altStyles={altStyles}
-                  mode={mode || "haiku"}
-                  href={`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`}
-                  onClick={onClickLogo}
-                // onboardingElement={onboardingElement}
-                />
-              </PopOnClick>
-            </div>
           </div>
-          <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4">
-            <div className="py-2">
+
+          {/* your haikus */}
+          <div className="_bg-yellow-400 flex flex-col h-full overflow-scroll px-3 md:px-4 sm:mt-[0.2rem] md:mt-[0.6rem]">
+            <div className="py-2 text-[1.2rem] md:text-[1.2rem]">
               {(!user?.isAdmin || listMode == "haiku") &&
                 <div className="flex flex-row gap-3 group">
                   {user?.isAdmin &&
@@ -264,7 +273,9 @@ export default function SidePanel({
                     </div>
                   }
                   {!user?.isAdmin &&
-                    "Your Haikus"
+                    <StyledLayers styles={styles}>
+                      "Your Haikus"
+                    </StyledLayers>
                   }
                   {/* <StyledLayers styles={styles.slice(0, 1)} className="my-auto">
                     <div className="flex flex-row gap-1 my-auto pt-[0.1rem]">
@@ -393,10 +404,10 @@ export default function SidePanel({
           </div>
           <div className="_bg-purple-400 flex flex-row justify-center px-2 pt-4 pb-2 h-fit w-full">
             <StyledLayers styles={styles}>
-              <div className="_bg-purple-200 flex flex-row gap-3">
+              <div className="_bg-purple-200 flex flex-row gap-4">
                 <Link
                   key="about"
-                  className="flex flex-row"
+                  className="flex flex-row gap-1"
                   href="#"
                   title="About"
                   onClick={(e: any) => {
@@ -408,32 +419,9 @@ export default function SidePanel({
                     onShowAbout && onShowAbout();
                   }}
                 >
-                  <IoHelpCircle className="text-2xl" />
-                  <div className="sm:block hidden">
+                  <IoHelpCircle className="mt-[-0.2rem] md:mt-[-0.3rem] text-[2rem] md:text-[2.1rem]" />
+                  <div>
                     About
-                  </div>
-                  <div className="block md:hidden">
-                    About
-                  </div>
-                </Link>
-                <Link
-                  key="github"
-                  className="flex flex-row gap-1"
-                  href="https://github.com/desmat/haiku"
-                  target="_blank"
-                  onClick={() => {
-                    trackEvent("clicked-github", {
-                      userId: user?.id,
-                      location: "side-panel",
-                    });
-                  }}
-                >
-                  <IoLogoGithub className="text-xl mt-[0.2rem]" />
-                  <div className="sm:block hidden">
-                    github/desmat
-                  </div>
-                  <div className="block sm:hidden">
-                    github
                   </div>
                 </Link>
                 <Link
@@ -448,8 +436,28 @@ export default function SidePanel({
                     });
                   }}
                 >
-                  <MdHome className="text-2xl" />
+                  <MdHome className="mt-[-0.2rem] md:mt-[-0.3rem] text-[2rem] md:text-[2.1rem]" />
                   desmat.ca
+                </Link>
+                <Link
+                  key="github"
+                  className="flex flex-row gap-2"
+                  href="https://github.com/desmat/haiku"
+                  target="_blank"
+                  onClick={() => {
+                    trackEvent("clicked-github", {
+                      userId: user?.id,
+                      location: "side-panel",
+                    });
+                  }}
+                >
+                  <IoLogoGithub className="mt-[0rem] md:mt-[-0.1rem] text-[1.7rem] md:text-[1.8rem]" />
+                  <div className="sm:block hidden">
+                    github/desmat
+                  </div>
+                  <div className="block sm:hidden">
+                    github
+                  </div>
                 </Link>
               </div>
             </StyledLayers>

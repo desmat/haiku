@@ -196,8 +196,8 @@ export function GenerateInput({
         }
       }}
       className={`GenerateInput _bg-pink-200 absolute
-        top-[0.6rem] md:top-[0.5rem] left-[2.8rem] md:left-1/2 md:transform md:-translate-x-1/2
-        w-[calc(100vw-3.6rem)] md:w-[550px]
+        top-[0.8rem] md:top-[0.8rem] right-[3.2rem] md:right-[3.8rem] md:left-1/2 lg:transform md:-translate-x-1/2
+        w-[calc(100vw-6.5rem)] md:w-[500px]
       `}
       style={{ zIndex: onboarding ? "50" : "20" }}
     >
@@ -260,7 +260,7 @@ export function GenerateInput({
                   //@ts-ignore
                   ref={ref}
                   maxLength={46}
-                  placeholder={`A haiku about... ${haikuTheme}`}
+                  placeholder={`Create a haiku about... ${haikuTheme}`}
                   disabled={exceededUsageLimit}
                   value={undefined}
                   onChange={handleChange}
@@ -268,7 +268,7 @@ export function GenerateInput({
                   onBlur={handleBlur}
                   onKeyDown={handleKeyDown}
                   className={`w-full absolute top-0 left-0
-                    pt-[0.1rem] pr-[7.8rem]  md:pr-[10rem] pb-[0.1rem] pl-[0.7rem]
+                    pt-[0.1rem] pr-[2rem]  md:pr-[2.6rem] pb-[0.1rem] pl-[0.7rem]
                     mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0 md:mt-[0.1rem] md:mr-[0rem]      
                   `}
                   style={{ cursor: exceededUsageLimit ? "not-allowed" : "pointer" }}
@@ -281,7 +281,7 @@ export function GenerateInput({
             </div>
             <div className="relative w-0">
               <div
-                className="_bg-pink-200 p-[0.5rem] absolute md:top-[-0.3rem] top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-20"
+                className="_bg-pink-200 p-[0.5rem] absolute md:top-[0.1rem] _top-[-0.5rem] md:right-[-0.1rem] right-[-0.2rem] z-20"
                 style={{
                   opacity: active ? "1" : "0.6",
                 }}
@@ -292,7 +292,6 @@ export function GenerateInput({
                 <PopOnClick>
                   <StyledLayers styles={altStyles.slice(0, 2)}>
                     <GenerateIcon style={{ cursor: exceededUsageLimit ? "not-allowed" : "pointer" }}>
-                      Create
                     </GenerateIcon>
                   </StyledLayers>
                 </PopOnClick>
@@ -344,6 +343,7 @@ function BottomLinks({
   const router = useRouter();
   const user = useUser((state: any) => state.user);
   const haikuMode = mode == "haiku";
+  const haikudleMode = mode == "haikudle";
 
   return (
     <div
@@ -352,7 +352,7 @@ function BottomLinks({
       <div
         className="relative flex flex-row gap-2 items-center justify-center _font-semibold"
       >
-        {onShowAbout &&
+        {onShowAbout && (haikudleMode || user?.isAdmin) &&
           <div
             key="about"
             className="cursor-pointer relative"
@@ -369,13 +369,13 @@ function BottomLinks({
               <div className={`absolute top-[-0rem] right-[-0rem] rounded-full w-[0.6rem] h-[0.6rem] ${haiku.isIncorrect ? "bg-red-600" : "bg-blue-600"}`} />
             }
             <PopOnClick color={haiku?.bgColor}>
-              <IoHelpCircle className="text-2xl" />
+              <IoHelpCircle className="text-[2rem] md:text-[2.25rem]" />
             </PopOnClick>
           </div>
         }
         {!onShowAbout &&
           <div className="opacity-40">
-            <IoHelpCircle className="text-2xl" />
+            <IoHelpCircle className="text-[2rem] md:text-[2.25rem]" />
           </div>
         }
         {/* <Link
@@ -390,7 +390,7 @@ function BottomLinks({
           }}
         >
           <PopOnClick color={haiku?.bgColor}>
-            <IoLogoGithub className="text-xl" />
+            <IoLogoGithub className="text-[1.5rem] md:text-[1.75rem]" />
           </PopOnClick>
         </Link> */}
         {!user?.isAdmin &&
@@ -406,7 +406,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor}>
-              <MdHome className="text-2xl" />
+              <MdHome className="text-[2rem] md:text-[2.25rem]" />
             </PopOnClick>
           </Link>
         }
@@ -423,7 +423,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor}>
-              <RiTwitterFill className="text-2xl" />
+              <RiTwitterFill className="text-[2rem] md:text-[2.25rem]" />
             </PopOnClick>
           </Link>
         }
@@ -440,7 +440,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor}>
-              <MdFacebook className="text-2xl" />
+              <MdFacebook className="text-[2rem] md:text-[2.25rem]" />
             </PopOnClick>
           </Link>
         }
@@ -457,7 +457,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor}>
-              <BiLogoInstagramAlt className="text-2xl" />
+              <BiLogoInstagramAlt className="text-[2rem] md:text-[2.25rem]" />
             </PopOnClick>
           </Link>
         }
@@ -466,7 +466,7 @@ function BottomLinks({
           href={`mailto:haiku${mode == "haikudle" ? "dle" : ""}@desmat.ca`}
           target="_blank"
         >
-          <MdMail className="text-xl" />
+          <MdMail className="text-[1.5rem] md:text-[1.75rem]" />
         </Link> */}
         {user?.isAdmin && haiku?.id && onLikeHaiku &&
           <StyledLayers
@@ -482,14 +482,14 @@ function BottomLinks({
                 <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.6rem] h-[0.6rem] bg-red-600" />
               }
               <PopOnClick color={haiku?.bgColor} >
-                <IoHeartSharp className="text-xl" />
+                <IoHeartSharp className="text-[1.75rem] md:text-[2rem]" />
               </PopOnClick>
             </div>
           </StyledLayers>
         }
         {user?.isAdmin && (!haiku?.id || !onLikeHaiku) &&
           <div className="opacity-40">
-            <IoHeartSharp className="text-xl" />
+            <IoHeartSharp className="text-[1.5rem] md:text-[1.75rem]" />
           </div>
         }
         {user?.isAdmin &&
@@ -509,7 +509,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onCopyHaiku}>
-              <FaCopy className="text-xl" />
+              <FaCopy className="text-[1.5rem] md:text-[1.75rem]" />
             </PopOnClick>
           </div>
         }
@@ -533,7 +533,7 @@ function BottomLinks({
                 }}
               >
                 <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
-                  <FaShare className="text-xl" />
+                  <FaShare className="text-[1.5rem] md:text-[1.75rem]" />
                 </PopOnClick>
               </Link>
             </StyledLayers>
@@ -541,7 +541,7 @@ function BottomLinks({
         }
         {(!haiku?.id || !onCopyLink) &&
           <div className="opacity-40">
-            <FaShare className="text-xl" />
+            <FaShare className="text-[1.5rem] md:text-[1.75rem]" />
           </div>
         }
         {user?.isAdmin &&
@@ -552,7 +552,7 @@ function BottomLinks({
             title="Load random"
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
-              <FaRandom className="text-xl" />
+              <FaRandom className="text-[1.5rem] md:text-[1.75rem]" />
             </PopOnClick>
           </div>
         }
@@ -564,7 +564,7 @@ function BottomLinks({
             title="Delete"
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
-              <MdDelete className="text-xl" />
+              <MdDelete className="text-[1.75rem] md:text-[2rem]" />
             </PopOnClick>
           </div>
         }
@@ -576,7 +576,7 @@ function BottomLinks({
             title={`Save as daily ${mode}`}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
-              <IoAddCircle className="text-xl" />
+              <IoAddCircle className="text-[1.5rem] md:text-[1.75rem]" />
             </PopOnClick>
 
           </div>
@@ -589,7 +589,7 @@ function BottomLinks({
             className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
           >
             <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
-              <BsDatabaseFillUp className="text-xl" />
+              <BsDatabaseFillUp className="text-[1.5rem] md:text-[1.75rem]" />
             </PopOnClick>
           </div>
         }
@@ -606,7 +606,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
-              <HiSwitchVertical className="text-xl" />
+              <HiSwitchVertical className="text-[1.75rem] md:text-[2rem]" />
             </PopOnClick>
           </Link>
         }
@@ -621,7 +621,7 @@ function BottomLinks({
             }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
-              <FaExpand className="text-xl" />
+              <FaExpand className="text-[1.5rem] md:text-[1.75rem]" />
             </PopOnClick>
           </Link>
         }
@@ -736,8 +736,8 @@ export function NavOverlay({
         />
       }
 
-      {false && ["haikudle", "haiku"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-40"}`}>
+      {["haikudle", "haiku"].includes(mode) &&
+        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
             {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement || "") &&
               <div className="onboarding-focus" />
@@ -748,6 +748,7 @@ export function NavOverlay({
             <PopOnClick color={haiku?.bgColor} active={onboardingElement == "logo"}>
               {/* TODO: href to support multi-language */}
               <Logo
+                iconOnly={true}
                 styles={styles}
                 altStyles={altStyles}
                 mode={mode}

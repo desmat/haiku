@@ -14,7 +14,7 @@ export const haikuOnboardingSteps = [
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with 5/7/5 syllable per line, traditionally evoking images of the natural world. Learn more <b><a href="https://en.wikipedia.org/wiki/Haiku" target="_blank">here</a></b>.</div>
         <div>I built this for haiku enthusiasts to make and share their creations, but also for me to have a bit of fun with <b><a href="https://en.wikipedia.org/wiki/Large_language_model" target="_blank">Large Language Models</a></b>.</div>
-        <div>Hit the <b>Create</b> button at the top of screen to start crafting your own haiku and share it with the world!</div>
+        <div>Hit the <b>✨</b> button at the top of screen to start crafting your own haiku and share it with the world!</div>
         <div>Follow the next steps to learn all about <b>Haiku Genius</b>.</div>
       </div>
     `,
@@ -35,7 +35,7 @@ export const haikuOnboardingSteps = [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>A new haiku will be featured every day, maybe one of yours! Click on the logo in the side panel to see today's, come back tomorrow for more.</div>
-        <div>To create your own haiku hit the <b>Create</b> button at the top of the screen, maybe pick a theme and AI will get you started. The rest is up to!</div>
+        <div>To create your own haiku hit the <b>✨</b> button at the top of the screen, maybe pick a theme and AI will get you started. The rest is up to!</div>
       </div>
     `,
     style: { bottom: "10%" },
@@ -45,8 +45,8 @@ export const haikuOnboardingSteps = [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>Find all your haikus in the side panel to the left.</div>
-        <div>To learn about me, access the source code, <b>like</b>, <b>copy</b> or <b>share</b> this haiku see the buttons at the bottom.</div>
-        <div>For the best mobile experience hit the <b>Add to Home Screen</b> under the <b>Share</b> or <b>three-dot menu icon</b>.</div>
+        <div>To learn <b>about me</b>, access Haiku Genius' social home, or <b>share</b> this haiku see the buttons at the bottom.</div>
+        <div>For the best experience on mobile hit the <b>Add to Home Screen</b> under the <b>Share</b> or <b>three-dot menu icon</b>.</div>
         <div>Enjoy <b>Haiku Genius!</b></div>        
       </div>
     `,
@@ -126,7 +126,7 @@ export const haikudleOnboardingSteps = [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>A new haiku puzzle will be featured every day. Click on the logo in the side panel to return to today's, and come back to tomorrow for a new puzzle!</div>
-        <div>To create your very own haikus hit the <b>Create</b> button at the top of the screen and pick a theme or subject: AI will get you started writing a poem and will generate art work to match.</div>
+        <div>To create your very own haikus hit the <b>✨</b> button at the top of the screen and pick a theme or subject: AI will get you started writing a poem and will generate art work to match.</div>
       </div>
     `,
     style: { bottom: "10%" },

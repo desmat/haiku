@@ -4,9 +4,9 @@ export default function manifest(): MetadataRoute.Manifest {
   const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 
   return {
-    name: isHaikudleMode ? 'hAIkudle - AI-powered daily Haiku puzzles' : 'hAIku - AI-generated art and Haiku poems',
-    short_name: isHaikudleMode ? 'hAIkudle' : 'hAIku',
-    description: isHaikudleMode ? 'AI-powered daily Haiku puzzles' : 'AI-generated art and Haiku poems',
+    name: isHaikudleMode ? 'hAIkudle - AI-powered daily haiku puzzles' : 'Haiku Genius - AI-powered haiku poetry and generative art',
+    short_name: isHaikudleMode ? 'hAIkudle' : 'Haiku Genius',
+    description: isHaikudleMode ? 'AI-powered daily haiku puzzles' : 'AI-powered haiku poetry and generative art',
     start_url: '/',
     display: 'standalone',
     background_color: 'rgb(32, 31, 27)',
