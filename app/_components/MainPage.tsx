@@ -177,8 +177,8 @@ export default function MainPage({
   const isPuzzleMode = haikudleMode &&
     !_haikudle?.previousDailyHaikudleId &&
     !haikudleSolved &&
-    (!previousDailyHaikudleId || user?.isAdmin) &&
-    (!(haiku?.createdBy == user?.id) || user?.isAdmin);
+    (!previousDailyHaikudleId || user?.isAdmin);
+    //&& (!(haiku?.createdBy == user?.id) || user?.isAdmin);
   // console.log('>> app.MainPage.render()', { isPuzzleMode, haikudleSolved, previousDailyHaikudleId, user_isAdmin: user?.isAdmin, haiku_createdBy: haiku?.createdBy });
 
   const { textStyles, altTextStyles } = haikuStyles(haiku);
@@ -343,9 +343,13 @@ export default function MainPage({
 
       if (ret?.id) {
         incUserUsage(user, "haikusCreated");
-        setHaikuId(ret.id);
-        setHaiku(ret);
-        window.history.replaceState(null, '', `/${ret.id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
+        if (haikudleMode) {
+          loadHaiku(ret.id);
+        } else {
+          setHaikuId(ret.id);
+          setHaiku(ret);
+          window.history.replaceState(null, '', `/${ret.id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
+        }
         setGenerating(false);
       }
     } else {

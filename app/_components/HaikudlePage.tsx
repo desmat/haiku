@@ -111,7 +111,7 @@ export default function HaikudlePage({
             transition: "filter 0.5s ease-out",
           }}
         />
-        <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[18pt] absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit ${onboardingElement && ["puzzle"].includes(onboardingElement) ? "z-50" : "z-10"} transition-all `}>
+        <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[18pt] absolute top-0 left-0 right-0 bottom-[5vh] portrait:bottom-[12vh] m-auto w-fit h-fit ${onboardingElement && ["puzzle"].includes(onboardingElement) ? "z-50" : "z-10"} transition-all `}>
           {regenerating &&
             <Loading styles={styles} />
           }
