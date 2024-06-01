@@ -782,9 +782,9 @@ export default function MainPage({
           regenerating={regenerating}
           onboardingElement={onboardingElement}
           refresh={!haiku?.error && loadRandom}
-          saveHaiku={!haiku?.error && doSaveHaiku}
-          regeneratePoem={!haiku?.error && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
-          regenerateImage={!haiku?.error && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
+          saveHaiku={!haiku?.error && !haikudleMode && doSaveHaiku}
+          regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
+          regenerateImage={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
           copyHaiku={!haiku?.error && copyHaiku}
         />
       }
