@@ -358,6 +358,7 @@ export default function MainPage({
 
     trackEvent("clicked-regenerate-haiku", {
       userId: user?.id,
+      id: haiku?.id,
     });
 
     if (user?.isAdmin || haiku?.createdBy == user?.id) {
@@ -376,6 +377,7 @@ export default function MainPage({
 
     trackEvent("clicked-regenerate-image", {
       userId: user?.id,
+      id: haiku?.id,
     });
 
     if (user?.isAdmin || haiku?.createdBy == user?.id) {
