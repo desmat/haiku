@@ -102,8 +102,8 @@ export async function POST(request: Request) {
   const data: any = await request.json();
   let { subject, lang, artStyle } = data.request;
   let mood;
-  if (subject.indexOf(",") > -1) {
-    const split = subject.split(",");
+  if (subject.indexOf("/") > -1) {
+    const split = subject.split("/");
     subject = split[0];
     mood = split[1];
   }
