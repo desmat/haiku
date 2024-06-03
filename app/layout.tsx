@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const appName = isHaikudleMode
   ? "Solve the puzzle to reveal today's haiku, generate and share haiku poems paired and beautiful generative art with Haikudle - AI-powered haiku poetry, puzzles and visual art"
-  : "Compose and share your haiku creations with Haiku Genius - AI-powered haiku poetry and generative art";
+  : "Haiku poetry and generative art ✨ Daily featured haikus ✨ AI-powered poem and art generator ✨ Free - no signup required";
 
 export const appDescription = isHaikudleMode
   ? "Solve the daily puzzles, generate new haikus, enjoy beautiful generative art and share with the world - no signup required. " +
