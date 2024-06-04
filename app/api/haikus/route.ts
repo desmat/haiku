@@ -116,12 +116,12 @@ export async function POST(request: Request) {
     const usage = await userUsage(user);
     const { haikusCreated } = usage[moment().format("YYYYMMDD")];
 
-    if (haikusCreated && haikusCreated >= USAGE_LIMIT.DAILY_CREATE_HAIKU) {
+    if ((haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) {
       return NextResponse.json(
         { success: false, message: 'exceeded daily limit' },
         { status: 429 }
       );
-    } else if (haikusCreated && haikusCreated == USAGE_LIMIT.DAILY_CREATE_HAIKU - 1) {
+    } else if ((haikusCreated || 0) + 1 == USAGE_LIMIT.DAILY_CREATE_HAIKU) {
       reachedUsageLimit = true;
     }
   }

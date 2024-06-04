@@ -99,7 +99,6 @@ export function GenerateInput({
   generate?: any,
   onboardingElement?: string | undefined,
 }) {
-  const [value, setValue] = useState<string | undefined>();
   const [active, setActive] = useState(false);
   const [focus, setFocus] = useState(false);
   const [clickingGenerate, setClickingGenerate] = useState(false);
@@ -114,7 +113,6 @@ export function GenerateInput({
 
   const handleChange = (e: any) => {
     setActive(true);
-    // setValue(e.target.value);
   }
 
   const handleKeyDown = (e: any) => {
@@ -162,7 +160,6 @@ export function GenerateInput({
     setActive(false);
     setFocus(false);
     setClickingGenerate(false);
-    setValue(undefined);
     // @ts-ignore
     ref.current.blur();
 
@@ -284,8 +281,8 @@ export function GenerateInput({
                 style={{
                   opacity: active ? "1" : "0.6",
                 }}
-                onMouseDown={() => setClickingGenerate(true)}
-                onMouseUp={() => clickingGenerate && handleClickedGenerate()}
+                onMouseDown={() => !exceededUsageLimit && setClickingGenerate(true)}
+                onMouseUp={() => clickingGenerate && !exceededUsageLimit && handleClickedGenerate()}
                 title={exceededUsageLimit ? "Exceeded daily limit: try again later" : "Create a new haiku"}
               >
                 <PopOnClick>

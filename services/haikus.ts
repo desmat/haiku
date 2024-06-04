@@ -8,10 +8,11 @@ import { hashCode, mapToList, normalizeWord, uuid } from '@/utils/misc';
 import * as samples from '@/services/stores/samples';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { Haikudle, UserHaikudle } from '@/types/Haikudle';
+import { USAGE_LIMIT } from '@/types/Usage';
+import shuffleArray from '@/utils/shuffleArray';
 import { deleteHaikudle, getHaikudle } from './haikudles';
 import * as openai from './openai';
-import { incUserUsage } from './usage';
-import shuffleArray from '@/utils/shuffleArray';
+import { incUserUsage, userUsage } from './usage';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -77,7 +78,8 @@ export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]>
       ...userHaikus.map((userHaiku: UserHaiku) => userHaiku.haikuId),
       ...userHaikudles.map((userHaikudle: UserHaikudle) => userHaikudle.haikudle?.solved && userHaikudle.haikudle?.haikuId),
     ]));
-    haikus = await store.haikus.find({ id: haikuIds });
+    haikus = (await store.haikus.find({ id: haikuIds }))
+      .filter((haiku: Haiku) => haiku && !haiku.deprecated && !haiku.deprecatedAt);
     console.log(`>> services.haiku.getUserHaikus`, { haikuIds, justThoseHaikus: haikus });
 
     const generatedHaikuLookup = new Map(generatedHaikus
@@ -227,6 +229,15 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
   const language = supportedLanguages[lang].name;
   console.log(">> services.haiku.completeHaikuPoem", { language, subject, mood, user });
 
+  // a bit akward to do this here and in this way but we're just covering a narrow case
+  const usage = await userUsage(user);
+  const { haikusRegenerated } = usage[moment().format("YYYYMMDD")];
+  console.log('>> services.haiku.completeHaikuPoem', { haikusRegenerated, usage });
+
+  if (haikusRegenerated && haikusRegenerated >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU) {
+    throw 'exceeded daily limit';
+  }
+
   const {
     response: {
       haiku: completedPoem,
@@ -306,7 +317,8 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   } as Haiku;
 
   if (!user.isAdmin) {
-    incUserUsage(user, "haikusCreated");
+    // TODO let's separate image and text
+    incUserUsage(user, "haikusRegenerated");
   }
 
   return saveHaiku(user, updatedHaiku);
@@ -519,7 +531,7 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
     const nonDailyLikedhaikus = likedHaikus
       .filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
     const nonDailyhaikus = haikus
-    .filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
+      .filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
 
     // pick from liked haikus, else all haikus
     const randomHaikuId = shuffleArray(nonDailyLikedhaikus || nonDailyhaikus)[0].id;

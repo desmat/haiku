@@ -390,7 +390,7 @@ export default function MainPage({
         setRegenerating(true);
         const ret = await regenerateHaiku(user, haiku, "image", { artStyle });
         // console.log('>> app.page.startRegenerateHaiku()', { ret });
-        incUserUsage(user, "haikusCreated"); // TODO haikuImageRegenerated?
+        incUserUsage(user, "haikusRegenerated"); // TODO haikuImageRegenerated?
         setHaiku(ret);
         setRegenerating(false);
       } else {
