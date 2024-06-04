@@ -472,6 +472,10 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         addUserHaiku(generated, "generated");
 
         if (reachedUsageLimit) {
+          trackEvent("warning", {
+            type: "reached-usage-limit-create-haiku",
+            userId: generated.createdBy,
+          });
           useAlert.getState().warning("Daily limit reached: you can create more haikus tomorrow.");
         }
 
@@ -522,6 +526,11 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         useHaikudle.setState({ haiku: regenerated });
 
         if (reachedUsageLimit) {
+          trackEvent("warning", {
+            type: "reached-usage-limit-regenerate-haiku",
+            userId: regenerated.updatedBy,
+          });
+
           useAlert.getState().warning("Daily limit reached: you can re-generate more haikus tomorrow.");
         }
 
