@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus } from '@/services/haikus';
+import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
 import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
@@ -61,8 +61,12 @@ export async function GET(request: NextRequest, params?: any) {
       createUserHaiku(user, randomHaiku);
     }
 
+    // if (user.isAdmin) {
+    randomHaiku.numLikes = await getHaikuNumLikes(randomHaiku.id);
+    // }
+
     return NextResponse.json({ haikus: [randomHaiku] });
-  } else if (typeof(query.latest) != undefined) {    
+  } else if (typeof (query.latest) != undefined) {
     const fromDate = moment().add((query.latest || 1) * -1, "days").valueOf();
     const latest = await getLatestHaikus(fromDate);
 
@@ -90,8 +94,8 @@ export async function GET(request: NextRequest, params?: any) {
 
     todaysHaiku.dailyHaikudleId = dailyHaikudles
       .filter((dhle: DailyHaikudle) => dhle?.haikuId == todaysHaiku.id)[0]?.id;
-  } 
-  
+  }
+
   return NextResponse.json({ haikus: [todaysHaiku] });
 }
 

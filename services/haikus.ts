@@ -159,13 +159,17 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   }
 
   // if (user.isAdmin) {
-  haiku.numLikes = (await store.userHaikus.find({ haikuId: id }))
-    .filter((uh: UserHaiku) => uh.likedAt)
-    .length;
+  haiku.numLikes = await getHaikuNumLikes(haiku.id);
   // }
 
   console.log(`>> services.haiku.getHaiku`, { id, haiku });
   return haiku;
+}
+
+export async function getHaikuNumLikes(id: number) {
+  return (await store.userHaikus.find({ haikuId: id }))
+  .filter((uh: UserHaiku) => uh.likedAt)
+  .length;
 }
 
 export async function createHaiku(user: User, haiku: Haiku): Promise<Haiku> {
