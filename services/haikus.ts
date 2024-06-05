@@ -627,14 +627,12 @@ export async function getLikedHaikus(): Promise<DailyHaiku[]> {
 
 export async function getLatestHaikus(fromDate?: number, toDate?: number): Promise<Haiku[]> {
   const now = moment();
+  const yesterday = moment().add(-1, "days").valueOf()
   console.log(">> services.haiku.getLatestHaikus", { fromDate, toDate, now: now.valueOf() });
 
-  fromDate = fromDate || now.add(-8, "days").valueOf();
-  toDate = toDate || now.add(1, "days").valueOf();
-
-  const haikus = await store.haikus.find();
+  const haikus = await store.haikus.find({id: "4aba886d"});
   const latest = haikus
-    .filter((haiku: Haiku) => haiku.createdAt >= fromDate && haiku.createdAt <= toDate)
+    .filter((haiku: Haiku) => haiku.createdAt >= (fromDate || yesterday) && haiku.createdAt <= (toDate || now))
     .sort(byCreatedAtDesc);
   console.log(">> services.haiku.getLatestHaikus", { haikus, latest });
 
