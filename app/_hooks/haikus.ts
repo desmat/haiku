@@ -621,7 +621,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           }
         });
 
-        return resolve(init(dailyHaiku));
+        return resolve(dailyHaiku);
       });
     });
   },
