@@ -630,7 +630,7 @@ export async function getLatestHaikus(fromDate?: number, toDate?: number): Promi
   const yesterday = moment().add(-1, "days").valueOf()
   console.log(">> services.haiku.getLatestHaikus", { fromDate, toDate, now: now.valueOf() });
 
-  const haikus = await store.haikus.find({id: "4aba886d"});
+  const haikus = await store.haikus.find();
   const latest = haikus
     .filter((haiku: Haiku) => haiku.createdAt >= (fromDate || yesterday) && haiku.createdAt <= (toDate || now))
     .sort(byCreatedAtDesc);
