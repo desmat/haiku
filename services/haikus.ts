@@ -13,6 +13,7 @@ import shuffleArray from '@/utils/shuffleArray';
 import { deleteHaikudle, getHaikudle } from './haikudles';
 import * as openai from './openai';
 import { incUserUsage, userUsage } from './usage';
+import { byCreatedAtDesc } from '@/utils/sort';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -622,4 +623,20 @@ export async function getLikedHaikus(): Promise<DailyHaiku[]> {
     .map((userHaiku: UserHaiku) => userHaiku.haikuId);
 
   return (await store.haikus.find({ id: likedUserHaikuIds })).filter((haiku: Haiku) => !haiku.deletedAt);
+}
+
+export async function getLatestHaikus(fromDate?: number, toDate?: number): Promise<Haiku[]> {
+  const now = moment();
+  console.log(">> services.haiku.getLatestHaikus", { fromDate, toDate, now: now.valueOf() });
+
+  fromDate = fromDate || now.add(-8, "days").valueOf();
+  toDate = toDate || now.add(1, "days").valueOf();
+
+  const haikus = await store.haikus.find();
+  const latest = haikus
+    .filter((haiku: Haiku) => haiku.createdAt >= fromDate && haiku.createdAt <= toDate)
+    .sort(byCreatedAtDesc);
+  console.log(">> services.haiku.getLatestHaikus", { haikus, latest });
+
+  return latest;
 }

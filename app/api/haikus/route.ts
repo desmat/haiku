@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku } from '@/services/haikus';
+import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
 import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
@@ -62,6 +62,11 @@ export async function GET(request: NextRequest, params?: any) {
     }
 
     return NextResponse.json({ haikus: [randomHaiku] });
+  } else if (typeof(query.latest) != undefined) {    
+    const fromDate = moment().add((query.latest || 1) * -1, "days").valueOf();
+    const latest = await getLatestHaikus(fromDate);
+
+    return NextResponse.json({ haikus: latest });
   }
 
   const todaysDailyHaiku = await getDailyHaiku();
@@ -85,14 +90,8 @@ export async function GET(request: NextRequest, params?: any) {
 
     todaysHaiku.dailyHaikudleId = dailyHaikudles
       .filter((dhle: DailyHaikudle) => dhle?.haikuId == todaysHaiku.id)[0]?.id;
-  } else {
-    const userHaiku = await getUserHaiku(user.id, todaysHaiku.id);
-    if (!userHaiku) {
-      // user viewed today's featured haiku for the first
-      createUserHaiku(user, todaysHaiku);
-    }
-  }
-
+  } 
+  
   return NextResponse.json({ haikus: [todaysHaiku] });
 }
 
