@@ -66,7 +66,7 @@ export async function GET(request: NextRequest, params?: any) {
     // }
 
     return NextResponse.json({ haikus: [randomHaiku] });
-  } else if (typeof (query.latest) != undefined) {
+  } else if (typeof(query.latest) == "string") {
     const fromDate = moment().add((query.latest || 1) * -1, "days").valueOf();
     const latest = await getLatestHaikus(fromDate);
 
