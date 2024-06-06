@@ -56,8 +56,12 @@ export default async function Page({
   params: { slug: any }
   searchParams?: { [key: string]: string | undefined },
 }) {
-  let id = searchParams && searchParams["id"] || params.slug && params.slug[0];
-  const version = searchParams && searchParams["version"];
+  const versionSeparator = "%3A"; // url-encoded ':'
+  const ids =
+    searchParams && searchParams["id"] && searchParams["id"].split(versionSeparator) ||
+    params.slug && params.slug[0] && params.slug[0].split(versionSeparator);
+  let id = ids && ids[0];
+  const version = ids && ids[1] || searchParams && searchParams["version"];
   const lang = searchParams && searchParams["lang"] as LanguageType || "en";
   const mode = (searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
