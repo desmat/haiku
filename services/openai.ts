@@ -137,9 +137,13 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
     };
   }
 
-  const systemPrompt = `Given a topic (or "any", meaning you pick) and optionally mood, please generate a haiku in ${language || "English"} and respond in JSON where each response is an array of 3 strings.
+  // ... generate a haiku in ${language || "English"} and respond ...
+  const systemPrompt = `Given a topic (or "any", meaning you pick) and optionally mood, please generate a haiku and respond in JSON where each response is an array of 3 strings.
     Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
-    Also include in the response, in fewest number of words, what were the subject and mood of the haiku. Please only include keys "haiku", "subject" and "mood".
+    If the topic mentions a language please generate the haiku in that language.
+    Also include in the response, in fewest number of words, what were the subject and mood of the haiku. 
+    The subject should be in the same language of the haiku. 
+    Please only include keys "haiku", "subject" and "mood".
     `;
   // @ts-ignore
   const completion = await openai.chat.completions.create({
