@@ -140,10 +140,11 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
   // ... generate a haiku in ${language || "English"} and respond ...
   const systemPrompt = `Given a topic (or "any", meaning you pick) and optionally mood, please generate a haiku and respond in JSON where each response is an array of 3 strings.
     Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
-    If the topic mentions a language please generate the haiku in that language.
+    If the topic specifies a language, or is in another language, please generate the haiku in that language.
     Also include in the response, in fewest number of words, what were the subject and mood of the haiku. 
     The subject should be in the same language of the haiku. 
-    Please only include keys "haiku", "subject" and "mood".
+    Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
+    Please only include keys "haiku", "subject", "mood" and "lang".
     `;
   // @ts-ignore
   const completion = await openai.chat.completions.create({
@@ -210,10 +211,13 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
           If a line looks like this: "... <one or more words> ..." then keep the word(s) together and fill the rest.
           Additionally, if a line looks obviously incomplete even without "..." characters please complete it.
           Optionally a topic (or "any", meaning you pick) and/or mood may be included.
-          Please generate a haiku in ${language || "English"} and respond in JSON where each response is an array of 3 strings.
+          Please generate a haiku and respond in JSON where each response is an array of 3 strings.
           Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
+          If the topic specifies a language, or is in another language, or the incomplete haiku is in another language, please generate the haiku in that language.
           Also, please fix up any extraneous white spaces, punctuation, incorrect capitalized words, typos or incorrectly words.
-          Also include in the response, in fewest number of words, what were the subject and mood of the haiku. Please only include keys "haiku", "subject" and "mood"`
+          Also include in the response, in fewest number of words, what were the subject and mood of the haiku. 
+          Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
+          Please only include keys "haiku", "subject", "mood" and "lang".`
       },
       {
         role: 'user',

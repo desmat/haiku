@@ -200,6 +200,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
       haiku: poem,
       subject: generatedSubject,
       mood: generatedMood,
+      lang: generatedLang,
     }
   } = await openai.generateHaiku(language, subject, mood);
   // console.log(">> services.haiku.regenerateHaikuPoem", { ret });
@@ -222,6 +223,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
     poem,
     theme: generatedSubject,
     mood: generatedMood,
+    lang: generatedLang || lang || "en",
     poemPrompt,
     languageModel,
   });
@@ -231,8 +233,8 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
   const lang = (haiku.lang || "en") as LanguageType;
   const subject = haiku.theme;
   const mood = haiku.mood;
-  const language = supportedLanguages[lang].name;
-  console.log(">> services.haiku.completeHaikuPoem", { language, subject, mood, user });
+  const language = supportedLanguages[lang]?.name;
+  console.log(">> services.haiku.completeHaikuPoem", { subject, mood, user });
 
   // a bit akward to do this here and in this way but we're just covering a narrow case
   const usage = await userUsage(user);
@@ -248,6 +250,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
       haiku: completedPoem,
       subject: generatedSubject,
       mood: generatedMood,
+      lang: generatedLang,
     },
     model: languageModel,
     prompt: poemPrompt,
@@ -271,6 +274,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
     poem: completedPoem,
     theme: generatedSubject,
     mood: generatedMood,
+    lang: generatedLang,
     languageModel,
     poemPrompt,
   });
@@ -341,6 +345,7 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
       haiku: poem,
       subject: generatedSubject,
       mood: generatedMood,
+      lang: generatedLang,
     }
   } = await openai.generateHaiku(language, subject, mood);
   // console.log(">> services.haiku.generateHaiku", { ret });
@@ -377,7 +382,7 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
 
   let haiku = {
     id: haikuId,
-    lang: lang || "en",
+    lang: generatedLang || lang || "en",
     createdBy: user.id,
     createdAt: moment().valueOf(),
     status: "created",
