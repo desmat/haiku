@@ -26,25 +26,31 @@ import SidePanel from './SidePanel';
 import { User } from '@/types/User';
 
 const haikuThemeSuggestions = [
-  "",
-  "",
-  "",
-  "",
-  "",
-  "nature",
-  "mountains",
-  "cherry blossoms",
-  "spring",
-  "summer",
-  "autumn",
-  "winter",
-  "flowers",
-  "summer in Paris",
-  "city at night",
-  "springtime in Kyoto",
-  "rainy morning",
-  "sunset on the ocean",
-  "sunrise on the lake",
+  "Create a haiku about… ",
+  "Create a haiku about… ",
+  "Create a haiku about… ",
+  "Create a haiku about… ",
+  "Create a haiku about… ",
+  "Create a haiku about… nature",
+  "Create a haiku about… mountains",
+  "Create a haiku about… cherry blossoms",
+  "Create a haiku about… spring",
+  "Create a haiku about… summer",
+  "Create a haiku about… autumn",
+  "Create a haiku about… winter",
+  "Create a haiku about… flowers",
+  "Create a haiku about… summer in Paris",
+  "Create a haiku about… evening in Paris in French",
+  "Create a haiku about… city at night",
+  "Create a haiku about… springtime in Kyoto",
+  "Create a haiku about… rainy morning",
+  "Create a haiku about… sunset on the ocean",
+  "Create a haiku about… sunrise on the lake",
+  "Crea un haiku sobre… la lluvia de la mañana",
+  "के बारे में एक हाइकु बनाएं… एक शांतिपूर्ण नदी",
+  "について俳句を作ってみましょう… 桜",
+  "創建一個俳句關於… 河流和山脈",
+  "Tạo một bài thơ haiku về… những bông hoa",
 ];
 
 export function GenerateIcon({
@@ -102,7 +108,7 @@ export function GenerateInput({
   const [active, setActive] = useState(false);
   const [focus, setFocus] = useState(false);
   const [clickingGenerate, setClickingGenerate] = useState(false);
-  const [haikuTheme, setHaikuTheme] = useState("");
+  const [haikuTheme, setHaikuTheme] = useState(haikuThemeSuggestions[0]);
   const [intervalId, setIntervalId] = useState<any | undefined>();
   const ref = useRef();
   // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
@@ -142,7 +148,7 @@ export function GenerateInput({
     // @ts-ignore
     if (!ref.current.value) {
       // @ts-ignore
-      ref.current.value = haikuTheme;
+      ref.current.value = haikuTheme.split("…")[1].trim();
       // @ts-ignore
       ref.current.select();
     }
@@ -256,7 +262,7 @@ export function GenerateInput({
                   //@ts-ignore
                   ref={ref}
                   maxLength={46}
-                  placeholder={`Create a haiku about... ${haikuTheme}`}
+                  placeholder={`${haikuTheme}`}
                   disabled={exceededUsageLimit}
                   value={undefined}
                   onChange={handleChange}

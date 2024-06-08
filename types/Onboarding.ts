@@ -1,3 +1,4 @@
+import * as locale from 'locale-codes'
 import { formatTimeFromNow } from "@/utils/format";
 import { Haiku } from "./Haiku";
 
@@ -35,7 +36,7 @@ export const haikuOnboardingSteps = [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>A new haiku will be featured every day, maybe one of yours! Click on the logo to see today's haiku, come back tomorrow for more.</div>
-        <div>To create your own haiku hit the <b>✨</b> button at the top of the screen, maybe pick a theme and AI will get you started. The rest is up to!</div>
+        <div>To create your own haiku hit the <b>✨</b> button at the top of the screen, maybe specify <b>theme or subject in any language</b> and AI will get you started. The rest is up to!</div>
       </div>
     `,
     style: { bottom: "10%" },
@@ -70,6 +71,21 @@ export const haikuGeneratedOnboardingSteps = (haiku: Haiku) => [
   },
 ];
 
+export const haikuMultiLanguageSteps = (haiku: Haiku) => [
+  {
+    focus: "generate",
+    message: `
+      <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+        <div>
+          🎉 Haiku Genius now support multi-language! 🎉
+        </div>
+        <div>To generate a haiku poem in any language, simply ask in the language you want, or specify the language directly.</div>
+        <div>For example <i>Summer in Paris <b>in French</b></i>, <i>Lluvia de la mañana <b>en español</b></i>, <b>桜の花が咲く</b>, <b>शांतिपूर्ण नदी</b>, etc.</div>
+      </div>`,
+    style: { bottom: "10%" },
+  },
+];
+
 export const haikuPromptSteps = (haiku: Haiku) => [
   {
     focus: "poem",
@@ -80,19 +96,20 @@ export const haikuPromptSteps = (haiku: Haiku) => [
         <!-- <div>Poem prompt: <i>${haiku.poemPrompt || "N/A"}</i></div> -->
         <div>Image prompt: <i>${haiku.imagePrompt || "N/A"}</i></div>
         ${haiku.version || haiku.deprecated || haiku.deprecatedAt
-          ? `<div>Version: ${haiku.version}
+        ? `<div>Version: ${haiku.version}
             ${haiku.version
-            ? ` <a href="/${haiku.id}?version=${haiku.version - 1}">(Load previous)</a>`
-            : ""}
+          ? ` <a href="/${haiku.id}?version=${haiku.version - 1}">(Load previous)</a>`
+          : ""}
             ${haiku.deprecated || haiku.deprecatedAt
-            ? ` <a href="/${haiku.id}">(Load current)</a>`
-            : ""}</div>`
-          : ""}    
+          ? ` <a href="/${haiku.id}">(Load current)</a>`
+          : ""}</div>`
+        : ""}    
         <div>Created by: user ${haiku.createdBy} ${formatTimeFromNow(haiku.createdAt || 0)}</div>      
         ${haiku.updatedBy ? `<div>Updated by: user ${haiku.updatedBy} ${formatTimeFromNow(haiku.updatedAt || 0)}</div>` : ""} 
         ${haiku.dailyHaikuId ? `<div>Daily haiku: ${haiku.dailyHaikuId}</div>` : ""} 
         ${haiku.dailyHaikudleId ? `<div>Daily haikudle: ${haiku.dailyHaikudleId}</div>` : ""} 
         ${haiku.isIncorrect ? `<div>Incorrect haiku: ${haiku.isIncorrect}</div>` : ""} 
+        ${haiku.lang ? `<div>Language: ${locale.getByTag(haiku.lang)?.name} (${haiku.lang})</div>` : ""} 
       </div>`,
     style: { bottom: "50%", transform: "translateY(50%)" },
   },

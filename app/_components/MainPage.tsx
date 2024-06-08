@@ -16,7 +16,7 @@ import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haikudle } from '@/types/Haikudle';
 import { LanguageType } from '@/types/Languages';
-import { haikuGeneratedOnboardingSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleOnboardingSteps } from '@/types/Onboarding';
+import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleOnboardingSteps } from '@/types/Onboarding';
 import { User } from '@/types/User';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
@@ -171,7 +171,7 @@ export default function MainPage({
   const isPuzzleMode = haikudleMode &&
     !haikudleSolved &&
     (!previousDailyHaikudleId || user?.isAdmin);
-    //&& (!(haiku?.createdBy == user?.id) || user?.isAdmin);
+  //&& (!(haiku?.createdBy == user?.id) || user?.isAdmin);
   // console.log('>> app.MainPage.render()', { isPuzzleMode, haikudleSolved, previousDailyHaikudleId, user_isAdmin: user?.isAdmin, haiku_createdBy: haiku?.createdBy });
 
   const { textStyles, altTextStyles } = haikuStyles(haiku);
@@ -257,7 +257,14 @@ export default function MainPage({
     // show first message normally then show as onboarding: 
     // first step is just a plain alert, rest of steps are onboarding
     plainAlert(haikuOnboardingSteps[0].message, {
-      onDismiss: () => saveUser({ ...user, preferences: { ...user?.preferences, onboarded: true } }),
+      onDismiss: () => saveUser({
+        ...user,
+        preferences: {
+          ...user?.preferences,
+          onboarded: true,
+          onboardedMultiLanguage: true
+        }
+      }),
       style: haikuOnboardingSteps[0].style,
       customActions: [
         {
@@ -299,6 +306,13 @@ export default function MainPage({
     startOnboarding(
       haikuGeneratedOnboardingSteps(haiku),
       () => saveUser({ ...user, preferences: { ...user?.preferences, onboardedGenerated: true } })
+    );
+  }
+
+  const showMultiLanguage = () => {
+    startOnboarding(
+      haikuMultiLanguageSteps(haiku),
+      () => saveUser({ ...user, preferences: { ...user?.preferences, onboardedMultiLanguage: true } })
     );
   }
 
@@ -613,6 +627,8 @@ export default function MainPage({
         timeoutId = setTimeout(showAboutGenerated, 2000);
       } else if ((haikuMode || haikudleMode) && !previousDailyHaikudleId && !user?.preferences?.onboarded) {
         timeoutId = setTimeout(haikudleMode ? startFirstVisitHaikudleOnboarding : startFirstVisitOnboarding, 2000);
+      } else if (haikuMode && user?.preferences?.onboarded && !user?.preferences?.onboardedMultiLanguage && !user?.isAdmin) {
+        timeoutId = setTimeout(showMultiLanguage, 2000);
       }
     }
 
