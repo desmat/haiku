@@ -86,6 +86,17 @@ export const haikuMultiLanguageSteps = (haiku: Haiku) => [
   },
 ];
 
+export const haikudleGotoHaikuGenius = (haiku: Haiku) => [
+  {
+    message: `
+      <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+        <div>Want more haiku poems without the puzzles?</div>
+        <div><b><a href="https://haikugenius.io/" target="_blank">Haiku Genius</a></b> features a daily haiku with beautiful generative art, a poem generator and editor, and access to the official social media pages so you won't miss a single one!</div>
+      </div>`,
+    style: { bottom: "10%" },
+  },
+];
+
 export const haikuPromptSteps = (haiku: Haiku) => [
   {
     focus: "poem",
@@ -123,7 +134,8 @@ export const haikudleOnboardingSteps = [
         <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with 5/7/5 syllable per line, traditionally evoking images of the natural world. Learn more <b><a href="https://en.wikipedia.org/wiki/Haiku" target="_blank">here</a></b>.</div>
         <div><b>Wordle</b>: a word game with a single daily solution, with all players attempting to guess the same word. Learn more <b><a href="https://en.wikipedia.org/wiki/Wordle" target="_blank">here</a></b>.</div>
         <div>Unscramble the poem to solve today's haiku puzzle and reveal the art work!</div>
-        <div>Follow the next steps to learn all about <b>Haikudle</b>.</div>
+        <div>Want more haiku poems without the puzzles?</div>
+        <div><b><a href="https://haikugenius.io/" target="_blank">Haiku Genius</a></b> features a daily haiku with beautiful generative art, a poem generator and editor, and access to the official social media pages so you won't miss a single one!</div>
       </div>`,
     style: { bottom: "50%", transform: "translateY(50%)" },
   },
@@ -139,7 +151,7 @@ export const haikudleOnboardingSteps = [
     style: { bottom: "10%" },
   },
   {
-    focus: "logo-and-generate",
+    focus: "generate",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>A new haiku puzzle will be featured every day. Click on the logo in the side panel to return to today's, and come back to tomorrow for a new puzzle!</div>
@@ -153,7 +165,7 @@ export const haikudleOnboardingSteps = [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>Find all your haikus (solved or created) in the side panel to the left.</div>
-        <div>To access the source code, learn more about me, or access a link to share this haiku see the buttons at the bottom of the screen.</div>
+        <div>To show this message again, learn more about me or get a link to share this haiku see the buttons at the bottom of the screen.</div>
         <div>Enjoy <b>Haikudle!</b></div>        
       </div>
     `,

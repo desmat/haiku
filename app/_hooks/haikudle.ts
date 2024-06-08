@@ -69,6 +69,7 @@ const initialState = {
         <div style="display: flex; flex-direction: column; gap: 0.4rem">
           <div>Solved in ${moves} move${moves > 1 ? "s" : ""}! <b><span class="clickable" style="cursor: copy;" onClick="navigator.clipboard.writeText('${shareContent}');">Copy</span></b> and share your result on your social networks and come back tomorrow for a new haiku puzzle.</div>
           <div>Until then try the generate button above and see what AI comes up with!</div>
+          <div>Want more haiku poems? Try <b><a href="https://haikugenius.io/" target="_blank">Haiku Genius</a></b>!</div>
         </div>`);
     }, 250);
   },

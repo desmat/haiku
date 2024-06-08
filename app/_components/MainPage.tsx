@@ -16,7 +16,7 @@ import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haikudle } from '@/types/Haikudle';
 import { LanguageType } from '@/types/Languages';
-import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleOnboardingSteps } from '@/types/Onboarding';
+import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleGotoHaikuGenius, haikudleOnboardingSteps } from '@/types/Onboarding';
 import { User } from '@/types/User';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
@@ -215,7 +215,14 @@ export default function MainPage({
     // show first message normally then show as onboarding: 
     // first step is just a plain alert, rest of steps are onboarding
     plainAlert(haikudleOnboardingSteps[0].message, {
-      onDismiss: () => saveUser({ ...user, preferences: { ...user?.preferences, onboarded: true } }),
+      onDismiss: () => saveUser({
+        ...user,
+        preferences: {
+          ...user?.preferences,
+          onboarded: true,
+          onboardedGotoHaikuGenius: true,
+        }
+      }),
       style: haikudleOnboardingSteps[0].style,
       customActions: [
         {
@@ -313,6 +320,13 @@ export default function MainPage({
     startOnboarding(
       haikuMultiLanguageSteps(haiku),
       () => saveUser({ ...user, preferences: { ...user?.preferences, onboardedMultiLanguage: true } })
+    );
+  }
+
+  const showGotoHaikuGenius = () => {
+    startOnboarding(
+      haikudleGotoHaikuGenius(haiku),
+      () => saveUser({ ...user, preferences: { ...user?.preferences, onboardedGotoHaikuGenius: true } })
     );
   }
 
@@ -629,6 +643,8 @@ export default function MainPage({
         timeoutId = setTimeout(haikudleMode ? startFirstVisitHaikudleOnboarding : startFirstVisitOnboarding, 2000);
       } else if (haikuMode && user?.preferences?.onboarded && !user?.preferences?.onboardedMultiLanguage && !user?.isAdmin) {
         timeoutId = setTimeout(showMultiLanguage, 2000);
+      } else if (haikudleMode && user?.preferences?.onboarded && !user?.preferences?.onboardedGotoHaikuGenius && !user?.isAdmin) {
+        timeoutId = setTimeout(showGotoHaikuGenius, 2000);
       }
     }
 
