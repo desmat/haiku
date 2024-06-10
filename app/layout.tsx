@@ -28,6 +28,7 @@ export const metaUrl = isHaikudleMode
   : "https://haikugenius.io/";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(metaUrl),
   title: appName,
   description: appDescription,
 }
