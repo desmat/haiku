@@ -227,9 +227,9 @@ export default function SidePanel({
           backgroundColor: `${styles[styles.length - 1]?.color ? styles[styles.length - 1]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
-          right: panelOpened ? 0 : "-27rem",
-          width: panelOpened /* || panelAnimating */ ? "27rem" : "0rem",
-          display: panelOpened || panelAnimating ? "block" : "none",
+          right: true || panelOpened ? 0 : "-27rem",
+          width: true || panelOpened /* || panelAnimating */ ? "27rem" : "0rem",
+          display: panelOpened /* || panelAnimating */ ? "block" : "none",
         }}
         onMouseLeave={() => panelOpened && !panelPinned && toggleMenuOpened()}
       >
