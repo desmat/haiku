@@ -228,7 +228,7 @@ export default function SidePanel({
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
           right: panelOpened ? 0 : "-27rem",
-          width: true || panelOpened || panelAnimating ? "27rem" : "0rem",
+          width: panelOpened || panelAnimating ? "27rem" : "0rem",
         }}
         onMouseLeave={() => panelOpened && !panelPinned && toggleMenuOpened()}
       >
