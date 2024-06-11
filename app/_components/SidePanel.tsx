@@ -210,26 +210,34 @@ export default function SidePanel({
         />
       }
 
+      {/* hotspot to open the side panel on mouse hover */}
       <div
-        className={`_bg-pink-200 absolute top-0 h-full w-[27rem] max-w-[90vw] ${onboarding ? "z-50" : "z-20"} ${!onboarding && "transition-all"} _blur-[10px]`}
+        className="_bg-red-400 open-side-panel-hoverspot group absolute top-[4rem] right-[0rem] w-[1rem] mr-[0rem] h-[calc(100vh-4rem)] _z-50"
+        style={{
+          zIndex: 99,
+          display: panelOpened ? "none" : "block",
+        }}
+        onMouseEnter={() => !panelOpened && !panelAnimating && toggleMenuOpened()}
+        onClick={() => panelOpened && toggleMenuOpened()}
+      />
+
+      <div
+        className={`_bg-pink-200 absolute top-0 h-full _w-[27rem] _max-w-[90vw] ${onboarding ? "z-50" : "z-20"} ${!onboarding && "transition-[right]"} _blur-[10px]`}
         style={{
           backgroundColor: `${styles[styles.length - 1]?.color ? styles[styles.length - 1]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
-          right: panelOpened ? 0 : "-27rem"
+
+          // note: animating on the position is prettier but causes issues on mobile
+          // right: panelOpened ? 0 : "-27rem",
+          // width: panelOpened || panelAnimating ? "27rem" : "0rem",
+          right: 0,
+          width: "27rem",
+          display: panelOpened ? "block" : "none",
         }}
         onMouseLeave={() => panelOpened && !panelPinned && toggleMenuOpened()}
       >
         <div className="_bg-pink-400 flex flex-col h-[100vh]">
-
-          {/* hotspot to open the side panel on mouse hover */}
-          <div
-            className="_bg-red-400 open-side-panel-hoverspot group absolute top-[4rem] left-[-1rem] w-[1rem] mr-[1rem] h-[calc(100vh-4rem)] _z-50"
-            style={{ zIndex: 99 }}
-            onMouseEnter={() => !panelOpened && !panelAnimating && toggleMenuOpened()}
-            onClick={() => panelOpened && toggleMenuOpened()}
-          >
-          </div>
 
           {/* close button and logo */}
           <div className="block _sm:hidden">
