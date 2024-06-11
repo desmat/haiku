@@ -227,6 +227,8 @@ export default function SidePanel({
           backgroundColor: `${styles[styles.length - 1]?.color ? styles[styles.length - 1]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
+
+          // note: animating on the position is prettier but causes issues on mobile
           // right: panelOpened ? 0 : "-27rem",
           // width: panelOpened || panelAnimating ? "27rem" : "0rem",
           right: 0,
