@@ -191,7 +191,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { responses });
 
-    return new Promise((resolve) => resolve(value));
+    return new Promise((resolve) => resolve(createdValue));
   }
 
   async update(userId: string, value: T, options: any = {}): Promise<T> {

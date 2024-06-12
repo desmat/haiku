@@ -33,7 +33,7 @@ export async function POST(
     const savedUserHaiku = await saveUserHaiku(user, {
       ...userHaiku,
       likedAt: data.value ? moment().valueOf() : undefined,
-    })
+    });
 
     return NextResponse.json({ haiku, userHaiku: savedUserHaiku });
   } else {

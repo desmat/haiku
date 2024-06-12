@@ -7,6 +7,7 @@ import { User } from '@/types/User';
 import { uuid } from '@/utils/misc';
 import shuffleArray from '@/utils/shuffleArray';
 import { getDailyHaikus, getHaiku, getHaikus } from './haikus';
+import { triggerDailyHaikudleSaved } from './webhooks';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -291,19 +292,24 @@ export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: st
 
   if (!haikudle) throw `Haikudle not found: ${haikudleId}`;
 
+  let ret;
   if (dailyhaikudle) {
-    return store.dailyHaikudles.update(user.id, {
+    ret = await store.dailyHaikudles.update(user.id, {
       id: dateCode,
       haikuId,
       haikudleId,
       theme: haiku.theme
     });
+  } else {
+    ret = await store.dailyHaikudles.create(user.id, {
+      id: dateCode,
+      haikuId,
+      haikudleId,
+      theme: haiku.theme,
+    });
   }
 
-  return store.dailyHaikudles.create(user.id, {
-    id: dateCode,
-    haikuId,
-    haikudleId,
-    theme: haiku.theme,
-  });
+  triggerDailyHaikudleSaved(ret);
+
+  return ret;
 }

@@ -9,11 +9,12 @@ import * as samples from '@/services/stores/samples';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { Haikudle, UserHaikudle } from '@/types/Haikudle';
 import { USAGE_LIMIT } from '@/types/Usage';
+import { byCreatedAtDesc } from '@/utils/sort';
 import shuffleArray from '@/utils/shuffleArray';
 import { deleteHaikudle, getHaikudle } from './haikudles';
 import * as openai from './openai';
 import { incUserUsage, userUsage } from './usage';
-import { byCreatedAtDesc } from '@/utils/sort';
+import { triggerDailyHaikuSaved } from './webhooks';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -168,8 +169,8 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
 
 export async function getHaikuNumLikes(id: number) {
   return (await store.userHaikus.find({ haikuId: id }))
-  .filter((uh: UserHaiku) => uh.likedAt)
-  .length;
+    .filter((uh: UserHaiku) => uh.likedAt)
+    .length;
 }
 
 export async function createHaiku(user: User, haiku: Haiku): Promise<Haiku> {
@@ -544,11 +545,17 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
       .filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
 
     // pick from liked haikus, else all haikus
-    const randomHaikuId = shuffleArray(nonDailyLikedhaikus || nonDailyhaikus)[0].id;
-    const randomHaiku = haikus[randomHaikuId];
+    const randomHaikuId = shuffleArray(nonDailyLikedhaikus || nonDailyhaikus)[0]?.id;
+    let randomHaiku = haikus[randomHaikuId];
+
+    if (!randomHaiku) {
+      randomHaiku = shuffleArray(haikus)[0];
+      console.warn(`>> services.haiku.getDailyHaiku WARNING: ran out of liked or non-daily haikus, picking from the lot`, { randomHaiku });
+    }
+
     console.log('>> app.api.haikus.GET creating daily haiku', { randomHaikuId, randomHaiku, previousDailyHaikus, likedHaikus, haikus });
 
-    dailyHaiku = await saveDailyHaiku({ id: "(system)" } as User, id, randomHaikuId);
+    dailyHaiku = await saveDailyHaiku({ id: "(system)" } as User, id, randomHaiku.id);
   }
 
   return new Promise((resolve, reject) => resolve(dailyHaiku));
@@ -611,19 +618,24 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
 
   if (!haiku) throw `Haiku not found: ${haikuId}`;
 
+  let ret;
   if (dailyHaiku) {
-    return store.dailyHaikus.update(user.id, {
+    ret = await store.dailyHaikus.update(user.id, {
       id: dateCode,
       haikuId,
       theme: haiku.theme
     });
+  } else {
+    ret = await store.dailyHaikus.create(user.id, {
+      id: dateCode,
+      haikuId,
+      theme: haiku.theme,
+    });
   }
 
-  return store.dailyHaikus.create(user.id, {
-    id: dateCode,
-    haikuId,
-    theme: haiku.theme,
-  });
+  triggerDailyHaikuSaved(ret);
+
+  return ret;
 }
 
 export async function getLikedHaikus(): Promise<DailyHaiku[]> {
