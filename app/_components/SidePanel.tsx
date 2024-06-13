@@ -222,7 +222,7 @@ export default function SidePanel({
       />
 
       <div
-        className={`_bg-pink-200 absolute top-0 h-full _w-[27rem] _max-w-[90vw] ${onboarding ? "z-50" : "z-20"} ${!onboarding && "transition-[right]"} _blur-[10px]`}
+        className={`_bg-pink-200 absolute top-0 h-full ${onboarding ? "z-50" : "z-20"} ${!onboarding && "transition-[right]"} _blur-[10px]`}
         style={{
           backgroundColor: `${styles[styles.length - 1]?.color ? styles[styles.length - 1]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
           backdropFilter: "blur(10px)",
@@ -233,6 +233,7 @@ export default function SidePanel({
           // width: panelOpened || panelAnimating ? "27rem" : "0rem",
           right: 0,
           width: "27rem",
+          maxWidth: "95vw",
           display: panelOpened ? "block" : "none",
         }}
         onMouseLeave={() => panelOpened && !panelPinned && toggleMenuOpened()}
