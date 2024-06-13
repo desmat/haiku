@@ -205,6 +205,15 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       throw `Cannot update ${this.key}: does not exist: ${value.id}`;
     }
 
+    const listValue = await kv.json.get(this.listKey(), `${jsonGetBy("id", value.id || "")}`);
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { listEntry: listValue });
+
+    if (!listValue?.length) {
+      // corner case where somehow the list value was not found
+      console.warn(`>> services.stores.redis.RedisStore<${this.key}>.update LIST VALUE NOT FOUND: creating record`);
+      await this.create(userId, value, options);
+    }
+
     const updatedValue = {
       ...value,
       updatedAt: moment().valueOf(),
