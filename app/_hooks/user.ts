@@ -68,6 +68,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         userId: createdUser.id,
         isAdmin: createdUser.isAdmin,
         isAnonymous: createdUser.isAnonymous,
+        host: createdUser.host,
       });
     } 
     
@@ -88,12 +89,14 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         userId: createdUser.id,
         isAdmin: createdUser.isAdmin,
         isAnonymous: createdUser.isAnonymous,
+        host: createdUser.host,
       });
     } else {
       trackEvent("user-session-loaded", {
         userId: remoteUser.id,
         isAdmin: remoteUser.isAdmin,
         isAnonymous: remoteUser.isAnonymous,
+        host: remoteUser.host,
         // token, 
       });
     }

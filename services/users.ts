@@ -30,7 +30,7 @@ export function getProviderType(user: User): string | undefined {
 export async function userSession(request: any) {
   // console.log(">> services.users.userSession", { request });
   const authorization = request.headers.get("Authorization");
-  // console.log(">> services.users.userSession", { authorization });
+  // console.log(">> services.users.userSession", { authorization, host: request.headers.get("host") });
 
   let token;
   if (authorization?.startsWith("Bearer ")) {
@@ -51,7 +51,8 @@ export async function userSession(request: any) {
     user: {
       ...decodedToken.user,
       ...user,
-      isAdmin: user?.isAdmin || ((process.env.ADMIN_USER_IDS || "").split(",").includes(decodedToken.user.id))
+      isAdmin: user?.isAdmin || ((process.env.ADMIN_USER_IDS || "").split(",").includes(decodedToken.user.id)),
+      host: user?.host || request.headers.get("host"),
     }
   };
 }
