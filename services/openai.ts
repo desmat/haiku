@@ -35,6 +35,7 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     "Oil painting with natural paint strokes",
     "Abstract painting",
     "Impressionist painting",
+    "Post-Impressionism painting",
     "Expressionist painting",
     "Landscape painting",
     "Chinene Shan Shui painting",
