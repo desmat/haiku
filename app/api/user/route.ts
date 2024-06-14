@@ -116,6 +116,7 @@ export async function POST(
     isAdmin: ((process.env.ADMIN_USER_IDS || "").split(",").includes(userId)),
     preferences: {},
     host: request.headers.get("host"),
+    referer: request.headers.get("referer"),
   };
 
   const savedUser = await saveUser(newUser);

@@ -53,6 +53,7 @@ export async function userSession(request: any) {
       ...user,
       isAdmin: user?.isAdmin || ((process.env.ADMIN_USER_IDS || "").split(",").includes(decodedToken.user.id)),
       host: user?.host || request.headers.get("host"),
+      referer: user?.referer || request.headers.get("referer"),
     }
   };
 }
