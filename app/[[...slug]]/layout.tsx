@@ -46,7 +46,7 @@ if (isHaikudleMode) {
 
 export let metadata: Metadata = {
   ...rootMetadata,
-  title: `${isHaikudleMode ? "Haikudle" : "HaikuGenius"} - ${rootMetadata.title}`,
+  title: `${isHaikudleMode ? "Haikudle" : "Haiku Genius"} - ${rootMetadata.title}`,
 }
 
 export default async function Layout({

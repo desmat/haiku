@@ -10,8 +10,8 @@ const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 const inter = Inter({ subsets: ['latin'] });
 
 export const appName = isHaikudleMode
-  ? "AI-powered daily haiku puzzles and generative art - Solve the puzzle to reveal today's haiku, generate and share haiku poems paired and beautiful generative art, always free, no signup required."
-  : "AI-powered haiku poetry and generative art - Daily featured haikus, haiku generator, poem composer and editor, visual art generator, always free, no signup required.";
+  ? "AI-powered Daily Haiku Puzzles and Generative Art - Solve the puzzle to reveal today's haiku, generate haiku poems paired and beautiful generative art, always free, no signup required."
+  : "AI-Powered Haiku Poetry and Generative Art - Daily featured haikus, haiku generator, smart poem editor, visual art generator, always free, no signup required.";
 
 export const appDescription = isHaikudleMode
   ? "Solve the daily puzzles, generate new haikus, enjoy beautiful generative art and share with the world - no signup required. " +
