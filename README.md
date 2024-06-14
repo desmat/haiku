@@ -1,4 +1,4 @@
-# Haiku Genius: AI-Powered Haiku Poem Creator and Generative Art
+# AI-Powered Haiku Poetry, Generative Art and Daily Puzzles
 
 Haiku poem assistant by OpenAI's ChatGPT and generative art by DALL-E:
 
