@@ -440,7 +440,7 @@ export default function HaikuPoem({
                 active={!!(onboardingElement && onboardingElement.includes("poem"))}
               >
                 {haiku?.poem.map((poemLine: string, i: number) => (
-                  <div key={i} className="md:my-[0.05rem] sm:my-[0.03rem] my-[0.15rem] transition-all">
+                  <div key={i} className="md:my-[0.05rem] sm:my-[0.03rem] my-[0.15rem] _transition-all">
                     <StyledLayers styles={
                       aboutToEdit || editing || saving
                         ? styles.slice(0, 1)
@@ -451,7 +451,7 @@ export default function HaikuPoem({
                             : styles
                     }>
                       <div
-                        className="relative m-[0rem] transition-all"
+                        className="relative m-[0rem] _transition-all"
                         onKeyDown={(e: any) => canEdit && handlePoemLineKeyDown(e, i)}
                         onMouseOver={() => canEdit && setAboutToEditLine(i)}
                         onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
@@ -459,7 +459,7 @@ export default function HaikuPoem({
                       >
                         {/* set the width while editing */}
                         {editAllowed &&
-                          <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 md:leading-[3rem] sm:leading-[2.5rem] leading-[2rem]`}>
+                          <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem]`}>
                             <ControlledInput
                               id={i}
                               activeId={editingLine}
@@ -502,7 +502,7 @@ export default function HaikuPoem({
                 style={{ fontSize }}
               >
                 <div
-                  className="transition-all _bg-pink-400"
+                  className="_transition-all _bg-pink-400"
                   onClick={(e: any) => !showcaseMode && handleClickHaiku(e)}
                   title={showcaseMode ? "" : "Copy to clipboard"}
                   style={{
