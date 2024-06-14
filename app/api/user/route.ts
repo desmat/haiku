@@ -115,10 +115,10 @@ export async function POST(
     isAnonymous: true,
     isAdmin: ((process.env.ADMIN_USER_IDS || "").split(",").includes(userId)),
     preferences: {},
+    host: request.headers.get("host"),
   };
 
-  // TODO: uncripple
-  const savedUser = newUser; //await saveUser(newUser);
+  const savedUser = await saveUser(newUser);
   const token = await createToken(savedUser);
 
   return NextResponse.json({ user: savedUser, token });

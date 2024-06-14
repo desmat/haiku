@@ -8,4 +8,5 @@ export type User = {
   email?: string,
   preferences?: any,
   usage?: Usage,
+  host?: string | undefined | null,
 }
