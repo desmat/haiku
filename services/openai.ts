@@ -53,7 +53,7 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     "Japanese Rimpa style painting",
     "japanese style ink painting with very few simple large brush strokes",
     "Japanese style watercolor with few large brush strokes and a minimal palete of colors",
-    "quick wobbly sketch, colored hastily with watercolors", // https://www.reddit.com/r/dalle2/comments/1ch4ddv/how_do_i_create_images_with_this_style/
+    "Quick wobbly sketch, colored hastily with watercolors", // https://www.reddit.com/r/dalle2/comments/1ch4ddv/how_do_i_create_images_with_this_style/
   ];
   const selectedArtStyle = artStyle || imageTypes[Math.floor(Math.random() * imageTypes.length)];
   const prompt = `
