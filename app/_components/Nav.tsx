@@ -702,6 +702,7 @@ export function NavOverlay({
     // console.log(">> app._component.Nav.handleKeyDown", { mode });
     if (e.key == "Escape" && ["showcase", "social-img"].includes(mode) && onSwitchMode) {
       onSwitchMode();
+      e.preventDefault();
     }
   }
 
@@ -875,19 +876,19 @@ export function NavOverlay({
         <>
           {onSwitchMode &&
             <div
-              className="_bg-pink-400 absolute top-0 left-0 w-[10vw] h-full z-40 cursor-pointer"
+              className={`_bg-pink-400 absolute top-0 left-0 ${user?.isAdmin ? "w-[10vw] z-40" : "w-full z-10"} h-full cursor-pointer`}
               title="Exit showcase mode"
               onClick={() => onSwitchMode()}
             />
           }
-          {increaseDelay &&
+          {increaseDelay && user?.isAdmin && 
             <div
               className="_bg-yellow-400 absolute bottom-0 left-0 w-[10vw] h-[10vw] z-40 cursor-pointer"
               title="Increase refresh time"
               onClick={increaseDelay}
             />
           }
-          {decreaseDelay &&
+          {decreaseDelay && user?.isAdmin && 
             <div
               className="_bg-yellow-400 absolute bottom-0 right-0 w-[10vw] h-[10vw] z-40 cursor-pointer"
               title="Decrease refresh time"
