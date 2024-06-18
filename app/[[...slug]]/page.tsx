@@ -66,6 +66,7 @@ export default async function Page({
   let mode = (searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
   const fontSize = searchParams && searchParams["fontSize"];
+  const noOnboarding = searchParams && searchParams["noOnboarding"] == "true";
   // console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
   // can't switch modes in puzzle mode
@@ -146,6 +147,7 @@ export default async function Page({
           lang={lang}
           refreshDelay={refreshDelay}
           fontSize={fontSize}
+          noOnboarding={noOnboarding}
         />
       </NoSsr>
     </Suspense>

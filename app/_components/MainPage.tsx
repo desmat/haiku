@@ -29,6 +29,7 @@ export default function MainPage({
   lang,
   refreshDelay,
   fontSize,
+  noOnboarding,
 }: {
   haiku: Haiku,
   haikudle?: Haikudle,
@@ -36,6 +37,7 @@ export default function MainPage({
   lang?: undefined | LanguageType,
   refreshDelay?: number,
   fontSize?: string | undefined,
+  noOnboarding?: boolean | undefined,
 }) {
   // console.log('>> app.MainPage.render()', { mode, lang, _haiku, _haikudle });
 
@@ -636,7 +638,7 @@ export default function MainPage({
     // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
     // @ts-ignore
     let timeoutId;
-    if (user && (haikudleMode && (previousDailyHaikudleId || haikudleReady) || !haikudleMode)) {
+    if (!noOnboarding && user && (haikudleMode && (previousDailyHaikudleId || haikudleReady) || !haikudleMode)) {
       if (previousDailyHaikudleId && !user?.preferences?.onboardedPreviousDaily) {
         timeoutId = setTimeout(showAboutPreviousDaily, 2000);
       } else if (userGeneratedHaiku && !haikudleMode && !user?.preferences?.onboardedGenerated) {
