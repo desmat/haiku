@@ -63,10 +63,15 @@ export default async function Page({
   let id = ids && ids[0];
   const version = ids && ids[1] || searchParams && searchParams["version"];
   const lang = searchParams && searchParams["lang"] as LanguageType || "en";
-  const mode = (searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
+  let mode = (searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
   const fontSize = searchParams && searchParams["fontSize"];
   // console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
+
+  // can't switch modes in puzzle mode
+  if (process.env.EXPERIENCE_MODE == "haikudle" && mode != process.env.EXPERIENCE_MODE) {
+    mode = "haikudle";
+  }
 
   if (!isSupportedLanguage(lang)) {
     return <NotFound mode={mode} />

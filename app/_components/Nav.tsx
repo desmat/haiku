@@ -595,7 +595,7 @@ function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {mode != "social-img" && user?.isAdmin &&
+        {mode != "social-img" && user?.isAdmin && process.env.EXPERIENCE_MODE != "haikudle" &&
           <Link
             key="changeMode"
             href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`}
@@ -612,7 +612,7 @@ function BottomLinks({
             </PopOnClick>
           </Link>
         }
-        {user?.isAdmin &&
+        {user?.isAdmin && process.env.EXPERIENCE_MODE != "haikudle" &&
           <Link
             key="socialImgMode"
             href={`/${haiku ? haiku?.id : ""}?mode=showcase`}
