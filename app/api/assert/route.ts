@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!data.match(regex)) {
+    console.warn('>> app.api.assert.POST ASSERTION FAILED', { regex, data });
     return NextResponse.json(
       { success: false, message: 'assertion failed' },
       { status: 418 }
