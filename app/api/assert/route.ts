@@ -23,11 +23,17 @@ export async function POST(request: NextRequest) {
   console.log('>> app.api.assert.POST', { regex, data });
 
   if (!data) {
-    throw `Required key 'data' not provided`;
+    return NextResponse.json(
+      { success: false, message: `Required key 'data' not provided` },
+      { status: 400 }
+    );
   }
 
   if (!regex) {
-    throw `Required key 'regex' not provided`;
+    return NextResponse.json(
+      { success: false, message: `Required key 'regex' not provided` },
+      { status: 400 }
+    );
   }
 
   if (!data.match(regex)) {
