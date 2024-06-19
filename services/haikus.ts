@@ -333,12 +333,12 @@ export async function regenerateLimerickPoem(user: any, haiku: Haiku): Promise<H
   });
 }
 
-export async function completeHLimerickuPoem(user: any, haiku: Haiku): Promise<Haiku> {
+export async function completeLimerickPoem(user: any, haiku: Haiku): Promise<Haiku> {
   const lang = (haiku.lang || "en") as LanguageType;
   const subject = haiku.theme;
   const mood = haiku.mood;
   const language = supportedLanguages[lang].name;
-  console.log(">> services.haiku.completeHLimerickuPoem", { language, subject, mood, user });
+  console.log(">> services.haiku.completeLimerickPoem", { language, subject, mood, user });
 
   const {
     response: {
@@ -348,11 +348,11 @@ export async function completeHLimerickuPoem(user: any, haiku: Haiku): Promise<H
       // mood: generatedMood,
     }
   } = await openai.completeLimerick(haiku.poem);
-  console.log(">> services.haiku.completeHLimerickuPoem", { completedPoem, title });
+  console.log(">> services.haiku.completeLimerickPoem", { completedPoem, title });
 
   // // delete corresponding haikudle 
   // getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
-  //   console.log(">> services.haiku.completeHLimerickuPoem", { haikudle });
+  //   console.log(">> services.haiku.completeLimerickPoem", { haikudle });
   //   if (haikudle) {
   //     deleteHaikudle(user, haikudle.id);
   //   }
@@ -597,7 +597,7 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
 
   const poem = haiku.poem.join("/");
   if (poem.includes("...") || poem.includes("…")) {
-    return completeHaikuPoem(user, haiku);
+    return completeLimerickPoem(user, haiku);
   }
 
   const original = await store.haikus.get(haiku.id);
