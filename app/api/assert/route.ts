@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
   if (!data.match(regex)) {
     return NextResponse.json(
       { success: false, message: 'assertion failed' },
-      { status: 500 }
+      { status: 418 }
     );
   }
 
