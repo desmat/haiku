@@ -19,7 +19,23 @@ export async function POST(request: NextRequest) {
   const { user: sessionUser } = await userSession(request);
   console.log('>> app.api.assert.POST', { sessionUser });
 
-  const data: any = await request.json();
+  const { regex, data } = await request.json();
+  console.log('>> app.api.assert.POST', { regex, data });
 
-  return NextResponse.json(data);
+  if (!data) {
+    throw `Required key 'data' not provided`;
+  }
+
+  if (!regex) {
+    throw `Required key 'regex' not provided`;
+  }
+
+  if (!data.match(regex)) {
+    return NextResponse.json(
+      { success: false, message: 'assertion failed' },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({ success: true });
 }
