@@ -103,7 +103,53 @@ export async function POST(
     const haiku = await getHaiku(user, params.id);
     console.log(`>> app.api.haiku.[id].[action].POST`, { action: params.action, url, haiku });
 
-    const updatedHaiku = await updateHaikuImage(user, haiku, url);
+    if (!haiku) {
+      return NextResponse.json(
+        { success: false, message: 'haiku not found' },
+        { status: 404 }
+      );
+    }
+
+    const imageRet = await fetch(url);
+    // console.log(">> app.api.haiku.[id].[action].POST", { imageRet });  
+    const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+    // console.log(">> app.api.haiku.[id].[action].POST", { imageBuffer });
+    const updatedHaiku = await updateHaikuImage(user, haiku, imageBuffer);
+    console.log(`>> app.api.haiku.[id].[action].POST`, { updatedHaiku });
+    
+    return NextResponse.json({ haiku: updatedHaiku });
+  } else if (params.action == "uploadImage") {
+    const [formData, { user }] = await Promise.all([
+      request.formData(),
+      userSession(request),
+    ]);
+
+    // only admins can upload their own images
+    if (!user.isAdmin) {
+      return NextResponse.json(
+        { success: false, message: 'authorization failed' },
+        { status: 403 }
+      );  
+    }
+    
+    // console.log(`>> app.api.haiku.[id].[action].POST`, { action: params.action, formData });
+
+    const parts: File[] = [];
+    formData.forEach((part: FormDataEntryValue) => parts.push(part as File));
+    // console.log(">> app.api.haiku.[id].[action].POST", { parts });
+
+    const haiku = await getHaiku(user, params.id);
+    console.log(`>> app.api.haiku.[id].[action].POST`, { action: params.action, haiku });
+
+    if (!haiku) {
+      return NextResponse.json(
+        { success: false, message: 'haiku not found' },
+        { status: 404 }
+      );
+    }
+
+    const imageBuffer = Buffer.from(await parts[0].arrayBuffer());
+    const updatedHaiku = await updateHaikuImage(user, haiku, imageBuffer);
     console.log(`>> app.api.haiku.[id].[action].POST`, { updatedHaiku });
     
     return NextResponse.json({ haiku: updatedHaiku });

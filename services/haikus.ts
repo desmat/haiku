@@ -335,20 +335,11 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   return saveHaiku(user, updatedHaiku);
 }
 
-export async function updateHaikuImage(user: any, haiku: Haiku, imageUrl: string): Promise<Haiku> {
-  console.log(">> services.haiku.updateHaikuImage", { user, haiku, imageUrl });
-  const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
-  console.warn(`>> services.haiku.updateHaikuImage: DEBUG mode: not uploading to blob store`);
-
-  const imageRet = await fetch(imageUrl);
-  // console.log(">> services.haiku.updateHaikuImage", { imageRet });
-
-  const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
-  // console.log(">> services.haiku.updateHaikuImage", { imageBuffer });
+export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer): Promise<Haiku> {
+  console.log(">> services.haiku.updateHaikuImage", { user, haiku, buffer });
 
   const getColors = require('get-image-colors');
-
-  const colors = await getColors(imageBuffer, 'image/png');
+  const colors = await getColors(buffer, 'image/png');
   // console.log(">> services.haiku.updateHaikuImage", { colors });
 
   // sort by darkness and pick darkest for foreground, lightest for background
@@ -356,7 +347,7 @@ export async function updateHaikuImage(user: any, haiku: Haiku, imageUrl: string
 
   const haikuId = uuid();
   const filename = `haiku-${haikuId}-custom-${moment().format("YYYYMMDD_HHmmss")}-${(haiku.version || 0) + 1}.png`;
-  const blob = !debugOpenai && await put(filename, imageBuffer, {
+  const blob = await put(filename, buffer, {
     access: 'public',
     addRandomSuffix: false,
   });
@@ -368,7 +359,7 @@ export async function updateHaikuImage(user: any, haiku: Haiku, imageUrl: string
     imagePrompt: undefined,
     imageModel: undefined,
     // @ts-ignore
-    bgImage: debugOpenai ? imageUrl : blob.url,
+    bgImage: blob.url,
     color: sortedColors[0].darken(0.5).hex(),
     bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),
@@ -381,7 +372,7 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
   console.log(">> services.haiku.generateHaiku", { lang, subject, mood, user });
   const language = supportedLanguages[lang || "en"].name;
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
-  console.warn(`>> services.haiku.generateHaiku: DEBUG mode: not uploading to blob store`);
+  debugOpenai && console.warn(`>> services.haiku.generateHaiku: DEBUG mode: not uploading to blob store`);
 
   const {
     prompt: poemPrompt,
