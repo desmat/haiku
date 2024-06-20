@@ -171,7 +171,8 @@ export function GenerateInput({
 
     // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate() generate');
     // @ts-ignore
-    generate && generate(focus || ref.current.value ? ref.current.value : haikuTheme);
+    const theme = focus || ref.current.value ? ref.current.value : haikuTheme.split("…")[1].trim();
+    generate && generate(theme);
     // @ts-ignore
     ref.current.value = "";
   };
