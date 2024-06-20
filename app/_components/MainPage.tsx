@@ -4,7 +4,7 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { syllable } from 'syllable';
 import { Haiku, haikuStyles } from "@/types/Haiku";
-import { NavOverlay } from '@/app/_components/Nav';
+import { NavOverlay } from '@/app/_components/nav/NavOverlay';
 import Loading from "@/app/_components/Loading";
 import HaikuPage from '@/app/_components/HaikuPage';
 import useAlert from '@/app/_hooks/alert';

@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import HaikuGeniusIcon from "@/app/_components/HaikuGeniusIcon";
+import { StyledLayers } from '@/app/_components/StyledLayers';
+import HaikuGeniusIcon from "@/app/_components/nav/HaikuGeniusIcon";
 import * as font from "@/app/font";
 import { ExperienceMode } from '@/types/ExperienceMode';
-import { StyledLayers } from './StyledLayers';
 
 export function Logo({
   mode,

@@ -2,7 +2,7 @@ import moment from 'moment';
 import { Suspense } from 'react';
 import HaikuPage from '@/app/_components/HaikuPage';
 import MainPage from '@/app/_components/MainPage';
-import { NavOverlay } from '@/app/_components/Nav';
+import { NavOverlay } from '@/app/_components/nav/NavOverlay';
 import { NoSsr } from '@/app/_components/NoSsr';
 import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';

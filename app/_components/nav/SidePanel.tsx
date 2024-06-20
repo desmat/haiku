@@ -3,9 +3,11 @@
 import moment from 'moment';
 import Link from 'next/link'
 import { useEffect, useState } from 'react';
-import { IoEyeSharp, IoHeartSharp, IoHelpCircle, IoLogoGithub, IoSparkles, IoMenu } from 'react-icons/io5';
+import { IoHelpCircle, IoLogoGithub, IoMenu } from 'react-icons/io5';
 import { MdHome } from "react-icons/md";
 import * as font from "@/app/font";
+import PopOnClick from '@/app/_components/PopOnClick';
+import { StyledLayers } from '@/app/_components/StyledLayers';
 import useUser from '@/app/_hooks/user';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { UserHaiku } from '@/types/Haiku';
@@ -14,8 +16,6 @@ import { User } from '@/types/User';
 import { formatTimeFromNow } from '@/utils/format';
 import * as sort from '@/utils/sort';
 import trackEvent from '@/utils/trackEvent';
-import PopOnClick from './PopOnClick';
-import { StyledLayers } from './StyledLayers';
 import { Logo } from './Logo';
 
 function OpenCloseButton({

@@ -13,9 +13,9 @@ import { USAGE_LIMIT } from "@/types/Usage";
 import { User } from "@/types/User";
 import { capitalize, upperCaseFirstLetter } from "@/utils/format";
 import trackEvent from "@/utils/trackEvent";
-import { GenerateIcon } from "./Nav";
 import PopOnClick from "./PopOnClick";
 import { StyledLayers } from "./StyledLayers";
+import { GenerateIcon } from "./nav/GenerateInput";
 
 const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
   return [
