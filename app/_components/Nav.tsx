@@ -739,7 +739,7 @@ export function NavOverlay({
       }
 
       {["haikudle", "haiku"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"}`}>
+        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} ${loading ? "opacity-40" : ""}`}>
           <div className="onboarding-container">
             {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement || "") &&
               <div className="onboarding-focus" />
@@ -785,39 +785,6 @@ export function NavOverlay({
           </PopOnClick>
         </div>
       }
-      {["haikudle", "haiku"].includes(mode) &&
-        <div className={`fixed top-2.5 right-2.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement) ? "z-50" : "z-20"}`}>
-          <div className="onboarding-container">
-            {/* {onboardingElement && onboardingElement == "logo" &&
-              <div className="onboarding-focus" />
-            }
-            {onboardingElement && onboardingElement == "logo-and-generate" &&
-              <div className="onboarding-focus double" />
-            }
-            {(!onClickGenerate || !user?.isAdmin && (user.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
-              <div className="opacity-40" title={onClickGenerate ? "Exceeded daily limit: try again later" : ""}>
-                <StyledLayers styles={altStyles}>
-                  <GenerateIcon>
-                    <div style={{ WebkitTextStroke: `1.2px ${altStyles[0].color}` }}>Create</div>
-                  </GenerateIcon>
-                </StyledLayers>
-              </div>
-            } */}
-            {/* {onClickGenerate && (user?.isAdmin || (user?.usage[dateCode]?.haikusCreated || 0) < USAGE_LIMIT.DAILY_CREATE_HAIKU) &&
-              <div title="Generate a new haiku">
-                <PopOnClick color={haiku?.bgColor} active={!!onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement)}>
-                  <StyledLayers styles={altStyles}>
-                    <GenerateIcon onClick={onClickGenerate} >
-                      <div style={{ WebkitTextStroke: `1.2px ${altStyles[0].color}` }}>Create</div>
-                    </GenerateIcon>
-                  </StyledLayers>
-                </PopOnClick>
-              </div>
-            } */}
-          </div>
-        </div>
-      }
-
       <div
         className={`absolute top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-10`}
         style={{
