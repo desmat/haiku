@@ -85,6 +85,14 @@ export async function POST(
       userSession(request),
     ]);
 
+    // only admins can update the image directly
+    if (!user.isAdmin) {
+      return NextResponse.json(
+        { success: false, message: 'authorization failed' },
+        { status: 403 }
+      );  
+    }
+        
     if (!url) {
       return NextResponse.json(
         { success: false, message: 'image url not provided' },

@@ -394,12 +394,12 @@ export default function MainPage({
 
     if (user?.isAdmin || haiku?.createdBy == user?.id) {
       resetAlert();
-      setRegenerating(true);
+      setLoadingUI(true);
       const ret = await regenerateHaiku(user, haiku, "poem");
       // console.log('>> app.page.startRegenerateHaiku()', { ret });
       incUserUsage(user, "haikusRegenerated");
       setHaiku(ret);
-      setRegenerating(false);
+      setLoadingUI(false);
     }
   }
 
@@ -418,12 +418,12 @@ export default function MainPage({
 
       if (typeof (artStyle) == "string") {
         resetAlert();
-        setRegenerating(true);
+        setLoadingUI(true);
         const ret = await regenerateHaiku(user, haiku, "image", { artStyle });
         // console.log('>> app.page.startRegenerateHaiku()', { ret });
         incUserUsage(user, "haikusRegenerated"); // TODO haikuImageRegenerated?
         setHaiku(ret);
-        setRegenerating(false);
+        setLoadingUI(false);
       } else {
         trackEvent("cancelled-regenerate-image", {
           userId: user?.id,
@@ -647,10 +647,10 @@ export default function MainPage({
 
     if (typeof (url) == "string") {
       // console.log('>> app._components.MainPage.updateHaikuImage()', { url });    
-      setRegenerating(true);
+      setLoadingUI(true);
       haikuAction(haikuId, "updateImage", url).then((haiku: Haiku) => {
         setHaiku(haiku);
-        setRegenerating(false);
+        setLoadingUI(false);
       })
     }
   }

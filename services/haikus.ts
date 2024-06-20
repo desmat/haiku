@@ -284,6 +284,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
 export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: string): Promise<Haiku> {
   console.log(">> services.haiku.regenerateHaikuImage", { user, haiku });
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
+  console.warn(`>> services.haiku.regenerateHaikuImage: DEBUG mode: not uploading to blob store`);
 
   const {
     url: openaiUrl,
@@ -336,6 +337,9 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
 
 export async function updateHaikuImage(user: any, haiku: Haiku, imageUrl: string): Promise<Haiku> {
   console.log(">> services.haiku.updateHaikuImage", { user, haiku, imageUrl });
+  const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
+  console.warn(`>> services.haiku.updateHaikuImage: DEBUG mode: not uploading to blob store`);
+
   const imageRet = await fetch(imageUrl);
   // console.log(">> services.haiku.updateHaikuImage", { imageRet });
 
@@ -352,7 +356,7 @@ export async function updateHaikuImage(user: any, haiku: Haiku, imageUrl: string
 
   const haikuId = uuid();
   const filename = `haiku-${haikuId}-custom-${moment().format("YYYYMMDD_HHmmss")}-${(haiku.version || 0) + 1}.png`;
-  const blob = await put(filename, imageBuffer, {
+  const blob = !debugOpenai && await put(filename, imageBuffer, {
     access: 'public',
     addRandomSuffix: false,
   });
@@ -364,7 +368,7 @@ export async function updateHaikuImage(user: any, haiku: Haiku, imageUrl: string
     imagePrompt: undefined,
     imageModel: undefined,
     // @ts-ignore
-    bgImage: blob.url,
+    bgImage: debugOpenai ? imageUrl : blob.url,
     color: sortedColors[0].darken(0.5).hex(),
     bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),
@@ -377,6 +381,7 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
   console.log(">> services.haiku.generateHaiku", { lang, subject, mood, user });
   const language = supportedLanguages[lang || "en"].name;
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
+  console.warn(`>> services.haiku.generateHaiku: DEBUG mode: not uploading to blob store`);
 
   const {
     prompt: poemPrompt,
