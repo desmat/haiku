@@ -2,7 +2,6 @@
 
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { syllable } from 'syllable';
 import { Haiku, haikuStyles } from "@/types/Haiku";
 import { NavOverlay } from '@/app/_components/nav/NavOverlay';
 import Loading from "@/app/_components/Loading";
@@ -634,6 +633,28 @@ export default function MainPage({
     })
   }
 
+  const uploadImage = () => {
+    console.log('>> app._components.MainPage.uploadImage()', { haikuId });
+
+
+    // TODO
+  }
+
+  const updateHaikuImage = () => {
+    // console.log('>> app._components.MainPage.updateHaikuImage()', { haikuId });
+
+    const url = prompt("Image URL?");
+
+    if (typeof (url) == "string") {
+      // console.log('>> app._components.MainPage.updateHaikuImage()', { url });    
+      setRegenerating(true);
+      haikuAction(haikuId, "updateImage", url).then((haiku: Haiku) => {
+        setHaiku(haiku);
+        setRegenerating(false);
+      })
+    }
+  }
+
   useEffect(() => {
     // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
     // @ts-ignore
@@ -817,6 +838,8 @@ export default function MainPage({
         onCopyHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyHaiku}
         onCopyLink={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyLink}
         onLikeHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && likeHaiku}
+        // onUploadImage={!haiku?.error && uploadImage}
+        onUpdateImage={!haiku?.error && updateHaikuImage}
       />
 
       {isPuzzleMode &&

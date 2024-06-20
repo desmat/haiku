@@ -334,6 +334,45 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   return saveHaiku(user, updatedHaiku);
 }
 
+export async function updateHaikuImage(user: any, haiku: Haiku, imageUrl: string): Promise<Haiku> {
+  console.log(">> services.haiku.updateHaikuImage", { user, haiku, imageUrl });
+  const imageRet = await fetch(imageUrl);
+  // console.log(">> services.haiku.updateHaikuImage", { imageRet });
+
+  const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+  // console.log(">> services.haiku.updateHaikuImage", { imageBuffer });
+
+  const getColors = require('get-image-colors');
+
+  const colors = await getColors(imageBuffer, 'image/png');
+  // console.log(">> services.haiku.updateHaikuImage", { colors });
+
+  // sort by darkness and pick darkest for foreground, lightest for background
+  const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
+
+  const haikuId = uuid();
+  const filename = `haiku-${haikuId}-custom-${moment().format("YYYYMMDD_HHmmss")}-${(haiku.version || 0) + 1}.png`;
+  const blob = await put(filename, imageBuffer, {
+    access: 'public',
+    addRandomSuffix: false,
+  });
+  // console.log(">> services.haiku.updateHaikuImage", { filename, blob });
+
+  let updatedHaiku = {
+    ...haiku,
+    artStyle: undefined,
+    imagePrompt: undefined,
+    imageModel: undefined,
+    // @ts-ignore
+    bgImage: blob.url,
+    color: sortedColors[0].darken(0.5).hex(),
+    bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
+    colorPalette: sortedColors.map((c: any) => c.hex()),
+  } as Haiku;
+
+  return saveHaiku(user, updatedHaiku);
+}
+
 export async function generateHaiku(user: any, lang?: LanguageType, subject?: string, mood?: string, artStyle?: string): Promise<Haiku> {
   console.log(">> services.haiku.generateHaiku", { lang, subject, mood, user });
   const language = supportedLanguages[lang || "en"].name;

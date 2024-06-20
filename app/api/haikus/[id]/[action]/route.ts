@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { getHaiku, getUserHaiku, createUserHaiku, saveUserHaiku, regenerateHaikuImage, regenerateHaikuPoem } from '@/services/haikus';
+import { getHaiku, getUserHaiku, createUserHaiku, saveUserHaiku, regenerateHaikuImage, regenerateHaikuPoem, updateHaikuImage } from '@/services/haikus';
 import { userUsage } from '@/services/usage';
 import { userSession } from '@/services/users';
 import { USAGE_LIMIT } from '@/types/Usage';
@@ -79,6 +79,26 @@ export async function POST(
       : await regenerateHaikuPoem(user, haiku);
         
     return NextResponse.json({ haiku: updatedHaiku, reachedUsageLimit });
+  } else if (params.action == "updateImage") {
+    const [{ value: url }, { user }] = await Promise.all([
+      request.json(),
+      userSession(request),
+    ]);
+
+    if (!url) {
+      return NextResponse.json(
+        { success: false, message: 'image url not provided' },
+        { status: 400 }
+      );
+    }
+
+    const haiku = await getHaiku(user, params.id);
+    console.log(`>> app.api.haiku.[id].[action].POST`, { action: params.action, url, haiku });
+
+    const updatedHaiku = await updateHaikuImage(user, haiku, url);
+    console.log(`>> app.api.haiku.[id].[action].POST`, { updatedHaiku });
+    
+    return NextResponse.json({ haiku: updatedHaiku });
   } else {
     return NextResponse.json(
       { success: false, message: 'unsupported action' },

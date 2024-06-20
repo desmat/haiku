@@ -10,6 +10,7 @@ import { HiSwitchVertical } from "react-icons/hi";
 import { MdHome, MdDelete, MdFacebook } from "react-icons/md";
 import { BsDatabaseFillUp } from "react-icons/bs";
 import { FaRandom } from "react-icons/fa";
+import { RiImageFill, RiImageAddFill, RiImageEditFill } from "react-icons/ri";
 import useUser from '@/app/_hooks/user';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haiku } from '@/types/Haiku';
@@ -35,6 +36,8 @@ export default function BottomLinks({
   onCopyHaiku,
   onCopyLink,
   onLikeHaiku,
+  onUploadImage,
+  onUpdateImage,
 }: {
   mode: ExperienceMode,
   haiku?: Haiku,
@@ -52,6 +55,8 @@ export default function BottomLinks({
   onCopyHaiku?: any,
   onCopyLink?: any,
   onLikeHaiku?: any,
+  onUploadImage?: any,
+  onUpdateImage?: any,
 }) {
   // console.log("BottomLinks", { lang, haiku })
   const router = useRouter();
@@ -267,6 +272,43 @@ export default function BottomLinks({
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
               <FaRandom className="text-[1.5rem] md:text-[1.75rem]" />
+            </PopOnClick>
+          </div>
+        }
+        {user?.isAdmin && haiku?.bgImage && 
+          <Link
+            key="downloadImage"
+            className={haiku?.id ? "cursor-pointer" : "opacity-40"}
+            title="Download background image"
+            href={haiku?.bgImage}
+            target="_blank"
+          >
+            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
+              <RiImageFill className="text-[1.75rem] md:text-[2rem]" />
+            </PopOnClick>
+          </Link>
+        }
+        {user?.isAdmin && haiku?.id && onUpdateImage && 
+          <div
+            key="uploadImageUrl"
+            className="cursor-pointer"
+            title="Upload background image"
+            onClick={onUpdateImage}
+          >
+            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
+              <RiImageEditFill className="text-[1.75rem] md:text-[2rem]" />
+            </PopOnClick>
+          </div>
+        }
+        {user?.isAdmin && haiku?.id && onUploadImage && 
+          <div
+            key="uploadImage"
+            className="cursor-pointer"
+            title="Upload background image"
+            onClick={onUploadImage}
+          >
+            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
+              <RiImageAddFill className="text-[1.75rem] md:text-[2rem]" />
             </PopOnClick>
           </div>
         }

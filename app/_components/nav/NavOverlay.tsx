@@ -37,6 +37,8 @@ export function NavOverlay({
   onCopyHaiku,
   onCopyLink,
   onLikeHaiku,
+  onUploadImage,
+  onUpdateImage,
 }: {
   mode: ExperienceMode,
   loading?: boolean,
@@ -60,6 +62,8 @@ export function NavOverlay({
   onCopyHaiku?: any,
   onCopyLink?: any,
   onLikeHaiku?: any,
+  onUploadImage?: any,
+  onUpdateImage?: any,
 }) {
   const [user] = useUser((state: any) => [state.user]);
   const onboarding = !!(onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement));
@@ -199,6 +203,8 @@ export function NavOverlay({
                   onCopyHaiku={onCopyHaiku}
                   onCopyLink={onCopyLink}
                   onLikeHaiku={onLikeHaiku}
+                  onUploadImage={onUploadImage}
+                  onUpdateImage={onUpdateImage}
                 />
               </StyledLayers>
             </PopOnClick>
