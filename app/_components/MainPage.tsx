@@ -16,7 +16,7 @@ import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haikudle } from '@/types/Haikudle';
 import { LanguageType } from '@/types/Languages';
-import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleGotoHaikuGenius, haikudleOnboardingSteps } from '@/types/Onboarding';
+import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleGotoHaikuGenius, haikudleOnboardingSteps, notShowcase_notOnboardedFirstTime_onboardedShowcase, showcase_notOnboardedFirstTime, showcase_onboardedFirstTime, showcase_onboardedFirstTime_admin } from '@/types/Onboarding';
 import { User } from '@/types/User';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
@@ -29,6 +29,7 @@ export default function MainPage({
   lang,
   refreshDelay,
   fontSize,
+  noOnboarding,
 }: {
   haiku: Haiku,
   haikudle?: Haikudle,
@@ -36,6 +37,7 @@ export default function MainPage({
   lang?: undefined | LanguageType,
   refreshDelay?: number,
   fontSize?: string | undefined,
+  noOnboarding?: boolean | undefined,
 }) {
   // console.log('>> app.MainPage.render()', { mode, lang, _haiku, _haikudle });
 
@@ -206,7 +208,10 @@ export default function MainPage({
     saveUser({
       ...user,
       preferences: {
-        ...user?.preferences, onboarded: true
+        ...user?.preferences,
+        onboarded: true,
+        onboardedMultiLanguage: true,
+        onboardedGotoHaikuGenius: true,
       }
     });
   };
@@ -261,18 +266,17 @@ export default function MainPage({
   }
 
   const startFirstVisitOnboarding = () => {
+    // console.log('>> app.page.startFirstVisitOnboarding()', { user });
+
+    const firstStep = user?.preferences?.onboardedShowcase
+      ? notShowcase_notOnboardedFirstTime_onboardedShowcase[0]
+      : haikuOnboardingSteps[0];
+
     // show first message normally then show as onboarding: 
     // first step is just a plain alert, rest of steps are onboarding
-    plainAlert(haikuOnboardingSteps[0].message, {
-      onDismiss: () => saveUser({
-        ...user,
-        preferences: {
-          ...user?.preferences,
-          onboarded: true,
-          onboardedMultiLanguage: true
-        }
-      }),
-      style: haikuOnboardingSteps[0].style,
+    plainAlert(firstStep.message, {
+      onDismiss: saveUserOnboarded,
+      style: firstStep.style,
       customActions: [
         {
           label: "Close",
@@ -634,7 +638,7 @@ export default function MainPage({
     // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
     // @ts-ignore
     let timeoutId;
-    if (user && (haikudleMode && (previousDailyHaikudleId || haikudleReady) || !haikudleMode)) {
+    if (!noOnboarding && user && (haikudleMode && (previousDailyHaikudleId || haikudleReady) || !haikudleMode)) {
       if (previousDailyHaikudleId && !user?.preferences?.onboardedPreviousDaily) {
         timeoutId = setTimeout(showAboutPreviousDaily, 2000);
       } else if (userGeneratedHaiku && !haikudleMode && !user?.preferences?.onboardedGenerated) {
@@ -645,6 +649,27 @@ export default function MainPage({
         timeoutId = setTimeout(showMultiLanguage, 2000);
       } else if (haikudleMode && user?.preferences?.onboarded && !user?.preferences?.onboardedGotoHaikuGenius && !user?.isAdmin) {
         timeoutId = setTimeout(showGotoHaikuGenius, 2000);
+      } else if (showcaseMode && user?.preferences?.onboarded && !user?.preferences?.onboardedShowcase && !user?.isAdmin) {
+        timeoutId = setTimeout(
+          () => startOnboarding(
+            showcase_onboardedFirstTime,
+            () => saveUser({ ...user, preferences: { ...user?.preferences, onboardedShowcase: true } })
+          ),
+          2000);
+      } else if (showcaseMode && user?.preferences?.onboarded && !user?.preferences?.onboardedShowcase && user?.isAdmin) {
+        timeoutId = setTimeout(
+          () => startOnboarding(
+            showcase_onboardedFirstTime_admin,
+            () => saveUser({ ...user, preferences: { ...user?.preferences, onboardedShowcase: true } })
+          ),
+          2000);
+      } else if (showcaseMode && !user?.preferences?.onboarded && !user?.preferences?.onboardedShowcase) {
+        timeoutId = setTimeout(
+          () => startOnboarding(
+            showcase_notOnboardedFirstTime(haiku),
+            () => saveUser({ ...user, preferences: { ...user?.preferences, onboardedShowcase: true } })
+          ),
+          2000);
       }
     }
 
@@ -815,11 +840,12 @@ export default function MainPage({
           popPoem={haikudleMode && haikudleSolvedJustNow}
           regenerating={regenerating}
           onboardingElement={onboardingElement}
-          refresh={!haiku?.error && loadRandom}
+          refresh={!haiku?.error && user?.isAdmin && loadRandom}
           saveHaiku={!haiku?.error && !haikudleMode && doSaveHaiku}
           regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
           regenerateImage={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
           copyHaiku={!haiku?.error && copyHaiku}
+          switchMode={switchMode}
         />
       }
     </div>
