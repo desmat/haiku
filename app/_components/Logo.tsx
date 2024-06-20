@@ -8,8 +8,8 @@ export function Logo({
   mode,
   href,
   onClick,
-  styles,
-  altStyles,
+  styles = [],
+  altStyles = [],
   onboardingElement,
   iconOnly,
 }: {
@@ -65,13 +65,13 @@ export function Logo({
               {onboarding &&
                 <div className="onboarding-focus" />
               }
-              <HaikuGeniusIcon className="h-[2.8rem] w-[2.8rem] md:h-[3.5rem] md:w-[3.5rem]" />
+              <HaikuGeniusIcon color={styles[0].color} className="h-[2.8rem] w-[2.8rem] md:h-[3.5rem] md:w-[3.5rem]" />
             </div>
           </StyledLayers>
         </div>
       }
       {!iconOnly &&
-        <div className={`${font.architects_daughter.className} flex flex-row`}>
+        <div className={`HaikuGeniusIcon ${font.architects_daughter.className} flex flex-row`}>
           <StyledLayers
             styles={onboardingElement
               ? styles.slice(0, 1)
@@ -79,10 +79,10 @@ export function Logo({
             }
           >
             {(isSocialImgMode || isHaikudleSocialImgMode) &&
-              <HaikuGeniusIcon className="h-[10rem] w-[10rem] mt-[1rem] mr-[-3rem]" />
+              <HaikuGeniusIcon color={styles[0].color} className="h-[10rem] w-[10rem] mt-[2rem] mr-[-3rem]" />
             }
             {!(isSocialImgMode || isHaikudleSocialImgMode) &&
-              <HaikuGeniusIcon className="h-[2.8rem] w-[2.8rem] md:h-[3.5rem] md:w-[3.5rem] mt-[0.3rem] mr-[-0.7rem] md:mt-[0.3rem] md:mr-[-0.9rem]" />
+              <HaikuGeniusIcon color={styles[0].color} className="h-[2.8rem] w-[2.8rem] md:h-[3.5rem] md:w-[3.5rem] mt-[0.3rem] mr-[-0.7rem] md:mt-[0.3rem] md:mr-[-0.9rem]" />
             }
           </StyledLayers>
           <span className="mt-[0.1rem] sm:mt-[0rem]">{styledAi}</span>
