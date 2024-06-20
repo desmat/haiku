@@ -107,6 +107,7 @@ export default function MainPage({
     haikuAction,
     saveHaiku,
     initHaiku,
+    uploadHaikuImage,
   ] = useHaikus((state: any) => [
     state.loaded(haikuId),
     state.load,
@@ -119,6 +120,7 @@ export default function MainPage({
     state.action,
     state.save,
     state.init,
+    state.uploadImage,
   ]);
 
   let [
@@ -633,11 +635,13 @@ export default function MainPage({
     })
   }
 
-  const uploadImage = () => {
-    console.log('>> app._components.MainPage.uploadImage()', { haikuId });
-
-
-    // TODO
+  const uploadImage = (file: File) => {
+    // console.log('>> app._components.MainPage.uploadImage()', { haikuId, file });
+    setLoadingUI(true);
+    uploadHaikuImage(haikuId, file).then((haiku: Haiku) => {
+      setHaiku(haiku);
+      setLoadingUI(false);
+    });
   }
 
   const updateHaikuImage = () => {
@@ -838,7 +842,7 @@ export default function MainPage({
         onCopyHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyHaiku}
         onCopyLink={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyLink}
         onLikeHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && likeHaiku}
-        // onUploadImage={!haiku?.error && uploadImage}
+        onUploadImage={!haiku?.error && uploadImage}
         onUpdateImage={!haiku?.error && updateHaikuImage}
       />
 

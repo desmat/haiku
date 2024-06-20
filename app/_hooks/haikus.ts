@@ -699,6 +699,71 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     });
   },
 
+  uploadImage: async (haikuId: string, file: File) => {
+    // console.log(">> hooks.haiku.uploadImage", { haikuId, file });
+    const { _haikus, init } = get();
+    const haiku = _haikus[haikuId];
+    const userState = await useUser.getState();
+    const userHaikus = userState.haikus
+    const userHaiku = userHaikus[haikuId];
+    const updatedAt = moment().valueOf();
+
+    set({
+      _haikus: {
+        ..._haikus,
+        [haikuId]: {
+          ...haiku,
+          updatedAt,
+        }
+      },
+    });
+
+    userHaiku && useUser.setState({
+      haikus: {
+        ...userState.haikus,
+        [haikuId]: {
+          ...userHaiku,
+          updatedAt,
+        }
+      }
+    });
+
+    const data = new FormData();
+    data.append("file", file);
+
+    return new Promise(async (resolve, reject) => {
+      fetch(`/api/haikus/${haiku.id}/uploadImage`, {
+        ...await fetchOpts(),
+        method: "POST",
+        body: data,
+      }).then(async (res) => {
+        if (res.status != 200) {
+          handleErrorResponse(res, "uploaded-haiku-image", haikuId, `Error uploaded haiku image`);
+
+          // roll back optimistic
+          set({ _haikus });
+          if (!userState?.user?.isAdmin && userHaiku) {
+            useUser.setState({
+              haikus: userHaikus,
+            });
+          }
+
+          return reject(res.statusText);
+        }
+
+        const data = await res.json();
+        const actedOn = data.haiku;
+
+        trackEvent("uploaded-haiku-image", {
+          id: actedOn.id,
+          userId: userState?.user?.id,
+        });
+
+        return resolve(init(actedOn));
+      });
+    });
+  },
+
 })));
 
 export default useHaikus;

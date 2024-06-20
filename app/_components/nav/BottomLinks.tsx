@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useRef } from 'react';
 import { IoAddCircle, IoHelpCircle, IoHeartSharp } from 'react-icons/io5';
 import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
 import { BiLogoInstagramAlt } from "react-icons/bi";
@@ -61,6 +62,7 @@ export default function BottomLinks({
   // console.log("BottomLinks", { lang, haiku })
   const router = useRouter();
   const user = useUser((state: any) => state.user);
+  const fileInputRef = useRef();
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
 
@@ -275,7 +277,7 @@ export default function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {user?.isAdmin && haiku?.bgImage && 
+        {user?.isAdmin && haiku?.bgImage &&
           <Link
             key="downloadImage"
             className={haiku?.id ? "cursor-pointer" : "opacity-40"}
@@ -288,7 +290,7 @@ export default function BottomLinks({
             </PopOnClick>
           </Link>
         }
-        {user?.isAdmin && haiku?.id && onUpdateImage && 
+        {user?.isAdmin && haiku?.id && onUpdateImage &&
           <div
             key="uploadImageUrl"
             className="cursor-pointer"
@@ -300,16 +302,32 @@ export default function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {user?.isAdmin && haiku?.id && onUploadImage && 
+        {user?.isAdmin && haiku?.id && onUploadImage &&
           <div
             key="uploadImage"
             className="cursor-pointer"
             title="Upload background image"
-            onClick={onUploadImage}
+            onClick={() => {
+              //@ts-ignore
+              fileInputRef?.current && fileInputRef.current.click();
+            }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
               <RiImageAddFill className="text-[1.75rem] md:text-[2rem]" />
             </PopOnClick>
+            <input
+              //@ts-ignore
+              ref={fileInputRef}
+              type="file"
+              name="file"
+              accept="image/png" // TODO read other file types, convert to PNG 
+              className="hidden"
+              onInput={(e: any) => {
+                // console.log("SUBMIT", { e, fileInputRef, file: fileInputRef?.current?.files && fileInputRef?.current?.files[0] });
+                //@ts-ignore
+                fileInputRef?.current?.files && onUploadImage(fileInputRef?.current?.files[0]);
+              }}
+            />
           </div>
         }
         {user?.isAdmin &&
