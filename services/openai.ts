@@ -184,7 +184,7 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
 
   console.log(`>> services.openai.completeHaiku`, { language, subject, mood, prompt });
 
-  if (true || process.env.OPENAI_API_KEY == "DEBUG") {
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
     // for testing
     console.warn(`>> services.openai.completeHaiku: DEBUG mode: returning dummy response`);
     await delay(1000);
