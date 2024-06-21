@@ -2,9 +2,8 @@
 
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { syllable } from 'syllable';
 import { Haiku, haikuStyles } from "@/types/Haiku";
-import { NavOverlay } from '@/app/_components/Nav';
+import { NavOverlay } from '@/app/_components/nav/NavOverlay';
 import Loading from "@/app/_components/Loading";
 import HaikuPage from '@/app/_components/HaikuPage';
 import useAlert from '@/app/_hooks/alert';
@@ -108,6 +107,7 @@ export default function MainPage({
     haikuAction,
     saveHaiku,
     initHaiku,
+    uploadHaikuImage,
   ] = useHaikus((state: any) => [
     state.loaded(haikuId),
     state.load,
@@ -120,6 +120,7 @@ export default function MainPage({
     state.action,
     state.save,
     state.init,
+    state.uploadImage,
   ]);
 
   let [
@@ -395,12 +396,12 @@ export default function MainPage({
 
     if (user?.isAdmin || haiku?.createdBy == user?.id) {
       resetAlert();
-      setRegenerating(true);
+      setLoadingUI(true);
       const ret = await regenerateHaiku(user, haiku, "poem");
       // console.log('>> app.page.startRegenerateHaiku()', { ret });
       incUserUsage(user, "haikusRegenerated");
       setHaiku(ret);
-      setRegenerating(false);
+      setLoadingUI(false);
     }
   }
 
@@ -419,12 +420,12 @@ export default function MainPage({
 
       if (typeof (artStyle) == "string") {
         resetAlert();
-        setRegenerating(true);
+        setLoadingUI(true);
         const ret = await regenerateHaiku(user, haiku, "image", { artStyle });
         // console.log('>> app.page.startRegenerateHaiku()', { ret });
         incUserUsage(user, "haikusRegenerated"); // TODO haikuImageRegenerated?
         setHaiku(ret);
-        setRegenerating(false);
+        setLoadingUI(false);
       } else {
         trackEvent("cancelled-regenerate-image", {
           userId: user?.id,
@@ -634,6 +635,36 @@ export default function MainPage({
     })
   }
 
+  const uploadImage = (file: File) => {
+    // console.log('>> app._components.MainPage.uploadImage()', { haikuId, file });
+    setLoadingUI(true);
+    uploadHaikuImage(haikuId, file).then((haiku: Haiku) => {
+      setHaiku(haiku);
+      setLoadingUI(false);
+    }).catch((error: any) => {
+      console.error('>> app._components.MainPage.uploadImage()', { error });
+      setLoadingUI(false);
+    });
+  }
+
+  const updateHaikuImage = () => {
+    // console.log('>> app._components.MainPage.updateHaikuImage()', { haikuId });
+
+    const url = prompt("Image URL?");
+
+    if (typeof (url) == "string") {
+      // console.log('>> app._components.MainPage.updateHaikuImage()', { url });    
+      setLoadingUI(true);
+      haikuAction(haikuId, "updateImage", url).then((haiku: Haiku) => {
+        setHaiku(haiku);
+        setLoadingUI(false);
+      }).catch((error: any) => {
+        console.error('>> app._components.MainPage.updateHaikuImage()', { error });
+        setLoadingUI(false);
+      });
+    }
+  }
+
   useEffect(() => {
     // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
     // @ts-ignore
@@ -817,6 +848,8 @@ export default function MainPage({
         onCopyHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyHaiku}
         onCopyLink={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyLink}
         onLikeHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && likeHaiku}
+        onUploadImage={!haiku?.error && uploadImage}
+        onUpdateImage={!haiku?.error && updateHaikuImage}
       />
 
       {isPuzzleMode &&
