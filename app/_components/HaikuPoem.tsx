@@ -682,7 +682,15 @@ export default function HaikuPoem({
                       >
                         {/* set the width while editing */}
                         <div
-                          className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row gap-1 select-none _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
+                          className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row gap-1 _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
+                          style={{
+                            userSelect: "none",
+                            WebkitUserSelect: "none",
+                            WebkitTouchCallout: "none",
+                            MozUserSelect: "none",
+                            msUserSelect: "none",
+                            WebkitTapHighlightColor: "rgba(0,0,0,0)",
+                          }}
                         // onMouseLeave={(e: any) => handleMouseLeaveLine(e, i)}
                         >
                           {poemLine.map((word: string, j: number) => (
@@ -707,13 +715,13 @@ export default function HaikuPoem({
                                 console.log("onPointerEnter", { rect: e.target.getBoundingClientRect(), ref: refs[i][j].current.getBoundingClientRect() });
 
                               }}
-                              // onPointerEnterCapture={console.log}
-                              // onPointerMoveCapture={console.log}
-                              // onPointerOver={console.log}
-                              // onDragOver={console.log}
-                              // onDragEnter={console.log}
-                              // onPointerDownCapture={console.log}
-                              // onTouchMove={console.log}
+                            // onPointerEnterCapture={console.log}
+                            // onPointerMoveCapture={console.log}
+                            // onPointerOver={console.log}
+                            // onDragOver={console.log}
+                            // onDragEnter={console.log}
+                            // onPointerDownCapture={console.log}
+                            // onTouchMove={console.log}
                             >
                               {/* Display  */}
                               <div
