@@ -681,7 +681,7 @@ export default function HaikuPoem({
                       >
                         {/* set the width while editing */}
                         <div
-                          className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row gap-1 _select-none _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
+                          className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row gap-1 select-none _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
                         // onMouseLeave={(e: any) => handleMouseLeaveLine(e, i)}
                         >
                           {poemLine.map((word: string, j: number) => (
