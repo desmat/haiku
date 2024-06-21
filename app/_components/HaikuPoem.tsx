@@ -729,10 +729,10 @@ export default function HaikuPoem({
                               >
                                 <PopOnClick color={haiku?.bgColor}>
 
-                                  {i == 0 &&
+                                  {j == 0 &&
                                     <span>{upperCaseFirstLetter(displayPoem[i][j])}</span>
                                   }
-                                  {i != 0 &&
+                                  {j != 0 &&
                                     <span>{displayPoem[i][j]}</span>
                                   }
                                 </PopOnClick>
@@ -741,10 +741,10 @@ export default function HaikuPoem({
                               <div
                                 className="opacity-10"
                               >
-                                {i == 0 &&
+                                {j == 0 &&
                                   <span>{upperCaseFirstLetter(word)}</span>
                                 }
-                                {i != 0 &&
+                                {j != 0 &&
                                   <span>{word}</span>
                                 }
                               </div>
