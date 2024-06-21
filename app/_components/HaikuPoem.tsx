@@ -499,6 +499,7 @@ export default function HaikuPoem({
 
     mouseDown = false;
     setMouseDown(mouseDown);
+    killWord(lineNum, wordNum);
   };
 
   const handleDragStartWord = async (e: any, lineNum: number, wordNum: number) => {
@@ -701,11 +702,11 @@ export default function HaikuPoem({
                               // onPointerDown={console.log}
                               // onPointerMove={console.log}
                               // onPointerOverCapture={console.log}
-                              // onPointerEnter={(e: any) => {
-                              //   // @ts-ignore
-                              //   console.log("onPointerEnter", { rect: e.target.getBoundingClientRect(), ref: refs[i][j].current.getBoundingClientRect() });
+                              onPointerEnter={(e: any) => {
+                                // @ts-ignore
+                                console.log("onPointerEnter", { rect: e.target.getBoundingClientRect(), ref: refs[i][j].current.getBoundingClientRect() });
 
-                              // }}
+                              }}
                               // onPointerEnterCapture={console.log}
                               // onPointerMoveCapture={console.log}
                               // onPointerOver={console.log}
