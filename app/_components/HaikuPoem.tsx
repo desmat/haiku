@@ -475,7 +475,7 @@ export default function HaikuPoem({
       updatedEditPoem[lineNum][wordNum] = "...";
       setEditPoem(updatedEditPoem);
 
-      // debounced(updatedEditPoem);
+      debounced(updatedEditPoem);
     }
     // console.log(">> app._component.HaikuPoem.handleClickWord", { displayPoem });
   };
@@ -573,7 +573,7 @@ export default function HaikuPoem({
     },
     10
   );
-
+``
   const handleTouchMove = async (e: any) => {
     debouncedTouchMoved(e);
   }
