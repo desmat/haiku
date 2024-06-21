@@ -1,13 +1,13 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes } from '@/services/haikus';
+import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes, createHaiku } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
 import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
 import { userUsage } from '@/services/usage';
 import { DailyHaiku, Haiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
-import shuffleArray from '@/utils/shuffleArray';
+import { LanguageType } from '@/types/Languages';
 import { USAGE_LIMIT } from '@/types/Usage';
 
 export const maxDuration = 300;
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest, params?: any) {
     // }
 
     return NextResponse.json({ haikus: [randomHaiku] });
-  } else if (typeof(query.latest) == "string") {
+  } else if (typeof (query.latest) == "string") {
     const fromDate = moment().add((query.latest || 1) * -1, "days").valueOf();
     const latest = await getLatestHaikus(fromDate);
 
@@ -99,21 +99,53 @@ export async function GET(request: NextRequest, params?: any) {
   return NextResponse.json({ haikus: [todaysHaiku] });
 }
 
-export async function POST(request: Request) {
-  console.log('>> app.api.haiku.POST', {});
+export async function POST(request: NextRequest) {  
+  const contentType = request.headers.get("content-type");
+  console.log('>> app.api.haiku.POST', { contentType });
 
-  const data: any = await request.json();
-  let { subject, lang, artStyle } = data.request;
-  let mood;
-  if (subject.indexOf("/") > -1) {
-    const split = subject.split("/");
-    subject = split[0];
-    mood = split[1];
+  let subject: string | undefined;
+  let lang: LanguageType | undefined;
+  let artStyle: string | undefined;
+  let mood: string | undefined;
+  let poemString: string | undefined;
+  let title: string | undefined;
+  let imageFile: File | undefined;
+
+  if (contentType && contentType.includes("multipart/form-data")) {
+    const [formData, { user }] = await Promise.all([
+      request.formData(),
+      userSession(request),
+    ]);
+
+    // only admins can upload their own images
+    if (!user.isAdmin) {
+      return NextResponse.json(
+        { success: false, message: 'authorization failed' },
+        { status: 403 }
+      );
+    }
+
+    title = formData.get("title") as string;
+    poemString = formData.get("poem") as string;
+    imageFile = formData.get("image") as File;
+
+    console.log(">> app.api.haiku.POST", { title, poemString, imageFile });
+  } else {
+    // assume json
+    const data: any = await request.json();
+    subject = data.request.subject;
+    lang = data.request.lang;
+    artStyle = data.request.artStyle;
+    if (subject && subject.indexOf("/") > -1) {
+      const split = subject.split("/");
+      subject = split[0];
+      mood = split[1];
+    }
+    console.log('>> app.api.haiku.POST', { lang, subject, mood, artStyle });
   }
-  console.log('>> app.api.haiku.POST', { lang, subject, mood, artStyle });
 
   const { user } = await userSession(request);
-  let reachedUsageLimit = false; // actually _will_ reach usage limit shortly
+  let reachedUsageLimit = false; // actually _will it_ reach usage limit shortly
 
   if (!user.isAdmin) {
     const usage = await userUsage(user);
@@ -129,7 +161,33 @@ export async function POST(request: Request) {
     }
   }
 
-  const updatedHaiku = await generateHaiku(user, lang, subject, mood, artStyle);
+  let haiku;
+  if (title && poemString && imageFile) {
+    // only admins can create specific haikus
+    if (!user.isAdmin) {
+      return NextResponse.json(
+        { success: false, message: 'authorization failed' },
+        { status: 403 }
+      );
+    }
 
-  return NextResponse.json({ haiku: updatedHaiku, reachedUsageLimit });
+    const poem = poemString.split(/[\n\/]/);
+    if (poem?.length != 3) {
+      return NextResponse.json(
+        { success: false, message: 'haiku poem must have 3 lines' },
+        { status: 400 }
+      );
+    }
+
+    const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
+    const imageType = imageFile.type;
+
+    // @ts-ignore
+    haiku = await createHaiku(user, { theme: title, poem, imageBuffer, imageType });
+  } else {
+    // console.log('>> app.api.haiku.POST generating new haiku', { lang, subject, mood, artStyle });
+    haiku = await generateHaiku(user, { lang, subject, mood, artStyle })
+  }
+
+  return NextResponse.json({ haiku, reachedUsageLimit });
 }

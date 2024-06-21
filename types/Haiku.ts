@@ -1,10 +1,13 @@
 export type Haiku = {
   id: string,
-  status?: string,
-  createdAt?: number,
-  createdBy?: string,
+  createdAt: number,
+  createdBy: string,
+  theme: string,
+  poem: string[],
+  bgImage: string,
   updatedAt?: number,
   updatedBy?: string,
+  status?: string,
 } | any;
 
 export type UserHaiku = {

@@ -173,16 +173,88 @@ export async function getHaikuNumLikes(id: number) {
     .length;
 }
 
-export async function createHaiku(user: User, haiku: Haiku): Promise<Haiku> {
-  console.log(">> services.haiku.createHaiku", { user });
+export async function createHaiku(user: User, {
+  theme,
+  poem,
+  imageBuffer,
+  imageType,
+  imageUrl,
+  mood,
+  artStyle,
+  poemPrompt,
+  languageModel,
+  imagePrompt,
+  imageModel,
+  lang,
+}: {
+  theme: string,
+  poem: string[],
+  // note: either imageBuffer or imageUrl should be provided
+  imageBuffer?: Buffer,
+  imageType?: string
+  imageUrl?: string,
+  mood?: string,
+  artStyle?: string,
+  poemPrompt?: string,
+  languageModel?: string,
+  imagePrompt?: string,
+  imageModel?: string,
+  lang?: LanguageType,
+}): Promise<Haiku> {
+  console.log(">> services.haiku.createHaiku", { user, theme, poem, imageUrl });
+
+  if (!imageBuffer && !imageUrl) {
+    throw 'neither imageBuffer or imageUrl provided';
+  }
+
+  const debug = process.env.OPENAI_API_KEY == "DEBUG";
+  debug && console.warn(`>> services.haiku.createHaiku: DEBUG mode: not uploading to blob store`);
+
+  if (!imageBuffer && imageUrl) {
+    const imageRet = await fetch(imageUrl);
+    // console.log(">> services.haiku.createHaiku", { imageRet });
+    imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+  }
+
+  const getColors = require('get-image-colors')
+  const colors = await getColors(imageBuffer, imageType || 'image/png');
+  // console.log(">> services.haiku.createHaiku", { colors });
+  // sort by darkness and pick darkest for foreground, lightest for background
+  const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
+
+  const haikuId = uuid();
+
+  if (!debug && imageBuffer) {
+    const filename = `haiku-${haikuId}-${theme?.replaceAll(/\W/g, "_").toLowerCase()}.png`;
+    const blob = !debug && await put(filename, imageBuffer, {
+      access: 'public',
+      addRandomSuffix: false,
+    });
+    // console.log(">> services.haiku.createHaiku", { subject, filename, blob });
+    imageUrl = blob.url;
+  }
 
   let create = {
-    ...haiku,
-    id: haiku.id || uuid(),
-    createdBy: user.id,
-    createdAt: moment().valueOf(),
+    id: haikuId,
+    theme,
+    poem,
+    bgImage: imageUrl,
     status: "created",
+    mood,
+    artStyle,
+    poemPrompt,
+    languageModel,
+    imagePrompt,
+    imageModel,
+    color: sortedColors[0].darken(0.5).hex(),
+    bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
+    colorPalette: sortedColors.map((c: any) => c.hex()),
+    lang,
   } as Haiku;
+
+  if (!user.isAdmin) {
+    incUserUsage(user, "haikusCreated");
+  }
 
   return store.haikus.create(user.id, create);
 }
@@ -240,7 +312,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
   // a bit akward to do this here and in this way but we're just covering a narrow case
   const usage = await userUsage(user);
   const { haikusRegenerated } = usage[moment().format("YYYYMMDD")];
-  console.log('>> services.haiku.completeHaikuPoem', { haikusRegenerated, usage });
+  // console.log('>> services.haiku.completeHaikuPoem', { haikusRegenerated, usage });
 
   if (haikusRegenerated && haikusRegenerated >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU) {
     throw 'exceeded daily limit';
@@ -297,12 +369,12 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   // console.log(">> services.haiku.regenerateHaikuImage", { imageRet });
 
   const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
-  console.log(">> services.haiku.generateHaiku", { imageBuffer });
+  // console.log(">> services.haiku.generateHaiku", { imageBuffer });
 
   const getColors = require('get-image-colors')
 
   const colors = await getColors(imageBuffer, 'image/png');
-  console.log(">> services.haiku.generateHaiku", { colors });
+  // console.log(">> services.haiku.generateHaiku", { colors });
 
   // sort by darkness and pick darkest for foreground, lightest for background
   const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
@@ -368,7 +440,23 @@ export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, 
   return saveHaiku(user, updatedHaiku);
 }
 
-export async function generateHaiku(user: any, lang?: LanguageType, subject?: string, mood?: string, artStyle?: string): Promise<Haiku> {
+export async function generateHaiku(user: User, {
+  lang,
+  subject,
+  mood,
+  artStyle,
+  // title,
+  // poem,
+  // image,
+}: {
+  lang?: LanguageType,
+  subject?: string,
+  mood?: string,
+  artStyle?: string,
+  // title?: string
+  // poem?: string[],
+  // image?: Buffer,
+}): Promise<Haiku> {
   console.log(">> services.haiku.generateHaiku", { lang, subject, mood, user });
   const language = supportedLanguages[lang || "en"].name;
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
@@ -378,50 +466,24 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
     prompt: poemPrompt,
     model: languageModel,
     response: {
-      haiku: poem,
+      haiku: generatedPoem,
       subject: generatedSubject,
       mood: generatedMood,
       lang: generatedLang,
     }
   } = await openai.generateHaiku(language, subject, mood);
   // console.log(">> services.haiku.generateHaiku", { ret });
-  console.log(">> services.haiku.generateHaiku", { poem, generatedSubject, generatedMood, poemPrompt });
+  console.log(">> services.haiku.generateHaiku", { generatedPoem, generatedSubject, generatedMood, poemPrompt });
 
   const {
-    url: openaiUrl,
+    url: imageUrl,
     prompt: imagePrompt,
     artStyle: selectedArtStyle,
     model: imageModel,
   } = await openai.generateBackgroundImage(subject || generatedSubject, mood || generatedMood, artStyle);
 
-  const imageRet = await fetch(openaiUrl);
-  // console.log(">> services.haiku.generateHaiku", { imageRet });
-
-  const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
-  console.log(">> services.haiku.generateHaiku", { imageBuffer });
-
-  const getColors = require('get-image-colors')
-
-  const colors = await getColors(imageBuffer, 'image/png');
-  console.log(">> services.haiku.generateHaiku", { colors });
-
-  // sort by darkness and pick darkest for foreground, lightest for background
-  const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
-
-  const haikuId = uuid();
-  const filename = `haiku-${haikuId}-${generatedSubject?.replaceAll(/\W/g, "_").toLowerCase()}.png`;
-  const blob = !debugOpenai && await put(filename, imageBuffer, {
-    access: 'public',
-    addRandomSuffix: false,
-  });
-  // console.log(">> services.haiku.generateHaiku", { subject, filename, blob });
-
-  let haiku = {
-    id: haikuId,
+  return createHaiku( user, {
     lang: generatedLang || lang || "en",
-    createdBy: user.id,
-    createdAt: moment().valueOf(),
-    status: "created",
     theme: generatedSubject,
     mood: generatedMood,
     artStyle: selectedArtStyle,
@@ -429,19 +491,9 @@ export async function generateHaiku(user: any, lang?: LanguageType, subject?: st
     languageModel,
     imagePrompt,
     imageModel,
-    // @ts-ignore
-    bgImage: debugOpenai ? openaiUrl : blob.url,
-    color: sortedColors[0].darken(0.5).hex(),
-    bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
-    colorPalette: sortedColors.map((c: any) => c.hex()),
-    poem,
-  } as Haiku;
-
-  if (!user.isAdmin) {
-    incUserUsage(user, "haikusCreated");
-  }
-
-  return store.haikus.create(user.id, haiku);
+    imageUrl,
+    poem: generatedPoem,
+  });
 }
 
 export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
