@@ -380,6 +380,11 @@ export default function HaikuPoem({
   let [displayPoem, setDisplayPoem] = useState<string[][]>(haikuPoem);
   let [editPoem, setEditPoem] = useState<string[][]>(haikuPoem);
   let [currentPoem, setCurrentPoem] = useState<string[][]>(haikuPoem);
+  let refs = [
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+  ]
 
   let [savingLine, setSavingLine] = useState<boolean[]>(haiku && haiku.poem.map((line: string) => false));
 
@@ -388,7 +393,7 @@ export default function HaikuPoem({
     (value: any) => {
       // setDisplayPoem([...value]);
       // setEditPoem([...value]);
-      
+
       // join the words then consolidate the possible "... ..." repetition
       const updatePoemRequest = value.map((line: string[]) => line.join(" ").replaceAll(/(\.\.\.\s?)+/g, "..."));
       const updateLineRequest = updatePoemRequest.map((line: string, i: number) => {
@@ -423,23 +428,23 @@ export default function HaikuPoem({
         // only update requested lines
         // NOTE: with overlapping requests this won't work
         setDisplayPoem((poem: string[][]) => {
-          return poem.map((line: string[], i: number) => true || updateLineRequest[i] 
+          return poem.map((line: string[], i: number) => true || updateLineRequest[i]
             ? haiku.poem[i].split(/\s+/)
             : line);
         });
 
         setEditPoem((poem: string[][]) => {
-          return poem.map((line: string[], i: number) => true || updateLineRequest[i] 
+          return poem.map((line: string[], i: number) => true || updateLineRequest[i]
             ? haiku.poem[i].split(/\s+/)
             : line);
         });
-        
+
         setCurrentPoem((poem: string[][]) => {
-          return poem.map((line: string[], i: number) => true || updateLineRequest[i] 
+          return poem.map((line: string[], i: number) => true || updateLineRequest[i]
             ? haiku.poem[i].split(/\s+/)
             : line);
         });
-        
+
         setSaving(false);
         // setSavingLine(updateLineRequest.map((saving: boolean, i: number) => saving ? false : savingLine[i]));
         updateLineRequest.forEach((saving: boolean, i: number) => {
@@ -475,8 +480,6 @@ export default function HaikuPoem({
     // console.log(">> app._component.HaikuPoem.handleClickWord", { displayPoem });
   };
 
-
-
   const handleClickWord = async (e: any, lineNum: number, wordNum: number) => {
     console.log(">> app._component.HaikuPoem.handleClickWord", { e, lineNum, wordNum, displayPoem });
 
@@ -499,13 +502,13 @@ export default function HaikuPoem({
   };
 
   const handleDragStartWord = async (e: any, lineNum: number, wordNum: number) => {
-    // console.log(">> app._component.HaikuPoem.handleDragStartWord", { e, lineNum, wordNum });
+    console.log(">> app._component.HaikuPoem.handleDragStartWord", { e, lineNum, wordNum });
 
     // TODO
   };
 
   const handleDragEndWord = async (e: any, lineNum: number, wordNum: number) => {
-    // console.log(">> app._component.HaikuPoem.handleDragEndWord", { e, lineNum, wordNum });
+    console.log(">> app._component.HaikuPoem.handleDragEndWord", { e, lineNum, wordNum });
 
     // TODO
   };
@@ -609,6 +612,33 @@ export default function HaikuPoem({
               maxWidth: showcaseMode ? "calc(100vw - 64px)" : "800px",
               minWidth: "200px",
             }}
+            // onPointerMove={(e: any) => console.log("onPointerMove", { x: e.screenX, y: e.screenY, e})}
+            onPointerMove={console.log}
+            onTouchMove={(e: any) => {
+              // var touch = e.originalEvent?.touches && e.originalEvent?.touches[0] || e.originalEvent?.changedTouches && e.originalEvent?.changedTouches[0];
+              var touch = e.touches[0];
+              var touchX = touch.pageX;
+              var touchY = touch.pageY;
+
+              const overWord = refs.map((line: any[], i: number) => line.map((ref: any, j: number) => {
+                if (!ref?.current) return undefined;
+
+                const { x, y, width, height } = ref.current.getBoundingClientRect();
+
+                if (touchX >= x && touchX <= x + width &&
+                  touchY >= y && touchY <= y + height) {
+                  return [i, j]
+                }
+              })).flat().filter(Boolean)[0];
+
+              // console.log("onTouchMove", { x: touchX, y: touchY, overWord });
+
+              if (overWord && overWord.length >= 2) {
+                // @ts-ignore
+                killWord(overWord[0], overWord[1]);
+              }
+            }}
+
           >
             <div
               className="_bg-purple-200 flex flex-col _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
@@ -617,6 +647,12 @@ export default function HaikuPoem({
               style={{
                 cursor: showcaseMode ? "pointer" : "",
                 fontSize,
+
+
+                // width: 500,
+                // height: 300,
+                // background: "pink",
+
               }}
             >
               <PopOnClick
@@ -644,22 +680,39 @@ export default function HaikuPoem({
                         onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
                       >
                         {/* set the width while editing */}
-                        <div 
-                          className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row gap-1 select-none _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
-                          // onMouseLeave={(e: any) => handleMouseLeaveLine(e, i)}
+                        <div
+                          className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row gap-1 _select-none _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
+                        // onMouseLeave={(e: any) => handleMouseLeaveLine(e, i)}
                         >
                           {poemLine.map((word: string, j: number) => (
                             <div
                               key={`line-${i}-word-${j}`}
+                              // @ts-ignore
+                              ref={refs[i][j]}
                               className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] ${savingLine[i] ? "cursor-not-allowed opacity-40 animate-pulse" : "cursor-pointer"}`}
-                              onClick={(e: any) => handleClickWord(e, i, j)}
+                              // onClick={(e: any) => handleClickWord(e, i, j)}
                               onMouseDown={(e: any) => handleMouseDownWord(e, i, j)}
                               onMouseUp={(e: any) => handleMouseUpWord(e, i, j)}
                               onDragStart={(e: any) => handleDragStartWord(e, i, j)}
                               onDragEnd={(e: any) => handleDragEndWord(e, i, j)}
                               onMouseEnter={(e: any) => handleMouseEnterWord(e, i, j)}
                               onMouseLeave={(e: any) => handleMouseLeaveWord(e, i, j)}
-                              onMouseMove={(e: any) => handleMouseMoveWord(e, i, j)}                          
+                              onMouseMove={(e: any) => handleMouseMoveWord(e, i, j)}
+                              // onPointerDown={console.log}
+                              // onPointerMove={console.log}
+                              // onPointerOverCapture={console.log}
+                              // onPointerEnter={(e: any) => {
+                              //   // @ts-ignore
+                              //   console.log("onPointerEnter", { rect: e.target.getBoundingClientRect(), ref: refs[i][j].current.getBoundingClientRect() });
+
+                              // }}
+                              // onPointerEnterCapture={console.log}
+                              // onPointerMoveCapture={console.log}
+                              // onPointerOver={console.log}
+                              // onDragOver={console.log}
+                              // onDragEnter={console.log}
+                              // onPointerDownCapture={console.log}
+                              // onTouchMove={console.log}
                             >
                               {/* Display  */}
                               <div
