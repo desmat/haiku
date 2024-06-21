@@ -320,7 +320,7 @@ export default function BottomLinks({
               ref={fileInputRef}
               type="file"
               name="file"
-              accept="image/png" // TODO read other file types, convert to PNG 
+              accept="image/png, image/jpg, image/jpeg, image/gif, image/svg"
               className="hidden"
               onInput={(e: any) => {
                 // console.log("SUBMIT", { e, fileInputRef, file: fileInputRef?.current?.files && fileInputRef?.current?.files[0] });

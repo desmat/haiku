@@ -114,7 +114,9 @@ export async function POST(
     // console.log(">> app.api.haiku.[id].[action].POST", { imageRet });  
     const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
     // console.log(">> app.api.haiku.[id].[action].POST", { imageBuffer });
-    const updatedHaiku = await updateHaikuImage(user, haiku, imageBuffer);
+    const fileExtensionMatch = url.match(/.*(?:\.(jpg|jpeg|gif|png|svg)).*/i);
+    // console.log(">> app.api.haiku.[id].[action].POST", { url, fileExtensionMatch });
+    const updatedHaiku = await updateHaikuImage(user, haiku, imageBuffer, fileExtensionMatch ? `image/${fileExtensionMatch[1]}` : undefined);
     console.log(`>> app.api.haiku.[id].[action].POST`, { updatedHaiku });
     
     return NextResponse.json({ haiku: updatedHaiku });
@@ -149,7 +151,7 @@ export async function POST(
     }
 
     const imageBuffer = Buffer.from(await parts[0].arrayBuffer());
-    const updatedHaiku = await updateHaikuImage(user, haiku, imageBuffer);
+    const updatedHaiku = await updateHaikuImage(user, haiku, imageBuffer, parts[0].type);
     console.log(`>> app.api.haiku.[id].[action].POST`, { updatedHaiku });
     
     return NextResponse.json({ haiku: updatedHaiku });

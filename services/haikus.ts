@@ -335,11 +335,11 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   return saveHaiku(user, updatedHaiku);
 }
 
-export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer): Promise<Haiku> {
-  console.log(">> services.haiku.updateHaikuImage", { user, haiku, buffer });
+export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, type: string = "image/png"): Promise<Haiku> {
+  console.log(">> services.haiku.updateHaikuImage", { user, haiku, buffer, type });
 
   const getColors = require('get-image-colors');
-  const colors = await getColors(buffer, 'image/png');
+  const colors = await getColors(buffer, type);
   // console.log(">> services.haiku.updateHaikuImage", { colors });
 
   // sort by darkness and pick darkest for foreground, lightest for background

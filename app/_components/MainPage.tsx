@@ -641,6 +641,9 @@ export default function MainPage({
     uploadHaikuImage(haikuId, file).then((haiku: Haiku) => {
       setHaiku(haiku);
       setLoadingUI(false);
+    }).catch((error: any) => {
+      console.error('>> app._components.MainPage.uploadImage()', { error });
+      setLoadingUI(false);
     });
   }
 
@@ -655,7 +658,10 @@ export default function MainPage({
       haikuAction(haikuId, "updateImage", url).then((haiku: Haiku) => {
         setHaiku(haiku);
         setLoadingUI(false);
-      })
+      }).catch((error: any) => {
+        console.error('>> app._components.MainPage.updateHaikuImage()', { error });
+        setLoadingUI(false);
+      });
     }
   }
 
