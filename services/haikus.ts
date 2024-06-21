@@ -342,7 +342,16 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
     incUserUsage(user, "haikusRegenerated");
   }
 
-  return saveHaiku(user, {
+  // return saveHaiku(user, {
+  //   ...haiku,
+  //   poem: completedPoem,
+  //   theme: generatedSubject,
+  //   mood: generatedMood,
+  //   lang: generatedLang,
+  //   languageModel,
+  //   poemPrompt,
+  // });
+  return {
     ...haiku,
     poem: completedPoem,
     theme: generatedSubject,
@@ -350,7 +359,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
     lang: generatedLang,
     languageModel,
     poemPrompt,
-  });
+  }
 }
 
 export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: string): Promise<Haiku> {
@@ -482,7 +491,7 @@ export async function generateHaiku(user: User, {
     model: imageModel,
   } = await openai.generateBackgroundImage(subject || generatedSubject, mood || generatedMood, artStyle);
 
-  return createHaiku( user, {
+  return createHaiku(user, {
     lang: generatedLang || lang || "en",
     theme: generatedSubject,
     mood: generatedMood,

@@ -80,8 +80,8 @@ export default function HaikuPage({
               regenerateImage={regenerateImage}
               refresh={refresh}
               saveHaiku={saveHaiku}
-              copyHaiku={copyHaiku}
-              switchMode={switchMode}
+              // copyHaiku={copyHaiku}
+              // switchMode={switchMode}
             />
           </div>
         }

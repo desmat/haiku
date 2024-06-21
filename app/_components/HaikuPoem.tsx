@@ -16,6 +16,7 @@ import trackEvent from "@/utils/trackEvent";
 import PopOnClick from "./PopOnClick";
 import { StyledLayers } from "./StyledLayers";
 import { GenerateIcon } from "./nav/GenerateInput";
+import { useDebouncedCallback } from "use-debounce";
 
 const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
   return [
@@ -232,7 +233,7 @@ export default function HaikuPoem({
   const canCopy = copyAllowed && !editing && !saving;
   const editAllowed = !showcaseMode && saveHaiku && (user?.isAdmin || haiku?.createdBy == user?.id) && saveHaiku;
   const canClickEdit = editAllowed && !saving && !onboarding;
-  const canEdit = editAllowed && user?.isAdmin && !saving && !onboarding;
+  const canEdit = false; //editAllowed && user?.isAdmin && !saving && !onboarding;
   const regeneratePoemAllowed = regeneratePoem && (user?.isAdmin || haiku?.createdBy == user?.id) && regeneratePoem;
   const regenerateImageAllowed = regenerateImage && (user?.isAdmin || haiku?.createdBy == user?.id) && regenerateImage;
   const canRegeneratePoem = regeneratePoemAllowed && !editing && !saving;
@@ -280,11 +281,12 @@ export default function HaikuPoem({
   }
 
   const finishEdit = async () => {
-    // console.log('>> app._components.HaikuPoem.finishEdit()', { haiku, poem: haiku?.poem, updatedLines: updatedPoem });
+    console.log('>> app._components.HaikuPoem.finishEdit()', { haiku, poem: haiku?.poem, updatedLines: updatedPoem });
     setEditingLine(undefined);
     setAboutToEditLine(undefined);
 
     const hasUpdates = (original: string[], updates: string[]): boolean => {
+      console.log('>> app._components.HaikuPoem.finishEdit.hasUpdates()', { original, updates });
       return original
         .reduce((reduced: boolean, value: string, i: number) => {
           return reduced || typeof (updates[i]) == "string" && updates[i] != value;
@@ -373,6 +375,172 @@ export default function HaikuPoem({
     }
   };
 
+
+  const haikuPoem = haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word));
+  let [displayPoem, setDisplayPoem] = useState<string[][]>(haikuPoem);
+  let [editPoem, setEditPoem] = useState<string[][]>(haikuPoem);
+  let [currentPoem, setCurrentPoem] = useState<string[][]>(haikuPoem);
+
+  let [savingLine, setSavingLine] = useState<boolean[]>(haiku && haiku.poem.map((line: string) => false));
+
+  const debounced = useDebouncedCallback(
+    // function
+    (value: any) => {
+      // setDisplayPoem([...value]);
+      // setEditPoem([...value]);
+      
+      // join the words then consolidate the possible "... ..." repetition
+      const updatePoemRequest = value.map((line: string[]) => line.join(" ").replaceAll(/(\.\.\.\s?)+/g, "..."));
+      const updateLineRequest = updatePoemRequest.map((line: string, i: number) => {
+        const saving = line.includes("...") && !savingLine[i];
+        setSavingLine((savingLine: boolean[]) => {
+          savingLine[i] = true //saving ? true : savingLine[i];
+          return savingLine;
+        });
+        return saving;
+      });
+      console.log(">> app._component.HaikuPoem debounced", { value, updatePoemRequest, updateLineRequest, savingLine });
+
+      setSaving(true);
+      // setSavingLine(updateLineRequest.map((saving: boolean, i: number) => saving ? true : savingLine[i]));
+
+      saveHaiku({
+        ...haiku,
+        poem: updatePoemRequest,
+      }).then((haiku: Haiku) => {
+        console.log(">> app._component.HaikuPoem debounced saved", { value, updateLineRequest, savingLine, haiku });
+
+        // const updatedDisplayPoem = haiku.poem.map((line: string, i: number) => updateLineRequest[i]
+        //   ? line.split(/\s+/).map((word: string) => word)
+        //   : displayPoem[i]);
+        // const updatedEditPoem = haiku.poem.map((line: string, i: number) => updateLineRequest[i]
+        //   ? line.split(/\s+/).map((word: string) => word)
+        //   : editPoem[i])
+        // console.log(">> app._component.HaikuPoem debounced saved", { value, updatePoemRequest, updatedPoem, updateLineRequest, savingLine });
+        // setDisplayPoem(updatedDisplayPoem);
+        // setEditPoem(updatedEditPoem);
+
+        // only update requested lines
+        // NOTE: with overlapping requests this won't work
+        setDisplayPoem((poem: string[][]) => {
+          return poem.map((line: string[], i: number) => true || updateLineRequest[i] 
+            ? haiku.poem[i].split(/\s+/)
+            : line);
+        });
+
+        setEditPoem((poem: string[][]) => {
+          return poem.map((line: string[], i: number) => true || updateLineRequest[i] 
+            ? haiku.poem[i].split(/\s+/)
+            : line);
+        });
+        
+        setCurrentPoem((poem: string[][]) => {
+          return poem.map((line: string[], i: number) => true || updateLineRequest[i] 
+            ? haiku.poem[i].split(/\s+/)
+            : line);
+        });
+        
+        setSaving(false);
+        // setSavingLine(updateLineRequest.map((saving: boolean, i: number) => saving ? false : savingLine[i]));
+        updateLineRequest.forEach((saving: boolean, i: number) => {
+          setSavingLine((savingLine: boolean[]) => {
+            savingLine[i] = false //saving ? false : savingLine[i];
+            return savingLine;
+          });
+        });
+      });
+    },
+    // delay in ms
+    1000
+  );
+
+  console.log(">> app._component.HaikuPoem", { displayPoem, editPoem });
+
+  let [mouseDown, setMouseDown] = useState(false);
+
+  const killWord = async (lineNum: number, wordNum: number) => {
+    console.log(">> app._component.HaikuPoem.killWord", { lineNum, wordNum, displayPoem });
+
+    if (!savingLine[lineNum]) {
+      const updatedDisplayPoem = displayPoem.map((line: string[]) => [...line]);
+      updatedDisplayPoem[lineNum][wordNum] = "";
+      setDisplayPoem(updatedDisplayPoem);
+
+      const updatedEditPoem = editPoem.map((line: string[]) => [...line]);
+      updatedEditPoem[lineNum][wordNum] = "...";
+      setEditPoem(updatedEditPoem);
+
+      debounced(updatedEditPoem);
+    }
+    // console.log(">> app._component.HaikuPoem.handleClickWord", { displayPoem });
+  };
+
+
+
+  const handleClickWord = async (e: any, lineNum: number, wordNum: number) => {
+    console.log(">> app._component.HaikuPoem.handleClickWord", { e, lineNum, wordNum, displayPoem });
+
+    killWord(lineNum, wordNum);
+    // console.log(">> app._component.HaikuPoem.handleClickWord", { displayPoem });
+  };
+
+  const handleMouseDownWord = async (e: any, lineNum: number, wordNum: number) => {
+    console.log(">> app._component.HaikuPoem.handleMouseDownWord", { e, lineNum, wordNum });
+
+    mouseDown = true;
+    setMouseDown(mouseDown);
+  };
+
+  const handleMouseUpWord = async (e: any, lineNum: number, wordNum: number) => {
+    console.log(">> app._component.HaikuPoem.handleMouseUpWord", { e, lineNum, wordNum });
+
+    mouseDown = false;
+    setMouseDown(mouseDown);
+  };
+
+  const handleDragStartWord = async (e: any, lineNum: number, wordNum: number) => {
+    // console.log(">> app._component.HaikuPoem.handleDragStartWord", { e, lineNum, wordNum });
+
+    // TODO
+  };
+
+  const handleDragEndWord = async (e: any, lineNum: number, wordNum: number) => {
+    // console.log(">> app._component.HaikuPoem.handleDragEndWord", { e, lineNum, wordNum });
+
+    // TODO
+  };
+
+  const handleMouseEnterWord = async (e: any, lineNum: number, wordNum: number) => {
+    console.log(">> app._component.HaikuPoem.handleMouseEnterWord", { e, lineNum, wordNum });
+
+    if (mouseDown) {
+      killWord(lineNum, wordNum);
+    }
+  };
+
+  const handleMouseLeaveWord = async (e: any, lineNum: number, wordNum: number) => {
+    console.log(">> app._component.HaikuPoem.handleMouseLeaveWord", { e, lineNum, wordNum });
+
+    if (mouseDown) {
+      killWord(lineNum, wordNum);
+    }
+  };
+
+  const handleMouseMoveWord = async (e: any, lineNum: number, wordNum: number) => {
+    console.log(">> app._component.HaikuPoem.handleMouseMoveWord", { e, lineNum, wordNum });
+
+    if (mouseDown) {
+      killWord(lineNum, wordNum);
+    }
+  };
+
+  const handleMouseLeaveLine = async (e: any, lineNum: number, wordNum: number) => {
+    console.log(">> app._component.HaikuPoem.handleMouseLeaveLine", { e, lineNum, wordNum });
+
+    mouseDown = false;
+    setMouseDown(mouseDown);
+  };
+
   useEffect(() => {
     // console.log(">> app._component.SidePanel.useEffect", { mode, haiku });
     document.body.addEventListener('keydown', handleKeyDown);
@@ -393,19 +561,20 @@ export default function HaikuPoem({
       }
 
       {/* note: https://stackoverflow.com/questions/28269669/css-pseudo-elements-in-react */}
+      {/*
       <style
         dangerouslySetInnerHTML={{
           __html: `
             .poem-line-input div {
               background: none;
-              _background: pink; /* for debugging */
+              _background: pink; / * for debugging * /
               caret-color: ${haiku?.color || "#000000"};
               border-radius: 0.4rem;
               height: auto;
               padding: 0.15rem 0.5rem;
               outline: 1px solid ${haiku?.bgColor || ""}00;
             }
-            .poem-line-input.poem-line-${/* !editing && */ !saving && !onboarding && aboutToEditLine} div {
+            .poem-line-input.poem-line-${/ * !editing && * / !saving && !onboarding && aboutToEditLine} div {
               outline: 1px solid ${haiku?.bgColor || ""}66;
               background-color: ${haiku?.bgColor || "#ffffff"}44;  
             }
@@ -419,6 +588,7 @@ export default function HaikuPoem({
         }}
       >
       </style>
+      */}
       <div className="onboarding-container">
         {onboardingElement && ["poem"].includes(onboardingElement) &&
           <div className="onboarding-focus double" />
@@ -455,10 +625,10 @@ export default function HaikuPoem({
                 disabled={editing || !showcaseMode || (!canCopy && !canSwitchMode)}
                 active={!!(onboardingElement && onboardingElement.includes("poem"))}
               >
-                {haiku?.poem.map((poemLine: string, i: number) => (
+                {currentPoem.map((poemLine: string[], i: number) => (
                   <div key={i} className="md:my-[0.05rem] sm:my-[0.03rem] my-[0.15rem] _transition-all">
                     <StyledLayers styles={
-                      aboutToEdit || editing || saving
+                      aboutToEdit || editing //|| saving
                         ? styles.slice(0, 1)
                         : onboardingElement && !onboardingElement.includes("poem")
                           ? styles.slice(0, 2)
@@ -474,8 +644,52 @@ export default function HaikuPoem({
                         onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
                       >
                         {/* set the width while editing */}
-                        <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}>
-                          <ControlledInput
+                        <div 
+                          className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row gap-1 select-none _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
+                          // onMouseLeave={(e: any) => handleMouseLeaveLine(e, i)}
+                        >
+                          {poemLine.map((word: string, j: number) => (
+                            <div
+                              key={`line-${i}-word-${j}`}
+                              className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] ${savingLine[i] ? "cursor-not-allowed opacity-40 animate-pulse" : "cursor-pointer"}`}
+                              onClick={(e: any) => handleClickWord(e, i, j)}
+                              onMouseDown={(e: any) => handleMouseDownWord(e, i, j)}
+                              onMouseUp={(e: any) => handleMouseUpWord(e, i, j)}
+                              onDragStart={(e: any) => handleDragStartWord(e, i, j)}
+                              onDragEnd={(e: any) => handleDragEndWord(e, i, j)}
+                              onMouseEnter={(e: any) => handleMouseEnterWord(e, i, j)}
+                              onMouseLeave={(e: any) => handleMouseLeaveWord(e, i, j)}
+                              onMouseMove={(e: any) => handleMouseMoveWord(e, i, j)}                          
+                            >
+                              {/* Display  */}
+                              <div
+                                className="absolute top-0 left-0 w-0 h-0"
+                              >
+                                <PopOnClick color={haiku?.bgColor}>
+
+                                  {i == 0 &&
+                                    <span>{upperCaseFirstLetter(displayPoem[i][j])}</span>
+                                  }
+                                  {i != 0 &&
+                                    <span>{displayPoem[i][j]}</span>
+                                  }
+                                </PopOnClick>
+                              </div>
+                              {/* Keep the document structure */}
+                              <div
+                                className="opacity-10"
+                              >
+                                {i == 0 &&
+                                  <span>{upperCaseFirstLetter(word)}</span>
+                                }
+                                {i != 0 &&
+                                  <span>{word}</span>
+                                }
+                              </div>
+                            </div>
+                          ))
+                          }
+                          {/* <ControlledInput
                             id={i}
                             activeId={editingLine}
                             value={upperCaseFirstLetter(saving
@@ -485,7 +699,7 @@ export default function HaikuPoem({
                               : upperCaseFirstLetter(poemLine))}
                             select={select}
                             onChange={(value: string) => handleInputChange(value, i)}
-                          />
+                          /> */}
                         </div>
                       </div>
                     </StyledLayers>
@@ -646,7 +860,7 @@ export default function HaikuPoem({
             </div>
           </div>
         </PopOnClick >
-      </div>
+      </div >
     </div >
   )
 }

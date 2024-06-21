@@ -7,12 +7,14 @@ export default function PopOnClick({
   active,
   disabled,
   force,
+  className,
   children,
 }: {
   color?: string,
   active?: boolean,
   disabled?: boolean,
   force?: boolean,
+  className?: string,
   children: React.ReactNode,
 }) {
   const [pop, setPop] = useState(false);
@@ -30,6 +32,7 @@ export default function PopOnClick({
 
   return (
     <div
+      className={className || ""}
       style={{
         filter: `${pop || active ? `drop-shadow(0px 0px 16px ${color})` : ""}`,
       }}

@@ -184,14 +184,14 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
 
   console.log(`>> services.openai.completeHaiku`, { language, subject, mood, prompt });
 
-  if (process.env.OPENAI_API_KEY == "DEBUG") {
+  if (true || process.env.OPENAI_API_KEY == "DEBUG") {
     // for testing
     console.warn(`>> services.openai.completeHaiku: DEBUG mode: returning dummy response`);
-    // await delay(3000);
+    await delay(1000);
     return {
       response: {
         prompt,
-        haiku: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "_") : line),
+        haiku: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "___") : line),
         subject: subject || "test subject",
         mood: mood || "test mood",
         model: "debug",
