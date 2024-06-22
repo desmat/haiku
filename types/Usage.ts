@@ -12,5 +12,6 @@ export type UserUsage = {
 
 export const USAGE_LIMIT = {
   DAILY_CREATE_HAIKU: 10,
-  DAILY_REGENERATE_HAIKU: 20,
+  // TODO UNCRIPPLE
+  DAILY_REGENERATE_HAIKU: 120,
 };
