@@ -582,7 +582,7 @@ export default function HaikuPoem({
     lastTouchXY = [touchX, touchY];
     setLastTouchXY(lastTouchXY);
 
-    console.log(">> app._component.HaikuPoem.findMovedOver", { touchX, touchY, lastTouchX, lastTouchY, refBoundingClientRects });
+    // console.log(">> app._component.HaikuPoem.findMovedOver", { touchX, touchY, lastTouchX, lastTouchY, refBoundingClientRects });
 
     const overWords = refBoundingClientRects && refBoundingClientRects.map((line: any[], i: number) => line.map((rects: any, j: number) => {
       const { x, y, width, height } = rects;
@@ -595,7 +595,7 @@ export default function HaikuPoem({
     })).flat().filter(Boolean);
 
     const overWord = overWords && overWords[0];
-    console.log("app._component.HaikuPoem.findMovedOver", { x: touchX, y: touchY, overWord, overWords });
+    // console.log("app._component.HaikuPoem.findMovedOver", { x: touchX, y: touchY, overWord, overWords });
 
     if (overWord && overWord.length >= 2 && displayPoem[overWord[0]][overWord[1]]) {
       // @ts-ignore
