@@ -468,16 +468,19 @@ export default function HaikuPoem({
     setEditPoem(haikuPoem);
   }
 
-  const killWord = async (lineNum: number, wordNum: number) => {
-    // console.log(">> app._component.HaikuPoem.killWord", { lineNum, wordNum, displayPoem });
+  const killWords = async (words: any[]) => {
+    // console.log(">> app._component.HaikuPoem.killWords", { lineNum, wordNum, displayPoem });
 
-    if (!savingLine[lineNum]) {
+    if (!saving) { //!savingLine[lineNum]) {
       const updatedDisplayPoem = displayPoem.map((line: string[]) => [...line]);
-      updatedDisplayPoem[lineNum][wordNum] = "";
-      setDisplayPoem(updatedDisplayPoem);
-
       const updatedEditPoem = editPoem.map((line: string[]) => [...line]);
-      updatedEditPoem[lineNum][wordNum] = "...";
+      words.forEach((word: any) => {
+        const [lineNum, wordNum] = word;
+        updatedDisplayPoem[lineNum][wordNum] = "";
+        updatedEditPoem[lineNum][wordNum] = "...";
+      })
+
+      setDisplayPoem(updatedDisplayPoem);
       setEditPoem(updatedEditPoem);
 
       // debounced(updatedEditPoem);
@@ -488,7 +491,7 @@ export default function HaikuPoem({
   const handleClickWord = async (e: any, lineNum: number, wordNum: number) => {
     console.log(">> app._component.HaikuPoem.handleClickWord", { e, lineNum, wordNum, displayPoem });
 
-    killWord(lineNum, wordNum);
+    killWords([lineNum, wordNum]);
     // console.log(">> app._component.HaikuPoem.handleClickWord", { displayPoem });
   };
 
@@ -504,7 +507,7 @@ export default function HaikuPoem({
 
     mouseDown = false;
     setMouseDown(mouseDown);
-    killWord(lineNum, wordNum);
+    killWords([lineNum, wordNum]);
   };
 
   const handleDragStartWord = async (e: any, lineNum: number, wordNum: number) => {
@@ -523,7 +526,7 @@ export default function HaikuPoem({
     console.log(">> app._component.HaikuPoem.handleMouseEnterWord", { e, lineNum, wordNum });
 
     if (mouseDown) {
-      killWord(lineNum, wordNum);
+      killWords([lineNum, wordNum]);
     }
   };
 
@@ -531,7 +534,7 @@ export default function HaikuPoem({
     console.log(">> app._component.HaikuPoem.handleMouseLeaveWord", { e, lineNum, wordNum });
 
     if (mouseDown) {
-      killWord(lineNum, wordNum);
+      killWords([lineNum, wordNum]);
     }
   };
 
@@ -539,7 +542,7 @@ export default function HaikuPoem({
     console.log(">> app._component.HaikuPoem.handleMouseMoveWord", { e, lineNum, wordNum });
 
     if (mouseDown) {
-      killWord(lineNum, wordNum);
+      killWords([lineNum, wordNum]);
     }
   };
 
@@ -551,6 +554,7 @@ export default function HaikuPoem({
   };
 
   let [refBoundingClientRects, setRefBoundingClientRects] = useState<any[][]>();
+  let [lastTouchXY, setLastTouchXY] = useState<[number, number]>();
 
   const handlePointerEnterWord = async (e: any, lineNum: number, wordNum: number) => {
     console.log(">> app._component.HaikuPoem.handlePointerEnterWord", { e, lineNum, wordNum });
@@ -561,36 +565,47 @@ export default function HaikuPoem({
       );
     setRefBoundingClientRects(refBoundingClientRects);
     console.log(">> app._component.HaikuPoem.handlePointerEnterWord", { refBoundingClientRects });
+
+    lastTouchXY = [e.clientX, e.clientY];
+    setLastTouchXY(lastTouchXY);
   }
 
   const findMovedOver = (e: any) => {
     // var touch = e.originalEvent?.touches && e.originalEvent?.touches[0] || e.originalEvent?.changedTouches && e.originalEvent?.changedTouches[0];
-    var touch = e.touches[0];
-    var touchX = touch.pageX;
-    var touchY = touch.pageY;
+    const touch = e.touches[0];
+    const touchX = touch.pageX;
+    const touchY = touch.pageY;
 
-    console.log(">> app._component.HaikuPoem.debouncedTouchMoved debounced", { touchX, touchY, refBoundingClientRects });
+    const lastTouchX = lastTouchXY && lastTouchXY.length >= 1 && lastTouchXY[0] || touchX;
+    const lastTouchY = lastTouchXY && lastTouchXY.length >= 2 && lastTouchXY[1] || touchY;
 
-    const overWord = refBoundingClientRects && refBoundingClientRects.map((line: any[], i: number) => line.map((rects: any, j: number) => {
+    lastTouchXY = [touchX, touchY];
+    setLastTouchXY(lastTouchXY);
+
+    console.log(">> app._component.HaikuPoem.findMovedOver", { touchX, touchY, lastTouchX, lastTouchY, refBoundingClientRects });
+
+    const overWords = refBoundingClientRects && refBoundingClientRects.map((line: any[], i: number) => line.map((rects: any, j: number) => {
       const { x, y, width, height } = rects;
 
-      if (touchX >= x && touchX <= x + width &&
-        touchY >= y && touchY <= y + height) {
+      if (touchX >= x && lastTouchX <= x + width
+        && touchY >= y && lastTouchY <= y + height
+      ) {
         return [i, j]
       }
-    })).flat().filter(Boolean)[0];
+    })).flat().filter(Boolean);
 
-    console.log("onTouchMove", { x: touchX, y: touchY, overWord });
+    const overWord = overWords && overWords[0];
+    console.log("app._component.HaikuPoem.findMovedOver", { x: touchX, y: touchY, overWord, overWords });
 
     if (overWord && overWord.length >= 2 && displayPoem[overWord[0]][overWord[1]]) {
       // @ts-ignore
-      killWord(overWord[0], overWord[1]);
+      killWords(overWords);
     }
   }
 
   const debouncedTouchMoved = useDebouncedCallback(
     findMovedOver,
-    10
+    100
   );
   ``
   const handleTouchMove = async (e: any) => {
