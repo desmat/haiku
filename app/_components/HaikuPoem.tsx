@@ -300,7 +300,7 @@ export default function HaikuPoem({
       return;
     }
 
-    setAboutToSave(false);
+    // setAboutToSave(false);
     setSaving(true);
 
     const syllables = haiku?.poem
@@ -414,7 +414,7 @@ export default function HaikuPoem({
       // });
       console.log(">> app._component.HaikuPoem debounced", { editPoem, updatePoemRequest, savingLine });
 
-      setAboutToSave(false);
+      // setAboutToSave(false);
       setSaving(true);
       // setSavingLine(updateLineRequest.map((saving: boolean, i: number) => saving ? true : savingLine[i]));
 
@@ -455,7 +455,7 @@ export default function HaikuPoem({
         });
 
         setSaving(false);
-        setAboutToSave(false);
+        // setAboutToSave(false);
         // setSavingLine(updateLineRequest.map((saving: boolean, i: number) => saving ? false : savingLine[i]));
         // updateLineRequest.forEach((saving: boolean, i: number) => {
         //   setSavingLine((savingLine: boolean[]) => {
@@ -482,7 +482,7 @@ export default function HaikuPoem({
     () => {
       setDisplayPoem(displayPoem.map((line: string[]) => [...line]));
       setEditPoem(editPoem.map((line: string[]) => [...line]));
-      setAboutToSave(false);
+      // setAboutToSave(false);
     },
     10
   )
@@ -507,7 +507,7 @@ export default function HaikuPoem({
         debouncedSetPoemStates();
       }
 
-      debouncedSetAboutToSave();
+      // debouncedSetAboutToSave();
       debounced();
     }
     // console.log(">> app._component.HaikuPoem.handleClickWord", { displayPoem });
@@ -564,7 +564,7 @@ export default function HaikuPoem({
   const debouncedSetLastTouchXY = useDebouncedCallback(
     () => {
       setLastTouchXY(lastTouchXY);
-      setAboutToSave(false);
+      // setAboutToSave(false);
       // debouncedSetAboutToSave();
     },
     100
@@ -777,7 +777,7 @@ export default function HaikuPoem({
                               ref={refs[i][j]}
                               className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] ${aboutToSave ? "opacity-50" : saving ? "cursor-wait opacity-50 animate-pulse" : killingWords ? "cursor-crosshair" : "cursor-pointer"}`}
                               style={{
-                                transition: "opacity 0.2s ease-out"
+                                transition: "opacity 0.5s ease-out"
                               }}
                               // onClick={(e: any) => handleClickWord(e, i, j)}
                               onMouseDown={(e: any) => handleMouseDownWord(e, i, j)}
