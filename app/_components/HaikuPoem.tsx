@@ -386,6 +386,7 @@ export default function HaikuPoem({
   ]
 
   let [savingLine, setSavingLine] = useState<boolean[]>(haiku && haiku.poem.map((line: string) => false));
+  let [killingWords, setKillingWords] = useState(false);
 
   const debounced = useDebouncedCallback(
     // function
@@ -520,56 +521,29 @@ export default function HaikuPoem({
     setMouseDown(mouseDown);
   };
 
-  const handleMouseUpWord = async (e: any, lineNum: number, wordNum: number) => {
-    console.log(">> app._component.HaikuPoem.handleMouseUpWord", { e, lineNum, wordNum });
+  const handleMouseUp = async (e: any) => {
+    console.log(">> app._component.HaikuPoem.handleMouseUp", { e });
 
     mouseDown = false;
     setMouseDown(mouseDown);
+    killingWords = false;
+    setKillingWords(killingWords);
+
     // TODO either bring this back or allow single-tap for showcase mode
     // killWords([[lineNum, wordNum]]);
-  };
-
-  const handleDragStartWord = async (e: any, lineNum: number, wordNum: number) => {
-    console.log(">> app._component.HaikuPoem.handleDragStartWord", { e, lineNum, wordNum });
-
-    // TODO
-  };
-
-  const handleDragEndWord = async (e: any, lineNum: number, wordNum: number) => {
-    console.log(">> app._component.HaikuPoem.handleDragEndWord", { e, lineNum, wordNum });
-
-    // TODO
-  };
-
-  const handleMouseEnterWord = async (e: any, lineNum: number, wordNum: number) => {
-    console.log(">> app._component.HaikuPoem.handleMouseEnterWord", { e, lineNum, wordNum });
-
-    if (mouseDown) {
-      killWords([[lineNum, wordNum]]);
-    }
-  };
-
-  const handleMouseLeaveWord = async (e: any, lineNum: number, wordNum: number) => {
-    console.log(">> app._component.HaikuPoem.handleMouseLeaveWord", { e, lineNum, wordNum });
-
-    if (mouseDown) {
-      killWords([[lineNum, wordNum]]);
-    }
   };
 
   const handleMouseMoveWord = async (e: any, lineNum: number, wordNum: number) => {
     console.log(">> app._component.HaikuPoem.handleMouseMoveWord", { e, lineNum, wordNum });
 
     if (mouseDown) {
+      if (!killingWords) {
+        killingWords = true;
+        setKillingWords(killingWords);
+      }
+
       killWords([[lineNum, wordNum]]);
     }
-  };
-
-  const handleMouseLeaveLine = async (e: any, lineNum: number, wordNum: number) => {
-    console.log(">> app._component.HaikuPoem.handleMouseLeaveLine", { e, lineNum, wordNum });
-
-    mouseDown = false;
-    setMouseDown(mouseDown);
   };
 
   let [refBoundingClientRects, setRefBoundingClientRects] = useState<any[][]>();
@@ -614,15 +588,19 @@ export default function HaikuPoem({
 
     // console.log(">> app._component.HaikuPoem.findMovedOver", { touchX, touchY, lastTouchX, lastTouchY, refBoundingClientRects });
 
-    const overWords = refBoundingClientRects && refBoundingClientRects.map((line: any[], i: number) => line.map((rects: any, j: number) => {
-      const { x, y, width, height } = rects;
+    const overWords = refBoundingClientRects && refBoundingClientRects
+      .map((line: any[], i: number) => line
+        .map((rects: any, j: number) => {
+          const { x, y, width, height } = rects;
 
-      if (touchX >= x && lastTouchX <= x + width
-        && touchY >= y && lastTouchY <= y + height
-      ) {
-        return [i, j]
-      }
-    })).flat().filter(Boolean);
+          if (touchX >= x && lastTouchX <= x + width
+            && touchY >= y && lastTouchY <= y + height
+          ) {
+            return [i, j]
+          }
+        }))
+      .flat()
+      .filter(Boolean);
 
     const overWord = overWords && overWords[0];
     // console.log("app._component.HaikuPoem.findMovedOver", { x: touchX, y: touchY, overWord, overWords });
@@ -641,19 +619,25 @@ export default function HaikuPoem({
         firstWordPointerEnter = undefined;
         setFirstWordPointerEnter(firstWordPointerEnter);
       }
-      
+
       findMovedOver(e);
     },
     1
   );
-  ``
+
   const handleTouchMove = async (e: any) => {
+    // console.log("app._component.HaikuPoem.handleTouchMove", { e });
     debouncedTouchMoved(e);
     // findMovedOver(e);
+
+    if (!killingWords) {
+      killingWords = true;
+      setKillingWords(killingWords);
+    }
   }
 
   useEffect(() => {
-    console.log(">> app._component.SidePanel.useEffect", { mode, haiku });
+    // console.log(">> app._component.SidePanel.useEffect", { mode, haiku });
     document.body.addEventListener('keydown', handleKeyDown);
 
     return () => {
@@ -713,17 +697,16 @@ export default function HaikuPoem({
           disabled={editing || canEdit || showcaseMode || (!canEdit && !canSwitchMode)}
         >
           <div
-            className={`_bg-pink-200 px-[1.5rem] ${canEdit ? "group/edit" : ""} ${saving ? "animate-pulse" : ""}`}
+            className={`_bg-pink-200 p-[2.5rem] ${canEdit ? "group/edit" : ""} ${saving ? "animate-pulse" : ""}`}
             style={{
               cursor: showcaseMode ? "pointer" : "",
               fontSize,
               maxWidth: showcaseMode ? "calc(100vw - 64px)" : "800px",
               minWidth: "200px",
             }}
-            // onPointerMove={(e: any) => console.log("onPointerMove", { x: e.screenX, y: e.screenY, e})}
-            // onPointerMove={console.log}
             onTouchMove={handleTouchMove}
-
+            onMouseLeave={handleMouseUp}
+            onMouseEnter={handleMouseUp}
           >
             <div
               className="_bg-purple-200 flex flex-col _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
@@ -732,12 +715,6 @@ export default function HaikuPoem({
               style={{
                 cursor: showcaseMode ? "pointer" : "",
                 fontSize,
-
-
-                // width: 500,
-                // height: 300,
-                // background: "pink",
-
               }}
             >
               <PopOnClick
@@ -782,26 +759,12 @@ export default function HaikuPoem({
                               key={`line-${i}-word-${j}`}
                               // @ts-ignore
                               ref={refs[i][j]}
-                              className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] ${savingLine[i] ? "cursor-not-allowed opacity-40 animate-pulse" : "cursor-pointer"}`}
+                              className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] ${savingLine[i] ? "cursor-wait opacity-40 animate-pulse" : killingWords ? "cursor-crosshair" : "cursor-pointer"}`}
                               // onClick={(e: any) => handleClickWord(e, i, j)}
                               onMouseDown={(e: any) => handleMouseDownWord(e, i, j)}
-                              onMouseUp={(e: any) => handleMouseUpWord(e, i, j)}
-                              onDragStart={(e: any) => handleDragStartWord(e, i, j)}
-                              onDragEnd={(e: any) => handleDragEndWord(e, i, j)}
-                              onMouseEnter={(e: any) => handleMouseEnterWord(e, i, j)}
-                              onMouseLeave={(e: any) => handleMouseLeaveWord(e, i, j)}
+                              onMouseUp={handleMouseUp}
                               onMouseMove={(e: any) => handleMouseMoveWord(e, i, j)}
-                              // onPointerDown={console.log}
-                              // onPointerMove={console.log}
-                              // onPointerOverCapture={console.log}
                               onPointerEnter={(e: any) => handlePointerEnterWord(e, i, j)}
-                            // onPointerEnterCapture={console.log}
-                            // onPointerMoveCapture={console.log}
-                            // onPointerOver={console.log}
-                            // onDragOver={console.log}
-                            // onDragEnter={console.log}
-                            // onPointerDownCapture={console.log}
-                            // onTouchMove={console.log}
                             >
                               {/* Display  */}
                               <div
