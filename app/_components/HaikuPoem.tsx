@@ -224,6 +224,7 @@ export default function HaikuPoem({
   const [editingLine, setEditingLine] = useState<number | undefined>();
   const [aboutToEditLine, setAboutToEditLine] = useState<number | undefined>();
   const [saving, setSaving] = useState(false);
+  const [aboutToSave, setAboutToSave] = useState(false);
   const [select, setSelection] = useState(false);
   const editing = typeof (editingLine) == "number";
   const aboutToEdit = typeof (aboutToEditLine) == "number";
@@ -299,6 +300,7 @@ export default function HaikuPoem({
       return;
     }
 
+    setAboutToSave(false);
     setSaving(true);
 
     const syllables = haiku?.poem
@@ -388,24 +390,31 @@ export default function HaikuPoem({
   let [savingLine, setSavingLine] = useState<boolean[]>(haiku && haiku.poem.map((line: string) => false));
   let [killingWords, setKillingWords] = useState(false);
 
+
+  const debouncedSetAboutToSave = useDebouncedCallback(
+    () => setAboutToSave(true),
+    800
+  )
+
   const debounced = useDebouncedCallback(
     // function
-    (value: any) => {
+    () => {
       // setDisplayPoem([...value]);
       // setEditPoem([...value]);
 
       // join the words then consolidate the possible "... ..." repetition
-      const updatePoemRequest = value.map((line: string[]) => line.join(" ").replaceAll(/(\.\.\.\s?)+/g, "..."));
-      const updateLineRequest = updatePoemRequest.map((line: string, i: number) => {
-        const saving = line.includes("...") && !savingLine[i];
-        setSavingLine((savingLine: boolean[]) => {
-          savingLine[i] = true //saving ? true : savingLine[i];
-          return savingLine;
-        });
-        return saving;
-      });
-      console.log(">> app._component.HaikuPoem debounced", { value, updatePoemRequest, updateLineRequest, savingLine });
+      const updatePoemRequest = editPoem.map((line: string[]) => line.join(" ").replaceAll(/(\.\.\.\s?)+/g, "..."));
+      // const updateLineRequest = updatePoemRequest.map((line: string, i: number) => {
+      //   const saving = line.includes("...") && !savingLine[i];
+      //   setSavingLine((savingLine: boolean[]) => {
+      //     savingLine[i] = true //saving ? true : savingLine[i];
+      //     return savingLine;
+      //   });
+      //   return saving;
+      // });
+      console.log(">> app._component.HaikuPoem debounced", { editPoem, updatePoemRequest, savingLine });
 
+      setAboutToSave(false);
       setSaving(true);
       // setSavingLine(updateLineRequest.map((saving: boolean, i: number) => saving ? true : savingLine[i]));
 
@@ -413,7 +422,7 @@ export default function HaikuPoem({
         ...haiku,
         poem: updatePoemRequest,
       }).then((haiku: Haiku) => {
-        console.log(">> app._component.HaikuPoem debounced saved", { value, updateLineRequest, savingLine, haiku });
+        console.log(">> app._component.HaikuPoem debounced saved", { editPoem, savingLine, haiku });
 
         // const updatedDisplayPoem = haiku.poem.map((line: string, i: number) => updateLineRequest[i]
         //   ? line.split(/\s+/).map((word: string) => word)
@@ -428,31 +437,32 @@ export default function HaikuPoem({
         // only update requested lines
         // NOTE: with overlapping requests this won't work
         setDisplayPoem((poem: string[][]) => {
-          return poem.map((line: string[], i: number) => true || updateLineRequest[i]
+          return poem.map((line: string[], i: number) => true
             ? haiku.poem[i].split(/\s+/)
             : line);
         });
 
         setEditPoem((poem: string[][]) => {
-          return poem.map((line: string[], i: number) => true || updateLineRequest[i]
+          return poem.map((line: string[], i: number) => true
             ? haiku.poem[i].split(/\s+/)
             : line);
         });
 
         setCurrentPoem((poem: string[][]) => {
-          return poem.map((line: string[], i: number) => true || updateLineRequest[i]
+          return poem.map((line: string[], i: number) => true
             ? haiku.poem[i].split(/\s+/)
             : line);
         });
 
         setSaving(false);
+        setAboutToSave(false);
         // setSavingLine(updateLineRequest.map((saving: boolean, i: number) => saving ? false : savingLine[i]));
-        updateLineRequest.forEach((saving: boolean, i: number) => {
-          setSavingLine((savingLine: boolean[]) => {
-            savingLine[i] = false //saving ? false : savingLine[i];
-            return savingLine;
-          });
-        });
+        // updateLineRequest.forEach((saving: boolean, i: number) => {
+        //   setSavingLine((savingLine: boolean[]) => {
+        //     savingLine[i] = false //saving ? false : savingLine[i];
+        //     return savingLine;
+        //   });
+        // });
       });
     },
     // delay in ms
@@ -472,6 +482,7 @@ export default function HaikuPoem({
     () => {
       setDisplayPoem(displayPoem.map((line: string[]) => [...line]));
       setEditPoem(editPoem.map((line: string[]) => [...line]));
+      setAboutToSave(false);
     },
     10
   )
@@ -496,7 +507,8 @@ export default function HaikuPoem({
         debouncedSetPoemStates();
       }
 
-      // debounced(updatedEditPoem);
+      debouncedSetAboutToSave();
+      debounced();
     }
     // console.log(">> app._component.HaikuPoem.handleClickWord", { displayPoem });
   };
@@ -518,7 +530,7 @@ export default function HaikuPoem({
     console.log(">> app._component.HaikuPoem.handleMouseDownWord", { e, lineNum, wordNum });
 
     mouseDown = true;
-    setMouseDown(mouseDown);
+    setMouseDown(mouseDown);    
   };
 
   const handleMouseUp = async (e: any) => {
@@ -550,7 +562,11 @@ export default function HaikuPoem({
   let [lastTouchXY, setLastTouchXY] = useState<[number, number]>();
 
   const debouncedSetLastTouchXY = useDebouncedCallback(
-    () => setLastTouchXY(lastTouchXY),
+    () => {
+      setLastTouchXY(lastTouchXY);
+      setAboutToSave(false);
+      // debouncedSetAboutToSave();
+    },
     100
   )
 
@@ -759,7 +775,10 @@ export default function HaikuPoem({
                               key={`line-${i}-word-${j}`}
                               // @ts-ignore
                               ref={refs[i][j]}
-                              className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] ${savingLine[i] ? "cursor-wait opacity-40 animate-pulse" : killingWords ? "cursor-crosshair" : "cursor-pointer"}`}
+                              className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] ${aboutToSave ? "opacity-50" : saving ? "cursor-wait opacity-50 animate-pulse" : killingWords ? "cursor-crosshair" : "cursor-pointer"}`}
+                              style={{
+                                transition: "opacity 0.2s ease-out"
+                              }}
                               // onClick={(e: any) => handleClickWord(e, i, j)}
                               onMouseDown={(e: any) => handleMouseDownWord(e, i, j)}
                               onMouseUp={handleMouseUp}
