@@ -580,6 +580,8 @@ export default function HaikuPoem({
     100
   )
 
+  let [firstWordPointerEnter, setFirstWordPointerEnter] = useState<number[]>();
+
   const handlePointerEnterWord = async (e: any, lineNum: number, wordNum: number) => {
     console.log(">> app._component.HaikuPoem.handlePointerEnterWord", { e, lineNum, wordNum });
 
@@ -588,7 +590,9 @@ export default function HaikuPoem({
         .map((ref: any) => ref?.current && ref.current.getBoundingClientRect()).filter(Boolean)
       );
     setRefBoundingClientRects(refBoundingClientRects);
-    console.log(">> app._component.HaikuPoem.handlePointerEnterWord", { refBoundingClientRects });
+    firstWordPointerEnter = [lineNum, wordNum];
+    setFirstWordPointerEnter(firstWordPointerEnter);
+    console.log(">> app._component.HaikuPoem.handlePointerEnterWord", { refBoundingClientRects, firstWordPointerEnter });
 
     lastTouchXY = [e.clientX, e.clientY];
     // setLastTouchXY(lastTouchXY);
@@ -630,7 +634,16 @@ export default function HaikuPoem({
   }
 
   const debouncedTouchMoved = useDebouncedCallback(
-    findMovedOver,
+    (e: any) => {
+      // make sure the first move kills the first word right away
+      if (firstWordPointerEnter) {
+        killWords([firstWordPointerEnter])
+        firstWordPointerEnter = undefined;
+        setFirstWordPointerEnter(firstWordPointerEnter);
+      }
+      
+      findMovedOver(e);
+    },
     1
   );
   ``
