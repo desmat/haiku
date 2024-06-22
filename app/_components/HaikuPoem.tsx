@@ -472,16 +472,22 @@ export default function HaikuPoem({
     // console.log(">> app._component.HaikuPoem.killWords", { lineNum, wordNum, displayPoem });
 
     if (!saving) { //!savingLine[lineNum]) {
+      let someToKill = false;
       const updatedDisplayPoem = displayPoem.map((line: string[]) => [...line]);
       const updatedEditPoem = editPoem.map((line: string[]) => [...line]);
       words.forEach((word: any) => {
         const [lineNum, wordNum] = word;
-        updatedDisplayPoem[lineNum][wordNum] = "";
-        updatedEditPoem[lineNum][wordNum] = "...";
+        if (updatedDisplayPoem[lineNum][wordNum]) {
+          updatedDisplayPoem[lineNum][wordNum] = "";
+          updatedEditPoem[lineNum][wordNum] = "...";
+          someToKill = true;
+        }
       })
 
-      setDisplayPoem(updatedDisplayPoem);
-      setEditPoem(updatedEditPoem);
+      if (someToKill) {
+        setDisplayPoem(updatedDisplayPoem);
+        setEditPoem(updatedEditPoem);
+      }
 
       // debounced(updatedEditPoem);
     }
@@ -609,8 +615,8 @@ export default function HaikuPoem({
   );
   ``
   const handleTouchMove = async (e: any) => {
-    debouncedTouchMoved(e);
-    // findMovedOver(e);
+    // debouncedTouchMoved(e);
+    findMovedOver(e);
   }
 
   useEffect(() => {
