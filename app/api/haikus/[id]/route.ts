@@ -79,12 +79,13 @@ export async function PUT(
     );
   }
 
-  if (!user.isAdmin && haiku.createdBy != user.id) {
-    return NextResponse.json(
-      { success: false, message: 'authorization failed' },
-      { status: 403 }
-    );
-  }
+  // TODO UNCRIPPLE
+  // if (!user.isAdmin && haiku.createdBy != user.id) {
+  //   return NextResponse.json(
+  //     { success: false, message: 'authorization failed' },
+  //     { status: 403 }
+  //   );
+  // }
 
   // TODO UNCRIPPLE (note that we're creating haikudles when we should not)
   // const haikudle = await getHaikudle(user, params.id);
