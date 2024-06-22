@@ -605,12 +605,12 @@ export default function HaikuPoem({
 
   const debouncedTouchMoved = useDebouncedCallback(
     findMovedOver,
-    100
+    10
   );
   ``
   const handleTouchMove = async (e: any) => {
-    // debouncedTouchMoved(e);
-    findMovedOver(e);
+    debouncedTouchMoved(e);
+    // findMovedOver(e);
   }
 
   useEffect(() => {
