@@ -376,10 +376,9 @@ export default function HaikuPoem({
   };
 
 
-  const haikuPoem = haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word));
-  let [displayPoem, setDisplayPoem] = useState<string[][]>(haikuPoem);
-  let [editPoem, setEditPoem] = useState<string[][]>(haikuPoem);
-  let [currentPoem, setCurrentPoem] = useState<string[][]>(haikuPoem);
+  let [displayPoem, setDisplayPoem] = useState<string[][]>(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
+  let [editPoem, setEditPoem] = useState<string[][]>(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
+  let [currentPoem, setCurrentPoem] = useState<string[][]>(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
   let refs = [
     [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
     [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
@@ -459,34 +458,41 @@ export default function HaikuPoem({
     1000
   );
 
-  // console.log(">> app._component.HaikuPoem", { displayPoem, editPoem });
+  // console.log(">> app._component.HaikuPoem render", { displayPoem, editPoem });
 
   let [mouseDown, setMouseDown] = useState(false);
 
   const resetPoem = () => {
-    setDisplayPoem(haikuPoem);
-    setEditPoem(haikuPoem);
+    setDisplayPoem(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
+    setEditPoem(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
   }
 
+  const debouncedSetPoemStates = useDebouncedCallback(
+    () => {
+      setDisplayPoem(displayPoem.map((line: string[]) => [...line]));
+      setEditPoem(editPoem.map((line: string[]) => [...line]));
+    },
+    10
+  )
+
   const killWords = async (words: any[]) => {
-    // console.log(">> app._component.HaikuPoem.killWords", { lineNum, wordNum, displayPoem });
+    // console.log(">> app._component.HaikuPoem.killWords", { words });
 
     if (!saving) { //!savingLine[lineNum]) {
       let someToKill = false;
-      const updatedDisplayPoem = displayPoem.map((line: string[]) => [...line]);
-      const updatedEditPoem = editPoem.map((line: string[]) => [...line]);
       words.forEach((word: any) => {
         const [lineNum, wordNum] = word;
-        if (updatedDisplayPoem[lineNum][wordNum]) {
-          updatedDisplayPoem[lineNum][wordNum] = "";
-          updatedEditPoem[lineNum][wordNum] = "...";
+        if (displayPoem[lineNum][wordNum]) {
+          displayPoem[lineNum][wordNum] = "";
+          editPoem[lineNum][wordNum] = "...";
           someToKill = true;
         }
       })
 
       if (someToKill) {
-        setDisplayPoem(updatedDisplayPoem);
-        setEditPoem(updatedEditPoem);
+        // setDisplayPoem(displayPoem.map((line: string[]) => [...line]));
+        // setEditPoem(editPoem.map((line: string[]) => [...line]));
+        debouncedSetPoemStates();
       }
 
       // debounced(updatedEditPoem);
@@ -494,10 +500,16 @@ export default function HaikuPoem({
     // console.log(">> app._component.HaikuPoem.handleClickWord", { displayPoem });
   };
 
+  const debouncedKillWords = useDebouncedCallback(
+    // function
+    killWords,
+    5
+  );
+
   const handleClickWord = async (e: any, lineNum: number, wordNum: number) => {
     console.log(">> app._component.HaikuPoem.handleClickWord", { e, lineNum, wordNum, displayPoem });
 
-    killWords([lineNum, wordNum]);
+    killWords([[lineNum, wordNum]]);
     // console.log(">> app._component.HaikuPoem.handleClickWord", { displayPoem });
   };
 
@@ -513,7 +525,8 @@ export default function HaikuPoem({
 
     mouseDown = false;
     setMouseDown(mouseDown);
-    killWords([lineNum, wordNum]);
+    // TODO either bring this back or allow single-tap for showcase mode
+    // killWords([[lineNum, wordNum]]);
   };
 
   const handleDragStartWord = async (e: any, lineNum: number, wordNum: number) => {
@@ -532,7 +545,7 @@ export default function HaikuPoem({
     console.log(">> app._component.HaikuPoem.handleMouseEnterWord", { e, lineNum, wordNum });
 
     if (mouseDown) {
-      killWords([lineNum, wordNum]);
+      killWords([[lineNum, wordNum]]);
     }
   };
 
@@ -540,7 +553,7 @@ export default function HaikuPoem({
     console.log(">> app._component.HaikuPoem.handleMouseLeaveWord", { e, lineNum, wordNum });
 
     if (mouseDown) {
-      killWords([lineNum, wordNum]);
+      killWords([[lineNum, wordNum]]);
     }
   };
 
@@ -548,7 +561,7 @@ export default function HaikuPoem({
     console.log(">> app._component.HaikuPoem.handleMouseMoveWord", { e, lineNum, wordNum });
 
     if (mouseDown) {
-      killWords([lineNum, wordNum]);
+      killWords([[lineNum, wordNum]]);
     }
   };
 
@@ -562,6 +575,11 @@ export default function HaikuPoem({
   let [refBoundingClientRects, setRefBoundingClientRects] = useState<any[][]>();
   let [lastTouchXY, setLastTouchXY] = useState<[number, number]>();
 
+  const debouncedSetLastTouchXY = useDebouncedCallback(
+    () => setLastTouchXY(lastTouchXY),
+    100
+  )
+
   const handlePointerEnterWord = async (e: any, lineNum: number, wordNum: number) => {
     console.log(">> app._component.HaikuPoem.handlePointerEnterWord", { e, lineNum, wordNum });
 
@@ -573,7 +591,8 @@ export default function HaikuPoem({
     console.log(">> app._component.HaikuPoem.handlePointerEnterWord", { refBoundingClientRects });
 
     lastTouchXY = [e.clientX, e.clientY];
-    setLastTouchXY(lastTouchXY);
+    // setLastTouchXY(lastTouchXY);
+    debouncedSetLastTouchXY();
   }
 
   const findMovedOver = (e: any) => {
@@ -586,7 +605,8 @@ export default function HaikuPoem({
     const lastTouchY = lastTouchXY && lastTouchXY.length >= 2 && lastTouchXY[1] || touchY;
 
     lastTouchXY = [touchX, touchY];
-    setLastTouchXY(lastTouchXY);
+    debouncedSetLastTouchXY();
+    // setLastTouchXY(lastTouchXY);
 
     // console.log(">> app._component.HaikuPoem.findMovedOver", { touchX, touchY, lastTouchX, lastTouchY, refBoundingClientRects });
 
@@ -604,23 +624,23 @@ export default function HaikuPoem({
     // console.log("app._component.HaikuPoem.findMovedOver", { x: touchX, y: touchY, overWord, overWords });
 
     if (overWord && overWord.length >= 2 && displayPoem[overWord[0]][overWord[1]]) {
-      // @ts-ignore
       killWords(overWords);
+      // debouncedKillWords(overWords);
     }
   }
 
   const debouncedTouchMoved = useDebouncedCallback(
     findMovedOver,
-    10
+    1
   );
   ``
   const handleTouchMove = async (e: any) => {
-    // debouncedTouchMoved(e);
-    findMovedOver(e);
+    debouncedTouchMoved(e);
+    // findMovedOver(e);
   }
 
   useEffect(() => {
-    // console.log(">> app._component.SidePanel.useEffect", { mode, haiku });
+    console.log(">> app._component.SidePanel.useEffect", { mode, haiku });
     document.body.addEventListener('keydown', handleKeyDown);
 
     return () => {
@@ -761,12 +781,7 @@ export default function HaikuPoem({
                               // onPointerDown={console.log}
                               // onPointerMove={console.log}
                               // onPointerOverCapture={console.log}
-                              onPointerEnter={(e: any) => {
-                                // @ts-ignore
-                                console.log("onPointerEnter", { rect: e.target.getBoundingClientRect(), ref: refs[i][j].current.getBoundingClientRect() });
-                                handlePointerEnterWord(e, i, j);
-
-                              }}
+                              onPointerEnter={(e: any) => handlePointerEnterWord(e, i, j)}
                             // onPointerEnterCapture={console.log}
                             // onPointerMoveCapture={console.log}
                             // onPointerOver={console.log}
@@ -777,20 +792,24 @@ export default function HaikuPoem({
                             >
                               {/* Display  */}
                               <div
-                                className="absolute top-0 left-0 w-0 h-0"
+                                // className="absolute top-0 left-0 w-0 h-0"
+                                className={`${displayPoem[i][j] ? "opacity-100" : "opacity-20"} transition-opacity`}
                               >
-                                <PopOnClick color={haiku?.bgColor}>
-
+                                <PopOnClick
+                                  color={haiku?.color}
+                                  force={!displayPoem[i][j]}
+                                  disabled={!displayPoem[i][j]}
+                                >
                                   {j == 0 &&
-                                    <span>{upperCaseFirstLetter(displayPoem[i][j])}</span>
+                                    <span>{upperCaseFirstLetter(currentPoem[i][j])}</span>
                                   }
                                   {j != 0 &&
-                                    <span>{displayPoem[i][j]}</span>
+                                    <span>{currentPoem[i][j]}</span>
                                   }
                                 </PopOnClick>
                               </div>
                               {/* Keep the document structure */}
-                              <div
+                              {/* <div
                                 className="opacity-20"
                               >
                                 {j == 0 &&
@@ -799,7 +818,7 @@ export default function HaikuPoem({
                                 {j != 0 &&
                                   <span>{word}</span>
                                 }
-                              </div>
+                              </div> */}
                             </div>
                           ))
                           }
@@ -838,7 +857,9 @@ export default function HaikuPoem({
               >
                 <div
                   className="poem-title _transition-all _bg-pink-400"
-                  onClick={(e: any) => !showcaseMode && handleClickHaiku(e)}
+                  // onClick={(e: any) => !showcaseMode && handleClickHaiku(e)}
+                  onClick={resetPoem}
+
                   title={showcaseMode || canSwitchMode ? "" : "Copy to clipboard"}
                   style={{
                     cursor: showcaseMode || canSwitchMode
@@ -927,8 +948,7 @@ export default function HaikuPoem({
                             <StyledLayers styles={altStyles || []}>
                               <PopOnClick>
                                 <GenerateIcon
-                                  // onClick={() => canRegeneratePoem && regeneratePoem()}
-                                  onClick={resetPoem}
+                                  onClick={() => canRegeneratePoem && regeneratePoem()}
                                   sizeOverwrite={`
                                   h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 
                                   ${canRegeneratePoem || onboardingElement == "poem-actions" ? "cursor-pointer opacity-100" : "opacity-60"} 

@@ -23,6 +23,8 @@ export default function PopOnClick({
     setPop(true);
     setTimeout(() => setPop(false), 100);
   };
+  const handleMouseDown = () => !disabled && setPop(true);
+  const handleMouseUp = () => !disabled && doPop()
 
   useEffect(() => {
     if (force) {
@@ -36,8 +38,10 @@ export default function PopOnClick({
       style={{
         filter: `${pop || active ? `drop-shadow(0px 0px 16px ${color})` : ""}`,
       }}
-      onMouseDown={() => !disabled && setPop(true)}
-      onMouseUp={() => !disabled && doPop()}
+      onMouseDown={handleMouseDown}
+      onPointerEnter={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onPointerLeave={handleMouseUp}
     >
       {children}
     </div>
