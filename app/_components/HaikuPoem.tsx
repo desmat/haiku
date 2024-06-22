@@ -466,7 +466,7 @@ export default function HaikuPoem({
       });
     },
     // delay in ms
-    1000
+    1500
   );
 
   // console.log(">> app._component.HaikuPoem render", { displayPoem, editPoem });
@@ -533,7 +533,7 @@ export default function HaikuPoem({
     setMouseDown(mouseDown);    
   };
 
-  const handleMouseUp = async (e: any) => {
+  const handleMouseUp = async (e: any, lineNum?: number, wordNum?: number) => {
     console.log(">> app._component.HaikuPoem.handleMouseUp", { e });
 
     mouseDown = false;
@@ -542,7 +542,9 @@ export default function HaikuPoem({
     setKillingWords(killingWords);
 
     // TODO either bring this back or allow single-tap for showcase mode
-    // killWords([[lineNum, wordNum]]);
+    if (typeof(lineNum) == "number" && typeof(wordNum) == "number") {
+      killWords([[lineNum, wordNum]]);
+    }
   };
 
   const handleMouseMoveWord = async (e: any, lineNum: number, wordNum: number) => {
@@ -781,7 +783,7 @@ export default function HaikuPoem({
                               }}
                               // onClick={(e: any) => handleClickWord(e, i, j)}
                               onMouseDown={(e: any) => handleMouseDownWord(e, i, j)}
-                              onMouseUp={handleMouseUp}
+                              onMouseUp={(e: any) => handleMouseUp(e, i, j)}
                               onMouseMove={(e: any) => handleMouseMoveWord(e, i, j)}
                               onPointerEnter={(e: any) => handlePointerEnterWord(e, i, j)}
                             >
