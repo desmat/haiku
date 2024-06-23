@@ -32,7 +32,6 @@ function LinkGroup({
   links: any[],
 }) {
   const [linksVisible, setLinksVisible] = useState(false);
-  const [forcedClosed, setForcedClosed] = useState(false);
 
   // for testing
   // useEffect(() => {
@@ -43,21 +42,8 @@ function LinkGroup({
   return (
     <div
       className="_bg-pink-200 flex flex-row relative"
-      onMouseOver={() => {
-        !forcedClosed && setLinksVisible(true);
-      }}
-      onMouseOut={() => {
-        setLinksVisible(false);
-        setForcedClosed(false);
-      }}
-      onClick={(e: any) => {
-        if (linksVisible) {
-          setLinksVisible(false);
-          setForcedClosed(true);
-        } else {
-          setLinksVisible(true);
-        }
-      }}
+      onMouseOver={() => setLinksVisible(true)}
+      onMouseOut={() => setLinksVisible(false)}
     >
       <div
         className={className}
