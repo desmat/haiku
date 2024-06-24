@@ -24,11 +24,13 @@ function LinkGroup({
   icon,
   className,
   title,
+  disabled,
   links,
 }: {
   icon: any,
   className?: string,
   title?: string,
+  disabled?: boolean,
   links: any[],
 }) {
   const [linksVisible, setLinksVisible] = useState(false);
@@ -41,9 +43,9 @@ function LinkGroup({
 
   return (
     <div
-      className="_bg-pink-200 flex flex-row relative"
-      onMouseOver={() => setLinksVisible(true)}
-      onMouseOut={() => setLinksVisible(false)}
+      className={`_bg-pink-200 flex flex-row relative ${disabled ? "opacity-40" : "cursor-pointer"}`}
+      onMouseOver={() => !disabled && setLinksVisible(true)}
+      onMouseOut={() => !disabled && setLinksVisible(false)}
     >
       <div
         className={className}
@@ -266,7 +268,7 @@ export default function BottomLinks({
         }
         {user?.isAdmin && (!haiku?.id || !onLikeHaiku) &&
           <div className="opacity-40">
-            <IoHeartSharp className="text-[1.5rem] md:text-[1.75rem]" />
+            <IoHeartSharp className="text-[1.75rem] md:text-[2rem]" />
           </div>
         }
         {user?.isAdmin &&
@@ -333,11 +335,11 @@ export default function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {user?.isAdmin && haiku?.bgImage &&
+        {user?.isAdmin &&
           <LinkGroup
             key="imageOptions"
-            className={haiku?.id ? "cursor-pointer" : "opacity-40"}
             title="Image options"
+            disabled={!haiku?.bgImage}
             icon={
               <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
                 <RiImageFill className="text-[1.75rem] md:text-[2rem]" />
@@ -347,7 +349,6 @@ export default function BottomLinks({
               user?.isAdmin && haiku?.id &&
               <Link
                 key="downloadImage"
-                className={haiku?.id ? "cursor-pointer" : "opacity-40"}
                 title="Download background image"
                 href={haiku?.bgImage}
                 target="_blank"
