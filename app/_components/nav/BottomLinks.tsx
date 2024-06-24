@@ -2,16 +2,16 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IoAddCircle, IoHelpCircle, IoHeartSharp } from 'react-icons/io5';
 import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
 import { BiLogoInstagramAlt } from "react-icons/bi";
 import { RiTwitterFill } from "react-icons/ri";
-import { HiSwitchVertical } from "react-icons/hi";
+import { HiSwitchVertical, } from "react-icons/hi";
 import { MdHome, MdDelete, MdFacebook } from "react-icons/md";
 import { BsDatabaseFillUp } from "react-icons/bs";
 import { FaRandom } from "react-icons/fa";
-import { RiImageFill, RiImageAddFill, RiImageEditFill } from "react-icons/ri";
+import { RiImageFill, RiImageAddLine, RiImageEditLine, RiImageLine } from "react-icons/ri";
 import useUser from '@/app/_hooks/user';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haiku } from '@/types/Haiku';
@@ -19,6 +19,62 @@ import { LanguageType, supportedLanguages } from '@/types/Languages';
 import trackEvent from '@/utils/trackEvent';
 import { StyledLayers } from '../StyledLayers';
 import PopOnClick from '../PopOnClick';
+
+function LinkGroup({
+  icon,
+  className,
+  title,
+  links,
+}: {
+  icon: any,
+  className?: string,
+  title?: string,
+  links: any[],
+}) {
+  const [linksVisible, setLinksVisible] = useState(false);
+
+  // for testing
+  // useEffect(() => {
+  //   const interval = setInterval(() => setChildrenVisible(!childrenVisible), 1000);
+  //   return () => clearInterval(interval);
+  // })
+
+  return (
+    <div
+      className="_bg-pink-200 flex flex-row relative"
+      onMouseOver={() => setLinksVisible(true)}
+      onMouseOut={() => setLinksVisible(false)}
+    >
+      <div
+        className={className}
+        title={title}
+      >
+        {icon}
+      </div>
+      <div
+        className={`_bg-yellow-200 flex flex-col gap-[0rem] absolute bottom-[-0rem] left-[0rem] p-[0rem]`}
+        style={{
+          display: linksVisible ? "block" : "none",
+        }}
+      >
+        {links.filter(Boolean).map((link: any, i: number) => (
+          <div
+            key={i}
+            className="_bg-orange-200 absolute left-[-0.2rem] bottom-0 px-[0.2rem] py-[0rem]"
+            style={{
+              // bottom: `${childrenVisible ? i * 1.7 : 0}rem`,
+              transform: `translate(0%, -${linksVisible ? i * 100 + 100 : 0}%)`,
+              // y no work?!
+              transition: "transform 1s ease, bottom 1s ease",
+            }}
+          >
+            {link}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+};
 
 export default function BottomLinks({
   mode,
@@ -278,57 +334,67 @@ export default function BottomLinks({
           </div>
         }
         {user?.isAdmin && haiku?.bgImage &&
-          <Link
-            key="downloadImage"
+          <LinkGroup
+            key="imageOptions"
             className={haiku?.id ? "cursor-pointer" : "opacity-40"}
-            title="Download background image"
-            href={haiku?.bgImage}
-            target="_blank"
-          >
-            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
-              <RiImageFill className="text-[1.75rem] md:text-[2rem]" />
-            </PopOnClick>
-          </Link>
-        }
-        {user?.isAdmin && haiku?.id && onUpdateImage &&
-          <div
-            key="uploadImageUrl"
-            className="cursor-pointer"
-            title="Upload background image"
-            onClick={onUpdateImage}
-          >
-            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
-              <RiImageEditFill className="text-[1.75rem] md:text-[2rem]" />
-            </PopOnClick>
-          </div>
-        }
-        {user?.isAdmin && haiku?.id && onUploadImage &&
-          <div
-            key="uploadImage"
-            className="cursor-pointer"
-            title="Upload background image"
-            onClick={() => {
-              //@ts-ignore
-              fileInputRef?.current && fileInputRef.current.click();
-            }}
-          >
-            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
-              <RiImageAddFill className="text-[1.75rem] md:text-[2rem]" />
-            </PopOnClick>
-            <input
-              //@ts-ignore
-              ref={fileInputRef}
-              type="file"
-              name="file"
-              accept="image/png, image/jpg, image/jpeg, image/gif, image/svg"
-              className="hidden"
-              onInput={(e: any) => {
-                // console.log("SUBMIT", { e, fileInputRef, file: fileInputRef?.current?.files && fileInputRef?.current?.files[0] });
-                //@ts-ignore
-                fileInputRef?.current?.files && onUploadImage(fileInputRef?.current?.files[0]);
-              }}
-            />
-          </div>
+            title="Image options"
+            icon={
+              <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
+                <RiImageFill className="text-[1.75rem] md:text-[2rem]" />
+              </PopOnClick>
+            }
+            links={[
+              user?.isAdmin && haiku?.id &&
+              <Link
+                key="downloadImage"
+                className={haiku?.id ? "cursor-pointer" : "opacity-40"}
+                title="Download background image"
+                href={haiku?.bgImage}
+                target="_blank"
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.bgImage}>
+                  <RiImageLine className="text-[1.75rem] md:text-[2rem]" />
+                </PopOnClick>
+              </Link>,
+              user?.isAdmin && haiku?.id && onUploadImage &&
+              <div
+                key="uploadImage"
+                className="cursor-pointer"
+                title="Upload background image"
+                onClick={() => {
+                  //@ts-ignore
+                  fileInputRef?.current && fileInputRef.current.click();
+                }}
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onUploadImage}>
+                  <RiImageAddLine className="text-[1.75rem] md:text-[2rem]" />
+                </PopOnClick>
+                <input
+                  //@ts-ignore
+                  ref={fileInputRef}
+                  type="file"
+                  name="file"
+                  accept="image/png, image/jpg, image/jpeg, image/gif, image/svg"
+                  className="hidden"
+                  onInput={(e: any) => {
+                    //@ts-ignore
+                    fileInputRef?.current?.files && onUploadImage(fileInputRef?.current?.files[0]);
+                  }}
+                />
+              </div>,
+              user?.isAdmin && haiku?.id && onUpdateImage &&
+              <div
+                key="uploadImageUrl"
+                className="cursor-pointer"
+                title="Update background image from URL"
+                onClick={onUpdateImage}
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onUpdateImage}>
+                  <RiImageEditLine className="text-[1.75rem] md:text-[2rem]" />
+                </PopOnClick>
+              </div>,
+            ]}
+          />
         }
         {user?.isAdmin &&
           <div
