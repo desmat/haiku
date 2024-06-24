@@ -177,12 +177,12 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
   }
 }
 
-export async function completeHaiku(poem: string[], language?: string, subject?: string, mood?: string): Promise<any> {
-  const prompt = `Haiku to complete: "${poem.join(" / ")}"
+export async function completeHaiku(poem: string[], language?: string, subject?: string, mood?: string, previousPoems?: any[]): Promise<any> {
+  const prompt = `Haiku poem to complete: "${poem.join(" / ")}"
   ${subject ? `Topic: "${subject}"` : ""}
   ${mood ? ` Mood: "${mood}"` : ""}`;
 
-  console.log(`>> services.openai.completeHaiku`, { language, subject, mood, prompt });
+  console.log(`>> services.openai.completeHaiku`, { language, subject, mood, prompt, previousPoems });
 
   if (process.env.OPENAI_API_KEY == "DEBUG") {
     // for testing
@@ -199,32 +199,42 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
     };
   }
 
+  const messages = [
+    {
+      role: 'system',
+      content: `
+      Given an incomplete haiku please complete the haiku. 
+      Characters "..." or "…" will be used to indicate a placeholder, please keep the existing word(s) and fill the rest.
+      If a line looks like this: "<some one or more words> ..." then keep the word(s) at the beginning and fill the rest.          If a line looks like this: "... <one or more words>" then keep the word(s) at the end and fill the rest.
+      If a line looks like this: "... <one or more words> ..." then keep the word(s) together and fill the rest.
+      Additionally, if a line looks obviously incomplete even without "..." characters please complete it.
+      Optionally a topic (or "any", meaning you pick) and/or mood may be included.
+      Previous haiku poems may be provided, if so please ensure that the new haiku poem is different than previous ones.
+      Please generate a haiku and respond in JSON where each response is an array of 3 strings.
+      Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
+      If the topic specifies a language, or is in another language, or the incomplete haiku is in another language, please generate the haiku in that language.
+      Also, please fix up any extraneous white spaces, punctuation, incorrect capitalized words, typos or incorrectly words.
+      Also include in the response, in fewest number of words, what were the subject (in the language requested) and mood (in English) of the haiku. 
+      Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
+      Please only include keys "haiku", "subject", "mood" and "lang".`
+    },
+    ...((previousPoems || []).map((previousPoem: []) => {
+      return {
+        role: 'user',
+        content: `Previous haiku poem: \n${previousPoem.join("\n")}`,
+      }
+    })),
+    {
+      role: 'user',
+      content: prompt,
+    }
+  ];
+  // console.log(`>> services.openai.completeHaiku`, { messages });
+
   // @ts-ignore
   const completion = await openai.chat.completions.create({
     model: languageModel,
-    messages: [
-      {
-        role: 'system',
-        content: `
-          Given an incomplete haiku please complete the haiku. 
-          Characters "..." or "…" will be used to indicate a placeholder, please keep the existing word(s) and fill the rest.
-          If a line looks like this: "<some one or more words> ..." then keep the word(s) at the beginning and fill the rest.          If a line looks like this: "... <one or more words>" then keep the word(s) at the end and fill the rest.
-          If a line looks like this: "... <one or more words> ..." then keep the word(s) together and fill the rest.
-          Additionally, if a line looks obviously incomplete even without "..." characters please complete it.
-          Optionally a topic (or "any", meaning you pick) and/or mood may be included.
-          Please generate a haiku and respond in JSON where each response is an array of 3 strings.
-          Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
-          If the topic specifies a language, or is in another language, or the incomplete haiku is in another language, please generate the haiku in that language.
-          Also, please fix up any extraneous white spaces, punctuation, incorrect capitalized words, typos or incorrectly words.
-          Also include in the response, in fewest number of words, what were the subject (in the language requested) and mood (in English) of the haiku. 
-          Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
-          Please only include keys "haiku", "subject", "mood" and "lang".`
-      },
-      {
-        role: 'user',
-        content: prompt,
-      }
-    ],
+    messages,
   });
 
   let response;

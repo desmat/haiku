@@ -137,7 +137,7 @@ export async function getUserHaikus(user: User, all?: boolean): Promise<Haiku[]>
   return haikus;
 }
 
-export async function getHaiku(user: User, id: string, hashPoem?: boolean, version?: string): Promise<Haiku | undefined> {
+export async function getHaiku(user: User, id: string, hashPoem?: boolean, version?: number): Promise<Haiku | undefined> {
   console.log(`>> services.haiku.getHaiku`, { id, hashPoem });
 
   const versionedId = version ? `${id}:${version}` : id;
@@ -307,7 +307,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
   const subject = haiku.theme;
   const mood = haiku.mood;
   const language = supportedLanguages[lang]?.name;
-  console.log(">> services.haiku.completeHaikuPoem", { subject, mood, user });
+  console.log(">> services.haiku.completeHaikuPoem", { subject, mood, user, haiku });
 
   // a bit akward to do this here and in this way but we're just covering a narrow case
   const usage = await userUsage(user);
@@ -318,6 +318,15 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
     throw 'exceeded daily limit';
   }
 
+  const previousHaikus: any[] = await Promise.all(
+    Array.from(Array(Math.min(haiku?.version || 0, 8)))
+      .map((_, i: number) => getHaiku(user, haiku.id, undefined, haiku.version - i))
+  );
+  const previousPoems = [
+    (await getHaiku(user, haiku.id)).poem,
+    ...previousHaikus?.map((haiku: Haiku) => haiku.poem)
+  ];
+
   const {
     response: {
       haiku: completedPoem,
@@ -327,7 +336,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
     },
     model: languageModel,
     prompt: poemPrompt,
-  } = await openai.completeHaiku(haiku.poem, language, subject, mood);
+  } = await openai.completeHaiku(haiku.poem, language, subject, mood, previousPoems);
   console.log(">> services.haiku.completeHaikuPoem", { completedPoem, generatedSubject, generatedMood });
 
   // delete corresponding haikudle 
