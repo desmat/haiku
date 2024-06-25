@@ -25,7 +25,7 @@ const appDescription = isHaikudleMode
 
 const metaUrl = isHaikudleMode
   ? "https://haikudle.art/"
-  : "https://haikugenius.io/";
+  : "https://haikugenius.ai/";
 
 const haikuGeniusMetaImages = [
   "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_98b222c0_mountains.png",

@@ -20,7 +20,7 @@ import { GenerateIcon } from "./nav/GenerateInput";
 const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
   return [
     `"${capitalize(haiku?.theme)}", `,
-    `${mode == "haikudle" ? "haikudle.art" : "haikugenius.io"}/${haiku?.id}`
+    `${mode == "haikudle" ? "haikudle.art" : "haikugenius.ai"}/${haiku?.id}`
   ];
 }
 

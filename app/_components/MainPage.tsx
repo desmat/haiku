@@ -615,7 +615,7 @@ export default function MainPage({
 
   const copyLink = () => {
     if (haikudleMode && haikudleSolved || !haikudleMode) {
-      navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : "https://haikugenius.io"}/${haiku.id}`);
+      navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : "https://haikugenius.ai"}/${haiku.id}`);
       plainAlert(`Link to this haiku copied to clipboard`, { closeDelay: 750 });
       trackEvent("haiku-shared", {
         userId: user?.id,
