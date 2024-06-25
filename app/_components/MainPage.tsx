@@ -901,7 +901,7 @@ export default function MainPage({
           regenerateImage={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
           copyHaiku={!haiku?.error && copyHaiku}
           switchMode={switchMode}
-          adjustLayout={adjustLayout}
+          adjustLayout={user?.isAdmin && adjustLayout}
         />
       }
     </div>

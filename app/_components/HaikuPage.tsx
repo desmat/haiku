@@ -53,6 +53,7 @@ export default function HaikuPage({
   const poemLayout = showcaseMode && !regenerating && !loading
     ? haiku?.layout?.poem
     : {};
+  const canAdjustLayout = !!adjustLayout && showcaseMode;
 
   return (
     <div>
@@ -75,7 +76,7 @@ export default function HaikuPage({
           marginBottom: poemLayout?.bottom ? 0 : "auto",
         }}
       >
-        {showcaseMode && !regenerating && !loading &&
+        {canAdjustLayout && 
           <AdjustLayoutControls
             layout={haiku.layout}
             adjustLayout={adjustLayout}
