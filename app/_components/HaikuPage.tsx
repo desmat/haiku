@@ -1,4 +1,4 @@
-// 'use client'
+'use client'
 
 // import useUser from "@/app/_hooks/user";
 import * as font from "@/app/font";
@@ -7,6 +7,7 @@ import { Haiku } from "@/types/Haiku";
 import HaikuPoem from "./HaikuPoem";
 import Loading from "./Loading";
 import { User } from "@/types/User";
+import { useEffect, useState } from "react";
 
 export default function HaikuPage({
   user,
@@ -49,6 +50,20 @@ export default function HaikuPage({
   const blurValue = loading ? 50 : 0;
   const saturateValue = loading ? 0 : 1;
 
+  // TODO make sure this still renders correctly serverside
+  const [tweaks, setTweaks] = useState<any>({
+    top: undefined,
+    up: undefined,
+    // down: undefined,
+    bottom: undefined,
+  });
+
+  useEffect(() => {
+    if (regenerating || loading) {
+      setTweaks({});
+    }
+  }, [regenerating, loading]);
+
   return (
     <div>
       <div
@@ -61,12 +76,96 @@ export default function HaikuPage({
           transition: loading ? "filter 0.2s ease-out" : "filter 0.1s ease-out",
         }}
       />
-      <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 bottom-[5vh] ${showcaseMode ? "portrait:bottom-[10vh]" : "portrait:bottom-[12vh]"} bottom-[] m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}>
+      <div
+        className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 bottom-[5vh] ${showcaseMode ? "portrait:bottom-[10vh]" : "portrait:bottom-[12vh]"} bottom-[] m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}
+        style={{
+          top: tweaks?.top || tweaks?.down ? `${tweaks?.top || tweaks?.down}vh` : tweaks?.up ? `${-1 * tweaks.up}vh` : undefined,
+          bottom: tweaks?.bottom ? `${tweaks.bottom}vh` : undefined,
+          marginTop: tweaks?.top ? 0 : "auto",
+          marginBottom: tweaks?.bottom ? 0 : "auto",
+        }}
+      >
+        <div
+          className="_bg-blue-400 w-[25%] h-20 left-[50%] translate-x-[-50%] top-[50%] tranlate-y-[-50%] fixed cursor-move z-20"
+          onClick={(e: any) => {
+            setTweaks({});
+            e.preventDefault();
+          }}
+          title="Center poem"
+        />
+
+        <div
+          className="_bg-pink-200 w-[25vw] h-10 left-[50%] translate-x-[-50%] -top-10 absolute cursor-n-resize z-30"
+          onClick={(e: any) => {
+            setTweaks({ 
+              top: tweaks.top ? tweaks.top - 5 : undefined,
+              bottom: tweaks?.bottom ? tweaks.bottom + 5 : undefined,
+              up: tweaks.top ? undefined : (tweaks?.up || 0) + 5,
+            });
+            e.preventDefault();
+          }}
+          title="Move poem up slightly"
+        />
+        <div
+          className="_bg-pink-400 w-[25vw] h-10 left-[50%] translate-x-[-50%] -top-20 absolute cursor-n-resize z-30"
+          onClick={(e: any) => {
+            setTweaks({ 
+              top: tweaks?.top ? tweaks.top - 15 : undefined,
+              bottom: tweaks?.bottom ? tweaks.bottom + 15 : undefined,
+              up: tweaks.top ? undefined : (tweaks?.up || 0) + 15
+             });
+            e.preventDefault();
+          }}
+          title="Move poem up"
+        />
+        <div
+          className="_bg-pink-200 w-[25vw] h-10 left-[50%] translate-x-[-50%] -bottom-10 absolute cursor-s-resize z-30"
+          onClick={(e: any) => {
+            setTweaks({ 
+              top: tweaks.top ? tweaks.top + 5 : undefined,
+              bottom: tweaks?.bottom ? tweaks.bottom - 5 : undefined,
+              up: tweaks.top ? undefined : (tweaks?.up || 0) - 5,
+             });
+            e.preventDefault();
+          }}
+          title="Move poem down slightly"
+        />
+        <div
+          className="_bg-pink-400 w-[25vw] h-10 left-[50%] translate-x-[-50%] -bottom-20 absolute cursor-s-resize z-30"
+          onClick={(e: any) => {
+            setTweaks({
+              top: tweaks.top ? tweaks.top + 15 : undefined,
+              bottom: tweaks?.bottom ? tweaks.bottom - 15 : undefined,
+              up: tweaks.top ? undefined : (tweaks?.up || 0) - 15,
+            });
+            e.preventDefault();
+          }}
+          title="Move poem down"
+        />
+        <div
+          className="_bg-blue-200 w-[25vw] h-10 left-[50%] translate-x-[-50%] top-0 fixed cursor-move z-30"
+          onClick={(e: any) => {
+            setTweaks({ top: 5, up: undefined });
+            e.preventDefault();
+          }}
+          title="Move poem to top"
+        />
+        <div
+          className="_bg-blue-200 w-[25vw] h-10 left-[50%] translate-x-[-50%] bottom-0 fixed cursor-move z-30"
+          onClick={(e: any) => {
+            setTweaks({ bottom: 5, up: undefined });
+            e.preventDefault();
+          }}
+          title="Move poem to bottom"
+        />
+
         {(regenerating || loading) &&
           <Loading styles={styles} />
         }
-        {!regenerating && !loading && mode != "social-img" && mode != "haikudle-social-img" && !haiku.poemHashed && 
-          <div className="_xtall:bg-orange-400 _tall:bg-pink-200 _wide:bg-yellow-200 relative">
+        {!regenerating && !loading && mode != "social-img" && mode != "haikudle-social-img" && !haiku.poemHashed &&
+          <div
+            className="_xtall:bg-orange-400 _tall:bg-pink-200 _wide:bg-yellow-200 relative z-20"
+          >
             <HaikuPoem
               user={user}
               mode={mode}
