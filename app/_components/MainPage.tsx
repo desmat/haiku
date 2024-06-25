@@ -2,6 +2,7 @@
 
 import moment from 'moment';
 import { useEffect, useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 import { Haiku, haikuStyles } from "@/types/Haiku";
 import { NavOverlay } from '@/app/_components/nav/NavOverlay';
 import Loading from "@/app/_components/Loading";
@@ -515,6 +516,27 @@ export default function MainPage({
     document.location.href = url;
   };
 
+  const debounceSaveHaiku = useDebouncedCallback(async (haiku: Haiku) => {
+    console.log('>> app.page.debounceSaveLayout()', { haiku });
+    await doSaveHaiku(haiku);
+    plainAlert("Layout adjustments saved", { closeDelay: 750 });
+
+  }, 1000);
+
+  const adjustLayout = async (layout: any) => {
+    // console.log('>> app.page.adjustLayout()', { layout });
+    const updatedHaiku = {
+      ...haiku,
+      layout: {
+        ...haiku.layout,
+        ...layout,
+      }
+    };
+
+    setHaiku(updatedHaiku);
+    debounceSaveHaiku(updatedHaiku);
+  };
+
   const doDelete = async () => {
     // console.log('>> app.page.doDelete()', {});
     if (haikudleMode) {
@@ -879,6 +901,7 @@ export default function MainPage({
           regenerateImage={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
           copyHaiku={!haiku?.error && copyHaiku}
           switchMode={switchMode}
+          adjustLayout={user?.isAdmin && adjustLayout}
         />
       }
     </div>

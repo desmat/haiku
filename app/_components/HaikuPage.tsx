@@ -1,12 +1,12 @@
 // 'use client'
 
-// import useUser from "@/app/_hooks/user";
 import * as font from "@/app/font";
 import { ExperienceMode } from "@/types/ExperienceMode";
 import { Haiku } from "@/types/Haiku";
 import HaikuPoem from "./HaikuPoem";
 import Loading from "./Loading";
 import { User } from "@/types/User";
+import AdjustLayoutControls from "./AdjustLayoutControls";
 
 export default function HaikuPage({
   user,
@@ -25,6 +25,7 @@ export default function HaikuPage({
   regenerateImage,
   copyHaiku,
   switchMode,
+  adjustLayout,
 }: {
   user?: User,
   mode: ExperienceMode,
@@ -42,12 +43,17 @@ export default function HaikuPage({
   regenerateImage?: any,
   copyHaiku?: any,
   switchMode?: any,
+  adjustLayout?: any,
 }) {
   // console.log('>> app._components.HaikuPage.render()', { loading, mode, id: haiku?.id, poem: haiku?.poem, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   // const [user] = useUser((state: any) => [state.user]);
   const blurValue = loading ? 50 : 0;
   const saturateValue = loading ? 0 : 1;
+  const poemLayout = showcaseMode && !regenerating && !loading
+    ? haiku?.layout?.poem
+    : {};
+  const canAdjustLayout = !!adjustLayout && showcaseMode;
 
   return (
     <div>
@@ -61,12 +67,28 @@ export default function HaikuPage({
           transition: loading ? "filter 0.2s ease-out" : "filter 0.1s ease-out",
         }}
       />
-      <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 bottom-[5vh] ${showcaseMode ? "portrait:bottom-[10vh]" : "portrait:bottom-[12vh]"} bottom-[] m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}>
+      <div
+        className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 bottom-[5vh] ${showcaseMode ? "portrait:bottom-[10vh]" : "portrait:bottom-[12vh]"} bottom-[] m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}
+        style={{
+          top: poemLayout?.top || poemLayout?.down ? `${poemLayout?.top || poemLayout?.down}vh` : poemLayout?.up ? `${-1 * poemLayout.up}vh` : undefined,
+          bottom: poemLayout?.bottom ? `${poemLayout.bottom}vh` : undefined,
+          marginTop: poemLayout?.top ? 0 : "auto",
+          marginBottom: poemLayout?.bottom ? 0 : "auto",
+        }}
+      >
+        {canAdjustLayout && 
+          <AdjustLayoutControls
+            layout={haiku.layout}
+            adjustLayout={adjustLayout}
+          />
+        }
         {(regenerating || loading) &&
           <Loading styles={styles} />
         }
-        {!regenerating && !loading && mode != "social-img" && mode != "haikudle-social-img" && !haiku.poemHashed && 
-          <div className="_xtall:bg-orange-400 _tall:bg-pink-200 _wide:bg-yellow-200 relative">
+        {!regenerating && !loading && mode != "social-img" && mode != "haikudle-social-img" && !haiku.poemHashed &&
+          <div
+            className="_xtall:bg-orange-400 _tall:bg-pink-200 _wide:bg-yellow-200 relative z-20"
+          >
             <HaikuPoem
               user={user}
               mode={mode}
