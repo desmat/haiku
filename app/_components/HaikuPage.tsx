@@ -1,12 +1,12 @@
 // 'use client'
 
 import * as font from "@/app/font";
+import AdjustLayoutControls from "@/app/_components/nav/AdjustLayoutControls";
 import { ExperienceMode } from "@/types/ExperienceMode";
 import { Haiku } from "@/types/Haiku";
+import { User } from "@/types/User";
 import HaikuPoem from "./HaikuPoem";
 import Loading from "./Loading";
-import { User } from "@/types/User";
-import AdjustLayoutControls from "./AdjustLayoutControls";
 
 export default function HaikuPage({
   user,
@@ -54,6 +54,7 @@ export default function HaikuPage({
     ? haiku?.layout?.poem
     : {};
   const canAdjustLayout = !!adjustLayout && showcaseMode;
+  console.log('>> app._components.HaikuPage.render()', { poemLayout });
 
   return (
     <div>
