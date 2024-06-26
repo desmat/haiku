@@ -552,10 +552,9 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
 export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
   console.log(">> services.haiku.saveHaiku", { haiku, user });
 
-  // TODO UNCRIPPLE
-  // if (!(haiku.createdBy == user.id || user.isAdmin)) {
-  //   throw `Unauthorized`;
-  // }
+  if (!(haiku.createdBy == user.id || user.isAdmin)) {
+    throw `Unauthorized`;
+  }
 
   const original = await store.haikus.get(haiku.id);
 
