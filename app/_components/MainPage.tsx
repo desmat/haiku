@@ -374,7 +374,10 @@ export default function MainPage({
           loadHaiku(ret.id);
         } else {
           setHaikuId(ret.id);
-          setHaiku(ret);
+          setHaiku({
+            ...ret,
+            generatedJustNow: true,
+          });
           window.history.replaceState(null, '', `/${ret.id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
         }
         setGenerating(false);

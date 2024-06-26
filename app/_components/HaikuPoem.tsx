@@ -236,14 +236,13 @@ export default function HaikuPoem({
   const copyAllowed = !!copyHaiku && !switchModeAllowed;
   const canCopy = copyAllowed && !editing && !saving;
 
-
   const editAllowed = false; // !showcaseMode && saveHaiku && (user?.isAdmin || haiku?.createdBy == user?.id) && saveHaiku;
   const canClickEdit = false; // editAllowed && !saving && !onboarding;
   const canEdit = false; //editAllowed && user?.isAdmin && !saving && !onboarding;
 
   const quickEditAllowed = haiku?.createdBy == user?.id || user?.isAdmin;
   const canClickQuickEdit = quickEditAllowed;
-  const [quickEditing, setQuickEditing] = useState(false);
+  const [quickEditing, setQuickEditing] = useState(haiku?.generatedJustNow);
 
   const regeneratePoemAllowed = regeneratePoem && (user?.isAdmin || haiku?.createdBy == user?.id) && regeneratePoem;
   const regenerateImageAllowed = regenerateImage && (user?.isAdmin || haiku?.createdBy == user?.id) && regenerateImage;
@@ -911,7 +910,7 @@ export default function HaikuPoem({
                 </StyledLayers>
               </div>
 
-              {!showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed) &&
+              {!showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed || quickEditAllowed) &&
                 <div
                   className="onboarding-container group/actions _bg-yellow-200 flex flex-row md:gap-3 gap-[0.5rem] mt-auto md:mt-[-0.1rem] md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.1rem] sm:pb-[0.5rem] pb-[0.4rem] md:pl-[0.9rem] sm:pl-[0.8rem] pl-[0.7rem]"
                 >
