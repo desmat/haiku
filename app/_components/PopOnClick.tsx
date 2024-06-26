@@ -7,6 +7,7 @@ export default function PopOnClick({
   active,
   disabled,
   force,
+  hoverSupported,
   className,
   children,
 }: {
@@ -14,6 +15,7 @@ export default function PopOnClick({
   active?: boolean,
   disabled?: boolean,
   force?: boolean,
+  hoverSupported?: boolean,
   className?: string,
   children: React.ReactNode,
 }) {
@@ -39,9 +41,9 @@ export default function PopOnClick({
         filter: `${pop || active ? `drop-shadow(0px 0px 16px ${color})` : ""}`,
       }}
       onMouseDown={handleMouseDown}
-      onPointerEnter={handleMouseDown}
+      onPointerEnter={() => hoverSupported && handleMouseDown()}
       onMouseUp={handleMouseUp}
-      onPointerLeave={handleMouseUp}
+      onPointerLeave={() => hoverSupported && handleMouseUp()}
     >
       {children}
     </div>

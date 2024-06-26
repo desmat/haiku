@@ -396,12 +396,14 @@ export default function MainPage({
 
     if (user?.isAdmin || haiku?.createdBy == user?.id) {
       resetAlert();
-      setLoadingUI(true);
+      // setLoadingUI(true);
+      setRegenerating(true);
       const ret = await regenerateHaiku(user, haiku, "poem");
       // console.log('>> app.page.startRegenerateHaiku()', { ret });
       incUserUsage(user, "haikusRegenerated");
       setHaiku(ret);
-      setLoadingUI(false);
+      // setLoadingUI(false);
+      setRegenerating(false);
     }
   }
 

@@ -120,7 +120,7 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
   if (process.env.OPENAI_API_KEY == "DEBUG") {
     // for testing
     console.warn(`>> services.openai.generateHaiku: DEBUG mode: returning dummy response`);
-    // await delay(3000);
+    await delay(2000);
     const sampleHaikus = mapToList(samples.haikus);
     return {
       response: {
