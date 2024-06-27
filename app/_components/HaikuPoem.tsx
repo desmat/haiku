@@ -187,6 +187,7 @@ export default function HaikuPoem({
   user,
   mode,
   haiku,
+  version,
   popPoem,
   styles,
   altStyles,
@@ -203,6 +204,7 @@ export default function HaikuPoem({
   user?: User,
   mode: ExperienceMode,
   haiku: Haiku,
+  version?: number,
   popPoem?: boolean,
   styles: any[],
   altStyles?: any[],
@@ -216,7 +218,7 @@ export default function HaikuPoem({
   switchMode?: any,
   regenerating?: boolean,
 }) {
-  // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
+  console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, version, status: haiku?.status, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   const onboarding = typeof (onboardingElement) == "string"
   const maxHaikuTheme = showcaseMode ? 32 : 18;

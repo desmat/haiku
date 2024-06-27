@@ -12,6 +12,7 @@ export default function HaikuPage({
   user,
   mode,
   haiku,
+  version, 
   styles,
   altStyles,
   fontSize,
@@ -29,6 +30,7 @@ export default function HaikuPage({
   user?: User,
   mode: ExperienceMode,
   haiku?: Haiku,
+  version?: number,
   styles: any[],
   altStyles?: any[],
   fontSize?: string | undefined,
@@ -71,6 +73,7 @@ export default function HaikuPage({
               user={user}
               mode={mode}
               haiku={haiku}
+              version={version}
               popPoem={popPoem}
               styles={styles}
               altStyles={altStyles}

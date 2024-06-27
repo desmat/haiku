@@ -4,6 +4,7 @@ import { getHaiku, getUserHaiku, createUserHaiku, saveUserHaiku, regenerateHaiku
 import { userUsage } from '@/services/usage';
 import { userSession } from '@/services/users';
 import { USAGE_LIMIT } from '@/types/Usage';
+import { regenerateLimerickImage, regenerateLimerickPoem } from '@/services/limericks';
 
 export const maxDuration = 300;
 // export const dynamic = 'force-dynamic';
@@ -75,9 +76,11 @@ export async function POST(
     if (!["image", "poem"].includes(part))throw `Regenerate part not supported: ${part}`;
   
     const updatedHaiku = part == "image"
-      ? await regenerateHaikuImage(user, haiku, artStyle)
-      : await regenerateHaikuPoem(user, haiku);
-        
+    // ? await regenerateHaikuImage(user, haiku, artStyle)
+    // : await regenerateHaikuPoem(user, haiku);
+    ? await regenerateLimerickImage(user, haiku, artStyle)
+    : await regenerateLimerickPoem(user, haiku);
+    
     return NextResponse.json({ haiku: updatedHaiku, reachedUsageLimit });
   } else if (params.action == "updateImage") {
     const [{ value: url }, { user }] = await Promise.all([

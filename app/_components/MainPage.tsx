@@ -406,13 +406,13 @@ export default function MainPage({
 
     if (user?.isAdmin || haiku?.createdBy == user?.id) {
       resetAlert();
-      // setLoadingUI(true);
+      setLoadingUI(true);
       setRegenerating(true);
       const ret = await regenerateHaiku(user, haiku, "poem");
-      // console.log('>> app.page.startRegenerateHaiku()', { ret });
+      console.log('>> app.page.startRegenerateHaiku()', { ret });
       incUserUsage(user, "haikusRegenerated");
       setHaiku(ret);
-      // setLoadingUI(false);
+      setLoadingUI(false);
       setRegenerating(false);
     }
   }
@@ -859,8 +859,8 @@ export default function MainPage({
         onCopyHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyHaiku}
         onCopyLink={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyLink}
         onLikeHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && likeHaiku}
-        onUploadImage={!haiku?.error && uploadImage}
-        onUpdateImage={!haiku?.error && updateHaikuImage}
+        // onUploadImage={!haiku?.error && uploadImage}
+        // onUpdateImage={!haiku?.error && updateHaikuImage}
       />
 
       {isPuzzleMode &&
@@ -878,6 +878,7 @@ export default function MainPage({
           user={user}
           mode={mode}
           haiku={haikudleSolved ? solvedHaikudleHaiku : haiku}
+          // version={haiku?.version}
           styles={textStyles}
           altStyles={altTextStyles}
           fontSize={fontSize}
