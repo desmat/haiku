@@ -7,8 +7,27 @@ import { StyledLayers } from "./StyledLayers";
 import { default as ClientLoading } from "@/app/_components/client/Loading";
 
 export const loadingMessages = [
-  "Loading",
-]
+  "Tickling Leprachans",
+  "Milking Unicorns",
+  "Separating Green Skittles",
+  "Befriending Ghosts in the Attic",
+  "Arm Wrestling with Mannequins",
+  "Brewing Coffee for Sleepwalkers",
+  "Negotiating with Noisy Neighbors",
+  "Pillow Fighting with Pirates",
+  "Serenading Seahorses",
+  "Training Turtles for the Olympics",
+  "Playing Poker with Parrots",
+  "Crocheting Cozies for Bald Eagles",
+  "Waltzing with Washing Machines",
+  "Squishing Marshmallows on Millionaires",
+  "Sipping Secrets from Soup Spoons",
+  "Gossiping with Goldfishes",
+  "Knitting Sweaters for Snakes",
+  "Babysitting Bandicoots",
+  "Tickling Turtles with Feathers",
+  "Serenading Sandwiches at Midnight",
+];
 
 export default function Loading({ styles = [] }: { styles?: any }) {
   const seed = Math.floor(moment().valueOf() / (5 * 60 * 1000)); // make sure client and server sides render the same within a reasonable window

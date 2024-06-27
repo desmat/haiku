@@ -1,16 +1,14 @@
 import { MetadataRoute } from 'next'
  
 export default function manifest(): MetadataRoute.Manifest {
-  const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
-
   return {
-    name: isHaikudleMode ? 'hAIkudle - AI-powered daily haiku puzzles' : 'Haiku Genius - AI-powered haiku poetry and generative art',
-    short_name: isHaikudleMode ? 'hAIkudle' : 'Haiku Genius',
-    description: isHaikudleMode ? 'AI-powered daily haiku puzzles' : 'AI-powered haiku poetry and generative art',
+    name: 'Limericks - AI-Powered Limerick Poetry and Generative Art',
+    short_name: 'Limericks',
+    description: 'AI-Powered Limerick Poetry and Generative Art',
     start_url: '/',
     display: 'standalone',
-    background_color: 'rgb(32, 31, 27)',
-    theme_color: 'rgb(32, 31, 27)',
+    background_color: '#e5e0c4',
+    theme_color: '#e5e0c4',
     icons: [
       {
         src: 'favicon.ico',

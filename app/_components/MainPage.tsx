@@ -15,7 +15,7 @@ import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haikudle } from '@/types/Haikudle';
 import { LanguageType } from '@/types/Languages';
-import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleGotoHaikuGenius, haikudleOnboardingSteps, notShowcase_notOnboardedFirstTime_onboardedShowcase, showcase_notOnboardedFirstTime, showcase_onboardedFirstTime, showcase_onboardedFirstTime_admin } from '@/types/Onboarding';
+import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleGotoHaikuGenius, haikudleOnboardingSteps, notShowcase_notOnboardedFirstTime_onboardedShowcase, showcase_notOnboardedFirstTime, showcase_onboardedFirstTime, showcase_onboardedFirstTime_admin, limerickPromptSteps } from '@/types/Onboarding';
 import { User } from '@/types/User';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
@@ -349,6 +349,13 @@ export default function MainPage({
     );
   }
 
+  const showLimerickDetails = () => {
+    startOnboarding(
+      limerickPromptSteps(haiku),
+      // () => saveUser({ ...user, preferences: { ...user?.preferences, onboardedGenerated: true } })
+    );
+  }
+
   const startGenerateHaiku = async (theme?: string) => {
     // console.log('>> app.page.startGenerateHaiku()', { theme });
     trackEvent("clicked-generate-haiku", {
@@ -357,7 +364,7 @@ export default function MainPage({
     });
 
     const subject = typeof (theme) == "undefined"
-      ? prompt(`Haiku's theme or subject? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test poem)" : "(For example 'nature', 'cherry blossoms', or leave blank)"}`)
+      ? prompt(`Limerick starting with? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test)" : ""}`, "There once was a man")
       : theme;
 
     if (typeof (subject) == "string") {
@@ -604,7 +611,7 @@ export default function MainPage({
   const copyHaiku = () => {
     if (haikudleMode && haikudleSolved || !haikudleMode) {
       navigator.clipboard.writeText(formatHaikuText(haikudleSolved ? solvedHaikudleHaiku : haiku, mode));
-      plainAlert(`Haiku poem copied to clipboard`, { closeDelay: 750 });
+      plainAlert(`Limerick copied to clipboard`, { closeDelay: 750 });
     }
   }
 
@@ -620,8 +627,8 @@ export default function MainPage({
 
   const copyLink = () => {
     if (haikudleMode && haikudleSolved || !haikudleMode) {
-      navigator.clipboard.writeText(`${mode == "haikudle" ? "https://haikudle.art" : "https://haikugenius.io"}/${haiku.id}`);
-      plainAlert(`Link to this haiku copied to clipboard`, { closeDelay: 750 });
+      navigator.clipboard.writeText(`https://limerick.desmat.ca/${haiku.id}`);
+      plainAlert(`Link to this limerick copied to clipboard`, { closeDelay: 750 });
       trackEvent("haiku-shared", {
         userId: user?.id,
         id: haiku.id,
@@ -829,17 +836,16 @@ export default function MainPage({
         onDelete={!haiku?.error && doDelete}
         onSaveDailyHaiku={!haiku?.error && saveDailyHaiku}
         onShowAbout={
-          haiku.error && user?.isAdmin
-            ? showHaikuError
-            : user?.isAdmin
-              ? showHaikuDetails
-              : userGeneratedHaiku && !haikudleMode
-                ? showAboutGenerated
-                : haikudleMode
-                  ? previousDailyHaikudleId
-                    ? showAboutPreviousDaily // with onboarding?
-                    : startFirstVisitHaikudleOnboarding
-                  : startFirstVisitOnboarding
+          showLimerickDetails
+          // user?.isAdmin
+          //   ? showHaikuDetails
+          //   : userGeneratedHaiku
+          //     ? showAboutGenerated
+          //     : haikudleMode
+          //       ? previousDailyHaikudleId
+          //         ? showAboutPreviousDaily // with onboarding?
+          //         : startFirstVisitHaikudleOnboarding
+          //       : startFirstVisitOnboarding
         }
         onSelectHaiku={(id: string) => {
           trackEvent("haiku-selected", {

@@ -425,6 +425,270 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   return saveHaiku(user, updatedHaiku);
 }
 
+export async function _regenerateLimerickPoem(user: any, haiku: Haiku): Promise<Haiku> {
+  const lang = (haiku.lang || "en") as LanguageType;
+  const startingWith = haiku.startingWith;
+  console.log(">> services.haiku.regenerateLimerickPoem", { lang, startingWith, user });
+  const language = supportedLanguages[lang].name;
+
+  const {
+    prompt: poemPrompt,
+    languageModel,
+    response: {
+      limerick: poem,
+      title,
+    }
+  } = await openai.generateLimerick({ language, startingWith });
+  console.log(">> services.haiku.regenerateLimerick", { poem, title, poemPrompt });
+
+  // delete corresponding haikudle 
+  // getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
+  //   console.log(">> services.haiku.regenerateHaikuPoem", { haikudle });
+  //   if (haikudle) {
+  //     deleteHaikudle(user, haikudle.id);
+  //   }
+  // });
+
+  // if (!user.isAdmin) {
+  //   incUserUsage(user, "haikusRegenerated");
+  // }
+
+  return saveHaiku(user, {
+    ...haiku,
+    poem,
+    theme: title,
+    poemPrompt,
+    languageModel,
+  });
+}
+
+export async function completeLimerickPoem(user: any, haiku: Haiku): Promise<Haiku> {
+  const lang = (haiku.lang || "en") as LanguageType;
+  const subject = haiku.theme;
+  const mood = haiku.mood;
+  const language = supportedLanguages[lang].name;
+  console.log(">> services.haiku.completeLimerickPoem", { language, subject, mood, user });
+
+  const previousLimericks: any[] = await Promise.all(
+    Array.from(Array(Math.min(haiku?.version || 0, 8)))
+      .map((_, i: number) => getHaiku(user, haiku.id, undefined, haiku.version - i))
+  );
+  const previousPoems = [
+    (await getHaiku(user, haiku.id)).poem,
+    ...previousLimericks?.map((haiku: Haiku) => haiku.poem)
+  ];
+
+  const {
+    response: {
+      limerick: completedPoem,
+      title,
+      // subject: generatedSubject,
+      // mood: generatedMood,
+    }
+  } = await openai.completeLimerick(haiku.poem, language, subject, mood, previousPoems);
+  console.log(">> services.haiku.completeLimerickPoem", { completedPoem, title });
+
+  // // delete corresponding haikudle 
+  // getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
+  //   console.log(">> services.haiku.completeLimerickPoem", { haikudle });
+  //   if (haikudle) {
+  //     deleteHaikudle(user, haikudle.id);
+  //   }
+  // });
+
+  if (!user.isAdmin) {
+    incUserUsage(user, "haikusRegenerated");
+  }
+
+  return store.haikus.update(user.id, {
+    ...haiku,
+    poem: completedPoem,
+    title,
+    // theme: generatedSubject,
+    // mood: generatedMood,
+  });
+}
+
+export async function _regenerateLimerickImage(user: any, haiku: Haiku, artStyle?: string): Promise<Haiku> {
+  console.log(">> services.haiku.regenerateLimerickImage", { user, haiku });
+  const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
+
+  const {
+    url: openaiUrl,
+    prompt: imagePrompt,
+    artStyle: selectedArtStyle,
+    imageModel,
+  } = await openai.generateLimerickImage(haiku.poem.join(" / "), undefined, undefined, artStyle);
+
+  const imageRet = await fetch(openaiUrl);
+  // console.log(">> services.haiku.regenerateLimerickImage", { imageRet });
+
+  const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+  console.log(">> services.haiku.regenerateLimerickImage", { imageBuffer });
+
+  const getColors = require('get-image-colors')
+
+  const colors = await getColors(imageBuffer, 'image/png');
+  console.log(">> services.haiku.regenerateLimerickImage", { colors });
+
+  // sort by darkness and pick darkest for foreground, lightest for background
+  const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
+
+  const haikuId = uuid();
+  const filename = `limerick-${haikuId}-${haiku.theme?.replaceAll(/\W/g, "_").toLowerCase()}-${(haiku.version || 0) + 1}.png`;
+  const blob = !debugOpenai && await put(filename, imageBuffer, {
+    access: 'public',
+    addRandomSuffix: false,
+  });
+  // console.log(">> services.haiku.generateHaiku", { subject, filename, blob });
+
+  let updatedHaiku = {
+    ...haiku,
+    artStyle: selectedArtStyle,
+    imagePrompt,
+    imageModel,
+    // @ts-ignore
+    bgImage: debugOpenai ? openaiUrl : blob.url,
+    color: sortedColors[0].darken(0.5).hex(),
+    bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
+    colorPalette: sortedColors.map((c: any) => c.hex()),
+  } as Haiku;
+
+  if (!user.isAdmin) {
+    // TODO let's separate image and text
+    incUserUsage(user, "haikusRegenerated");
+  }
+
+  return saveHaiku(user, updatedHaiku);
+}
+
+export async function regenerateLimerickPoem(user: any, haiku: Haiku): Promise<Haiku> {
+  const lang = (haiku.lang || "en") as LanguageType;
+  const startingWith = haiku.startingWith;
+  console.log(">> services.haiku.regenerateLimerickPoem", { lang, startingWith, user });
+  const language = supportedLanguages[lang].name;
+
+  const {
+    prompt: poemPrompt,
+    languageModel,
+    response: {
+      limerick: poem,
+      title,
+    }
+  } = await openai.generateLimerick({ language, startingWith });
+  console.log(">> services.haiku.regenerateLimerick", { poem, title, poemPrompt });
+
+  // delete corresponding haikudle 
+  // getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
+  //   console.log(">> services.haiku.regenerateHaikuPoem", { haikudle });
+  //   if (haikudle) {
+  //     deleteHaikudle(user, haikudle.id);
+  //   }
+  // });
+
+  // if (!user.isAdmin) {
+  //   incUserUsage(user, "haikusRegenerated");
+  // }
+
+  return saveHaiku(user, {
+    ...haiku,
+    poem,
+    theme: title,
+    poemPrompt,
+    languageModel,
+  });
+}
+
+export async function _completeLimerickPoem(user: any, haiku: Haiku): Promise<Haiku> {
+  const lang = (haiku.lang || "en") as LanguageType;
+  const subject = haiku.theme;
+  const mood = haiku.mood;
+  const language = supportedLanguages[lang].name;
+  console.log(">> services.haiku.completeLimerickPoem", { language, subject, mood, user });
+
+  const {
+    response: {
+      limerick: completedPoem,
+      title,
+      // subject: generatedSubject,
+      // mood: generatedMood,
+    }
+  } = await openai.completeLimerick(haiku.poem);
+  console.log(">> services.haiku.completeLimerickPoem", { completedPoem, title });
+
+  // // delete corresponding haikudle 
+  // getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
+  //   console.log(">> services.haiku.completeLimerickPoem", { haikudle });
+  //   if (haikudle) {
+  //     deleteHaikudle(user, haikudle.id);
+  //   }
+  // });
+
+  if (!user.isAdmin) {
+    incUserUsage(user, "haikusRegenerated");
+  }
+
+  return store.haikus.update(user.id, {
+    ...haiku,
+    poem: completedPoem,
+    title,
+    // theme: generatedSubject,
+    // mood: generatedMood,
+  });
+}
+
+export async function regenerateLimerickImage(user: any, haiku: Haiku, artStyle?: string): Promise<Haiku> {
+  console.log(">> services.haiku.regenerateLimerickImage", { user, haiku });
+  const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
+
+  const {
+    url: openaiUrl,
+    prompt: imagePrompt,
+    artStyle: selectedArtStyle,
+    imageModel,
+  } = await openai.generateLimerickImage(haiku.poem.join(" / "), undefined, undefined, artStyle);
+
+  const imageRet = await fetch(openaiUrl);
+  // console.log(">> services.haiku.regenerateLimerickImage", { imageRet });
+
+  const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+  console.log(">> services.haiku.regenerateLimerickImage", { imageBuffer });
+
+  const getColors = require('get-image-colors')
+
+  const colors = await getColors(imageBuffer, 'image/png');
+  console.log(">> services.haiku.regenerateLimerickImage", { colors });
+
+  // sort by darkness and pick darkest for foreground, lightest for background
+  const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
+
+  const haikuId = uuid();
+  const filename = `limerick-${haikuId}-${haiku.theme?.replaceAll(/\W/g, "_").toLowerCase()}-${(haiku.version || 0) + 1}.png`;
+  const blob = !debugOpenai && await put(filename, imageBuffer, {
+    access: 'public',
+    addRandomSuffix: false,
+  });
+  // console.log(">> services.haiku.generateHaiku", { subject, filename, blob });
+
+  let updatedHaiku = {
+    ...haiku,
+    artStyle: selectedArtStyle,
+    imagePrompt,
+    imageModel,
+    // @ts-ignore
+    bgImage: debugOpenai ? openaiUrl : blob.url,
+    color: sortedColors[0].darken(0.5).hex(),
+    bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
+    colorPalette: sortedColors.map((c: any) => c.hex()),
+  } as Haiku;
+
+  if (!user.isAdmin) {
+    incUserUsage(user, "haikusCreated");
+  }
+
+  return saveHaiku(user, updatedHaiku);
+}
+
 export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, type: string = "image/png"): Promise<Haiku> {
   console.log(">> services.haiku.updateHaikuImage", { user, haiku, buffer, type });
 
@@ -514,6 +778,142 @@ export async function generateHaiku(user: User, {
   });
 }
 
+export async function _generateLimerick(user: any, lang?: LanguageType, startingWith?: string): Promise<Haiku> {
+  console.log(">> services.haiku.generateLimerick", { lang, startingWith, user });
+  const language = supportedLanguages[lang || "en"].name;
+  const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
+
+  const {
+    prompt: poemPrompt,
+    languageModel,
+    response: {
+      limerick: poem,
+      title,
+    }
+  } = await openai.generateLimerick({ language, startingWith });
+  console.log(">> services.haiku.generateLimerick", { poem, title, poemPrompt });
+
+  const {
+    url: imageUrl,
+    prompt: imagePrompt,
+    artStyle: selectedArtStyle,
+    imageModel,
+  } = await openai.generateLimerickImage(poem.join(" / ")); // TODO provide poem here
+
+  const imageRet = await fetch(imageUrl);
+  // console.log(">> services.haiku.generateLimerick", { imageRet });
+
+  const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+  console.log(">> services.haiku.generateLimerick", { imageBuffer });
+
+  const getColors = require('get-image-colors')
+
+  const colors = await getColors(imageBuffer, 'image/png');
+  console.log(">> services.haiku.generateLimerick", { colors });
+
+  // sort by darkness and pick darkest for foreground, lightest for background
+  const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
+
+  const haikuId = uuid();
+  const filename = `limerick-${haikuId}-${title?.replaceAll(/\W/g, "_").toLowerCase()}.png`;
+  const blob = !debugOpenai && await put(filename, imageBuffer, {
+    access: 'public',
+    addRandomSuffix: false,
+  });
+  // console.log(">> services.haiku.generateLimerick", { subject, filename, blob });
+
+  let haiku = {
+    id: haikuId,
+    lang: lang || "en",
+    createdBy: user.id,
+    createdAt: moment().valueOf(),
+    status: "created",
+    startingWith,
+    theme: title,
+    artStyle: selectedArtStyle,
+    poemPrompt,
+    languageModel,
+    imagePrompt,
+    imageModel,
+    imageUrl,
+    poem,
+  };
+
+  // ???
+}
+
+export async function generateLimerick(user: any, lang?: LanguageType, startingWith?: string): Promise<Haiku> {
+  console.log(">> services.haiku.generateLimerick", { lang, startingWith, user });
+  const language = supportedLanguages[lang || "en"].name;
+  const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
+
+  const {
+    prompt: poemPrompt,
+    languageModel,
+    response: {
+      limerick: poem,
+      title,
+    }
+  } = await openai.generateLimerick({ language, startingWith });
+  console.log(">> services.haiku.generateLimerick", { poem, title, poemPrompt });
+
+  const {
+    url: openaiUrl,
+    prompt: imagePrompt,
+    artStyle: selectedArtStyle,
+    imageModel,
+  } = await openai.generateLimerickImage(poem.join(" / ")); // TODO provide poem here
+
+  const imageRet = await fetch(openaiUrl);
+  // console.log(">> services.haiku.generateLimerick", { imageRet });
+
+  const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+  console.log(">> services.haiku.generateLimerick", { imageBuffer });
+
+  const getColors = require('get-image-colors')
+
+  const colors = await getColors(imageBuffer, 'image/png');
+  console.log(">> services.haiku.generateLimerick", { colors });
+
+  // sort by darkness and pick darkest for foreground, lightest for background
+  const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
+
+  const haikuId = uuid();
+  const filename = `limerick-${haikuId}-${title?.replaceAll(/\W/g, "_").toLowerCase()}.png`;
+  const blob = !debugOpenai && await put(filename, imageBuffer, {
+    access: 'public',
+    addRandomSuffix: false,
+  });
+  // console.log(">> services.haiku.generateLimerick", { subject, filename, blob });
+
+  let haiku = {
+    id: haikuId,
+    lang: lang || "en",
+    createdBy: user.id,
+    createdAt: moment().valueOf(),
+    status: "created",
+    startingWith,
+    theme: title,
+    artStyle: selectedArtStyle,
+    poemPrompt,
+    languageModel,
+    imagePrompt,
+    imageModel,
+    // @ts-ignore
+    bgImage: debugOpenai ? openaiUrl : blob.url,
+    color: sortedColors[0].darken(0.5).hex(),
+    bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
+    colorPalette: sortedColors.map((c: any) => c.hex()),
+    poem,
+  } as Haiku;
+
+  if (!user.isAdmin) {
+    incUserUsage(user, "haikusCreated");
+  }
+
+  return store.haikus.create(user.id, haiku);
+}
+
 export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
   console.log(">> services.haiku.deleteHaiku", { id, user });
 
@@ -576,7 +976,8 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
 
   const poem = haiku.poem.join("/");
   if (poem.includes("...") || poem.includes("…")) {
-    return completeHaikuPoem(user, haiku);
+    // return completeHaikuPoem(user, haiku);
+    return completeLimerickPoem(user, haiku);
   }
 
   return store.haikus.update(user.id, { ...haiku, version: version + 1 });

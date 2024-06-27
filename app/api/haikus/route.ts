@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes, createHaiku } from '@/services/haikus';
+import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes, createHaiku, generateLimerick } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
 import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
@@ -186,7 +186,8 @@ export async function POST(request: NextRequest) {
     haiku = await createHaiku(user, { theme: title, poem, imageBuffer, imageType });
   } else {
     // console.log('>> app.api.haiku.POST generating new haiku', { lang, subject, mood, artStyle });
-    haiku = await generateHaiku(user, { lang, subject, mood, artStyle })
+    haiku = await generateLimerick(user, lang, subject);
+
   }
 
   return NextResponse.json({ haiku, reachedUsageLimit });

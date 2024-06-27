@@ -126,6 +126,29 @@ export const haikuPromptSteps = (haiku: Haiku) => [
   },
 ];
 
+export const limerickPromptSteps = (haiku: Haiku) => [
+  {
+    focus: "poem",
+    message: `
+      <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+      <div>Starting with:: <i>${haiku.startingWith}</i></div>      
+      <div>Image instructions: <i>${haiku.artStyle || "N/A"}</i></div>      
+      <div>Poem prompt: <i>${haiku.poemPrompt || "N/A"}</i></div>
+      <div>Image prompt: <i>${haiku.imagePrompt || "N/A"}</i></div>
+      ${haiku.version || haiku.deprecated
+        ? `<div>Version: ${haiku.version}
+          ${haiku.version
+          ? ` <a href="/${haiku.id}?version=${haiku.version - 1}">(Load previous)</a>`
+          : ""}
+          ${haiku.deprecated
+          ? ` <a href="/${haiku.id}">(Load current)</a>`
+          : ""}</div>`
+        : ""}    
+      </div>`,
+    style: { bottom: "50%", transform: "translateY(50%)" },
+  },
+];
+
 export const haikudleOnboardingSteps = [
   {
     focus: "",

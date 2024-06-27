@@ -40,7 +40,7 @@ export default function Page({
         </div>
       }
       {loading &&
-        <p className='italic text-center opacity-20 animate-pulse'>読込</p>
+        <p className='italic text-center opacity-20 animate-pulse'>Loading</p>
       }
       {!loading &&
         <div className="px-2 flex flex-col align-center self-center w-fit">

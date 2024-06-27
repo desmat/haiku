@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import * as samples from "@/services/stores/samples";
 import delay from '@/utils/delay';
 import { mapToList } from '@/utils/misc';
+import { LanguageType } from '@/types/Languages';
 
 const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -205,7 +206,8 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
       content: `
       Given an incomplete haiku please complete the haiku. 
       Characters "..." or "…" will be used to indicate a placeholder, please keep the existing word(s) and fill the rest.
-      If a line looks like this: "<some one or more words> ..." then keep the word(s) at the beginning and fill the rest.          If a line looks like this: "... <one or more words>" then keep the word(s) at the end and fill the rest.
+      If a line looks like this: "<some one or more words> ..." then keep the word(s) at the beginning and fill the rest.
+      If a line looks like this: "... <one or more words>" then keep the word(s) at the end and fill the rest.
       If a line looks like this: "... <one or more words> ..." then keep the word(s) together and fill the rest.
       Additionally, if a line looks obviously incomplete even without "..." characters please complete it.
       Optionally a topic (or "any", meaning you pick) and/or mood may be included.
@@ -245,5 +247,210 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
     return { prompt, response, model: completion.model };
   } catch (error) {
     console.error("Error reading results", { error, response, completion });
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+export async function generateLimerick({ startingWith, language }: { startingWith?: string, language?: string }): Promise<any> {
+  const prompt = `Starting with: ${startingWith}`;
+
+  console.log(`>> services.openai.generateLimerick`, { language, prompt });
+
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
+    console.warn(`>> services.openai.generateLimerick: DEBUG mode: returning dummy response`);
+    // await delay(3000);
+    const sampleHaikus = mapToList(samples.haikus);
+    return {
+      response: {
+        prompt,
+        limerick: true // startingWith?.includes("DEBUG")
+          ? [
+              "There was once a man from Kent,",
+              "Whose rod was so long it bent.",
+              "It scared all the fishes,",
+              "Fulfilled mermaid wishes,",
+              "And made quite the splash wherever he went!",
+          ] : sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].poem,
+        // startingWith: subject || "test subject",
+        // mood: mood || "test mood",
+        title: "test title",
+      }
+    };
+  }
+
+  const systemPrompt = `Given the starting words (if provided) please generate a limerick in ${language || "English"} and respond in JSON where each response is an array of strings.
+    Make sure the limerick include innuendos.
+    Also include in the response, in fewest number of words, a title for this limeric. 
+    Please only include keys "limerick" and "title".
+    `;
+  // @ts-ignore
+  const completion = await openai.chat.completions.create({
+    model: languageModel,
+    messages: [
+      {
+        role: 'system',
+        content: systemPrompt
+      },
+      {
+        role: 'user',
+        content: prompt,
+      }
+    ],
+  });
+
+  let response;
+  try {
+    // console.log(">> services.openai.generateLimerick RESULTS FROM API", completion);
+    response = parseJson(completion.choices[0].message.content || "{}");
+    console.log(">> services.openai.generateLimerick RESULTS FROM API", { completion, response });
+    return {
+      prompt: systemPrompt + "\n" + prompt,
+      languageModel,
+      response,
+    };
+  } catch (error) {
+    console.error("Error reading results", { error, response, completion });
+  }
+}
+
+export async function completeLimerick(poem: string[], language?: string, subject?: string, mood?: string, previousPoems?: any[]): Promise<any> {
+  const prompt = `Limerick to complete: "${poem.join(" / ")}"
+  ${subject ? `Topic: "${subject}"` : ""}
+  ${mood ? ` Mood: "${mood}"` : ""}`;
+
+  console.log(`>> services.openai.completeLimerick`, { poem, language, subject, mood, prompt, previousPoems });
+
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
+    console.warn(`>> services.openai.completeLimerick: DEBUG mode: returning dummy response`);
+    // await delay(3000);
+    return {
+      response: {
+        prompt,
+        limerick: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "___") : line),
+        // subject: subject || "test subject",
+        // mood: mood || "test mood",
+        title: "test title",
+      }
+    };
+  }
+
+  const messages = [
+    {
+      role: 'system',
+      content: `
+        Given an incomplete limerick please complete the limerick. 
+        Characters "..." or "…" will be used to indicate a placeholder, please keep the existing word(s) and fill the rest.
+        If a line looks like this: "<some one or more words> ..." then keep the word(s) at the beginning and fill the rest.
+        If a line looks like this: "... <one or more words>" then keep the word(s) at the end and fill the rest.
+        If a line looks like this: "... <one or more words> ..." then keep the word(s) together and fill the rest.
+        Additionally, if a line looks obviously incomplete even without "..." characters please complete it.
+        Any empty or missing lines should be filled in or added so that we end up with 5 lines.
+        Optionally a topic (or "any", meaning you pick) and/or mood may be included.
+        Previous limerick poems may be provided, if so please ensure that the new limerick poem is different than previous ones.
+        Make sure the limerick include innuendos.
+        Also, please fix up any extraneous white spaces, punctuation, incorrect capitalized words, typos or incorrectly words.
+        Respond in JSON where the response is an array of strings.
+        Also include in the response, in fewest number of words, a title for this limeric. 
+        Please only include keys "limerick" and "title".`
+    },
+    ...((previousPoems || []).map((previousPoem: []) => {
+      return {
+        role: 'user',
+        content: `Previous haiku poem: \n${previousPoem.join("\n")}`,
+      }
+    })),
+    {
+      role: 'user',
+      content: prompt,
+    }
+  ];
+  // console.log(`>> services.openai.completeHaiku`, { messages });
+
+  // @ts-ignore
+  const completion = await openai.chat.completions.create({
+    model: languageModel,
+    messages,
+  });
+
+  let response;
+  try {
+    // console.log(">> services.openai.completeHaiku RESULTS FROM API", { completion });
+    response = parseJson(completion.choices[0].message.content || "{}");
+    console.log(">> services.openai.completeHaiku RESULTS FROM API", { response });
+    return { prompt, response };
+  } catch (error) {
+    console.error("Error reading results", { error, response, completion });
+  }
+}
+
+export async function generateLimerickImage(limerick?: string, subject?: string, mood?: string, artStyle?: string): Promise<any> {
+  console.log(`>> services.openai.generateLimerickImage`, { limerick, subject, mood, artStyle });
+  const imageTypes = [
+    // "charcoal drawing", 
+    // "pencil drawing",
+    // "Painting",
+    "funny and whimsical painting with large brush strokes, in a style often seen in irish or english pubs",
+    "funny and whimsical quick wobbly sketch, colored hastily with watercolors",
+  ];
+  const selectedArtStyle = artStyle || imageTypes[Math.floor(Math.random() * imageTypes.length)];
+  const prompt = `
+    Please read this limerick: ${limerick}
+    Respond with an image that would complement, hint at, and/or capture the essence that limerick.
+    Make the art low-key with negative space in the middle, so that the limerick can be overlayed.
+    The image SHOULD NOT contain any writing, letters, numbers or characters of any kind.
+    ${selectedArtStyle ? "Additional instructions for the image: " + selectedArtStyle + "." : ""}
+  `;
+
+  // for testing
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    console.warn(`>> services.openai.generateLimerickImage: DEBUG mode: returning dummy response`);
+    const res = {
+      "created": 1705515146,
+      "data": [
+        {
+          "revised_prompt": "REVISED PROMPT",
+          url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/limericks/DALL%C2%B7E%202024-04-27%2011.26.51%20-%20An%20impressionistic%20painting%20of%20a%20whimsical%20scene%20featuring%20a%20man%20from%20Kent%20at%20a%20riverbank,%20holding%20a%20long,%20curiously%20bent%20fishing%20rod.%20The%20setting%20is%20%20(2).png"
+        }
+      ]
+    }
+
+    return {
+      artStyle: selectedArtStyle,
+      prompt: res.data[0]["revised_prompt"],
+      url: res.data[0].url,
+      imageModel,
+    };
+  }
+
+  // @ts-ignore
+  const response = await openai.images.generate({
+    model: imageModel,
+    prompt,
+    n: 1,
+    size: "1024x1024",
+    // size: "256x256",
+  });
+
+  try {
+    console.log(">> services.openai.generateBackgroundImage RESULTS FROM API", { response });
+    return {
+      artStyle: selectedArtStyle,
+      prompt: (response.data[0]["revised_prompt"] || prompt),
+      imageModel,
+      url: response.data[0].url,
+    };
+  } catch (error) {
+    console.error("Error reading results", { error, response });
   }
 }
