@@ -697,7 +697,7 @@ export default function HaikuPoem({
   }, []);
 
   return (
-    <div className="relative px-[2rem] ">
+    <div className="relative">
       {/* allow editors to click out and finish */}
       {!showcaseMode &&
         <div
@@ -768,9 +768,10 @@ export default function HaikuPoem({
               force={popPoem || quickEditing}
               disabled={editing || quickEditing || (!canCopy && !canSwitchMode)}
               active={/*quickEditing || */  !!(onboardingElement && onboardingElement.includes("poem"))}
+              className="flex flex-col gap-2"
             >
               {currentPoem.map((poemLine: string[], i: number) => (
-                <div key={i} className="md:my-[0.05rem] sm:my-[0.03rem] my-[0.15rem] _transition-all">
+                <div key={i} className="md:my-[0.05rem] sm:my-[0.03rem] my-[0.15rem] _transition-all md:leading-[2.2rem] leading-[1.5rem]">
                   <StyledLayers styles={
                     quickEditing
                       ? styles.slice(0, 3) || []
@@ -791,7 +792,7 @@ export default function HaikuPoem({
                     >
                       {/* set the width while editing */}
                       <div
-                        className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row gap-[0.5rem] _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
+                        className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row flex-wrap items-center gap-[0.5rem] _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
                         style={{
                           userSelect: "none",
                           WebkitUserSelect: "none",
@@ -879,7 +880,7 @@ export default function HaikuPoem({
             <div
               className={showcaseMode
                 ? "_bg-yellow-200 fixed bottom-4 right-8 w-max flex flex-row"
-                : "_bg-orange-200 flex flex-row w-max ml-[0.5rem] mt-[-0.2rem] md:mt-[0.2rem] leading-5"
+                : "_bg-orange-200 flex flex-row w-max ml-[0rem] mt-[0.5rem] md:mt-[0.8rem] leading-5"
               }
               style={{ fontSize }}
             >
