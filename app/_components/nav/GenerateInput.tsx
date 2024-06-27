@@ -140,7 +140,7 @@ export default function GenerateInput({
 
     // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate() generate');
     // @ts-ignore
-    // const theme = focus || ref.current.value ? ref.current.value : haikuTheme.split("…")[1].trim();
+    const theme = focus || ref.current.value ? ref.current.value : haikuTheme.split("…").join();
     // generate && generate(theme);
     generate(theme);
     // @ts-ignore

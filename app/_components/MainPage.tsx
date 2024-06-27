@@ -793,7 +793,7 @@ export default function MainPage({
             dangerouslySetInnerHTML={{
               __html: `
                 body {
-                  background-color: ${haiku?.bgColor};         
+                  background-color: ${haiku?.bgColor};
                 }
               `
             }}
@@ -859,8 +859,8 @@ export default function MainPage({
         onCopyHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyHaiku}
         onCopyLink={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyLink}
         onLikeHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && likeHaiku}
-        // onUploadImage={!haiku?.error && uploadImage}
-        // onUpdateImage={!haiku?.error && updateHaikuImage}
+      // onUploadImage={!haiku?.error && uploadImage}
+      // onUpdateImage={!haiku?.error && updateHaikuImage}
       />
 
       {isPuzzleMode &&

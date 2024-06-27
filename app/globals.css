@@ -201,8 +201,8 @@ ul {
 .onboarding-focus:not(.double) {
   /* background-color: yellow; */
   opacity: 0.52;
-  box-shadow: 
-    0 0 max(100vh, 100vw) max(100vh, 100vw) #000000, 
+  box-shadow:
+    0 0 max(100vh, 100vw) max(100vh, 100vw) #000000,
     inset 0 0 1rem 2rem #000000,
     inset 0 0 1rem max(100vh, 100vw) #00000044;
 }
@@ -210,11 +210,26 @@ ul {
 .onboarding-focus.double {
   /* background-color: pink; */
   opacity: 0.3;
-  box-shadow: 
-    0 0 max(100vh, 100vw) max(100vh, 100vw) #000000, 
+  box-shadow:
+    0 0 max(100vh, 100vw) max(100vh, 100vw) #000000,
     inset 0 0 1rem 2rem #000000;
 }
 
-.Alert a, .Alert .Action {
+.Alert a,
+.Alert .Action {
   text-decoration: underline;
+}
+
+.animate-pulse-offset {
+  animation: pulse-offset 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-offset {
+  0%, 100% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
 }

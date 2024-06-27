@@ -743,10 +743,11 @@ export default function HaikuPoem({
           <div className="onboarding-focus" />
         }
         <div
-          className={`_bg-pink-200 p-[2.5rem] ${canEdit ? "group/edit" : ""} ${saving ? "animate-pulse" : ""}`}
+          className={`_bg-pink-200 _p-[2.5rem] ${canEdit ? "group/edit" : ""} ${saving ? "animate-pulse" : ""}`}
           style={{
             cursor: showcaseMode ? "pointer" : "",
             fontSize,
+            width: "calc(100vw - 64px)",
             maxWidth: showcaseMode ? "calc(100vw - 64px)" : "800px",
             minWidth: "200px",
           }}
@@ -755,7 +756,7 @@ export default function HaikuPoem({
           onMouseEnter={handleMouseUp}
         >
           <div
-            className="_bg-purple-200 flex flex-col _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
+            className="_bg-purple-200 flex flex-col _transition-all w-fit m-auto md:text-[26pt] sm:text-[22pt] text-[18pt]"
             onClick={handleClickHaiku}
             title={showcaseMode && canRefresh ? "Refresh" : canEdit ? "Click to edit" : canCopy ? "Click to copy haiku poem" : showcaseMode ? "Click to switch to edit mode" : canSwitchMode ? "Click to switch to showcase mode" : ""}
             style={{

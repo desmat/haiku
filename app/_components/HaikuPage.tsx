@@ -12,7 +12,7 @@ export default function HaikuPage({
   user,
   mode,
   haiku,
-  version, 
+  version,
   styles,
   altStyles,
   fontSize,
@@ -67,7 +67,7 @@ export default function HaikuPage({
         {(/* regenerating || */ loading) &&
           <Loading styles={styles} />
         }
-        {/* !regenerating && */ !loading && mode != "social-img" && mode != "haikudle-social-img" && !haiku.poemHashed && 
+        {/* !regenerating && */ !loading && mode != "social-img" && mode != "haikudle-social-img" && !haiku.poemHashed &&
           <div className="_xtall:bg-orange-400 _tall:bg-pink-200 _wide:bg-yellow-200 relative">
             <HaikuPoem
               user={user}
