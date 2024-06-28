@@ -279,11 +279,11 @@ export default function SidePanel({
                   {user?.isAdmin &&
                     <div
                       className="cursor-pointer"
-                      title="Show daily haikus"
+                      title="Show daily limerics"
                       onClick={() => setListMode("dailyHaiku")}
                     >
                       <StyledLayers styles={styles}>
-                        All Haikus
+                        All Limerics
                       </StyledLayers>
                     </div>
                   }
@@ -325,18 +325,18 @@ export default function SidePanel({
               {user?.isAdmin && listMode == "dailyHaiku" &&
                 <div
                   className="cursor-pointer"
-                  title="Show daily haikudles"
-                  onClick={() => setListMode("dailyHaikudle")}
+                  title="Show all limerics"
+                  onClick={() => setListMode("haiku")}
                 >
                   <StyledLayers styles={styles}>
-                    Daily Haikus
+                    Daily Limerics
                   </StyledLayers>
                 </div>
               }
               {user?.isAdmin && listMode == "dailyHaikudle" &&
                 <div
                   className="cursor-pointer"
-                  title="Show Haikus"
+                  title="Show limericks"
                   onClick={() => setListMode("haiku")}
                 >
                   <StyledLayers styles={styles}>
