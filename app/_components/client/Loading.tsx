@@ -9,8 +9,8 @@ import * as font from "@/app/font";
 export default function Loading({ styles = [] }: { styles?: any }) {
   const [loadingMessage, setLoadingMessage] = useState(""); //loadingMessages[Math.floor(seedrandom(`${seed}`)() * loadingMessages.length)]);
   const [intervalId, setIntervalId] = useState<any>();
-  const initialTimeoutValue = 2000;
-  const intervalValue = 2000;
+  const intervalValue = 4500;
+  const initialTimeoutValue = intervalValue * 1 / 3;
   // console.log('>> app._components.client.Loading', { seed, random: seedrandom(`${seed}`)(), loadingMessage });
 
   useEffect(() => {

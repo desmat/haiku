@@ -48,8 +48,8 @@ export default function HaikuPage({
   // console.log('>> app._components.HaikuPage.render()', { loading, mode, id: haiku?.id, poem: haiku?.poem, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   // const [user] = useUser((state: any) => [state.user]);
-  const blurValue = loading ? 30 : 0;
-  const saturateValue = loading ? 0.5 : 1;
+  const blurValue = loading ? 60 : 0;
+  const saturateValue = loading ? 0.6 : 1;
 
   return (
     <div>
@@ -60,7 +60,7 @@ export default function HaikuPage({
           backgroundPosition: "center",
           backgroundSize: "cover",
           filter: `brightness(1.2) blur(${blurValue}px) saturate(${saturateValue}) `,
-          transition: loading ? "filter 0.2s ease-out" : "filter 0.1s ease-out",
+          transition: loading ? "filter 0.5s ease-out" : "filter 0.1s ease-out",
         }}
       />
       <div className={`poem-outer-container ${font.architects_daughter.className} _bg-pink-200 h-full flex justify-center md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 _bottom-[5vh] ${showcaseMode ? "_portrait:bottom-[10vh] _py-[2vh]" : "_portrait:bottom-[12vh] _pb-[5rem] _pt-[3rem]"} bottom-[] m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}>
