@@ -43,7 +43,8 @@ export default function MainPage({
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
   const showcaseMode = mode == "showcase";
-  let [haiku, setHaiku] = useState<Haiku | undefined>(_haiku);
+  // TODO clean up generatedJustNow business
+  let [haiku, setHaiku] = useState<Haiku | undefined>({ ..._haiku, generatedJustNow: false });
   let [haikudle, setHaikudle] = useState<Haiku | undefined>(_haikudle);
   let [haikuId, setHaikuId] = useState(_haiku?.id);
   const [generating, setGenerating] = useState(false);
@@ -411,7 +412,7 @@ export default function MainPage({
       const ret = await regenerateHaiku(user, haiku, "poem");
       console.log('>> app.page.startRegenerateHaiku()', { ret });
       incUserUsage(user, "haikusRegenerated");
-      setHaiku(ret);
+      setHaiku({ ...ret, generatedJustNow: false });
       setLoadingUI(false);
       setRegenerating(false);
     }
@@ -436,7 +437,7 @@ export default function MainPage({
         const ret = await regenerateHaiku(user, haiku, "image", { artStyle });
         // console.log('>> app.page.startRegenerateHaiku()', { ret });
         incUserUsage(user, "haikusRegenerated"); // TODO haikuImageRegenerated?
-        setHaiku(ret);
+        setHaiku({ ...ret, generatedJustNow: false });
         setLoadingUI(false);
       } else {
         trackEvent("cancelled-regenerate-image", {
@@ -470,7 +471,7 @@ export default function MainPage({
         .then((haikudles: Haikudle | Haikudle[]) => {
           // console.log('>> app.MainPage.loadPage loadRandom.then', { haikudles });
           const loadedHaikudle = haikudles[0] || haikudles;
-          setHaiku(loadedHaikudle?.haiku);
+          setHaiku({ ...loadedHaikudle?.haiku, generatedJustNow: false });
           setHaikuId(loadedHaikudle?.haiku?.id);
           setHaikudle(loadedHaikudle);
           setLoadingUI(false);
@@ -480,7 +481,7 @@ export default function MainPage({
           // console.log('>> app.MainPage.loadPage loadRandom.then', { haikus });
           const loadedHaiku = haikus[0] || haikus;
           window.history.replaceState(null, '', `/${loadedHaiku?.id}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
-          setHaiku(loadedHaiku);
+          setHaiku({ ...loadedHaiku, generatedJustNow: false });
           setHaikuId(loadedHaiku?.id);
           setLoadingUI(false);
         });
@@ -508,7 +509,7 @@ export default function MainPage({
         .then((haikus: Haiku | Haiku[]) => {
           // console.log('>> app.MainPage.loadHaiku loadHaikus.then', { haikus });
           const loadedHaiku = haikus[0] || haikus;
-          setHaiku(loadedHaiku);
+          setHaiku({ ...loadedHaiku, generatedJustNow: false });
           setHaikuId(loadedHaiku?.id);
           setLoadingUI(false);
           window.history.replaceState(null, '', `/${haikuId || ""}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
@@ -619,7 +620,7 @@ export default function MainPage({
     // console.log(">> app.MainPage.doSaveHaiku", { haiku });
     const savedHaiku = await saveHaiku(user, haiku);
     // console.log(">> app.MainPage.doSaveHaiku", { savedHaiku });
-    setHaiku(savedHaiku);
+    setHaiku({ ...savedHaiku, generatedJustNow: false });
     setHaikuId(savedHaiku?.id);
 
     return savedHaiku;
@@ -643,7 +644,7 @@ export default function MainPage({
     const value = userHaiku?.likedAt ? undefined : moment().valueOf();
 
     haikuAction(haikuId, "like", value).then((haiku: Haiku) => {
-      setHaiku(haiku);
+      setHaiku({ ...haiku, generatedJustNow: false });
     })
   }
 
@@ -651,7 +652,7 @@ export default function MainPage({
     // console.log('>> app._components.MainPage.uploadImage()', { haikuId, file });
     setLoadingUI(true);
     uploadHaikuImage(haikuId, file).then((haiku: Haiku) => {
-      setHaiku(haiku);
+      setHaiku({ ...haiku, generatedJustNow: false });
       setLoadingUI(false);
     }).catch((error: any) => {
       console.error('>> app._components.MainPage.uploadImage()', { error });
@@ -668,7 +669,7 @@ export default function MainPage({
       // console.log('>> app._components.MainPage.updateHaikuImage()', { url });    
       setLoadingUI(true);
       haikuAction(haikuId, "updateImage", url).then((haiku: Haiku) => {
-        setHaiku(haiku);
+        setHaiku({ ...haiku, generatedJustNow: false });
         setLoadingUI(false);
       }).catch((error: any) => {
         console.error('>> app._components.MainPage.updateHaikuImage()', { error });
@@ -766,13 +767,13 @@ export default function MainPage({
           ? initHaiku(haiku, haiku.id, mode).then((haikus: Haiku | Haiku[]) => {
             // console.log('>> app.MainPage init initHaiku.then', { haikus });
             const initializedHaiku = haikus[0] || haikus;
-            setHaiku(initializedHaiku);
+            setHaiku({ ...initializedHaiku, generatedJustNow: false });
             setHaikuId(initializedHaiku?.id);
           })
           : loadHaikus(haikuId || { lang }).then((haikus: Haiku | Haiku[]) => {
             // console.log('>> app.MainPage init loadHaikus.then', { haikus });
             const loadedHaiku = haikus[0] || haikus;
-            setHaiku(loadedHaiku);
+            setHaiku({ ...loadedHaiku, generatedJustNow: false });
             setHaikuId(loadedHaiku?.id);
           });
 

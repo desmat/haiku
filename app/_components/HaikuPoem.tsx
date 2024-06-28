@@ -253,6 +253,12 @@ export default function HaikuPoem({
   const canRegenerateImage = regenerateImageAllowed && !editing && !saving;
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { editing, showcaseMode, canCopy, canSwitchMode });
 
+  const customLayout = true //showcaseMode // true
+    // ? [40, 0, 10, 1, 5, 0] // for top-level focus
+    ? [0, 0, 20, 1, 5, 0] // for mid-top focus
+    : undefined;
+
+
   const handleClickHaiku = (e: any) => {
     // console.log('>> app._components.HaikuPoem.handleClickHaiku()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
     if (quickEditing) return;
@@ -407,11 +413,11 @@ export default function HaikuPoem({
   let [editPoem, setEditPoem] = useState<string[][]>(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
   let [currentPoem, setCurrentPoem] = useState<string[][]>(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
   let refs = [
-    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
-    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
-    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
-    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
-    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
   ]
 
   let [savingLine, setSavingLine] = useState<boolean[]>(haiku && haiku.poem.map((line: string) => false));
@@ -687,6 +693,142 @@ export default function HaikuPoem({
     }
   }
 
+  const PoemButtons = () => {
+    return (
+      <div
+        className="poem-buttons onboarding-container group/actions _bg-yellow-200 flex flex-row md:gap-3 gap-[0.5rem]"
+        onClick={(e: any) => e.preventDefault()}
+      >
+        {onboardingElement && ["poem-actions"].includes(onboardingElement) &&
+          <div className="onboarding-focus" />
+        }
+        {onboardingElement && ["poem-and-poem-actions"].includes(onboardingElement) &&
+          <div className="onboarding-focus double" />
+        }
+        {editAllowed &&
+          <Link
+            href="#"
+            className={`${!saving ? "cursor-pointer" : "cursor-default"} sm:mt-[-0.15rem] mt-[-0.1rem]`}
+            title="Edit this haiku"
+            onClick={(e: any) => {
+              e.preventDefault();
+              if (editAllowed) {
+                editing
+                  ? finishEdit()
+                  : canClickEdit
+                    ? startEdit(0, true)
+                    : undefined;
+              }
+            }}
+          >
+            <StyledLayers styles={altStyles || []}>
+              <PopOnClick>
+                <FaEdit className={`
+            h-[1.2rem] w-[1.2rem] md:h-6 md:w-6 
+            ${editing || onboardingElement == "poem-actions"
+                    ? "opacity-100"
+                    : saving || !canClickEdit
+                      ? "opacity-60"
+                      : canClickEdit
+                        ? "opacity-100"
+                        : ""
+                  }
+          `} />
+              </PopOnClick>
+            </StyledLayers>
+          </Link>
+        }
+        {quickEditAllowed &&
+          <div
+            className={`${!saving ? "cursor-pointer" : "cursor-default"} md:mt-[0.05rem] mt-[0.03rem]`}
+            title="Edit this haiku"
+            onClick={(e: any) => {
+              e.preventDefault();
+              if (canClickQuickEdit) {
+                setQuickEditing(!quickEditing);
+              }
+            }}
+          >
+            <StyledLayers styles={altStyles || []}>
+              <PopOnClick>
+                <FaMagic className={`
+                  h-4 w-4 md:h-5 md:w-5 
+                  ${quickEditing ? "animate-pulse" : ""}
+                  ${editing || onboardingElement == "poem-actions"
+                    ? "opacity-100"
+                    : saving || !canClickQuickEdit
+                      ? "opacity-60"
+                      : canClickQuickEdit
+                        ? "opacity-100"
+                        : ""
+                  }
+                `} />
+              </PopOnClick>
+            </StyledLayers>
+          </div>
+        }
+        {regeneratePoemAllowed &&
+          <div className="_bg-pink-200 md:mt-[-0.02rem] mt-[0]">
+            {!user?.isAdmin && (user?.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
+              <span title="Exceeded daily limit: try again later">
+                <StyledLayers styles={altStyles || []}>
+                  <GenerateIcon sizeOverwrite={`
+                    h-[1.1rem] w-[1.1rem] md:h-6 md:w-6
+                    ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"}
+                  `} />
+                </StyledLayers>
+              </span>
+            }
+            {(user?.isAdmin || (user?.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
+              <span title="Regenerate this haiku with the same theme">
+                <StyledLayers styles={altStyles || []}>
+                  <PopOnClick>
+                    <GenerateIcon
+                      onClick={() => canRegeneratePoem && regeneratePoem()}
+                      sizeOverwrite={`
+                        h-[1.1rem] w-[1.1rem] md:h-6 md:w-6 
+                        ${canRegeneratePoem || onboardingElement == "poem-actions" ? "cursor-pointer opacity-100" : "opacity-60"} 
+                      `}
+                    />
+                  </PopOnClick>
+                </StyledLayers>
+              </span>
+            }
+          </div>
+        }
+        {regenerateImageAllowed &&
+          <div className="_bg-pink-200 md:mt-[-0.05rem] mt-[-0.02rem] md:ml-[-0.2rem] ml-[-0.1rem]">
+            {!user?.isAdmin && (user?.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
+              <span title="Exceeded daily limit: try again later">
+                <StyledLayers styles={altStyles || []}>
+                  <TbReload className={`
+                h-[1.2rem] w-[1.2rem] md:h-6 md:w-6 
+                ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"}
+              `} />
+                </StyledLayers>
+              </span>
+            }
+            {(user?.isAdmin || (user?.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
+              <span title="Regenerate this haiku's art with the same theme">
+                <StyledLayers styles={altStyles || []}>
+                  <PopOnClick>
+                    <TbReload
+                      onClick={() => canRegenerateImage && regenerateImage()}
+                      className={`
+                  h-[1.2rem] w-[1.2rem] md:h-6 md:w-6 
+                  ${canRegeneratePoem || onboardingElement == "poem-actions" ? "cursor-pointer opacity-100" : "opacity-60"} 
+                `}
+                    />
+                  </PopOnClick>
+                </StyledLayers>
+              </span>
+            }
+          </div>
+        }
+      </div>
+    )
+  }
+
   useEffect(() => {
     // console.log(">> app._component.SidePanel.useEffect", { mode, haiku });
     document.body.addEventListener('keydown', handleKeyDown);
@@ -697,7 +839,7 @@ export default function HaikuPoem({
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative h-full">
       {/* allow editors to click out and finish */}
       {!showcaseMode &&
         <div
@@ -735,7 +877,11 @@ export default function HaikuPoem({
       >
       </style>
       */}
-      <div className="onboarding-container">
+      <div className="onboarding-container flex"
+        style={{
+          height: "100%",
+        }}
+      >
         {onboardingElement && ["poem"].includes(onboardingElement) &&
           <div className="onboarding-focus double" />
         }
@@ -743,20 +889,23 @@ export default function HaikuPoem({
           <div className="onboarding-focus" />
         }
         <div
-          className={`_bg-pink-200 _p-[2.5rem] ${canEdit ? "group/edit" : ""} ${saving ? "animate-pulse" : ""}`}
+          className={`h-full _bg-pink-200 _p-[2.5rem] m-auto ${canEdit ? "group/edit" : ""} ${saving ? "animate-pulse" : ""}`}
           style={{
             cursor: showcaseMode ? "pointer" : "",
             fontSize,
             width: "calc(100vw - 64px)",
-            maxWidth: showcaseMode ? "calc(100vw - 64px)" : "800px",
+            maxWidth: customLayout ? "calc(100vw - 64px)" : "90vh",
             minWidth: "200px",
+            height: showcaseMode ? "calc(100vh - 64px)" : "120vw",
+            minHeight: showcaseMode ? "" : "50vh",
+            maxHeight: showcaseMode ? "" : "calc(100vh - 192px)"
           }}
           onTouchMove={handleTouchMove}
           onMouseLeave={handleMouseUp}
           onMouseEnter={handleMouseUp}
         >
           <div
-            className="_bg-purple-200 flex flex-col _transition-all w-fit m-auto md:text-[26pt] sm:text-[22pt] text-[18pt]"
+            className="h-full _bg-purple-200 flex flex-col _transition-all w-fit m-auto md:text-[26pt] sm:text-[22pt] text-[18pt]"
             onClick={handleClickHaiku}
             title={showcaseMode && canRefresh ? "Refresh" : canEdit ? "Click to edit" : canCopy ? "Click to copy haiku poem" : showcaseMode ? "Click to switch to edit mode" : canSwitchMode ? "Click to switch to showcase mode" : ""}
             style={{
@@ -769,77 +918,113 @@ export default function HaikuPoem({
               force={popPoem || quickEditing}
               disabled={editing || quickEditing || (!canCopy && !canSwitchMode)}
               active={/*quickEditing || */  !!(onboardingElement && onboardingElement.includes("poem"))}
-              className="flex flex-col gap-2"
+              className={`h-full inner-container _bg-yellow-200 flex flex-col ${customLayout ? "justify-between gap-1" : "justify-center gap-1"}`}
             >
-              {currentPoem.map((poemLine: string[], i: number) => (
-                <div key={i} className="md:my-[0.05rem] sm:my-[0.03rem] my-[0.15rem] _transition-all md:leading-[2.2rem] leading-[1.5rem]">
-                  <StyledLayers styles={
-                    quickEditing
-                      ? styles.slice(0, 3) || []
-                      : aboutToEdit || editing //|| saving
-                        ? styles.slice(0, 1)
-                        : onboardingElement && !onboardingElement.includes("poem")
-                          ? styles.slice(0, 2)
-                          : saving
-                            ? styles.slice(0, 3)
-                            : styles
-                  }>
+              {
+                Array.apply(0, new Array(currentPoem.length * 2 + 1)).map((_: any, j: number) => { return { spacer: !(j % 2), i: Math.floor(j / 2) } })
+                  .map(({ spacer, i }) => (
+                    // currentPoem.map((poemLine: string[], i: number) => (
                     <div
-                      className="relative m-[0rem] _transition-all"
-                      onKeyDown={(e: any) => (canEdit || editing) && handlePoemLineKeyDown(e, i)}
-                      onMouseOver={() => canEdit && setAboutToEditLine(i)}
-                      onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
-                      onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
+                      key="j"
+                      className={`line-and-spacer ${spacer ? "spacer-" + i : "line-" + i} flex flex-col ${spacer ? "_flex-grow" : "_flex-grow-0"}`}
+                      style={{
+                        flexGrow: spacer && customLayout && customLayout[i] || 0
+                      }}
                     >
-                      {/* set the width while editing */}
-                      <div
-                        className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row flex-wrap items-center gap-[0.5rem] _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
-                        style={{
-                          userSelect: "none",
-                          WebkitUserSelect: "none",
-                          WebkitTouchCallout: "none",
-                          MozUserSelect: "none",
-                          msUserSelect: "none",
-                          WebkitTapHighlightColor: "rgba(0,0,0,0)",
-                        }}
-                      // onMouseLeave={(e: any) => handleMouseLeaveLine(e, i)}
-                      >
-                        {poemLine.map((word: string, j: number) => (
-                          <div
-                            key={`line-${i}-word-${j}`}
-                            // @ts-ignore
-                            ref={refs[i][j]}
-                            className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] ${aboutToSave ? "opacity-50" : saving ? "cursor-wait opacity-50 animate-pulse" : killingWords ? "cursor-crosshair" : "cursor-pointer"}`}
-                            style={{
-                              transition: "opacity 0.5s ease-out"
-                            }}
-                            // onClick={(e: any) => handleClickWord(e, i, j)}
-                            onMouseDown={(e: any) => handleMouseDownWord(e, i, j)}
-                            onMouseUp={(e: any) => handleMouseUp(e, i, j)}
-                            onMouseMove={(e: any) => handleMouseMoveWord(e, i, j)}
-                            onPointerEnter={(e: any) => handlePointerEnterWord(e, i, j)}
-                          >
-                            {/* Display  */}
+                      {customLayout && spacer &&
+                        <div
+                          className="spacer _bg-orange-200 flex h-full w-full"
+                          style={{
+                            // flexGrow: 1
+                          }}
+                        >
+                        </div>
+                      }
+                      {!spacer && i < currentPoem.length &&
+                        <div
+                          key={i}
+                          className={`
+                            _bg-pink-200 line-container flex md:my-[0.05rem] sm:my-[0.03rem] my-[0.15rem] _transition-all md:leading-[2.2rem] leading-[1.5rem]                            
+                            ${customLayout ? (i == 0 ? "mb-auto" : i == 3 ? "my-auto ml-auto" : i == 4 ? "mt-auto" : "my-auto") : ""}
+                          `}
+                        >
+                          <StyledLayers
+                            className={`_bg-yellow-200 `}
+                            styles={
+                              quickEditing
+                                ? styles.slice(0, 3) || []
+                                : aboutToEdit || editing //|| saving
+                                  ? styles.slice(0, 1)
+                                  : onboardingElement && !onboardingElement.includes("poem")
+                                    ? styles.slice(0, 2)
+                                    : saving
+                                      ? styles.slice(0, 3)
+                                      : styles
+                            }>
                             <div
-                              // className="absolute top-0 left-0 w-0 h-0"
-                              className={`${displayPoem[i][j] ? "opacity-100" : "opacity-20"} transition-opacity`}
+                              className="relative m-[0rem] _transition-all"
+                              onKeyDown={(e: any) => (canEdit || editing) && handlePoemLineKeyDown(e, i)}
+                              onMouseOver={() => canEdit && setAboutToEditLine(i)}
+                              onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
+                              onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
                             >
-                              <PopOnClick
-                                color={haiku?.color}
-                                force={!displayPoem[i][j]}
-                                disabled={!quickEditing || quickEditing && !displayPoem[i][j]}
-                                hoverSupported={quickEditing}
+                              {/* set the width while editing */}
+                              <div
+                                className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row flex-wrap items-center gap-[0.5rem] _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
+                                style={{
+                                  userSelect: "none",
+                                  WebkitUserSelect: "none",
+                                  WebkitTouchCallout: "none",
+                                  MozUserSelect: "none",
+                                  msUserSelect: "none",
+                                  WebkitTapHighlightColor: "rgba(0,0,0,0)",
+                                  justifyContent: customLayout
+                                    ? (i == 3
+                                      ? "end"
+                                      : i == 4
+                                        ? "start" // "center"
+                                        : "start"
+                                    )
+                                    : "start"
+                                }}
+                              // onMouseLeave={(e: any) => handleMouseLeaveLine(e, i)}
                               >
-                                {j == 0 &&
-                                  <span>{upperCaseFirstLetter(currentPoem[i][j])}</span>
-                                }
-                                {j != 0 &&
-                                  <span>{currentPoem[i][j]}</span>
-                                }
-                              </PopOnClick>
-                            </div>
-                            {/* Keep the document structure */}
-                            {/* <div
+                                {currentPoem[i].map((word: string, j: number) => (
+                                  <div
+                                    key={`line-${i}-word-${j}`}
+                                    // @ts-ignore
+                                    ref={refs[i][j]}
+                                    className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] ${aboutToSave ? "opacity-50" : saving ? "cursor-wait opacity-50 animate-pulse" : killingWords ? "cursor-crosshair" : "cursor-pointer"}`}
+                                    style={{
+                                      transition: "opacity 0.5s ease-out",
+                                    }}
+                                    // onClick={(e: any) => handleClickWord(e, i, j)}
+                                    onMouseDown={(e: any) => handleMouseDownWord(e, i, j)}
+                                    onMouseUp={(e: any) => handleMouseUp(e, i, j)}
+                                    onMouseMove={(e: any) => handleMouseMoveWord(e, i, j)}
+                                    onPointerEnter={(e: any) => handlePointerEnterWord(e, i, j)}
+                                  >
+                                    {/* Display  */}
+                                    <div
+                                      // className="absolute top-0 left-0 w-0 h-0"
+                                      className={`${displayPoem[i][j] ? "opacity-100" : "opacity-20"} transition-opacity`}
+                                    >
+                                      <PopOnClick
+                                        color={haiku?.color}
+                                        force={!displayPoem[i][j]}
+                                        disabled={!quickEditing || quickEditing && !displayPoem[i][j]}
+                                        hoverSupported={quickEditing}
+                                      >
+                                        {j == 0 &&
+                                          <span>{upperCaseFirstLetter(currentPoem[i][j])}</span>
+                                        }
+                                        {j != 0 &&
+                                          <span>{currentPoem[i][j]}</span>
+                                        }
+                                      </PopOnClick>
+                                    </div>
+                                    {/* Keep the document structure */}
+                                    {/* <div
                                 className="opacity-20"
                               >
                                 {j == 0 &&
@@ -849,10 +1034,17 @@ export default function HaikuPoem({
                                   <span>{word}</span>
                                 }
                               </div> */}
-                          </div>
-                        ))
-                        }
-                        {/* <ControlledInput
+                                  </div>
+                                ))
+                                }
+                                {false && !spacer && i == currentPoem.length - 1 && !showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed || quickEditAllowed) &&
+                                  <div className="flex flex-grow-0 justify-end relative _h-0">
+                                    <div className="_absolute top-0 right-0">
+                                      <PoemButtons />
+                                    </div>
+                                  </div>
+                                }
+                                {/* <ControlledInput
                             id={i}
                             activeId={editingLine}
                             value={upperCaseFirstLetter(saving
@@ -863,193 +1055,91 @@ export default function HaikuPoem({
                             select={select}
                             onChange={(value: string) => handleInputChange(value, i)}
                           /> */}
-                      </div>
+                              </div>
+                            </div>
+                          </StyledLayers>
+                        </div>
+                      }
+                      {!spacer && i == currentPoem.length - 1 && !showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed || quickEditAllowed) &&
+                        <div className="flex flex-grow-0 justify-end relative h-0">
+                          <div className="absolute top-0 right-0 z-40"
+                            onMouseDown={(e: any) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              e.nativeEvent.stopImmediatePropagation();
+                            }}
+                            onClick={(e: any) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              e.nativeEvent.stopImmediatePropagation();
+                            }}
+                          >
+                            <PoemButtons />
+                          </div>
+                        </div>
+                      }
+
                     </div>
-                  </StyledLayers>
-                </div>
-              ))}
+                  ))}
             </PopOnClick>
           </div>
 
-          <div
-            className={`_bg-red-400 relative md:text-[16pt] sm:text-[14pt] text-[12pt] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
-            style={{
-              // background: "pink",
-              fontSize: "60%",
-            }}
-          >
+          {false &&
             <div
-              className={showcaseMode
-                ? "_bg-yellow-200 fixed bottom-4 right-8 w-max flex flex-row"
-                : "_bg-orange-200 flex flex-row w-max ml-[0rem] mt-[0.5rem] md:mt-[0.8rem] leading-5"
-              }
-              style={{ fontSize }}
+              className={`_bg-red-400 relative md:text-[16pt] sm:text-[14pt] text-[12pt] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
+              style={{
+                // background: "pink",
+                fontSize: "60%",
+              }}
             >
               <div
-                className="poem-title _transition-all _bg-pink-400"
-                onClick={(e: any) => !showcaseMode && handleClickHaiku(e)}
-                title={showcaseMode || canSwitchMode ? "" : canCopy ? "Copy to clipboard" : ""}
-                style={{
-                  cursor: showcaseMode || canSwitchMode
-                    ? "pointer"
-                    : !canEdit && canCopy
-                      ? "copy"
-                      : ""
-                }}
+                className={showcaseMode
+                  ? "_bg-yellow-200 fixed bottom-4 right-8 w-max flex flex-row"
+                  : "_bg-orange-200 flex flex-row w-max ml-[0rem] mt-[0.5rem] md:mt-[0.8rem] leading-5"
+                }
+                style={{ fontSize }}
               >
-                <StyledLayers
-                  styles={
-                    saving
-                      ? styles.slice(0, 3)
-                      : onboardingElement && !onboardingElement.includes("poem")
-                        ? styles.slice(0, 2)
-                        : styles
-                  }
-                >
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: `${formatHaikuTitleAndAuthor(haiku, mode).join(haiku?.theme?.length > maxHaikuTheme
-                        ? "<br/>&nbsp;"
-                        : "")}`
-                    }}
-                  />
-                </StyledLayers>
-              </div>
-
-              {!showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed || quickEditAllowed) &&
                 <div
-                  className="onboarding-container group/actions _bg-yellow-200 flex flex-row md:gap-3 gap-[0.5rem] mt-auto md:mt-[-0.1rem] md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.1rem] sm:pb-[0.5rem] pb-[0.4rem] md:pl-[0.9rem] sm:pl-[0.8rem] pl-[0.7rem]"
+                  className="poem-title _transition-all _bg-pink-400"
+                  onClick={(e: any) => !showcaseMode && handleClickHaiku(e)}
+                  title={showcaseMode || canSwitchMode ? "" : canCopy ? "Copy to clipboard" : ""}
+                  style={{
+                    cursor: showcaseMode || canSwitchMode
+                      ? "pointer"
+                      : !canEdit && canCopy
+                        ? "copy"
+                        : ""
+                  }}
                 >
-                  {onboardingElement && ["poem-actions"].includes(onboardingElement) &&
-                    <div className="onboarding-focus" />
-                  }
-                  {onboardingElement && ["poem-and-poem-actions"].includes(onboardingElement) &&
-                    <div className="onboarding-focus double" />
-                  }
-                  {editAllowed &&
-                    <Link
-                      href="#"
-                      className={`${!saving ? "cursor-pointer" : "cursor-default"} sm:mt-[-0.15rem] mt-[-0.1rem]`}
-                      title="Edit this haiku"
-                      onClick={(e: any) => {
-                        e.preventDefault();
-                        if (editAllowed) {
-                          editing
-                            ? finishEdit()
-                            : canClickEdit
-                              ? startEdit(0, true)
-                              : undefined;
-                        }
+                  <StyledLayers
+                    styles={
+                      saving
+                        ? styles.slice(0, 3)
+                        : onboardingElement && !(onboardingElement || "").includes("poem")
+                          ? styles.slice(0, 2)
+                          : styles
+                    }
+                  >
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: `${formatHaikuTitleAndAuthor(haiku, mode).join(haiku?.theme?.length > maxHaikuTheme
+                          ? "<br/>&nbsp;"
+                          : "")}`
                       }}
-                    >
-                      <StyledLayers styles={altStyles || []}>
-                        <PopOnClick>
-                          <FaEdit className={`
-                            h-[1.2rem] w-[1.2rem] md:h-6 md:w-6 
-                            ${editing || onboardingElement == "poem-actions"
-                              ? "opacity-100"
-                              : saving || !canClickEdit
-                                ? "opacity-60"
-                                : canClickEdit
-                                  ? "opacity-100"
-                                  : ""
-                            }
-                          `} />
-                        </PopOnClick>
-                      </StyledLayers>
-                    </Link>
-                  }
-                  {quickEditAllowed &&
-                    <div
-                      className={`${!saving ? "cursor-pointer" : "cursor-default"} md:mt-[0.05rem] mt-[0.03rem]`}
-                      title="Edit this haiku"
-                      onClick={(e: any) => {
-                        e.preventDefault();
-                        if (canClickQuickEdit) {
-                          setQuickEditing(!quickEditing);
-                        }
-                      }}
-                    >
-                      <StyledLayers styles={altStyles || []}>
-                        <PopOnClick>
-                          <FaMagic className={`
-                            h-4 w-4 md:h-5 md:w-5 
-                            ${quickEditing ? "animate-pulse" : ""}
-                            ${editing || onboardingElement == "poem-actions"
-                              ? "opacity-100"
-                              : saving || !canClickQuickEdit
-                                ? "opacity-60"
-                                : canClickQuickEdit
-                                  ? "opacity-100"
-                                  : ""
-                            }
-                          `} />
-                        </PopOnClick>
-                      </StyledLayers>
-                    </div>
-                  }
-                  {regeneratePoemAllowed &&
-                    <div className="_bg-pink-200 md:mt-[-0.02rem] mt-[0]">
-                      {!user?.isAdmin && (user?.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
-                        <span title="Exceeded daily limit: try again later">
-                          <StyledLayers styles={altStyles || []}>
-                            <GenerateIcon sizeOverwrite={`
-                                h-[1.1rem] w-[1.1rem] md:h-6 md:w-6
-                                ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"}
-                              `} />
-                          </StyledLayers>
-                        </span>
-                      }
-                      {(user?.isAdmin || (user?.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
-                        <span title="Regenerate this haiku with the same theme">
-                          <StyledLayers styles={altStyles || []}>
-                            <PopOnClick>
-                              <GenerateIcon
-                                onClick={() => canRegeneratePoem && regeneratePoem()}
-                                sizeOverwrite={`
-                                  h-[1.1rem] w-[1.1rem] md:h-6 md:w-6 
-                                  ${canRegeneratePoem || onboardingElement == "poem-actions" ? "cursor-pointer opacity-100" : "opacity-60"} 
-                                `}
-                              />
-                            </PopOnClick>
-                          </StyledLayers>
-                        </span>
-                      }
-                    </div>
-                  }
-                  {regenerateImageAllowed &&
-                    <div className="_bg-pink-200 md:mt-[-0.05rem] mt-[-0.02rem] md:ml-[-0.2rem] ml-[-0.1rem]">
-                      {!user?.isAdmin && (user?.usage[dateCode]?.haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU &&
-                        <span title="Exceeded daily limit: try again later">
-                          <StyledLayers styles={altStyles || []}>
-                            <TbReload className={`
-                                h-[1.2rem] w-[1.2rem] md:h-6 md:w-6 
-                                ${onboardingElement == "poem-actions" ? "opacity-100" : "opacity-60"}
-                              `} />
-                          </StyledLayers>
-                        </span>
-                      }
-                      {(user?.isAdmin || (user?.usage[dateCode]?.haikusRegenerated || 0) < USAGE_LIMIT.DAILY_REGENERATE_HAIKU) &&
-                        <span title="Regenerate this haiku's art with the same theme">
-                          <StyledLayers styles={altStyles || []}>
-                            <PopOnClick>
-                              <TbReload
-                                onClick={() => canRegenerateImage && regenerateImage()}
-                                className={`
-                                  h-[1.2rem] w-[1.2rem] md:h-6 md:w-6 
-                                  ${canRegeneratePoem || onboardingElement == "poem-actions" ? "cursor-pointer opacity-100" : "opacity-60"} 
-                                `}
-                              />
-                            </PopOnClick>
-                          </StyledLayers>
-                        </span>
-                      }
-                    </div>
-                  }
+                    />
+                  </StyledLayers>
                 </div>
-              }
+
+                {!showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed || quickEditAllowed) &&
+                  <div
+                    className="md:mt-[-0.1rem] md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.1rem] sm:pb-[0.5rem] pb-[0.4rem] md:pl-[0.9rem] sm:pl-[0.8rem] pl-[0.7rem]"
+                  >
+                    <PoemButtons />
+                  </div>
+                }
+              </div>
             </div>
-          </div>
+          }
         </div>
       </div >
     </div >

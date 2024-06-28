@@ -367,7 +367,7 @@ export default function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {mode != "social-img" && user?.isAdmin && process.env.EXPERIENCE_MODE != "haikudle" &&
+        {false && mode != "social-img" && user?.isAdmin && process.env.EXPERIENCE_MODE != "haikudle" &&
           <Link
             key="changeMode"
             href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`}

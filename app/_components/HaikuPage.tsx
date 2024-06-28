@@ -63,7 +63,7 @@ export default function HaikuPage({
           transition: loading ? "filter 0.2s ease-out" : "filter 0.1s ease-out",
         }}
       />
-      <div className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 bottom-[5vh] ${showcaseMode ? "portrait:bottom-[10vh]" : "portrait:bottom-[12vh]"} bottom-[] m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}>
+      <div className={`poem-outer-container ${font.architects_daughter.className} _bg-pink-200 h-full flex justify-center md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 _bottom-[5vh] ${showcaseMode ? "_portrait:bottom-[10vh] _py-[2vh]" : "_portrait:bottom-[12vh] _pb-[5rem] _pt-[3rem]"} bottom-[] m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}>
         {(/* regenerating || */ loading) &&
           <Loading styles={styles} />
         }
