@@ -11,14 +11,14 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const appName = isHaikudleMode
   ? "AI-powered Daily Haiku Puzzles and Generative Art - Solve the puzzle to reveal today's haiku, generate haiku poems paired and beautiful generative art, always free, no signup required."
-  : "AI-Powered Limericks and Generative Art - TODO";
+  : "limericksAI - AI-Powered Limericks and Generative Art";
 
 export const appDescription = isHaikudleMode
   ? "Solve the daily puzzles, generate new haikus, enjoy beautiful generative art and share with the world - no signup required. " +
   "Haikudle integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
   "Generate haiku poems and share AI-generated creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
   "Explore daily haiku puzzles and discover the limitless poetic and artistic possibilities with Haikudle."
-  : "TODO";
+  : "Generate hilarious limerick with matching generative art today! Always free and not signup required.";
 
 export const metaUrl = isHaikudleMode
   ? "https://haikudle.art/"
@@ -54,7 +54,8 @@ if (isHaikudleMode) {
   ];
 } else {
   metaImages = [
-    "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limerick/limeick_5069ddc0.png",
+    // "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limerick/limeick_5069ddc0.png",
+    "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limerick/liimerick_52b6369b.png",
   ];
 }
 
