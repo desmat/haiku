@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const appName = isHaikudleMode
   ? "AI-powered Daily Haiku Puzzles and Generative Art - Solve the puzzle to reveal today's haiku, generate haiku poems paired and beautiful generative art, always free, no signup required."
-  : "limericksAI - AI-Powered Limericks and Generative Art";
+  : "AI-Powered Limericks and Generative Art";
 
 export const appDescription = isHaikudleMode
   ? "Solve the daily puzzles, generate new haikus, enjoy beautiful generative art and share with the world - no signup required. " +
