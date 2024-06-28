@@ -61,14 +61,17 @@ export async function completeLimerickPoem(user: any, haiku: Haiku): Promise<Hai
   console.log(">> services.limerick.completeLimerickPoem", { language, subject, mood, user });
 
   const previousLimericks: any[] = await Promise.all(
-    Array.from(Array(Math.min(haiku?.version || 0, 8)))
+    Array.from(Array(Math.min(haiku?.version || 0, 16)))
       .map((_, i: number) => getHaiku(user, haiku.id, undefined, haiku.version - i))
   );
   console.log(">> services.limerick.completeLimerickPoem", { previousLimericks });
-  const previousPoems = [
-    (await getHaiku(user, haiku.id))?.poem,
-    ...previousLimericks?.map((haiku: Haiku) => haiku && haiku?.poem)
-  ];
+  const previousPoems = Array.from(
+    new Set([
+      (await getHaiku(user, haiku.id))?.poem,
+      ...previousLimericks
+        .map((haiku: Haiku) => haiku && haiku?.poem)
+        .filter(Boolean)
+    ]))    
   console.log(">> services.limerick.completeLimerickPoem", { previousPoems });
 
   const {
@@ -78,7 +81,7 @@ export async function completeLimerickPoem(user: any, haiku: Haiku): Promise<Hai
       // subject: generatedSubject,
       // mood: generatedMood,
     }
-  } = await openai.completeLimerick(haiku.poem, language, subject, mood, previousPoems);
+  } = await openai.completeLimerick(haiku.poem, language, subject, mood, previousPoems.slice(0, 4));
   console.log(">> services.limerick.completeLimerickPoem", { completedPoem, title });
 
   // // delete corresponding haikudle 
@@ -93,7 +96,7 @@ export async function completeLimerickPoem(user: any, haiku: Haiku): Promise<Hai
     incUserUsage(user, "haikusRegenerated");
   }
 
-  return store.haikus.update(user.id, {
+  return saveHaiku(user, {
     ...haiku,
     poem: completedPoem,
     title,
@@ -108,6 +111,20 @@ export async function regenerateLimerickPoem(user: any, haiku: Haiku): Promise<H
   console.log(">> services.limericks.regenerateLimerickPoem", { lang, startingWith, user });
   const language = supportedLanguages[lang].name;
 
+  const previousLimericks: any[] = await Promise.all(
+    Array.from(Array(Math.min(haiku?.version || 0, 16)))
+      .map((_, i: number) => getHaiku(user, haiku.id, undefined, haiku.version - i))
+  );
+  console.log(">> services.limerick.regenerateLimerickPoem", { previousLimericks });
+  const previousPoems = Array.from(
+    new Set([
+      (await getHaiku(user, haiku.id))?.poem,
+      ...previousLimericks
+        .map((haiku: Haiku) => haiku && haiku?.poem)
+        .filter(Boolean)
+    ]))    
+  console.log(">> services.limerick.regenerateLimerickPoem", { previousPoems });
+
   const {
     prompt: poemPrompt,
     languageModel,
@@ -115,7 +132,7 @@ export async function regenerateLimerickPoem(user: any, haiku: Haiku): Promise<H
       limerick: poem,
       title,
     }
-  } = await openai.generateLimerick({ language, startingWith });
+  } = await openai.generateLimerick({ language, startingWith, previousPoems: previousPoems.slice(0, 4) });
   console.log(">> services.limerick.regenerateLimerick", { poem, title, poemPrompt });
 
   // delete corresponding haikudle 

@@ -3,6 +3,7 @@ import * as samples from "@/services/stores/samples";
 import delay from '@/utils/delay';
 import { mapToList } from '@/utils/misc';
 import { LanguageType } from '@/types/Languages';
+import { temperature } from 'chroma-js';
 
 const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -260,7 +261,7 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
 
 
 
-export async function generateLimerick({ startingWith, language }: { startingWith?: string, language?: string }): Promise<any> {
+export async function generateLimerick({ startingWith, language, previousPoems }: { startingWith?: string, language?: string, previousPoems?: any[] }): Promise<any> {
   const prompt = `Starting with: ${startingWith}`;
 
   console.log(`>> services.openai.generateLimerick`, { language, prompt });
@@ -268,7 +269,7 @@ export async function generateLimerick({ startingWith, language }: { startingWit
   if (process.env.OPENAI_API_KEY == "DEBUG") {
     // for testing
     console.warn(`>> services.openai.generateLimerick: DEBUG mode: returning dummy response`);
-    // await delay(3000);
+    // await delay(13000);
     const sampleHaikus = mapToList(samples.haikus);
     return {
       response: {
@@ -288,24 +289,43 @@ export async function generateLimerick({ startingWith, language }: { startingWit
     };
   }
 
-  const systemPrompt = `Given the starting words (if provided) please generate a limerick in ${language || "English"} and respond in JSON where each response is an array of strings.
+  const systemPrompt = `
+    Given the starting words (if provided) please generate a limerick in ${language || "English"} and respond in JSON where each response is an array of strings.
     Make sure the limerick include innuendos.
+    Other limerick poems may be provided, if so please ensure that this new limerick poem is different from the previous ones.
     Also include in the response, in fewest number of words, a title for this limeric. 
     Please only include keys "limerick" and "title".
     `;
-  // @ts-ignore
-  const completion = await openai.chat.completions.create({
-    model: languageModel,
-    messages: [
+
+    const messages = [
       {
         role: 'system',
-        content: systemPrompt
+        content: `
+          Given the starting words (if provided) please generate a limerick in ${language || "English"} and respond in JSON where each response is an array of strings.
+          Make sure the limerick include innuendos.
+          Other limerick poems may be provided, if so please ensure that this new limerick poem is different from the previous ones.
+          Also include in the response, in fewest number of words, a title for this limeric. 
+          Please only include keys "limerick" and "title".
+        `  
       },
+      ...((previousPoems || []).map((previousPoem: []) => {
+        return {
+          role: 'user',
+          content: `Other limerick poem: \n${previousPoem.join("\n")}`,
+        }
+      })),
       {
         role: 'user',
         content: prompt,
       }
-    ],
+    ];
+    console.log(`>> services.openai.generateLimerick`, { messages });
+  
+
+  // @ts-ignore
+  const completion = await openai.chat.completions.create({
+    model: languageModel,
+    messages,
   });
 
   let response;
@@ -361,13 +381,13 @@ export async function completeLimerick(poem: string[], language?: string, subjec
         Make sure the limerick include innuendos.
         Also, please fix up any extraneous white spaces, punctuation, incorrect capitalized words, typos or incorrectly words.
         Respond in JSON where the response is an array of strings.
-        Also include in the response, in fewest number of words, a title for this limeric. 
+        Also include in the response, in fewest number of words, a title for this limerick. 
         Please only include keys "limerick" and "title".`
     },
     ...((previousPoems || []).map((previousPoem: []) => {
       return {
         role: 'user',
-        content: `Previous haiku poem: \n${previousPoem.join("\n")}`,
+        content: `Previous limerick poem: \n${previousPoem.join("\n")}`,
       }
     })),
     {
@@ -375,17 +395,18 @@ export async function completeLimerick(poem: string[], language?: string, subjec
       content: prompt,
     }
   ];
-  // console.log(`>> services.openai.completeHaiku`, { messages });
+  console.log(`>> services.openai.completeLimerick`, { messages });
 
   // @ts-ignore
   const completion = await openai.chat.completions.create({
     model: languageModel,
     messages,
+    // temperature: 1,
   });
 
   let response;
   try {
-    // console.log(">> services.openai.completeHaiku RESULTS FROM API", { completion });
+    console.log(">> services.openai.completeHaiku RESULTS FROM API", { completion });
     response = parseJson(completion.choices[0].message.content || "{}");
     console.log(">> services.openai.completeHaiku RESULTS FROM API", { response });
     return { prompt, response };
