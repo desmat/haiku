@@ -232,7 +232,7 @@ export default function GenerateInput({
                 <input
                   //@ts-ignore
                   ref={ref}
-                  maxLength={46}
+                  maxLength={256}
                   placeholder={`${haikuTheme}`}
                   disabled={exceededUsageLimit}
                   value={undefined}
