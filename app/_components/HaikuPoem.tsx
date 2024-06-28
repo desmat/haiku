@@ -274,6 +274,10 @@ export default function HaikuPoem({
       alignments: [l, l, l, r, l]
     },
     {
+      spacing: [10, 10, 10, 10, 10, 10], // spread mix
+      alignments: [c, c, l, r, c]
+    },
+    {
       spacing: [10, 10, 10, 10, 10, 10], // spread centered
       alignments: [c, c, c, c, c]
     },
@@ -282,16 +286,36 @@ export default function HaikuPoem({
       alignments: [l, l, l, l, l]
     },
     {
-      spacing: [32, 0, 0, 0, 0, 32], // middle
+      spacing: [32, 0, 0, 0, 0, 32], // middle mix
+      alignments: [c, c, l, r, l]
+    },
+    {
+      spacing: [32, 0, 0, 0, 0, 32], // middle left
       alignments: [l, l, l, l, l]
     },
     {
-      spacing: [0, 0, 0, 0, 0, 32], // top
+      spacing: [32, 0, 0, 0, 0, 0], // bottom mix
+      alignments: [c, c, l, r, c]
+    },
+    {
+      spacing: [32, 0, 0, 0, 0, 0], // bottom left
       alignments: [l, l, l, l, l]
     },
     {
-      spacing: [32, 0, 0, 0, 0, 0], // bottom
+      spacing: [32, 0, 0, 0, 0, 0], // bottom right
+      alignments: [r, r, r, r, r]
+    },
+    {
+      spacing: [0, 0, 0, 0, 0, 32], // top mix
+      alignments: [c, c, l, r, c]
+    },
+    {
+      spacing: [0, 0, 0, 0, 0, 32], // top left
       alignments: [l, l, l, l, l]
+    },
+    {
+      spacing: [0, 0, 0, 0, 0, 32], // top right
+      alignments: [r, r, r, r, r]
     },
   ];
 
@@ -323,7 +347,7 @@ export default function HaikuPoem({
 
       const preset = haiku?.layout?.preset >= presetLayouts.length - 1
         ? 0
-        : (haiku?.layout?.preset || defaultPreset) + 1;
+        : (typeof(haiku?.layout?.preset) == "number" ? haiku?.layout?.preset : defaultPreset) + 1;
       return updateLayout({
         preset,
         custom: presetLayouts[preset]
@@ -959,9 +983,28 @@ export default function HaikuPoem({
           <div
             className="h-full _bg-purple-200 flex flex-col _transition-all w-fit m-auto md:text-[26pt] sm:text-[22pt] text-[18pt]"
             onClick={handleClickHaiku}
-            title={showcaseMode && canRefresh ? "Refresh" : canEdit ? "Click to edit" : canCopy ? "Click to copy haiku poem" : showcaseMode ? "Click to switch to edit mode" : canSwitchMode ? "Click to switch to showcase mode" : canUpdateLayout ? "Click to change layout" : ""}
+            title={canUpdateLayout
+              ? "Update layout"
+              : showcaseMode && canRefresh
+                ? "Refresh"
+                : canEdit
+                  ? "Click to edit"
+                  : canCopy
+                    ? "Click to copy haiku poem"
+                    : showcaseMode
+                      ? "Click to switch to edit mode"
+                      : canSwitchMode
+                        ? "Click to switch to showcase mode"
+                        : canUpdateLayout
+                          ? "Click to change layout"
+                          : ""
+            }
             style={{
-              cursor: showcaseMode ? "pointer" : "",
+              cursor: canUpdateLayout
+                ? "row-resize"
+                : showcaseMode
+                  ? "pointer"
+                  : "",
               fontSize,
             }}
           >
@@ -1028,7 +1071,17 @@ export default function HaikuPoem({
                               >
                                 {/* set the width while editing */}
                                 <div
-                                  className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row flex-wrap items-center gap-[0.5rem] _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode || canUpdateLayout ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
+                                  className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row flex-wrap items-center gap-[0.5rem] _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] 
+                                    ${canUpdateLayout
+                                      ? "cursor-row-resize"
+                                      : canUpdateLayout
+                                        ? "cursor-row-resize"
+                                        : showcaseMode || canSwitchMode
+                                          ? "cursor-pointer"
+                                          : !canEdit && canCopy
+                                            ? "cursor-copy"
+                                            : ""
+                                    }`}
                                   style={{
                                     userSelect: "none",
                                     WebkitUserSelect: "none",
@@ -1045,7 +1098,18 @@ export default function HaikuPoem({
                                       key={`line-${i}-word-${j}`}
                                       // @ts-ignore
                                       ref={refs[i][j]}
-                                      className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] ${aboutToSave ? "opacity-50" : saving ? "cursor-wait opacity-50 animate-pulse" : killingWords ? "cursor-crosshair" : canCopy || canSwitchMode || canUpdateLayout ? "cursor-pointer" : ""}`}
+                                      className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] 
+                                        ${aboutToSave
+                                          ? "opacity-50"
+                                          : saving
+                                            ? "cursor-wait opacity-50 animate-pulse"
+                                            : killingWords
+                                              ? "cursor-crosshair"
+                                              : canUpdateLayout
+                                                ? "cursor-row-resize"
+                                                : canCopy || canSwitchMode
+                                                  ? "cursor-pointer" : ""
+                                        }`}
                                       style={{
                                         transition: "opacity 0.5s ease-out",
                                       }}
@@ -1138,7 +1202,15 @@ export default function HaikuPoem({
 
           {false &&
             <div
-              className={`_bg-red-400 relative md:text-[16pt] sm:text-[14pt] text-[12pt] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
+              className={`_bg-red-400 relative md:text-[16pt] sm:text-[14pt] text-[12pt] 
+                ${canUpdateLayout
+                  ? "cursor-row-resize"
+                  : showcaseMode || canSwitchMode
+                    ? "cursor-pointer"
+                    : !canEdit && canCopy
+                      ? "cursor-copy"
+                      : ""
+                }`}
               style={{
                 // background: "pink",
                 fontSize: "60%",
@@ -1156,11 +1228,13 @@ export default function HaikuPoem({
                   onClick={(e: any) => !showcaseMode && handleClickHaiku(e)}
                   title={showcaseMode || canSwitchMode ? "" : canCopy ? "Copy to clipboard" : ""}
                   style={{
-                    cursor: showcaseMode || canSwitchMode || canUpdateLayout
-                      ? "pointer"
-                      : !canEdit && canCopy
-                        ? "copy"
-                        : ""
+                    cursor: canUpdateLayout
+                      ? "cursor-row-resize"
+                      : showcaseMode || canSwitchMode
+                        ? "pointer"
+                        : !canEdit && canCopy
+                          ? "copy"
+                          : ""
                   }}
                 >
                   <StyledLayers
