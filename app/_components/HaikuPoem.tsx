@@ -253,10 +253,21 @@ export default function HaikuPoem({
   const canRegenerateImage = regenerateImageAllowed && !editing && !saving;
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { editing, showcaseMode, canCopy, canSwitchMode });
 
-  const customLayout = true //showcaseMode // true
-    // ? [40, 0, 10, 1, 5, 0] // for top-level focus
-    ? [0, 1, 20, 2, 5, 0] // for mid-top focus
+  const justifyContent = "space-between";
+  const spacing = true //showcaseMode // true
+    ? [0, 1, 20, 2, 8, 0] // mid-level focus (DEFAULT 1)
+    // ? [0, 15, 15, 2, 5, 0] // mid-top focus (DEFAULT 2)
+    // ? [20, 5, 10, 2, 5, 0] // mid-top-level focus
+    // ? [20, 5, 10, 2, 5, 5] // mid-top-level focus and pushed up for balance (DEFAULT 3)
+    // ? [32, 0, 0, 0, 0, 32] // center (DEFAULT 4)
+    // ? [0, 0, 0, 0, 0, 32] // top
+    // ? [32, 0, 0, 0, 0, 0] // bottom
+    // ? [10, 10, 10, 10, 10, 10] // spread mid (DEFAULT 5)
+    // ? [0, 10, 10, 10, 10, 0] // spread wide
     : undefined;
+  const [l, c, r] = ["start", "center", "end"];
+  const alignments =
+    [l, l, r, l, l];
 
 
   const handleClickHaiku = (e: any) => {
@@ -894,7 +905,7 @@ export default function HaikuPoem({
             cursor: showcaseMode ? "pointer" : "",
             fontSize,
             width: "calc(100vw - 64px)",
-            maxWidth: customLayout ? "calc(100vw - 64px)" : "90vh",
+            maxWidth: spacing ? "calc(100vw - 64px)" : "90vh",
             minWidth: "200px",
             height: showcaseMode ? "calc(100vh - 64px)" : "120vw",
             minHeight: showcaseMode ? "" : "50vh",
@@ -918,113 +929,112 @@ export default function HaikuPoem({
               force={popPoem || quickEditing}
               disabled={editing || quickEditing || (!canCopy && !canSwitchMode)}
               active={/*quickEditing || */  !!(onboardingElement && onboardingElement.includes("poem"))}
-              className={`h-full inner-container _bg-yellow-200 flex flex-col ${customLayout ? "justify-between gap-1" : "justify-center gap-1"}`}
+              className={`h-full`}
             >
-              {
-                Array.apply(0, new Array(currentPoem.length * 2 + 1)).map((_: any, j: number) => { return { spacer: !(j % 2), i: Math.floor(j / 2) } })
-                  .map(({ spacer, i }) => (
-                    // currentPoem.map((poemLine: string[], i: number) => (
-                    <div
-                      key="j"
-                      className={`line-and-spacer ${spacer ? "spacer-" + i : "line-" + i} flex flex-col ${spacer ? "_flex-grow" : "_flex-grow-0"}`}
-                      style={{
-                        flexGrow: spacer && customLayout && customLayout[i] || 0
-                      }}
-                    >
-                      {customLayout && spacer &&
-                        <div
-                          className="spacer _bg-orange-200 flex h-full w-full"
-                          style={{
-                            // flexGrow: 1
-                          }}
-                        >
-                        </div>
-                      }
-                      {!spacer && i < currentPoem.length &&
-                        <div
-                          key={i}
-                          className={`
+              <div
+                className="h-full inner-container _bg-yellow-200 flex flex-col gap-1"
+                style={{
+                  justifyContent: justifyContent || "center"
+                }}
+              >
+                {
+                  Array.apply(0, new Array(currentPoem.length * 2 + 1))
+                    .map((_: any, j: number) => { return { spacer: !(j % 2), i: Math.floor(j / 2) } })
+                    .map(({ spacer, i }) => (
+                      <div
+                        key="j"
+                        className={`line-and-spacer ${spacer ? "spacer-" + i : "line-" + i} flex flex-col ${spacer ? "_flex-grow" : "_flex-grow-0"}`}
+                        style={{
+                          flexGrow: spacer && spacing && spacing[i] || 0
+                        }}
+                      >
+                        {spacing && spacer &&
+                          <div
+                            className="spacer _bg-orange-200 flex h-full w-full"
+                            style={{
+                              // flexGrow: 1
+                            }}
+                          >
+                          </div>
+                        }
+                        {!spacer && i < currentPoem.length &&
+                          <div
+                            key={i}
+                            className={`
                             _bg-pink-200 line-container flex md:my-[0.05rem] sm:my-[0.03rem] my-[0.15rem] _transition-all md:leading-[2.2rem] leading-[1.5rem]                            
-                            ${customLayout ? (i == 0 ? "mb-auto" : i == 3 ? "my-auto ml-auto" : i == 4 ? "mt-auto" : "my-auto") : ""}
+                            ${spacing ? (i == 0 ? "mb-auto" : i == 3 ? "my-auto ml-auto" : i == 4 ? "mt-auto" : "my-auto") : ""}
                           `}
-                        >
-                          <StyledLayers
-                            className={`_bg-yellow-200 `}
-                            styles={
-                              quickEditing
-                                ? styles.slice(0, 3) || []
-                                : aboutToEdit || editing //|| saving
-                                  ? styles.slice(0, 1)
-                                  : onboardingElement && !onboardingElement.includes("poem")
-                                    ? styles.slice(0, 2)
-                                    : saving
-                                      ? styles.slice(0, 3)
-                                      : styles
-                            }>
-                            <div
-                              className="relative m-[0rem] _transition-all"
-                              onKeyDown={(e: any) => (canEdit || editing) && handlePoemLineKeyDown(e, i)}
-                              onMouseOver={() => canEdit && setAboutToEditLine(i)}
-                              onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
-                              onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
-                            >
-                              {/* set the width while editing */}
+                          >
+                            <StyledLayers
+                              className={`_bg-yellow-200 `}
+                              styles={
+                                quickEditing
+                                  ? styles.slice(0, 3) || []
+                                  : aboutToEdit || editing //|| saving
+                                    ? styles.slice(0, 1)
+                                    : onboardingElement && !onboardingElement.includes("poem")
+                                      ? styles.slice(0, 2)
+                                      : saving
+                                        ? styles.slice(0, 3)
+                                        : styles
+                              }>
                               <div
-                                className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row flex-wrap items-center gap-[0.5rem] _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
-                                style={{
-                                  userSelect: "none",
-                                  WebkitUserSelect: "none",
-                                  WebkitTouchCallout: "none",
-                                  MozUserSelect: "none",
-                                  msUserSelect: "none",
-                                  WebkitTapHighlightColor: "rgba(0,0,0,0)",
-                                  justifyContent: customLayout
-                                    ? (i == 3
-                                      ? "end"
-                                      : i == 4
-                                        ? "start" // "center"
-                                        : "start"
-                                    )
-                                    : "start"
-                                }}
-                              // onMouseLeave={(e: any) => handleMouseLeaveLine(e, i)}
+                                className="relative m-[0rem] _transition-all"
+                                onKeyDown={(e: any) => (canEdit || editing) && handlePoemLineKeyDown(e, i)}
+                                onMouseOver={() => canEdit && setAboutToEditLine(i)}
+                                onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
+                                onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
                               >
-                                {currentPoem[i].map((word: string, j: number) => (
-                                  <div
-                                    key={`line-${i}-word-${j}`}
-                                    // @ts-ignore
-                                    ref={refs[i][j]}
-                                    className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] ${aboutToSave ? "opacity-50" : saving ? "cursor-wait opacity-50 animate-pulse" : killingWords ? "cursor-crosshair" : "cursor-pointer"}`}
-                                    style={{
-                                      transition: "opacity 0.5s ease-out",
-                                    }}
-                                    // onClick={(e: any) => handleClickWord(e, i, j)}
-                                    onMouseDown={(e: any) => handleMouseDownWord(e, i, j)}
-                                    onMouseUp={(e: any) => handleMouseUp(e, i, j)}
-                                    onMouseMove={(e: any) => handleMouseMoveWord(e, i, j)}
-                                    onPointerEnter={(e: any) => handlePointerEnterWord(e, i, j)}
-                                  >
-                                    {/* Display  */}
+                                {/* set the width while editing */}
+                                <div
+                                  className={`poem-line-input poem-line-${i} _bg-orange-400 flex flex-row flex-wrap items-center gap-[0.5rem] _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
+                                  style={{
+                                    userSelect: "none",
+                                    WebkitUserSelect: "none",
+                                    WebkitTouchCallout: "none",
+                                    MozUserSelect: "none",
+                                    msUserSelect: "none",
+                                    WebkitTapHighlightColor: "rgba(0,0,0,0)",
+                                    justifyContent: alignments[i] || "start"
+                                  }}
+                                // onMouseLeave={(e: any) => handleMouseLeaveLine(e, i)}
+                                >
+                                  {currentPoem[i].map((word: string, j: number) => (
                                     <div
-                                      // className="absolute top-0 left-0 w-0 h-0"
-                                      className={`${displayPoem[i][j] ? "opacity-100" : "opacity-20"} transition-opacity`}
+                                      key={`line-${i}-word-${j}`}
+                                      // @ts-ignore
+                                      ref={refs[i][j]}
+                                      className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] ${aboutToSave ? "opacity-50" : saving ? "cursor-wait opacity-50 animate-pulse" : killingWords ? "cursor-crosshair" : "cursor-pointer"}`}
+                                      style={{
+                                        transition: "opacity 0.5s ease-out",
+                                      }}
+                                      // onClick={(e: any) => handleClickWord(e, i, j)}
+                                      onMouseDown={(e: any) => handleMouseDownWord(e, i, j)}
+                                      onMouseUp={(e: any) => handleMouseUp(e, i, j)}
+                                      onMouseMove={(e: any) => handleMouseMoveWord(e, i, j)}
+                                      onPointerEnter={(e: any) => handlePointerEnterWord(e, i, j)}
                                     >
-                                      <PopOnClick
-                                        color={haiku?.color}
-                                        force={!displayPoem[i][j]}
-                                        disabled={!quickEditing || quickEditing && !displayPoem[i][j]}
-                                        hoverSupported={quickEditing}
+                                      {/* Display  */}
+                                      <div
+                                        // className="absolute top-0 left-0 w-0 h-0"
+                                        className={`${displayPoem[i][j] ? "opacity-100" : "opacity-20"} transition-opacity`}
                                       >
-                                        {j == 0 &&
-                                          <span>{upperCaseFirstLetter(currentPoem[i][j])}</span>
-                                        }
-                                        {j != 0 &&
-                                          <span>{currentPoem[i][j]}</span>
-                                        }
-                                      </PopOnClick>
-                                    </div>
-                                    {/* Keep the document structure */}
-                                    {/* <div
+                                        <PopOnClick
+                                          color={haiku?.color}
+                                          force={!displayPoem[i][j]}
+                                          disabled={!quickEditing || quickEditing && !displayPoem[i][j]}
+                                          hoverSupported={quickEditing}
+                                        >
+                                          {j == 0 &&
+                                            <span>{upperCaseFirstLetter(currentPoem[i][j])}</span>
+                                          }
+                                          {j != 0 &&
+                                            <span>{currentPoem[i][j]}</span>
+                                          }
+                                        </PopOnClick>
+                                      </div>
+                                      {/* Keep the document structure */}
+                                      {/* <div
                                 className="opacity-20"
                               >
                                 {j == 0 &&
@@ -1034,17 +1044,17 @@ export default function HaikuPoem({
                                   <span>{word}</span>
                                 }
                               </div> */}
-                                  </div>
-                                ))
-                                }
-                                {false && !spacer && i == currentPoem.length - 1 && !showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed || quickEditAllowed) &&
-                                  <div className="flex flex-grow-0 justify-end relative _h-0">
-                                    <div className="_absolute top-0 right-0">
-                                      <PoemButtons />
                                     </div>
-                                  </div>
-                                }
-                                {/* <ControlledInput
+                                  ))
+                                  }
+                                  {false && !spacer && i == currentPoem.length - 1 && !showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed || quickEditAllowed) &&
+                                    <div className="flex flex-grow-0 justify-end relative _h-0">
+                                      <div className="_absolute top-0 right-0">
+                                        <PoemButtons />
+                                      </div>
+                                    </div>
+                                  }
+                                  {/* <ControlledInput
                             id={i}
                             activeId={editingLine}
                             value={upperCaseFirstLetter(saving
@@ -1055,32 +1065,33 @@ export default function HaikuPoem({
                             select={select}
                             onChange={(value: string) => handleInputChange(value, i)}
                           /> */}
+                                </div>
                               </div>
-                            </div>
-                          </StyledLayers>
-                        </div>
-                      }
-                      {!spacer && i == currentPoem.length - 1 && !showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed || quickEditAllowed) &&
-                        <div className="flex flex-grow-0 justify-end relative h-0">
-                          <div className="absolute top-0 right-0 z-40"
-                            onMouseDown={(e: any) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              e.nativeEvent.stopImmediatePropagation();
-                            }}
-                            onClick={(e: any) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              e.nativeEvent.stopImmediatePropagation();
-                            }}
-                          >
-                            <PoemButtons />
+                            </StyledLayers>
                           </div>
-                        </div>
-                      }
+                        }
+                        {!spacer && i == currentPoem.length - 1 && !showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed || quickEditAllowed) &&
+                          <div className="flex flex-grow-0 justify-end relative h-0">
+                            <div className="absolute top-0 right-0 z-40"
+                              onMouseDown={(e: any) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.nativeEvent.stopImmediatePropagation();
+                              }}
+                              onClick={(e: any) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.nativeEvent.stopImmediatePropagation();
+                              }}
+                            >
+                              <PoemButtons />
+                            </div>
+                          </div>
+                        }
 
-                    </div>
-                  ))}
+                      </div>
+                    ))}
+              </div>
             </PopOnClick>
           </div>
 
