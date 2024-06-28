@@ -255,7 +255,7 @@ export default function HaikuPoem({
 
   const customLayout = true //showcaseMode // true
     // ? [40, 0, 10, 1, 5, 0] // for top-level focus
-    ? [0, 0, 20, 1, 5, 0] // for mid-top focus
+    ? [0, 1, 20, 2, 5, 0] // for mid-top focus
     : undefined;
 
 
