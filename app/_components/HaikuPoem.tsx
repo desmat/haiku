@@ -248,7 +248,7 @@ export default function HaikuPoem({
   const canClickQuickEdit = quickEditAllowed;
   const [quickEditing, setQuickEditing] = useState(haiku?.generatedJustNow);
 
-  const updateLayoutAllowed = !!updateLayout && user?.isAdmin;
+  const updateLayoutAllowed = !!updateLayout && (user?.isAdmin || haiku?.createdBy && haiku?.createdBy == user?.id);
   const canUpdateLayout = updateLayoutAllowed && !editing && !saving && process.env.EXPERIENCE_MODE != "haikudle";
 
   const regeneratePoemAllowed = regeneratePoem && (user?.isAdmin || haiku?.createdBy == user?.id) && regeneratePoem;
