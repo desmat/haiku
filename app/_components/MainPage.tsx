@@ -2,6 +2,7 @@
 
 import moment from 'moment';
 import { useEffect, useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 import { Haiku, haikuStyles } from "@/types/Haiku";
 import { NavOverlay } from '@/app/_components/nav/NavOverlay';
 import Loading from "@/app/_components/Loading";
@@ -678,6 +679,27 @@ export default function MainPage({
     }
   }
 
+  const debounceSaveHaiku = useDebouncedCallback(async (haiku: Haiku) => {
+    console.log('>> app.page.debounceSaveLayout()', { haiku });
+    const ret = await doSaveHaiku(haiku);
+    console.log('>> app.page.debounceSaveLayout() Layout adjustment saved', { ret });
+    // plainAlert("Layout adjustments saved", { closeDelay: 750 });
+  }, 3000);
+
+  const adjustLayout = async (layout: any) => {
+    // console.log('>> app.page.adjustLayout()', { layout });
+    const updatedHaiku = {
+      ...haiku,
+      layout: {
+        ...haiku.layout,
+        ...layout,
+      }
+    };
+
+    setHaiku(updatedHaiku);
+    debounceSaveHaiku(updatedHaiku);
+  };
+
   useEffect(() => {
     // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
     // @ts-ignore
@@ -891,7 +913,8 @@ export default function MainPage({
           regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
           regenerateImage={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
           copyHaiku={!haiku?.error && copyHaiku}
-          switchMode={switchMode}
+          // switchMode={switchMode}
+          updateLayout={adjustLayout}
         />
       }
     </div>

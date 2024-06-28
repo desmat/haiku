@@ -26,6 +26,7 @@ export default function HaikuPage({
   regenerateImage,
   copyHaiku,
   switchMode,
+  updateLayout,
 }: {
   user?: User,
   mode: ExperienceMode,
@@ -44,6 +45,7 @@ export default function HaikuPage({
   regenerateImage?: any,
   copyHaiku?: any,
   switchMode?: any,
+  updateLayout?: any,
 }) {
   // console.log('>> app._components.HaikuPage.render()', { loading, mode, id: haiku?.id, poem: haiku?.poem, popPoem, haiku });
   const showcaseMode = mode == "showcase";
@@ -86,6 +88,7 @@ export default function HaikuPage({
               // copyHaiku={copyHaiku}
               switchMode={switchMode}
               regenerating={regenerating}
+              updateLayout={updateLayout}
             />
           </div>
         }
