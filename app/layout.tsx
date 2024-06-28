@@ -18,7 +18,7 @@ export const appDescription = isHaikudleMode
   "Haikudle integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
   "Generate haiku poems and share AI-generated creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
   "Explore daily haiku puzzles and discover the limitless poetic and artistic possibilities with Haikudle."
-  : "Generate hilarious limericks with matching generative art today! Always free and not signup required.";
+  : "Generate hilarious limericks with matching generative art today! Always free and no signup required.";
 
 export const metaUrl = isHaikudleMode
   ? "https://haikudle.art/"
