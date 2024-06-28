@@ -20,6 +20,7 @@ const haikuGeniusMetaImages = [
   // "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_39044b38_loading_3.png",
   // "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_f8de7f46_nature_2.png",
   "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limerick/limerick_52b6369b.png",
+  // "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limerick/limerick_showcase_52b6369b.png",
 ];
 
 let metaImages: string[];
