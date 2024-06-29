@@ -187,7 +187,7 @@ export default function BottomLinks({
             </PopOnClick>
           </Link>
         }
-        {haikuMode && !user?.isAdmin &&
+        {/* {haikuMode && !user?.isAdmin &&
           <Link
             key="twitter"
             href="https://x.com/haiku_genius"
@@ -203,11 +203,11 @@ export default function BottomLinks({
               <RiTwitterFill className="text-[2rem] md:text-[2.25rem]" />
             </PopOnClick>
           </Link>
-        }
+        } */}
         {haikuMode && !user?.isAdmin &&
           <Link
             key="facebook"
-            href="https://www.facebook.com/haikugenius"
+            href="https://www.facebook.com/limericksai"
             target="_blank"
             onClick={() => {
               trackEvent("clicked-facebook", {
@@ -221,7 +221,7 @@ export default function BottomLinks({
             </PopOnClick>
           </Link>
         }
-        {haikuMode && !user?.isAdmin &&
+        {/* {haikuMode && !user?.isAdmin &&
           <Link
             key="instagram"
             href="https://www.instagram.com/haiku_genius/"
@@ -237,7 +237,7 @@ export default function BottomLinks({
               <BiLogoInstagramAlt className="text-[2rem] md:text-[2.25rem]" />
             </PopOnClick>
           </Link>
-        }
+        } */}
         {/* <Link
           key="email"
           href={`mailto:haiku${mode == "haikudle" ? "dle" : ""}@desmat.ca`}
@@ -269,7 +269,7 @@ export default function BottomLinks({
             <IoHeartSharp className="text-[1.5rem] md:text-[1.75rem]" />
           </div>
         }
-        {user?.isAdmin &&
+        {true && //user?.isAdmin &&
           <div
             key="copy"
             className={haiku?.id && onCopyHaiku ? "cursor-copy" : "opacity-40"}
