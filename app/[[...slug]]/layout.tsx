@@ -19,8 +19,8 @@ const haikuGeniusMetaImages = [
   // "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_f8de7f46_nature.png",
   // "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_39044b38_loading_3.png",
   // "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_f8de7f46_nature_2.png",
-  "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limerick/limerick_52b6369b.png",
-  // "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limerick/limerick_showcase_52b6369b.png",
+  "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limericks/5069ddc0.png",
+  // "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limericks/52b6369b.png",
 ];
 
 let metaImages: string[];
@@ -94,7 +94,7 @@ export default async function Layout({
       images: [
         isHaikudleMode
           ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`
-          : `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_limerick/${haikuId}.png`,
+          : `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_limericks/${haikuId}.png`,
         ...metaImages,
       ]
     }

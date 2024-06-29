@@ -55,7 +55,7 @@ if (isHaikudleMode) {
 } else {
   metaImages = [
     // "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limerick/limeick_5069ddc0.png",
-    "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limerick/liimerick_52b6369b.png",
+    "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limericks/5069ddc0.png",
   ];
 }
 
