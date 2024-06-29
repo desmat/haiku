@@ -54,16 +54,15 @@ export function Logo({
       className={`logo hover:no-underline ${isSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
     >
       {iconOnly &&
-        <div className="HaikuGeniusIcon absolute flex flex-row top-[0.15rem] left-[-0.1rem] md:top-[0.2rem] md:left-[0.1rem] lg:top-[0.2rem] lg:left-[0.2rem]">
+        <div className="HaikuGeniusIcon absolute flex flex-row top-[0.6rem] left-[-0.1rem] md:top-[0.6rem] md:left-[-0.1rem] lg:top-[0.6rem] lg:left-[-0.1rem]">
           <StyledLayers
             styles={onboardingElement
               ? styles.slice(0, 1)
               : styles
             }
           >
-            l
+            <HaikuGeniusIcon color={styles[0].color} className="h-[9rem] w-[9rem] md:h-[12rem] md:w-[12rem]" />
           </StyledLayers>
-          <span className="mt-[-0.1rem] sm:mt-[0rem]">{styledAi}</span>
         </div>
       }
       {!iconOnly &&
