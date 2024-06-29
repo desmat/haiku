@@ -78,12 +78,13 @@ export function Logo({
               : styles
             }
           >
-            {(isSocialImgMode || isHaikudleSocialImgMode) &&
+            {/* {(isSocialImgMode || isHaikudleSocialImgMode) &&
               <HaikuGeniusIcon color={styles[0].color} className="h-[10rem] w-[10rem] mt-[2rem] mr-[-3rem]" />
             }
             {!(isSocialImgMode || isHaikudleSocialImgMode) &&
               <HaikuGeniusIcon color={styles[0].color} className="h-[2.8rem] w-[2.8rem] md:h-[3.5rem] md:w-[3.5rem] mt-[0.3rem] mr-[-0.7rem] md:mt-[0.3rem] md:mr-[-0.9rem]" />
-            }
+            } */}
+            h
           </StyledLayers>
           <span className="mt-[0.1rem] sm:mt-[0rem]">{styledAi}</span>
           <StyledLayers
