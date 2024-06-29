@@ -21,7 +21,7 @@ import { useDebouncedCallback } from "use-debounce";
 const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
   return [
     `"${capitalize(haiku.theme)}", `,
-    `limerick.desmat.ca/${haiku.id}`
+    `limericks.ai/${haiku.id}`
   ];
 }
 

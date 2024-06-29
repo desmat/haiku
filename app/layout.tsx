@@ -22,7 +22,7 @@ export const appDescription = isHaikudleMode
 
 export const metaUrl = isHaikudleMode
   ? "https://haikudle.art/"
-  : "https://limerick.desmat.ca/";
+  : "https://limericks.ai/";
 
 const haikuGeniusMetaImages = [
   "https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/haikugenius_98b222c0_mountains.png",
