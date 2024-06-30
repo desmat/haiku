@@ -86,6 +86,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="canonical" href={metaUrl} key="canonical" />
         <meta property="fb:app_id" content={process.env.FB_APP_ID}></meta>
+        <meta name="facebook-domain-verification" content="r8ajq2e3ewk63juwwx7iop5fr1i2qj" />
       </head>
       <body
         className={inter.className}
