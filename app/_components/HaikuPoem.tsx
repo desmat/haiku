@@ -6,9 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import { syllable } from "syllable";
 import { FaEdit, FaMagic } from "react-icons/fa";
 import { TbReload } from "react-icons/tb";
+import { useDebouncedCallback } from "use-debounce";
 import useAlert from "@/app/_hooks/alert";
 import { ExperienceMode } from "@/types/ExperienceMode";
 import { Haiku } from "@/types/Haiku";
+import { defaultPresetLayout, presetLayouts } from "@/types/Layout";
 import { USAGE_LIMIT } from "@/types/Usage";
 import { User } from "@/types/User";
 import { capitalize, upperCaseFirstLetter } from "@/utils/format";
@@ -16,7 +18,6 @@ import trackEvent from "@/utils/trackEvent";
 import PopOnClick from "./PopOnClick";
 import { StyledLayers } from "./StyledLayers";
 import { GenerateIcon } from "./nav/GenerateInput";
-import { useDebouncedCallback } from "use-debounce";
 
 const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
   return [
@@ -258,68 +259,7 @@ export default function HaikuPoem({
   const canRegenerateImage = regenerateImageAllowed && !editing && !saving;
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { editing, showcaseMode, canCopy, canSwitchMode });
 
-  const [l, c, r] = ["start", "center", "end"];
-  const defaultPreset = 1
-  const presetLayouts = [
-    {
-      spacing: [0, 15, 15, 2, 5, 0], // mid-top focus
-      alignments: [l, l, l, r, l]
-    },
-    {
-      spacing: [0, 1, 20, 2, 8, 0], // mid-level focus
-      alignments: [l, l, l, r, l]
-    },
-    {
-      spacing: [20, 5, 10, 2, 5, 5], // mid-top-level focus and pushed up for balance
-      alignments: [l, l, l, r, l]
-    },
-    {
-      spacing: [10, 10, 10, 10, 10, 10], // spread mix
-      alignments: [c, c, l, r, c]
-    },
-    {
-      spacing: [10, 10, 10, 10, 10, 10], // spread centered
-      alignments: [c, c, c, c, c]
-    },
-    {
-      spacing: [10, 10, 10, 10, 10, 10], // spread left-aligned
-      alignments: [l, l, l, l, l]
-    },
-    {
-      spacing: [32, 0, 0, 0, 0, 32], // middle mix
-      alignments: [c, c, l, r, l]
-    },
-    {
-      spacing: [32, 0, 0, 0, 0, 32], // middle left
-      alignments: [l, l, l, l, l]
-    },
-    {
-      spacing: [32, 0, 0, 0, 0, 0], // bottom mix
-      alignments: [c, c, l, r, c]
-    },
-    {
-      spacing: [32, 0, 0, 0, 0, 0], // bottom left
-      alignments: [l, l, l, l, l]
-    },
-    {
-      spacing: [32, 0, 0, 0, 0, 0], // bottom right
-      alignments: [r, r, r, r, r]
-    },
-    {
-      spacing: [0, 0, 0, 0, 0, 32], // top mix
-      alignments: [c, c, l, r, c]
-    },
-    {
-      spacing: [0, 0, 0, 0, 0, 32], // top left
-      alignments: [l, l, l, l, l]
-    },
-    {
-      spacing: [0, 0, 0, 0, 0, 32], // top right
-      alignments: [r, r, r, r, r]
-    },
-  ];
-
-  const layout = haiku?.layout?.custom || presetLayouts[defaultPreset];
+  const layout = haiku?.layout?.custom || presetLayouts[defaultPresetLayout];
 
   const handleClickHaiku = (e: any) => {
     // console.log('>> app._components.HaikuPoem.handleClickHaiku()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
@@ -337,21 +277,6 @@ export default function HaikuPoem({
       });
 
       return copyHaiku();
-    }
-
-    if (canUpdateLayout) {
-      trackEvent("layout-updated", {
-        userId: user?.id,
-        id: haiku?.id,
-      });
-
-      const preset = haiku?.layout?.preset >= presetLayouts.length - 1
-        ? 0
-        : (typeof(haiku?.layout?.preset) == "number" ? haiku?.layout?.preset : defaultPreset) + 1;
-      return updateLayout({
-        preset,
-        custom: presetLayouts[preset]
-      });
     }
 
     if (canSwitchMode) {
@@ -985,7 +910,7 @@ export default function HaikuPoem({
             onClick={handleClickHaiku}
             title={canUpdateLayout
               ? "Update layout"
-              : showcaseMode && canRefresh
+              : false //showcaseMode && canRefresh
                 ? "Refresh"
                 : canEdit
                   ? "Click to edit"
@@ -1041,9 +966,9 @@ export default function HaikuPoem({
                             key={i}
                             className={`
                             _bg-pink-200 line-container flex md:my-[0.05rem] sm:my-[0.03rem] my-[0.15rem] _transition-all md:leading-[2.2rem] leading-[1.5rem]                            
-                            ${layout?.alignments[i] == c
+                            ${layout?.alignments[i] == "center"
                                 ? "m-auto"
-                                : layout?.alignments[i] == r
+                                : layout?.alignments[i] == "end"
                                   ? "my-auto ml-auto"
                                   : "my-auto mr-auto"
                               }

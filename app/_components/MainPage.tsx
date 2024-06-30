@@ -16,6 +16,7 @@ import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haikudle } from '@/types/Haikudle';
 import { LanguageType } from '@/types/Languages';
+import { defaultPresetLayout, presetLayouts } from '@/types/Layout';
 import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleGotoHaikuGenius, haikudleOnboardingSteps, notShowcase_notOnboardedFirstTime_onboardedShowcase, showcase_notOnboardedFirstTime, showcase_onboardedFirstTime, showcase_onboardedFirstTime_admin, limerickPromptSteps } from '@/types/Onboarding';
 import { User } from '@/types/User';
 import trackEvent from '@/utils/trackEvent';
@@ -679,26 +680,50 @@ export default function MainPage({
     }
   }
 
-  const debounceSaveHaiku = useDebouncedCallback(async (haiku: Haiku) => {
-    console.log('>> app.page.debounceSaveLayout()', { haiku });
-    const ret = await doSaveHaiku(haiku);
-    console.log('>> app.page.debounceSaveLayout() Layout adjustment saved', { ret });
-    // plainAlert("Layout adjustments saved", { closeDelay: 750 });
+  const debounceSaveHaiku = useDebouncedCallback(async (haiku: Haiku, then?: any) => {
+    // console.log('>> app.page.debounceSaveLayout()', { haiku });
+    const ret = await saveHaiku(user, haiku);
+    // console.log('>> app.page.debounceSaveLayout() Layout adjustment saved', { ret });
+    then && then(ret);
   }, 3000);
 
-  const adjustLayout = async (layout: any) => {
-    // console.log('>> app.page.adjustLayout()', { layout });
+  const cycleLayout = async (previous?: boolean) => {
+    console.log('>> app.page.cycleLayout()', { previous });
+
+    let preset = (typeof (haiku?.layout?.preset) == "number"
+      ? haiku?.layout?.preset
+      : defaultPresetLayout)
+      + (previous ? -1 : 1);
+
+    console.log('>> app.page.cycleLayout()', { preset });
+
+    if (preset >= presetLayouts.length) preset = 0;
+    if (preset < 0) preset = presetLayouts.length - 1;
+
+    console.log('>> app.page.cycleLayout()', { preset });
+
     const updatedHaiku = {
       ...haiku,
       layout: {
         ...haiku.layout,
-        ...layout,
+        ...{
+          preset,
+          custom: presetLayouts[preset]
+        },
       }
     };
 
     setHaiku(updatedHaiku);
-    debounceSaveHaiku(updatedHaiku);
-  };
+    debounceSaveHaiku(updatedHaiku, (haiku: Haiku) => {
+      console.log('>> app.page.cycleLayout()', { savedHaiku: haiku });
+      plainAlert("Layout adjustments saved", { closeDelay: 750 });
+
+      trackEvent("layout-updated", {
+        userId: user?.id,
+        id: haiku?.id,
+      });
+    });
+  }
 
   // useEffect(() => {
   //   // console.log('>> app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
@@ -884,6 +909,7 @@ export default function MainPage({
         onLikeHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && likeHaiku}
         onUploadImage={!haiku?.error && uploadImage}
         onUpdateImage={!haiku?.error && updateHaikuImage}
+        onCycleLayout={!haiku?.error && (haiku?.createdBy && haiku?.createdBy == user?.id || user?.isAdmin) && cycleLayout}
       />
 
       {isPuzzleMode &&
@@ -913,8 +939,8 @@ export default function MainPage({
           regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
           regenerateImage={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
           copyHaiku={!haiku?.error && copyHaiku}
-          // switchMode={switchMode}
-          updateLayout={adjustLayout}
+          switchMode={switchMode}
+          // updateLayout={adjustLayout}
         />
       }
     </div>

@@ -39,6 +39,7 @@ export function NavOverlay({
   onLikeHaiku,
   onUploadImage,
   onUpdateImage,
+  onCycleLayout,
 }: {
   mode: ExperienceMode,
   loading?: boolean,
@@ -64,6 +65,7 @@ export function NavOverlay({
   onLikeHaiku?: any,
   onUploadImage?: any,
   onUpdateImage?: any,
+  onCycleLayout?: any
 }) {
   const [user] = useUser((state: any) => [state.user]);
   const onboarding = !!(onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement));
@@ -221,25 +223,43 @@ export function NavOverlay({
               onClick={() => onSwitchMode()}
             />
           }
-          {onClickRandom && 
+          {onClickRandom &&
             <div
               className={`_bg-orange-400 absolute top-0 right-0 w-[10vw] z-40 h-full cursor-e-resize`}
               title="Load random"
               onClick={() => onClickRandom()}
             />
           }
-          {increaseDelay && increaseDelay && 
+          {increaseDelay && increaseDelay &&
             <div
               className="_bg-yellow-400 absolute bottom-0 left-0 w-[10vw] h-[10vw] z-40 cursor-pointer"
               title="Increase refresh time"
               onClick={increaseDelay}
             />
           }
-          {decreaseDelay && user?.isAdmin && 
+          {decreaseDelay && user?.isAdmin &&
             <div
               className="_bg-yellow-400 absolute bottom-0 right-0 w-[10vw] h-[10vw] z-40 cursor-pointer"
               title="Decrease refresh time"
               onClick={decreaseDelay}
+            />
+          }
+          {onCycleLayout &&
+            <div
+              className="_bg-blue-200 w-[calc(80vw)] h-[3rem] left-[50%] translate-x-[-50%] top-0 fixed cursor-row-resize z-40"
+              onClick={(e: any) => {
+                onCycleLayout(true);
+              }}
+              title="Change layout"
+            />
+          }
+          {onCycleLayout &&
+            <div
+              className="_bg-blue-200 w-[calc(80vw)] h-[3rem] left-[50%] translate-x-[-50%] bottom-0 fixed cursor-row-resize z-40"
+              onClick={(e: any) => {
+                onCycleLayout(false);
+              }}
+              title="Change layout"
             />
           }
         </>
