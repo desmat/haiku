@@ -94,7 +94,7 @@ export default async function Layout({
       images: [
         isHaikudleMode
           ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`
-          : `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_limericks/${haikuId}.png`,
+          : `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limericks/${haikuId}.png`,
         ...metaImages,
       ]
     }
