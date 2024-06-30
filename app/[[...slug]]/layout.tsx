@@ -101,7 +101,7 @@ export default async function Layout({
     }
   }
 
-  console.log('>> app.[[..slug]].layout.render()', { metadata, images: JSON.stringify(metadata.openGraph?.images) });
+  // console.log('>> app.[[..slug]].layout.render()', { metadata, images: JSON.stringify(metadata.openGraph?.images) });
 
   return (
     <section>
