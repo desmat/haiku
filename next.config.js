@@ -11,7 +11,6 @@ const nextConfig = {
         FB_APP_ID: process.env.FB_APP_ID,
         EXPERIENCE_MODE: process.env.EXPERIENCE_MODE,
         OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-        WEBHOOK_LIMERICK_SHARED: process.env.WEBHOOK_LIMERICK_SHARED,
     }
 }
 

@@ -14,6 +14,7 @@ export async function triggerLimerickShared(haiku: Haiku) {
 
   if (res.status != 200) {
     console.error(">> app.services.webhooks.triggerLimerickShared ERROR", { res });
+    return false;
   }
 
   console.log('>> app.services.webhooks.triggerLimerickShared', { res });
@@ -24,7 +25,7 @@ export async function triggerLimerickShared(haiku: Haiku) {
   const ret = await res.text();
   console.log('>> app.services.webhooks.triggerLimerickShared', { ret });
 
-  return ret;
+  return true;
 }
 
 export async function triggerDailyHaikuSaved(dailyHaiku: DailyHaiku) {

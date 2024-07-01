@@ -44,7 +44,7 @@ export type DailyHaiku = {
   theme?: string, // ???
 };
 
-export type HaikuAction = "like";
+export type HaikuAction = "like" | "share";
 
 export function haikuStyles(haiku: Haiku) {
   const fontColor = haiku?.color || "#555555";

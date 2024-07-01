@@ -1,10 +1,11 @@
 import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { getHaiku, getUserHaiku, createUserHaiku, saveUserHaiku, regenerateHaikuImage, regenerateHaikuPoem, updateHaikuImage } from '@/services/haikus';
+import { getHaiku, getUserHaiku, createUserHaiku, saveUserHaiku, regenerateHaikuImage, regenerateHaikuPoem, updateHaikuImage, saveHaiku } from '@/services/haikus';
 import { userUsage } from '@/services/usage';
 import { userSession } from '@/services/users';
 import { USAGE_LIMIT } from '@/types/Usage';
 import { regenerateLimerickImage, regenerateLimerickPoem } from '@/services/limericks';
+import { triggerLimerickShared } from '@/services/webhooks';
 
 export const maxDuration = 300;
 // export const dynamic = 'force-dynamic';
@@ -39,6 +40,33 @@ export async function POST(
     });
 
     return NextResponse.json({ haiku, userHaiku: savedUserHaiku });
+  } else if (params.action == "share") {
+    const [data, { user }] = await Promise.all([
+      request.json(),
+      userSession(request),
+    ]);
+    let haiku = await getHaiku(user, params.id);
+
+    if (!haiku) {
+      return NextResponse.json(
+        { success: false, message: 'haiku not found' },
+        { status: 404 }
+      );
+    }
+
+    if (!haiku.shared) {
+      const ret = await triggerLimerickShared(haiku);
+      if (ret) {
+        haiku = await saveHaiku(user, { 
+          ...haiku, 
+          shared: true,
+        }, { noVersion: true });
+      }
+    } else {
+      console.log(`>> app.api.haiku.[id].[action].POST: already shared`, { action: params.action, haiku });
+    }
+
+    return NextResponse.json({ haiku });    
   } else if (params.action == "regenerate") {
     let { haiku, part, artStyle }: any = await request.json();
     part = part || "poem";

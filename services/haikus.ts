@@ -687,7 +687,7 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
   return store.haikus.delete(user.id, id);
 }
 
-export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
+export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Promise<Haiku> {
   console.log(">> services.haiku.saveHaiku", { haiku, user });
 
   if (!(haiku.createdBy == user.id || user.isAdmin)) {
@@ -701,16 +701,18 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
   }
 
   const version = (original.version || 0);
-  store.haikus.create(user.id, {
-    ...original,
-    id: `${original.id}:${version}`,
-    version,
-    deprecated: true,
-  });
+  if (!options.noVersion) {
+    store.haikus.create(user.id, {
+      ...original,
+      id: `${original.id}:${version}`,
+      version,
+      deprecated: true,
+    });
 
-  // edge case where we're editing a previous version
-  delete haiku.deprecated;
-  delete haiku.deprecatedAt;
+    // edge case where we're editing a previous version
+    delete haiku.deprecated;
+    delete haiku.deprecatedAt;
+  }
 
   const poem = haiku.poem.join("/");
   if (poem.includes("...") || poem.includes("…")) {
@@ -718,7 +720,15 @@ export async function saveHaiku(user: any, haiku: Haiku): Promise<Haiku> {
     return completeLimerickPoem(user, haiku);
   }
 
-  return store.haikus.update(user.id, { ...haiku, version: version + 1 });
+  return store.haikus.update(user.id, {
+    ...haiku,
+    version: options.noVersion
+      ? version
+      : version + 1,
+    shared: options.noVersion
+      ? haiku.shared
+      : false,
+  });
 }
 
 export async function getUserHaiku(userId: string, haikuId: string): Promise<UserHaiku | undefined> {

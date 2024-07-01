@@ -13,14 +13,13 @@ import useHaikudle from '@/app/_hooks/haikudle';
 import useOnboarding from '@/app/_hooks/onboarding';
 import useUser from '@/app/_hooks/user';
 import NotFound from '@/app/not-found';
+import trackEvent from '@/utils/trackEvent';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haikudle } from '@/types/Haikudle';
 import { LanguageType } from '@/types/Languages';
 import { defaultPresetLayout, presetLayouts } from '@/types/Layout';
 import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleGotoHaikuGenius, haikudleOnboardingSteps, notShowcase_notOnboardedFirstTime_onboardedShowcase, showcase_notOnboardedFirstTime, showcase_onboardedFirstTime, showcase_onboardedFirstTime_admin, limerickPromptSteps } from '@/types/Onboarding';
 import { User } from '@/types/User';
-import { triggerLimerickShared } from '@/services/webhooks';
-import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
 
@@ -616,7 +615,7 @@ export default function MainPage({
     if (haikudleMode && haikudleSolved || !haikudleMode) {
       navigator.clipboard.writeText(formatHaikuText(haikudleSolved ? solvedHaikudleHaiku : haiku, mode));
       plainAlert(`Limerick copied to clipboard`, { closeDelay: 750 });
-      triggerLimerickShared(haiku);
+      haikuAction(haikuId, "share");
       trackEvent("haiku-poem-copied", {
         userId: user?.id,
         id: haiku.id,
@@ -638,7 +637,7 @@ export default function MainPage({
     if (haikudleMode && haikudleSolved || !haikudleMode) {
       navigator.clipboard.writeText(`https://limericks.ai/${haiku.id}`);
       plainAlert(`Link to this limerick copied to clipboard`, { closeDelay: 750 });
-      triggerLimerickShared(haiku);
+      haikuAction(haikuId, "share");
       trackEvent("haiku-shared", {
         userId: user?.id,
         id: haiku.id,
