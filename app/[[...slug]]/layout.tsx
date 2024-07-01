@@ -82,8 +82,8 @@ export default async function Layout({
     }
   }
 
-  const haiku = { bgColor: "" };  //await getHaiku(user, haikuId);
-  // console.log('>> app.[[..slug]].layout.render()', { haiku });
+  const haiku = await getHaiku({ id: "(system)"}, haikuId);
+  console.log('>> app.[[..slug]].layout.render()', { haiku });
 
   metadata = {
     ...metadata,
@@ -93,15 +93,17 @@ export default async function Layout({
       type: "website",
       url: metaUrl,
       images: [
-        isHaikudleMode
-          ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`
-          : `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limericks/${haikuId}.png`,
-        ...metaImages,
+        // isHaikudleMode
+          // ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`
+          // : 
+          `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limericks/${haikuId}_${haiku?.version}.png`,
+          `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limericks/${haikuId}.png`,
+          ...metaImages,
       ]
     }
   }
 
-  // console.log('>> app.[[..slug]].layout.render()', { metadata, images: JSON.stringify(metadata.openGraph?.images) });
+  console.log('>> app.[[..slug]].layout.render()', { metadata, images: JSON.stringify(metadata.openGraph?.images) });
 
   return (
     <section>
