@@ -131,6 +131,8 @@ export const limerickPromptSteps = (haiku: Haiku) => [
     focus: "poem",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+      <div>Title: <i>${haiku.title}</i></div>      
+      <div>Theme: <i>${haiku.theme}</i></div>      
       <div>Starting with: <i>${haiku.startingWith}</i></div>      
       <div>Image instructions: <i>${haiku.artStyle || "N/A"}</i></div>      
       <div>Poem prompt: <i>${haiku.poemPrompt || "N/A"}</i></div>
@@ -144,6 +146,8 @@ export const limerickPromptSteps = (haiku: Haiku) => [
           ? ` <a href="/${haiku.id}">(Load current)</a>`
           : ""}</div>`
         : ""}    
+      <div>Created by: user ${haiku.createdBy} ${formatTimeFromNow(haiku.createdAt || 0)}</div>      
+      ${haiku.updatedBy ? `<div>Updated by: user ${haiku.updatedBy} ${formatTimeFromNow(haiku.updatedAt || 0)}</div>` : ""} 
       </div>`,
     style: { bottom: "50%", transform: "translateY(50%)" },
   },
