@@ -635,7 +635,8 @@ export default function MainPage({
 
   const copyLink = () => {
     if (haikudleMode && haikudleSolved || !haikudleMode) {
-      navigator.clipboard.writeText(`https://limericks.ai/${haiku.id}`);
+      const version = (haiku.deprecated || haiku.deprecatedAt) && haiku.version;
+      navigator.clipboard.writeText(`https://limericks.ai/${haiku.id}${version ? `:${version}` : ""}`);
       plainAlert(`Link to this limerick copied to clipboard`, { closeDelay: 750 });
       haikuAction(haikuId, "share");
       trackEvent("haiku-shared", {

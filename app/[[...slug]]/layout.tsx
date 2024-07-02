@@ -59,14 +59,17 @@ export default async function Layout({
   children: React.ReactNode,
   params?: any,
 }) {
-  let haikuId = params?.slug && params.slug[0];
-
+  const versionSeparator = "%3A"; // url-encoded ':'
+  const idAndVersion = params.slug && params.slug[0] && params.slug[0].split(versionSeparator);
+  let haikuId = idAndVersion && idAndVersion[0];
+  let version = idAndVersion && idAndVersion[1];
+  
   // not sure what's going on here (only when deployed to vercel)
   if (haikuId == "index") {
     haikuId = undefined;
   }
 
-  // console.log('>> app.[[..slug]].layout.render()', { haikuId, slug: params?.slug, params });
+  console.log('>> app.[[..slug]].layout.render()', { haikuId, version, slug: params?.slug, params });
 
   if (!haikuId) {
     if (process.env.EXPERIENCE_MODE == "haikudle") {
@@ -82,8 +85,9 @@ export default async function Layout({
     }
   }
 
-  const haiku = await getHaiku({ id: "(system)"}, haikuId);
-  console.log('>> app.[[..slug]].layout.render()', { haiku });
+  const haiku = await getHaiku({ id: "(system)"}, haikuId, undefined, version);
+  version = haiku.version || version || 0;
+  // console.log('>> app.[[..slug]].layout.render()', { version });
 
   metadata = {
     ...metadata,
@@ -96,7 +100,7 @@ export default async function Layout({
         // isHaikudleMode
           // ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`
           // : 
-          `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limericks/${haikuId}_${haiku?.version}.png`,
+          `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limericks/${haikuId}_${version}.png`,
           `https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/social_img_limericks/${haikuId}.png`,
           ...metaImages,
       ]

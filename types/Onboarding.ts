@@ -109,7 +109,7 @@ export const haikuPromptSteps = (haiku: Haiku) => [
         ${haiku.version || haiku.deprecated || haiku.deprecatedAt
         ? `<div>Version: ${haiku.version}
             ${haiku.version
-          ? ` <a href="/${haiku.id}?version=${haiku.version - 1}">(Load previous)</a>`
+          ? ` <a href="/${haiku.id}:${haiku.version - 1}">(Load previous)</a>`
           : ""}
             ${haiku.deprecated || haiku.deprecatedAt
           ? ` <a href="/${haiku.id}">(Load current)</a>`
@@ -138,7 +138,7 @@ export const limerickPromptSteps = (haiku: Haiku) => [
       ${haiku.version || haiku.deprecated
         ? `<div>Version: ${haiku.version}
           ${haiku.version
-          ? ` <a href="/${haiku.id}?version=${haiku.version - 1}">(Load previous)</a>`
+          ? ` <a href="/${haiku.id}:${haiku.version - 1}">(Load previous)</a>`
           : ""}
           ${haiku.deprecated
           ? ` <a href="/${haiku.id}">(Load current)</a>`
