@@ -519,7 +519,7 @@ export default function MainPage({
   const debounceSaveHaiku = useDebouncedCallback(async (haiku: Haiku) => {
     // console.log('>> app.page.debounceSaveLayout()', { haiku });
     saveHaiku(user, haiku);
-  }, 2000);
+  }, 500);
 
   const adjustLayout = async (layout: any) => {
     // console.log('>> app.page.adjustLayout()', { layout });
@@ -785,7 +785,7 @@ export default function MainPage({
           });
 
         // make sure the current haiku at least shows up in side bar as viewed
-        !isPuzzleMode && addUserHaiku(_haiku, "viewed")
+        !isPuzzleMode && !user?.isAdmin && addUserHaiku(_haiku, "viewed")
       }
     });
   }
