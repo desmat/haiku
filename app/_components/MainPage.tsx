@@ -691,22 +691,20 @@ export default function MainPage({
     const ret = await saveHaiku(user, haiku);
     // console.log('>> app.page.debounceSaveLayout() Layout adjustment saved', { ret });
     then && then(ret);
-  }, 3000);
+  }, 500);
 
   const cycleLayout = async (previous?: boolean) => {
-    console.log('>> app.page.cycleLayout()', { previous });
+    // console.log('>> app.page.cycleLayout()', { previous });
 
     let preset = (typeof (haiku?.layout?.preset) == "number"
       ? haiku?.layout?.preset
       : defaultPresetLayout)
       + (previous ? -1 : 1);
-
-    console.log('>> app.page.cycleLayout()', { preset });
+    // console.log('>> app.page.cycleLayout()', { preset });
 
     if (preset >= presetLayouts.length) preset = 0;
     if (preset < 0) preset = presetLayouts.length - 1;
-
-    console.log('>> app.page.cycleLayout()', { preset });
+    // console.log('>> app.page.cycleLayout()', { preset });
 
     const updatedHaiku = {
       ...haiku,
@@ -721,9 +719,8 @@ export default function MainPage({
 
     setHaiku(updatedHaiku);
     debounceSaveHaiku(updatedHaiku, (haiku: Haiku) => {
-      console.log('>> app.page.cycleLayout()', { savedHaiku: haiku });
-      plainAlert("Layout adjustments saved", { closeDelay: 750 });
-
+      // console.log('>> app.page.cycleLayout()', { savedHaiku: haiku });
+      // plainAlert("Layout adjustments saved", { closeDelay: 750 });
       trackEvent("layout-updated", {
         userId: user?.id,
         id: haiku?.id,
