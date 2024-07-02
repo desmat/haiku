@@ -54,7 +54,7 @@ export default function HaikuPage({
     ? haiku?.layout?.poem
     : {};
   const canAdjustLayout = !!adjustLayout && showcaseMode;
-  console.log('>> app._components.HaikuPage.render()', { poemLayout });
+  // console.log('>> app._components.HaikuPage.render()', { poemLayout });
 
   return (
     <div>
