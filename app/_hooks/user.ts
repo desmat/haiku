@@ -62,14 +62,6 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         set({ loading: false });
         return;
       }
-
-      window?.localStorage && window.localStorage.setItem("session", token || "");
-      trackEvent("user-session-created", {
-        userId: createdUser.id,
-        isAdmin: createdUser.isAdmin,
-        isAnonymous: createdUser.isAnonymous,
-        host: createdUser.host,
-      });
     } 
     
     const {
