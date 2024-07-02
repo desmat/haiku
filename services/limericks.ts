@@ -8,6 +8,7 @@ import { LanguageType, supportedLanguages } from '@/types/Languages';
 import * as openai from './openai';
 import { incUserUsage } from './usage';
 import { getHaiku, saveHaiku } from './haikus';
+import { triggerLimerickShared } from './webhooks';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -205,7 +206,16 @@ export async function regenerateLimerickImage(user: any, haiku: Haiku, artStyle?
     incUserUsage(user, "haikusCreated");
   }
 
-  return saveHaiku(user, updatedHaiku);
+  const savedHaiku = await saveHaiku(user, updatedHaiku);
+
+  if (await triggerLimerickShared(savedHaiku)) {
+    haiku = await saveHaiku(user, { 
+      ...savedHaiku, 
+      shared: true,
+    }, { noVersion: true });
+  }
+
+  return savedHaiku;
 }
 
 
@@ -278,5 +288,14 @@ export async function generateLimerick(user: any, lang?: LanguageType, startingW
     incUserUsage(user, "haikusCreated");
   }
 
-  return store.haikus.create(user.id, haiku);
+  const createdHaiku = store.haikus.create(user.id, haiku);
+
+  if (await triggerLimerickShared(createdHaiku)) {
+    haiku = await saveHaiku(user, { 
+      ...createdHaiku, 
+      shared: true,
+    }, { noVersion: true });
+  }
+
+  return createdHaiku;
 }
