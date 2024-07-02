@@ -288,7 +288,7 @@ export async function generateLimerick(user: any, lang?: LanguageType, startingW
     incUserUsage(user, "haikusCreated");
   }
 
-  const createdHaiku = store.haikus.create(user.id, haiku);
+  const createdHaiku = await store.haikus.create(user.id, haiku); 
 
   if (await triggerLimerickShared(createdHaiku)) {
     haiku = await saveHaiku(user, { 
