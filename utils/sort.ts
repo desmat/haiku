@@ -4,6 +4,16 @@ export const byName = (a: any, b: any) => {
   return -1;
 }
 
+export const byId = (a: any, b: any) => {
+  if (a && a.id && b && b.id && a.id.toLowerCase() > b.id.toLowerCase()) return 1;
+  return -1;
+}
+
+export const byIdDesc = (a: any, b: any) => {
+  if (a && a.id && b && b.id && a.id.toLowerCase() < b.id.toLowerCase()) return 1;
+  return -1;
+}
+
 export const byCreatedAt = (a: any, b: any) => {
   return (a.createdAt || 0) - (b.createdAt || 0)
 }

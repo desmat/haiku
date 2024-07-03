@@ -9,7 +9,7 @@ import * as samples from '@/services/stores/samples';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { Haikudle, UserHaikudle } from '@/types/Haikudle';
 import { USAGE_LIMIT } from '@/types/Usage';
-import { byCreatedAtDesc } from '@/utils/sort';
+import { byCreatedAtDesc, byIdDesc } from '@/utils/sort';
 import shuffleArray from '@/utils/shuffleArray';
 import { deleteHaikudle, getHaikudle } from './haikudles';
 import * as openai from './openai';
@@ -641,39 +641,17 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
 
   if (!id) id = moment().format("YYYYMMDD");
 
-  let dailyHaiku = await store.dailyHaikus.get(id);
+  let dailyHaiku = undefined //await store.dailyHaikus.get(id);
   console.log(`>> services.haiku.getDailyHaiku`, { id, dailyHaiku });
 
   if (!dailyHaiku) {
-    // create daily haiku if none for today
-    const previousDailyHaikus = await getDailyHaikus();
-    const previousDailyHaikuIds = previousDailyHaikus
-      .map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
-    const [
-      likedHaikus,
-      haikus
-    ] = await Promise.all([
-      getLikedHaikus(),
-      getHaikus(),
-    ]);
-
-    const nonDailyLikedhaikus = likedHaikus
-      .filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
-    const nonDailyhaikus = haikus
-      .filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
-
-    // pick from liked haikus, else all haikus
-    const randomHaikuId = shuffleArray(nonDailyLikedhaikus || nonDailyhaikus)[0]?.id;
-    let randomHaiku = haikus[randomHaikuId];
-
-    if (!randomHaiku) {
-      randomHaiku = shuffleArray(haikus)[0];
-      console.warn(`>> services.haiku.getDailyHaiku WARNING: ran out of liked or non-daily haikus, picking from the lot`, { randomHaiku });
-    }
-
-    console.log('>> app.api.haikus.GET creating daily haiku', { randomHaikuId, randomHaiku, previousDailyHaikus, likedHaikus, haikus });
-
-    dailyHaiku = await saveDailyHaiku({ id: "(system)" } as User, id, randomHaiku.id);
+    // find previous daily haiku
+    const previousDailyHaikus = (await getDailyHaikus())
+    .filter((dh: DailyHaiku) => dh.id < id)
+    .sort(byIdDesc);
+    // console.log(`>> services.haiku.getDailyHaiku`, { previousDailyHaikus });
+    
+    dailyHaiku = previousDailyHaikus[0];
   }
 
   return new Promise((resolve, reject) => resolve(dailyHaiku));
