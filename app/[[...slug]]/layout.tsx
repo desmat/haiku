@@ -86,7 +86,7 @@ export default async function Layout({
   }
 
   const haiku = await getHaiku({ id: "(system)"}, haikuId, undefined, version);
-  version = haiku.version || version || 0;
+  version = haiku?.version || version || 0;
   // console.log('>> app.[[..slug]].layout.render()', { version });
 
   metadata = {
