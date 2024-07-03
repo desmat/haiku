@@ -829,7 +829,7 @@ export default function MainPage({
           });
 
         // make sure the current haiku at least shows up in side bar as viewed
-        !isPuzzleMode && addUserHaiku(_haiku, "viewed")
+        !isPuzzleMode && user && !user.isAdmin && addUserHaiku(_haiku, "viewed");
       }
     });
   }
