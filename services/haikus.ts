@@ -647,7 +647,7 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
   if (!dailyHaiku) {
     // find previous daily haiku
     const previousDailyHaikus = (await getDailyHaikus())
-    .filter((dh: DailyHaiku) => dh.id < id)
+    .filter((dh: DailyHaiku) => id && dh.id < id)
     .sort(byIdDesc);
     // console.log(`>> services.haiku.getDailyHaiku`, { previousDailyHaikus });
     
