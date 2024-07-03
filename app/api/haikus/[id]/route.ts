@@ -79,7 +79,7 @@ export async function PUT(
     );
   }
 
-  if (!user.isAdmin && haiku.createdBy != user.id) {
+  if (!haiku?.isDemo && !user.isAdmin && haiku.createdBy != user.id) {
     return NextResponse.json(
       { success: false, message: 'authorization failed' },
       { status: 403 }
@@ -95,8 +95,12 @@ export async function PUT(
   //   );
   // }
 
-  const savedHaiku = await saveHaiku(user, haikuToSave);
+  const savedHaiku = await saveHaiku(user, {
+    ...haikuToSave,
+    isDemo: haiku.isDemo,
+  });
   return NextResponse.json({ haiku: savedHaiku });
+  // return NextResponse.json({ haiku: haikuToSave });
 }
 
 export async function DELETE(

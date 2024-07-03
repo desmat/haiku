@@ -245,7 +245,7 @@ export default function HaikuPoem({
   const canClickEdit = false; // editAllowed && !saving && !onboarding;
   const canEdit = false; //editAllowed && user?.isAdmin && !saving && !onboarding;
 
-  const quickEditAllowed = haiku?.createdBy == user?.id || user?.isAdmin;
+  const quickEditAllowed = haiku?.createdBy == user?.id || user?.isAdmin || haiku?.isDemo;
   const canClickQuickEdit = quickEditAllowed && !showcaseMode;
   let [quickEditing, setQuickEditing] = useState(false);
   const [lastVersion, setLastVersion] = useState<number | undefined>(haiku?.version);

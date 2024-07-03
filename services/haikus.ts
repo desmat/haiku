@@ -554,7 +554,7 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
 export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Promise<Haiku> {
   console.log(">> services.haiku.saveHaiku", { haiku, user });
 
-  if (!(haiku.createdBy == user.id || user.isAdmin)) {
+  if (!(haiku.createdBy == user.id || user.isAdmin || haiku.isDemo)) {
     throw `Unauthorized`;
   }
 
