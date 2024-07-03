@@ -641,7 +641,7 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
 
   if (!id) id = moment().format("YYYYMMDD");
 
-  let dailyHaiku = undefined //await store.dailyHaikus.get(id);
+  let dailyHaiku = await store.dailyHaikus.get(id);
   console.log(`>> services.haiku.getDailyHaiku`, { id, dailyHaiku });
 
   if (!dailyHaiku) {
