@@ -226,13 +226,13 @@ export default function HaikuPoem({
   const onboarding = typeof (onboardingElement) == "string"
   const maxHaikuTheme = showcaseMode ? 32 : 18;
   const dateCode = moment().format("YYYYMMDD");
+  const layout = haiku?.layout?.custom || presetLayouts[defaultPresetLayout];
 
   const [updatedPoem, setUpdatedPoem] = useState<string[]>([]);
   const [editingLine, setEditingLine] = useState<number | undefined>();
   const [aboutToEditLine, setAboutToEditLine] = useState<number | undefined>();
   const [_saving, setSaving] = useState(false);
   const saving = _saving || regenerating;
-  const [aboutToSave, setAboutToSave] = useState(false);
   const [select, setSelection] = useState(false);
   const editing = typeof (editingLine) == "number";
   const aboutToEdit = typeof (aboutToEditLine) == "number";
@@ -245,13 +245,10 @@ export default function HaikuPoem({
   const canClickEdit = false; // editAllowed && !saving && !onboarding;
   const canEdit = false; //editAllowed && user?.isAdmin && !saving && !onboarding;
 
-  const quickEditAllowed = true; //haiku?.createdBy == user?.id || user?.isAdmin;
+  const quickEditAllowed = haiku?.createdBy == user?.id || user?.isAdmin;
   const canClickQuickEdit = quickEditAllowed;
   let [quickEditing, setQuickEditing] = useState(false);
-  let _quickEditing = quickEditing;
-  let __quickEditing = true;
   const [lastVersion, setLastVersion] = useState<number | undefined>(haiku?.version);
-
 
   const updateLayoutAllowed = !!updateLayout && (user?.isAdmin || haiku?.createdBy && haiku?.createdBy == user?.id);
   const canUpdateLayout = updateLayoutAllowed && !editing && !saving && process.env.EXPERIENCE_MODE != "haikudle";
@@ -263,9 +260,21 @@ export default function HaikuPoem({
   const canRegenerateImage = regenerateImageAllowed && !editing && !saving;
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { editing, showcaseMode, canCopy, canSwitchMode });
 
-  const layout = haiku?.layout?.custom || presetLayouts[defaultPresetLayout];
-
+  let [displayPoem, setDisplayPoem] = useState<string[][]>(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
+  let [editPoem, setEditPoem] = useState<string[][]>(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
+  let [currentPoem, setCurrentPoem] = useState<string[][]>(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
+  let [lastPoem, setLastPoem] = useState<string[][]>();
+  let refs = [
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
+  ]
   const longPressTimerRef = useRef();
+  let [killingWords, setKillingWords] = useState(false);
+  let [mouseDown, setMouseDown] = useState(false);
+  let [firstWordPointerEnter, setFirstWordPointerEnter] = useState<number[]>();
 
   const handleLongPressHaiku = (e: any) => {
     // console.log('>> app._components.HaikuPoem.handleLongPressHaiku()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
@@ -281,11 +290,10 @@ export default function HaikuPoem({
   const handleClickHaiku = (e: any) => {
     // console.log('>> app._components.HaikuPoem.handleClickHaiku()', { longPressTimerRef });
     if (longPressTimerRef.current) {
-
       return handleLongPressHaiku(e);
     }
 
-    return;
+    // return;
 
     console.log('>> app._components.HaikuPoem.handleClickHaiku()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
 
@@ -346,7 +354,6 @@ export default function HaikuPoem({
       return;
     }
 
-    // setAboutToSave(false);
     setSaving(true);
 
     const syllables = haiku?.poem
@@ -435,117 +442,32 @@ export default function HaikuPoem({
     }
   };
 
-
-  let [displayPoem, setDisplayPoem] = useState<string[][]>(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
-  let [editPoem, setEditPoem] = useState<string[][]>(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
-  let [currentPoem, setCurrentPoem] = useState<string[][]>(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
-  let [lastPoem, setLastPoem] = useState<string[][]>();
-  let refs = [
-    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
-    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
-    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
-    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
-    [useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(), useRef(),],
-  ]
-
-  let [savingLine, setSavingLine] = useState<boolean[]>(haiku && haiku.poem.map((line: string) => false));
-  let [killingWords, setKillingWords] = useState(false);
-
-
-  const debouncedSetAboutToSave = useDebouncedCallback(
-    () => setAboutToSave(true),
-    800
-  )
-
-  const debounced = useDebouncedCallback(
-    // function
+  const debouncedSave = useDebouncedCallback(
     () => {
-      // setDisplayPoem([...value]);
-      // setEditPoem([...value]);
-
+      setLastPoem(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
       // join the words then consolidate the possible "... ..." repetition
       const updatePoemRequest = editPoem.map((line: string[]) => line.join(" ").replaceAll(/(\.\.\.\s?)+/g, "..."));
-      // const updateLineRequest = updatePoemRequest.map((line: string, i: number) => {
-      //   const saving = line.includes("...") && !savingLine[i];
-      //   setSavingLine((savingLine: boolean[]) => {
-      //     savingLine[i] = true //saving ? true : savingLine[i];
-      //     return savingLine;
-      //   });
-      //   return saving;
-      // });
-      // console.log(">> app._component.HaikuPoem debounced", { editPoem, updatePoemRequest, savingLine });
-
-      // setAboutToSave(false);
       setSaving(true);
-      // setSavingLine(updateLineRequest.map((saving: boolean, i: number) => saving ? true : savingLine[i]));
-
-      setLastPoem(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
 
       saveHaiku({
         ...haiku,
         poem: updatePoemRequest,
       }).then((haiku: Haiku) => {
-        // console.log(">> app._component.HaikuPoem debounced saved", { editPoem, savingLine, haiku });
-
-        // const updatedDisplayPoem = haiku.poem.map((line: string, i: number) => updateLineRequest[i]
-        //   ? line.split(/\s+/).map((word: string) => word)
-        //   : displayPoem[i]);
-        // const updatedEditPoem = haiku.poem.map((line: string, i: number) => updateLineRequest[i]
-        //   ? line.split(/\s+/).map((word: string) => word)
-        //   : editPoem[i])
-        // console.log(">> app._component.HaikuPoem debounced saved", { value, updatePoemRequest, updatedPoem, updateLineRequest, savingLine });
-        // setDisplayPoem(updatedDisplayPoem);
-        // setEditPoem(updatedEditPoem);
-
-        // only update requested lines
-        // NOTE: with overlapping requests this won't work
-        setDisplayPoem((poem: string[][]) => {
-          return poem.map((line: string[], i: number) => true
-            ? haiku.poem[i].split(/\s+/)
-            : line);
-        });
-
-        setEditPoem((poem: string[][]) => {
-          return poem.map((line: string[], i: number) => true
-            ? haiku.poem[i].split(/\s+/)
-            : line);
-        });
-
-        setCurrentPoem((poem: string[][]) => {
-          return poem.map((line: string[], i: number) => true
-            ? haiku.poem[i].split(/\s+/)
-            : line);
-        });
-
+        setDisplayPoem(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
+        setEditPoem(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
+        setCurrentPoem(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
         setSaving(false);
-        // setAboutToSave(false);
-        // setSavingLine(updateLineRequest.map((saving: boolean, i: number) => saving ? false : savingLine[i]));
-        // updateLineRequest.forEach((saving: boolean, i: number) => {
-        //   setSavingLine((savingLine: boolean[]) => {
-        //     savingLine[i] = false //saving ? false : savingLine[i];
-        //     return savingLine;
-        //   });
-        // });
       });
     },
-    // delay in ms
     2000
   );
 
   // console.log(">> app._component.HaikuPoem render", { displayPoem, editPoem });
 
-  let [mouseDown, setMouseDown] = useState(false);
-
-  const resetPoem = () => {
-    setDisplayPoem(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
-    setEditPoem(haiku && haiku.poem.map((line: string) => line.split(/\s+/).map((word: string) => word)));
-  }
-
   const debouncedSetPoemStates = useDebouncedCallback(
     () => {
       setDisplayPoem(displayPoem.map((line: string[]) => [...line]));
       setEditPoem(editPoem.map((line: string[]) => [...line]));
-      // setAboutToSave(false);
     },
     10
   )
@@ -565,34 +487,22 @@ export default function HaikuPoem({
       })
 
       if (someToKill) {
-        // setDisplayPoem(displayPoem.map((line: string[]) => [...line]));
-        // setEditPoem(editPoem.map((line: string[]) => [...line]));
         debouncedSetPoemStates();
       }
 
-      // debouncedSetAboutToSave();
-      // TODO uncripple
-      // console.warn("TODO UNCRIPPLE");
-      debounced();
+      debouncedSave();
     }
-    // console.log(">> app._component.HaikuPoem.handleClickWord", { displayPoem });
-  };
-
-  const debouncedKillWords = useDebouncedCallback(
-    // function
-    killWords,
-    5
-  );
-
-  const handleClickWord = async (e: any, lineNum: number, wordNum: number) => {
-    if (!quickEditing) return;
-    // console.log(">> app._component.HaikuPoem.handleClickWord", { e, lineNum, wordNum, displayPoem });
-
-    killWords([[lineNum, wordNum]]);
-    // console.log(">> app._component.HaikuPoem.handleClickWord", { displayPoem });
+    // console.log(">> app._component.HaikuPoem.killWords", { displayPoem });
   };
 
   const handleMouseDownWord = async (e: any, lineNum: number, wordNum: number) => {
+    if (showcaseMode) return;
+
+    // @ts-ignore
+    longPressTimerRef.current = setTimeout(() => {
+      handlePointerEnterWord(e, lineNum, wordNum);
+    }, 250);
+
     if (!quickEditing) return;
     // console.log(">> app._component.HaikuPoem.handleMouseDownWord", { e, lineNum, wordNum });
 
@@ -604,6 +514,9 @@ export default function HaikuPoem({
   };
 
   const handleMouseUp = async (e: any, lineNum?: number, wordNum?: number) => {
+    longPressTimerRef.current && clearTimeout(longPressTimerRef.current)
+    longPressTimerRef.current = undefined;
+
     if (!quickEditing) return;
     // console.log(">> app._component.HaikuPoem.handleMouseUp", { e });
 
@@ -638,13 +551,9 @@ export default function HaikuPoem({
   const debouncedSetLastTouchXY = useDebouncedCallback(
     () => {
       setLastTouchXY(lastTouchXY);
-      // setAboutToSave(false);
-      // debouncedSetAboutToSave();
     },
     100
   )
-
-  let [firstWordPointerEnter, setFirstWordPointerEnter] = useState<number[]>();
 
   const handlePointerEnterWord = async (e: any, lineNum: number, wordNum: number) => {
     // console.log(">> app._component.HaikuPoem.handlePointerEnterWord", { quickEditing, mouseDown, killingWords });
@@ -654,20 +563,10 @@ export default function HaikuPoem({
 
       quickEditing = true;
       setQuickEditing(quickEditing);
-      // mouseDown = true;
-      // setMouseDown(mouseDown);
-      // killingWords = true;
-      // setKillingWords(killingWords);
-
-      // killWords([[lineNum, wordNum]]);  
-
       handleMouseDownWord(e, lineNum, wordNum);
     }
 
     if (!quickEditing) return;
-
-
-
 
     // console.log(">> app._component.HaikuPoem.handlePointerEnterWord", { e, lineNum, wordNum });
 
@@ -911,7 +810,7 @@ export default function HaikuPoem({
       {!showcaseMode &&
         <div
           className={`_bg-pink-100 fixed top-0 left-0 w-full h-full ${saving ? " opacity-50" : ""}`}
-          onClick={() => editing && finishEdit() || _quickEditing && setQuickEditing(false)}
+          onClick={() => editing && finishEdit() || quickEditing && setQuickEditing(false)}
         />
       }
 
@@ -970,19 +869,6 @@ export default function HaikuPoem({
           onTouchMove={handleTouchMove}
           onMouseLeave={handleMouseUp}
           onMouseEnter={handleMouseUp}
-        // onMouseDown={(e: any) => {
-        // console.log("DOWN");
-        //   // @ts-ignore
-        //   longPressTimerRef.current = setTimeout(() => {
-        //     handleClickHaiku(e);
-        //   }, 500);
-        // }}
-        // onMouseUp={(e: any) => {
-        //   console.log("UP");
-        //   longPressTimerRef.current && clearTimeout(longPressTimerRef.current)
-        //   longPressTimerRef.current = undefined;
-        // }}
-
         >
           <div
             className="h-full _bg-purple-200 flex flex-col _transition-all w-fit m-auto md:text-[26pt] sm:text-[22pt] text-[18pt]"
@@ -1013,10 +899,10 @@ export default function HaikuPoem({
             }}
           >
             <PopOnClick
-              color={_quickEditing ? haiku?.color : haiku?.bgColor}
-              force={popPoem || _quickEditing || haiku?.version && haiku.version != lastVersion}
-              disabled={editing || _quickEditing || (!canCopy && !canSwitchMode && !canUpdateLayout)}
-              active={/*_quickEditing || */  !!(onboardingElement && onboardingElement.includes("poem"))}
+              color={quickEditing ? haiku?.color : haiku?.bgColor}
+              force={popPoem || quickEditing || haiku?.version && haiku.version != lastVersion}
+              disabled={editing || quickEditing || (!canCopy && !canSwitchMode && !canUpdateLayout)}
+              active={/*quickEditing || */  !!(onboardingElement && onboardingElement.includes("poem"))}
               className={`h-full`}
               hoverSupported={false}
 
@@ -1058,15 +944,13 @@ export default function HaikuPoem({
                             <StyledLayers
                               className={`_bg-yellow-200 `}
                               styles={
-                                __quickEditing
-                                  ? styles.slice(0, 3) || []
-                                  : aboutToEdit || editing //|| saving
-                                    ? styles.slice(0, 1)
-                                    : onboardingElement && !onboardingElement.includes("poem")
-                                      ? styles.slice(0, 2)
-                                      : saving
-                                        ? styles.slice(0, 3)
-                                        : styles
+                                aboutToEdit || editing //|| saving
+                                  ? styles.slice(0, 1)
+                                  : onboardingElement && !onboardingElement.includes("poem")
+                                    ? styles.slice(0, 2)
+                                    : saving
+                                      ? styles.slice(0, 3)
+                                      : styles
                               }>
                               <div
                                 className="relative m-[0rem] _transition-all"
@@ -1105,98 +989,25 @@ export default function HaikuPoem({
                                       // @ts-ignore
                                       ref={refs[i][j]}
                                       className={`poem-line-word poem-line-word-${j} _bg-yellow-200 relative _mx-[-0.7rem] 
-                                        ${aboutToSave
-                                          ? "opacity-50"
-                                          : saving
-                                            ? "cursor-wait opacity-50 animate-pulse"
-                                            : _quickEditing
-                                              ? "cursor-crosshair opacity-80"
-                                              : canUpdateLayout
-                                                ? "cursor-row-resize"
-                                                : canCopy || canSwitchMode
-                                                  ? "cursor-pointer" : ""
+                                        ${saving
+                                          ? "cursor-wait opacity-50 animate-pulse"
+                                          : quickEditing
+                                            ? "cursor-crosshair opacity-80"
+                                            : canUpdateLayout
+                                              ? "cursor-row-resize"
+                                              : canCopy || canSwitchMode
+                                                ? "cursor-pointer" : ""
                                         }`}
                                       style={{
                                         transition: "opacity 0.5s ease-out",
                                       }}
-                                      // onClick={(e: any) => handleClickWord(e, i, j)}
-
-
-
-                                      onMouseDown={(e: any) => {
-
-                                        console.log("DOWN");
-                                        // @ts-ignore
-                                        longPressTimerRef.current = setTimeout(() => {
-                                          // handleClickHaiku(e);
-                                          // setQuickEditing(true);
-                                          handlePointerEnterWord(e, i, j);
-                                        }, 500);
-
-
-
-
-                                        handleMouseDownWord(e, i, j)
-                                      }}
-                                      onTouchStart={(e: any) => {
-
-                                        // console.log("START");
-                                        // @ts-ignore
-                                        longPressTimerRef.current = setTimeout(() => {
-                                          // handleClickHaiku(e);
-                                          // setQuickEditing(true);
-                                          // handlePointerEnterWord(e, i, j);
-
-                                          // quickEditing = true;
-                                          // setQuickEditing(quickEditing);
-                                          // mouseDown = true;
-                                          // setMouseDown(mouseDown);
-                                          // killingWords = true;
-                                          // setKillingWords(killingWords);
-
-
-
-                                          // THIS IS THE ONE
-                                          handlePointerEnterWord(e, i, j);
-                                        }, 250);
-
-
-
-
-                                        // handleMouseDownWord(e, i, j)
-                                      }}
-
-                                      onMouseUp={(e: any) => {
-
-
-                                        // console.log("UP");
-                                        longPressTimerRef.current && clearTimeout(longPressTimerRef.current)
-                                        longPressTimerRef.current = undefined;
-
-
-
-
-                                        handleMouseUp(e, i, j)
-                                      }}
-                                      onTouchEnd={(e: any) => {
-                                        // console.log("START");
-
-                                        longPressTimerRef.current && clearTimeout(longPressTimerRef.current)
-                                        longPressTimerRef.current = undefined;
-
-
-
-
-                                        handleMouseUp(e, i, j)
-                                      }}
-
-
-
-
+                                      onMouseDown={(e: any) => handleMouseDownWord(e, i, j)}
+                                      onTouchStart={(e: any) => handleMouseDownWord(e, i, j)}
+                                      onMouseUp={(e: any) => handleMouseUp(e, i, j)}
+                                      onTouchEnd={(e: any) => handleMouseUp(e, i, j)}
                                       onMouseMove={(e: any) => handleMouseMoveWord(e, i, j)}
                                       onPointerEnter={(e: any) => handlePointerEnterWord(e, i, j)}
                                     >
-                                      {/* Display  */}
                                       <div
                                         // className="absolute top-0 left-0 w-0 h-0"
                                         className={`${displayPoem[i][j] ? "opacity-100" : "opacity-20"} transition-opacity`}
@@ -1204,7 +1015,7 @@ export default function HaikuPoem({
                                         <PopOnClick
                                           color={haiku?.color}
                                           force={!displayPoem[i][j] || !!(lastPoem && lastPoem[i][j] && lastPoem[i][j] != currentPoem[i][j])}
-                                          // disabled={!_quickEditing || _quickEditing && !displayPoem[i][j]}
+                                          disabled={!quickEditing || quickEditing && !displayPoem[i][j]}
                                           hoverSupported={true}
                                         >
                                           {j == 0 &&
@@ -1215,17 +1026,6 @@ export default function HaikuPoem({
                                           }
                                         </PopOnClick>
                                       </div>
-                                      {/* Keep the document structure */}
-                                      {/* <div
-                                className="opacity-20"
-                              >
-                                {j == 0 &&
-                                  <span>{upperCaseFirstLetter(word)}</span>
-                                }
-                                {j != 0 &&
-                                  <span>{word}</span>
-                                }
-                              </div> */}
                                     </div>
                                   ))
                                   }
@@ -1237,16 +1037,16 @@ export default function HaikuPoem({
                                     </div>
                                   }
                                   {/* <ControlledInput
-                            id={i}
-                            activeId={editingLine}
-                            value={upperCaseFirstLetter(saving
-                              ? typeof (updatedPoem[i]) == "string"
-                                ? updatedPoem[i]
-                                : upperCaseFirstLetter(poemLine)
-                              : upperCaseFirstLetter(poemLine))}
-                            select={select}
-                            onChange={(value: string) => handleInputChange(value, i)}
-                          /> */}
+                                    id={i}
+                                    activeId={editingLine}
+                                    value={upperCaseFirstLetter(saving
+                                      ? typeof (updatedPoem[i]) == "string"
+                                        ? updatedPoem[i]
+                                        : upperCaseFirstLetter(poemLine)
+                                      : upperCaseFirstLetter(poemLine))}
+                                    select={select}
+                                    onChange={(value: string) => handleInputChange(value, i)}
+                                  /> */}
                                 </div>
                               </div>
                             </StyledLayers>
