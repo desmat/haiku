@@ -246,7 +246,7 @@ export default function HaikuPoem({
   const canEdit = false; //editAllowed && user?.isAdmin && !saving && !onboarding;
 
   const quickEditAllowed = haiku?.createdBy == user?.id || user?.isAdmin;
-  const canClickQuickEdit = quickEditAllowed;
+  const canClickQuickEdit = quickEditAllowed && !showcaseMode;
   let [quickEditing, setQuickEditing] = useState(false);
   const [lastVersion, setLastVersion] = useState<number | undefined>(haiku?.version);
 
@@ -496,7 +496,7 @@ export default function HaikuPoem({
   };
 
   const handleMouseDownWord = async (e: any, lineNum: number, wordNum: number) => {
-    if (showcaseMode) return;
+    if (!canClickQuickEdit) return;
 
     // @ts-ignore
     longPressTimerRef.current = setTimeout(() => {
