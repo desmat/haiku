@@ -9,9 +9,11 @@ export const notFoundHaiku = {
   bgColor: "#e1ddce",
   colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
   poem: [
-    "Quest ends in silence,",
-    "'404 Not Found' echoes,",
-    "Lost in digital.",
+    "There once was a man seeking something,",
+    "His heart felt the emptiness stinging,",
+    "He wandered afar,",
+    "Chased each falling star,",
+    "But found that he never gained nothing.",
   ],
 }
 
@@ -24,9 +26,11 @@ export const error429Haiku = {
   bgColor: "#e1ddce",
   colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
   poem: [
-    "Requests flood, cascade",
-    "'429 Too Many Requests'",
-    "Rest now, try later."
+    "A coder was swamped by requests,",
+    "His mind couldn't handle the tests,",
+    "He tried and he tried,",
+    "But just sighed and cried,",
+    `"Too many, please try again later," he confessed.`,
   ],
 }
 
@@ -41,9 +45,11 @@ export const error4xxHaiku = (code: number, message?: string) => {
     bgColor: "#e1ddce",
     colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
     poem: [
-      "Seeking resources,",
-      "Request returned unfulfilled:",
-      `'${errorStr}'.`
+      "A soul made a plea, deeply filled,",
+      "But the answer they sought was then stilled,",
+      "With a tear and a frown,",
+      "The response let them down,",
+      `"${errorStr}" was the reason, unfulfilled.`,
     ],
   }
 }
@@ -58,11 +64,21 @@ export const serverErrorHaiku = (code: number, message?: string) => {
     color: "#4a5247",
     bgColor: "#e1ddce",
     colorPalette: ['#5f685c', '#747369', '#767c6b', '#b0b3a6', '#e1ddce'],
-    poem: [
-      "Server falls in strife",
-      `'${errorStr}'`,
-      "Silent bytes, no life."
-    ],
+    poem: message
+      ? [
+        "A user with hope in their eyes,",
+        "Found dreams shattered by silent cries,",
+        "An attempt met despair,",
+        `"${errorStr}"`,
+        "Left alone with unanswered whys.",
+      ]
+      : [
+        "A user with dreams tried to cope,",
+        "But the server extinguished their hope,",
+        "With a message so dire,",
+        `"${errorStr}," conspired,`,
+        "Left them lost in a desolate scope.",
+      ]
   }
 }
 
