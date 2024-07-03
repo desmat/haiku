@@ -65,15 +65,15 @@ export function haikuStyles(haiku: Haiku) {
       {
         filter: `drop-shadow(0px 0px 4px ${bgColor}99)`,
       },
+      // {
+      //   filter: `drop-shadow(0px 0px 8px ${bgColor}66)`,
+      // },
       {
-        filter: `drop-shadow(0px 0px 8px ${bgColor}66)`,
+        filter: `drop-shadow(0px 0px 12px ${bgColor}66)`,
       },
-      {
-        filter: `drop-shadow(0px 0px 12px ${bgColor}33)`,
-      },
-      {
-        filter: `drop-shadow(0px 0px 18px ${bgColor}22)`,
-      },
+      // {
+      //   filter: `drop-shadow(0px 0px 18px ${bgColor}22)`,
+      // },
     ],
     altTextStyles: [
       {

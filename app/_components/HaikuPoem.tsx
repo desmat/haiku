@@ -943,15 +943,7 @@ export default function HaikuPoem({
                           >
                             <StyledLayers
                               className={`_bg-yellow-200 `}
-                              styles={
-                                aboutToEdit || editing //|| saving
-                                  ? styles.slice(0, 1)
-                                  : onboardingElement && !onboardingElement.includes("poem")
-                                    ? styles.slice(0, 2)
-                                    : saving
-                                      ? styles.slice(0, 3)
-                                      : styles
-                              }>
+                              styles={styles}>
                               <div
                                 className="relative m-[0rem] _transition-all"
                                 onKeyDown={(e: any) => (canEdit || editing) && handlePoemLineKeyDown(e, i)}
