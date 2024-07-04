@@ -51,7 +51,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
     let createdUser: User | undefined;
     let token = window?.localStorage && window.localStorage.getItem("session");
-    
+
     if (!token) {
       const ret = await get().createRemote(user);
       createdUser = ret.user;
@@ -62,8 +62,10 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         set({ loading: false });
         return;
       }
-    } 
-    
+
+      window?.localStorage && window.localStorage.setItem("session", token || "");
+    }
+
     const {
       user: remoteUser,
       haikus,
@@ -201,14 +203,14 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     // console.log(">> hooks.user.createRemote()", { updatedToken, updatedUser });
 
     return { user: updatedUser, token: updatedToken };
-  },  
+  },
 
   saveRemote: async (user: any) => {
     // console.log(">> hooks.user.saveRemote()", { user });
 
     const token = await get().getToken();
     const opts = token && { headers: { Authorization: `Bearer ${token}` } } || {};
-  
+
     const res = await fetch(`/api/user/${user.id}`, {
       ...opts,
       method: "PUT",
@@ -228,7 +230,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     // console.log(">> hooks.user.saveRemote()", { updatedToken, updatedUser });
 
     return { user: updatedUser, token: updatedToken };
-  },  
+  },
 
   addUserHaiku: async (haiku: Haiku, action?: "viewed" | "generated") => {
     const { user, haikus, allHaikus } = get();
@@ -265,7 +267,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         [haiku.id]: userHaiku
       },
     });
-  },  
+  },
 })));
 
 export default useUser;
