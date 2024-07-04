@@ -15,9 +15,9 @@ export async function encodeJWT(payload: any) {
       typ: 'JWT',
       alg: algorithm,
     })
-    .setIssuer('https://haiku.desmat.ca')
+    .setIssuer('https://haikugenius.ai/')
     // .setSubject('uniqueUserId')
-    .setAudience('haiku.desmat.ca')
+    .setAudience('haikugenius.ai')
     .setExpirationTime('1y')
     .setIssuedAt()
     .sign(privateKey);
