@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { userSession } from '@/services/users';
 import { restore } from '@/services/admin';
 
+export const maxDuration = 300;
+
 export async function POST(request: NextRequest) {
   console.log('>> app.api.admin.restore.POST', {});
 

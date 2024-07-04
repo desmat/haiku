@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { userSession } from '@/services/users';
 import { backup } from '@/services/admin';
 
+export const maxDuration = 300;
+
 export async function POST(request: Request) {
   console.log('>> app.api.admin.backup.POST', {});
 
