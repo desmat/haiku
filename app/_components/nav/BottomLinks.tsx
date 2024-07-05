@@ -144,8 +144,8 @@ export default function BottomLinks({
               onShowAbout && onShowAbout();
             }}
           >
-            {user?.isAdmin && (haiku?.dailyHaikuId || haiku?.dailyHaikudleId || haiku.isIncorrect) &&
-              <div className={`absolute top-[-0rem] right-[-0rem] rounded-full w-[0.6rem] h-[0.6rem] ${haiku.isIncorrect ? "bg-red-600" : "bg-blue-600"}`} />
+            {user?.isAdmin && (haiku?.dailyHaikuId || haiku?.dailyHaikudleId || haiku?.isIncorrect) &&
+              <div className={`absolute top-[-0rem] right-[-0rem] rounded-full w-[0.6rem] h-[0.6rem] ${haiku?.isIncorrect ? "bg-red-600" : "bg-blue-600"}`} />
             }
             <PopOnClick color={haiku?.bgColor}>
               <IoHelpCircle className="text-[2rem] md:text-[2.25rem]" />
@@ -247,29 +247,24 @@ export default function BottomLinks({
         >
           <MdMail className="text-[1.5rem] md:text-[1.75rem]" />
         </Link> */}
-        {user?.isAdmin && haiku?.id && onLikeHaiku &&
+        {user?.isAdmin && 
           <StyledLayers
-            styles={haiku.likedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
+            styles={haiku?.likedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
           >
             <div
               key="heart"
-              title={`${haiku.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user?.isAdmin ? `(${haiku.numLikes} like${!haiku.numLikes || haiku.numLikes > 1 ? "s" : ""})` : ""}`}
-              className="cursor-pointer relative"
-              onClick={onLikeHaiku}
+              title={`${haiku?.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user?.isAdmin ? `(${haiku?.numLikes} like${!haiku?.numLikes || haiku?.numLikes > 1 ? "s" : ""})` : ""}`}
+              className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
+              onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku()}
             >
               {user?.isAdmin && haiku?.numLikes > 0 &&
                 <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.6rem] h-[0.6rem] bg-red-600" />
               }
-              <PopOnClick color={haiku?.bgColor} >
+              <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>
                 <IoHeartSharp className="text-[1.75rem] md:text-[2rem]" />
               </PopOnClick>
             </div>
           </StyledLayers>
-        }
-        {user?.isAdmin && (!haiku?.id || !onLikeHaiku) &&
-          <div className="opacity-40">
-            <IoHeartSharp className="text-[1.75rem] md:text-[2rem]" />
-          </div>
         }
         {user?.isAdmin &&
           <div
@@ -292,7 +287,7 @@ export default function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {haiku?.id && onCopyLink &&
+        {true && 
           <div className="onboarding-container">
             {onboardingElement == "bottom-links-share" &&
               <div className="onboarding-focus" />
@@ -303,24 +298,19 @@ export default function BottomLinks({
             >
               <Link
                 key="link"
-                href={`/${haiku.id}`}
+                href={`/${haiku?.id}`}
                 title="Copy link to share"
-                className="cursor-copy"
+                className={haiku?.id && onCopyLink ? "cursor-copy" : "opacity-40"}
                 onClick={(e: any) => {
                   e.preventDefault();
-                  onCopyLink()
+                  haiku?.id && onCopyLink && onCopyLink()
                 }}
               >
-                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onCopyLink}>
                   <FaShare className="text-[1.5rem] md:text-[1.75rem]" />
                 </PopOnClick>
               </Link>
             </StyledLayers>
-          </div>
-        }
-        {(!haiku?.id || !onCopyLink) &&
-          <div className="opacity-40">
-            <FaShare className="text-[1.5rem] md:text-[1.75rem]" />
           </div>
         }
         {user?.isAdmin &&
