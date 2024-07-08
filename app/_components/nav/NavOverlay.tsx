@@ -21,7 +21,7 @@ export function NavOverlay({
   altStyles,
   haiku,
   lang,
-  refreshDelay = 24 * 60 * 60 * 1000,
+  refreshDelay = 12 * 60 * 60 * 1000,
   backupInProgress,
   onboardingElement,
   onClickLogo,
