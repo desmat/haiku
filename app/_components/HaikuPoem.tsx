@@ -247,9 +247,10 @@ export default function HaikuPoem({
     }
 
     if (canCopy) {
-      trackEvent("haiku-copied", {
+      trackEvent("haiku-shared", {
         userId: user?.id,
         id: haiku?.id,
+        value: "poem-copied",
         location: "haiku-poem",
       });
 

@@ -647,7 +647,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         ..._haikus,
         [haikuId]: {
           ...haiku,
-          [`${action}dAt`]: value,
+          [`${action}dAt`]: moment().valueOf(),
         }
       },
     });
@@ -657,7 +657,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         ...userState.haikus,
         [haikuId]: {
           ...userHaiku,
-          [`${action}dAt`]: value,
+          [`${action}dAt`]: moment().valueOf(),
         }
       }
     });
@@ -668,10 +668,10 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         method: "POST",
         body: JSON.stringify({ value }),
       }).then(async (res) => {
-        const event = `haiku-${formatPastAction(action, !value)}`;
-        const actionVerb = formatActionInProgress(action, !value);
+        const event = `haiku-${formatPastAction(action)}`;
 
         if (res.status != 200) {
+          const actionVerb = formatActionInProgress(action);
           handleErrorResponse(res, event, haikuId, `Error ${actionVerb} haiku`);
 
           // roll back optimistic

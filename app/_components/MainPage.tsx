@@ -640,6 +640,7 @@ export default function MainPage({
       trackEvent("haiku-shared", {
         userId: user?.id,
         id: haiku.id,
+        value: "url-copied",
       });
     }
   }
@@ -650,7 +651,7 @@ export default function MainPage({
     const userHaiku = userHaikus[haiku.id];
     const value = userHaiku?.likedAt ? undefined : moment().valueOf();
 
-    haikuAction(haikuId, "like", value).then((haiku: Haiku) => {
+    haikuAction(haikuId, userHaiku?.likedAt ? "un-like" : "like").then((haiku: Haiku) => {
       setHaiku(haiku);
     })
   }
