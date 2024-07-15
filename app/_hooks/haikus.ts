@@ -367,7 +367,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     });
   },
 
-  save: async (user: User, haiku: Haiku) => {
+  save: async (user: User, haiku: Haiku, options: {}) => {
     // console.log(">> hooks.haiku.save", { haiku });
     const { _haikus, init } = get();
 
@@ -385,7 +385,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
       fetch(`/api/haikus/${haiku.id}`, {
         ...await fetchOpts(),
         method: "PUT",
-        body: JSON.stringify({ haiku }),
+        body: JSON.stringify({ haiku, options }),
       }).then(async (res) => {
         const { _haikus } = get();
 
