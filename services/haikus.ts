@@ -466,14 +466,14 @@ export async function generateHaiku(user: User, {
     prompt: poemPrompt,
     model: languageModel,
     response: {
-      haiku: generatedPoem,
+      // haiku: generatedPoem,
       subject: generatedSubject,
       mood: generatedMood,
       lang: generatedLang,
     }
-  } = await openai.generateHaiku(language, subject, mood);
+  } = await openai.analyzeHaiku(subject || "");
   // console.log(">> services.haiku.generateHaiku", { ret });
-  console.log(">> services.haiku.generateHaiku", { generatedPoem, generatedSubject, generatedMood, poemPrompt });
+  console.log(">> services.haiku.generateHaiku", { generatedSubject, generatedMood, poemPrompt });
 
   const {
     url: imageUrl,
@@ -492,7 +492,7 @@ export async function generateHaiku(user: User, {
     imagePrompt,
     imageModel,
     imageUrl,
-    poem: generatedPoem,
+    poem: subject?.split(/\n/).filter(Boolean) || [],
   });
 }
 

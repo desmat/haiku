@@ -28,29 +28,29 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
   const imageTypes = [
     // "charcoal drawing", 
     // "pencil drawing",
-    "Painting",
+    // "Painting",
     "Watercolor painting",
-    "Oil painting",
-    "Oil painting with large paint strokes",
-    "Oil painting with natural paint strokes",
-    "Abstract painting",
-    "Impressionist painting",
-    "Post-Impressionism painting",
-    "Expressionist painting",
-    "Landscape painting",
+    // "Oil painting",
+    // "Oil painting with large paint strokes",
+    // "Oil painting with natural paint strokes",
+    // "Abstract painting",
+    // "Impressionist painting",
+    // "Post-Impressionism painting",
+    // "Expressionist painting",
+    // "Landscape painting",
     "Chinese Shan Shui painting",
     "Chinese-style ink wash painting",
     "Old-school Japanese-style painting",
-    "Japanese woodblock print",
+    // "Japanese woodblock print",
     "Japanese-style ink wash painting",
-    "Japanese Ukiyo-e style woodblock print or painting",
-    "Japanese Hanga style woodblock print",
-    "Japanese Sosaku-Hanga woodblock print",
-    "Japanese Shin-Hanga woodblock print",
+    // "Japanese Ukiyo-e style woodblock print or painting",
+    // "Japanese Hanga style woodblock print",
+    // "Japanese Sosaku-Hanga woodblock print",
+    // "Japanese Shin-Hanga woodblock print",
     "Japanese Sumi-e style ink painting",
-    "Japanese Yamato-e style painting",
-    "Japanese Nihonga style painting",
-    "Japanese Rimpa style painting",
+    // "Japanese Yamato-e style painting",
+    // "Japanese Nihonga style painting",
+    // "Japanese Rimpa style painting",
     "japanese style ink painting with very few simple large brush strokes",
     "Japanese style watercolor with few large brush strokes and a minimal palete of colors",
     "Quick wobbly sketch, colored hastily with watercolors", // https://www.reddit.com/r/dalle2/comments/1ch4ddv/how_do_i_create_images_with_this_style/
@@ -60,9 +60,8 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     Respond with an extremely muted, almost monochromatic colors, 
     ${selectedArtStyle},
     on the theme of ${subject || "any"}${mood ? ` with a mood of ${mood}` : ""}.
-    Make the art low-key with negative space in the middle, 
-    so that a haiku poem can be overlayed.
-    The image should not contain any characters of any kind.
+    Make the art extremely minimal and low-key, with very few brush strokes, 
+    The image should not contain any writing of characters of any kind.
   `;
 
   // for testing
@@ -233,6 +232,72 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
     response = parseJson(completion.choices[0].message.content);
     console.log(">> services.openai.completeHaiku RESULTS FROM API", { response });
     return { prompt, response, model: completion.model };
+  } catch (error) {
+    console.error("Error reading results", { error, response, completion });
+  }
+}
+
+export async function analyzeHaiku(poem: string): Promise<any> {
+
+  const language = undefined
+  const subject = undefined;
+  const mood = undefined;
+  console.log(`>> services.openai.analyzeHaiku`, { language, subject, mood });
+
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
+    console.warn(`>> services.openai.analyzeHaiku: DEBUG mode: returning dummy response`);
+    // await delay(3000);
+    const sampleHaikus = mapToList(samples.haikus);
+    return {
+      response: {
+        prompt: "<system prompt>" + "\n" + poem,
+        haiku: true //subject?.includes("DEBUG")
+          ? [
+            "line one,",
+            "line two,",
+            "line three.",
+          ] : sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].poem,
+        subject: subject || "test subject",
+        mood: mood || "test mood",
+        model: "debug",
+      }
+    };
+  }
+
+  // ... generate a haiku in ${language || "English"} and respond ...
+  const systemPrompt = `
+    Given a haiku poem of any language, 
+    please respond, in fewest number of words, what were the subject (in the language of the poem) and mood (in English) of the haiku.
+    The subject should be in the same language of the haiku. 
+    Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
+    Please only include keys "subject", "mood" and "lang".
+    `;
+  // @ts-ignore
+  const completion = await openai.chat.completions.create({
+    model: languageModel,
+    messages: [
+      {
+        role: 'system',
+        content: systemPrompt
+      },
+      {
+        role: 'user',
+        content: poem,
+      }
+    ],
+  });
+
+  let response;
+  try {
+    console.log(">> services.openai.analyzeHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
+    response = parseJson(completion.choices[0].message.content);
+    console.log(">> services.openai.analyzeHaiku RESULTS FROM API", { response });
+    return {
+      prompt: systemPrompt + "\n" + poem,
+      model: completion.model,
+      response,
+    };
   } catch (error) {
     console.error("Error reading results", { error, response, completion });
   }
