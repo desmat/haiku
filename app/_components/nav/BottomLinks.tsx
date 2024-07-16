@@ -131,7 +131,7 @@ export default function BottomLinks({
       <div
         className="relative flex flex-row gap-2 items-center justify-center _font-semibold"
       >
-        {onShowAbout && (haikudleMode || user?.isAdmin) &&
+        {onShowAbout && (haikudleMode || user?.isAdmin || true) &&
           <div
             key="about"
             className="cursor-pointer relative"
@@ -152,7 +152,7 @@ export default function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {!onShowAbout && (haikudleMode || user?.isAdmin) &&
+        {!(onShowAbout && (haikudleMode || user?.isAdmin || true)) && 
           <div className="opacity-40">
             <IoHelpCircle className="text-[2rem] md:text-[2.25rem]" />
           </div>
