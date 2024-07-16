@@ -71,7 +71,11 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
   const prompt = customPrompt || `
     Respond with an extremely muted, almost monochromatic colors, 
     ${selectedArtStyle},
+<<<<<<< HEAD
     on the theme of ${subject || "any"}${mood ? `, with a mood of ${mood}` : ""}.
+=======
+    on the theme of ${subject || "any"}${mood ? ` with a mood of ${mood}` : ""}.
+>>>>>>> d25ab3a (analyze haiku -> generate image)
     Make the art extremely minimal and low-key, with very few brush strokes, 
     The image should not contain any writing of characters of any kind.
   `;
@@ -250,7 +254,11 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
   }
 }
 
+<<<<<<< HEAD
 export async function analyzeHaiku(poem: string[]): Promise<any> {
+=======
+export async function analyzeHaiku(poem: string): Promise<any> {
+>>>>>>> d25ab3a (analyze haiku -> generate image)
 
   const language = undefined
   const subject = undefined;
@@ -264,7 +272,11 @@ export async function analyzeHaiku(poem: string[]): Promise<any> {
     const sampleHaikus = mapToList(samples.haikus);
     return {
       response: {
+<<<<<<< HEAD
         prompt: "<system prompt>" + "\n" + poem.join("\n"),
+=======
+        prompt: "<system prompt>" + "\n" + poem,
+>>>>>>> d25ab3a (analyze haiku -> generate image)
         haiku: true //subject?.includes("DEBUG")
           ? [
             "line one,",
@@ -296,7 +308,11 @@ export async function analyzeHaiku(poem: string[]): Promise<any> {
       },
       {
         role: 'user',
+<<<<<<< HEAD
         content: poem.join("\n"),
+=======
+        content: poem,
+>>>>>>> d25ab3a (analyze haiku -> generate image)
       }
     ],
   });
