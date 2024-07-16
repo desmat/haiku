@@ -326,7 +326,7 @@ export default function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {haiku?.id &&
+        {!user?.isAdmin && haiku?.id &&
           <Link
             key="downloadImage"
             title="Download background image"
