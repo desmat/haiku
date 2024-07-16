@@ -152,7 +152,7 @@ export default function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {!onShowAbout &&
+        {!onShowAbout && (haikudleMode || user?.isAdmin) &&
           <div className="opacity-40">
             <IoHelpCircle className="text-[2rem] md:text-[2.25rem]" />
           </div>
