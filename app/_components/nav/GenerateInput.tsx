@@ -127,8 +127,10 @@ export default function GenerateInput({
       ref.current.value = "";
       // @ts-ignore
       ref.current.blur();
-    } else if (e.key == "Enter" && !e.shiftKey) {
-      !exceededUsageLimit && handleClickedGenerate && handleClickedGenerate();
+    } else if (e.key == "Enter") {
+      if (inputRows >= 3 || e.metaKey) {
+        !exceededUsageLimit && handleClickedGenerate && handleClickedGenerate();
+      }
     }
   }
 
@@ -141,12 +143,12 @@ export default function GenerateInput({
     setFocus(true);
 
     // @ts-ignore
-    if (!ref.current.value) {
-      // @ts-ignore
-      ref.current.value = haikuTheme.split("…")[1].trim();
-      // @ts-ignore
-      ref.current.select();
-    }
+    // if (!ref.current.value) {
+    //   // @ts-ignore
+    //   ref.current.value = haikuTheme.split("…")[1].trim();
+    //   // @ts-ignore
+    //   ref.current.select();
+    // }
   }
 
   const handleBlur = () => {
@@ -265,10 +267,22 @@ export default function GenerateInput({
                   //@ts-ignore
                   ref={ref}
                   maxLength={256}
-                  placeholder={`${haikuTheme}`}
+                  // placeholder={`${haikuTheme}`}
                   disabled={exceededUsageLimit}
                   value={undefined}
                   onChange={handleChange}
+                  onPaste={(e: any) => {
+                    // // GET TEXT REPRESENTATION OF CLIBOARD DATA
+                    const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                    const lines = text.split(/\n/);
+                    // // @ts-ignore
+                    // const refVal = ref.current.value;
+                    // console.log("onPaste", { text, lines, refVal })
+                    if (inputRows < 3) {
+                      setInputRows(Math.max(3, lines.filter(Boolean).length));
+                    }
+
+                  }}
                   onFocus={handleFocus}
                   onBlur={handleBlur}
                   onKeyDown={handleKeyDown}
