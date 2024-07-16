@@ -152,7 +152,7 @@ export default function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {!(onShowAbout && (haikudleMode || user?.isAdmin || true)) && 
+        {!(onShowAbout && (haikudleMode || user?.isAdmin || true)) &&
           <div className="opacity-40">
             <IoHelpCircle className="text-[2rem] md:text-[2.25rem]" />
           </div>
@@ -247,7 +247,7 @@ export default function BottomLinks({
         >
           <MdMail className="text-[1.5rem] md:text-[1.75rem]" />
         </Link> */}
-        {user?.isAdmin && 
+        {user?.isAdmin &&
           <StyledLayers
             styles={haiku?.likedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
           >
@@ -288,7 +288,7 @@ export default function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {true && 
+        {true &&
           <div className="onboarding-container">
             {onboardingElement == "bottom-links-share" &&
               <div className="onboarding-focus" />
@@ -325,6 +325,18 @@ export default function BottomLinks({
               <FaRandom className="text-[1.5rem] md:text-[1.75rem]" />
             </PopOnClick>
           </div>
+        }
+        {haiku?.id &&
+          <Link
+            key="downloadImage"
+            title="Download background image"
+            href={haiku?.bgImage}
+            target="_blank"
+          >
+            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.bgImage}>
+              <RiImageFill className="text-[1.75rem] md:text-[2rem]" />
+            </PopOnClick>
+          </Link>
         }
         {user?.isAdmin &&
           <LinkGroup
