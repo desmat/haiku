@@ -7,10 +7,12 @@ import type { Viewport } from 'next'
 import moment from 'moment';
 
 const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
+const isShowcaseMode = process.env.EXPERIENCE_MODE == "showcase";
 const inter = Inter({ subsets: ['latin'] });
 
 export const appName = isHaikudleMode
   ? "AI-powered Daily Haiku Puzzles and Generative Art - Solve the puzzle to reveal today's haiku, generate haiku poems paired and beautiful generative art, always free, no signup required."
+  // TODO isShowcaseMode for dailyhaiku
   : "AI-Powered Haiku Poetry and Generative Art - Daily featured haikus, haiku generator, smart poem editor, visual art generator, always free, no signup required.";
 
 export const appDescription = isHaikudleMode
@@ -18,6 +20,7 @@ export const appDescription = isHaikudleMode
   "Haikudle integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
   "Generate haiku poems and share AI-generated creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
   "Explore daily haiku puzzles and discover the limitless poetic and artistic possibilities with Haikudle."
+  // TODO isShowcaseMode for dailyhaiku
   : "Create and share your haiku masterpieces with beautiful generated art — no signup required. " +
   "Haiku Genius integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
   "Craft haiku poems seamlessly with our AI assistant and share your creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
@@ -25,7 +28,9 @@ export const appDescription = isHaikudleMode
 
 export const metaUrl = isHaikudleMode
   ? "https://haikudle.art/"
-  : "https://haikugenius.ai/";
+  : isShowcaseMode
+    ? "https://dailyhaiku.ai/"
+    : "https://haikugenius.ai/";
 
 export const metadata: Metadata = {
   metadataBase: new URL(metaUrl),
