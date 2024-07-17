@@ -331,6 +331,13 @@ export default function BottomLinks({
             key="downloadImage"
             title="Download background image"
             href={haiku?.bgImage}
+            onClick={() => {
+              trackEvent("clicked-download-image", {
+                userId: user?.id,
+                haikuId: haiku.id,
+                location: "bottom-links",
+              })
+            }}
             target="_blank"
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.bgImage}>
