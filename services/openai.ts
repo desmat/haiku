@@ -40,7 +40,7 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     // "Landscape painting",
     "Chinese Shan Shui painting",
     "Chinese-style ink wash painting",
-    "Old-school Japanese-style painting",
+    // "Old-school Japanese-style painting",
     // "Japanese woodblock print",
     "Japanese-style ink wash painting",
     // "Japanese Ukiyo-e style woodblock print or painting",
@@ -55,14 +55,22 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     "Japanese style watercolor with few large brush strokes and a minimal palete of colors",
     "Quick wobbly sketch, colored hastily with watercolors", // https://www.reddit.com/r/dalle2/comments/1ch4ddv/how_do_i_create_images_with_this_style/
   ];
-  const selectedArtStyle = artStyle || imageTypes[Math.floor(Math.random() * imageTypes.length)];
+  const selectedArtStyle = "custom" //artStyle || imageTypes[Math.floor(Math.random() * imageTypes.length)];
+  // const prompt = `
+  //   Respond with an extremely muted, almost monochromatic colors, 
+  //   ${selectedArtStyle},
+  //   on the theme of ${subject || "any"}${mood ? ` with a mood of ${mood}` : ""}.
+  //   Make the art extremely minimal and low-key, with very few brush strokes, 
+  //   The image should not contain any writing of characters of any kind.
+  // `;
   const prompt = `
-    Respond with an extremely muted, almost monochromatic colors, 
-    ${selectedArtStyle},
-    on the theme of ${subject || "any"}${mood ? ` with a mood of ${mood}` : ""}.
-    Make the art extremely minimal and low-key, with very few brush strokes, 
-    The image should not contain any writing of characters of any kind.
+    Generate a painting that uses the traditional East Asian art techniques of sumi-e or Chinese ink painting, with characteristics such as minimal brush strokes, a focus on natural subjects, and the use of negative space. 
+    Employ a selective use of color to add a layer of emphasis and contrast, enhancing the overall aesthetic without detracting from the simplicity and elegance that define this art style.
+    The painting should be on the subject of ${subject || "any"}${mood ? ` with a mood of ${mood}` : ""}, with dark petals painted with simple and large linear brush strokes, very imperfect almost hasty strokes. No detailed brush strokes. 
+    There should be at most 8 brush strokes using only dark ink with a few colourful accents with an ink of bright color like orange, pink, red, etc.
+    The background should be pure white and the composition extremely simple and abstract with extreme use of negative space.
   `;
+
 
   // for testing
   if (process.env.OPENAI_API_KEY == "DEBUG") {
