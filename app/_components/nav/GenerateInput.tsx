@@ -96,6 +96,7 @@ export default function GenerateInput({
   const [clickingGenerate, setClickingGenerate] = useState(false);
   const [haikuTheme, setHaikuTheme] = useState(haikuThemeSuggestions[0]);
   const [intervalId, setIntervalId] = useState<any | undefined>();
+  const [inputRows, setInputRows] = useState(1);
   const ref = useRef();
   // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
 
@@ -104,7 +105,15 @@ export default function GenerateInput({
   const exceededUsageLimit = !user?.isAdmin && (user?.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU;
 
   const handleChange = (e: any) => {
+    // const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+    // console.log("handleChange", { text });
+
     setActive(true);
+
+    // adjust textarea rows
+    // @ts-ignore
+    const lines = ref.current.value.split("\n");
+    setInputRows(Math.min(lines.length, 3));
   }
 
   const handleKeyDown = (e: any) => {
@@ -118,7 +127,7 @@ export default function GenerateInput({
       ref.current.value = "";
       // @ts-ignore
       ref.current.blur();
-    } else if (e.key == "Enter") {
+    } else if (e.key == "Enter" && !e.shiftKey) {
       !exceededUsageLimit && handleClickedGenerate && handleClickedGenerate();
     }
   }
@@ -201,7 +210,7 @@ export default function GenerateInput({
               <style
                 dangerouslySetInnerHTML={{
                   __html: `
-                  .haiku-theme-input input {
+                  .haiku-theme-input textarea {
                     background: none;
                     _background: pink; /* for debugging */
                     outline: 2px solid ${bgColor || ""}88;
@@ -217,24 +226,24 @@ export default function GenerateInput({
                     outline: none;
                     background-color: ${bgColor || "#ffffff"}44;  
                   }
-                  ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus"} {
+                  ${/* saving || */ onboarding ? "" : ".haiku-theme-input textarea:focus"} {
                     outline: 2px solid ${bgColor || ""}88;
                     background-color: ${bgColor || "#ffffff"}66;
                   }
-                  ${/* saving || */ onboarding ? "" : ".haiku-theme-input input:focus::placeholder"} {
+                  ${/* saving || */ onboarding ? "" : ".haiku-theme-input textarea:focus::placeholder"} {
                     opacity: 0;
                   }
-                  .haiku-theme-input input::selection { 
+                  .haiku-theme-input textarea::selection { 
                     background: ${color || "#000000"}66 
                   }
-                  .haiku-theme-input input::placeholder {
+                  .haiku-theme-input textarea::placeholder {
                     color: ${color || "#000000"};
                     -webkit-text-stroke: 1px ${color};
                     text-stroke: 1px ${color};
                     opacity: 0.4;
                     text-align: center; 
                   }
-                  .haiku-theme-input input::-ms-input-placeholder { /* Edge 12 -18 */
+                  .haiku-theme-input textarea::-ms-input-placeholder { /* Edge 12 -18 */
                     color: ${color || "#000000"};
                     text-stroke: 1px ${color};
                     opacity: 0.4;
@@ -245,10 +254,17 @@ export default function GenerateInput({
               </style>
               <div className="relative">
                 {/* <StyledLayers styles={styles.slice(0, 2)}> */}
-                <input
+                <textarea
+                  // @ts-ignore
+                  rows={
+                    // @ts-ignore
+                    // ref.current.value.split(/\n/).length || 1
+                    inputRows
+                  }
+                  resize="none"
                   //@ts-ignore
                   ref={ref}
-                  maxLength={46}
+                  maxLength={256}
                   placeholder={`${haikuTheme}`}
                   disabled={exceededUsageLimit}
                   value={undefined}
@@ -260,7 +276,10 @@ export default function GenerateInput({
                     pt-[0.1rem] pr-[2rem]  md:pr-[2.6rem] pb-[0.1rem] pl-[0.7rem]
                     mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0 md:mt-[0.1rem] md:mr-[0rem]      
                   `}
-                  style={{ cursor: exceededUsageLimit ? "not-allowed" : "pointer" }}
+                  style={{
+                    cursor: exceededUsageLimit ? "not-allowed" : "text",
+                    resize: "none",
+                  }}
                   title={exceededUsageLimit
                     ? "Exceeded daily limit: try again later"
                     : "Enter theme, subject or leave blank, and click the button to create a new haiku"

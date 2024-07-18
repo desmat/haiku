@@ -446,7 +446,7 @@ export async function generateHaiku(user: User, {
   mood,
   artStyle,
   // title,
-  // poem,
+  poem,
   // image,
 }: {
   lang?: LanguageType,
@@ -454,10 +454,10 @@ export async function generateHaiku(user: User, {
   mood?: string,
   artStyle?: string,
   // title?: string
-  // poem?: string[],
+  poem?: string[],
   // image?: Buffer,
 }): Promise<Haiku> {
-  console.log(">> services.haiku.generateHaiku", { lang, subject, mood, user });
+  console.log(">> services.haiku.generateHaiku", { lang, subject, mood, poem, user });
   const language = supportedLanguages[lang || "en"].name;
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
   debugOpenai && console.warn(`>> services.haiku.generateHaiku: DEBUG mode: not uploading to blob store`);
@@ -471,9 +471,11 @@ export async function generateHaiku(user: User, {
       mood: generatedMood,
       lang: generatedLang,
     }
-  } = await openai.generateHaiku(language, subject, mood);
+  } = poem
+  ? await openai.analyzeHaiku(poem)
+  : await openai.generateHaiku(language, subject, mood);
   // console.log(">> services.haiku.generateHaiku", { ret });
-  console.log(">> services.haiku.generateHaiku", { generatedPoem, generatedSubject, generatedMood, poemPrompt });
+  console.log(">> services.haiku.generateHaiku", { generatedSubject, generatedMood, poemPrompt });
 
   const {
     url: imageUrl,
@@ -492,7 +494,7 @@ export async function generateHaiku(user: User, {
     imagePrompt,
     imageModel,
     imageUrl,
-    poem: generatedPoem,
+    poem: poem || generatedPoem || [],
   });
 }
 
