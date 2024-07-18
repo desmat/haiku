@@ -237,7 +237,7 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
   }
 }
 
-export async function analyzeHaiku(poem: string): Promise<any> {
+export async function analyzeHaiku(poem: string[]): Promise<any> {
 
   const language = undefined
   const subject = undefined;
@@ -251,7 +251,7 @@ export async function analyzeHaiku(poem: string): Promise<any> {
     const sampleHaikus = mapToList(samples.haikus);
     return {
       response: {
-        prompt: "<system prompt>" + "\n" + poem,
+        prompt: "<system prompt>" + "\n" + poem.join("\n"),
         haiku: true //subject?.includes("DEBUG")
           ? [
             "line one,",
@@ -283,7 +283,7 @@ export async function analyzeHaiku(poem: string): Promise<any> {
       },
       {
         role: 'user',
-        content: poem,
+        content: poem.join("\n"),
       }
     ],
   });

@@ -109,6 +109,11 @@ export default function GenerateInput({
     // console.log("handleChange", { text });
 
     setActive(true);
+
+    // adjust textarea rows
+    // @ts-ignore
+    const lines = ref.current.value.split("\n");
+    setInputRows(Math.min(lines.length, 3));
   }
 
   const handleKeyDown = (e: any) => {
@@ -122,12 +127,8 @@ export default function GenerateInput({
       ref.current.value = "";
       // @ts-ignore
       ref.current.blur();
-    } else if (e.key == "Enter") {
-      if (e.shiftKey || e.metaKey) {
-        !exceededUsageLimit && handleClickedGenerate && handleClickedGenerate();
-      } else if (inputRows < 3) {
-        setInputRows(inputRows + 1);
-      }
+    } else if (e.key == "Enter" && !e.shiftKey) {
+      !exceededUsageLimit && handleClickedGenerate && handleClickedGenerate();
     }
   }
 
@@ -255,7 +256,7 @@ export default function GenerateInput({
                 {/* <StyledLayers styles={styles.slice(0, 2)}> */}
                 <textarea
                   // @ts-ignore
-                  rows={                    
+                  rows={
                     // @ts-ignore
                     // ref.current.value.split(/\n/).length || 1
                     inputRows
@@ -268,18 +269,6 @@ export default function GenerateInput({
                   disabled={exceededUsageLimit}
                   value={undefined}
                   onChange={handleChange}
-                  onPaste={(e: any) => {
-                    // // GET TEXT REPRESENTATION OF CLIBOARD DATA
-                    const text = (e.originalEvent || e).clipboardData.getData('text/plain');
-                    const lines = text.split(/\n/);
-                    // // @ts-ignore
-                    // const refVal = ref.current.value;
-                    // console.log("onPaste", { text, lines, refVal })
-                    if (inputRows < 3) {
-                      setInputRows(Math.max(3, lines.filter(Boolean).length));
-                    }
-
-                  }}
                   onFocus={handleFocus}
                   onBlur={handleBlur}
                   onKeyDown={handleKeyDown}
