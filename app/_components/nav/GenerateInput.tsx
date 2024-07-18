@@ -141,12 +141,12 @@ export default function GenerateInput({
     setFocus(true);
 
     // @ts-ignore
-    // if (!ref.current.value) {
-    //   // @ts-ignore
-    //   ref.current.value = haikuTheme.split("…")[1].trim();
-    //   // @ts-ignore
-    //   ref.current.select();
-    // }
+    if (!ref.current.value) {
+      // @ts-ignore
+      ref.current.value = haikuTheme.split("…")[1].trim();
+      // @ts-ignore
+      ref.current.select();
+    }
   }
 
   const handleBlur = () => {
@@ -265,7 +265,7 @@ export default function GenerateInput({
                   //@ts-ignore
                   ref={ref}
                   maxLength={256}
-                  // placeholder={`${haikuTheme}`}
+                  placeholder={`${haikuTheme}`}
                   disabled={exceededUsageLimit}
                   value={undefined}
                   onChange={handleChange}
