@@ -6,12 +6,12 @@ export default function manifest(): MetadataRoute.Manifest {
 
   return {
     name: isHaikudleMode
-      ? 'hAIkudle - AI-powered daily haiku puzzles'
+      ? 'Haikudle - AI-powered daily haiku puzzles'
       : isShowcaseMode
         ? "DailyHaiku - AI-powered and curated daily haiku poetry and generative art"
         : 'HaikuGenius - AI-powered haiku poetry and generative art',
     short_name: isHaikudleMode
-      ? 'hAIkudle'
+      ? 'Haikudle'
       : isShowcaseMode
         ? 'DailyHaiku'
         : 'HaikuGenius',
