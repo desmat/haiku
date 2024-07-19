@@ -36,7 +36,7 @@ if (isHaikudleMode) {
   metaImages = [
     `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${moment().format("YYYYMMDD")}.png`,
     `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${dateCode}.png`,
-    "https://haikudle.art/social_img_haikudle.png",
+    "https://haikudle.ai/social_img_haikudle.png",
   ];
 } else {
   metaImages = [

@@ -24,7 +24,7 @@ const appDescription = isHaikudleMode
     "Explore daily featured haikus and experience AI-assisted creativity and discover the limitless possibilities of poetic exploration with Haiku Genius.";
 
 const metaUrl = isHaikudleMode
-  ? "https://haikudle.art/"
+  ? "https://haikudle.ai/"
   : "https://haikugenius.ai/";
 
 const haikuGeniusMetaImages = [
@@ -53,7 +53,7 @@ if (isHaikudleMode) {
   metaImages = [
     `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${moment().format("YYYYMMDD")}.png`,
     `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img/${dateCode}.png`,
-    "https://haikudle.art/social_img_haikudle.png",
+    "https://haikudle.ai/social_img_haikudle.png",
   ];
 } else {
   metaImages = [

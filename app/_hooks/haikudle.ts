@@ -63,7 +63,7 @@ const initialState = {
     useUser.getState().addUserHaiku(currentHaiku, "solved");
 
     setTimeout(() => {
-      const shareContent = "Solved today\\'s haiku puzzle in " + moves + " moves! https://haikudle.art/\\n\\n"
+      const shareContent = "Solved today\\'s haiku puzzle in " + moves + " moves! https://haikudle.ai/\\n\\n"
         + "#haiku #haikuoftheday #haikuchallenge #haikudle #puzzle #dailypuzzle #AI #aiart #dalle #dalle3 #chatgpt ";
       useAlert.getState().plain(`
         <div style="display: flex; flex-direction: column; gap: 0.4rem">

@@ -27,7 +27,7 @@ export const appDescription = isHaikudleMode
   "Explore daily featured haikus and experience AI-assisted creativity and discover the limitless possibilities of poetic exploration with Haiku Genius.";
 
 export const metaUrl = isHaikudleMode
-  ? "https://haikudle.art/"
+  ? "https://haikudle.ai/"
   : isShowcaseMode
     ? "https://dailyhaiku.ai/"
     : "https://haikugenius.ai/";
