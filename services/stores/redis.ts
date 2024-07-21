@@ -20,6 +20,7 @@ import { kv } from "@vercel/kv";
 import { kvArrayToObject, uuid } from "@/utils/misc";
 import { GenericStore, Store } from "@/types/Store";
 import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
+import { HaikuAlbum } from "@/types/Album";
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
 import { User } from "@/types/User";
@@ -282,6 +283,7 @@ export function create(): Store {
   return {
     haikus: new RedisStore<Haiku>("haiku"),
     dailyHaikus: new RedisStore<DailyHaiku>("dailyhaiku"),
+    haikuAlbums: new RedisStore<HaikuAlbum>("haikualbum"),
     haikudles: new RedisStore<Haikudle>("haikudle"),
     dailyHaikudles: new RedisStore<DailyHaikudle>("dailyhaikudle"),
     userHaikudles: new RedisStore<UserHaikudle>("userhaikudle"),

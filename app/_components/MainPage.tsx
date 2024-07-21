@@ -44,6 +44,7 @@ export default function MainPage({
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
   const showcaseMode = mode == "showcase";
+  const haikuAlbumId = process.env.HAIKU_ALBUM;
   let [haiku, setHaiku] = useState<Haiku | undefined>(_haiku);
   let [haikudle, setHaikudle] = useState<Haiku | undefined>(_haikudle);
   let [haikuId, setHaikuId] = useState(_haiku?.id);
@@ -786,7 +787,7 @@ export default function MainPage({
           });
 
         // make sure the current haiku at least shows up in side bar as viewed
-        !isPuzzleMode && user && !user.isAdmin && addUserHaiku(_haiku, "viewed");
+        !isPuzzleMode && !haikuAlbumId && user && !user.isAdmin && addUserHaiku(_haiku, "viewed");
       }
     });
   }
@@ -828,6 +829,7 @@ export default function MainPage({
           ...(haikudleSolved ? solvedHaikudleHaiku : haiku),
           likedAt: userHaikus[haiku.id]?.likedAt,
         }}
+        haikuAlbumId={haikuAlbumId}
         refreshDelay={_refreshDelay}
         backupInProgress={backupInProgress}
         styles={textStyles.slice(0, textStyles.length - 3)}

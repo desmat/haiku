@@ -190,7 +190,8 @@ export async function POST(request: NextRequest) {
     haiku = await createHaiku(user, { theme: title, poem, imageBuffer, imageType });
   } else {
     // console.log('>> app.api.haiku.POST generating new haiku', { lang, subject, mood, artStyle });
-    haiku = await generateHaiku(user, { lang, subject, mood, artStyle, poem })
+    const albumId = process.env.HAIKU_ALBUM;
+    haiku = await generateHaiku(user, { lang, subject, mood, artStyle, poem, albumId })
   }
 
   return NextResponse.json({ haiku, reachedUsageLimit });

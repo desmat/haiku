@@ -11,6 +11,7 @@ const nextConfig = {
         FB_APP_ID: process.env.FB_APP_ID,
         EXPERIENCE_MODE: process.env.EXPERIENCE_MODE,
         OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+        HAIKU_ALBUM: process.env.HAIKU_ALBUM,
     }
 }
 

@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, params?: any) {
   let userHaikus = {
     haikus: user.isAdmin
       ? [] // don't need to pull the admin's haikus because we pull all of them later
-      : await getUserHaikus(user),
+      : await getUserHaikus(user, false, process.env.HAIKU_ALBUM),
   } as any;
 
   if (user.isAdmin) {

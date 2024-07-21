@@ -23,9 +23,9 @@ function parseJson(input: string) {
   return undefined;
 }
 
-export async function generateBackgroundImage(subject?: string, mood?: string, artStyle?: string): Promise<any> {
-  console.log(`>> services.openai.generateBackgroundImage`, { subject, mood, artStyle });
-  const imageTypes = [
+export async function generateBackgroundImage(subject?: string, mood?: string, artStyle?: string, customPrompt?: string, customArtStyles?: string[]): Promise<any> {
+  console.log(`>> services.openai.generateBackgroundImage`, { subject, mood, artStyle, customPrompt, customArtStyles });
+  const imageTypes = customArtStyles || [
     // "charcoal drawing", 
     // "pencil drawing",
     // "Painting",
@@ -56,13 +56,14 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     "Quick wobbly sketch, colored hastily with watercolors", // https://www.reddit.com/r/dalle2/comments/1ch4ddv/how_do_i_create_images_with_this_style/
   ];
   const selectedArtStyle = artStyle || imageTypes[Math.floor(Math.random() * imageTypes.length)];
-  const prompt = `
+  const prompt = customPrompt || `
     Respond with an extremely muted, almost monochromatic colors, 
     ${selectedArtStyle},
     on the theme of ${subject || "any"}${mood ? ` with a mood of ${mood}` : ""}.
     Make the art extremely minimal and low-key, with very few brush strokes, 
     The image should not contain any writing of characters of any kind.
   `;
+  // console.log(`>> services.openai.generateBackgroundImage`, { prompt });
 
   // for testing
   if (process.env.OPENAI_API_KEY == "DEBUG") {
@@ -111,7 +112,7 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
   }
 }
 
-export async function generateHaiku(language?: string, subject?: string, mood?: string): Promise<any> {
+export async function generateHaiku(language?: string, subject?: string, mood?: string, customPrompt?: string): Promise<any> {
   const prompt = `Topic: ${subject || "any"}${mood ? ` Mood: ${mood}` : ""}`;
 
   console.log(`>> services.openai.generateHaiku`, { language, subject, mood, prompt });
@@ -138,7 +139,7 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
   }
 
   // ... generate a haiku in ${language || "English"} and respond ...
-  const systemPrompt = `Given a topic (or "any", meaning you pick) and optionally mood, please generate a haiku and respond in JSON where each response is an array of 3 strings.
+  const systemPrompt = customPrompt || `Given a topic (or "any", meaning you pick) and optionally mood, please generate a haiku and respond in JSON where each response is an array of 3 strings.
     Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
     If the topic specifies a language, or is in another language, please generate the haiku in that language.
     Also include in the response, in fewest number of words, what were the subject (in the language requested) and mood (in English) of the haiku.
