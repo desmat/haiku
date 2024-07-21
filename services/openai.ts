@@ -55,15 +55,27 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     "Japanese style watercolor with few large brush strokes and a minimal palete of colors",
     "Quick wobbly sketch, colored hastily with watercolors", // https://www.reddit.com/r/dalle2/comments/1ch4ddv/how_do_i_create_images_with_this_style/
   ];
+
+  if (customPrompt) {
+    if (customPrompt.indexOf("${theme}") > -1 || customPrompt.indexOf("${mood}") > -1) {
+      customPrompt = customPrompt
+        .replace("${theme}", subject || "")
+        .replace("${mood}", mood ? ` with a mood of ${mood || mood}` : "")
+    } else if (subject || mood) {
+      customPrompt = `${customPrompt}.
+      ${subject ? `It should be on the subject of ${subject}` : ""}${subject && mood ? ", and it should have" : "It should have"}${mood ? ` a mood of ${mood}` : ""}`
+    }
+  }
+
   const selectedArtStyle = artStyle || imageTypes[Math.floor(Math.random() * imageTypes.length)];
   const prompt = customPrompt || `
     Respond with an extremely muted, almost monochromatic colors, 
     ${selectedArtStyle},
-    on the theme of ${subject || "any"}${mood ? ` with a mood of ${mood}` : ""}.
+    on the theme of ${subject || "any"}${mood ? `, with a mood of ${mood}` : ""}.
     Make the art extremely minimal and low-key, with very few brush strokes, 
     The image should not contain any writing of characters of any kind.
   `;
-  // console.log(`>> services.openai.generateBackgroundImage`, { prompt });
+  console.log(`>> services.openai.generateBackgroundImage`, { prompt });
 
   // for testing
   if (process.env.OPENAI_API_KEY == "DEBUG") {

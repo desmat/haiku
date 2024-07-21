@@ -6,6 +6,6 @@ export type HaikuAlbum = {
   updatedAt?: number,
   updatedBy?: string,  
   poemPrompt?: string,
-  imagePrompt?: string,
+  imagePrompt?: string, // can include ${theme} and/or ${mood}
   artStyles?: string[],
 }
