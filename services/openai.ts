@@ -189,7 +189,7 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
   }
 }
 
-export async function completeHaiku(poem: string[], language?: string, subject?: string, mood?: string): Promise<any> {
+export async function completeHaiku(poem: string[], language?: string, subject?: string, mood?: string, customPrompt?: string): Promise<any> {
   const prompt = `Haiku to complete: "${poem.join(" / ")}"
   ${subject ? `Topic: "${subject}"` : ""}
   ${mood ? ` Mood: "${mood}"` : ""}`;
@@ -217,7 +217,7 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
     messages: [
       {
         role: 'system',
-        content: `
+        content: customPrompt || `
           Given an incomplete haiku please complete the haiku. 
           Characters "..." or "…" will be used to indicate a placeholder, please keep the existing word(s) and fill the rest.
           If a line looks like this: "<some one or more words> ..." then keep the word(s) at the beginning and fill the rest.          If a line looks like this: "... <one or more words>" then keep the word(s) at the end and fill the rest.

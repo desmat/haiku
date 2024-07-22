@@ -276,12 +276,15 @@ export async function createHaiku(user: User, {
   return store.haikus.create(user.id, create);
 }
 
-export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haiku> {
+export async function regenerateHaikuPoem(user: any, haiku: Haiku, albumId?: string): Promise<Haiku> {
   const lang = (haiku.lang || "en") as LanguageType;
   const subject = haiku.theme;
   const mood = undefined;
   console.log(">> services.haiku.regenerateHaikuPoem", { lang, subject, mood, user });
   const language = supportedLanguages[lang].name;
+
+  const album = albumId && await store.haikuAlbums.get(albumId);
+  const customPoemPrompt = album && album.poemPrompt;
 
   const {
     prompt: poemPrompt,
@@ -292,7 +295,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
       mood: generatedMood,
       lang: generatedLang,
     }
-  } = await openai.generateHaiku(language, subject, mood);
+  } = await openai.generateHaiku(language, subject, mood, customPoemPrompt);
   // console.log(">> services.haiku.regenerateHaikuPoem", { ret });
   console.log(">> services.haiku.regenerateHaikuPoem", { poem, generatedSubject, generatedMood, poemPrompt });
 
@@ -319,7 +322,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku): Promise<Haik
   });
 }
 
-export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku> {
+export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: string): Promise<Haiku> {
   const lang = (haiku.lang || "en") as LanguageType;
   const subject = haiku.theme;
   const mood = haiku.mood;
@@ -335,6 +338,9 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
     throw 'exceeded daily limit';
   }
 
+  const album = albumId && await store.haikuAlbums.get(albumId);
+  const customPoemPrompt = album && album.poemPrompt;
+
   const {
     response: {
       haiku: completedPoem,
@@ -344,7 +350,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
     },
     model: languageModel,
     prompt: poemPrompt,
-  } = await openai.completeHaiku(haiku.poem, language, subject, mood);
+  } = await openai.completeHaiku(haiku.poem, language, subject, mood, customPoemPrompt);
   console.log(">> services.haiku.completeHaikuPoem", { completedPoem, generatedSubject, generatedMood });
 
   // delete corresponding haikudle 
@@ -370,17 +376,21 @@ export async function completeHaikuPoem(user: any, haiku: Haiku): Promise<Haiku>
   });
 }
 
-export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: string): Promise<Haiku> {
+export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: string, albumId?: string): Promise<Haiku> {
   console.log(">> services.haiku.regenerateHaikuImage", { user, haiku });
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
   console.warn(`>> services.haiku.regenerateHaikuImage: DEBUG mode: not uploading to blob store`);
+
+  const album = albumId && await store.haikuAlbums.get(albumId);
+  const customImagePrompt = album && album.imagePrompt;
+  const customArtStyles = album && album.artStyles || undefined;
 
   const {
     url: openaiUrl,
     prompt: imagePrompt,
     artStyle: selectedArtStyle,
     model: imageModel,
-  } = await openai.generateBackgroundImage(haiku.theme, haiku.mood, artStyle);
+  } = await openai.generateBackgroundImage(haiku.theme, haiku.mood, artStyle, customImagePrompt, customArtStyles);
 
   const imageRet = await fetch(openaiUrl);
   // console.log(">> services.haiku.regenerateHaikuImage", { imageRet });
@@ -807,4 +817,14 @@ export async function addToAlbum(user: User, haiku: Haiku, albumId: string): Pro
     ...haiku,
     albumId: haikuAlbum.id,
   }
+}
+
+export async function getAlbumHaikus(user: User, albumId: string): Promise<Haiku[]> {
+  const haikuAlbum = albumId && await store.haikuAlbums.get(albumId);
+  
+  if (haikuAlbum && haikuAlbum.haikuIds) {
+    return store.haikus.find({ id: haikuAlbum.haikuIds || [] });
+  }
+
+  return [];
 }

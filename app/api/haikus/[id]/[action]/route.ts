@@ -71,9 +71,10 @@ export async function POST(
   
     if (!["image", "poem"].includes(part))throw `Regenerate part not supported: ${part}`;
   
+    const albumId = process.env.HAIKU_ALBUM;
     const updatedHaiku = part == "image"
-      ? await regenerateHaikuImage(user, haiku, artStyle)
-      : await regenerateHaikuPoem(user, haiku);
+      ? await regenerateHaikuImage(user, haiku, artStyle, albumId)
+      : await regenerateHaikuPoem(user, haiku, albumId);
         
     return NextResponse.json({ haiku: updatedHaiku, reachedUsageLimit });
   } else if (params.action == "updateImage") {
