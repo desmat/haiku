@@ -67,7 +67,7 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     }
   }
 
-  const selectedArtStyle = artStyle || imageTypes[Math.floor(Math.random() * imageTypes.length)];
+  const selectedArtStyle = artStyle || imageTypes && Array.isArray(imageTypes) && imageTypes.length > 0 && imageTypes[Math.floor(Math.random() * imageTypes.length)] || undefined;
   const prompt = customPrompt || `
     Respond with an extremely muted, almost monochromatic colors, 
     ${selectedArtStyle},
