@@ -7,7 +7,7 @@ import { NoSsr } from '@/app/_components/NoSsr';
 import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { LanguageType, isSupportedLanguage } from '@/types/Languages';
-import { getDailyHaiku, getHaiku } from '@/services/haikus';
+import { getAlbumHaikus, getDailyHaiku, getHaiku } from '@/services/haikus';
 import { getDailyHaikudle, getDailyHaikudles, getHaikudle } from '@/services/haikudles';
 import { notFoundHaiku } from '@/services/stores/samples';
 import { haikuStyles } from '@/types/Haiku';
@@ -21,6 +21,11 @@ const todaysHaiku = async () => {
   if (todaysDailyHaiku?.haikuId) {
     return getHaiku(user, todaysDailyHaiku?.haikuId);
   }
+}
+
+const randomAlbumHaiku = async (albumId: string) => {
+  const haikus = await getAlbumHaikus(user, albumId);
+  return haikus[Math.floor(Math.random() * haikus.length)];
 }
 
 const todaysHaikudle = async () => {
@@ -67,6 +72,7 @@ export default async function Page({
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
   const fontSize = searchParams && searchParams["fontSize"];
   const noOnboarding = searchParams && searchParams["noOnboarding"] == "true";
+  const albumId = process.env.HAIKU_ALBUM;
   // console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
   // can't switch modes in puzzle mode
@@ -97,7 +103,9 @@ export default async function Page({
     ? await getHaiku({} as User, haikudle.haikuId, !haikudle?.previousDailyHaikudleId, version)
     : id
       ? await getHaiku({} as User, id, false, version)
-      : await todaysHaiku();
+      : albumId
+        ? await randomAlbumHaiku(albumId)
+        : await todaysHaiku();
 
   haiku = {
     ...(haiku || notFoundHaiku),

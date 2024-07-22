@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes, createHaiku } from '@/services/haikus';
+import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes, createHaiku, getAlbumHaikus } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
 import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
@@ -71,6 +71,13 @@ export async function GET(request: NextRequest, params?: any) {
     const latest = await getLatestHaikus(fromDate);
 
     return NextResponse.json({ haikus: latest });
+  } 
+
+  const albumId = process.env.HAIKU_ALBUM;
+  if (albumId) {
+    const haikus = await getAlbumHaikus(user, albumId);
+    const randomHaiku = haikus[Math.floor(Math.random() * haikus.length)];
+    return NextResponse.json({ haikus: [randomHaiku] });
   }
 
   const todaysDailyHaiku = await getDailyHaiku();
