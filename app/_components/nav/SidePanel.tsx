@@ -53,7 +53,7 @@ function OpenCloseButton({
 
 export default function SidePanel({
   user,
-  haikuAlbumId,
+  album,
   mode,
   styles,
   altStyles,
@@ -64,7 +64,7 @@ export default function SidePanel({
   onClickLogo: _onClickLogo,
 }: {
   user: User,
-  haikuAlbumId?: string,
+  album?: string,
   mode?: ExperienceMode,
   styles: any[],
   altStyles: any[],
@@ -292,7 +292,7 @@ export default function SidePanel({
                   {!user?.isAdmin &&
                     <StyledLayers styles={styles}>
                       <span className="capitalize">
-                        {haikuAlbumId ? `${haikuAlbumId} Haikus` : "Your Haikus"}
+                        {album ? `${album} Haikus` : "Your Haikus"}
                       </span>
                     </StyledLayers>
                   }

@@ -15,6 +15,7 @@ import { deleteHaikudle, getHaikudle } from './haikudles';
 import * as openai from './openai';
 import { incUserUsage, userUsage } from './usage';
 import { triggerDailyHaikuSaved } from './webhooks';
+import { HaikuAlbum } from '@/types/Album';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -529,7 +530,7 @@ export async function generateHaiku(user: User, {
     imageModel,
     imageUrl,
     poem: poem || generatedPoem || [],
-    albumId: process.env.HAIKU_ALBUM,
+    albumId,
   });
 }
 
@@ -817,6 +818,10 @@ export async function addToAlbum(user: User, haiku: Haiku, albumId: string): Pro
     ...haiku,
     albumId: haikuAlbum.id,
   }
+}
+
+export async function getHaikuAlbum(user: User, albumId: string): Promise<HaikuAlbum | undefined> {
+  return store.haikuAlbums.get(albumId);
 }
 
 export async function getAlbumHaikus(user: User, albumId: string): Promise<Haiku[]> {

@@ -49,7 +49,7 @@ export function listToMap(
     valFn?: (e: any) => any,
   }
 ): { [key: string]: any } {
-  const keyFn = opts?.keyFn || function (e: any) { return e.id };
+  const keyFn = opts?.keyFn || function (e: any) { return e?.id };
   const valFn = opts?.valFn || function (e: any) { return e };
 
   return kvArrayToObject(l.map((e: any) => [keyFn(e), valFn(e)]));

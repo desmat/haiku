@@ -67,12 +67,12 @@ export default async function Page({
     params.slug && params.slug[0] && params.slug[0].split(versionSeparator);
   let id = ids && ids[0];
   const version = ids && ids[1] || searchParams && searchParams["version"];
-  const lang = searchParams && searchParams["lang"] as LanguageType || "en";
+  const lang = searchParams && searchParams["lang"] as LanguageType;
   let mode = (searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
   const fontSize = searchParams && searchParams["fontSize"];
   const noOnboarding = searchParams && searchParams["noOnboarding"] == "true";
-  const albumId = process.env.HAIKU_ALBUM;
+  const album = process.env.HAIKU_ALBUM;
   // console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
   // can't switch modes in puzzle mode
@@ -80,7 +80,7 @@ export default async function Page({
     mode = "haikudle";
   }
 
-  if (!isSupportedLanguage(lang)) {
+  if (lang && !isSupportedLanguage(lang)) {
     return <NotFound mode={mode} />
   }
 
@@ -103,8 +103,8 @@ export default async function Page({
     ? await getHaiku({} as User, haikudle.haikuId, !haikudle?.previousDailyHaikudleId, version)
     : id
       ? await getHaiku({} as User, id, false, version)
-      : albumId
-        ? await randomAlbumHaiku(albumId)
+      : album
+        ? await randomAlbumHaiku(album)
         : await todaysHaiku();
 
   haiku = {
@@ -128,6 +128,7 @@ export default async function Page({
           />
           <NavOverlay
             haiku={haiku}
+            album={album}
             mode={mode}
             lang={lang}
             styles={textStyles.slice(0, textStyles.length - 3)}
@@ -151,6 +152,7 @@ export default async function Page({
         <MainPage
           haiku={haiku}
           haikudle={haikudle}
+          album={album}
           mode={mode}
           lang={lang}
           refreshDelay={refreshDelay}

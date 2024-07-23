@@ -3,11 +3,12 @@ import { createToken, loadUser, saveUser, userSession } from '@/services/users';
 import { userUsage } from '@/services/usage';
 import { getDailyHaikus, getNextDailyHaikuId, getUserHaikus } from '@/services/haikus';
 import { getDailyHaikudles, getNextDailyHaikudleId } from '@/services/haikudles';
-import { uuid } from '@/utils/misc';
+import { searchParamsToMap, uuid } from '@/utils/misc';
 
 export async function GET(request: NextRequest, params?: any) {
+  const query = searchParamsToMap(request.nextUrl.searchParams.toString()) as any;
   const { user: sessionUser } = await userSession(request);
-  console.log('>> app.api.user.GET', { sessionUser });
+  console.log('>> app.api.user.GET', { sessionUser, params, query });
 
   if (!sessionUser) {
     return NextResponse.json(
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest, params?: any) {
   let userHaikus = {
     haikus: user.isAdmin
       ? [] // don't need to pull the admin's haikus because we pull all of them later
-      : await getUserHaikus(user, false, process.env.HAIKU_ALBUM),
+      : await getUserHaikus(user, false, query.album),
   } as any;
 
   if (user.isAdmin) {

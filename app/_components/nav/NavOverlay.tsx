@@ -20,7 +20,7 @@ export function NavOverlay({
   styles,
   altStyles,
   haiku,
-  haikuAlbumId,
+  album,
   lang,
   refreshDelay = 12 * 60 * 60 * 1000,
   backupInProgress,
@@ -46,7 +46,7 @@ export function NavOverlay({
   styles: any[],
   altStyles: any[],
   haiku?: Haiku,
-  haikuAlbumId?: string,
+  album?: string,
   lang?: LanguageType,
   refreshDelay?: number,
   backupInProgress?: boolean,
@@ -243,7 +243,7 @@ export function NavOverlay({
       {!loading && ["haiku", "haikudle"].includes(mode) &&
         <SidePanel
           user={user}
-          haikuAlbumId={haikuAlbumId}
+          album={album}
           mode={mode}
           styles={styles}
           altStyles={altStyles}

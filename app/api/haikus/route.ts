@@ -71,11 +71,8 @@ export async function GET(request: NextRequest, params?: any) {
     const latest = await getLatestHaikus(fromDate);
 
     return NextResponse.json({ haikus: latest });
-  } 
-
-  const albumId = process.env.HAIKU_ALBUM;
-  if (albumId) {
-    const haikus = await getAlbumHaikus(user, albumId);
+  } else if (typeof (query.album) == "string" && query.album) {
+    const haikus = await getAlbumHaikus(user, query.album);
     const randomHaiku = haikus[Math.floor(Math.random() * haikus.length)];
     return NextResponse.json({ haikus: [randomHaiku] });
   }
@@ -118,6 +115,7 @@ export async function POST(request: NextRequest) {
   let poem: string[] | undefined;
   let title: string | undefined;
   let imageFile: File | undefined;
+  let album: string | undefined;
 
   if (contentType && contentType.includes("multipart/form-data")) {
     const [formData, { user }] = await Promise.all([
@@ -135,6 +133,7 @@ export async function POST(request: NextRequest) {
 
     title = formData.get("title") as string;
     poemString = formData.get("poem") as string;
+    album = formData.get("album") as string;
     imageFile = formData.get("image") as File;
 
     console.log(">> app.api.haiku.POST", { title, poemString, imageFile });
@@ -143,7 +142,8 @@ export async function POST(request: NextRequest) {
     const data: any = await request.json();
     subject = data.request.subject;
     lang = data.request.lang;
-    artStyle = data.request.artStyle;    
+    artStyle = data.request.artStyle; 
+    album = data.request.album;   
     if (subject && subject.indexOf("/") > -1) {
       const split = subject.split("/");
       subject = split[0];
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
       poem = subject.split(/\n/).filter(Boolean)
       subject = undefined;
     }
-    console.log('>> app.api.haiku.POST', { lang, subject, mood, artStyle, poem });
+    console.log('>> app.api.haiku.POST', { lang, subject, mood, artStyle, poem, album });
   }
 
   const { user } = await userSession(request);
@@ -194,11 +194,10 @@ export async function POST(request: NextRequest) {
     const imageType = imageFile.type;
 
     // @ts-ignore
-    haiku = await createHaiku(user, { theme: title, poem, imageBuffer, imageType });
+    haiku = await createHaiku(user, { theme: title, poem, imageBuffer, imageType, albumId: album });
   } else {
-    // console.log('>> app.api.haiku.POST generating new haiku', { lang, subject, mood, artStyle });
-    const albumId = process.env.HAIKU_ALBUM;
-    haiku = await generateHaiku(user, { lang, subject, mood, artStyle, poem, albumId })
+    // console.log('>> app.api.haiku.POST generating new haiku', { lang, subject, mood, artStyle });    
+    haiku = await generateHaiku(user, { lang, subject, mood, artStyle, poem, albumId: album })
   }
 
   return NextResponse.json({ haiku, reachedUsageLimit });
