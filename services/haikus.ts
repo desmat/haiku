@@ -501,18 +501,14 @@ export async function generateHaiku(user: User, {
     prompt: poemPrompt,
     model: languageModel,
     response: {
-      // haiku: generatedPoem,
+      haiku: generatedPoem,
       subject: generatedSubject,
       mood: generatedMood,
       lang: generatedLang,
     }
-<<<<<<< HEAD
   } = poem
       ? await openai.analyzeHaiku(poem)
       : await openai.generateHaiku(language, subject, mood, customPoemPrompt);
-=======
-  } = await openai.analyzeHaiku(subject || "");
->>>>>>> d25ab3a (analyze haiku -> generate image)
   // console.log(">> services.haiku.generateHaiku", { ret });
   console.log(">> services.haiku.generateHaiku", { generatedSubject, generatedMood, poemPrompt });
 
@@ -533,12 +529,8 @@ export async function generateHaiku(user: User, {
     imagePrompt,
     imageModel,
     imageUrl,
-<<<<<<< HEAD
     poem: poem || generatedPoem || [],
-    albumId,
-=======
-    poem: subject?.split(/\n/).filter(Boolean) || [],
->>>>>>> d25ab3a (analyze haiku -> generate image)
+    albumId,    
   });
 }
 

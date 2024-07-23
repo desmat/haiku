@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       const split = subject.split("/");
       subject = split[0];
       mood = split[1];
-    } else if (subject && subject.indexOf("\n") > -1) {
+    } else if (subject /* && subject.indexOf("\n") > -1 */) {
       poem = subject.split(/\n/).filter(Boolean)
       subject = undefined;
     }
