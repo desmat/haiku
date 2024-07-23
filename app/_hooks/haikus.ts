@@ -208,7 +208,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
     return new Promise(async (resolve, reject) => {
       if (id) {
-        const params = mapToSearchParams({ mode, version });
+        const params = mapToSearchParams({ mode, version});
         fetch(`/api/haikus/${id}${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();
 
@@ -248,7 +248,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         // const params = // "?mode=haiku";
 
         const params = mapToSearchParams({
-          ...query
+          ...query,
           // ..._mode(mode ? { mode } : {}),
         });
 

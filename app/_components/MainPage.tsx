@@ -25,6 +25,7 @@ import { formatHaikuText } from './HaikuPoem';
 export default function MainPage({
   haiku: _haiku,
   haikudle: _haikudle,
+  album,
   mode,
   lang,
   refreshDelay,
@@ -33,6 +34,7 @@ export default function MainPage({
 }: {
   haiku: Haiku,
   haikudle?: Haikudle,
+  album?: string | undefined,
   mode: ExperienceMode,
   lang?: undefined | LanguageType,
   refreshDelay?: number,
@@ -44,6 +46,7 @@ export default function MainPage({
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
   const showcaseMode = mode == "showcase";
+  const haikuAlbumId = process.env.HAIKU_ALBUM;
   let [haiku, setHaiku] = useState<Haiku | undefined>(_haiku);
   let [haikudle, setHaikudle] = useState<Haiku | undefined>(_haikudle);
   let [haikuId, setHaikuId] = useState(_haiku?.id);
@@ -366,7 +369,7 @@ export default function MainPage({
 
       resetAlert();
       setGenerating(true);
-      const ret = await generateHaiku(user, { lang, subject, artStyle });
+      const ret = await generateHaiku(user, { lang, subject, artStyle, album });
       // console.log('>> app.page.startGenerateHaiku()', { ret });
 
       if (ret?.id) {
@@ -398,7 +401,7 @@ export default function MainPage({
     if (user?.isAdmin || haiku?.createdBy == user?.id) {
       resetAlert();
       setLoadingUI(true);
-      const ret = await regenerateHaiku(user, haiku, "poem");
+      const ret = await regenerateHaiku(user, haiku, "poem", { album });
       // console.log('>> app.page.startRegenerateHaiku()', { ret });
       incUserUsage(user, "haikusRegenerated");
       setHaiku(ret);
@@ -416,13 +419,13 @@ export default function MainPage({
 
     if (user?.isAdmin || haiku?.createdBy == user?.id) {
       const artStyle = user?.isAdmin
-        ? prompt(`Art style? (For example 'watercolor', 'Japanese woodblock print', 'abstract oil painting with large strokes', or leave blank for a style picked at random)"`, haiku.artStyle)
+        ? prompt(`Art style? (For example 'watercolor', 'Japanese woodblock print', 'abstract oil painting with large strokes', or leave blank for a style picked at random)"`, haiku.artStyle || "")
         : "";
 
       if (typeof (artStyle) == "string") {
         resetAlert();
         setLoadingUI(true);
-        const ret = await regenerateHaiku(user, haiku, "image", { artStyle });
+        const ret = await regenerateHaiku(user, haiku, "image", { artStyle, album });
         // console.log('>> app.page.startRegenerateHaiku()', { ret });
         incUserUsage(user, "haikusRegenerated"); // TODO haikuImageRegenerated?
         setHaiku(ret);
@@ -455,7 +458,7 @@ export default function MainPage({
     setHaikudle(undefined);
 
     haikudleMode
-      ? loadHaikudle(haikuId || { random: true, lang })
+      ? loadHaikudle(haikuId || { random: true, ...lang && { lang }, ...album && { album } })
         .then((haikudles: Haikudle | Haikudle[]) => {
           // console.log('>> app.MainPage.loadPage loadRandom.then', { haikudles });
           const loadedHaikudle = haikudles[0] || haikudles;
@@ -464,7 +467,7 @@ export default function MainPage({
           setHaikudle(loadedHaikudle);
           setLoadingUI(false);
         })
-      : loadHaikus({ random: true, lang }, mode)
+      : loadHaikus({ random: true, ...lang && { lang }, ...album && { album } }, mode)
         .then((haikus: Haiku | Haiku[]) => {
           // console.log('>> app.MainPage.loadPage loadRandom.then', { haikus });
           const loadedHaiku = haikus[0] || haikus;
@@ -484,7 +487,7 @@ export default function MainPage({
     setHaikudle(undefined);
 
     haikudleMode
-      ? loadHaikudle(haikuId || { lang }).then((haikudles: any) => {
+      ? loadHaikudle(haikuId || {  ...lang && { lang }, ...album && { album } }).then((haikudles: any) => {
         // console.log('>> app.MainPage.loadHaiku loadHaikudle.then', { haikudles });
         const loadedHaikudle = haikudles[0] || haikudles;
         setHaiku(loadedHaikudle?.haiku);
@@ -493,7 +496,7 @@ export default function MainPage({
         setLoadingUI(false);
         window.history.replaceState(null, '', `/${haikuId || ""}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
       })
-      : loadHaikus(haikuId || { lang }, mode)
+      : loadHaikus(haikuId || {  ...lang && { lang }, ...album && { album } }, mode)
         .then((haikus: Haiku | Haiku[]) => {
           // console.log('>> app.MainPage.loadHaiku loadHaikus.then', { haikus });
           const loadedHaiku = haikus[0] || haikus;
@@ -759,7 +762,7 @@ export default function MainPage({
 
   if (!userLoaded && !userLoading) {
     // console.log('>> app.MainPage init', { haiku });
-    loadUser().then((user: User) => {
+    loadUser({ ...album && { album } }).then((user: User) => {
       // console.log('>> app.MainPage init loadUser.then', { user });
       if (haikudleMode && !previousDailyHaikudleId) {
         loadHaikudle(haikuId || { lang }).then((haikudles: any) => {
@@ -778,7 +781,7 @@ export default function MainPage({
             setHaiku(initializedHaiku);
             setHaikuId(initializedHaiku?.id);
           })
-          : loadHaikus(haikuId || { lang }).then((haikus: Haiku | Haiku[]) => {
+          : loadHaikus(haikuId || {  ...lang && { lang }, ...album && { album } }).then((haikus: Haiku | Haiku[]) => {
             // console.log('>> app.MainPage init loadHaikus.then', { haikus });
             const loadedHaiku = haikus[0] || haikus;
             setHaiku(loadedHaiku);
@@ -786,7 +789,7 @@ export default function MainPage({
           });
 
         // make sure the current haiku at least shows up in side bar as viewed
-        !isPuzzleMode && user && !user.isAdmin && addUserHaiku(_haiku, "viewed");
+        !isPuzzleMode && !haikuAlbumId && user && !user.isAdmin && addUserHaiku(_haiku, "viewed");
       }
     });
   }
@@ -828,6 +831,7 @@ export default function MainPage({
           ...(haikudleSolved ? solvedHaikudleHaiku : haiku),
           likedAt: userHaikus[haiku.id]?.likedAt,
         }}
+        album={album}
         refreshDelay={_refreshDelay}
         backupInProgress={backupInProgress}
         styles={textStyles.slice(0, textStyles.length - 3)}

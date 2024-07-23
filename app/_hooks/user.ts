@@ -43,10 +43,10 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     return token;
   },
 
-  load: async () => {
+  load: async (options: any = {}) => {
     set({ loading: true });
     const { loadLocal, loadRemote } = get();
-    let user;
+    let user = { album: options.album };
     // console.log(">> hooks.user.load()", {});
 
     let createdUser: User | undefined;
@@ -74,7 +74,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       dailyHaikudles,
       nextDailyHaikuId,
       nextDailyHaikudleId,
-    } = await loadRemote(token);
+    } = await loadRemote(token, options);
 
     // console.log(">> hooks.user.load()", { createdUser, remoteUser });
 
@@ -161,10 +161,10 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     return { user: savedUser, token: savedToken };
   },
 
-  loadRemote: async (token: string) => {
-    // console.log(">> hooks.user.loadRemote()", { token });
+  loadRemote: async (token: string, options: any = {}) => {
+    // console.log(">> hooks.user.loadRemote()", { token, options });
 
-    const res = await fetch(`/api/user`, {
+    const res = await fetch(`/api/user${options.album ? `?album=${options.album}` : ""}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 

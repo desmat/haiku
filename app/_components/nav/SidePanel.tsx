@@ -53,6 +53,7 @@ function OpenCloseButton({
 
 export default function SidePanel({
   user,
+  album,
   mode,
   styles,
   altStyles,
@@ -63,6 +64,7 @@ export default function SidePanel({
   onClickLogo: _onClickLogo,
 }: {
   user: User,
+  album?: string,
   mode?: ExperienceMode,
   styles: any[],
   altStyles: any[],
@@ -289,7 +291,9 @@ export default function SidePanel({
                   }
                   {!user?.isAdmin &&
                     <StyledLayers styles={styles}>
-                      "Your Haikus"
+                      <span className="capitalize">
+                        {album ? `${album} Haikus` : "Your Haikus"}
+                      </span>
                     </StyledLayers>
                   }
                   {/* <StyledLayers styles={styles.slice(0, 1)} className="my-auto">

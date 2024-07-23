@@ -23,9 +23,9 @@ function parseJson(input: string) {
   return undefined;
 }
 
-export async function generateBackgroundImage(subject?: string, mood?: string, artStyle?: string): Promise<any> {
-  console.log(`>> services.openai.generateBackgroundImage`, { subject, mood, artStyle });
-  const imageTypes = [
+export async function generateBackgroundImage(subject?: string, mood?: string, artStyle?: string, customPrompt?: string, customArtStyles?: string[]): Promise<any> {
+  console.log(`>> services.openai.generateBackgroundImage`, { subject, mood, artStyle, customPrompt, customArtStyles });
+  const imageTypes = customArtStyles || [
     // "charcoal drawing", 
     // "pencil drawing",
     // "Painting",
@@ -55,14 +55,27 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     "Japanese style watercolor with few large brush strokes and a minimal palete of colors",
     "Quick wobbly sketch, colored hastily with watercolors", // https://www.reddit.com/r/dalle2/comments/1ch4ddv/how_do_i_create_images_with_this_style/
   ];
-  const selectedArtStyle = artStyle || imageTypes[Math.floor(Math.random() * imageTypes.length)];
-  const prompt = `
+
+  if (customPrompt) {
+    if (customPrompt.indexOf("${theme}") > -1 || customPrompt.indexOf("${mood}") > -1) {
+      customPrompt = customPrompt
+        .replace("${theme}", subject || "")
+        .replace("${mood}", mood ? ` with a mood of ${mood || mood}` : "")
+    } else if (subject || mood) {
+      customPrompt = `${customPrompt}.
+      ${subject ? `It should be on the subject of ${subject}` : ""}${subject && mood ? ", and it should have" : "It should have"}${mood ? ` a mood of ${mood}` : ""}`
+    }
+  }
+
+  const selectedArtStyle = artStyle || imageTypes && Array.isArray(imageTypes) && imageTypes.length > 0 && imageTypes[Math.floor(Math.random() * imageTypes.length)] || undefined;
+  const prompt = customPrompt || `
     Respond with an extremely muted, almost monochromatic colors, 
     ${selectedArtStyle},
-    on the theme of ${subject || "any"}${mood ? ` with a mood of ${mood}` : ""}.
+    on the theme of ${subject || "any"}${mood ? `, with a mood of ${mood}` : ""}.
     Make the art extremely minimal and low-key, with very few brush strokes, 
     The image should not contain any writing of characters of any kind.
   `;
+  console.log(`>> services.openai.generateBackgroundImage`, { prompt });
 
   // for testing
   if (process.env.OPENAI_API_KEY == "DEBUG") {
@@ -111,7 +124,7 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
   }
 }
 
-export async function generateHaiku(language?: string, subject?: string, mood?: string): Promise<any> {
+export async function generateHaiku(language?: string, subject?: string, mood?: string, customPrompt?: string): Promise<any> {
   const prompt = `Topic: ${subject || "any"}${mood ? ` Mood: ${mood}` : ""}`;
 
   console.log(`>> services.openai.generateHaiku`, { language, subject, mood, prompt });
@@ -138,7 +151,7 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
   }
 
   // ... generate a haiku in ${language || "English"} and respond ...
-  const systemPrompt = `Given a topic (or "any", meaning you pick) and optionally mood, please generate a haiku and respond in JSON where each response is an array of 3 strings.
+  const systemPrompt = customPrompt || `Given a topic (or "any", meaning you pick) and optionally mood, please generate a haiku and respond in JSON where each response is an array of 3 strings.
     Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
     If the topic specifies a language, or is in another language, please generate the haiku in that language.
     Also include in the response, in fewest number of words, what were the subject (in the language requested) and mood (in English) of the haiku.
@@ -176,7 +189,7 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
   }
 }
 
-export async function completeHaiku(poem: string[], language?: string, subject?: string, mood?: string): Promise<any> {
+export async function completeHaiku(poem: string[], language?: string, subject?: string, mood?: string, customPrompt?: string): Promise<any> {
   const prompt = `Haiku to complete: "${poem.join(" / ")}"
   ${subject ? `Topic: "${subject}"` : ""}
   ${mood ? ` Mood: "${mood}"` : ""}`;
@@ -204,7 +217,7 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
     messages: [
       {
         role: 'system',
-        content: `
+        content: customPrompt || `
           Given an incomplete haiku please complete the haiku. 
           Characters "..." or "…" will be used to indicate a placeholder, please keep the existing word(s) and fill the rest.
           If a line looks like this: "<some one or more words> ..." then keep the word(s) at the beginning and fill the rest.          If a line looks like this: "... <one or more words>" then keep the word(s) at the end and fill the rest.

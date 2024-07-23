@@ -7,7 +7,7 @@ import { NoSsr } from '@/app/_components/NoSsr';
 import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { LanguageType, isSupportedLanguage } from '@/types/Languages';
-import { getDailyHaiku, getHaiku } from '@/services/haikus';
+import { getAlbumHaikus, getDailyHaiku, getHaiku } from '@/services/haikus';
 import { getDailyHaikudle, getDailyHaikudles, getHaikudle } from '@/services/haikudles';
 import { notFoundHaiku } from '@/services/stores/samples';
 import { haikuStyles } from '@/types/Haiku';
@@ -21,6 +21,11 @@ const todaysHaiku = async () => {
   if (todaysDailyHaiku?.haikuId) {
     return getHaiku(user, todaysDailyHaiku?.haikuId);
   }
+}
+
+const randomAlbumHaiku = async (albumId: string) => {
+  const haikus = await getAlbumHaikus(user, albumId);
+  return haikus[Math.floor(Math.random() * haikus.length)];
 }
 
 const todaysHaikudle = async () => {
@@ -62,11 +67,12 @@ export default async function Page({
     params.slug && params.slug[0] && params.slug[0].split(versionSeparator);
   let id = ids && ids[0];
   const version = ids && ids[1] || searchParams && searchParams["version"];
-  const lang = searchParams && searchParams["lang"] as LanguageType || "en";
+  const lang = searchParams && searchParams["lang"] as LanguageType;
   let mode = (searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
   const fontSize = searchParams && searchParams["fontSize"];
   const noOnboarding = searchParams && searchParams["noOnboarding"] == "true";
+  const album = process.env.HAIKU_ALBUM;
   // console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
   // can't switch modes in puzzle mode
@@ -74,7 +80,7 @@ export default async function Page({
     mode = "haikudle";
   }
 
-  if (!isSupportedLanguage(lang)) {
+  if (lang && !isSupportedLanguage(lang)) {
     return <NotFound mode={mode} />
   }
 
@@ -97,7 +103,9 @@ export default async function Page({
     ? await getHaiku({} as User, haikudle.haikuId, !haikudle?.previousDailyHaikudleId, version)
     : id
       ? await getHaiku({} as User, id, false, version)
-      : await todaysHaiku();
+      : album
+        ? await randomAlbumHaiku(album)
+        : await todaysHaiku();
 
   haiku = {
     ...(haiku || notFoundHaiku),
@@ -120,6 +128,7 @@ export default async function Page({
           />
           <NavOverlay
             haiku={haiku}
+            album={album}
             mode={mode}
             lang={lang}
             styles={textStyles.slice(0, textStyles.length - 3)}
@@ -143,6 +152,7 @@ export default async function Page({
         <MainPage
           haiku={haiku}
           haikudle={haikudle}
+          album={album}
           mode={mode}
           lang={lang}
           refreshDelay={refreshDelay}
