@@ -30,30 +30,44 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     // "pencil drawing",
     // "Painting",
     "Watercolor painting",
-    // "Oil painting",
-    // "Oil painting with large paint strokes",
-    // "Oil painting with natural paint strokes",
-    // "Abstract painting",
-    // "Impressionist painting",
-    // "Post-Impressionism painting",
-    // "Expressionist painting",
-    // "Landscape painting",
-    "Chinese Shan Shui painting",
+    "Oil painting",
+    "Oil painting with large paint strokes",
+    "Oil painting with natural paint strokes",
+    "Abstract painting",
+    "Impressionist painting",
+    "Post-Impressionism painting",
+    "Expressionist painting",
+    "Landscape painting",
+    
     "Chinese-style ink wash painting",
+    "Chinese Shan Shui painting",
+    
     "Old-school Japanese-style painting",
+
     // "Japanese woodblock print",
-    "Japanese-style ink wash painting",
     // "Japanese Ukiyo-e style woodblock print or painting",
-    // "Japanese Hanga style woodblock print",
+    "Japanese Hanga style woodblock print",
     // "Japanese Sosaku-Hanga woodblock print",
     // "Japanese Shin-Hanga woodblock print",
+    
+    "Japanese-style ink wash painting",
     "Japanese Sumi-e style ink painting",
     // "Japanese Yamato-e style painting",
     // "Japanese Nihonga style painting",
     // "Japanese Rimpa style painting",
-    "japanese style ink painting with very few simple large brush strokes",
-    "Japanese style watercolor with few large brush strokes and a minimal palete of colors",
-    "Quick wobbly sketch, colored hastily with watercolors", // https://www.reddit.com/r/dalle2/comments/1ch4ddv/how_do_i_create_images_with_this_style/
+
+    "Japanese-style ink painting with very few simple large brush strokes",
+    "Japanese-style watercolor with few large brush strokes and a minimal palete of colors",
+
+    // https://www.reddit.com/r/dalle2/comments/1ch4ddv/how_do_i_create_images_with_this_style/
+    "Quick wobbly sketch, colored hastily with watercolors", 
+
+    // developped for kingfisher
+    `A painting that uses the traditional East Asian art techniques of sumi-e or Chinese ink painting, with characteristics such as minimal brush strokes, a focus on natural subjects, and the use of negative space. 
+    Employ a selective use of color to add a layer of emphasis and contrast, enhancing the overall aesthetic without detracting from the simplicity and elegance that define this art style.
+    The painting should use very imperfect almost hasty strokes. No detailed brush strokes. 
+    There should be at most 8 brush strokes using only dark ink with a few colourful accents with an ink of bright color like orange, pink, red, etc.
+    The background should be pure white and the composition extremely simple and abstract with extreme use of negative space.`,
   ];
 
   if (customPrompt) {
