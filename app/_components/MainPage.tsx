@@ -898,7 +898,7 @@ export default function MainPage({
           popPoem={haikudleMode && haikudleSolvedJustNow}
           regenerating={regenerating}
           onboardingElement={onboardingElement}
-          refresh={!haiku?.error && user?.isAdmin && loadRandom}
+          refresh={!haiku?.error && (user?.isAdmin || album) && loadRandom}
           saveHaiku={!haiku?.error && !haikudleMode && doSaveHaiku}
           regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
           regenerateImage={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
