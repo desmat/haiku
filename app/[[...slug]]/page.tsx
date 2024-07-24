@@ -71,7 +71,7 @@ export default async function Page({
   let mode = (searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
   const fontSize = searchParams && searchParams["fontSize"];
-  const noOnboarding = searchParams && searchParams["noOnboarding"] == "true";
+  const noOnboarding = searchParams && searchParams["noOnboarding"] == "true" || process.env.NO_ONBOARDING == "true";
   const album = process.env.HAIKU_ALBUM;
   // console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 

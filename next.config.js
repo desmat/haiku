@@ -12,6 +12,7 @@ const nextConfig = {
         EXPERIENCE_MODE: process.env.EXPERIENCE_MODE,
         OPENAI_API_KEY: process.env.OPENAI_API_KEY,
         HAIKU_ALBUM: process.env.HAIKU_ALBUM,
+        NO_ONBOARDING: process.env.NO_ONBOARDING,
     }
 }
 
