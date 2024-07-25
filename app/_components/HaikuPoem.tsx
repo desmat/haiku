@@ -504,10 +504,13 @@ export default function HaikuPoem({
             >
               <div
                 className={showcaseMode
-                  ? "_bg-yellow-200 fixed bottom-4 right-8 w-max flex flex-row"
+                  ? "_bg-yellow-200 fixed right-8 w-max flex flex-row"
                   : "_bg-orange-200 flex flex-row w-max ml-[0.5rem] mt-[-0.2rem] md:mt-[0.2rem] leading-5"
                 }
-                style={{ fontSize }}
+                style={{ 
+                  fontSize,
+                  ...showcaseMode && { bottom: "max(calc(((100vh - max(60vh, 100vw)) / 2) + 1rem), 1rem"},
+                }}
               >
                 <div
                   className="poem-title _transition-all _bg-pink-400"

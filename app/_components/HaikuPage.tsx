@@ -63,7 +63,9 @@ export default function HaikuPage({
         style={{
           backgroundImage: `url("${haiku?.bgImage}")`,
           backgroundPosition: "center",
-          backgroundSize: "cover",
+          backgroundSize: "max(60vh, 100vw)",
+          backgroundRepeat: "no-repeat",
+          backgroundColor: haiku?.bgColor || "#aaaaaa",
           filter: `brightness(1.2) blur(${blurValue}px) saturate(${saturateValue}) `,
           transition: loading ? "filter 0.2s ease-out" : "filter 0.1s ease-out",
         }}
