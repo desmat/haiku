@@ -59,7 +59,7 @@ export default function HaikuPage({
   return (
     <div>
       <div
-        className="bgImage-container absolute _bg-pink-200 _min-w-[100vw] z-0 opacity-100"
+        className="bgImage-container absolute _bg-pink-200 z-0 opacity-100"
         style={{
           backgroundImage: `url("${haiku?.bgImage}")`,
           backgroundPosition: "center",
