@@ -59,25 +59,39 @@ export default function HaikuPage({
   return (
     <div>
       <div
-        className="absolute top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0 opacity-100"
+        className="bgImage-container absolute _bg-pink-200 z-0 opacity-100"
         style={{
           backgroundImage: `url("${haiku?.bgImage}")`,
           backgroundPosition: "center",
-          backgroundSize: "cover",
+          // backgroundSize: "max(60vh, 100vw)",
+          backgroundRepeat: "no-repeat",
+          backgroundColor: haiku?.bgColor || "#aaaaaa",
           filter: `brightness(1.2) blur(${blurValue}px) saturate(${saturateValue}) `,
           transition: loading ? "filter 0.2s ease-out" : "filter 0.1s ease-out",
+          // allow clipping horizontal edges up to a point
+          top: "50dvh",
+          left: "50vw",
+          transform: "translate(-50%, -50%)",
+          backgroundSize: "auto max(min(100dvh, 150vw), 100vw)",
+          height: "100%",
+          width: "max(min(100dvh, 150vw), 100vw)",
+          maxHeight: "min(150vw, 100dvh))",
         }}
       />
       <div
         className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 bottom-[5vh] ${showcaseMode ? "portrait:bottom-[10vh]" : "portrait:bottom-[12vh]"} bottom-[] m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}
         style={{
-          top: poemLayout?.top || poemLayout?.down ? `${poemLayout?.top || poemLayout?.down}vh` : poemLayout?.up ? `${-1 * poemLayout.up}vh` : undefined,
+          top: poemLayout?.top || poemLayout?.down
+            ? `max(${poemLayout?.top || poemLayout?.down}dvh + (100dvh - max(min(100dvh, 150vw), 100vw)) / 2, ${poemLayout?.top || poemLayout?.down}dvh)`
+            : poemLayout?.up
+              ? `max(${-1 * poemLayout.up}dvh + (100dvh - max(min(100dvh, 150vw), 100vw)) / 2, ${-1 * poemLayout.up}dvh)`
+              : undefined,
           bottom: poemLayout?.bottom ? `${poemLayout.bottom}vh` : undefined,
           marginTop: poemLayout?.top ? 0 : "auto",
           marginBottom: poemLayout?.bottom ? 0 : "auto",
         }}
       >
-        {canAdjustLayout && 
+        {canAdjustLayout &&
           <AdjustLayoutControls
             layout={haiku.layout}
             adjustLayout={adjustLayout}
