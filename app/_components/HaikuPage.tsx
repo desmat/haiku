@@ -69,8 +69,8 @@ export default function HaikuPage({
           filter: `brightness(1.2) blur(${blurValue}px) saturate(${saturateValue}) `,
           transition: loading ? "filter 0.2s ease-out" : "filter 0.1s ease-out",
           // allow clipping horizontal edges up to a point
-          top: "50%",
-          left: "50%",
+          top: "50dvh",
+          left: "50vw",
           transform: "translate(-50%, -50%)",
           backgroundSize: "auto max(min(100dvh, 150vw), 100vw)",
           height: "100%",

@@ -511,7 +511,7 @@ export default function HaikuPoem({
                   fontSize,
                   ...showcaseMode && { 
                     right: "1.5rem",
-                    bottom: "max(1rem + (100vh - max(min(100dvh, 150vw), 100vw)) / 2, 1rem)"
+                    bottom: "max(1rem + (100dvh - max(min(100dvh, 150vw), 100vw)) / 2, 1rem)"
                   },
                 }}
               >
