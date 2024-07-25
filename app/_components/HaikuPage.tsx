@@ -59,15 +59,23 @@ export default function HaikuPage({
   return (
     <div>
       <div
-        className="absolute top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0 opacity-100"
+        className="bgImage-container absolute _bg-pink-200 _min-w-[100vw] z-0 opacity-100"
         style={{
           backgroundImage: `url("${haiku?.bgImage}")`,
           backgroundPosition: "center",
-          backgroundSize: "max(60vh, 100vw)",
+          // backgroundSize: "max(60vh, 100vw)",
           backgroundRepeat: "no-repeat",
           backgroundColor: haiku?.bgColor || "#aaaaaa",
           filter: `brightness(1.2) blur(${blurValue}px) saturate(${saturateValue}) `,
           transition: loading ? "filter 0.2s ease-out" : "filter 0.1s ease-out",
+          // allow clipping horizontal edges up to a point
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          backgroundSize: "auto max(min(100dvh, 150vw), 100vw)",
+          height: "100%",
+          width: "max(min(100dvh, 150vw), 100vw)",
+          maxHeight: "min(150vw, 100dvh))",
         }}
       />
       <div
