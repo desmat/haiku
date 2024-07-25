@@ -504,12 +504,15 @@ export default function HaikuPoem({
             >
               <div
                 className={showcaseMode
-                  ? "_bg-yellow-200 fixed right-8 w-max flex flex-row"
+                  ? "_bg-yellow-200 fixed w-max flex flex-row"
                   : "_bg-orange-200 flex flex-row w-max ml-[0.5rem] mt-[-0.2rem] md:mt-[0.2rem] leading-5"
                 }
                 style={{ 
                   fontSize,
-                  ...showcaseMode && { bottom: "max(calc(((100vh - max(60vh, 100vw)) / 2) + 1rem), 1rem"},
+                  ...showcaseMode && { 
+                    right: "1.5rem",
+                    bottom: "max(1rem + (100vh - max(min(100dvh, 150vw), 100vw)) / 2, 1rem)"
+                  },
                 }}
               >
                 <div
