@@ -72,10 +72,20 @@ export default function HaikuPage({
           top: "50dvh",
           left: "50vw",
           transform: "translate(-50%, -50%)",
-          backgroundSize: "auto max(min(100dvh, 150vw), 100vw)",
           height: "100%",
-          width: "max(min(100dvh, 150vw), 100vw)",
-          maxHeight: "min(150vw, 100dvh))",
+          ...haiku?.bgImageDimensions?.height > haiku?.bgImageDimensions?.width
+            ? {
+              // portrait
+              backgroundSize: "max(min(100vw, 150dvh), 100vw) auto",
+              width: "max(min(100vw, 150dvh), 100vw)",
+              // maxHeight: "min(100vw, 150dvh))",
+            }
+            : {
+              // square/landscape
+              backgroundSize: "auto max(min(150vw, 100dvh), 100vw)",
+              width: "max(min(150vw, 100dvh), 100vw)",
+              // maxHeight: "min(150vw, 100dvh))",
+            }
         }}
       />
       <div
