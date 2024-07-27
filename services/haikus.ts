@@ -230,11 +230,15 @@ export async function createHaiku(user: User, {
     imageBuffer = Buffer.from(await imageRet.arrayBuffer());
   }
 
-  const getColors = require('get-image-colors')
+  const getColors = require('get-image-colors');
   const colors = await getColors(imageBuffer, imageType || 'image/png');
   // console.log(">> services.haiku.createHaiku", { colors });
   // sort by darkness and pick darkest for foreground, lightest for background
   const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
+
+  const sizeOf = require('buffer-image-size');
+  const dimensions = sizeOf(imageBuffer);
+  // console.log(">> services.haiku.createHaiku", { imageWidth: dimensions.width, imageHeight: dimensions.height });
 
   const haikuId = uuid();
 
@@ -253,6 +257,7 @@ export async function createHaiku(user: User, {
     theme,
     poem,
     bgImage: imageUrl,
+    bgImageDimensions: dimensions,
     status: "created",
     mood,
     artStyle,
@@ -445,6 +450,10 @@ export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, 
   // sort by darkness and pick darkest for foreground, lightest for background
   const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
 
+  const sizeOf = require('buffer-image-size');
+  const dimensions = sizeOf(buffer);
+  // console.log(">> services.haiku.updateHaikuImage", { imageWidth: dimensions.width, imageHeight: dimensions.height });
+
   const haikuId = uuid();
   const filename = `haiku-${haikuId}-custom-${moment().format("YYYYMMDD_HHmmss")}-${(haiku.version || 0) + 1}.png`;
   const blob = await put(filename, buffer, {
@@ -460,6 +469,7 @@ export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, 
     imageModel: undefined,
     // @ts-ignore
     bgImage: blob.url,
+    bgImageDimensions: dimensions,
     color: sortedColors[0].darken(0.5).hex(),
     bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),
@@ -826,7 +836,7 @@ export async function getHaikuAlbum(user: User, albumId: string): Promise<HaikuA
 
 export async function getAlbumHaikus(user: User, albumId: string): Promise<Haiku[]> {
   const haikuAlbum = albumId && await store.haikuAlbums.get(albumId);
-  
+
   if (haikuAlbum && haikuAlbum.haikuIds) {
     return store.haikus.find({ id: haikuAlbum.haikuIds || [] });
   }
