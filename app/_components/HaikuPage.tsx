@@ -78,13 +78,11 @@ export default function HaikuPage({
               // portrait
               backgroundSize: "max(min(100vw, 150dvh), 100vw) auto",
               width: "max(min(100vw, 150dvh), 100vw)",
-              // maxHeight: "min(100vw, 150dvh))",
             }
             : {
               // square/landscape
               backgroundSize: "auto max(min(150vw, 100dvh), 100vw)",
               width: "max(min(150vw, 100dvh), 100vw)",
-              // maxHeight: "min(150vw, 100dvh))",
             }
         }}
       />
