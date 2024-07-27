@@ -287,8 +287,8 @@ export function create(): Store {
     haikudles: new RedisStore<Haikudle>("haikudle"),
     dailyHaikudles: new RedisStore<DailyHaikudle>("dailyhaikudle"),
     userHaikudles: new RedisStore<UserHaikudle>("userhaikudle"),
-    userHaikus: new RedisStore<UserHaiku>("userhaiku"),
+    userHaikus: new RedisStore<UserHaiku>("userhaiku2"),
     userUsage: new RedisStore<UserUsage>("userusage"),
-    user: new RedisStore<User>("user"),
+    user: new RedisStore<User>("user2"),
   }
 }
