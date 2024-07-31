@@ -12,12 +12,9 @@ export type Haiku = {
 } | any;
 
 export const HaikuSaveOptions = {
-  indices: {
-    lang: "string",
-  },
   lookups: {
-    lang: { "lang": "id" },
-    user: { "createdBy": "id" }
+    lang: "lang",
+    user: "createdBy",
   },
 };
 
@@ -40,10 +37,8 @@ export type UserHaiku = {
 
 export const UserHaikuSaveOptions = {
   lookups: {
-    // user: "haikuId",
-    // haiku: "userId",    
-    user: { userId: "haikuId"},
-    haiku: { haikuId: "userId" }
+    user: "userId",
+    haiku: "haikuId",
   },
 };
 
@@ -57,10 +52,8 @@ export type LikedHaiku = {
 
 export const LikedHaikuSaveOptions = {
   lookups: {
-    // userId: "haikuId",
-    // haikuId: "userId",    
-    user: { userId: "haikuId"},
-    haiku: { haikuId: "userId" }
+    user: "userId",
+    haiku: "haikuId",
   },
 };
 
@@ -76,7 +69,7 @@ export type DailyHaiku = {
 
 export const DailyHaikuSaveOptions = {
   lookups: {
-    haiku: { haikuId: "id" }
+    haiku: "haikuId",
   },
 };
 

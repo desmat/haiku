@@ -4,7 +4,7 @@ import { put } from '@vercel/blob';
 import { DailyHaiku, Haiku, LikedHaiku, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
 import { Store } from "@/types/Store";
 import { User } from '@/types/User';
-import { hashCode, mapToList, normalizeWord, uuid } from '@/utils/misc';
+import { hashCode, listToMap, normalizeWord, uuid } from '@/utils/misc';
 import * as samples from '@/services/stores/samples';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { Haikudle, UserHaikudle } from '@/types/Haikudle';
@@ -636,14 +636,12 @@ export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed
   const userHaiku = {
     id,
     userId: user.id,
-    createdBy: user.id,
-    createdAt: now,
     haikuId: haiku.id,
     theme: haiku.theme,
     ...actionKV,
   };
 
-  const createdUserHaiku = await store.userHaikus.create(id, userHaiku, UserHaikuSaveOptions);
+  const createdUserHaiku = await store.userHaikus.create(user.id, userHaiku, UserHaikuSaveOptions);
 
   console.log(`>> services.haiku.createUserHaiku`, { userHaiku: createdUserHaiku });
   return new Promise((resolve, reject) => resolve(createdUserHaiku));
@@ -687,7 +685,7 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
 
     // pick from liked haikus, else all haikus
     const randomHaikuId = shuffleArray(nonDailyLikedhaikus || nonDailyhaikus)[0]?.id;
-    let randomHaiku = haikus[randomHaikuId];
+    let randomHaiku =  listToMap(haikus)[randomHaikuId];
 
     if (!randomHaiku) {
       randomHaiku = shuffleArray(haikus)[0];
@@ -796,7 +794,7 @@ export async function likeHaiku(user: User, haiku: Haiku, like?: boolean): Promi
   }
 }
 
-export async function getLikedHaikus(): Promise<DailyHaiku[]> {
+export async function getLikedHaikus(): Promise<Haiku[]> {
   console.log(">> services.haiku.getLikedHaikus", { });
 
   const likedHaikus = await store.likedHaikus.find();

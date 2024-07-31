@@ -180,20 +180,16 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       .map((entry) => {
         const id = createdValue.id;
         const lookupName = entry[0];
-        const lookupKeyVal = entry[1];
+        const lookupKey = entry[1];
         // TODO validate and log errors
         // @ts-ignore
-        const lookupId = createdValue[Object.entries(lookupKeyVal)[0][0]];
-        // @ts-ignore
-        const lookedupId = createdValue[Object.entries(entry[1])[0][1]]; // TODO this can be "*"
+        const lookupId = createdValue[lookupKey];
 
         return [
           // foos -> 123:456
           [`${this.setKey}`, id],
-          // NOT SUPPORTED FOR NOW // foo:bars -> 123            
-          // NOT SUPPORTED FOR NOW [`${this.setKey}:${lookupName}s`, lookupId], // [`${this.setKey}:${lookupName}s`, lookupId],
-          // foo:bar:123 -> 123:456
-          [`${this.setKey}:${lookupName}:${lookupId}`, id] // [`${this.setKey}:${lookupName}:${lookupId}`, lookedupId]
+          // foos:bar:123 -> 123:456
+          [`${this.setKey}:${lookupName}:${lookupId}`, id],
         ]
       })
       .flat();
@@ -271,15 +267,15 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
 export function create(): Store {
   return {
-    haikus: new RedisStore<Haiku>("test2haiku", undefined, HaikuSaveOptions),
-    dailyHaikus: new RedisStore<DailyHaiku>("test2dailyhaiku", undefined, DailyHaikuSaveOptions),
-    haikuAlbums: new RedisStore<HaikuAlbum>("test2haikualbum"),
-    haikudles: new RedisStore<Haikudle>("test2haikudle", undefined, HaikudleSaveOptions),
-    dailyHaikudles: new RedisStore<DailyHaikudle>("test2dailyhaikudle", undefined, DailyHaikudleSaveOptions),
-    userHaikudles: new RedisStore<UserHaikudle>("test2userhaikudle", undefined, UserHaikudleSaveOptions),
-    userHaikus: new RedisStore<UserHaiku>("test2userhaiku", undefined, UserHaikuSaveOptions),
-    likedHaikus: new RedisStore<LikedHaiku>("test2likedhaiku", undefined, LikedHaikuSaveOptions),
-    userUsage: new RedisStore<UserUsage>("test2userusage"),
-    user: new RedisStore<User>("test2user"),
+    haikus: new RedisStore<Haiku>("test3haiku", undefined, HaikuSaveOptions),
+    dailyHaikus: new RedisStore<DailyHaiku>("test3dailyhaiku", undefined, DailyHaikuSaveOptions),
+    haikuAlbums: new RedisStore<HaikuAlbum>("test3haikualbum"),
+    haikudles: new RedisStore<Haikudle>("test3haikudle", undefined, HaikudleSaveOptions),
+    dailyHaikudles: new RedisStore<DailyHaikudle>("test3dailyhaikudle", undefined, DailyHaikudleSaveOptions),
+    userHaikudles: new RedisStore<UserHaikudle>("test3userhaikudle", undefined, UserHaikudleSaveOptions),
+    userHaikus: new RedisStore<UserHaiku>("test3userhaiku", undefined, UserHaikuSaveOptions),
+    likedHaikus: new RedisStore<LikedHaiku>("test3likedhaiku", undefined, LikedHaikuSaveOptions),
+    userUsage: new RedisStore<UserUsage>("test3userusage"),
+    user: new RedisStore<User>("test3user"),
   }
 }
