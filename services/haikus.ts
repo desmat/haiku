@@ -1,7 +1,7 @@
 import chroma from 'chroma-js';
 import moment from 'moment';
 import { put } from '@vercel/blob';
-import { DailyHaiku, Haiku, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
+import { DailyHaiku, Haiku, LikedHaiku, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
 import { Store } from "@/types/Store";
 import { User } from '@/types/User';
 import { hashCode, mapToList, normalizeWord, uuid } from '@/utils/misc';
@@ -31,10 +31,7 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
   // note that we started with .deprecated but moved to .deprecatedAt
 
   if (!haikus?.length && (!query || JSON.stringify(query) == "{}")) {
-    // empty db, populate with samples
-    haikus = await Promise.all(
-      mapToList(samples.haikus)
-        .map((h: Haiku) => store.haikus.create("(system)", h)));
+    return [];
   }
 
   if (hashPoem) {
@@ -74,13 +71,14 @@ export async function getUserHaikus(user: User, all?: boolean, albumId?: string)
         ]
         : await Promise.all([
           store.haikus.find({
-            createdBy: user.id
+            user: user.id,
           }),
+          // @ts-ignore
           store.userHaikus.find({
-            createdBy: user.id,
+            user: user.id,
           }),
           store.userHaikudles.find({
-            createdBy: user.id,
+            user: user.id,
             // solved: true, // nope, need to filter on haikudle.solved and can't do that
           }),
         ]);
@@ -672,6 +670,7 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
     // create daily haiku if none for today
     const previousDailyHaikus = await getDailyHaikus();
     const previousDailyHaikuIds = previousDailyHaikus
+      .filter(Boolean)
       .map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
     const [
       likedHaikus,
@@ -693,6 +692,11 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
     if (!randomHaiku) {
       randomHaiku = shuffleArray(haikus)[0];
       console.warn(`>> services.haiku.getDailyHaiku WARNING: ran out of liked or non-daily haikus, picking from the lot`, { randomHaiku });
+
+      if (!randomHaiku) {
+        console.warn(`>> services.haiku.getDailyHaiku WARNING: no haikus found!`, { randomHaiku });
+        return undefined;
+      }
     }
 
     console.log('>> app.api.haikus.GET creating daily haiku', { randomHaikuId, randomHaiku, previousDailyHaikus, likedHaikus, haikus });
@@ -780,12 +784,27 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
   return ret;
 }
 
-export async function getLikedHaikus(): Promise<DailyHaiku[]> {
-  const likedUserHaikuIds = (await store.userHaikus.find())
-    .filter((userHaiku: UserHaiku) => userHaiku.likedAt)
-    .map((userHaiku: UserHaiku) => userHaiku.haikuId);
+export async function likeHaiku(user: User, haiku: Haiku, like?: boolean): Promise<LikedHaiku | undefined> {
+  if (like) {
+    return store.likedHaikus.create(user.id, {
+      id: `${user.id}:${haiku.id}`,
+      userId: user.id,
+      haikuId: haiku.id,
+    });
+  } else {
+    return store.likedHaikus.delete(user.id, `${user.id}:${haiku.id}`);
+  }
+}
 
-  return (await store.haikus.find({ id: likedUserHaikuIds })).filter((haiku: Haiku) => !haiku.deletedAt);
+export async function getLikedHaikus(): Promise<DailyHaiku[]> {
+  console.log(">> services.haiku.getLikedHaikus", { });
+
+  const likedHaikus = await store.likedHaikus.find();
+  const haikuIds = Array.from(new Set(likedHaikus.map((likedHaiku: LikedHaiku) => likedHaiku.haikuId)))
+  const haikus = await store.haikus.find({ id: haikuIds });
+  // console.log(">> services.haiku.getLikedHaikus", { likedHaikus, haikuIds, haikus });
+
+  return haikus;  
 }
 
 export async function getLatestHaikus(fromDate?: number, toDate?: number): Promise<Haiku[]> {

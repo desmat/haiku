@@ -789,7 +789,7 @@ export default function MainPage({
           });
 
         // make sure the current haiku at least shows up in side bar as viewed
-        !isPuzzleMode && !haikuAlbumId && user && !user.isAdmin && addUserHaiku(_haiku, "viewed");
+        !isPuzzleMode && !haikuAlbumId && user && !user.isAdmin && !_haiku.error && addUserHaiku(_haiku, "viewed");
       }
     });
   }

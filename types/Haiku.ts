@@ -8,7 +8,18 @@ export type Haiku = {
   updatedAt?: number,
   updatedBy?: string,
   status?: string,
+  lang?: string,
 } | any;
+
+export const HaikuSaveOptions = {
+  indices: {
+    lang: "string",
+  },
+  lookups: {
+    lang: { "lang": "id" },
+    user: { "createdBy": "id" }
+  },
+};
 
 export type UserHaiku = {
   id: string,
@@ -20,18 +31,37 @@ export type UserHaiku = {
   updatedAt?: number,
   updatedBy?: string,
   solvedAt?: number,
-  moves?: number,
+  moves?: number, // move to UserHaikudle
   generatedAt?: number,
   generatedBy?: string,
   viewedAt?: number,
-  likedAt?: number,
+  likedAt?: number, // kill?
 };
 
 export const UserHaikuSaveOptions = {
-  indices: {
-    haikuId: "string",
-    likedAt: "number",
-  }
+  lookups: {
+    // user: "haikuId",
+    // haiku: "userId",    
+    user: { userId: "haikuId"},
+    haiku: { haikuId: "userId" }
+  },
+};
+
+export type LikedHaiku = {
+  id: string,
+  haikuId: string,
+  userId: string,
+  createdBy: string, 
+  createdAt: string,
+} | any;
+
+export const LikedHaikuSaveOptions = {
+  lookups: {
+    // userId: "haikuId",
+    // haikuId: "userId",    
+    user: { userId: "haikuId"},
+    haiku: { haikuId: "userId" }
+  },
 };
 
 export type DailyHaiku = {
@@ -42,6 +72,12 @@ export type DailyHaiku = {
   updatedAt?: number,
   updatedBy?: string,
   theme?: string, // ???
+};
+
+export const DailyHaikuSaveOptions = {
+  lookups: {
+    haiku: { haikuId: "id" }
+  },
 };
 
 export type HaikuAction = string;
