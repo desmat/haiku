@@ -848,10 +848,12 @@ export async function addToAlbum(user: User, haiku: Haiku, albumId: string): Pro
 }
 
 export async function getHaikuAlbum(user: User, albumId: string): Promise<HaikuAlbum | undefined> {
+  console.log(">> services.haiku.getHaikuAlbum", { user, albumId });
   return store.haikuAlbums.get(albumId);
 }
 
 export async function getAlbumHaikus(user: User, albumId: string): Promise<Haiku[]> {
+  console.log(">> services.haiku.getAlbumHaikus", { user, albumId });
   const haikuAlbum = albumId && await store.haikuAlbums.get(albumId);
 
   if (haikuAlbum && haikuAlbum.haikuIds) {
