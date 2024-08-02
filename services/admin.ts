@@ -15,14 +15,14 @@ import(`@/services/stores/${process.env.STORE_TYPE}`)
     store = new s.create();
   });
 
-export async function backup(user: User) {
-  console.log('>> app.services.admin.backup', { user });
+export async function backup(user: User, haikuId?: string | null) {
+  console.log('>> app.services.admin.backup', { user, haikuId });
 
   const keys = Object.keys(store)
-    // .filter((key: string) => key == "haikus"); //testing
+    .filter((key: string) => !haikuId || haikuId && key == "haikus");
   const values = await Promise.all(
     Object.values(store)
-      .map((v: any) => v.find())
+      .map((v: any) => v.find(haikuId ? { id: haikuId } : undefined))
   );
 
   // @ts-ignore
@@ -57,7 +57,7 @@ export async function backup(user: User) {
   );
 
   console.log('>> app.services.admin.backup', { keyValues });
-// return keyValues;
+  // return keyValues;
 
   const p = require('/package.json');
   const filename = `backups/${p.name}_${p.version}_${moment().format("YYYYMMDD_kkmmss")}.json`;

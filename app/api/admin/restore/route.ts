@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // TODO pull from request param
   const filename = request.nextUrl.searchParams.get("filename");
 
   if (!filename) {
