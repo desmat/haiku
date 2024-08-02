@@ -281,14 +281,14 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
 export function create(): Store {
   return {
-    haikus: new RedisStore<Haiku>("haiku"),
-    dailyHaikus: new RedisStore<DailyHaiku>("dailyhaiku"),
-    haikuAlbums: new RedisStore<HaikuAlbum>("haikualbum"),
-    haikudles: new RedisStore<Haikudle>("haikudle"),
-    dailyHaikudles: new RedisStore<DailyHaikudle>("dailyhaikudle"),
-    userHaikudles: new RedisStore<UserHaikudle>("userhaikudle"),
-    userHaikus: new RedisStore<UserHaiku>("userhaiku"),
-    userUsage: new RedisStore<UserUsage>("userusage"),
-    user: new RedisStore<User>("user"),
+    haikus: new RedisStore<Haiku>("kingfisherhaiku"),
+    dailyHaikus: new RedisStore<DailyHaiku>("kingfisherdailyhaiku"),
+    haikuAlbums: new RedisStore<HaikuAlbum>("kingfisherhaikualbum"),
+    haikudles: new RedisStore<Haikudle>("kingfisherhaikudle"),
+    dailyHaikudles: new RedisStore<DailyHaikudle>("kingfisherdailyhaikudle"),
+    userHaikudles: new RedisStore<UserHaikudle>("kingfisheruserhaikudle"),
+    userHaikus: new RedisStore<UserHaiku>("kingfisheruserhaiku"),
+    userUsage: new RedisStore<UserUsage>("kingfisheruserusage"),
+    user: new RedisStore<User>("kingfisheruser"),
   }
 }
