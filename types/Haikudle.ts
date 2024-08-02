@@ -8,11 +8,34 @@ export type Haikudle = {
   updatedBy?: string,
 } | any;
 
+// not really needed - for consistency
+export const HaikudleSaveOptions = {
+  lookups: {
+    haiku: "haikuId",
+    user: "createdBy",
+  },
+};
+
 export type UserHaikudle = {
   id: string,
   userId: string,
-  haikudle: Haikudle,
-} | any;
+  haikudleId: string,
+  haikudle: Haikudle, // kill?
+  createdAt?: number,
+  createdBy?: string,
+  updatedAt?: number,
+  updatedBy?: string,
+  solvedAt?: number,
+  moves?: number,
+}
+  | any; // kill?
+
+export const UserHaikudleSaveOptions = {
+  lookups: {
+    user: "userId",
+    haikudle: "haikudleId",
+  },
+};
 
 export type DailyHaikudle = {
   id: string,
@@ -23,4 +46,10 @@ export type DailyHaikudle = {
   updatedAt?: number,
   updatedBy?: string,
   theme?: string,  // ???
+};
+
+export const DailyHaikudleSaveOptions = {
+  lookups: {
+    haiku: "haikuId",
+  },
 };

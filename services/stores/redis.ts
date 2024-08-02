@@ -19,49 +19,11 @@ import moment from "moment";
 import { kv } from "@vercel/kv";
 import { kvArrayToObject, uuid } from "@/utils/misc";
 import { GenericStore, Store } from "@/types/Store";
-import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
+import { DailyHaiku, DailyHaikuSaveOptions, Haiku, HaikuSaveOptions, LikedHaiku, LikedHaikuSaveOptions, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
 import { HaikuAlbum } from "@/types/Album";
-import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
+import { DailyHaikudle, DailyHaikudleSaveOptions, Haikudle, HaikudleSaveOptions, UserHaikudle, UserHaikudleSaveOptions } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
 import { User } from "@/types/User";
-
-const jsonNotDeletedExpression = "(@.deletedAt > 0) == false && (@.deprecatedAt > 0) == false";
-const jsonEqualsExpression = (key: string, val: string) => {
-  return `@.${key} == ${typeof (val) == "number" ? val : `"${val}"`}`;
-}
-const jsonMatchExpression = (key: string, vals: string | string[]) => {
-  const regex = Array.isArray(vals)
-    ? vals.map((val: string) => `(${val})`).join("|")
-    : `(${vals})`;
-  return `@.${key} ~= "${regex}"`;
-}
-
-const jsonGetNotDeleted = `$[?(${jsonNotDeletedExpression})]`;
-const jsonGetBy = (key: string, val: string, deleted?: boolean) => {
-  const deletedExpression = deleted === false
-    ? ` && (${jsonNotDeletedExpression})`
-    : deleted === true ?
-      ` && ((${jsonNotDeletedExpression}) == false)`
-      : ""
-  return `$[?(true && (${jsonEqualsExpression(key, val)})${deletedExpression})]`;
-}
-const jsonFindBy = (key: string, vals: string | string[], deleted?: boolean) => {
-  const deletedExpression = deleted === false
-    ? ` && (${jsonNotDeletedExpression})`
-    : deleted === true ?
-      ` && ((${jsonNotDeletedExpression}) == false)`
-      : ""
-  return `$[?(true && (${jsonMatchExpression(key, vals)})${deletedExpression})]`;
-}
-
-async function checkKey(key: string) {
-  const response = await kv.json.get(key, "$");
-
-  if (!response || !response.length) {
-    console.log('>> services.stores.redis.checkKey(): empty redis key, creating empty list', { key });
-    return kv.json.set(key, "$", "[]");
-  }
-}
 
 type RedisStoreEntry = {
   id?: string,
@@ -77,13 +39,15 @@ type RedisStoreEntry = {
 
 class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   key: string;
+  setKey: string;
   valueKey: (id: string) => string;
-  listKey: () => string;
+  saveOptions: any;
 
-  constructor(key: string, listKey?: string) {
+  constructor(key: string, setKey?: string, saveOptions?: any) {
     this.key = key;
+    this.setKey = setKey || key + "s";
     this.valueKey = (id: string) => `${key}:${id}`;
-    this.listKey = () => `${listKey || key + "s"}`;
+    this.saveOptions = saveOptions;
   }
 
   async get(id: string): Promise<T | undefined> {
@@ -104,31 +68,48 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   async find(query?: any): Promise<T[]> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { query });
 
-    let keys: string[] | undefined;
-    const queryEntry = query && Object.entries(query)[0];
+    const queryEntries = query && Object.entries(query);
 
-    if (query && queryEntry[0] == "id" && Array.isArray(queryEntry[1])) {
-      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find special case: query is for IDs`, { ids: queryEntry[1] });
-      keys = queryEntry[1]
+    if (queryEntries?.length > 1) {
+      throw `redis.find(query) only supports a single query entry pair`;
+    }
+
+    let keys: string[] | undefined;
+    const queryEntry = queryEntries && queryEntries[0];
+    const [queryKey, queryVal] = queryEntry || [];
+
+    if (queryKey == "id" && Array.isArray(queryVal)) {
+      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find special case: query is for IDs`, { ids: queryVal });
+      keys = queryVal
         .map((id: string) => id && this.valueKey(id))
         .filter(Boolean);
     } else {
-      let list;
-      if (queryEntry?.length > 0) {
-        const jsonFindByQuery = jsonFindBy(queryEntry[0], `${queryEntry[1]}`, false);
-        // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { jsonFindByQuery });
-        list = await kv.json.get(this.listKey(), jsonFindByQuery);
-      } else {
-        list = await kv.json.get(this.listKey(), jsonGetNotDeleted);
-      }
-      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { list });
+      if (queryKey) {
+        /* NOT SUPPORTED FOR NOW
+        if (queryVal == "*") {
+          // lookup keys via the foos:bars lookup set
+          keys = (await kv.zrange(`${this.setKey}:${queryKey}s`, 0, -1))
+            // @ts-ignore
+            .map((key: string) => `${this.key}:${key}`);
+        } else */ if (queryVal) {
+          // lookup keys via the foos:bar:123 lookup set
+          keys = (await kv.zrange(`${this.setKey}:${queryKey}:${queryVal}`, 0, -1))
+            // @ts-ignore
+            .map((key: string) => `${this.key}:${key}`);
+        } else {
+          throw `redis.find(query) query must have key and value`;
+        }
 
-      keys = list && list
-        .map((value: T) => value.id && this.valueKey(value.id))
-        .filter(Boolean);
+        console.log(`>> services.stores.redis.RedisStore<${this.key}>.find queried lookup key`, { query, keys });
+      } else {
+        // get all keys via the index set
+        keys = (await kv.zrange(`${this.setKey}`, 0, -1))
+          // @ts-ignore
+          .map((key: string) => `${this.key}:${key}`)
+      }
     }
 
-    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
 
     // don't mget too many at once otherwise 💥
     const blockSize = 512;
@@ -145,58 +126,90 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
             .filter(Boolean)
             .flat())))
         .flat()
+        .filter((value: any) => value && !value.deletedAt)
       : [];
 
-    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { values });
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { values });
 
     return values as T[];
   }
 
-  async create(userId: string, value: T, options: any = {}): Promise<T> {
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { userId, value, options });
+  async create(userId: string, value: T, options?: any): Promise<T> {
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { userId, value, options, saveOptions: this.saveOptions });
 
-    if (!value.id) {
-      throw `Cannot save with null id`;
+    const now = moment().valueOf();
+    options = { ...this.saveOptions, ...options };
+    
+    const createdValue = {
+      id: value.id || uuid(),
+      createdAt: value.createdAt || now,
+      createdBy: value.createdBy || userId,
+      ...value,
     }
 
-    const additionalListValues = kvArrayToObject(
-      Object.entries(options?.indices || {})
+    /* 
+      create index and lookup sets based on options.lookups
+
+      given a likedhaiku record: 
+      {
+        id: 123:456,
+        userId: 123,
+        haikuId 456,
+      }
+
+      and lookups: 
+      { 
+        user: { userId: "haikuId"},
+        haiku: { haikuId: "userId" }
+      }
+  
+      we want indexes:
+
+      likedhaiku:123:456 -> value (JSON, the rest are sorted sets)
+      likedhaikus -> all likedhaiku id's (ie 123:456, etc)
+      // NOT SUPPORTED FOR NOW // likedhaikus:users -> all user ids (ie 123, etc) NOTE: this should be a sorted set of user ids with its score as number of haikus liked
+      likedhaikus:user:123 -> all likedhaiku id's for the given user (ie 123:456, etc)
+      // NOT SUPPORTED FOR NOW // likedhaikus:haikus ->  NOTE: this should be a sorted set of haiku ids with its score as number of users who liked it
+      likedhaikus:haiku:456 -> all likedhaiku id's for the given haiku (ie 123:456, etc)
+
+    */
+
+
+    const lookupKeys = Object
+      .entries(options?.lookups || {})
+      .map((entry) => {
+        const id = createdValue.id;
+        const lookupName = entry[0];
+        const lookupKey = entry[1];
+        // TODO validate and log errors
         // @ts-ignore
-        .map(([key, val]: [key: string, val: any]) => [key, value[key]])
-    );
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { additionalListValues });
+        const lookupId = createdValue[lookupKey];
 
-    const createdListValue = {
-      id: value.id || uuid(),
-      createdAt: value.createdAt || moment().valueOf(),
-      createdBy: value.createdBy || userId,
-      name: value.name,
-      lang: value.lang,
-      ...additionalListValues,
-    };
-    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { createdListValue });
+        return [
+          // foos -> 123:456
+          [`${this.setKey}`, id],
+          // foos:bar:123 -> 123:456
+          [`${this.setKey}:${lookupName}:${lookupId}`, id],
+        ]
+      })
+      .flat();
 
-    const createdValue = {
-      ...value,
-      ...createdListValue,
-    };
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { lookupKeys });
 
-    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { createdValue });
-
-    await checkKey(this.listKey());
     const responses = await Promise.all([
-      kv.json.arrappend(this.listKey(), "$", createdListValue),
-      kv.json.set(this.valueKey(value.id), "$", createdValue),
-      (options.expire ? kv.expire(this.valueKey(value.id), options.expire) : undefined),
+      kv.json.set(this.valueKey(createdValue.id), "$", createdValue),
+      (options.expire ? kv.expire(this.valueKey(createdValue.id), options.expire) : undefined),
+      kv.zadd(this.setKey, { score: createdValue.createdAt, member: createdValue.id }),
+      ...lookupKeys.map((lookupKey: any) => kv.zadd(lookupKey[0], { score: now, member: lookupKey[1] }))
     ]);
 
-    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { responses });
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { responses });
 
     return new Promise((resolve) => resolve(createdValue));
   }
 
-  async update(userId: string, value: T, options: any = {}): Promise<T> {
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { value });
+  async update(userId: string, value: T, options?: any): Promise<T> {
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { value, options });
 
     if (!value.id) {
       throw `Cannot update ${this.key}: null id`;
@@ -206,48 +219,21 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       throw `Cannot update ${this.key}: does not exist: ${value.id}`;
     }
 
-    const listValue = await kv.json.get(this.listKey(), `${jsonGetBy("id", value.id || "")}`);
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { listEntry: listValue });
-
-    if (!listValue?.length) {
-      // corner case where somehow the list value was not found
-      console.warn(`>> services.stores.redis.RedisStore<${this.key}>.update LIST VALUE NOT FOUND: creating record`);
-      await this.create(userId, value, options);
-    }
+    const now = moment().valueOf();
+    options = { ...this.saveOptions, ...options }
 
     const updatedValue = {
       ...value,
-      updatedAt: moment().valueOf(),
+      updatedAt: now,
       updatedBy: userId
     };
 
-    // TODO prefer kv.json.mset but not available here; figure out an alternative
-    const listKeys = Object
-      .entries({
-        ...(options?.indices || {}),
-        updatedAt: "number",
-        updatedBy: "string",
-      })
-      .map(([key, val]: [key: string, val: any]) => {
-        switch (val) {
-          case "string":
-            // @ts-ignore
-            return kv.json.set(this.listKey(), `${jsonGetBy("id", value.id || "")}.${key}`, `"${updatedValue[`${key}`]}"`)
-          case "number":
-            // @ts-ignore
-            return kv.json.set(this.listKey(), `${jsonGetBy("id", value.id || "")}.${key}`, updatedValue[`${key}`] || 0);
-          default:
-            throw `Unrecongnized index data type: ${val}`
-        }
-      });
-
     const response = await Promise.all([
-      ...listKeys,
       kv.json.set(this.valueKey(value.id), "$", updatedValue),
       (options.expire ? kv.expire(this.valueKey(value.id), options.expire) : undefined),
     ]);
 
-    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { response });
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { response });
 
     return new Promise((resolve) => resolve(updatedValue));
   }
@@ -259,6 +245,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       throw `Cannot delete ${this.key}: null id`;
     }
 
+    options = { ...this.saveOptions, ...options };
     const value = await this.get(id)
     if (!value) {
       throw `Cannot update ${this.key}: does not exist: ${id}`;
@@ -266,9 +253,8 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
     value.deletedAt = moment().valueOf();
     const response = await Promise.all([
-      kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedAt`, value.deletedAt),
-      kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedBy`, `"${userId}"`),
-      options.hardDelete 
+      // TODO remove lookup keys if hardDelete?
+      options.hardDelete
         ? kv.json.del(this.valueKey(id), "$")
         : kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf() }),
     ]);
@@ -281,14 +267,15 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
 export function create(): Store {
   return {
-    haikus: new RedisStore<Haiku>("haiku"),
-    dailyHaikus: new RedisStore<DailyHaiku>("dailyhaiku"),
+    haikus: new RedisStore<Haiku>("haiku", undefined, HaikuSaveOptions),
+    dailyHaikus: new RedisStore<DailyHaiku>("dailyhaiku", undefined, DailyHaikuSaveOptions),
     haikuAlbums: new RedisStore<HaikuAlbum>("haikualbum"),
-    haikudles: new RedisStore<Haikudle>("haikudle"),
-    dailyHaikudles: new RedisStore<DailyHaikudle>("dailyhaikudle"),
-    userHaikudles: new RedisStore<UserHaikudle>("userhaikudle"),
-    userHaikus: new RedisStore<UserHaiku>("userhaiku2"),
-    userUsage: new RedisStore<UserUsage>("userusage"),
-    user: new RedisStore<User>("user2"),
+    haikudles: new RedisStore<Haikudle>("haikudle", undefined, HaikudleSaveOptions),
+    dailyHaikudles: new RedisStore<DailyHaikudle>("dailyhaikudle", undefined, DailyHaikudleSaveOptions),
+    userHaikudles: new RedisStore<UserHaikudle>("legacyuserhaikudle", undefined, UserHaikudleSaveOptions),
+    userHaikus: new RedisStore<UserHaiku>("userhaiku", undefined, UserHaikuSaveOptions),
+    likedHaikus: new RedisStore<LikedHaiku>("likedhaiku", undefined, LikedHaikuSaveOptions),
+    userUsage: new RedisStore<UserUsage>("haikuuserusage"),
+    user: new RedisStore<User>("haikuuser"),
   }
 }

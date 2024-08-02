@@ -180,6 +180,7 @@ export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<H
   userHaikudle = {
     id: userHaikudleId,
     userId: user.id,
+    haikudleId: haikudle.id,
     haikudle,
   }
 

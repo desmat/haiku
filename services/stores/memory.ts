@@ -1,6 +1,6 @@
 
 import { mapToList } from "@/utils/misc";
-import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
+import { DailyHaiku, Haiku, LikedHaiku, UserHaiku } from "@/types/Haiku";
 import { HaikuAlbum } from "@/types/Album";
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { GenericStore, Store } from "@/types/Store";
@@ -155,6 +155,7 @@ export function create(): Store {
     dailyHaikudles: new MemoryStore<DailyHaikudle>("dailyhaikudle"),
     userHaikudles: new MemoryStore<UserHaikudle>("userhaikudle"),
     userHaikus: new MemoryStore<UserHaiku>("userhaiku"),
+    likedHaikus: new MemoryStore<LikedHaiku>("test1likedhaiku"),
     userUsage: new MemoryStore<UserUsage>("userusage"),
     user: new MemoryStore<User>("user"),
   }

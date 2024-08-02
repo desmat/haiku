@@ -1,4 +1,4 @@
-import { DailyHaiku, Haiku, UserHaiku } from "./Haiku";
+import { DailyHaiku, Haiku, LikedHaiku, UserHaiku } from "./Haiku";
 import { Haikudle, UserHaikudle, DailyHaikudle } from "./Haikudle";
 import { HaikuAlbum } from "./Album";
 import { UserUsage } from "./Usage";
@@ -19,6 +19,7 @@ export type Store = {
   haikudles: GenericStore<Haikudle>,
   dailyHaikudles: GenericStore<DailyHaikudle>,
   userHaikus: GenericStore<UserHaiku>,
+  likedHaikus: GenericStore<LikedHaiku>,
   userHaikudles: GenericStore<UserHaikudle>,
   userUsage: GenericStore<UserUsage>,
   user: GenericStore<User>,

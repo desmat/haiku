@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { getHaiku, getUserHaiku, createUserHaiku, saveUserHaiku, regenerateHaikuImage, regenerateHaikuPoem, updateHaikuImage } from '@/services/haikus';
+import { getHaiku, saveUserHaiku, regenerateHaikuImage, regenerateHaikuPoem, updateHaikuImage, likeHaiku } from '@/services/haikus';
 import { userUsage } from '@/services/usage';
 import { userSession } from '@/services/users';
 import { USAGE_LIMIT } from '@/types/Usage';
@@ -25,13 +25,12 @@ export async function POST(
       );
     }
 
-    const userHaiku =
-      (await getUserHaiku(user.id, params.id)) ||
-      (await createUserHaiku(user, haiku));
-
+    const likedHaiku = await likeHaiku(user, haiku, params.action == "like");
     const savedUserHaiku = await saveUserHaiku(user, {
-      ...userHaiku,
-      likedAt: params.action == "like" ? moment().valueOf() : undefined,
+      ...likedHaiku,
+      likedAt: params.action == "like" 
+      ? moment().valueOf() 
+      : undefined,
     });
 
     return NextResponse.json({ haiku, userHaiku: savedUserHaiku });
