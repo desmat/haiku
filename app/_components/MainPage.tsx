@@ -18,6 +18,7 @@ import { Haikudle } from '@/types/Haikudle';
 import { LanguageType } from '@/types/Languages';
 import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleGotoHaikuGenius, haikudleOnboardingSteps, notShowcase_notOnboardedFirstTime_onboardedShowcase, showcase_notOnboardedFirstTime, showcase_onboardedFirstTime, showcase_onboardedFirstTime_admin } from '@/types/Onboarding';
 import { User } from '@/types/User';
+import { upperCaseFirstLetter } from '@/utils/format';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
@@ -487,7 +488,7 @@ export default function MainPage({
     setHaikudle(undefined);
 
     haikudleMode
-      ? loadHaikudle(haikuId || {  ...lang && { lang }, ...album && { album } }).then((haikudles: any) => {
+      ? loadHaikudle(haikuId || { ...lang && { lang }, ...album && { album } }).then((haikudles: any) => {
         // console.log('>> app.MainPage.loadHaiku loadHaikudle.then', { haikudles });
         const loadedHaikudle = haikudles[0] || haikudles;
         setHaiku(loadedHaikudle?.haiku);
@@ -496,7 +497,7 @@ export default function MainPage({
         setLoadingUI(false);
         window.history.replaceState(null, '', `/${haikuId || ""}${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`);
       })
-      : loadHaikus(haikuId || {  ...lang && { lang }, ...album && { album } }, mode)
+      : loadHaikus(haikuId || { ...lang && { lang }, ...album && { album } }, mode)
         .then((haikus: Haiku | Haiku[]) => {
           // console.log('>> app.MainPage.loadHaiku loadHaikus.then', { haikus });
           const loadedHaiku = haikus[0] || haikus;
@@ -592,18 +593,46 @@ export default function MainPage({
     );
   }
 
-  const startBackup = async () => {
-    // console.log('>> app._components.MainPage.startBackup()', {});
+  const startBackup = async (type: 'backup' | 'backupHaiku' | 'restore' = 'backup') => {
+    console.log('>> app._components.MainPage.startBackup()', { type });
 
     const token = await getUserToken();
-    setBackupInProgress(true);
-    // const filename = prompt("File url to restore?");
-    // if (!filename) return;
-    // const res = await fetch(`/api/admin/restore?filename=${filename}`, {
-    const res = await fetch("/api/admin/backup", {
-      headers: { Authorization: `Bearer ${token}` },
-      method: "POST",
-    });
+    let res;
+
+    if (type == 'backup') {
+      const entities = prompt(
+        "Entit(y|ies) to backup? (comma or space-separated names, or empty for all)",
+        "haikus, dailyHaikus, likedHaikus, haikudles, dailyHaikudles, userHaikudles, "
+      );
+      if (typeof (entities) != "string") return;
+
+      setBackupInProgress(true);
+      res = await fetch(`/api/admin/backup?entity=${entities.split(/\W+/).join(",")}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        method: "POST",
+      });
+    } else if (type == 'backupHaiku') {
+      const id = prompt("Haiku(s) to backup? (comma or space-separated ids)", haikuId);
+      if (!id) return;
+
+      setBackupInProgress(true);
+      // const res = await fetch(`/api/admin/restore?filename=${filename}`, {
+      res = await fetch(`/api/admin/backup?haiku=${id.split(/\W+/).join(",")}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        method: "POST",
+      });
+    } else if (type == 'restore') {
+      const filename = prompt("File url to restore?");
+      if (!filename) return;
+
+      setBackupInProgress(true);
+      res = await fetch(`/api/admin/restore?filename=${filename}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        method: "POST",
+      });
+    } else {
+      throw `unknown type '${type}'`;
+    }
 
     setBackupInProgress(false);
 
@@ -614,7 +643,7 @@ export default function MainPage({
     }
 
     const data = await res.json();
-    plainAlert(`Backup successful: ${JSON.stringify(data)}`, {
+    plainAlert(`${upperCaseFirstLetter(type)}Successful: ${JSON.stringify(data)}`, {
       // closeDelay: 3000
     });
   }
@@ -781,7 +810,7 @@ export default function MainPage({
             setHaiku(initializedHaiku);
             setHaikuId(initializedHaiku?.id);
           })
-          : loadHaikus(haikuId || {  ...lang && { lang }, ...album && { album } }).then((haikus: Haiku | Haiku[]) => {
+          : loadHaikus(haikuId || { ...lang && { lang }, ...album && { album } }).then((haikus: Haiku | Haiku[]) => {
             // console.log('>> app.MainPage init loadHaikus.then', { haikus });
             const loadedHaiku = haikus[0] || haikus;
             setHaiku(loadedHaiku);

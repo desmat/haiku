@@ -16,8 +16,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const haikuId = request.nextUrl.searchParams.get("haiku");
-  const ret = await backup(user, haikuId);
+  const haikuIds = request.nextUrl.searchParams.get("haiku");
+  const entities = request.nextUrl.searchParams.get("entity");
+  console.log('>> app.api.admin.backup.POST', { haikuIds, entities });
+  const ret = await backup(user, (entities ?? "").split(",").filter(Boolean), (haikuIds ?? "").split(",").filter(Boolean));
   console.log('>> app.api.admin.backup.POST', { ret });
 
   return NextResponse.json(ret);

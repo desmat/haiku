@@ -9,7 +9,7 @@ import { BiLogoInstagramAlt } from "react-icons/bi";
 import { RiTwitterFill } from "react-icons/ri";
 import { HiSwitchVertical, } from "react-icons/hi";
 import { MdHome, MdDelete, MdFacebook } from "react-icons/md";
-import { BsDatabaseFillUp } from "react-icons/bs";
+import { BsDatabaseFillUp, BsDatabaseFillDown, BsDatabaseDown, BsDatabaseFill } from "react-icons/bs";
 import { FaRandom } from "react-icons/fa";
 import { RiImageFill, RiImageAddLine, RiImageEditLine, RiImageLine } from "react-icons/ri";
 import useUser from '@/app/_hooks/user';
@@ -247,7 +247,7 @@ export default function BottomLinks({
         >
           <MdMail className="text-[1.5rem] md:text-[1.75rem]" />
         </Link> */}
-        {user?.isAdmin && 
+        {user?.isAdmin &&
           <StyledLayers
             styles={haiku?.likedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
           >
@@ -288,7 +288,7 @@ export default function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {true && 
+        {true &&
           <div className="onboarding-container">
             {onboardingElement == "bottom-links-share" &&
               <div className="onboarding-focus" />
@@ -414,16 +414,49 @@ export default function BottomLinks({
           </div>
         }
         {user?.isAdmin &&
-          <div
-            key="backup"
-            onClick={() => !backupInProgress && onBackup && onBackup()}
+          <LinkGroup
+            key="backupOptions"
             title={backupInProgress ? "Database backup in progress..." : "Backup database"}
+            disabled={!haiku?.bgImage || backupInProgress || !onBackup}
             className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
-          >
-            <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
-              <BsDatabaseFillUp className="text-[1.5rem] md:text-[1.75rem]" />
-            </PopOnClick>
-          </div>
+            icon={
+              <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
+                <BsDatabaseFill className="text-[1.5rem] md:text-[1.75rem]" />
+              </PopOnClick>
+            }
+            links={[
+              <div
+                key="backupHaiku"
+                onClick={() => !backupInProgress && onBackup && onBackup("backupHaiku")}
+                title={backupInProgress ? "Database backup in progress..." : "Backup specific haiku"}
+                className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
+                  <BsDatabaseDown className="text-[1.5rem] md:text-[1.75rem]" />
+                </PopOnClick>
+              </div>,
+              <div
+                key="backupEntity"
+                onClick={() => !backupInProgress && onBackup && onBackup("backup")}
+                title={backupInProgress ? "Database backup in progress..." : "Backup database"}
+                className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
+                  <BsDatabaseFillDown className="text-[1.5rem] md:text-[1.75rem]" />
+                </PopOnClick>
+              </div>,
+              <div
+                key="restore"
+                onClick={() => !backupInProgress && onBackup && onBackup("restore")}
+                title={backupInProgress ? "Database backup in progress..." : "Restore database"}
+                className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
+                  <BsDatabaseFillUp className="text-[1.5rem] md:text-[1.75rem]" />
+                </PopOnClick>
+              </div>
+            ]}
+          />
         }
         {mode != "social-img" && user?.isAdmin && process.env.EXPERIENCE_MODE != "haikudle" &&
           <Link

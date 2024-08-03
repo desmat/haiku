@@ -15,14 +15,23 @@ import(`@/services/stores/${process.env.STORE_TYPE}`)
     store = new s.create();
   });
 
-export async function backup(user: User, haikuId?: string | null) {
-  console.log('>> app.services.admin.backup', { user, haikuId });
+export async function backup(user: User, entities?: string[], haikuIds?: string[] | null) {
+  console.log('>> app.services.admin.backup', { user, entities, haikuIds });
 
   const keys = Object.keys(store)
-    .filter((key: string) => !haikuId || haikuId && key == "haikus");
+    .filter((key: string) => {
+      return entities?.length 
+      ? entities.includes(key)
+      : haikuIds?.length
+        ? key == "haikus"
+        : true
+    });
+
+  if (!keys) throw 'No entities to backup';
+
   const values = await Promise.all(
-    Object.values(store)
-      .map((v: any) => v.find(haikuId ? { id: haikuId } : undefined))
+    // @ts-ignore
+    keys.map((key: string) => store[key].find(haikuIds?.length ? { id: haikuIds } : undefined))
   );
 
   // @ts-ignore
