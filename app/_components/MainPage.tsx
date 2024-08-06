@@ -789,39 +789,41 @@ export default function MainPage({
     }
   }, [haiku?.id, loadingUI, showcaseMode, _refreshDelay]);
 
-  if (!userLoaded && !userLoading) {
-    // console.log('>> app.MainPage init', { haiku });
-    loadUser({ ...album && { album } }).then((user: User) => {
-      // console.log('>> app.MainPage init loadUser.then', { user });
-      if (haikudleMode && !previousDailyHaikudleId) {
-        loadHaikudle(haikuId || { lang }).then((haikudles: any) => {
-          // console.log('>> app.MainPage init loadHaikudle.then', { haikudles });
-          const loadedHaikudle = haikudles[0] || haikudles;
-          setHaiku(loadedHaikudle?.haiku);
-          setHaikuId(loadedHaikudle?.haiku?.id);
-          setHaikudle(loadedHaikudle);
-        });
-      } else {
-        // TODO: clean this up
-        haiku
-          ? initHaiku(haiku, haiku.id, mode).then((haikus: Haiku | Haiku[]) => {
-            // console.log('>> app.MainPage init initHaiku.then', { haikus });
-            const initializedHaiku = haikus[0] || haikus;
-            setHaiku(initializedHaiku);
-            setHaikuId(initializedHaiku?.id);
-          })
-          : loadHaikus(haikuId || { ...lang && { lang }, ...album && { album } }).then((haikus: Haiku | Haiku[]) => {
-            // console.log('>> app.MainPage init loadHaikus.then', { haikus });
-            const loadedHaiku = haikus[0] || haikus;
-            setHaiku(loadedHaiku);
-            setHaikuId(loadedHaiku?.id);
+  useEffect(() => {
+    // console.log('>> app.page useEffect [userLoaded, userLoading]', { userLoaded, userLoading });
+    if (!userLoaded && !userLoading) {
+      // console.log('>> app.MainPage init', { haiku });
+      loadUser({ ...album && { album } }).then((user: User) => {
+        // console.log('>> app.MainPage init loadUser.then', { user });
+        if (haikudleMode && !previousDailyHaikudleId) {
+          loadHaikudle(haikuId || { lang }).then((haikudles: any) => {
+            // console.log('>> app.MainPage init loadHaikudle.then', { haikudles });
+            const loadedHaikudle = haikudles[0] || haikudles;
+            setHaiku(loadedHaikudle?.haiku);
+            setHaikuId(loadedHaikudle?.haiku?.id);
+            setHaikudle(loadedHaikudle);
           });
-
-        // make sure the current haiku at least shows up in side bar as viewed
-        !isPuzzleMode && !haikuAlbumId && user && !user.isAdmin && !_haiku.error && addUserHaiku(_haiku, "viewed");
-      }
-    });
-  }
+        } else {
+          haiku
+            ? initHaiku(haiku, haiku.id, mode).then((haikus: Haiku | Haiku[]) => {
+              // console.log('>> app.MainPage init initHaiku.then', { haikus });
+              const initializedHaiku = haikus[0] || haikus;
+              setHaiku(initializedHaiku);
+              setHaikuId(initializedHaiku?.id);
+            })
+            : loadHaikus(haikuId || { ...lang && { lang }, ...album && { album } }).then((haikus: Haiku | Haiku[]) => {
+              // console.log('>> app.MainPage init loadHaikus.then', { haikus });
+              const loadedHaiku = haikus[0] || haikus;
+              setHaiku(loadedHaiku);
+              setHaikuId(loadedHaiku?.id);
+            });
+  
+          // make sure the current haiku at least shows up in side bar as viewed
+          !isPuzzleMode && !haikuAlbumId && user && !user.isAdmin && !_haiku.error && addUserHaiku(_haiku, "viewed");
+        }
+      });
+    }  
+  }, [userLoaded, userLoading]);
 
   // console.log('>> app.MainPage.render() loading page?', { loadingUI, generating, haikudleMode, haikudleLoaded, haikudleReady, thing: haikudleMode && !haikudleLoaded && !haikudleReady });
 
