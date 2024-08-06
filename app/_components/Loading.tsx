@@ -1,19 +1,15 @@
-import moment from "moment";
 import Link from "next/link";
 import { Suspense } from "react";
-import seedrandom from "seedrandom";
 import * as font from "@/app/font";
 import { StyledLayers } from "./StyledLayers";
 import { default as ClientLoading } from "@/app/_components/client/Loading";
 
 export const loadingMessages = [
   "Loading",
-]
+];
 
 export default function Loading({ styles = [] }: { styles?: any }) {
-  const seed = Math.floor(moment().valueOf() / (5 * 60 * 1000)); // make sure client and server sides render the same within a reasonable window
-  // @ts-ignore
-  const loadingMessage = loadingMessages[Math.floor(seedrandom(`${seed}`)() * loadingMessages.length)];
+  const loadingMessage = "";
   // console.log('>> app._components.Loading', { seed, random: seedrandom(`${seed}`)(), loadingMessage });
 
   return (
@@ -26,7 +22,9 @@ export default function Loading({ styles = [] }: { styles?: any }) {
         >
           <StyledLayers styles={styles}>
             <div className="animate-pulse flex flex-col items-center">
-              <div>{loadingMessage}...</div>
+              <div className="_bg-pink-200 relative text-center w-[80vw]">
+                {loadingMessage ? `${loadingMessage}...` : ""}
+              </div>
             </div>
           </StyledLayers>
         </Link>
@@ -34,7 +32,5 @@ export default function Loading({ styles = [] }: { styles?: any }) {
     >
       <ClientLoading styles={styles} />
     </Suspense>
-
-
   );
 }

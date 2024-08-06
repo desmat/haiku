@@ -218,3 +218,17 @@ ul {
 .Alert a, .Alert .Action {
   text-decoration: underline;
 }
+
+.animate-pulse-offset {
+  animation: pulse-offset 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-offset {
+  0%, 100% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
+}
