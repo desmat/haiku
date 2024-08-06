@@ -793,7 +793,7 @@ export default function MainPage({
     // console.log('>> app.page useEffect [userLoaded, userLoading]', { userLoaded, userLoading });
     if (!userLoaded && !userLoading) {
       // console.log('>> app.MainPage init', { haiku });
-      loadUser({ ...album && { album } }).then((user: User) => {
+      loadUser({ ...album && { album } }).then(({ user }: any) => {
         // console.log('>> app.MainPage init loadUser.then', { user });
         if (haikudleMode && !previousDailyHaikudleId) {
           loadHaikudle(haikuId || { lang }).then((haikudles: any) => {
