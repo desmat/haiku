@@ -258,7 +258,7 @@ export default function BottomLinks({
               onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.likedAt ? "un-like" : "like")}
             >
               {user?.isAdmin && haiku?.numLikes > 0 &&
-                <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.6rem] h-[0.6rem] bg-red-600" />
+                <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-blue-600" />
               }
               <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>
                 <IoHeartSharp className="text-[1.75rem] md:text-[2rem]" />
