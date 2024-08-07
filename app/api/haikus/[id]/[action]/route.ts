@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { getHaiku, saveUserHaiku, regenerateHaikuImage, regenerateHaikuPoem, updateHaikuImage, likeHaiku } from '@/services/haikus';
+import { getHaiku, saveUserHaiku, regenerateHaikuImage, regenerateHaikuPoem, updateHaikuImage, likeHaiku, flagHaiku } from '@/services/haikus';
 import { userUsage } from '@/services/usage';
 import { userSession } from '@/services/users';
 import { USAGE_LIMIT } from '@/types/Usage';
@@ -29,6 +29,26 @@ export async function POST(
     const savedUserHaiku = await saveUserHaiku(user, {
       ...likedHaiku,
       likedAt: params.action == "like" 
+      ? moment().valueOf() 
+      : undefined,
+    });
+
+    return NextResponse.json({ haiku: await getHaiku(user, params.id) });
+  } else if (["flag", "un-flag"].includes(params.action)) {
+    const { user } = await userSession(request);
+    const haiku = await getHaiku(user, params.id);
+
+    if (!haiku) {
+      return NextResponse.json(
+        { success: false, message: 'haiku not found' },
+        { status: 404 }
+      );
+    }
+
+    const flaggedHaiku = await flagHaiku(user, haiku, params.action == "flag");
+    const savedUserHaiku = await saveUserHaiku(user, {
+      ...flaggedHaiku,
+      flaggedAt: params.action == "flag" 
       ? moment().valueOf() 
       : undefined,
     });

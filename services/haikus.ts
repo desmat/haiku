@@ -1,11 +1,10 @@
 import chroma from 'chroma-js';
 import moment from 'moment';
 import { put } from '@vercel/blob';
-import { DailyHaiku, Haiku, LikedHaiku, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
+import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
 import { Store } from "@/types/Store";
 import { User } from '@/types/User';
 import { hashCode, listToMap, normalizeWord, uuid } from '@/utils/misc';
-import * as samples from '@/services/stores/samples';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { Haikudle, UserHaikudle } from '@/types/Haikudle';
 import { USAGE_LIMIT } from '@/types/Usage';
@@ -154,11 +153,15 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   let [
     haiku,
     userLiked, 
-    haikuLikes
+    haikuLikes,
+    userFlagged, 
+    haikuflags,
   ] = await Promise.all([
     store.haikus.get(versionedId),
     user?.id && store.likedHaikus.get(`${user?.id}:${id}`),
-    store.likedHaikus.find({ haiku: id }),
+    user.isAdmin && store.likedHaikus.find({ haiku: id }),
+    user.isAdmin && user?.id && store.flaggedHaikus.get(`${user?.id}:${id}`),
+    user.isAdmin && store.flaggedHaikus.find({ haiku: id }),
   ])
 
   if (!haiku) return;
@@ -167,8 +170,12 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     haiku = { ...haiku, id };
   }
 
-  haiku.likedAt = userLiked?.createdAt;
-  haiku.numLikes = haikuLikes.length;
+  if (user.isAdmin) {
+    haiku.likedAt = userLiked?.createdAt;
+    haiku.numLikes = haikuLikes && haikuLikes.length;
+    haiku.flaggedAt = userFlagged?.createdAt;
+    haiku.numFlags = haikuflags && haikuflags.length;
+  }
 
   if (hashPoem) {
     haiku = {
@@ -672,33 +679,39 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
 
   if (!dailyHaiku) {
     // create daily haiku if none for today
-    const previousDailyHaikus = await getDailyHaikus();
-    const previousDailyHaikuIds = previousDailyHaikus
-      .filter(Boolean)
-      .map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
     const [
+      haikus,
+      previousDailyHaikus,
       likedHaikus,
-      haikus
+      flaggedHaikus,
     ] = await Promise.all([
-      getLikedHaikus(),
       getHaikus(),
+      getDailyHaikus(),
+      getLikedHaikus(),
+      getFlaggedHaikus(),
     ]);
 
+    const flaggedHaikuIds = flaggedHaikus.map((haiku: Haiku) => haiku.id);
+    const previousDailyHaikuIds = previousDailyHaikus
+    .filter(Boolean)
+    .map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
+
     const nonDailyLikedhaikus = likedHaikus
-      .filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
+      .filter((haiku: Haiku) => !flaggedHaikuIds.includes(haiku.id) && !previousDailyHaikuIds.includes(haiku.id));
     const nonDailyhaikus = haikus
-      .filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
+      .filter((haiku: Haiku) => !flaggedHaikuIds.includes(haiku.id) && !previousDailyHaikuIds.includes(haiku.id));
 
     // pick from liked haikus, else all haikus
     const randomHaikuId = shuffleArray(nonDailyLikedhaikus || nonDailyhaikus)[0]?.id;
     let randomHaiku = listToMap(haikus)[randomHaikuId];
 
     if (!randomHaiku) {
-      randomHaiku = shuffleArray(haikus)[0];
       console.warn(`>> services.haiku.getDailyHaiku WARNING: ran out of liked or non-daily haikus, picking from the lot`, { randomHaiku });
+      randomHaiku = shuffleArray(haikus)[0];
 
       if (!randomHaiku) {
         console.warn(`>> services.haiku.getDailyHaiku WARNING: no haikus found!`, { randomHaiku });
+        // TODO generate haiku here
         return undefined;
       }
     }
@@ -808,6 +821,30 @@ export async function getLikedHaikus(): Promise<Haiku[]> {
   const haikuIds = Array.from(new Set(likedHaikus.map((likedHaiku: LikedHaiku) => likedHaiku.haikuId)))
   const haikus = await store.haikus.find({ id: haikuIds });
   // console.log(">> services.haiku.getLikedHaikus", { likedHaikus, haikuIds, haikus });
+
+  return haikus;
+}
+
+export async function flagHaiku(user: User, haiku: Haiku, flag?: boolean): Promise<LikedHaiku | undefined> {
+  console.log(">> services.haiku.flagHaiku", { user, haiku, flag });
+  if (flag) {
+    return store.flaggedHaikus.create(user.id, {
+      id: `${user.id}:${haiku.id}`,
+      userId: user.id,
+      haikuId: haiku.id,
+    });
+  } else {
+    return store.flaggedHaikus.delete(user.id, `${user.id}:${haiku.id}`);
+  }
+}
+
+export async function getFlaggedHaikus(): Promise<Haiku[]> {
+  console.log(">> services.haiku.getFlaggedHaikus", {});
+
+  const flaggedHaikus = await store.flaggedHaikus.find();
+  const haikuIds = Array.from(new Set(flaggedHaikus.map((flaggedHaiku: FlaggedHaiku) => flaggedHaiku.haikuId)))
+  const haikus = await store.haikus.find({ id: haikuIds });
+  // console.log(">> services.haiku.getFlaggedHaikus", { flaggedHaikus, haikuIds, haikus });
 
   return haikus;
 }

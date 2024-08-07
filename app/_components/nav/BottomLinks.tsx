@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react';
-import { IoAddCircle, IoHelpCircle, IoHeartSharp } from 'react-icons/io5';
+import { IoAddCircle, IoHelpCircle, IoHeartSharp, IoFlagSharp } from 'react-icons/io5';
 import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
 import { BiLogoInstagramAlt } from "react-icons/bi";
 import { RiTwitterFill } from "react-icons/ri";
@@ -255,13 +255,32 @@ export default function BottomLinks({
               key="heart"
               title={`${haiku?.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user?.isAdmin ? `(${haiku?.numLikes} like${!haiku?.numLikes || haiku?.numLikes > 1 ? "s" : ""})` : ""}`}
               className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
-              onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku()}
+              onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.likedAt ? "un-like" : "like")}
             >
               {user?.isAdmin && haiku?.numLikes > 0 &&
                 <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.6rem] h-[0.6rem] bg-red-600" />
               }
               <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>
                 <IoHeartSharp className="text-[1.75rem] md:text-[2rem]" />
+              </PopOnClick>
+            </div>
+          </StyledLayers>
+        }
+        {user?.isAdmin &&
+          <StyledLayers
+            styles={haiku?.flaggedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
+          >
+            <div
+              key="flag"
+              title={`${haiku?.flaggedAt ? "Un-flag this haiku" : "Flag this haiku"} ${user?.isAdmin ? `(flagged ${haiku?.numFlags} time${!haiku?.numFlags || haiku?.numFlags > 1 ? "s" : ""})` : ""}`}
+              className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
+              onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.flaggedAt ? "un-flag" : "flag")}
+            >
+              {user?.isAdmin && haiku?.numFlags > 0 &&
+                <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.6rem] h-[0.6rem] bg-red-600" />
+              }
+              <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>
+                <IoFlagSharp className="text-[1.5rem] md:text-[1.75rem]" />
               </PopOnClick>
             </div>
           </StyledLayers>

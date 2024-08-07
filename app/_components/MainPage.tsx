@@ -677,16 +677,19 @@ export default function MainPage({
     }
   }
 
-  const likeHaiku = () => {
-    // console.log('>> app._components.MainPage.likeHaiku()', { haikuId });
-
-    // const userHaiku = userHaikus[haiku.id];
-    const value = haiku?.likedAt ? undefined : moment().valueOf();
-    // console.log('>> app._components.MainPage.likeHaiku()', { value });
+  const likeHaiku = (action: "like" | "un-like" | "flag" | "un-flag") => {
+    // console.log('>> app._components.MainPage.likeHaiku()', { haikuId, action });
 
     // anticipate
-    setHaiku({ ...haiku, likedAt: value });
-    haikuAction(haikuId, value ? "like" : "un-like").then((haiku: Haiku) => {
+    setHaiku({ 
+      ...haiku, 
+      ...action == "like" && { likedAt: moment().valueOf() },
+      ...action == "un-like" && { likedAt: undefined },
+      ...action == "flag" && { flaggedAt: moment().valueOf() },
+      ...action == "un-flag" && { flaggedAt: undefined },
+    });
+
+    haikuAction(haikuId, action).then((haiku: Haiku) => {
       setHaiku(haiku);
     })
   }

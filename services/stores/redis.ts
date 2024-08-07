@@ -19,7 +19,7 @@ import moment from "moment";
 import { kv } from "@vercel/kv";
 import { kvArrayToObject, uuid } from "@/utils/misc";
 import { GenericStore, Store } from "@/types/Store";
-import { DailyHaiku, DailyHaikuSaveOptions, Haiku, HaikuSaveOptions, LikedHaiku, LikedHaikuSaveOptions, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
+import { DailyHaiku, DailyHaikuSaveOptions, FlaggedHaiku, FlaggedHaikuSaveOptions, Haiku, HaikuSaveOptions, LikedHaiku, LikedHaikuSaveOptions, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
 import { HaikuAlbum } from "@/types/Album";
 import { DailyHaikudle, DailyHaikudleSaveOptions, Haikudle, HaikudleSaveOptions, UserHaikudle, UserHaikudleSaveOptions } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
@@ -275,6 +275,7 @@ export function create(): Store {
     userHaikudles: new RedisStore<UserHaikudle>("legacyuserhaikudle", undefined, UserHaikudleSaveOptions),
     userHaikus: new RedisStore<UserHaiku>("userhaiku", undefined, UserHaikuSaveOptions),
     likedHaikus: new RedisStore<LikedHaiku>("likedhaiku", undefined, LikedHaikuSaveOptions),
+    flaggedHaikus: new RedisStore<FlaggedHaiku>("flaggedhaiku", undefined, FlaggedHaikuSaveOptions),
     userUsage: new RedisStore<UserUsage>("haikuuserusage"),
     user: new RedisStore<User>("haikuuser"),
   }

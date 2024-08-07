@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes, createHaiku, getAlbumHaikus } from '@/services/haikus';
+import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes, createHaiku, getAlbumHaikus, getFlaggedHaikus } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
 import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
@@ -41,10 +41,15 @@ export async function GET(request: NextRequest, params?: any) {
       query.lang = "en";
     }
 
-    const [haikus, dailyHaikudles] = await Promise.all([
+    let [haikus, dailyHaikudles, flaggedHaikus] = await Promise.all([
       getHaikus(query, mode == "haikudle"),
       getDailyHaikudles(),
+      getFlaggedHaikus(),
     ]);
+
+    // exclude flagged haikus
+    const flaggedHaikuIds = flaggedHaikus.map((haiku: Haiku) => haiku.id);
+    haikus = haikus.filter((haiku: Haiku) => !flaggedHaikuIds.includes(haiku.id))
 
     const randomHaiku = haikus[Math.floor(Math.random() * haikus.length)];
     const [numLikes, userHaiku, userHaikudle] = await Promise.all([

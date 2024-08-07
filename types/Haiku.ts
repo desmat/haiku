@@ -57,6 +57,21 @@ export const LikedHaikuSaveOptions = {
   },
 };
 
+export type FlaggedHaiku = {
+  id: string,
+  haikuId: string,
+  userId: string,
+  createdBy: string, 
+  createdAt: string,
+} | any;
+
+export const FlaggedHaikuSaveOptions = {
+  lookups: {
+    user: "userId",
+    haiku: "haikuId",
+  },
+};
+
 export type DailyHaiku = {
   id: string,
   haikuId: string,
