@@ -41,14 +41,17 @@ export async function GET(request: NextRequest, params?: any) {
       query.lang = "en";
     }
 
-    const [haikus, dailyHaikudles, userHaiku, userHaikudle] = await Promise.all([
+    const [haikus, dailyHaikudles] = await Promise.all([
       getHaikus(query, mode == "haikudle"),
       getDailyHaikudles(),
-      getUserHaiku(user.id, params.id),
-      getUserHaikudle(user?.id, params.id),
     ]);
 
     const randomHaiku = haikus[Math.floor(Math.random() * haikus.length)];
+    const [numLikes, userHaiku, userHaikudle] = await Promise.all([
+      getHaikuNumLikes(randomHaiku.id),
+      getUserHaiku(user.id, randomHaiku.id),
+      getUserHaikudle(user?.id, randomHaiku.id),
+    ]);
     const dailyHaikudle = dailyHaikudles
       .filter((dailyHaikudles: DailyHaikudle) => dailyHaikudles.haikuId == randomHaiku.id)[0];
     // console.log('>> app.api.haikus.GET', { dailyHaikudles, dailyHaikudle });
@@ -61,9 +64,8 @@ export async function GET(request: NextRequest, params?: any) {
       createUserHaiku(user, randomHaiku);
     }
 
-    // if (user.isAdmin) {
-    randomHaiku.numLikes = await getHaikuNumLikes(randomHaiku.id);
-    // }
+    randomHaiku.numLikes = numLikes;
+    randomHaiku.likedAt = userHaiku?.likedAt;
 
     return NextResponse.json({ haikus: [randomHaiku] });
   } else if (typeof (query.latest) == "string") {

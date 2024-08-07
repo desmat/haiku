@@ -151,13 +151,24 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   console.log(`>> services.haiku.getHaiku`, { id, hashPoem });
 
   const versionedId = version ? `${id}:${version}` : id;
-  let haiku = await store.haikus.get(versionedId);
+  let [
+    haiku,
+    userLiked, 
+    haikuLikes
+  ] = await Promise.all([
+    store.haikus.get(versionedId),
+    user?.id && store.likedHaikus.get(`${user?.id}:${id}`),
+    store.likedHaikus.find({ haiku: id }),
+  ])
 
   if (!haiku) return;
 
   if (version) {
     haiku = { ...haiku, id };
   }
+
+  haiku.likedAt = userLiked?.createdAt;
+  haiku.numLikes = haikuLikes.length;
 
   if (hashPoem) {
     haiku = {
@@ -169,17 +180,12 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     }
   }
 
-  // if (user.isAdmin) {
-  haiku.numLikes = await getHaikuNumLikes(haiku.id);
-  // }
-
   console.log(`>> services.haiku.getHaiku`, { id, haiku });
   return haiku;
 }
 
 export async function getHaikuNumLikes(id: number) {
-  return (await store.userHaikus.find({ haikuId: id }))
-    .filter((uh: UserHaiku) => uh.likedAt)
+  return (await store.likedHaikus.find({ haiku: id }))
     .length;
 }
 
@@ -685,7 +691,7 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
 
     // pick from liked haikus, else all haikus
     const randomHaikuId = shuffleArray(nonDailyLikedhaikus || nonDailyhaikus)[0]?.id;
-    let randomHaiku =  listToMap(haikus)[randomHaikuId];
+    let randomHaiku = listToMap(haikus)[randomHaikuId];
 
     if (!randomHaiku) {
       randomHaiku = shuffleArray(haikus)[0];
@@ -783,6 +789,7 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
 }
 
 export async function likeHaiku(user: User, haiku: Haiku, like?: boolean): Promise<LikedHaiku | undefined> {
+  console.log(">> services.haiku.likeHaiku", { user, haiku, like });
   if (like) {
     return store.likedHaikus.create(user.id, {
       id: `${user.id}:${haiku.id}`,
@@ -795,14 +802,14 @@ export async function likeHaiku(user: User, haiku: Haiku, like?: boolean): Promi
 }
 
 export async function getLikedHaikus(): Promise<Haiku[]> {
-  console.log(">> services.haiku.getLikedHaikus", { });
+  console.log(">> services.haiku.getLikedHaikus", {});
 
   const likedHaikus = await store.likedHaikus.find();
   const haikuIds = Array.from(new Set(likedHaikus.map((likedHaiku: LikedHaiku) => likedHaiku.haikuId)))
   const haikus = await store.haikus.find({ id: haikuIds });
   // console.log(">> services.haiku.getLikedHaikus", { likedHaikus, haikuIds, haikus });
 
-  return haikus;  
+  return haikus;
 }
 
 export async function getLatestHaikus(fromDate?: number, toDate?: number): Promise<Haiku[]> {

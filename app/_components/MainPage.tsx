@@ -680,10 +680,13 @@ export default function MainPage({
   const likeHaiku = () => {
     // console.log('>> app._components.MainPage.likeHaiku()', { haikuId });
 
-    const userHaiku = userHaikus[haiku.id];
-    const value = userHaiku?.likedAt ? undefined : moment().valueOf();
+    // const userHaiku = userHaikus[haiku.id];
+    const value = haiku?.likedAt ? undefined : moment().valueOf();
+    // console.log('>> app._components.MainPage.likeHaiku()', { value });
 
-    haikuAction(haikuId, userHaiku?.likedAt ? "un-like" : "like").then((haiku: Haiku) => {
+    // anticipate
+    setHaiku({ ...haiku, likedAt: value });
+    haikuAction(haikuId, value ? "like" : "un-like").then((haiku: Haiku) => {
       setHaiku(haiku);
     })
   }
@@ -804,25 +807,18 @@ export default function MainPage({
             setHaikudle(loadedHaikudle);
           });
         } else {
-          haiku
-            ? initHaiku(haiku, haiku.id, mode).then((haikus: Haiku | Haiku[]) => {
-              // console.log('>> app.MainPage init initHaiku.then', { haikus });
-              const initializedHaiku = haikus[0] || haikus;
-              setHaiku(initializedHaiku);
-              setHaikuId(initializedHaiku?.id);
-            })
-            : loadHaikus(haikuId || { ...lang && { lang }, ...album && { album } }).then((haikus: Haiku | Haiku[]) => {
-              // console.log('>> app.MainPage init loadHaikus.then', { haikus });
-              const loadedHaiku = haikus[0] || haikus;
-              setHaiku(loadedHaiku);
-              setHaikuId(loadedHaiku?.id);
-            });
-  
+          loadHaikus(haikuId || { ...lang && { lang }, ...album && { album } }).then((haikus: Haiku | Haiku[]) => {
+            // console.log('>> app.MainPage init loadHaikus.then', { haikus });
+            const loadedHaiku = haikus[0] || haikus;
+            setHaiku(loadedHaiku);
+            setHaikuId(loadedHaiku?.id);
+          });
+
           // make sure the current haiku at least shows up in side bar as viewed
           !isPuzzleMode && !haikuAlbumId && user && !user.isAdmin && !_haiku.error && addUserHaiku(_haiku, "viewed");
         }
       });
-    }  
+    }
   }, [userLoaded, userLoading]);
 
   // console.log('>> app.MainPage.render() loading page?', { loadingUI, generating, haikudleMode, haikudleLoaded, haikudleReady, thing: haikudleMode && !haikudleLoaded && !haikudleReady });
@@ -860,7 +856,6 @@ export default function MainPage({
         lang={lang}
         haiku={{
           ...(haikudleSolved ? solvedHaikudleHaiku : haiku),
-          likedAt: userHaikus[haiku.id]?.likedAt,
         }}
         album={album}
         refreshDelay={_refreshDelay}

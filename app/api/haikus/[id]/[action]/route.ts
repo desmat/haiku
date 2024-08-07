@@ -33,7 +33,7 @@ export async function POST(
       : undefined,
     });
 
-    return NextResponse.json({ haiku, userHaiku: savedUserHaiku });
+    return NextResponse.json({ haiku: await getHaiku(user, params.id) });
   } else if (params.action == "regenerate") {
     let { haiku, part, artStyle, album }: any = await request.json();
     part = part || "poem";
