@@ -829,7 +829,8 @@ export async function getAlbumHaikus(user: User, albumId: string): Promise<Haiku
   const haikuAlbum = albumId && await store.haikuAlbums.get(albumId);
 
   if (haikuAlbum && haikuAlbum.haikuIds) {
-    return store.haikus.find({ id: haikuAlbum.haikuIds || [] });
+    return (await store.haikus.find({ id: haikuAlbum.haikuIds || [] }))
+      .filter((haiku: Haiku) => haiku && !haiku.deletedAt);
   }
 
   return [];
