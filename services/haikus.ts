@@ -68,7 +68,8 @@ export async function getUserHaikus(user: User, all?: boolean, albumId?: string)
       userHaikudles
     ] = haikuAlbum
         ? [
-          await store.haikus.find({ id: haikuAlbum.haikuIds }),
+          (await store.haikus.find({ id: haikuAlbum.haikuIds }))
+            .filter((haiku: Haiku) => haiku && !haiku.deletedAt),
           [],
           []
         ]
@@ -530,7 +531,7 @@ export async function generateHaiku(user: User, {
     imageModel,
     imageUrl,
     poem: poem || generatedPoem || [],
-    albumId,    
+    albumId,
   });
 }
 
@@ -826,7 +827,7 @@ export async function getHaikuAlbum(user: User, albumId: string): Promise<HaikuA
 
 export async function getAlbumHaikus(user: User, albumId: string): Promise<Haiku[]> {
   const haikuAlbum = albumId && await store.haikuAlbums.get(albumId);
-  
+
   if (haikuAlbum && haikuAlbum.haikuIds) {
     return store.haikus.find({ id: haikuAlbum.haikuIds || [] });
   }
