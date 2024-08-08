@@ -154,7 +154,7 @@ export function NavOverlay({
             />
             <div
               className="_bg-pink-400 _opacity-50 absolute top-0 left-0 w-full h-full cursor-pointer"
-              onClick={() => onSwitchMode && onSwitchMode(process.env.EXPERIENCE_MODE)}
+              onClick={() => user?.isAdmin && onClickRandom ? onClickRandom() : onSwitchMode && onSwitchMode(process.env.EXPERIENCE_MODE)}
             />
           </PopOnClick>
         </div>
