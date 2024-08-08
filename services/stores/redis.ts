@@ -142,7 +142,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       ? (await Promise.all(
         blocks
           .map(async (keys: string[]) => (await kv.json.mget(keys, "$"))
-            .filter(Boolean)
+            .filter((v: any) => v && !v.deletedAt)
             .flat())))
         .flat()
       : [];
@@ -268,7 +268,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     const response = await Promise.all([
       kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedAt`, value.deletedAt),
       kv.json.set(this.listKey(), `${jsonGetBy("id", id)}.deletedBy`, `"${userId}"`),
-      options.hardDelete 
+      options.hardDelete
         ? kv.json.del(this.valueKey(id), "$")
         : kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf() }),
     ]);
