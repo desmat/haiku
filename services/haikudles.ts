@@ -127,7 +127,7 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
   }
 
   // remove daily haikudle and this user's userhaikudle (leave the others alone)
-  const userHaikudleId = `${id}-${user.id}`;
+  const userHaikudleId = `${user.id}:${id}`;
   const [
     dailyHaikudles,
     userHaikudle
@@ -157,7 +157,7 @@ export async function saveHaikudle(user: any, haikudle: Haikudle): Promise<Haiku
 export async function getUserHaikudle(userId: string, haikudleId: string): Promise<UserHaikudle | undefined> {
   console.log(`>> services.haikudle.getUserHaikudle`, { userId, haikudleId });
 
-  const userHaikudleId = `${haikudleId}-${userId}`; // this really should be userId:haikudleId but too late ¯\_(ツ)_/¯
+  const userHaikudleId = `${userId}:${haikudleId}`;
   const userHaikudle = await store.userHaikudles.get(userHaikudleId);
   console.log(`>> services.haikudle.getUserHaikudle`, { userHaikudleId, userHaikudle });
   return new Promise((resolve, reject) => resolve(userHaikudle));
@@ -170,7 +170,7 @@ export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<H
     throw `Unauthorized`;
   }
 
-  const userHaikudleId = `${haikudle.haikuId}-${user.id}`;
+  const userHaikudleId = `${user.id}:${haikudle.haikuId}`;
   let userHaikudle = await store.userHaikudles.get(userHaikudleId);
 
   if (userHaikudle) {

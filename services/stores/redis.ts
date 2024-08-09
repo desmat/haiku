@@ -272,7 +272,7 @@ export function create(): Store {
     haikuAlbums: new RedisStore<HaikuAlbum>("haikualbum"),
     haikudles: new RedisStore<Haikudle>("haikudle", undefined, HaikudleSaveOptions),
     dailyHaikudles: new RedisStore<DailyHaikudle>("dailyhaikudle", undefined, DailyHaikudleSaveOptions),
-    userHaikudles: new RedisStore<UserHaikudle>("legacyuserhaikudle", undefined, UserHaikudleSaveOptions),
+    userHaikudles: new RedisStore<UserHaikudle>("userhaikudle", undefined, UserHaikudleSaveOptions),
     userHaikus: new RedisStore<UserHaiku>("userhaiku", undefined, UserHaikuSaveOptions),
     likedHaikus: new RedisStore<LikedHaiku>("likedhaiku", undefined, LikedHaikuSaveOptions),
     flaggedHaikus: new RedisStore<FlaggedHaiku>("flaggedhaiku", undefined, FlaggedHaikuSaveOptions),
