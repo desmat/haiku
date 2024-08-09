@@ -174,11 +174,9 @@ export default function MainPage({
   }
 
   const userGeneratedHaiku = haiku?.createdBy == user?.id && !user?.isAdmin;
-  const userGeneratedHaikudle = haikudleMode && userGeneratedHaiku;
   // console.log('>> app.MainPage.render()', { userGeneratedHaiku, userGeneratedHaikudle, solvedHaikudleHaiku, haiku });
 
   const isPuzzleMode = haikudleMode &&
-    !userGeneratedHaikudle &&
     !haikudleSolved &&
     (!previousDailyHaikudleId || user?.isAdmin);
   //&& (!(haiku?.createdBy == user?.id) || user?.isAdmin);
@@ -652,7 +650,7 @@ export default function MainPage({
 
   const copyHaiku = () => {
     if (haikudleMode && haikudleSolved || !haikudleMode) {
-      navigator.clipboard.writeText(formatHaikuText(haikudleSolved || userGeneratedHaikudle ? solvedHaikudleHaiku : haiku, mode));
+      navigator.clipboard.writeText(formatHaikuText(haikudleSolved ? solvedHaikudleHaiku : haiku, mode));
       plainAlert(`Haiku poem copied to clipboard`, { closeDelay: 750 });
     }
   }
@@ -860,7 +858,7 @@ export default function MainPage({
         mode={mode}
         lang={lang}
         haiku={{
-          ...(haikudleSolved || userGeneratedHaikudle ? solvedHaikudleHaiku : haiku),
+          ...(haikudleSolved ? solvedHaikudleHaiku : haiku),
         }}
         album={album}
         refreshDelay={_refreshDelay}
@@ -922,7 +920,7 @@ export default function MainPage({
         <HaikuPage
           user={user}
           mode={mode}
-          haiku={haikudleSolved || userGeneratedHaikudle ? solvedHaikudleHaiku : haiku}
+          haiku={haikudleSolved ? solvedHaikudleHaiku : haiku}
           styles={textStyles}
           altStyles={altTextStyles}
           fontSize={fontSize}

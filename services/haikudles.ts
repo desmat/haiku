@@ -30,7 +30,8 @@ export async function getHaikudles(query?: any): Promise<Haikudle[]> {
 
 async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudle> {
   const haiku = await getHaiku(user, haikudle.haikuId);
-  console.log(`>> services.haikudle.createInProgress`, { haiku });
+  const shuffle = !user || user.isAdmin || !user.isAdmin && user.id != haiku.createdBy;
+  console.log(`>> services.haikudle.createInProgress`, { haiku, user, shuffle });
 
   let words = haiku.poem
     .join(" ")
@@ -44,17 +45,19 @@ async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudl
       }
     });
 
-  // always set first 2 and last words correct
-  let correctWords = [
-    words.splice(0, 2),
-    words.splice(words.length - 1, 1),
-  ];
+  if (shuffle) {
+    // always set first 2 and last words correct
+    let correctWords = [
+      words.splice(0, 2),
+      words.splice(words.length - 1, 1),
+    ];
 
-  words = [
-    ...correctWords[0],
-    ...shuffleArray(words),
-    ...correctWords[1],
-  ];
+    words = [
+      ...correctWords[0],
+      ...shuffleArray(words),
+      ...correctWords[1],
+    ];
+  } 
 
   const numWords = words.length;
   const numLines = haiku.poem.length;
@@ -64,6 +67,7 @@ async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudl
   haikudle = {
     ...haikudle,
     inProgress,
+    solved: !shuffle,
   }
 
   return haikudle;
