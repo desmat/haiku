@@ -748,6 +748,7 @@ export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
         }
       }
     })
+    .filter(Boolean)
     .sort((a: any, b: any) => a.id - b.id);
 }
 
