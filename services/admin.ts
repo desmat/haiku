@@ -15,6 +15,8 @@ import(`@/services/stores/${process.env.STORE_TYPE}`)
     store = new s.create();
   });
 
+// TODO stats function that uses redis .keys and returns just counts of entities
+
 export async function backup(user: User, entities?: string[], haikuIds?: string[] | null) {
   console.log('>> app.services.admin.backup', { user, entities, haikuIds });
 
@@ -29,6 +31,7 @@ export async function backup(user: User, entities?: string[], haikuIds?: string[
 
   if (!keys) throw 'No entities to backup';
 
+  // TODO maybe do in chucks
   const values = await Promise.all(
     // @ts-ignore
     keys.map((key: string) => store[key].find(haikuIds?.length ? { id: haikuIds } : undefined))
