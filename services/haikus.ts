@@ -626,9 +626,9 @@ export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Pro
       id: `${original.id}:${version}`,
       version,
       deprecated: true,
-    // }, {
-    //   noIndex: true,
-    //   noLookup: true,
+    }, {
+      noIndex: true,
+      noLookup: true,
     });
 
     // edge case where we're editing a previous version

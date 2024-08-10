@@ -136,7 +136,7 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
     dailyHaikudles,
     userHaikudle
   ] = await Promise.all([
-    store.dailyHaikudles.find(),
+    store.dailyHaikudles.find(), // TODO lookup
     store.userHaikudles.get(userHaikudleId),
   ]);
   const dailyHaikudle = dailyHaikudles
@@ -237,6 +237,7 @@ export async function getDailyHaikudle(id?: string): Promise<DailyHaikudle | und
 }
 
 export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
+  console.log(`>> services.haiku.getDailyHaikudles`, { query });
   const dailyHaikudles = (await store.dailyHaikudles.find(query))
     .filter(Boolean);
   const dailyHaikudleIds = dailyHaikudles
