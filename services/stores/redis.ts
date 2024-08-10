@@ -115,7 +115,11 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       }
     }
 
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
+    if (keys.length > 100) {
+      console.warn(`>> services.stores.redis.RedisStore<${this.key}>.find WARNING: json.mget more than 100 values`, { keys });
+    } else {
+      console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { keys });
+    }
 
     // don't mget too many at once otherwise 💥
     const blockSize = 512;
