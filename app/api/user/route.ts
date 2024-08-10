@@ -32,10 +32,13 @@ export async function GET(request: NextRequest, params?: any) {
     ...databaseUser,
   };
 
+  const count = Number(query.count) || undefined;
+  const offset = Number(query.offset) || undefined;
+
   let userHaikus = {
     haikus: user.isAdmin
       ? [] // don't need to pull the admin's haikus because we pull all of them later
-      : await getUserHaikus(user, false, query.album),
+      : await getUserHaikus(user, { albumId: query.album, count, offset })
   } as any;
 
   if (user.isAdmin) {
@@ -44,9 +47,9 @@ export async function GET(request: NextRequest, params?: any) {
       dailyHaikus,
       dailyHaikudles,
     ] = await Promise.all([
-      getUserHaikus(user, true),
-      getDailyHaikus(),
-      getDailyHaikudles(),
+      getUserHaikus(user, { all: true, count, offset }),
+      getDailyHaikus({ count, offset }),
+      getDailyHaikudles({ count, offset }),
     ]);
 
     const [

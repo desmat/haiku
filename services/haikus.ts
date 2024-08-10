@@ -24,8 +24,8 @@ import(`@/services/stores/${process.env.STORE_TYPE}`)
   });
 
 export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[]> {
-  console.log(">> services.haikus.getHaikus", { query, hashPoem })
-  let haikus = (await store.haikus.find(query))
+  console.log(">> services.haikus.getHaikus", { query, hashPoem });
+  let haikus = (await store.haikus.find({ ...query, count: 100 }))
     .filter((haiku: Haiku) => haiku && !haiku.deprecated && !haiku.deprecatedAt);
   // note that we started with .deprecated but moved to .deprecatedAt
 
@@ -46,14 +46,24 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
   return new Promise((resolve, reject) => resolve(haikus));
 }
 
-export async function getUserHaikus(user: User, all?: boolean, albumId?: string): Promise<Haiku[]> {
-  console.log(`>> services.haiku.getUserHaikus`, { user, all, albumId });
+export async function getUserHaikus(user: User, { 
+  all, 
+  albumId, 
+  count, 
+  offset, 
+} : {
+  all?: boolean, 
+  albumId?: string, 
+  count?: number, 
+  offset?: number 
+}): Promise<Haiku[]> {
+  console.log(`>> services.haiku.getUserHaikus`, { user, all, albumId, count, offset });
 
   let haikus;
 
   if (all) {
     // for admins: get all haikus
-    haikus = (await store.haikus.find())
+    haikus = (await store.haikus.find({ count: count || 100, offset }))
       .filter((haiku: Haiku) => haiku && !haiku.deprecated && !haiku.deprecatedAt);
   } else {
     const haikuAlbum = albumId && await store.haikuAlbums.get(albumId);
@@ -64,20 +74,26 @@ export async function getUserHaikus(user: User, all?: boolean, albumId?: string)
       userHaikudles
     ] = haikuAlbum
         ? [
-          await store.haikus.find({ id: haikuAlbum.haikuIds }),
+          await store.haikus.find({ id: haikuAlbum.haikuIds.splice(offset || 0, count || haikuAlbum.haikuIds.length) }),
           [],
           []
         ]
         : await Promise.all([
           store.haikus.find({
             user: user.id,
+            count,
+            offset,
           }),
           // @ts-ignore
           store.userHaikus.find({
             user: user.id,
+            count,
+            offset,
           }),
           store.userHaikudles.find({
             user: user.id,
+            count,
+            offset,
             // solved: true, // nope, need to filter on haikudle.solved and can't do that
           }),
         ]);
@@ -162,7 +178,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     user.isAdmin && store.likedHaikus.find({ haiku: id }),
     user.isAdmin && user?.id && store.flaggedHaikus.get(`${user?.id}:${id}`),
     user.isAdmin && store.flaggedHaikus.find({ haiku: id }),
-  ])
+  ]);
 
   if (!haiku) return;
 
@@ -576,8 +592,8 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
     dailyHaikus,
     userHaikus
   ] = await Promise.all([
-    store.dailyHaikus.find(),
-    store.userHaikus.find(),
+    store.dailyHaikus.find(), // TODO lookup 
+    store.userHaikus.find(), // TODO lookup
   ]);
   const dailyHaiku = dailyHaikus
     .filter((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId == id)[0];
@@ -610,6 +626,9 @@ export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Pro
       id: `${original.id}:${version}`,
       version,
       deprecated: true,
+    // }, {
+    //   noIndex: true,
+    //   noLookup: true,
     });
 
     // edge case where we're editing a previous version
@@ -725,6 +744,7 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
 }
 
 export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
+  console.log(`>> services.haiku.getDailyHaikus`, { query });
   const dailyHaikus = (await store.dailyHaikus.find(query))
     .filter(Boolean);
   const dailyHaikuIds = dailyHaikus

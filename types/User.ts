@@ -10,3 +10,5 @@ export type User = {
   usage?: Usage,
   host?: string | undefined | null,
 }
+
+export const HAIKUS_PAGE_SIZE = 20;

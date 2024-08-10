@@ -12,7 +12,7 @@ import useUser from '@/app/_hooks/user';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { UserHaiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
-import { User } from '@/types/User';
+import { HAIKUS_PAGE_SIZE, User } from '@/types/User';
 import { formatTimeFromNow } from '@/utils/format';
 import * as sort from '@/utils/sort';
 import trackEvent from '@/utils/trackEvent';
@@ -77,7 +77,7 @@ export default function SidePanel({
   const [panelOpened, setPanelOpened] = useState(false);
   const [panelAnimating, setPanelAnimating] = useState(false);
   const [panelPinned, setPanelPinned] = useState(false);
-  const pageSize = 20;
+  const pageSize = HAIKUS_PAGE_SIZE;
   const [numPages, setNumPages] = useState(1);
   const [listMode, setListMode] = useState<"haiku" | "dailyHaiku" | "dailyHaikudle">("haiku");
   type FilterType = "generated" | "liked" | "viewed"
@@ -91,6 +91,7 @@ export default function SidePanel({
     userLoaded,
     userLoading,
     loadUser,
+    canLoadMore,
   ] = useUser((state: any) => [
     user?.isAdmin && !filter
       ? state.allHaikus ? Object.values(state.allHaikus) : []
@@ -100,6 +101,7 @@ export default function SidePanel({
     state.loaded,
     state.loading,
     state.load,
+    state.canLoadMore,
   ]);
 
   // if (!user && !userLoaded && !userLoading) {
@@ -129,11 +131,6 @@ export default function SidePanel({
     if (panelOpened) setPanelPinned(false);
     setPanelOpened(!panelOpened);
   }
-
-  const loadMore = (e: any) => {
-    e.preventDefault();
-    setNumPages(numPages * 2);
-  };
 
   const handleKeyDown = async (e: any) => {
     // console.log(">> app._component.SidePanel.handleKeyDown", { panelOpened, panelAnimating });
@@ -165,6 +162,21 @@ export default function SidePanel({
 
     return true;
   }
+
+  // TODO: kill versioned haiku ids in haikus index and use this simpler and correct logic
+  // const canLoadMore = ((listMode == "haiku" ? userHaikus : userDailyHaikudles)
+  //   .filter(filterBy)
+  //   .length > numPages * pageSize);
+
+  const loadMore = async (e: any) => {
+    e.preventDefault();
+    const nextNumPages = numPages * 2;
+    await loadUser({ 
+      count: nextNumPages * pageSize + 1, 
+      offset: numPages * pageSize });
+    setNumPages(nextNumPages);
+  };
+
 
   const handleClickedFilter = (filterType: FilterType) => {
     trackEvent("clicked-filter", {
@@ -408,9 +420,7 @@ export default function SidePanel({
                 </StyledLayers>
               ))
             }
-            {((listMode == "haiku" ? userHaikus : userDailyHaikudles)
-              .filter(filterBy)
-              .length > numPages * pageSize) &&
+            {canLoadMore &&
               <div
                 className="py-2 cursor-pointer"
                 onClick={loadMore}

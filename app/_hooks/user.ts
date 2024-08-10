@@ -3,8 +3,8 @@ import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { DailyHaiku, Haiku, UserHaiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
-import { User } from '@/types/User';
-import { listToMap } from '@/utils/misc';
+import { HAIKUS_PAGE_SIZE, User } from '@/types/User';
+import { listToMap, mapToSearchParams } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from './alert';
 
@@ -14,6 +14,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   token: undefined,
   loaded: false,
   loading: false,
+  canLoadMore: true,
   // loading: false, // guard against signin in many times anonymously
 
   // populate the side panel
@@ -45,7 +46,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
   load: async (options: any = {}) => {
     set({ loading: true });
-    const { loadLocal, loadRemote } = get();
+    const { loadLocal, loadRemote, allHaikus, dailyHaikus, dailyHaikudles } = get();
     let user = { album: options.album };
     // console.log(">> hooks.user.load()", {});
 
@@ -69,9 +70,9 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     const {
       user: remoteUser,
       haikus,
-      allHaikus,
-      dailyHaikus,
-      dailyHaikudles,
+      allHaikus: loadedAllHaikus,
+      dailyHaikus: loadedDailyHaikus,
+      dailyHaikudles: loadedDailyHaikudles,
       nextDailyHaikuId,
       nextDailyHaikudleId,
     } = await loadRemote(token, options);
@@ -105,10 +106,20 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       token,
       loaded: true,
       loading: false,
+      canLoadMore: !!loadedAllHaikus?.length,
       haikus: haikus ? listToMap(haikus, { keyFn: (e: any) => e.haikuId }) : {},
-      allHaikus: allHaikus ? listToMap(allHaikus, { keyFn: (e: any) => e.haikuId }) : {},
-      dailyHaikus: dailyHaikus ? listToMap(dailyHaikus, { keyFn: (e: any) => e.haikuId }) : {},
-      dailyHaikudles: dailyHaikudles ? listToMap(dailyHaikudles, { keyFn: (e: any) => e.haikuId }) : {},
+      allHaikus: {
+        ...allHaikus,
+        ...loadedAllHaikus ? listToMap(loadedAllHaikus, { keyFn: (e: any) => e.haikuId }) : {},
+      },
+      dailyHaikus: {
+        ...dailyHaikus,
+        ...loadedDailyHaikus ? listToMap(loadedDailyHaikus, { keyFn: (e: any) => e.haikuId }) : {},
+      },
+      dailyHaikudles: {
+        ...dailyHaikudles,
+        ...loadedDailyHaikudles ? listToMap(loadedDailyHaikudles, { keyFn: (e: any) => e.haikuId }) : {},
+      },
       nextDailyHaikuId,
       nextDailyHaikudleId,
     });
@@ -117,8 +128,9 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       user,
       token,
       haikus,
-      dailyHaikus,
-      dailyHaikudles,
+      allHaikus: { ...allHaikus, ...loadedAllHaikus },
+      dailyHaikus: { ...dailyHaikus, ...loadedDailyHaikus },
+      dailyHaikudles: { ...dailyHaikudles, ...loadedDailyHaikudles },
       nextDailyHaikuId,
       nextDailyHaikudleId
     };
@@ -164,7 +176,13 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   loadRemote: async (token: string, options: any = {}) => {
     // console.log(">> hooks.user.loadRemote()", { token, options });
 
-    const res = await fetch(`/api/user${options.album ? `?album=${options.album}` : ""}`, {
+    const params = mapToSearchParams({
+      ...options.album && { album: options.album } || {},
+      ...options.count && { count: options.count } || { count: HAIKUS_PAGE_SIZE + 1 },
+      ...options.offset && { offset: options.offset } || {},
+    });
+
+    const res = await fetch(`/api/user${params ? `?${params}` : ""}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
