@@ -144,7 +144,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
     const now = moment().valueOf();
     options = { ...this.saveOptions, ...options };
-    
+
     const createdValue = {
       id: value.id || uuid(),
       createdAt: value.createdAt || now,
@@ -180,7 +180,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     */
 
 
-    const lookupKeys = Object
+    const lookupKeys = !options?.noLookup && Object
       .entries(options?.lookups || {})
       .map((entry) => {
         const id = createdValue.id;
@@ -203,9 +203,9 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
     const responses = await Promise.all([
       kv.json.set(this.valueKey(createdValue.id), "$", createdValue),
-      (options.expire ? kv.expire(this.valueKey(createdValue.id), options.expire) : undefined),
-      kv.zadd(this.setKey, { score: createdValue.createdAt, member: createdValue.id }),
-      ...lookupKeys.map((lookupKey: any) => kv.zadd(lookupKey[0], { score: now, member: lookupKey[1] }))
+      options.expire && kv.expire(this.valueKey(createdValue.id), options.expire),
+      !options.noIndex && kv.zadd(this.setKey, { score: createdValue.createdAt, member: createdValue.id }),
+      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => kv.zadd(lookupKey[0], { score: now, member: lookupKey[1] })) : []),
     ]);
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { responses });
@@ -224,6 +224,8 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       throw `Cannot update ${this.key}: does not exist: ${value.id}`;
     }
 
+    // TODO: update lookups 
+
     const now = moment().valueOf();
     options = { ...this.saveOptions, ...options }
 
@@ -235,7 +237,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
     const response = await Promise.all([
       kv.json.set(this.valueKey(value.id), "$", updatedValue),
-      (options.expire ? kv.expire(this.valueKey(value.id), options.expire) : undefined),
+      options.expire && kv.expire(this.valueKey(value.id), options.expire),
     ]);
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { response });
@@ -261,7 +263,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       kv.zrem(this.setKey, id),
       options.hardDelete
         ? kv.json.del(this.valueKey(id), "$")
-        : kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf() }),
+        : kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf(), deletedBy: userId }),
     ]);
 
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { response });

@@ -136,13 +136,11 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
     dailyHaikudles,
     userHaikudle
   ] = await Promise.all([
-    store.dailyHaikudles.find(), // TODO lookup
+    store.dailyHaikudles.find({ haiku: id }),
     store.userHaikudles.get(userHaikudleId),
   ]);
-  const dailyHaikudle = dailyHaikudles
-    .filter((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikudleId == id)[0];
 
-  dailyHaikudle && store.dailyHaikudles.delete(user.id, dailyHaikudle.id);
+  dailyHaikudles[0] && store.dailyHaikudles.delete(user.id, dailyHaikudles[0].id);
   userHaikudle && store.userHaikudles.delete(user.id, userHaikudle.id);
 
   return store.haikudles.delete(user.id, id);
@@ -261,6 +259,7 @@ export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
         }
       }
     })
+    .filter(Boolean)
     .sort((a: any, b: any) => a.id - b.id);
 }
 

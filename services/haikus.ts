@@ -579,6 +579,7 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
   }
 
   const haiku = await getHaiku(user, id);
+
   if (!haiku) {
     throw `Haiku not found: ${id}`;
   }
@@ -592,16 +593,13 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
     dailyHaikus,
     userHaikus
   ] = await Promise.all([
-    store.dailyHaikus.find(), // TODO lookup 
-    store.userHaikus.find(), // TODO lookup
+    store.dailyHaikus.find({ haiku: id }),
+    store.userHaikus.find({ haiku: id }), 
   ]);
-  const dailyHaiku = dailyHaikus
-    .filter((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId == id)[0];
+  console.log(">> services.haiku.deleteHaiku", { dailyHaikus, userHaikus });
 
-  dailyHaiku && store.dailyHaikus.delete(user.id, dailyHaiku.id);
-  userHaikus
-    .filter((userHaiku: UserHaiku) => userHaiku.haikuId == id)
-    .map((userHaiku: UserHaiku) => store.userHaikus.delete(user.id, userHaiku.id));
+  dailyHaikus[0] && store.dailyHaikus.delete(user.id, dailyHaikus[0].id);
+  userHaikus.map((userHaiku: UserHaiku) => store.userHaikus.delete(user.id, userHaiku.id));
 
   return store.haikus.delete(user.id, id);
 }
