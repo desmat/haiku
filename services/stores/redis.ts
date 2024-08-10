@@ -65,11 +65,17 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     return value;
   }
 
-  async find(query?: any): Promise<T[]> {
+  async find(query: any = {}): Promise<T[]> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { query });
+
+    const min = query.offset || 0;
+    const max = min + (query.count || 0) - 1;
+    delete query.offset;
+    delete query.count;
 
     const queryEntries = query && Object.entries(query);
 
+    // TODO: support more than one
     if (queryEntries?.length > 1) {
       throw `redis.find(query) only supports a single query entry pair`;
     }
@@ -93,7 +99,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
             .map((key: string) => `${this.key}:${key}`);
         } else */ if (queryVal) {
           // lookup keys via the foos:bar:123 lookup set
-          keys = (await kv.zrange(`${this.setKey}:${queryKey}:${queryVal}`, 0, -1))
+          keys = (await kv.zrange(`${this.setKey}:${queryKey}:${queryVal}`, min, max, { rev: true }))
             // @ts-ignore
             .map((key: string) => `${this.key}:${key}`);
         } else {
@@ -103,7 +109,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
         console.log(`>> services.stores.redis.RedisStore<${this.key}>.find queried lookup key`, { query, keys });
       } else {
         // get all keys via the index set
-        keys = (await kv.zrange(`${this.setKey}`, 0, -1))
+        keys = (await kv.zrange(`${this.setKey}`, min, max, { rev: true }))
           // @ts-ignore
           .map((key: string) => `${this.key}:${key}`)
       }
@@ -123,7 +129,6 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       ? (await Promise.all(
         blocks
           .map(async (keys: string[]) => (await kv.json.mget(keys, "$"))
-            .filter(Boolean)
             .flat())))
         .flat()
         .filter((value: any) => value && !value.deletedAt)
@@ -253,7 +258,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
     value.deletedAt = moment().valueOf();
     const response = await Promise.all([
-      // TODO remove lookup keys if hardDelete?
+      kv.zrem(this.setKey, id),
       options.hardDelete
         ? kv.json.del(this.valueKey(id), "$")
         : kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf() }),
