@@ -35,6 +35,9 @@ export async function GET(
 
   if (user.isAdmin) {
     // TODO: there's a bit of inconsistent redundancy: we sometimes add dailyHaikudleId when a daily is created...
+    
+    // TODO: don't pull all of them all the time!
+
     const [dailyHaikus, dailyHaikudles] = await Promise.all([
       await getDailyHaikus(),
       await getDailyHaikudles(),

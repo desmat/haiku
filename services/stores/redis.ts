@@ -65,9 +65,9 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     return value;
   }
 
-  async find(query: any = {}): Promise<T[]> {
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { query });
-
+  async ids(query: any = {}): Promise<Set<string>> {
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.ids`, { query });
+    
     const min = query.offset || 0;
     const max = min + (query.count || 0) - 1;
     delete query.offset;
@@ -80,15 +80,13 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       throw `redis.find(query) only supports a single query entry pair`;
     }
 
-    let keys: string[] | undefined;
+    let ids = [];
     const queryEntry = queryEntries && queryEntries[0];
     const [queryKey, queryVal] = queryEntry || [];
 
     if (queryKey == "id" && Array.isArray(queryVal)) {
-      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.find special case: query is for IDs`, { ids: queryVal });
-      keys = queryVal
-        .map((id: string) => id && this.valueKey(id))
-        .filter(Boolean);
+      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.ids special case: query is for IDs`, { ids: queryVal });
+      ids = queryVal;
     } else {
       if (queryKey) {
         /* NOT SUPPORTED FOR NOW
@@ -99,21 +97,33 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
             .map((key: string) => `${this.key}:${key}`);
         } else */ if (queryVal) {
           // lookup keys via the foos:bar:123 lookup set
-          keys = (await kv.zrange(`${this.setKey}:${queryKey}:${queryVal}`, min, max, { rev: true }))
-            // @ts-ignore
-            .map((key: string) => `${this.key}:${key}`);
+          // @ts-ignore
+          ids = await kv.zrange(`${this.setKey}:${queryKey}:${queryVal}`, min, max, { rev: true });
         } else {
           throw `redis.find(query) query must have key and value`;
         }
 
-        console.log(`>> services.stores.redis.RedisStore<${this.key}>.find queried lookup key`, { query, keys });
+        console.log(`>> services.stores.redis.RedisStore<${this.key}>.ids queried lookup key`, { query, ids });
       } else {
         // get all keys via the index set
-        keys = (await kv.zrange(`${this.setKey}`, min, max, { rev: true }))
-          // @ts-ignore
-          .map((key: string) => `${this.key}:${key}`)
+        // @ts-ignore
+        ids = await kv.zrange(`${this.setKey}`, min, max, { rev: true })
       }
     }
+
+    return new Set(ids);
+  }
+
+  async find(query: any = {}): Promise<T[]> {
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.find`, { query });
+
+    const keys = Array.isArray(query.id)
+      ? Array.from(await this.ids(query))
+        .map((id: string) => id && this.valueKey(id))
+        .filter(Boolean)
+      : Array.from(await this.ids(query))
+        // @ts-ignore
+        .map((key: string) => `${this.key}:${key}`);
 
     if (keys.length > 100) {
       console.warn(`>> services.stores.redis.RedisStore<${this.key}>.find WARNING: json.mget more than 100 values`, { keys });
