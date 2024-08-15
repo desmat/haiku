@@ -601,16 +601,16 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
 
   // remove daily haiku and all user haikus in addition to the actual haiku
   const [
-    dailyHaikus,
-    userHaikus
+    dailyHaikuIds,
+    userHaikuIds
   ] = await Promise.all([
-    store.dailyHaikus.find({ haiku: id }), // TODO .keys
-    store.userHaikus.find({ haiku: id }), // TODO .keys
+    store.dailyHaikus.ids({ haiku: id }),
+    store.userHaikus.ids({ haiku: id }),
   ]);
-  console.log(">> services.haiku.deleteHaiku", { dailyHaikus, userHaikus });
+  console.log(">> services.haiku.deleteHaiku", { dailyHaikuIds, userHaikuIds });
 
-  dailyHaikus[0] && store.dailyHaikus.delete(user.id, dailyHaikus[0].id);
-  userHaikus.map((userHaiku: UserHaiku) => store.userHaikus.delete(user.id, userHaiku.id));
+  dailyHaikuIds?.size && store.dailyHaikus.delete(user.id, dailyHaikuIds.values().next().value);
+  Array.from(userHaikuIds).map((id: string) => store.userHaikus.delete(user.id, id));
 
   return store.haikus.delete(user.id, id);
 }
