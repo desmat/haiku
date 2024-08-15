@@ -33,23 +33,6 @@ export async function GET(
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
 
-  if (user.isAdmin) {
-    // TODO: there's a bit of inconsistent redundancy: we sometimes add dailyHaikudleId when a daily is created...
-    
-    // TODO: don't pull all of them all the time!
-
-    const [dailyHaikus, dailyHaikudles] = await Promise.all([
-      await getDailyHaikus(),
-      await getDailyHaikudles(),
-    ]);
-
-    haiku.dailyHaikuId = dailyHaikus
-      .filter((dh: DailyHaiku) => dh?.haikuId == haiku.id)[0]?.id;
-
-    haiku.dailyHaikudleId = dailyHaikudles
-      .filter((dhle: DailyHaikudle) => dhle?.haikuId == haiku.id)[0]?.id;
-  }
-
   if (!user.isAdmin && haiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
     createUserHaiku(user, haiku);
   }

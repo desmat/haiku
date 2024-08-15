@@ -90,24 +90,6 @@ export async function GET(request: NextRequest, params?: any) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
 
-  if (user.isAdmin) {
-    // TODO: there's a bit of inconsistent redundancy: we sometimes add dailyHaikudleId when a daily is created...
-    // TODO also we should have that info on the front-end, let's get rid of this code here
-
-    // TODO: don't pull all of them all the time!
-
-    const [dailyHaikus, dailyHaikudles] = await Promise.all([
-      getDailyHaikus(),
-      getDailyHaikudles(),
-    ]);
-
-    todaysHaiku.dailyHaikuId = dailyHaikus
-      .filter((dh: DailyHaiku) => dh?.haikuId == todaysHaiku.id)[0]?.id;
-
-    todaysHaiku.dailyHaikudleId = dailyHaikudles
-      .filter((dhle: DailyHaikudle) => dhle?.haikuId == todaysHaiku.id)[0]?.id;
-  }
-
   return NextResponse.json({ haikus: [todaysHaiku] });
 }
 

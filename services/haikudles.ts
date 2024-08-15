@@ -263,17 +263,20 @@ export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
     .sort((a: any, b: any) => a.id - b.id);
 }
 
-export async function getNextDailyHaikudleId(dailyHaikudles?: DailyHaikudle[]): Promise<string> {
-  const ids = (dailyHaikudles || await getDailyHaikudles())
-    .map((dh: DailyHaikudle) => dh?.id)
+export async function getNextDailyHaikudleId(): Promise<string> {
+  const ids = Array.from(await store.dailyHaikudles.ids({ count: 10 }))
+    .map((id: any) => `${id}`) // but y?
+    .filter((id: string) => id.match(/\d{8}/)) // what's up with the strange ids in there?
     .sort()
     .reverse();
+    
   const todays = moment().format("YYYYMMDD");
 
   if (!ids.includes(todays)) {
     return todays;
   }
 
+  // @ts-ignore
   const next = moment(ids[0]).add(1, "days").format("YYYYMMDD");
 
   return next;

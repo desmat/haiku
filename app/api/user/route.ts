@@ -56,8 +56,8 @@ export async function GET(request: NextRequest, params?: any) {
       nextDailyHaikuId,
       nextDailyHaikudleId,
     ] = await Promise.all([
-      getNextDailyHaikuId(dailyHaikus),
-      getNextDailyHaikudleId(dailyHaikudles),
+      getNextDailyHaikuId(),
+      getNextDailyHaikudleId(),
     ]);
 
     userHaikus = {

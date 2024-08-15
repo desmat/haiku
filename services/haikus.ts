@@ -178,12 +178,16 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     haikuLikes,
     userFlagged,
     haikuflags,
+    dailyHaikuIds,
+    dailyHaikudleIds,
   ] = await Promise.all([
     store.haikus.get(versionedId),
     user?.id && store.likedHaikus.get(`${user?.id}:${id}`),
     user.isAdmin && store.likedHaikus.ids({ haiku: id }),
     user.isAdmin && user?.id && store.flaggedHaikus.get(`${user?.id}:${id}`),
     user.isAdmin && store.flaggedHaikus.ids({ haiku: id }),
+    user.isAdmin && store.dailyHaikus.ids({ haiku: id, count: 1 }),
+    user.isAdmin && store.dailyHaikudles.ids({ haikudle: id, count: 1 }),
   ]);
 
   if (!haiku) return;
@@ -196,7 +200,9 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     haiku.likedAt = userLiked?.createdAt;
     haiku.flaggedAt = userFlagged?.createdAt;
     haiku.numLikes = haikuLikes && haikuLikes.size;
-    haiku.numFlags = haikuflags && haikuflags.size
+    haiku.numFlags = haikuflags && haikuflags.size;
+    haiku.dailyHaikuId = dailyHaikuIds && dailyHaikuIds.size && dailyHaikuIds.values().next().value;
+    haiku.dailyHaikudleId = dailyHaikudleIds && dailyHaikudleIds.size && dailyHaikudleIds.values().next().value;
   }
 
   if (hashPoem) {
@@ -214,9 +220,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
 }
 
 export async function getHaikuNumLikes(id: number) {
-  // TODO return (await store.likedHaikus.keys({ haiku: id })).length;
-  return (await store.likedHaikus.find({ haiku: id }))
-    .length;
+  return (await store.likedHaikus.ids({ haiku: id })).size;
 }
 
 export async function createHaiku(user: User, {
@@ -777,17 +781,19 @@ export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
     .sort((a: any, b: any) => a.id - b.id);
 }
 
-export async function getNextDailyHaikuId(dailyHaikus?: DailyHaiku[]): Promise<string> {
-  const ids = (dailyHaikus || await getDailyHaikus())
-    .map((dh: DailyHaiku) => dh?.id)
+export async function getNextDailyHaikuId(): Promise<string> {
+  const ids = Array.from(await store.dailyHaikus.ids({ count: 10 }))
+    .map((id: any) => `${id}`) // but y?
     .sort()
     .reverse();
+    
   const todays = moment().format("YYYYMMDD");
 
   if (!ids.includes(todays)) {
     return todays;
   }
 
+  // @ts-ignore
   const next = moment(ids[0]).add(1, "days").format("YYYYMMDD");
 
   return next;
