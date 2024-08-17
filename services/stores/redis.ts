@@ -219,7 +219,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       kv.json.set(this.valueKey(createdValue.id), "$", createdValue),
       options.expire && kv.expire(this.valueKey(createdValue.id), options.expire),
       !options.noIndex && kv.zadd(this.setKey, { score: createdValue.createdAt, member: createdValue.id }),
-      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => kv.zadd(lookupKey[0], { score: now, member: lookupKey[1] })) : []),
+      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => kv.zadd(lookupKey[0], { score: createdValue.createdAt, member: lookupKey[1] })) : []),
     ]);
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { responses });

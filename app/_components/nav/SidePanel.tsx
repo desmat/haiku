@@ -91,7 +91,6 @@ export default function SidePanel({
     userLoaded,
     userLoading,
     loadUser,
-    canLoadMore,
   ] = useUser((state: any) => [
     user?.isAdmin && !filter
       ? state.allHaikus ? Object.values(state.allHaikus) : []
@@ -101,7 +100,6 @@ export default function SidePanel({
     state.loaded,
     state.loading,
     state.load,
-    state.canLoadMore,
   ]);
 
   // if (!user && !userLoaded && !userLoading) {
@@ -163,10 +161,10 @@ export default function SidePanel({
     return true;
   }
 
-  // TODO: kill versioned haiku ids in haikus index and use this simpler and correct logic
-  // const canLoadMore = ((listMode == "haiku" ? userHaikus : userDailyHaikudles)
-  //   .filter(filterBy)
-  //   .length > numPages * pageSize);
+  // simple trick: load +1 items, don't show the +1 but use it to determine if we have more in the backend
+  const canLoadMore = ((listMode == "haiku" ? userHaikus : userDailyHaikudles)
+    .filter(filterBy)
+    .length > numPages * pageSize);
 
   const loadMore = async (e: any) => {
     e.preventDefault();

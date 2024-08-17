@@ -22,11 +22,11 @@ export async function backup(user: User, entities?: string[], haikuIds?: string[
 
   const keys = Object.keys(store)
     .filter((key: string) => {
-      return entities?.length 
-      ? entities.includes(key)
-      : haikuIds?.length
-        ? key == "haikus"
-        : true
+      return entities?.length
+        ? entities.includes(key)
+        : haikuIds?.length
+          ? key == "haikus"
+          : true
     });
 
   if (!keys) throw 'No entities to backup';
@@ -105,11 +105,18 @@ export async function restore(user: User, url: string) {
         return;
       }
 
-      const options = key == "userHaikus" ? UserHaikuSaveOptions : {};
+      // const options = key == "userHaikus" ? UserHaikuSaveOptions : {};
       return await Promise.all(
         values.map(async (value: any) => {
           // @ts-ignore
           const record = await store[key].get(value.id);
+          const options = value.deprecated || value.deprecatedAt
+            ? {
+              noIndex: true,
+              noLookup: true,
+            }
+            : {};
+
           if (record) {
             // for now don't restore if already exists
             result[`${key}_skipped`] = (result[`${key}_skipped`] || 0) + 1;

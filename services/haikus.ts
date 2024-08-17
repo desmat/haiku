@@ -23,34 +23,34 @@ import(`@/services/stores/${process.env.STORE_TYPE}`)
     store = new s.create();
   });
 
-  export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[]> {
-    console.log(">> services.haikus.getHaikus", { query, hashPoem });
-    let haikus = (await store.haikus.find({ ...query, count: 100 }))
-      .filter((haiku: Haiku) => haiku && !haiku.deprecated && !haiku.deprecatedAt);
-    // note that we started with .deprecated but moved to .deprecatedAt
-  
-    if (!haikus?.length && (!query || JSON.stringify(query) == "{}")) {
-      return [];
-    }
-  
-    if (hashPoem) {
-      haikus = haikus
-        .map((haiku: Haiku) => haiku = {
-          ...haiku,
-          poem: haiku.poem
-            .map((line: string) => line.split(/\s+/)
-              .map((word: string) => hashCode(normalizeWord(word))))
-        })
-    }
-  
-    return new Promise((resolve, reject) => resolve(haikus));
+export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[]> {
+  console.log(">> services.haikus.getHaikus", { query, hashPoem });
+  let haikus = (await store.haikus.find({ ...query, count: 100 }))
+    .filter((haiku: Haiku) => haiku && !haiku.deprecated && !haiku.deprecatedAt);
+  // note that we started with .deprecated but moved to .deprecatedAt
+
+  if (!haikus?.length && (!query || JSON.stringify(query) == "{}")) {
+    return [];
   }
 
-  export async function getHaikuIds(query?: any): Promise<Set<any>> {
-    console.log(">> services.haikus.getHaikuIds", { query });
-    return store.haikus.ids(query);
+  if (hashPoem) {
+    haikus = haikus
+      .map((haiku: Haiku) => haiku = {
+        ...haiku,
+        poem: haiku.poem
+          .map((line: string) => line.split(/\s+/)
+            .map((word: string) => hashCode(normalizeWord(word))))
+      })
   }
-    
+
+  return new Promise((resolve, reject) => resolve(haikus));
+}
+
+export async function getHaikuIds(query?: any): Promise<Set<any>> {
+  console.log(">> services.haikus.getHaikuIds", { query });
+  return store.haikus.ids(query);
+}
+
 export async function getUserHaikus(user: User, {
   all,
   albumId,
@@ -786,7 +786,7 @@ export async function getNextDailyHaikuId(): Promise<string> {
     .map((id: any) => `${id}`) // but y?
     .sort()
     .reverse();
-    
+
   const todays = moment().format("YYYYMMDD");
 
   if (!ids.includes(todays)) {
@@ -891,11 +891,31 @@ export async function getLatestHaikus(fromDate?: number, toDate?: number): Promi
   const yesterday = moment().add(-1, "days").valueOf()
   console.log(">> services.haiku.getLatestHaikus", { fromDate, toDate, now: now.valueOf() });
 
-  const haikus = await store.haikus.find(); // TODO usecase for this is just to find latest from yesterday: maybe pull by blocks using count/offset with growing pagesize?
-  const latest = haikus
-    .filter((haiku: Haiku) => haiku.createdAt >= (fromDate || yesterday) && haiku.createdAt <= (toDate || now))
-    .sort(byCreatedAtDesc);
-  console.log(">> services.haiku.getLatestHaikus", { haikus, latest });
+  // typical usecase for this is to pick up latest haikus between yesterday and now,
+  // so for efficiency let's try with increasing batch sizes instead of pulling
+  // down the whole thing
+
+  let latest: Haiku[] = [];
+  let offset = 0;
+  let batchSize = 8;
+
+  do {
+    const haikus = (await store.haikus.find({ count: batchSize, offset }))
+      .filter((haiku: Haiku) => haiku.createdAt >= (fromDate || yesterday) && haiku.createdAt <= (toDate || now))
+      .sort(byCreatedAtDesc);
+
+    if (!haikus.length) break;
+
+    latest = [
+      ...latest,
+      ...haikus,
+    ];
+    offset += batchSize;
+    batchSize *= 2;
+    
+    console.log(">> services.haiku.getLatestHaikus", { batchSize, offset, haikus, latest });
+
+  } while (true);
 
   return latest;
 }

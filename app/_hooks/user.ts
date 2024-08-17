@@ -14,7 +14,6 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   token: undefined,
   loaded: false,
   loading: false,
-  canLoadMore: true,
   // loading: false, // guard against signin in many times anonymously
 
   // populate the side panel
@@ -106,7 +105,6 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       token,
       loaded: true,
       loading: false,
-      canLoadMore: !!loadedAllHaikus?.length,
       haikus: haikus ? listToMap(haikus, { keyFn: (e: any) => e.haikuId }) : {},
       allHaikus: {
         ...allHaikus,
