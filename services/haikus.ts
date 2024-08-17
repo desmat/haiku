@@ -1,4 +1,5 @@
 import chroma from 'chroma-js';
+import * as locale from 'locale-codes'
 import moment from 'moment';
 import { put } from '@vercel/blob';
 import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
@@ -325,7 +326,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku, albumId?: str
   const subject = haiku.theme;
   const mood = undefined;
   console.log(">> services.haiku.regenerateHaikuPoem", { lang, subject, mood, user });
-  const language = supportedLanguages[lang].name;
+  const language = locale.getByTag(lang)?.name
 
   const album = albumId && await store.haikuAlbums.get(albumId);
   const customPoemPrompt = album && album.poemPrompt;
