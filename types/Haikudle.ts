@@ -50,6 +50,6 @@ export type DailyHaikudle = {
 
 export const DailyHaikudleSaveOptions = {
   lookups: {
-    haiku: "haikuId",
+    haikudle: "haikudleId",
   },
 };

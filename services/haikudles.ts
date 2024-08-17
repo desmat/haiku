@@ -136,13 +136,11 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
     dailyHaikudles,
     userHaikudle
   ] = await Promise.all([
-    store.dailyHaikudles.find(),
+    store.dailyHaikudles.find({ haiku: id }),
     store.userHaikudles.get(userHaikudleId),
   ]);
-  const dailyHaikudle = dailyHaikudles
-    .filter((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikudleId == id)[0];
 
-  dailyHaikudle && store.dailyHaikudles.delete(user.id, dailyHaikudle.id);
+  dailyHaikudles[0] && store.dailyHaikudles.delete(user.id, dailyHaikudles[0].id);
   userHaikudle && store.userHaikudles.delete(user.id, userHaikudle.id);
 
   return store.haikudles.delete(user.id, id);
@@ -237,6 +235,7 @@ export async function getDailyHaikudle(id?: string): Promise<DailyHaikudle | und
 }
 
 export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
+  console.log(`>> services.haiku.getDailyHaikudles`, { query });
   const dailyHaikudles = (await store.dailyHaikudles.find(query))
     .filter(Boolean);
   const dailyHaikudleIds = dailyHaikudles
@@ -260,20 +259,24 @@ export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
         }
       }
     })
+    .filter(Boolean)
     .sort((a: any, b: any) => a.id - b.id);
 }
 
-export async function getNextDailyHaikudleId(dailyHaikudles?: DailyHaikudle[]): Promise<string> {
-  const ids = (dailyHaikudles || await getDailyHaikudles())
-    .map((dh: DailyHaikudle) => dh?.id)
+export async function getNextDailyHaikudleId(): Promise<string> {
+  const ids = Array.from(await store.dailyHaikudles.ids({ count: 10 }))
+    .map((id: any) => `${id}`) // but y?
+    .filter((id: string) => id.match(/\d{8}/)) // what's up with the strange ids in there?
     .sort()
     .reverse();
+    
   const todays = moment().format("YYYYMMDD");
 
   if (!ids.includes(todays)) {
     return todays;
   }
 
+  // @ts-ignore
   const next = moment(ids[0]).add(1, "days").format("YYYYMMDD");
 
   return next;

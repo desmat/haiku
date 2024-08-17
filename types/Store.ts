@@ -6,6 +6,7 @@ import { User } from "./User";
 
 export interface GenericStore<T> {
   get: (id: string) => Promise<T | undefined>,
+  ids: (query?: any) => Promise<Set<any>>,
   find: (query?: any) => Promise<T[]>,
   create: (userId: string, value: T, options?: any) => Promise<T>,
   update: (userId: string, value: T, options?: any) => Promise<T>,

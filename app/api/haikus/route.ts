@@ -1,9 +1,9 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikus, generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes, createHaiku, getAlbumHaikus, getFlaggedHaikus } from '@/services/haikus';
+import { generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes, createHaiku, getAlbumHaikus, getFlaggedHaikus, getHaikuIds, getFlaggedHaikuIds } from '@/services/haikus';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
-import { getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
+import { getDailyHaikudle, getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
 import { userUsage } from '@/services/usage';
 import { DailyHaiku, Haiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
@@ -41,25 +41,23 @@ export async function GET(request: NextRequest, params?: any) {
       query.lang = "en";
     }
 
-    let [haikus, dailyHaikudles, flaggedHaikus] = await Promise.all([
-      getHaikus(query, mode == "haikudle"),
-      getDailyHaikudles(),
-      getFlaggedHaikus(),
+    let [haikuIds, flaggedHaikuIds] = await Promise.all([
+      getHaikuIds(query),
+      getFlaggedHaikuIds(),
     ]);
 
     // exclude flagged haikus
-    const flaggedHaikuIds = flaggedHaikus.map((haiku: Haiku) => haiku.id);
-    haikus = haikus.filter((haiku: Haiku) => !flaggedHaikuIds.includes(haiku.id))
+    const filteredHaikuIds =  Array.from(haikuIds).filter((haiku: Haiku) => !flaggedHaikuIds.has(haiku.id))
+    const randomHaikuId = filteredHaikuIds[Math.floor(Math.random() * filteredHaikuIds.length)];
+    const randomHaiku = await getHaiku(user, randomHaikuId, mode == "haikudle");
 
-    const randomHaiku = haikus[Math.floor(Math.random() * haikus.length)];
     const [numLikes, userHaiku, userHaikudle] = await Promise.all([
       getHaikuNumLikes(randomHaiku.id),
       getUserHaiku(user.id, randomHaiku.id),
       getUserHaikudle(user?.id, randomHaiku.id),
     ]);
-    const dailyHaikudle = dailyHaikudles
-      .filter((dailyHaikudles: DailyHaikudle) => dailyHaikudles.haikuId == randomHaiku.id)[0];
-    // console.log('>> app.api.haikus.GET', { dailyHaikudles, dailyHaikudle });
+
+    const dailyHaikudle = await getDailyHaikudle(randomHaikuId);
 
     if (dailyHaikudle) {
       randomHaiku.dailyHaikudleId = dailyHaikudle?.id;
@@ -90,21 +88,6 @@ export async function GET(request: NextRequest, params?: any) {
 
   if (!todaysHaiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
-  }
-
-  if (user.isAdmin) {
-    // TODO: there's a bit of inconsistent redundancy: we sometimes add dailyHaikudleId when a daily is created...
-    // TODO also we should have that info on the front-end, let's get rid of this code here
-    const [dailyHaikus, dailyHaikudles] = await Promise.all([
-      getDailyHaikus(),
-      getDailyHaikudles(),
-    ]);
-
-    todaysHaiku.dailyHaikuId = dailyHaikus
-      .filter((dh: DailyHaiku) => dh?.haikuId == todaysHaiku.id)[0]?.id;
-
-    todaysHaiku.dailyHaikudleId = dailyHaikudles
-      .filter((dhle: DailyHaikudle) => dhle?.haikuId == todaysHaiku.id)[0]?.id;
   }
 
   return NextResponse.json({ haikus: [todaysHaiku] });

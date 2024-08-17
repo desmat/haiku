@@ -174,12 +174,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     // console.log(">> hooks.haiku.init", { mode, id, query: JSON.stringify(query), haiku });
 
     const { setLoaded, _mode, _haikus } = get();
-    const { dailyHaikus, dailyHaikudles } = useUser.getState();
 
-    // console.log(">> hooks.haiku.init", { dailyHaikus, dailyHaikudles });
-
-    haiku.dailyHaikuId = dailyHaikus[haiku.id]?.id;
-    haiku.dailyHaikudleId = dailyHaikudles[haiku.id]?.id;
 
     if ((haiku.lang || "en") == "en") {
       const syllables = haiku.poem
