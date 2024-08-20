@@ -602,7 +602,7 @@ export default function MainPage({
     if (type == 'backup') {
       const entities = prompt(
         "Entit(y|ies) to backup? (comma or space-separated names, or empty for all)",
-        "haikus, dailyHaikus, likedHaikus, haikudles, dailyHaikudles, userHaikudles, "
+        "haikus, dailyHaikus, likedHaikus, flaggedHaikus, haikudles, dailyHaikudles, userHaikudles, "
       );
       if (typeof (entities) != "string") return;
 
