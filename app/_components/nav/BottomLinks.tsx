@@ -14,6 +14,7 @@ import { FaRandom } from "react-icons/fa";
 import { RiImageFill, RiImageAddLine, RiImageEditLine, RiImageLine } from "react-icons/ri";
 import useUser from '@/app/_hooks/user';
 import { ExperienceMode } from '@/types/ExperienceMode';
+import { formatTimeFromNow } from '@/utils/format';
 import { Haiku } from '@/types/Haiku';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import trackEvent from '@/utils/trackEvent';
@@ -272,11 +273,11 @@ export default function BottomLinks({
           >
             <div
               key="flag"
-              title={`${haiku?.flaggedAt ? "Un-flag this haiku" : "Flag this haiku"} ${user?.isAdmin ? `(flagged ${haiku?.numFlags} time${!haiku?.numFlags || haiku?.numFlags > 1 ? "s" : ""})` : ""}`}
+              title={`${haiku?.userFlaggedAt ? `This haiku's author was flagged ${formatTimeFromNow(haiku.userFlaggedAt || 0)}` : haiku?.flaggedAt ? "Un-flag this haiku" : "Flag this haiku"} ${user?.isAdmin ? `(flagged ${haiku?.numFlags} time${!haiku?.numFlags || haiku?.numFlags > 1 ? "s" : ""})` : ""}`}
               className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
               onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.flaggedAt ? "un-flag" : "flag")}
             >
-              {user?.isAdmin && haiku?.numFlags > 0 &&
+              {user?.isAdmin && (haiku?.numFlags || haiku?.userFlaggedAt) &&
                 <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.6rem] h-[0.6rem] bg-red-600" />
               }
               <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>

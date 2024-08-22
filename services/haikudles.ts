@@ -6,7 +6,7 @@ import { Store } from "@/types/Store";
 import { User } from '@/types/User';
 import { uuid } from '@/utils/misc';
 import shuffleArray from '@/utils/shuffleArray';
-import { getDailyHaikus, getHaiku, getHaikus } from './haikus';
+import { getDailyHaikus, getFlaggedHaikuIds, getHaiku, getHaikus } from './haikus';
 import { triggerDailyHaikudleSaved } from './webhooks';
 
 let store: Store;
@@ -57,7 +57,7 @@ async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudl
       ...shuffleArray(words),
       ...correctWords[1],
     ];
-  } 
+  }
 
   const numWords = words.length;
   const numLines = haiku.poem.length;
@@ -205,10 +205,12 @@ export async function getDailyHaikudle(id?: string): Promise<DailyHaikudle | und
       previousDailyHaikudles,
       haikudles,
       dailyHaikus,
+      flaggedHaikuIds,
     ] = await Promise.all([
-      getDailyHaikudles(),
-      getHaikudles(),
-      getDailyHaikus(),
+      getDailyHaikudles(), // TODO: get ids
+      getHaikudles(), // TODO: get ids
+      getDailyHaikus(), // TODO: get ids
+      getFlaggedHaikuIds(),
     ]);
 
     const previousDailyHaikuIds = previousDailyHaikudles.map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
@@ -219,9 +221,12 @@ export async function getDailyHaikudle(id?: string): Promise<DailyHaikudle | und
       randomHaikuId = shuffleArray(nonDailyhaikus)[0].haikuId;
     } else {
       // didn't find any daily haikus that hasn't been a daily haikudle already
-      const haikus = await getHaikus();
-      nonDailyhaikus = haikus.filter((haiku: Haiku) => !previousDailyHaikuIds.includes(haiku.id));
-      randomHaikuId = shuffleArray(nonDailyhaikus)[0].id;
+      const haikus = await getHaikus(); // TODO get ids
+      nonDailyhaikus = haikus
+        .filter((haiku: Haiku) => !flaggedHaikuIds.has(haiku.id) && !previousDailyHaikuIds.includes(haiku.id));
+
+      randomHaikuId = shuffleArray(nonDailyhaikus)[0]?.id;
+      console.warn(`>> services.haiku.getDailyHaikudle WARNING: ran out of liked or non-daily haikus, picking from the lot`, { randomHaikuId });
     }
 
     const randomHaikudle = await createHaikudle(systemUser, { id: randomHaikuId, haikuId: randomHaikuId });
@@ -237,7 +242,7 @@ export async function getDailyHaikudle(id?: string): Promise<DailyHaikudle | und
 export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
   console.log(`>> services.haiku.getDailyHaikudles`, { query });
   const dailyHaikudles = (await store.dailyHaikudles.find(query))
-    .filter(Boolean);
+    .filter(Boolean); // TODO pull ids instead
   const dailyHaikudleIds = dailyHaikudles
     .map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
 
@@ -269,7 +274,7 @@ export async function getNextDailyHaikudleId(): Promise<string> {
     .filter((id: string) => id.match(/\d{8}/)) // what's up with the strange ids in there?
     .sort()
     .reverse();
-    
+
   const todays = moment().format("YYYYMMDD");
 
   if (!ids.includes(todays)) {

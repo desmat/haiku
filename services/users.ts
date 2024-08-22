@@ -83,3 +83,29 @@ export async function saveUser(user: User) {
 export async function createToken(user: User) {
   return encodeJWT({ user });
 }
+
+export async function flagUser(admin: User, user: User, reason?: string) {
+  console.log(">> services.users.flagUser", { admin, user, reason });
+  let flaggedUser = await store.flaggedUsers.get(user.id);  
+
+  if (flaggedUser) {
+    flaggedUser = await store.flaggedUsers.update(admin.id, {
+      ...flaggedUser,
+      id: user.id,
+      userId: user.id,
+      reason,
+    });
+  } else {
+    flaggedUser = await store.flaggedUsers.create(admin.id, {
+      id: user.id,
+      userId: user.id,
+      reason,  
+    });
+  }
+
+  return flaggedUser;
+}
+
+export async function getFlaggedUserIds(): Promise<Set<any>> {
+  return store.flaggedUsers.ids();
+}
