@@ -20,11 +20,14 @@ export async function POST(
       );
     }
 
-    const userToFlag = await loadUser(params.id);
+    // const userToFlag = await loadUser(params.id);
 
-    if (!userToFlag) {
-      return NextResponse.json({ user: {} }, { status: 404 });
-    }
+    // if (!userToFlag) {
+    //   return NextResponse.json({ user: {} }, { status: 404 });
+    // }
+
+    // add flag entry even if user record does not exist
+    const userToFlag = { id: params.id };
 
     const flaggedUser = await flagUser(user, userToFlag);
     return NextResponse.json({ user: flaggedUser });
