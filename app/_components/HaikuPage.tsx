@@ -90,9 +90,9 @@ export default function HaikuPage({
         className={`${font.architects_daughter.className} _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute top-0 left-0 right-0 bottom-[5vh] ${showcaseMode ? "portrait:bottom-[10vh]" : "portrait:bottom-[12vh]"} bottom-[] m-auto w-fit h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}
         style={{
           top: poemLayout?.top || poemLayout?.down
-            ? `max(${poemLayout?.top || poemLayout?.down}dvh + (100dvh - max(min(100dvh, 150vw), 100vw)) / 2, ${poemLayout?.top || poemLayout?.down}dvh)`
+            ? `max(${poemLayout?.top || poemLayout?.down}vh + (100vh - max(min(100vh, 150vw), 100vw)) / 2, ${poemLayout?.top || poemLayout?.down}vh)`
             : poemLayout?.up
-              ? `max(${-1 * poemLayout.up}dvh + (100dvh - max(min(100dvh, 150vw), 100vw)) / 2, ${-1 * poemLayout.up}dvh)`
+              ? `max(${-1 * poemLayout.up}vh + (100vh - max(min(100vh, 150vw), 100vw)) / 2, ${-1 * poemLayout.up}vh)`
               : undefined,
           bottom: poemLayout?.bottom ? `${poemLayout.bottom}vh` : undefined,
           marginTop: poemLayout?.top ? 0 : "auto",
