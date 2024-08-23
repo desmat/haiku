@@ -241,8 +241,17 @@ export async function getDailyHaikudle(id?: string): Promise<DailyHaikudle | und
 
 export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
   console.log(`>> services.haiku.getDailyHaikudles`, { query });
-  const dailyHaikudles = (await store.dailyHaikudles.find(query))
-    .filter(Boolean); // TODO pull ids instead
+  let allDailyHaikudleIds = Array.from(await store.dailyHaikudles.ids())
+    .map((id: any) => `${id}`)
+    .filter((id: string) => id && id.match(/20\d{6}/))
+    .sort()
+    .reverse();
+
+  if (query?.count) {
+    allDailyHaikudleIds = allDailyHaikudleIds.splice(query?.offset || 0, query.count)
+  }
+
+  const dailyHaikudles = await store.dailyHaikudles.find({ id: allDailyHaikudleIds })
   const dailyHaikudleIds = dailyHaikudles
     .map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
 

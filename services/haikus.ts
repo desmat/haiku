@@ -765,8 +765,17 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
 
 export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
   console.log(`>> services.haiku.getDailyHaikus`, { query });
-  const dailyHaikus = (await store.dailyHaikus.find(query))
-    .filter(Boolean);
+  let allDailyHaikuIds = Array.from(await store.dailyHaikus.ids())
+    .map((id: any) => `${id}`)
+    .filter((id: string) => id && id.match(/20\d{6}/))
+    .sort()
+    .reverse();
+
+  if (query?.count) {
+    allDailyHaikuIds = allDailyHaikuIds.splice(query?.offset || 0, query.count)
+  }
+
+  const dailyHaikus = await store.dailyHaikus.find({ id: allDailyHaikuIds });
   const dailyHaikuIds = dailyHaikus
     .map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
 
