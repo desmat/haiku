@@ -16,6 +16,7 @@ import * as openai from './openai';
 import { incUserUsage, userUsage } from './usage';
 import { triggerDailyHaikuSaved } from './webhooks';
 import { HaikuAlbum } from '@/types/Album';
+import { getFlaggedUserIds } from './users';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)
@@ -49,7 +50,8 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
 
 export async function getHaikuIds(query?: any): Promise<Set<any>> {
   console.log(">> services.haikus.getHaikuIds", { query });
-  return store.haikus.ids(query);
+  // note: some ids get converted to numbers for some reason
+  return new Set(Array.from(await store.haikus.ids(query)).map((id: any) => `${id}`));
 }
 
 export async function getUserHaikus(user: User, {
@@ -177,7 +179,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     haiku,
     userLiked,
     haikuLikes,
-    userFlagged,
+    flaggedHaiku,
     haikuflags,
     dailyHaikuIds,
     dailyHaikudleIds,
@@ -198,8 +200,14 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   }
 
   if (user.isAdmin) {
+    // TODO pull flagged users and see if author of this haiku is flagged
+    const flaggedUser = await store.flaggedUsers.get(haiku.createdBy);
+    if (flaggedUser) {
+      haiku.userFlaggedAt = flaggedUser.updatedAt || flaggedUser.createdAt;
+    }
+
     haiku.likedAt = userLiked?.createdAt;
-    haiku.flaggedAt = userFlagged?.createdAt;
+    haiku.flaggedAt = flaggedHaiku?.createdAt;
     haiku.numLikes = haikuLikes && haikuLikes.size;
     haiku.numFlags = haikuflags && haikuflags.size;
     haiku.dailyHaikuId = dailyHaikuIds && dailyHaikuIds.size && dailyHaikuIds.values().next().value;
@@ -709,34 +717,36 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
   if (!dailyHaiku) {
     // create daily haiku if none for today
     const [
-      haikus,
+      haikuIds,
       previousDailyHaikus,
       likedHaikus,
-      flaggedHaikus,
+      flaggedHaikuIds,
     ] = await Promise.all([
-      getHaikus(),
-      getDailyHaikus(),
-      getLikedHaikus(),
-      getFlaggedHaikus(),
+      getHaikuIds(),
+      getDailyHaikus(), // TODO: get daily haiku ids
+      getLikedHaikus(), // TODO: get liked haiku ids
+      getFlaggedHaikuIds(),
     ]);
 
-    const flaggedHaikuIds = flaggedHaikus.map((haiku: Haiku) => haiku.id);
+    const filteredHaikuIds = Array.from(haikuIds).filter((id: string) => !flaggedHaikuIds.has(id));
     const previousDailyHaikuIds = previousDailyHaikus
       .filter(Boolean)
       .map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
-
     const nonDailyLikedhaikus = likedHaikus
-      .filter((haiku: Haiku) => !flaggedHaikuIds.includes(haiku.id) && !previousDailyHaikuIds.includes(haiku.id));
-    const nonDailyhaikus = haikus
-      .filter((haiku: Haiku) => !flaggedHaikuIds.includes(haiku.id) && !previousDailyHaikuIds.includes(haiku.id));
+      .filter((haiku: Haiku) => !flaggedHaikuIds.has(haiku.id) && !previousDailyHaikuIds.includes(haiku.id));
+    const nonDailyhaikuIds = filteredHaikuIds
+      .filter((haikuId: string) => !flaggedHaikuIds.has(haikuId) && !previousDailyHaikuIds.includes(haikuId));
 
     // pick from liked haikus, else all haikus
-    const randomHaikuId = shuffleArray(nonDailyLikedhaikus || nonDailyhaikus)[0]?.id;
-    let randomHaiku = listToMap(haikus)[randomHaikuId];
+    const randomHaikuId = nonDailyLikedhaikus.length
+      ? shuffleArray(nonDailyLikedhaikus)[0]?.id
+      : shuffleArray(nonDailyhaikuIds)[0]
+
+    let randomHaiku = await store.haikus.get(randomHaikuId);
 
     if (!randomHaiku) {
       console.warn(`>> services.haiku.getDailyHaiku WARNING: ran out of liked or non-daily haikus, picking from the lot`, { randomHaiku });
-      randomHaiku = shuffleArray(haikus)[0];
+      randomHaiku = await store.haikus.get(shuffleArray(filteredHaikuIds)[0]);
 
       if (!randomHaiku) {
         console.warn(`>> services.haiku.getDailyHaiku WARNING: no haikus found!`, { randomHaiku });
@@ -745,7 +755,7 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
       }
     }
 
-    console.log('>> app.api.haikus.GET creating daily haiku', { randomHaikuId, randomHaiku, previousDailyHaikus, likedHaikus, haikus });
+    console.log('>> app.api.haikus.GET creating daily haiku', { randomHaikuId, randomHaiku, previousDailyHaikus, likedHaikus, haikuIds, filteredHaikuIds });
 
     dailyHaiku = await saveDailyHaiku({ id: "(system)" } as User, id, randomHaiku.id);
   }
@@ -884,7 +894,22 @@ export async function getFlaggedHaikus(): Promise<Haiku[]> {
 export async function getFlaggedHaikuIds(): Promise<Set<any>> {
   console.log(">> services.haiku.getFlaggedHaikuIds", {});
 
-  return new Set(Array.from(await store.flaggedHaikus.ids()).map((id: string) => id && id.split(":")[1]).filter(Boolean));
+
+  const flaggedHaikuIds = Array.from(await store.flaggedHaikus.ids())
+    .map((id: string) => id && id.split(":")[1])
+    .filter(Boolean);
+
+  const flaggedUserIds = await getFlaggedUserIds();
+  let haikuIdsByFlaggedUser = (await Promise.all(
+    Array.from(flaggedUserIds)
+      .map((userId: string) => store.haikus.ids({ user: userId }))));
+  // @ts-ignore
+  haikuIdsByFlaggedUser = haikuIdsByFlaggedUser
+    .reduce((accumulator: any, currentValue: any) => {
+      return [...accumulator, ...Array.from(currentValue)]
+    }, [])
+
+  return new Set([...haikuIdsByFlaggedUser, ...flaggedHaikuIds]);
 }
 
 export async function getLatestHaikus(fromDate?: number, toDate?: number): Promise<Haiku[]> {
@@ -913,7 +938,7 @@ export async function getLatestHaikus(fromDate?: number, toDate?: number): Promi
     ];
     offset += batchSize;
     batchSize *= 2;
-    
+
     console.log(">> services.haiku.getLatestHaikus", { batchSize, offset, haikus, latest });
 
   } while (true);

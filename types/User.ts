@@ -11,4 +11,20 @@ export type User = {
   host?: string | undefined | null,
 }
 
+export type FlaggedUser = {
+  id: string,
+  userId: string,
+  createdBy?: string,
+  createdAt?: number,
+  updatedBy?: string,
+  updatedAt?: number,
+  reason?: string,
+};
+
+export const FlaggedUserSaveOptions = {
+  lookups: {
+    user: "userId",
+  },
+};
+
 export const HAIKUS_PAGE_SIZE = 20;

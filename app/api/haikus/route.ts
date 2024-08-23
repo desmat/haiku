@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
 import { generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes, createHaiku, getAlbumHaikus, getFlaggedHaikus, getHaikuIds, getFlaggedHaikuIds } from '@/services/haikus';
-import { userSession } from '@/services/users';
+import { getFlaggedUserIds, userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
 import { getDailyHaikudle, getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
 import { userUsage } from '@/services/usage';
@@ -41,15 +41,20 @@ export async function GET(request: NextRequest, params?: any) {
       query.lang = "en";
     }
 
-    let [haikuIds, flaggedHaikuIds] = await Promise.all([
+    let [
+      haikuIds,
+      flaggedHaikuIds,
+    ] = await Promise.all([
       getHaikuIds(query),
       getFlaggedHaikuIds(),
     ]);
 
     // exclude flagged haikus
-    const filteredHaikuIds =  Array.from(haikuIds).filter((haiku: Haiku) => !flaggedHaikuIds.has(haiku.id))
+    const filteredHaikuIds = Array.from(haikuIds).filter((id: string) => !flaggedHaikuIds.has(id))
     const randomHaikuId = filteredHaikuIds[Math.floor(Math.random() * filteredHaikuIds.length)];
     const randomHaiku = await getHaiku(user, randomHaikuId, mode == "haikudle");
+
+    console.log('>> app.api.haikus.GET', { filteredHaikuIds, randomHaikuId, randomHaiku });
 
     const [numLikes, userHaiku, userHaikudle] = await Promise.all([
       getHaikuNumLikes(randomHaiku.id),
@@ -57,7 +62,7 @@ export async function GET(request: NextRequest, params?: any) {
       getUserHaikudle(user?.id, randomHaiku.id),
     ]);
 
-    const dailyHaikudle = await getDailyHaikudle(randomHaikuId);
+    const dailyHaikudle = await getDailyHaikudle(randomHaikuId); // TODO expects dateCode not haikuId
 
     if (dailyHaikudle) {
       randomHaiku.dailyHaikudleId = dailyHaikudle?.id;
@@ -93,7 +98,7 @@ export async function GET(request: NextRequest, params?: any) {
   return NextResponse.json({ haikus: [todaysHaiku] });
 }
 
-export async function POST(request: NextRequest) {  
+export async function POST(request: NextRequest) {
   const contentType = request.headers.get("content-type");
   console.log('>> app.api.haiku.POST', { contentType });
 
@@ -132,8 +137,8 @@ export async function POST(request: NextRequest) {
     const data: any = await request.json();
     subject = data.request.subject;
     lang = data.request.lang;
-    artStyle = data.request.artStyle; 
-    album = data.request.album;   
+    artStyle = data.request.artStyle;
+    album = data.request.album;
     if (subject && subject.indexOf("/") > -1) {
       const split = subject.split("/");
       subject = split[0];
