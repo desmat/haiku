@@ -232,3 +232,9 @@ ul {
     opacity: 0.2;
   }
 }
+
+/* fallbacks for safari browsers (dvh doesn't seem to work well) */
+.bgImage-container {
+  top: 50vh;
+  width: 100%;
+}

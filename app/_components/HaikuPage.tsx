@@ -76,12 +76,12 @@ export default function HaikuPage({
           ...haiku?.bgImageDimensions?.height > haiku?.bgImageDimensions?.width
             ? {
               // portrait
-              backgroundSize: "max(min(100vw, 150dvh), 100vw) auto",
+              backgroundSize: "max(min(100vw, 150vh), 100vw) auto",
               width: "max(min(100vw, 150dvh), 100vw)",
             }
             : {
               // square/landscape
-              backgroundSize: "auto max(min(150vw, 100dvh), 100vw)",
+              backgroundSize: "auto max(min(150vw, 100vh), 100vw)",
               width: "max(min(150vw, 100dvh), 100vw)",
             }
         }}
