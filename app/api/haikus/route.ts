@@ -62,12 +62,6 @@ export async function GET(request: NextRequest, params?: any) {
       getUserHaikudle(user?.id, randomHaiku.id),
     ]);
 
-    const dailyHaikudle = await getDailyHaikudle(randomHaikuId); // TODO expects dateCode not haikuId
-
-    if (dailyHaikudle) {
-      randomHaiku.dailyHaikudleId = dailyHaikudle?.id;
-    }
-
     if (!user.isAdmin && randomHaiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
       createUserHaiku(user, randomHaiku);
     }
