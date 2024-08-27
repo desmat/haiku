@@ -4,7 +4,7 @@ import { DailyHaiku, Haiku } from '@/types/Haiku';
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { Store } from "@/types/Store";
 import { User } from '@/types/User';
-import { uuid } from '@/utils/misc';
+import { findHoleInDatecodeSequence, uuid } from '@/utils/misc';
 import shuffleArray from '@/utils/shuffleArray';
 import { getDailyHaikus, getFlaggedHaikuIds, getHaiku, getHaikus } from './haikus';
 import { triggerDailyHaikudleSaved } from './webhooks';
@@ -278,22 +278,21 @@ export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
 }
 
 export async function getNextDailyHaikudleId(): Promise<string> {
-  const ids = Array.from(await store.dailyHaikudles.ids({ count: 10 }))
+  const todayDatecode = moment().format("YYYYMMDD");
+  const todaysDatecodeInt = parseInt(todayDatecode);
+
+  const ids = Array.from(await store.dailyHaikudles.ids())
+    .filter((id: any) => parseInt(id) >= todaysDatecodeInt)
     .map((id: any) => `${id}`) // but y?
-    .filter((id: string) => id.match(/\d{8}/)) // what's up with the strange ids in there?
-    .sort()
-    .reverse();
+    .sort();
 
-  const todays = moment().format("YYYYMMDD");
-
-  if (!ids.includes(todays)) {
-    return todays;
+  if (!ids.includes(todayDatecode)) {
+    return todayDatecode;
   }
 
-  // @ts-ignore
-  const next = moment(ids[0]).add(1, "days").format("YYYYMMDD");
+  const latestId = findHoleInDatecodeSequence(ids);
 
-  return next;
+  return moment(latestId).add(1, "days").format("YYYYMMDD");
 }
 
 

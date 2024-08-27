@@ -5,7 +5,7 @@ import { put } from '@vercel/blob';
 import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
 import { Store } from "@/types/Store";
 import { User } from '@/types/User';
-import { hashCode, listToMap, normalizeWord, uuid } from '@/utils/misc';
+import { findHoleInDatecodeSequence, hashCode, listToMap, normalizeWord, uuid } from '@/utils/misc';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { Haikudle, UserHaikudle } from '@/types/Haikudle';
 import { USAGE_LIMIT } from '@/types/Usage';
@@ -802,21 +802,21 @@ export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
 }
 
 export async function getNextDailyHaikuId(): Promise<string> {
-  const ids = Array.from(await store.dailyHaikus.ids({ count: 10 }))
+  const todayDatecode = moment().format("YYYYMMDD");
+  const todaysDatecodeInt = parseInt(todayDatecode);
+
+  const ids = Array.from(await store.dailyHaikus.ids())
+    .filter((id: any) => parseInt(id) >= todaysDatecodeInt)
     .map((id: any) => `${id}`) // but y?
-    .sort()
-    .reverse();
+    .sort();
 
-  const todays = moment().format("YYYYMMDD");
-
-  if (!ids.includes(todays)) {
-    return todays;
+  if (!ids.includes(todayDatecode)) {
+    return todayDatecode;
   }
 
-  // @ts-ignore
-  const next = moment(ids[0]).add(1, "days").format("YYYYMMDD");
+  const latestId = findHoleInDatecodeSequence(ids);
 
-  return next;
+  return moment(latestId).add(1, "days").format("YYYYMMDD");
 }
 
 export async function saveDailyHaiku(user: any, dateCode: string, haikuId: string): Promise<DailyHaiku> {

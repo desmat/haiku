@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 
 export function uuid(): string {
@@ -72,3 +73,24 @@ export function round(n: number, digits?: any) {
 }
 
 export const nullFunction = () => undefined;
+
+export function findHoleInDatecodeSequence(dateCodes: string[]): string | undefined {
+  return dateCodes
+    .sort()
+    .reduce((prev: any, curr: any) => {
+      // find first 'hole' in sequence    
+      const currInt = curr && Math.floor(moment(curr).valueOf() / 1000 / 60 / 60 / 24);
+      const prevInt = prev && Math.floor(moment(prev).valueOf() / 1000 / 60 / 60 / 24);
+      // console.log("findHoleInDatecodeSequence", { prev, curr, currInt, prevInt, diff: currInt - prevInt });
+
+      if (isNaN(curr)) return prev;
+
+      if (!prevInt) return curr;
+
+      if (currInt && currInt > 0 && currInt - prevInt > 1) {
+        return prev;
+      }
+
+      return curr;
+    }, undefined);
+}
