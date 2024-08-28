@@ -29,7 +29,11 @@ export async function getHaikudles(query?: any): Promise<Haikudle[]> {
 }
 
 async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudle> {
+  console.log(`>> services.haikudle.createInProgress`, { user, haikudle });
+  
   const haiku = await getHaiku(user, haikudle.haikuId);
+  if (!haiku) throw `Haiku not found: ${haikudle.haikuId}`;
+
   const shuffle = !user || user.isAdmin || !user.isAdmin && user.id != haiku.createdBy;
   console.log(`>> services.haikudle.createInProgress`, { haiku, user, shuffle });
 
