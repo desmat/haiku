@@ -21,6 +21,7 @@ export default function HaikuPage({
   onboardingElement,
   refresh,
   saveHaiku,
+  updateTitle,
   regeneratePoem,
   regenerateImage,
   copyHaiku,
@@ -38,7 +39,8 @@ export default function HaikuPage({
   loading?: boolean,
   onboardingElement?: string,
   refresh?: any,
-  saveHaiku?: any
+  saveHaiku?: any,
+  updateTitle?: any,
   regeneratePoem?: any,
   regenerateImage?: any,
   copyHaiku?: any,
@@ -127,6 +129,7 @@ export default function HaikuPage({
               saveHaiku={saveHaiku}
               copyHaiku={copyHaiku}
               switchMode={switchMode}
+              updateTitle={updateTitle}
             />
           </div>
         }

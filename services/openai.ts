@@ -168,7 +168,7 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
   const systemPrompt = customPrompt || `Given a topic (or "any", meaning you pick) and optionally mood, please generate a haiku and respond in JSON where each response is an array of 3 strings.
     Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
     If the topic specifies a language, or is in another language, please generate the haiku in that language.
-    Also include in the response, in fewest number of words, what were the subject (in the language requested) and mood (in English) of the haiku.
+    Also include in the response, in maximum 3 words, what were the subject (in the language requested) and mood (in English) of the haiku.
     The subject should be in the same language of the haiku. 
     Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
     Please only include keys "haiku", "subject", "mood" and "lang".

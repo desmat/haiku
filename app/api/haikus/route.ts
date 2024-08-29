@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
     const imageType = imageFile.type;
 
     // @ts-ignore
-    haiku = await createHaiku(user, { theme: title, poem, imageBuffer, imageType, albumId: album });
+    haiku = await createHaiku(user, { title, poem, imageBuffer, imageType, albumId: album });
   } else {
     // console.log('>> app.api.haiku.POST generating new haiku', { lang, subject, mood, artStyle });    
     haiku = await generateHaiku(user, { lang, subject, mood, artStyle, poem, albumId: album })

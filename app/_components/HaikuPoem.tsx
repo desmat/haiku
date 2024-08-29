@@ -18,8 +18,11 @@ import { StyledLayers } from "./StyledLayers";
 import { GenerateIcon } from "./nav/GenerateInput";
 
 const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
+  const title = haiku?.title ?? haiku?.theme;
   return [
-    `"${capitalize(haiku?.theme)}", `,
+    title
+      ? `"${capitalize(haiku?.title ?? haiku?.theme)}", `
+      : undefined,
     `${mode == "haikudle" ? "haikudle.ai" : "haikugenius.ai"}/${haiku?.id}`
   ];
 }
@@ -197,6 +200,7 @@ export default function HaikuPoem({
   saveHaiku,
   copyHaiku,
   switchMode,
+  updateTitle,
 }: {
   user?: User,
   mode: ExperienceMode,
@@ -212,6 +216,7 @@ export default function HaikuPoem({
   saveHaiku?: any,
   copyHaiku?: any,
   switchMode?: any,
+  updateTitle?: any,
 }) {
   // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
   const showcaseMode = mode == "showcase";
@@ -496,7 +501,7 @@ export default function HaikuPoem({
             </div>
 
             <div
-              className={`_bg-red-400 relative md:text-[16pt] sm:text-[14pt] text-[12pt] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}
+              className="_bg-red-400 relative md:text-[16pt] sm:text-[14pt] text-[12pt]"
               style={{
                 // background: "pink",
                 fontSize: "60%",
@@ -511,15 +516,19 @@ export default function HaikuPoem({
               >
                 <div
                   className="poem-title _transition-all _bg-pink-400"
-                  onClick={(e: any) => !showcaseMode && handleClickHaiku(e)}
-                  title={showcaseMode || canSwitchMode ? "" : "Copy to clipboard"}
+                  onClick={() => !showcaseMode && updateTitle && updateTitle()}
                   style={{
-                    cursor: showcaseMode || canSwitchMode
+                    cursor: updateTitle || canCopy
                       ? "pointer"
-                      : !canEdit && canCopy
-                        ? "copy"
-                        : ""
+                      : ""
                   }}
+                  title={
+                    updateTitle
+                      ? "Update title" :
+                      canCopy
+                        ? "Copy to clipboard"
+                        : ""
+                  }
                 >
                   <StyledLayers
                     styles={
@@ -532,7 +541,7 @@ export default function HaikuPoem({
                   >
                     <span
                       dangerouslySetInnerHTML={{
-                        __html: `${formatHaikuTitleAndAuthor(haiku, mode).join(haiku?.theme?.length > maxHaikuTheme
+                        __html: `${formatHaikuTitleAndAuthor(haiku, mode).join((haiku?.title?.length ?? haiku?.theme?.length) > maxHaikuTheme
                           ? "<br/>&nbsp;"
                           : "")}`
                       }}

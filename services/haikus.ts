@@ -233,7 +233,9 @@ export async function getHaikuNumLikes(id: number) {
 }
 
 export async function createHaiku(user: User, {
+  title,
   theme,
+  subject,
   poem,
   imageBuffer,
   imageType,
@@ -247,7 +249,9 @@ export async function createHaiku(user: User, {
   lang,
   albumId,
 }: {
-  theme: string,
+  title?: string,
+  theme?: string,
+  subject?: string,
   poem: string[],
   // note: either imageBuffer or imageUrl should be provided
   imageBuffer?: Buffer,
@@ -301,6 +305,8 @@ export async function createHaiku(user: User, {
 
   let create = {
     id: haikuId,
+    subject,
+    title,
     theme,
     poem,
     bgImage: imageUrl,
@@ -331,7 +337,7 @@ export async function createHaiku(user: User, {
 
 export async function regenerateHaikuPoem(user: any, haiku: Haiku, albumId?: string): Promise<Haiku> {
   const lang = (haiku.lang || "en") as LanguageType;
-  const subject = haiku.theme;
+  const subject = haiku.subject || haiku.theme || haiku.title;
   const mood = undefined;
   console.log(">> services.haiku.regenerateHaikuPoem", { lang, subject, mood, user });
   const language = locale.getByTag(lang)?.name
@@ -377,7 +383,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku, albumId?: str
 
 export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: string): Promise<Haiku> {
   const lang = (haiku.lang || "en") as LanguageType;
-  const subject = haiku.theme;
+  const subject = haiku.subject || haiku.theme || haiku.title;
   const mood = haiku.mood;
   const language = supportedLanguages[lang]?.name;
   console.log(">> services.haiku.completeHaikuPoem", { subject, mood, user });
@@ -443,7 +449,7 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
     prompt: imagePrompt,
     artStyle: selectedArtStyle,
     model: imageModel,
-  } = await openai.generateBackgroundImage(haiku.theme, haiku.mood, artStyle, customImagePrompt, customArtStyles);
+  } = await openai.generateBackgroundImage(haiku.subject || haiku.theme || haiku.title, haiku.mood, artStyle, customImagePrompt, customArtStyles);
 
   const imageRet = await fetch(openaiUrl);
   // console.log(">> services.haiku.regenerateHaikuImage", { imageRet });
@@ -578,6 +584,7 @@ export async function generateHaiku(user: User, {
 
   return createHaiku(user, {
     lang: generatedLang || lang || "en",
+    subject,
     theme: generatedSubject,
     mood: generatedMood,
     artStyle: selectedArtStyle,
