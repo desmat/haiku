@@ -439,6 +439,19 @@ export default function MainPage({
     }
   }
 
+  const updateHaikuTitle = async () => {
+    // console.log('>> app.page.updateHaikuTitle()');
+    const title = prompt("Title?", haiku.title ?? haiku.theme)
+
+    if (typeof (title) == "string") {
+      const haikuToSave = { ...haiku, title };
+      resetAlert();
+      setHaiku(haikuToSave);
+      const ret = await doSaveHaiku(haikuToSave);
+      // console.log('>> app.page.updateHaikuTitle()', { ret });
+    }
+  }
+
   const loadRandom = () => {
     // return;
     // console.log('>> app.page.loadRandom()', {});
@@ -929,6 +942,7 @@ export default function MainPage({
           onboardingElement={onboardingElement}
           refresh={!haiku?.error && (user?.isAdmin || album) && loadRandom}
           saveHaiku={!haiku?.error && !haikudleMode && doSaveHaiku}
+          updateTitle={!haiku?.error && !haikudleMode && user?.isAdmin && updateHaikuTitle}
           regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
           regenerateImage={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
           copyHaiku={!haiku?.error && copyHaiku}
