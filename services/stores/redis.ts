@@ -50,6 +50,61 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     this.saveOptions = saveOptions;
   }
 
+  lookupKeys(value: any, options?: any) {
+    options = { ...this.saveOptions, ...options };
+    console.log(`>> services.stores.redis.lookupKeys<${this.key}>.lookupKeys`, { value, options });
+
+    /* 
+      create index and lookup sets based on options.lookups
+
+      given a likedhaiku record: 
+      {
+        id: 123:456,
+        userId: 123,
+        haikuId 456,
+      }
+
+      and lookups: 
+      { 
+        user: { userId: "haikuId"},
+        haiku: { haikuId: "userId" }
+      }
+  
+      we want indexes:
+
+      likedhaiku:123:456 -> value (JSON, the rest are sorted sets)
+      likedhaikus -> all likedhaiku id's (ie 123:456, etc)
+      // NOT SUPPORTED FOR NOW // likedhaikus:users -> all user ids (ie 123, etc) NOTE: this should be a sorted set of user ids with its score as number of haikus liked
+      likedhaikus:user:123 -> all likedhaiku id's for the given user (ie 123:456, etc)
+      // NOT SUPPORTED FOR NOW // likedhaikus:haikus ->  NOTE: this should be a sorted set of haiku ids with its score as number of users who liked it
+      likedhaikus:haiku:456 -> all likedhaiku id's for the given haiku (ie 123:456, etc)
+
+    */
+
+    const lookupKeys = !options?.noLookup && Object
+      .entries(options?.lookups || {})
+      .map((entry) => {
+        const id = value.id;
+        const lookupName = entry[0];
+        const lookupKey = entry[1];
+        // TODO validate and log errors
+        // @ts-ignore
+        const lookupId = value[lookupKey];
+
+        return [
+          // foos -> 123:456
+          [`${this.setKey}`, id],
+          // foos:bar:123 -> 123:456
+          [`${this.setKey}:${lookupName}:${lookupId}`, id],
+        ]
+      })
+      .flat();
+
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.lookupKeys`, { lookupKeys });
+
+    return lookupKeys;
+  }
+
   async get(id: string): Promise<T | undefined> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.get`, { id });
 
@@ -67,7 +122,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
   async ids(query: any = {}): Promise<Set<string>> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.ids`, { query });
-    
+
     const min = query.offset || 0;
     const max = min + (query.count || 0) - 1;
     delete query.offset;
@@ -165,55 +220,10 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       createdBy: value.createdBy || userId,
       ...value,
     }
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { createdValue });
 
-    /* 
-      create index and lookup sets based on options.lookups
-
-      given a likedhaiku record: 
-      {
-        id: 123:456,
-        userId: 123,
-        haikuId 456,
-      }
-
-      and lookups: 
-      { 
-        user: { userId: "haikuId"},
-        haiku: { haikuId: "userId" }
-      }
-  
-      we want indexes:
-
-      likedhaiku:123:456 -> value (JSON, the rest are sorted sets)
-      likedhaikus -> all likedhaiku id's (ie 123:456, etc)
-      // NOT SUPPORTED FOR NOW // likedhaikus:users -> all user ids (ie 123, etc) NOTE: this should be a sorted set of user ids with its score as number of haikus liked
-      likedhaikus:user:123 -> all likedhaiku id's for the given user (ie 123:456, etc)
-      // NOT SUPPORTED FOR NOW // likedhaikus:haikus ->  NOTE: this should be a sorted set of haiku ids with its score as number of users who liked it
-      likedhaikus:haiku:456 -> all likedhaiku id's for the given haiku (ie 123:456, etc)
-
-    */
-
-
-    const lookupKeys = !options?.noLookup && Object
-      .entries(options?.lookups || {})
-      .map((entry) => {
-        const id = createdValue.id;
-        const lookupName = entry[0];
-        const lookupKey = entry[1];
-        // TODO validate and log errors
-        // @ts-ignore
-        const lookupId = createdValue[lookupKey];
-
-        return [
-          // foos -> 123:456
-          [`${this.setKey}`, id],
-          // foos:bar:123 -> 123:456
-          [`${this.setKey}:${lookupName}:${lookupId}`, id],
-        ]
-      })
-      .flat();
-
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { lookupKeys });
+    const lookupKeys = this.lookupKeys(createdValue, options);
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { lookupKeys });
 
     const responses = await Promise.all([
       kv.json.set(this.valueKey(createdValue.id), "$", createdValue),
@@ -229,16 +239,29 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
   async update(userId: string, value: T, options?: any): Promise<T> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { value, options });
-
+    
     if (!value.id) {
       throw `Cannot update ${this.key}: null id`;
     }
 
-    if (!this.get(value.id)) {
+    const prevValue = await this.get(value.id);
+
+    if (!prevValue) {
       throw `Cannot update ${this.key}: does not exist: ${value.id}`;
     }
 
-    // TODO: update lookups 
+    // update lookups 
+
+    const prevLookupKeys = this.lookupKeys(prevValue, options);
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { prevLookupKeys });
+
+    if (prevLookupKeys && prevLookupKeys.length) {
+      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.update deleting previous lookup keys`, { prevLookupKeys });
+      const response = await Promise.all([
+        ...prevLookupKeys.map((lookupKey: any) => kv.zrem(lookupKey[0], lookupKey[1]))
+      ]);
+      console.log(`>> services.stores.redis.RedisStore<${this.key}>.update deleted previous lookup keys`, { response });
+    }
 
     const now = moment().valueOf();
     options = { ...this.saveOptions, ...options }
@@ -249,9 +272,13 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       updatedBy: userId
     };
 
+    const lookupKeys = this.lookupKeys(updatedValue, options);
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { lookupKeys });
+
     const response = await Promise.all([
       kv.json.set(this.valueKey(value.id), "$", updatedValue),
       options.expire && kv.expire(this.valueKey(value.id), options.expire),
+      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => kv.zadd(lookupKey[0], { score: updatedValue.updatedAt, member: lookupKey[1] })) : []),
     ]);
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { response });
@@ -272,15 +299,19 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       throw `Cannot update ${this.key}: does not exist: ${id}`;
     }
 
+    const lookupKeys = this.lookupKeys(value, options);
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { lookupKeys });
+
     value.deletedAt = moment().valueOf();
     const response = await Promise.all([
-      kv.zrem(this.setKey, id),
       options.hardDelete
         ? kv.json.del(this.valueKey(id), "$")
         : kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf(), deletedBy: userId }),
+      kv.zrem(this.setKey, id),
+      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => kv.zrem(lookupKey[0], lookupKey[1])) : []),
     ]);
 
-    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { response });
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { response });
 
     return new Promise((resolve) => resolve(value));
   }
