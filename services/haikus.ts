@@ -708,7 +708,7 @@ export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<U
   console.log(`>> services.haiku.saveUserHaiku`, { userHaiku });
 
   const existingUserHaiku = await store.userHaikus.get(userHaiku.id);
-  let savedUserHaiku;
+  let savedUserHaiku: any;
   if (existingUserHaiku) {
     savedUserHaiku = await store.userHaikus.update(user.id, userHaiku, UserHaikuSaveOptions);
   } else {
