@@ -161,7 +161,7 @@ export async function getUserHaikus(user: User, {
         solvedAt: haiku.solvedAt,
         viewedAt: haiku.viewedAt,
         likedAt: haiku.likedAt,
-        theme: haiku.theme,
+        theme: haiku.title || haiku.theme,
         moves: haiku.moves,
       };
     })
@@ -791,7 +791,7 @@ export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
   // saving them with the daily haiku record  
   const haikus = await store.haikus.find({ id: dailyHaikuIds });
   const themeLookup = new Map(haikus
-    .map((haiku: Haiku) => [haiku.id, haiku.theme]));
+    .map((haiku: Haiku) => [haiku.id, haiku.title || haiku.theme]));
 
   // @ts-ignore
   return dailyHaikus

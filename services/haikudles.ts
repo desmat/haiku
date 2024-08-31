@@ -264,7 +264,7 @@ export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
   // saving them with the daily haikudle record  
   const haikus = await store.haikus.find({ id: dailyHaikudleIds });
   const themeLookup = new Map(haikus
-    .map((haiku: Haiku) => [haiku.id, haiku.theme]));
+    .map((haiku: Haiku) => [haiku.id, haiku.title || haiku.theme]));
 
   // @ts-ignore
   return dailyHaikudles
