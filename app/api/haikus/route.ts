@@ -1,12 +1,9 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { generateHaiku, getUserHaiku, createUserHaiku, getDailyHaiku, getDailyHaikus, saveDailyHaiku, getHaiku, getLatestHaikus, getHaikuNumLikes, createHaiku, getAlbumHaikus, getFlaggedHaikus, getHaikuIds, getFlaggedHaikuIds } from '@/services/haikus';
-import { getFlaggedUserIds, userSession } from '@/services/users';
+import { generateHaiku, getDailyHaiku, getHaiku, getLatestHaikus, createHaiku, getAlbumHaikus, getRandomHaiku } from '@/services/haikus';
+import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
-import { getDailyHaikudle, getDailyHaikudles, getUserHaikudle } from '@/services/haikudles';
 import { userUsage } from '@/services/usage';
-import { DailyHaiku, Haiku } from '@/types/Haiku';
-import { DailyHaikudle } from '@/types/Haikudle';
 import { LanguageType } from '@/types/Languages';
 import { USAGE_LIMIT } from '@/types/Usage';
 
@@ -41,33 +38,14 @@ export async function GET(request: NextRequest, params?: any) {
       query.lang = "en";
     }
 
-    let [
-      haikuIds,
-      flaggedHaikuIds,
-    ] = await Promise.all([
-      getHaikuIds(query),
-      getFlaggedHaikuIds(),
-    ]);
-
-    // exclude flagged haikus
-    const filteredHaikuIds = Array.from(haikuIds).filter((id: string) => !flaggedHaikuIds.has(id))
-    const randomHaikuId = filteredHaikuIds[Math.floor(Math.random() * filteredHaikuIds.length)];
-    const randomHaiku = await getHaiku(user, randomHaikuId, mode == "haikudle");
-
-    console.log('>> app.api.haikus.GET', { filteredHaikuIds, randomHaikuId, randomHaiku });
-
-    const [numLikes, userHaiku, userHaikudle] = await Promise.all([
-      getHaikuNumLikes(randomHaiku.id),
-      getUserHaiku(user.id, randomHaiku.id),
-      getUserHaikudle(user?.id, randomHaiku.id),
-    ]);
-
-    if (!user.isAdmin && randomHaiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
-      createUserHaiku(user, randomHaiku);
+    let randomHaiku = await getRandomHaiku(user, mode, query);
+    if (!randomHaiku) {
+      randomHaiku = await getRandomHaiku(user, mode, query);
+      if (!randomHaiku) {
+        randomHaiku = await getRandomHaiku(user, mode, query);
+        if (!randomHaiku) throw 'Unable to find random haiku';
+      }
     }
-
-    randomHaiku.numLikes = numLikes;
-    randomHaiku.likedAt = userHaiku?.likedAt;
 
     return NextResponse.json({ haikus: [randomHaiku] });
   } else if (typeof (query.latest) == "string") {

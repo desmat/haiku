@@ -11,7 +11,7 @@ import { Haikudle, UserHaikudle } from '@/types/Haikudle';
 import { USAGE_LIMIT } from '@/types/Usage';
 import { byCreatedAtDesc } from '@/utils/sort';
 import shuffleArray from '@/utils/shuffleArray';
-import { deleteHaikudle, getHaikudle } from './haikudles';
+import { deleteHaikudle, getHaikudle, getUserHaikudle } from './haikudles';
 import * as openai from './openai';
 import { incUserUsage, userUsage } from './usage';
 import { triggerDailyHaikuSaved } from './webhooks';
@@ -717,6 +717,46 @@ export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<U
 
   console.log(`>> services.haiku.saveUserHaiku`, { savedUserHaiku });
   return new Promise((resolve, reject) => resolve(savedUserHaiku));
+}
+
+export async function getRandomHaiku(user: User, mode: string, query?: any): Promise<Haiku | undefined> {
+  console.log(`>> services.haiku.getRandomHaiku`, { query });
+
+  
+  let [
+    haikuIds,
+    flaggedHaikuIds,
+  ] = await Promise.all([
+    getHaikuIds(query),
+    getFlaggedHaikuIds(),
+  ]);
+
+  // exclude flagged haikus
+  const filteredHaikuIds = Array.from(haikuIds).filter((id: string) => !flaggedHaikuIds.has(id))
+  const randomHaikuId = filteredHaikuIds[Math.floor(Math.random() * filteredHaikuIds.length)];
+  const randomHaiku = await getHaiku(user, randomHaikuId, mode == "haikudle");
+
+  if (!randomHaiku) {
+    console.warn('>> services.haiku.getRandomHaiku WARNING: random haiku not found', { randomHaikuId })
+    return undefined;
+  }
+
+  console.log('>> services.haiku.getRandomHaiku', { filteredHaikuIds, randomHaikuId, randomHaiku });
+
+  const [numLikes, userHaiku, userHaikudle] = await Promise.all([
+    getHaikuNumLikes(randomHaiku.id),
+    getUserHaiku(user.id, randomHaiku.id),
+    getUserHaikudle(user?.id, randomHaiku.id),
+  ]);
+
+  if (!user.isAdmin && randomHaiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
+    createUserHaiku(user, randomHaiku);
+  }
+
+  randomHaiku.numLikes = numLikes;
+  randomHaiku.likedAt = userHaiku?.likedAt;
+
+  return randomHaiku;
 }
 
 export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined> {
