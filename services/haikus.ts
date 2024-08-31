@@ -707,7 +707,13 @@ export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed
 export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<UserHaiku> {
   console.log(`>> services.haiku.saveUserHaiku`, { userHaiku });
 
-  const savedUserHaiku = await store.userHaikus.update(user.id, userHaiku, UserHaikuSaveOptions);
+  const existingUserHaiku = await store.userHaikus.get(userHaiku.id);
+  let savedUserHaiku;
+  if (existingUserHaiku) {
+    savedUserHaiku = await store.userHaikus.update(user.id, userHaiku, UserHaikuSaveOptions);
+  } else {
+    savedUserHaiku = await store.userHaikus.create(user.id, userHaiku, UserHaikuSaveOptions);
+  }
 
   console.log(`>> services.haiku.saveUserHaiku`, { savedUserHaiku });
   return new Promise((resolve, reject) => resolve(savedUserHaiku));
