@@ -1,4 +1,3 @@
-import moment from 'moment';
 import { Suspense } from 'react';
 import HaikuPage from '@/app/_components/HaikuPage';
 import MainPage from '@/app/_components/MainPage';
@@ -8,11 +7,11 @@ import NotFound from '@/app/not-found';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { LanguageType, isSupportedLanguage } from '@/types/Languages';
 import { getAlbumHaikus, getDailyHaiku, getHaiku } from '@/services/haikus';
-import { getDailyHaikudle, getDailyHaikudles, getHaikudle } from '@/services/haikudles';
+import { getDailyHaikudle, getDailyHaikudleIds, getHaikudle } from '@/services/haikudles';
 import { notFoundHaiku } from '@/services/stores/samples';
 import { haikuStyles } from '@/types/Haiku';
-import { DailyHaikudle } from '@/types/Haikudle';
 import { User } from '@/types/User';
+import moment from 'moment';
 
 const user = {} as User;
 
@@ -37,11 +36,11 @@ const todaysHaikudle = async () => {
 
 const getTheHaikudle = async (id: string) => {
   const todaysDateCode = moment().format("YYYYMMDD");
-  const dailyHaikudles = await getDailyHaikudles();
-  const dailyHaikudle = dailyHaikudles
-    .filter((dh: DailyHaikudle) => dh.id < todaysDateCode && dh.haikudleId == id)[0];
+  const previousDailyHaikudleIds = (await getDailyHaikudleIds({ haikudle: id }))
+    .filter((id: string) => id < todaysDateCode);  
+  const wasPreviousDailyHaikudle = previousDailyHaikudleIds.length > 0;
 
-  const haiku = await getHaiku(user, id, !dailyHaikudle?.id);
+  const haiku = await getHaiku(user, id, !wasPreviousDailyHaikudle);
   if (!haiku) return;
 
   const haikudle = await getHaikudle(user, id);
@@ -49,7 +48,7 @@ const getTheHaikudle = async (id: string) => {
 
   return {
     ...haikudle,
-    previousDailyHaikudleId: dailyHaikudle?.id,
+    previousDailyHaikudleId: previousDailyHaikudleIds[0],
     haiku: haiku,
   }
 }

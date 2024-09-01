@@ -1,9 +1,8 @@
 import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { getHaikudle, deleteHaikudle, saveUserHaikudle, getUserHaikudle, createHaikudle, getDailyHaikudles, getNextDailyHaikudleId } from '@/services/haikudles';
+import { getHaikudle, deleteHaikudle, saveUserHaikudle, getUserHaikudle, getDailyHaikudleIds } from '@/services/haikudles';
 import { userSession } from '@/services/users';
-import { createUserHaiku, getHaiku, getUserHaiku } from '@/services/haikus';
-import { DailyHaikudle } from '@/types/Haikudle';
+import { getHaiku } from '@/services/haikus';
 
 // TODO I don't think we need this let's remove
 // export const maxDuration = 300;
@@ -17,15 +16,15 @@ export async function GET(
   const { user } = await userSession(request);
 
   const todaysDateCode = moment().format("YYYYMMDD");
-  const dailyHaikudles = await getDailyHaikudles();
-  const dailyHaikudle = dailyHaikudles
-    .filter((dh: DailyHaikudle) => dh.id < todaysDateCode && dh.haikudleId == params.id)[0];
+  const previousDailyHaikudleIds = (await getDailyHaikudleIds({ haikudle: params.id }))
+    .filter((id: string) => id < todaysDateCode);  
+  const wasPreviousDailyHaikudle = previousDailyHaikudleIds.length > 0;
 
   let [
     haiku,
     haikudle,
   ] = await Promise.all([
-    getHaiku(user, params.id, !dailyHaikudle?.id),
+    getHaiku(user, params.id, !wasPreviousDailyHaikudle),
     getHaikudle(user, params.id),
   ]);
   const myHaiku = undefined; //!user.isAdmin && haiku?.createdBy == user.id && await getHaiku(user, params.id);
@@ -45,7 +44,7 @@ export async function GET(
     haikudle: {
       ...haikudle,
       ...userHaikudle?.haikudle,
-      previousDailyHaikudleId: dailyHaikudle?.id,
+      previousDailyHaikudleId: previousDailyHaikudleIds[0],
       haiku: myHaiku || haiku,
     }
   });

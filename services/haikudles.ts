@@ -30,7 +30,7 @@ export async function getHaikudles(query?: any): Promise<Haikudle[]> {
 
 async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudle> {
   console.log(`>> services.haikudle.createInProgress`, { user, haikudle });
-  
+
   const haiku = await getHaiku(user, haikudle.haikuId);
   if (!haiku) throw `Haiku not found: ${haikudle.haikuId}`;
 
@@ -243,19 +243,25 @@ export async function getDailyHaikudle(id?: string): Promise<DailyHaikudle | und
   return dailyHaikudle;
 }
 
-export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
-  console.log(`>> services.haiku.getDailyHaikudles`, { query });
-  let allDailyHaikudleIds = Array.from(await store.dailyHaikudles.ids())
+export async function getDailyHaikudleIds(query?: any): Promise<string[]> {
+  console.log(`>> services.haiku.getDailyHaikudleIds`, { query });
+  let dailyHaikudleIds = Array.from(await store.dailyHaikudles.ids(query))
     .map((id: any) => `${id}`)
     .filter((id: string) => id && id.match(/20\d{6}/))
     .sort()
     .reverse();
 
   if (query?.count) {
-    allDailyHaikudleIds = allDailyHaikudleIds.splice(query?.offset || 0, query.count)
+    dailyHaikudleIds = dailyHaikudleIds.splice(query?.offset || 0, query.count)
   }
 
-  const dailyHaikudles = await store.dailyHaikudles.find({ id: allDailyHaikudleIds })
+  return dailyHaikudleIds;
+}
+
+export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
+  console.log(`>> services.haiku.getDailyHaikudles`, { query });
+  const dailyHaikudleDateCodes = await getDailyHaikudleIds(query);
+  const dailyHaikudles = await store.dailyHaikudles.find({ id: dailyHaikudleDateCodes })
   const dailyHaikudleIds = dailyHaikudles
     .map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
 
@@ -286,7 +292,10 @@ export async function getNextDailyHaikudleId(): Promise<string> {
   const todaysDatecodeInt = parseInt(todayDatecode);
 
   const ids = Array.from(await store.dailyHaikudles.ids())
-    .filter((id: any) => parseInt(id) >= todaysDatecodeInt)
+    .filter((id: any) => {
+      const idInt = parseInt(id);
+      return idInt >= todaysDatecodeInt && idInt < 20990000; // some bad datecodes gpt om there somehow
+    })
     .map((id: any) => `${id}`) // but y?
     .sort();
 

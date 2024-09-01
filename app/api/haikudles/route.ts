@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaikudles, createHaikudle, getHaikudle, getUserHaikudle, getDailyHaikudle, saveDailyHaikudle, getDailyHaikudles, getNextDailyHaikudleId } from '@/services/haikudles';
+import { createHaikudle, getHaikudle, getUserHaikudle, getDailyHaikudle, saveDailyHaikudle, getNextDailyHaikudleId } from '@/services/haikudles';
 import { userSession } from '@/services/users';
 import { searchParamsToMap } from '@/utils/misc';
-import moment from 'moment';
-import { getDailyHaikus, getHaiku, getHaikus } from '@/services/haikus';
-import { DailyHaikudle, Haikudle } from '@/types/Haikudle';
-import shuffleArray from '@/utils/shuffleArray';
-import { DailyHaiku, Haiku } from '@/types/Haiku';
+import { getHaiku } from '@/services/haikus';
 
 export async function GET(request: NextRequest, params?: any) {
   const query = searchParamsToMap(request.nextUrl.searchParams.toString());
