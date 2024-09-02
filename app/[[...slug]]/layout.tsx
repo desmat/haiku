@@ -40,7 +40,7 @@ if (isHaikudleMode) {
   ];
 } else {
   metaImages = [
-    haikuGeniusMetaImages[Math.floor(Math.random() * haikuGeniusMetaImages.length)]
+    // haikuGeniusMetaImages[Math.floor(Math.random() * haikuGeniusMetaImages.length)]
   ];
 }
 
