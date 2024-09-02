@@ -82,6 +82,14 @@ export default async function Layout({
   const haiku = { bgColor: "" };  //await getHaiku(user, haikuId);
   // console.log('>> app.[[..slug]].layout.render()', { haiku });
 
+  const images = [
+    isHaikudleMode
+      ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`
+      : `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}.png`,
+    ...metaImages,
+  ];
+  console.log('>> app.[[..slug]].layout.render()', { images });
+
   metadata = {
     ...metadata,
     openGraph: {
@@ -89,12 +97,7 @@ export default async function Layout({
       description: rootMetadata.description || "",
       type: "website",
       url: metaUrl,
-      images: [
-        isHaikudleMode
-          ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`
-          : `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}.png`,
-        ...metaImages,
-      ]
+      images,
     }
   }
 
