@@ -665,6 +665,12 @@ export default function MainPage({
     if (haikudleMode && haikudleSolved || !haikudleMode) {
       navigator.clipboard.writeText(formatHaikuText(haikudleSolved ? solvedHaikudleHaiku : haiku, mode));
       plainAlert(`Haiku poem copied to clipboard`, { closeDelay: 750 });
+      trackEvent("haiku-shared", {
+        userId: user?.id,
+        id: haiku.id,
+        value: "poem-copied",
+      });
+      haikuAction(haikuId, "share");
     }
   }
 
@@ -687,6 +693,7 @@ export default function MainPage({
         id: haiku.id,
         value: "url-copied",
       });
+      haikuAction(haikuId, "share");
     }
   }
 

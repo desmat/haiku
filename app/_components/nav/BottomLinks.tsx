@@ -293,12 +293,6 @@ export default function BottomLinks({
             title="Copy haiku poem "
             onClick={() => {
               if (onCopyHaiku) {
-                trackEvent("haiku-shared", {
-                  userId: user?.id,
-                  id: haiku.id,
-                  value: "poem-copied",
-                  location: "bottom-links",
-                });
                 onCopyHaiku();
               }
             }}
