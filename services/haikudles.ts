@@ -343,7 +343,8 @@ export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: st
     });
   }
 
-  triggerDailyHaikudleSaved(ret);
+  const webhookRet = await triggerDailyHaikudleSaved(ret);
+  // console.log(">> services.haikudle.saveDailyHaikudle", { webhookRet });
 
   return ret;
 }

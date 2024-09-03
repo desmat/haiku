@@ -901,7 +901,8 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
     });
   }
 
-  triggerDailyHaikuSaved(ret);
+  const webhookRet = await triggerDailyHaikuSaved(ret);
+  // console.log(">> services.haikudle.saveDailyHaiku", { webhookRet });
 
   return ret;
 }

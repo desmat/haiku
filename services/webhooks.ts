@@ -2,14 +2,14 @@ import { DailyHaiku } from "@/types/Haiku";
 import { DailyHaikudle } from "@/types/Haikudle";
 
 export async function triggerDailyHaikuSaved(dailyHaiku: DailyHaiku) {
-  console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { dailyHaiku });
-
   const url = process.env.WEBHOOK_DAILY_HAIKU_SAVED;
+  console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { dailyHaiku, url });
+
   if (!url) {
     console.warn(">> app.services.webhooks.triggerDailyHaikuSaved WARNING: WEBHOOK_DAILY_HAIKU_SAVED variable not set");
     return;
   }
-  
+
   const res = await fetch(url, {
     method: "POST",
     body: JSON.stringify(dailyHaiku),
@@ -19,7 +19,7 @@ export async function triggerDailyHaikuSaved(dailyHaiku: DailyHaiku) {
     console.error(">> app.services.webhooks.triggerDailyHaikuSaved ERROR", { res });
   }
 
-  console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { res });
+  // console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { res });
 
   // const ret = await res.json();
   // console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { ret });
@@ -31,14 +31,14 @@ export async function triggerDailyHaikuSaved(dailyHaiku: DailyHaiku) {
 }
 
 export async function triggerDailyHaikudleSaved(dailyHaikudle: DailyHaikudle) {
-  console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { dailyHaikudle });
-
   const url = process.env.WEBHOOK_DAILY_HAIKUDLE_SAVED;
+  console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { dailyHaikudle, url });
+
   if (!url) {
     console.warn(">> app.services.webhooks.triggerDailyHaikudleSaved WARNING: WEBHOOK_DAILY_HAIKUDLE_SAVED variable not set");
     return;
   }
-  
+
   const res = await fetch(url, {
     method: "POST",
     body: JSON.stringify(dailyHaikudle),
@@ -48,7 +48,7 @@ export async function triggerDailyHaikudleSaved(dailyHaikudle: DailyHaikudle) {
     console.error(">> app.services.webhooks.triggerDailyHaikudleSaved ERROR", { res });
   }
 
-  console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { res });
+  // console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { res });
 
   // const ret = await res.json();
   // console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { ret });
