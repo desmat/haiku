@@ -1,4 +1,4 @@
-import { DailyHaiku } from "@/types/Haiku";
+import { DailyHaiku, Haiku } from "@/types/Haiku";
 import { DailyHaikudle } from "@/types/Haikudle";
 
 export async function triggerDailyHaikuSaved(dailyHaiku: DailyHaiku) {
@@ -57,4 +57,34 @@ export async function triggerDailyHaikudleSaved(dailyHaikudle: DailyHaikudle) {
   console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { ret });
 
   return ret;
+}
+
+export async function triggerHaikuShared(haiku: Haiku) {
+  const url = process.env.WEBHOOK_HAIKU_SHARED;
+  console.log('>> app.services.webhooks.triggerHaikuShared', { haiku, url });
+
+  if (!url) {
+    console.warn(">> app.services.webhooks.triggerHaikuShared WARNING: WEBHOOK_HAIKU_SHARED variable not set");
+    return;
+  }
+  
+  const res = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(haiku),
+  });
+
+  if (res.status != 200) {
+    console.error(">> app.services.webhooks.triggerHaikuShared ERROR", { res });
+    return false;
+  }
+
+  // console.log('>> app.services.webhooks.triggerHaikuShared', { res });
+
+  // const ret = await res.json();
+  // console.log('>> app.services.webhooks.triggerHaikuShared', { ret });
+
+  const ret = await res.text();
+  console.log('>> app.services.webhooks.triggerHaikuShared', { ret });
+
+  return true;
 }
