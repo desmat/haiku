@@ -286,7 +286,7 @@ export default function BottomLinks({
             </div>
           </StyledLayers>
         }
-        {user?.isAdmin &&
+        {true && //user?.isAdmin &&
           <div
             key="copy"
             className={haiku?.id && onCopyHaiku ? "cursor-copy" : "opacity-40"}
