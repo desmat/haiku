@@ -39,28 +39,6 @@ export async function triggerDailyHaikudleSaved(dailyHaikudle: DailyHaikudle) {
     return;
   }
 
-
-  try {
-    console.log('>> app.services.webhooks.triggerDailyHaikudleSaved about to test fetch 1', {});
-    const test1 = await fetch("https://haiku.desmat.ca/testwebhook", {
-      method: "GET",
-    });
-    console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { test1 });
-  } catch (error: any) {
-    console.error('>> app.services.webhooks.triggerDailyHaikudleSaved', { error });
-  }
-
-  try {
-    console.log('>> app.services.webhooks.triggerDailyHaikudleSaved about to test fetch 2', {});
-    const test2 = await fetch("https://haiku.desmat.ca/testwebhook", {
-      method: "POST",
-    });
-    console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { test2 });
-  } catch (error: any) {
-    console.error('>> app.services.webhooks.triggerDailyHaikudleSaved', { error });
-  }
-
-  console.log('>> app.services.webhooks.triggerDailyHaikudleSaved about fetch for real', { url });
   const res = await fetch(url, {
     method: "POST",
     body: JSON.stringify(dailyHaikudle),

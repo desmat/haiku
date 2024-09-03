@@ -343,9 +343,8 @@ export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: st
     });
   }
 
-  console.log(">> services.haikudle.saveDailyHaikudle about to call triggerDailyHaikudleSaved");
-  const triggered = await triggerDailyHaikudleSaved(ret);
-  console.log(">> services.haikudle.saveDailyHaikudle returned from triggerDailyHaikudleSaved", { triggered });
+  const webhookRet = await triggerDailyHaikudleSaved(ret);
+  console.log(">> services.haikudle.saveDailyHaikudle", { webhookRet });
 
   return ret;
 }
