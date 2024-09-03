@@ -9,7 +9,7 @@ export async function triggerDailyHaikuSaved(dailyHaiku: DailyHaiku) {
     console.warn(">> app.services.webhooks.triggerDailyHaikuSaved WARNING: WEBHOOK_DAILY_HAIKU_SAVED variable not set");
     return;
   }
-  
+
   const res = await fetch(url, {
     method: "POST",
     body: JSON.stringify(dailyHaiku),
@@ -38,19 +38,27 @@ export async function triggerDailyHaikudleSaved(dailyHaikudle: DailyHaikudle) {
     console.warn(">> app.services.webhooks.triggerDailyHaikudleSaved WARNING: WEBHOOK_DAILY_HAIKUDLE_SAVED variable not set");
     return;
   }
-  
 
-  console.log('>> app.services.webhooks.triggerDailyHaikudleSaved about to test fetch 1', {});
-  const test1 = await fetch("https://haiku.desmat.ca/testwebhook", {
-    method: "GET",    
-  });
-  console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { test1 });
 
-  console.log('>> app.services.webhooks.triggerDailyHaikudleSaved about to test fetch 2', {});
-  const test2 = await fetch("https://haiku.desmat.ca/testwebhook", {
-    method: "POST",    
-  });
-  console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { test1 });
+  try {
+    console.log('>> app.services.webhooks.triggerDailyHaikudleSaved about to test fetch 1', {});
+    const test1 = await fetch("https://haiku.desmat.ca/testwebhook", {
+      method: "GET",
+    });
+    console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { test1 });
+  } catch (error: any) {
+    console.error('>> app.services.webhooks.triggerDailyHaikudleSaved', { error });
+  }
+
+  try {
+    console.log('>> app.services.webhooks.triggerDailyHaikudleSaved about to test fetch 2', {});
+    const test2 = await fetch("https://haiku.desmat.ca/testwebhook", {
+      method: "POST",
+    });
+    console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { test2 });
+  } catch (error: any) {
+    console.error('>> app.services.webhooks.triggerDailyHaikudleSaved', { error });
+  }
 
   console.log('>> app.services.webhooks.triggerDailyHaikudleSaved about fetch for real', { url });
   const res = await fetch(url, {
