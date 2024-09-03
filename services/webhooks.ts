@@ -19,7 +19,7 @@ export async function triggerDailyHaikuSaved(dailyHaiku: DailyHaiku) {
     console.error(">> app.services.webhooks.triggerDailyHaikuSaved ERROR", { res });
   }
 
-  console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { res });
+  // console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { res });
 
   // const ret = await res.json();
   // console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { ret });
@@ -48,7 +48,7 @@ export async function triggerDailyHaikudleSaved(dailyHaikudle: DailyHaikudle) {
     console.error(">> app.services.webhooks.triggerDailyHaikudleSaved ERROR", { res });
   }
 
-  console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { res });
+  // console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { res });
 
   // const ret = await res.json();
   // console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { ret });
