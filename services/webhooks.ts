@@ -5,7 +5,10 @@ export async function triggerDailyHaikuSaved(dailyHaiku: DailyHaiku) {
   console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { dailyHaiku });
 
   const url = process.env.WEBHOOK_DAILY_HAIKU_SAVED;
-  if (!url) return;
+  if (!url) {
+    console.warn(">> app.services.webhooks.triggerDailyHaikuSaved WARNING: WEBHOOK_DAILY_HAIKU_SAVED variable not set");
+    return;
+  }
   
   const res = await fetch(url, {
     method: "POST",
@@ -31,7 +34,10 @@ export async function triggerDailyHaikudleSaved(dailyHaikudle: DailyHaikudle) {
   console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { dailyHaikudle });
 
   const url = process.env.WEBHOOK_DAILY_HAIKUDLE_SAVED;
-  if (!url) return;
+  if (!url) {
+    console.warn(">> app.services.webhooks.triggerDailyHaikudleSaved WARNING: WEBHOOK_DAILY_HAIKUDLE_SAVED variable not set");
+    return;
+  }
   
   const res = await fetch(url, {
     method: "POST",
