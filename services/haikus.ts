@@ -45,7 +45,7 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
       })
   }
 
-  return new Promise((resolve, reject) => resolve(haikus));
+  return haikus;
 }
 
 export async function getHaikuIds(query?: any): Promise<Set<any>> {
@@ -681,7 +681,7 @@ export async function getUserHaiku(userId: string, haikuId: string): Promise<Use
   const userHaiku = await store.userHaikus.get(id);
 
   console.log(`>> services.haiku.getUserHaiku`, { userHaiku });
-  return new Promise((resolve, reject) => resolve(userHaiku));
+  return userHaiku;
 }
 
 export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed" | "generated"): Promise<UserHaiku> {
@@ -701,14 +701,14 @@ export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed
   const createdUserHaiku = await store.userHaikus.create(user.id, userHaiku, UserHaikuSaveOptions);
 
   console.log(`>> services.haiku.createUserHaiku`, { userHaiku: createdUserHaiku });
-  return new Promise((resolve, reject) => resolve(createdUserHaiku));
+  return createdUserHaiku;
 }
 
 export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<UserHaiku> {
   console.log(`>> services.haiku.saveUserHaiku`, { userHaiku });
 
   const existingUserHaiku = await store.userHaikus.get(userHaiku.id);
-  let savedUserHaiku: any;
+  let savedUserHaiku: UserHaiku;
   if (existingUserHaiku) {
     savedUserHaiku = await store.userHaikus.update(user.id, userHaiku, UserHaikuSaveOptions);
   } else {
@@ -716,13 +716,13 @@ export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<U
   }
 
   console.log(`>> services.haiku.saveUserHaiku`, { savedUserHaiku });
-  return new Promise((resolve, reject) => resolve(savedUserHaiku));
+  return savedUserHaiku;
 }
 
 export async function getRandomHaiku(user: User, mode: string, query?: any): Promise<Haiku | undefined> {
   console.log(`>> services.haiku.getRandomHaiku`, { query });
 
-  
+
   let [
     haikuIds,
     flaggedHaikuIds,
@@ -813,7 +813,7 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
     dailyHaiku = await saveDailyHaiku({ id: "(system)" } as User, id, randomHaiku.id);
   }
 
-  return new Promise((resolve, reject) => resolve(dailyHaiku));
+  return dailyHaiku;
 }
 
 export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
@@ -879,26 +879,23 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
     throw `Unauthorized`;
   }
 
-  const [dailyHaiku, haiku] = await Promise.all([
+  let [dailyHaiku, haiku] = await Promise.all([
     store.dailyHaikus.get(dateCode),
     store.haikus.get(haikuId),
   ]);
 
   if (!haiku) throw `Haiku not found: ${haikuId}`;
 
+  dailyHaiku = {
+    id: dateCode,
+    haikuId,
+    theme: haiku.theme
+  };
   let ret;
   if (dailyHaiku) {
-    ret = await store.dailyHaikus.update(user.id, {
-      id: dateCode,
-      haikuId,
-      theme: haiku.theme
-    });
+    ret = await store.dailyHaikus.update(user.id, dailyHaiku);
   } else {
-    ret = await store.dailyHaikus.create(user.id, {
-      id: dateCode,
-      haikuId,
-      theme: haiku.theme,
-    });
+    ret = await store.dailyHaikus.create(user.id, dailyHaiku);
   }
 
   const webhookRet = await triggerDailyHaikuSaved(ret);

@@ -25,7 +25,7 @@ export async function getHaikudles(query?: any): Promise<Haikudle[]> {
     //     .map((h: Haikudle) => store.haikudles.create("(system)", h)));
   }
 
-  return new Promise((resolve, reject) => resolve(haikudles.filter(Boolean)));
+  return haikudles.filter(Boolean);
 }
 
 async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudle> {
@@ -96,7 +96,7 @@ export async function getHaikudle(user: User, id: string): Promise<Haikudle | un
 
   console.log(`>> services.haikudle.getHaikudle`, { haikudle });
 
-  return new Promise((resolve, reject) => resolve(haikudle));
+  return haikudle;
 }
 
 export async function createHaikudle(user: User, haikudle: Haikudle): Promise<Haikudle> {
@@ -166,7 +166,7 @@ export async function getUserHaikudle(userId: string, haikudleId: string): Promi
   const userHaikudleId = `${userId}:${haikudleId}`;
   const userHaikudle = await store.userHaikudles.get(userHaikudleId);
   console.log(`>> services.haikudle.getUserHaikudle`, { userHaikudleId, userHaikudle });
-  return new Promise((resolve, reject) => resolve(userHaikudle));
+  return userHaikudle;
 }
 
 export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<Haikudle> {
@@ -316,7 +316,7 @@ export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: st
     throw `Unauthorized`;
   }
 
-  const [dailyhaikudle, haiku, haikudle] = await Promise.all([
+  let [dailyhaikudle, haiku, haikudle] = await Promise.all([
     store.dailyHaikudles.get(dateCode),
     store.haikus.get(haikuId),
     store.haikudles.get(haikudleId),
@@ -326,21 +326,17 @@ export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: st
 
   if (!haikudle) throw `Haikudle not found: ${haikudleId}`;
 
+  dailyhaikudle = {
+    id: dateCode,
+    haikuId,
+    haikudleId,
+    theme: haiku.theme
+  };
   let ret;
   if (dailyhaikudle) {
-    ret = await store.dailyHaikudles.update(user.id, {
-      id: dateCode,
-      haikuId,
-      haikudleId,
-      theme: haiku.theme
-    });
+    ret = await store.dailyHaikudles.update(user.id, dailyhaikudle);
   } else {
-    ret = await store.dailyHaikudles.create(user.id, {
-      id: dateCode,
-      haikuId,
-      haikudleId,
-      theme: haiku.theme,
-    });
+    ret = await store.dailyHaikudles.create(user.id, dailyhaikudle);
   }
 
   const webhookRet = await triggerDailyHaikudleSaved(ret);

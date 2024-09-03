@@ -29,7 +29,7 @@ export async function getHaiku(id: string, hashPoem?: boolean): Promise<Haiku | 
   };
 
   console.log(`>> services.haiku.getHaiku`, { id, haiku });
-  return new Promise((resolve, reject) => resolve(haiku));
+  return haiku;
 }
 
 export async function getDailyHaiku(id: string): Promise<DailyHaiku | undefined> {
@@ -37,5 +37,5 @@ export async function getDailyHaiku(id: string): Promise<DailyHaiku | undefined>
 
   const dailyHaiku = await store.dailyHaikus.get(id);
   console.log(`>> services.haiku.getDailyHaiku`, { id, dailyHaiku });
-  return new Promise((resolve, reject) => resolve(dailyHaiku));
+  return dailyHaiku;
 }

@@ -234,7 +234,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { responses });
 
-    return new Promise((resolve) => resolve(createdValue));
+    return createdValue;
   }
 
   async update(userId: string, value: T, options?: any): Promise<T> {
@@ -283,7 +283,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { response });
 
-    return new Promise((resolve) => resolve(updatedValue));
+    return updatedValue;
   }
 
   async delete(userId: string, id: string, options: any = {}): Promise<T> {
@@ -313,7 +313,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { response });
 
-    return new Promise((resolve) => resolve(value));
+    return value;
   }
 }
 
