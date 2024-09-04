@@ -278,7 +278,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     const response = await Promise.all([
       kv.json.set(this.valueKey(value.id), "$", updatedValue),
       options.expire && kv.expire(this.valueKey(value.id), options.expire),
-      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => kv.zadd(lookupKey[0], { score: updatedValue.updatedAt, member: lookupKey[1] })) : []),
+      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => kv.zadd(lookupKey[0], { score: updatedValue.createdAt || updatedValue.updatedAt, member: lookupKey[1] })) : []),
     ]);
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { response });
