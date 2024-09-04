@@ -154,6 +154,7 @@ export default async function Page({
           album={album}
           mode={mode}
           lang={lang}
+          version={version}
           refreshDelay={refreshDelay}
           fontSize={fontSize}
           noOnboarding={noOnboarding}

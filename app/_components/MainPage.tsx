@@ -29,6 +29,7 @@ export default function MainPage({
   album,
   mode,
   lang,
+  version,
   refreshDelay,
   fontSize,
   noOnboarding,
@@ -38,6 +39,7 @@ export default function MainPage({
   album?: string | undefined,
   mode: ExperienceMode,
   lang?: undefined | LanguageType,
+  version?: string,
   refreshDelay?: number,
   fontSize?: string | undefined,
   noOnboarding?: boolean | undefined,
@@ -830,7 +832,7 @@ export default function MainPage({
             setHaikudle(loadedHaikudle);
           });
         } else {
-          loadHaikus(haikuId || { ...lang && { lang }, ...album && { album } }).then((haikus: Haiku | Haiku[]) => {
+          loadHaikus(haikuId || { ...lang && { lang }, ...album && { album } }, mode, version).then((haikus: Haiku | Haiku[]) => {
             // console.log('>> app.MainPage init loadHaikus.then', { haikus });
             const loadedHaiku = haikus[0] || haikus;
             setHaiku(loadedHaiku);
