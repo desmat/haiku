@@ -162,16 +162,21 @@ export default function SidePanel({
   }
 
   // simple trick: load +1 items, don't show the +1 but use it to determine if we have more in the backend
-  const canLoadMore = ((listMode == "haiku" ? userHaikus : userDailyHaikudles)
+  const canLoadMore = ((listMode == "haiku"
+    ? userHaikus
+    : listMode == "dailyHaiku"
+      ? userDailyHaikus
+      : userDailyHaikudles)
     .filter(filterBy)
     .length > numPages * pageSize);
 
   const loadMore = async (e: any) => {
     e.preventDefault();
     const nextNumPages = numPages * 2;
-    await loadUser({ 
-      count: nextNumPages * pageSize + 1, 
-      offset: numPages * pageSize });
+    await loadUser({
+      count: nextNumPages * pageSize + 1,
+      offset: numPages * pageSize
+    });
     setNumPages(nextNumPages);
   };
 
