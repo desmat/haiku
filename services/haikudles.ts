@@ -316,7 +316,7 @@ export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: st
     throw `Unauthorized`;
   }
 
-  let [dailyhaikudle, haiku, haikudle] = await Promise.all([
+  let [dailyHaikudle, haiku, haikudle] = await Promise.all([
     store.dailyHaikudles.get(dateCode),
     store.haikus.get(haikuId),
     store.haikudles.get(haikudleId),
@@ -326,17 +326,18 @@ export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: st
 
   if (!haikudle) throw `Haikudle not found: ${haikudleId}`;
 
-  dailyhaikudle = {
+  const newDailyHaikudle = {
     id: dateCode,
     haikuId,
     haikudleId,
     theme: haiku.theme
   };
+
   let ret;
-  if (dailyhaikudle) {
-    ret = await store.dailyHaikudles.update(user.id, dailyhaikudle);
+  if (dailyHaikudle) {
+    ret = await store.dailyHaikudles.update(user.id, { ...dailyHaikudle, ...newDailyHaikudle });
   } else {
-    ret = await store.dailyHaikudles.create(user.id, dailyhaikudle);
+    ret = await store.dailyHaikudles.create(user.id, newDailyHaikudle);
   }
 
   const webhookRet = await triggerDailyHaikudleSaved(ret);

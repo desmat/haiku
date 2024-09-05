@@ -886,16 +886,17 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
 
   if (!haiku) throw `Haiku not found: ${haikuId}`;
 
-  dailyHaiku = {
+  const newDailyHaiku = {
     id: dateCode,
     haikuId,
     theme: haiku.theme
   };
+
   let ret;
   if (dailyHaiku) {
-    ret = await store.dailyHaikus.update(user.id, dailyHaiku);
+    ret = await store.dailyHaikus.update(user.id, { ...dailyHaiku, ...newDailyHaiku });
   } else {
-    ret = await store.dailyHaikus.create(user.id, dailyHaiku);
+    ret = await store.dailyHaikus.create(user.id, newDailyHaiku);
   }
 
   const webhookRet = await triggerDailyHaikuSaved(ret);
