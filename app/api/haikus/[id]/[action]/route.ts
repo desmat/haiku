@@ -178,12 +178,9 @@ export async function POST(
     console.log(`>> app.api.haiku.[id].[action].POST`, { updatedHaiku });
 
     return NextResponse.json({ haiku: updatedHaiku });
-  } else if (params.action == "share") {
-    const [data, { user }] = await Promise.all([
-      request.json(),
-      userSession(request),
-    ]);
-    let haiku = await getHaiku(user, params.id);
+  } else if (params.action == "share") {    
+    const systemUser = { isAdmin: true, id: "(system)" }
+    let haiku = await getHaiku(systemUser, params.id);
 
     if (!haiku) {
       return NextResponse.json(
@@ -195,7 +192,7 @@ export async function POST(
     if (!haiku.shared && !haiku.dailyHaikuId) {
       const ret = await triggerHaikuShared(haiku);
       if (ret) {
-        haiku = await saveHaiku(user, {
+        haiku = await saveHaiku(systemUser, {
           ...haiku,
           shared: true,
         }, { noVersion: true });
