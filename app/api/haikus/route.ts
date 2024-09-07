@@ -23,7 +23,12 @@ export async function GET(request: NextRequest, params?: any) {
   }
 
   if (query.random) {
-    const mode = query.mode;
+    const { mode, flagged, liked, seen } = query;
+    const options = { 
+      flagged: typeof(flagged) == "string" ? flagged == "true" : undefined, 
+      liked: typeof(liked) == "string" ? liked == "true" : undefined, 
+      seen: typeof(seen) == "string" ? seen == "true" : undefined, 
+    };
 
     if (!["haiku", "showcase", "social-img", "haikudle-social-img"].includes(query.mode) && !user.isAdmin) {
       return NextResponse.json(
@@ -34,15 +39,19 @@ export async function GET(request: NextRequest, params?: any) {
 
     delete query.mode;
     delete query.random;
+    delete query.flagged;
+    delete query.liked;
+    delete query.seen;
+    
     if (!query.lang) {
       query.lang = "en";
     }
 
-    let randomHaiku = await getRandomHaiku(user, mode, query);
+    let randomHaiku = await getRandomHaiku(user, mode, query, options);
     if (!randomHaiku) {
-      randomHaiku = await getRandomHaiku(user, mode, query);
+      randomHaiku = await getRandomHaiku(user, mode, query, options);
       if (!randomHaiku) {
-        randomHaiku = await getRandomHaiku(user, mode, query);
+        randomHaiku = await getRandomHaiku(user, mode, query, options);
         if (!randomHaiku) throw 'Unable to find random haiku';
       }
     }

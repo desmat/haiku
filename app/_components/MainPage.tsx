@@ -454,7 +454,7 @@ export default function MainPage({
     }
   }
 
-  const loadRandom = () => {
+  const loadRandom = (options: any = {}) => {
     // return;
     // console.log('>> app.page.loadRandom()', {});
 
@@ -483,7 +483,7 @@ export default function MainPage({
           setHaikudle(loadedHaikudle);
           setLoadingUI(false);
         })
-      : loadHaikus({ random: true, ...lang && { lang }, ...album && { album } }, mode)
+      : loadHaikus({ random: true, ...lang && { lang }, ...album && { album }, ...options }, mode)
         .then((haikus: Haiku | Haiku[]) => {
           // console.log('>> app.MainPage.loadPage loadRandom.then', { haikus });
           const loadedHaiku = haikus[0] || haikus;

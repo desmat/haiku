@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react';
-import { IoAddCircle, IoHelpCircle, IoHeartSharp, IoFlagSharp } from 'react-icons/io5';
+import { IoAddCircle, IoHelpCircle, IoHeartSharp, IoHeartOutline, IoFlagSharp, IoFlagOutline, IoEyeSharp, IoEyeOutline } from 'react-icons/io5';
 import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
 import { BiLogoInstagramAlt } from "react-icons/bi";
 import { RiTwitterFill } from "react-icons/ri";
@@ -26,12 +26,14 @@ function LinkGroup({
   className,
   title,
   disabled,
+  onClick,
   links,
 }: {
   icon: any,
   className?: string,
   title?: string,
   disabled?: boolean,
+  onClick?: any,
   links: any[],
 }) {
   const [linksVisible, setLinksVisible] = useState(false);
@@ -51,6 +53,7 @@ function LinkGroup({
       <div
         className={className}
         title={title}
+        onClick={() => !disabled && onClick && onClick()}
       >
         {icon}
       </div>
@@ -329,16 +332,79 @@ export default function BottomLinks({
           </div>
         }
         {user?.isAdmin &&
-          <div
-            key="refresh"
-            className={haiku?.id && onRefresh ? "cursor-pointer" : "opacity-40"}
-            onClick={() => haiku?.id && onRefresh && onRefresh()}
+          <LinkGroup
+            key="randomOptions"
             title="Load random"
-          >
-            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
-              <FaRandom className="text-[1.5rem] md:text-[1.75rem]" />
-            </PopOnClick>
-          </div>
+            disabled={!haiku?.id || !onRefresh}
+            onClick={() => haiku?.id && onRefresh && onRefresh({ flagged: false })}
+            icon={
+              <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
+                <FaRandom className="text-[1.5rem] md:text-[1.75rem]" />
+              </PopOnClick>
+            }
+            links={[
+              <div
+                key="random-liked"
+                className={haiku?.id && onRefresh ? "cursor-pointer" : "opacity-40"}
+                onClick={() => haiku?.id && onRefresh && onRefresh({ liked: true })}
+                title="Load random (not liked or flagged)"
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
+                  <IoHeartSharp className="text-[1.5rem] md:text-[1.75rem]" />
+                </PopOnClick>
+              </div>,
+              <div
+                key="random-notliked"
+                className={haiku?.id && onRefresh ? "cursor-pointer" : "opacity-40"}
+                onClick={() => haiku?.id && onRefresh && onRefresh({ liked: false })}
+                title="Load random (not liked or flagged)"
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
+                  <IoHeartOutline className="text-[1.5rem] md:text-[1.75rem]" />
+                </PopOnClick>
+              </div>,
+              <div
+                key="random-seen"
+                className={haiku?.id && onRefresh ? "cursor-pointer" : "opacity-40"}
+                onClick={() => haiku?.id && onRefresh && onRefresh({ seen: true })}
+                title="Load random (not liked or flagged)"
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
+                  <IoEyeSharp className="text-[1.5rem] md:text-[1.75rem]" />
+                </PopOnClick>
+              </div>,
+              <div
+                key="random-notseen"
+                className={haiku?.id && onRefresh ? "cursor-pointer" : "opacity-40"}
+                onClick={() => haiku?.id && onRefresh && onRefresh({ seen: false })}
+                title="Load random (not liked or flagged)"
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
+                  <IoEyeOutline className="text-[1.5rem] md:text-[1.75rem]" />
+                </PopOnClick>
+              </div>,
+              <div
+                key="random-flagged"
+                className={haiku?.id && onRefresh ? "cursor-pointer" : "opacity-40"}
+                onClick={() => haiku?.id && onRefresh && onRefresh({ flagged: true })}
+                title="Load random (not liked or flagged)"
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
+                  <IoFlagSharp className="text-[1.5rem] md:text-[1.75rem]" />
+                </PopOnClick>
+              </div>,
+              // <div
+              //   key="random-notflagged"
+              //   className={haiku?.id && onRefresh ? "cursor-pointer" : "opacity-40"}
+              //   onClick={() => haiku?.id && onRefresh && onRefresh({ flagged: false })}
+              //   title="Load random (not liked or flagged)"
+              // >
+              //   <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
+              //     <IoFlagOutline className="text-[1.5rem] md:text-[1.75rem]" />
+              //   </PopOnClick>
+              // </div>,              
+            ]}
+          />
         }
         {user?.isAdmin &&
           <LinkGroup
