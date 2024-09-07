@@ -1007,12 +1007,11 @@ export async function getSeenHaikuIds(userId: string): Promise<Set<any>> {
   console.log(">> services.haiku.getSeenHaikuIds", {});
 
   const seedIds = Array.from(await store.userHaikus.ids({ user: userId }))
-    .map((id: string) => id && id.split(":")[1])
+    // .map((id: string) => id && id.split(":")[1])
     .filter(Boolean);
 
   // also those haikus created by user
   const createdIds = Array.from(await store.haikus.ids({ user: userId }))
-    .map((id: string) => id && id.split(":")[1])
     .filter(Boolean);
 
   return new Set([...seedIds, ...createdIds]);
