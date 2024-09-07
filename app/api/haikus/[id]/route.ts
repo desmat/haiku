@@ -33,8 +33,8 @@ export async function GET(
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
 
-  if (!user.isAdmin && haiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
-    createUserHaiku(user, haiku);
+  if (/* !user.isAdmin && */ haiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
+    await createUserHaiku(user, haiku);
   }
 
   console.log('>> app.api.haikus.GET', { haiku, userHaiku });

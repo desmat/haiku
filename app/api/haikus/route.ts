@@ -1,11 +1,12 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { generateHaiku, getDailyHaiku, getHaiku, getLatestHaikus, createHaiku, getAlbumHaikus, getRandomHaiku } from '@/services/haikus';
-import { userSession } from '@/services/users';
-import { searchParamsToMap } from '@/utils/misc';
+import { generateHaiku, getDailyHaiku, getHaiku, getLatestHaikus, createHaiku, getAlbumHaikus, getRandomHaiku, createUserHaiku, getUserHaiku } from '@/services/haikus';
+import { getUserHaikudle } from '@/services/haikudles';
 import { userUsage } from '@/services/usage';
+import { userSession } from '@/services/users';
 import { LanguageType } from '@/types/Languages';
 import { USAGE_LIMIT } from '@/types/Usage';
+import { searchParamsToMap } from '@/utils/misc';
 
 export const maxDuration = 300;
 // export const dynamic = 'force-dynamic';
@@ -24,10 +25,10 @@ export async function GET(request: NextRequest, params?: any) {
 
   if (query.random) {
     const { mode, flagged, liked, seen } = query;
-    const options = { 
-      flagged: typeof(flagged) == "string" ? flagged == "true" : undefined, 
-      liked: typeof(liked) == "string" ? liked == "true" : undefined, 
-      seen: typeof(seen) == "string" ? seen == "true" : undefined, 
+    const options = {
+      flagged: typeof (flagged) == "string" ? flagged == "true" : undefined,
+      liked: typeof (liked) == "string" ? liked == "true" : undefined,
+      seen: typeof (seen) == "string" ? seen == "true" : undefined,
     };
 
     if (!["haiku", "showcase", "social-img", "haikudle-social-img"].includes(query.mode) && !user.isAdmin) {
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest, params?: any) {
     delete query.flagged;
     delete query.liked;
     delete query.seen;
-    
+
     if (!query.lang) {
       query.lang = "en";
     }
@@ -52,8 +53,20 @@ export async function GET(request: NextRequest, params?: any) {
       randomHaiku = await getRandomHaiku(user, mode, query, options);
       if (!randomHaiku) {
         randomHaiku = await getRandomHaiku(user, mode, query, options);
-        if (!randomHaiku) throw 'Unable to find random haiku';
+        if (!randomHaiku) {
+          console.log('>> app.api.haikus.GET: WARNING: Unable to find random haiku');
+          return NextResponse.json({ haiku: {} }, { status: 404 });
+        }
       }
+    }
+
+    const [userHaiku, userHaikudle] = await Promise.all([
+      getUserHaiku(user.id, params.id),
+      getUserHaikudle(user?.id, params.id),
+    ]);
+
+    if (/* !user.isAdmin && */ randomHaiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
+      await createUserHaiku(user, randomHaiku);
     }
 
     return NextResponse.json({ haikus: [randomHaiku] });

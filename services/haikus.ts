@@ -719,20 +719,41 @@ export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<U
   return savedUserHaiku;
 }
 
-export async function getRandomHaiku(user: User, mode: string, query?: any): Promise<Haiku | undefined> {
-  console.log(`>> services.haiku.getRandomHaiku`, { query });
-
+export async function getRandomHaiku(user: User, mode: string, query?: any, options?: any): Promise<Haiku | undefined> {
+  console.log(`>> services.haiku.getRandomHaiku`, { query, options });
 
   let [
     haikuIds,
     flaggedHaikuIds,
+    likedHaikuIds,
+    seenHaikuIds,
   ] = await Promise.all([
     getHaikuIds(query),
-    getFlaggedHaikuIds(),
+    typeof (options.flagged) == "boolean" ? getFlaggedHaikuIds() : new Set(),
+    typeof (options.liked) == "boolean" ? getLikedHaikuIds() : new Set(),
+    typeof (options.seen) == "boolean" ? getSeenHaikuIds(user.id) : new Set(),
   ]);
 
-  // exclude flagged haikus
-  const filteredHaikuIds = Array.from(haikuIds).filter((id: string) => !flaggedHaikuIds.has(id))
+  console.log('>> services.haiku.getRandomHaiku', { flaggedHaikuIds, likedHaikuIds, seenHaikuIds });
+
+  // flagged: 8d8d6c60
+
+  // include or exclude flagged/liked/seen haikus
+  const filteredHaikuIds = Array.from(haikuIds).filter((id: string) => {
+    return (
+      typeof (options.flagged) == "boolean"
+        ? options.flagged ? flaggedHaikuIds.has(id) : (!flaggedHaikuIds.has(id))
+        : true
+    ) && (
+        typeof (options.liked) == "boolean"
+          ? options.liked ? likedHaikuIds.has(id) : (!likedHaikuIds.has(id))
+          : true
+      ) && (
+        typeof (options.seen) == "boolean"
+          ? options.seen ? seenHaikuIds.has(id) : (!seenHaikuIds.has(id))
+          : true
+      );
+  });
   const randomHaikuId = filteredHaikuIds[Math.floor(Math.random() * filteredHaikuIds.length)];
   const randomHaiku = await getHaiku(user, randomHaikuId, mode == "haikudle");
 
@@ -955,7 +976,6 @@ export async function getFlaggedHaikus(): Promise<Haiku[]> {
 export async function getFlaggedHaikuIds(): Promise<Set<any>> {
   console.log(">> services.haiku.getFlaggedHaikuIds", {});
 
-
   const flaggedHaikuIds = Array.from(await store.flaggedHaikus.ids())
     .map((id: string) => id && id.split(":")[1])
     .filter(Boolean);
@@ -971,6 +991,31 @@ export async function getFlaggedHaikuIds(): Promise<Set<any>> {
     }, [])
 
   return new Set([...haikuIdsByFlaggedUser, ...flaggedHaikuIds]);
+}
+
+export async function getLikedHaikuIds(): Promise<Set<any>> {
+  console.log(">> services.haiku.getLikedHaikuIds", {});
+
+  const ids = Array.from(await store.likedHaikus.ids())
+    .map((id: string) => id && id.split(":")[1])
+    .filter(Boolean);
+
+  return new Set(ids);
+}
+
+export async function getSeenHaikuIds(userId: string): Promise<Set<any>> {
+  console.log(">> services.haiku.getSeenHaikuIds", {});
+
+  const seedIds = Array.from(await store.userHaikus.ids({ user: userId }))
+    .map((id: string) => id && id.split(":")[1])
+    .filter(Boolean);
+
+  // also those haikus created by user
+  const createdIds = Array.from(await store.haikus.ids({ user: userId }))
+    .map((id: string) => id && id.split(":")[1])
+    .filter(Boolean);
+
+  return new Set([...seedIds, ...createdIds]);
 }
 
 export async function getLatestHaikus(fromDate?: number, toDate?: number): Promise<Haiku[]> {
