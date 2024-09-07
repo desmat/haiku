@@ -49,18 +49,12 @@ export async function GET(request: NextRequest, params?: any) {
 
     let randomHaiku = await getRandomHaiku(user, mode, query, options);
     if (!randomHaiku) {
-      randomHaiku = await getRandomHaiku(user, mode, query, options);
-      if (!randomHaiku) {
-        randomHaiku = await getRandomHaiku(user, mode, query, options);
-        if (!randomHaiku) {
-          console.log('>> app.api.haikus.GET: WARNING: Unable to find random haiku');
-          return NextResponse.json({ haiku: {} }, { status: 404 });
-        }
-      }
+      console.log('>> app.api.haikus.GET: WARNING: Unable to find random haiku');
+      return NextResponse.json({ haiku: {} }, { status: 404 });
     }
 
     const userHaiku = await getUserHaiku(user.id, randomHaiku.id);
-  
+
     if (/* !user.isAdmin && */ randomHaiku?.createdBy != user.id && !userHaiku) {
       await createUserHaiku(user, randomHaiku);
     }

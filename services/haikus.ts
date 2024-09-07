@@ -754,6 +754,9 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
           : true
       );
   });
+
+  if (!filteredHaikuIds.length) return;
+  
   const randomHaikuId = filteredHaikuIds[Math.floor(Math.random() * filteredHaikuIds.length)];
   const randomHaiku = await getHaiku(user, randomHaikuId, mode == "haikudle");
 
