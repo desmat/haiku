@@ -7,7 +7,7 @@ import { Store } from "@/types/Store";
 import { User } from '@/types/User';
 import { findHoleInDatecodeSequence, hashCode, listToMap, normalizeWord, uuid } from '@/utils/misc';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
-import { Haikudle, UserHaikudle } from '@/types/Haikudle';
+import { DailyHaikudle, Haikudle, UserHaikudle } from '@/types/Haikudle';
 import { USAGE_LIMIT } from '@/types/Usage';
 import { byCreatedAtDesc } from '@/utils/sort';
 import shuffleArray from '@/utils/shuffleArray';
@@ -1007,14 +1007,23 @@ export async function getSeenHaikuIds(userId: string): Promise<Set<any>> {
   console.log(">> services.haiku.getSeenHaikuIds", {});
 
   const seedIds = Array.from(await store.userHaikus.ids({ user: userId }))
-    // .map((id: string) => id && id.split(":")[1])
+    .map((id: string) => id && id.split(":")[1])
     .filter(Boolean);
 
   // also those haikus created by user
   const createdIds = Array.from(await store.haikus.ids({ user: userId }))
     .filter(Boolean);
 
-  return new Set([...seedIds, ...createdIds]);
+  // also include daily haikus and haikudles
+  const dailyHaikuIds = (await store.dailyHaikus.find())
+    .map((dailyHaiku: DailyHaiku) => dailyHaiku?.haikuId)
+    .filter(Boolean);
+
+  const dailyHaikudleIds = (await store.dailyHaikudles.find())
+    .map((dailyHaikudle: DailyHaikudle) => dailyHaikudle?.haikuId)
+    .filter(Boolean);
+
+  return new Set([...seedIds, ...createdIds, ...dailyHaikuIds, ...dailyHaikudleIds]);
 }
 
 export async function getLatestHaikus(fromDate?: number, toDate?: number): Promise<Haiku[]> {

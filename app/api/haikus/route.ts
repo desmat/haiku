@@ -1,7 +1,6 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
 import { generateHaiku, getDailyHaiku, getHaiku, getLatestHaikus, createHaiku, getAlbumHaikus, getRandomHaiku, createUserHaiku, getUserHaiku } from '@/services/haikus';
-import { getUserHaikudle } from '@/services/haikudles';
 import { userUsage } from '@/services/usage';
 import { userSession } from '@/services/users';
 import { LanguageType } from '@/types/Languages';
@@ -60,12 +59,9 @@ export async function GET(request: NextRequest, params?: any) {
       }
     }
 
-    const [userHaiku, userHaikudle] = await Promise.all([
-      getUserHaiku(user.id, params.id),
-      getUserHaikudle(user?.id, params.id),
-    ]);
-
-    if (/* !user.isAdmin && */ randomHaiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
+    const userHaiku = await getUserHaiku(user.id, randomHaiku.id);
+  
+    if (/* !user.isAdmin && */ randomHaiku?.createdBy != user.id && !userHaiku) {
       await createUserHaiku(user, randomHaiku);
     }
 
