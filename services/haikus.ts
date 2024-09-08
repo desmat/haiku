@@ -1018,15 +1018,15 @@ export async function getSeenHaikuIds(userId: string): Promise<Set<any>> {
     .filter(Boolean);
 
   // also include daily haikus and haikudles
-  const dailyHaikuIds = (await store.dailyHaikus.find())
-    .map((dailyHaiku: DailyHaiku) => dailyHaiku?.haikuId)
-    .filter(Boolean);
+  // const dailyHaikuIds = (await store.dailyHaikus.find())
+  //   .map((dailyHaiku: DailyHaiku) => dailyHaiku?.haikuId)
+  //   .filter(Boolean);
 
-  const dailyHaikudleIds = (await store.dailyHaikudles.find())
-    .map((dailyHaikudle: DailyHaikudle) => dailyHaikudle?.haikuId)
-    .filter(Boolean);
+  // const dailyHaikudleIds = (await store.dailyHaikudles.find())
+  //   .map((dailyHaikudle: DailyHaikudle) => dailyHaikudle?.haikuId)
+  //   .filter(Boolean);
 
-  return new Set([...seedIds, ...createdIds, ...dailyHaikuIds, ...dailyHaikudleIds]);
+  return new Set([...seedIds, ...createdIds, /* ...dailyHaikuIds, ...dailyHaikudleIds */]);
 }
 
 export async function getLatestHaikus(fromDate?: number, toDate?: number): Promise<Haiku[]> {
