@@ -49,7 +49,7 @@ export async function GET(request: NextRequest, params?: any) {
 
     let randomHaiku = await getRandomHaiku(user, mode, query, options);
     if (!randomHaiku) {
-      console.log('>> app.api.haikus.GET: WARNING: Unable to find random haiku');
+      console.warn('>> app.api.haikus.GET: WARNING: Unable to find random haiku');
       return NextResponse.json({ haiku: {} }, { status: 404 });
     }
 

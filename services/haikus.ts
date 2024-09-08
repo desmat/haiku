@@ -350,6 +350,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku, albumId?: str
     model: languageModel,
     response: {
       haiku: poem,
+      title: generatedTitle,
       subject: generatedSubject,
       mood: generatedMood,
       lang: generatedLang,
@@ -373,6 +374,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku, albumId?: str
   return saveHaiku(user, {
     ...haiku,
     poem,
+    title: generatedTitle,
     theme: generatedSubject,
     mood: generatedMood,
     lang: generatedLang || lang || "en",
@@ -403,6 +405,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: strin
   const {
     response: {
       haiku: completedPoem,
+      title: generatedTitle,
       subject: generatedSubject,
       mood: generatedMood,
       lang: generatedLang,
@@ -427,6 +430,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: strin
   return saveHaiku(user, {
     ...haiku,
     poem: completedPoem,
+    title: generatedTitle,
     theme: generatedSubject,
     mood: generatedMood,
     lang: generatedLang,
@@ -566,6 +570,7 @@ export async function generateHaiku(user: User, {
     response: {
       haiku: generatedPoem,
       subject: generatedSubject,
+      title: generatedTitle,
       mood: generatedMood,
       lang: generatedLang,
     }
@@ -586,6 +591,7 @@ export async function generateHaiku(user: User, {
     lang: generatedLang || lang || "en",
     subject,
     theme: generatedSubject,
+    title: generatedTitle,
     mood: generatedMood,
     artStyle: selectedArtStyle,
     poemPrompt,

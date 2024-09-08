@@ -169,9 +169,10 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
     Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
     If the topic specifies a language, or is in another language, please generate the haiku in that language.
     Also include in the response, in maximum 3 words, what were the subject (in the language requested) and mood (in English) of the haiku.
-    The subject should be in the same language of the haiku. 
+    Additionally, please include a very short title that reflects the poem, subject and mood, in the language of the haiku.
+    The subject should be in the same language of the haiku.
     Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
-    Please only include keys "haiku", "subject", "mood" and "lang".
+    Please only include keys "haiku", "subject", "mood", "title" and "lang".
     `;
   // @ts-ignore
   const completion = await openai.chat.completions.create({
@@ -244,7 +245,8 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
           Also, please fix up any extraneous white spaces, punctuation, incorrect capitalized words, typos or incorrectly words.
           Also include in the response, in fewest number of words, what were the subject (in the language requested) and mood (in English) of the haiku. 
           Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
-          Please only include keys "haiku", "subject", "mood" and "lang".`
+          Additionally, please include a very short title that reflects the poem, subject and mood, in the language of the haiku.
+          Please only include keys "haiku", "subject", "mood", "title" and "lang".`
       },
       {
         role: 'user',

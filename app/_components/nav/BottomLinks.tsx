@@ -148,7 +148,7 @@ export default function BottomLinks({
               onShowAbout && onShowAbout();
             }}
           >
-            {user?.isAdmin && (haiku?.dailyHaikuId || haiku?.dailyHaikudleId || haiku?.isIncorrect) &&
+            {user?.isAdmin && (haiku?.dailyHaikuId || haiku?.isIncorrect) &&
               <div className={`absolute top-[-0rem] right-[-0rem] rounded-full w-[0.6rem] h-[0.6rem] ${haiku?.isIncorrect ? "bg-red-600" : "bg-blue-600"}`} />
             }
             <PopOnClick color={haiku?.bgColor}>
