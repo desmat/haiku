@@ -442,7 +442,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: strin
 export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: string, albumId?: string): Promise<Haiku> {
   console.log(">> services.haiku.regenerateHaikuImage", { user, haiku });
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
-  console.warn(`>> services.haiku.regenerateHaikuImage: DEBUG mode: not uploading to blob store`);
+  debugOpenai && console.warn(`>> services.haiku.regenerateHaikuImage: DEBUG mode: not uploading to blob store`);
 
   const album = albumId && await store.haikuAlbums.get(albumId);
   const customImagePrompt = album && album.imagePrompt;
