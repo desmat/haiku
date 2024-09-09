@@ -148,8 +148,17 @@ export default function BottomLinks({
               onShowAbout && onShowAbout();
             }}
           >
-            {user?.isAdmin && (haiku?.dailyHaikuId || haiku?.isIncorrect) &&
-              <div className={`absolute top-[-0rem] right-[-0rem] rounded-full w-[0.6rem] h-[0.6rem] ${haiku?.isIncorrect ? "bg-red-600" : "bg-blue-600"}`} />
+            {user?.isAdmin && (haiku?.dailyHaikuId || haiku?.dailyHaikudleId || haiku?.isIncorrect) &&
+              <div className={`absolute top-[-0rem] right-[-0rem] rounded-full w-[0.6rem] h-[0.6rem] 
+                ${haiku?.isIncorrect
+                  ? "bg-red-600"
+                  : haiku?.dailyHaikuId && haiku?.dailyHaikudleId
+                    ? "bg-purple-600"
+                    : haiku?.dailyHaikuId
+                      ? "bg-blue-600"
+                      : "bg-green-600"
+                }`}
+              />
             }
             <PopOnClick color={haiku?.bgColor}>
               <IoHelpCircle className="text-[2rem] md:text-[2.25rem]" />
