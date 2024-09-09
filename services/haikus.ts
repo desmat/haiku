@@ -789,7 +789,7 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
   return randomHaiku;
 }
 
-export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined> {
+export async function getDailyHaiku(id?: string, dontCreate?: boolean): Promise<DailyHaiku | undefined> {
   console.log(`>> services.haiku.getDailyHaiku`, { id });
 
   if (!id) id = moment().format("YYYYMMDD");
@@ -797,7 +797,9 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
   let dailyHaiku = await store.dailyHaikus.get(id);
   console.log(`>> services.haiku.getDailyHaiku`, { id, dailyHaiku });
 
-  if (!dailyHaiku) {
+  if (!dailyHaiku && dontCreate) {
+    return;
+  } else if (!dailyHaiku) {
     // create daily haiku if none for today
     const [
       haikuIds,
@@ -838,7 +840,7 @@ export async function getDailyHaiku(id?: string): Promise<DailyHaiku | undefined
       }
     }
 
-    console.log('>> app.api.haikus.GET creating daily haiku', { randomHaikuId, randomHaiku, previousDailyHaikus, likedHaikus, haikuIds, filteredHaikuIds });
+    console.log('>> services.haiku.getDailyHaiku creating daily haiku', { randomHaikuId, randomHaiku, previousDailyHaikus, likedHaikus, haikuIds, filteredHaikuIds });
 
     dailyHaiku = await saveDailyHaiku({ id: "(system)" } as User, id, randomHaiku.id);
   }

@@ -68,13 +68,15 @@ export default async function Layout({
   if (!haikuId) {
     if (process.env.EXPERIENCE_MODE == "haikudle") {
       const todaysDateCode = moment().format("YYYYMMDD");
-      const todaysDailyHaikudle = await getDailyHaikudle(todaysDateCode);
+      const todaysDailyHaikudle = await getDailyHaikudle(todaysDateCode, true);
       // console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaikudle });
+      if (!todaysDailyHaikudle) console.warn('>> app.[[..slug]].layout.render() WARNING: todays daily haikudle not created', {});
       haikuId = todaysDailyHaikudle?.haikuId;
     } else {
       const todaysDateCode = moment().format("YYYYMMDD");
-      const todaysDailyHaiku = await getDailyHaiku(todaysDateCode);
+      const todaysDailyHaiku = await getDailyHaiku(todaysDateCode, true);
       // console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaiku });
+      if (!todaysDailyHaiku) console.warn('>> app.[[..slug]].layout.render() WARNING: todays daily haiku not created', {});
       haikuId = todaysDailyHaiku?.haikuId;
     }
   }

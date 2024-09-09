@@ -193,7 +193,7 @@ export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<H
   return store.userHaikudles.create(user.id, userHaikudle);
 }
 
-export async function getDailyHaikudle(id?: string): Promise<DailyHaikudle | undefined> {
+export async function getDailyHaikudle(id?: string, dontCreate?: boolean): Promise<DailyHaikudle | undefined> {
   console.log(`>> services.haikudle.getDailyHaikudle`, { id });
 
   if (!id) id = moment().format("YYYYMMDD");
@@ -201,7 +201,9 @@ export async function getDailyHaikudle(id?: string): Promise<DailyHaikudle | und
   let dailyHaikudle = await store.dailyHaikudles.get(id);
   console.log(`>> services.haikudle.getDailyHaikudle`, { id, dailyHaikudle });
 
-  if (!dailyHaikudle) {
+  if (!dailyHaikudle && dontCreate) {
+    return
+  } else if (!dailyHaikudle) {
     const systemUser = { id: "(system)" } as User;
     // create a new haikudle and dailyhaikudle combo: 
     // first pull from daily haikus, else from the rest
