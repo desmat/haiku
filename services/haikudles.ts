@@ -209,35 +209,37 @@ export async function getDailyHaikudle(id?: string, dontCreate?: boolean): Promi
     // first pull from daily haikus, else from the rest
     const [
       previousDailyHaikudles,
-      haikudles,
       dailyHaikus,
       flaggedHaikuIds,
     ] = await Promise.all([
-      getDailyHaikudles(), // TODO: get ids
-      getHaikudles(), // TODO: get ids
-      getDailyHaikus(), // TODO: get ids
+      store.dailyHaikudles.find(),
+      store.dailyHaikus.find(),
       getFlaggedHaikuIds(),
     ]);
+    console.log(`>> services.haikudle.getDailyHaikudle creating new daily haikudle`, { previousDailyHaikudles, dailyHaikus, flaggedHaikuIds });
 
-    const previousDailyHaikuIds = previousDailyHaikudles.map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
-    let nonDailyhaikus = dailyHaikus.filter((dailyHaiku: DailyHaiku) => !previousDailyHaikuIds.includes(dailyHaiku.haikuId));
+    const previousDailyHaikuIds = previousDailyHaikudles
+      .map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
+    let nonDailyhaikus = dailyHaikus
+      .filter((dailyHaiku: DailyHaiku) => `${dailyHaiku.haikuId}`.match(/20\d{6}/) && !previousDailyHaikuIds.includes(dailyHaiku.haikuId));
+    console.log(`>> services.haikudle.getDailyHaikudle creating new daily haikudle`, { previousDailyHaikuIds, nonDailyhaikus });
 
     let randomHaikuId;
     if (nonDailyhaikus.length) {
       randomHaikuId = shuffleArray(nonDailyhaikus)[0].haikuId;
     } else {
       // didn't find any daily haikus that hasn't been a daily haikudle already
-      const haikus = await getHaikus(); // TODO get ids
-      nonDailyhaikus = haikus
-        .filter((haiku: Haiku) => !flaggedHaikuIds.has(haiku.id) && !previousDailyHaikuIds.includes(haiku.id));
+      const nonDailyhaikuIds = Array.from(await store.haikus.ids())
+        .filter((id: string) => !flaggedHaikuIds.has(id) && !previousDailyHaikuIds.includes(id));
 
-      randomHaikuId = shuffleArray(nonDailyhaikus)[0]?.id;
-      console.warn(`>> services.haiku.getDailyHaikudle WARNING: ran out of liked or non-daily haikus, picking from the lot`, { randomHaikuId });
+      randomHaikuId = shuffleArray(nonDailyhaikuIds)[0];
+      console.warn(`>> services.haikudle.getDailyHaikudle WARNING: ran out of liked or non-daily haikus, picking from the lot`, { randomHaikuId });
     }
 
-    const randomHaikudle = await createHaikudle(systemUser, { id: randomHaikuId, haikuId: randomHaikuId });
+    console.log(`>> services.haikudle.getDailyHaikudle creating new daily haikudle`, { randomHaikuId });
 
-    console.log('>> app.api.haikudles.GET', { randomHaikuId, randomHaikudle, previousDailyHaikudles, haikudles });
+    const randomHaikudle = await createHaikudle(systemUser, { id: randomHaikuId, haikuId: randomHaikuId });
+    console.log('>> services.haikudle.getDailyHaikudle creating new daily haikudle', { randomHaikuId, randomHaikudle });
 
     dailyHaikudle = await saveDailyHaikudle(systemUser, id, randomHaikudle.haikuId, randomHaikudle.id);
   }

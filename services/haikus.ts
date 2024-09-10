@@ -762,7 +762,7 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
   });
 
   if (!filteredHaikuIds.length) return;
-  
+
   const randomHaikuId = filteredHaikuIds[Math.floor(Math.random() * filteredHaikuIds.length)];
   const randomHaiku = await getHaiku(user, randomHaikuId, mode == "haikudle");
 
@@ -804,28 +804,35 @@ export async function getDailyHaiku(id?: string, dontCreate?: boolean): Promise<
     const [
       haikuIds,
       previousDailyHaikus,
-      likedHaikus,
+      likedHaikuIds,
       flaggedHaikuIds,
     ] = await Promise.all([
       getHaikuIds(),
-      getDailyHaikus(), // TODO: get daily haiku ids
-      getLikedHaikus(), // TODO: get liked haiku ids
+      store.dailyHaikus.find(),
+      store.likedHaikus.ids(),
       getFlaggedHaikuIds(),
     ]);
 
-    const filteredHaikuIds = Array.from(haikuIds).filter((id: string) => !flaggedHaikuIds.has(id));
-    const previousDailyHaikuIds = previousDailyHaikus
-      .filter(Boolean)
-      .map((dailyHaiku: DailyHaiku) => dailyHaiku.haikuId);
-    const nonDailyLikedhaikus = likedHaikus
-      .filter((haiku: Haiku) => !flaggedHaikuIds.has(haiku.id) && !previousDailyHaikuIds.includes(haiku.id));
+    const filteredHaikuIds = Array.from(haikuIds)
+      .filter((id: string) => !flaggedHaikuIds.has(id));
+    const previousDailyHaikuIds = new Set(
+      previousDailyHaikus
+        .map((dailyHaiku: DailyHaiku) => dailyHaiku?.haikuId)
+    );
+    const nonDailyLikedHaikuIds = Array.from(likedHaikuIds)
+      .map((id: string) => id && id.split(":")[1])
+      .filter((haikuId: string) => haikuId && !flaggedHaikuIds.has(haikuId) && !previousDailyHaikuIds.has(haikuId));
     const nonDailyhaikuIds = filteredHaikuIds
-      .filter((haikuId: string) => !flaggedHaikuIds.has(haikuId) && !previousDailyHaikuIds.includes(haikuId));
+      .filter((haikuId: string) => haikuId && !flaggedHaikuIds.has(haikuId) && !previousDailyHaikuIds.has(haikuId));
+
+    console.log('>> services.haiku.getDailyHaiku creating daily haiku', { haikuIds, filteredHaikuIds, previousDailyHaikuIds, likedHaikuIds, nonDailyLikedHaikuIds, nonDailyhaikuIds });
 
     // pick from liked haikus, else all haikus
-    const randomHaikuId = nonDailyLikedhaikus.length
-      ? shuffleArray(nonDailyLikedhaikus)[0]?.id
+    const randomHaikuId = nonDailyLikedHaikuIds.length
+      ? shuffleArray(nonDailyLikedHaikuIds)[0]
       : shuffleArray(nonDailyhaikuIds)[0]
+
+    console.log('>> services.haiku.getDailyHaiku creating daily haiku', { randomHaikuId });
 
     let randomHaiku = await store.haikus.get(randomHaikuId);
 
@@ -840,7 +847,7 @@ export async function getDailyHaiku(id?: string, dontCreate?: boolean): Promise<
       }
     }
 
-    console.log('>> services.haiku.getDailyHaiku creating daily haiku', { randomHaikuId, randomHaiku, previousDailyHaikus, likedHaikus, haikuIds, filteredHaikuIds });
+    console.log('>> services.haiku.getDailyHaiku creating daily haiku', { randomHaikuId, randomHaiku });
 
     dailyHaiku = await saveDailyHaiku({ id: "(system)" } as User, id, randomHaiku.id);
   }
