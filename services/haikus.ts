@@ -1131,7 +1131,7 @@ export async function getHaikuStats(): Promise<any> {
   ] = await Promise.all([
     store.haikus.ids(),
     getLikedHaikuIds(),
-    store.flaggedUsers.ids(),
+    store.flaggedHaikus.ids(),
     getFlaggedHaikuIds(),
   ]);
 
