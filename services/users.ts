@@ -124,14 +124,18 @@ export async function getUserStats(): Promise<any> {
   const admins = [];
   let monthlyActiveUserCount = 0; // active session in the last 30 days
   let monthlyActiveUserSessionCount = 0;
+  let monthlyNewUserCount = 0;
   let dailyActiveUserCount = 0; // active session in the last 24 hours
   let dailyActiveUserSessionCount = 0;
+  let dailyNewUserCount = 0;
   let flaggedUserCount = 0
 
   for (const user of allUsers) {
     const isAdmin = user.isAdmin;
     // @ts-ignore
     const diff = moment().diff(user.updatedAt || user.createdAt, "days")
+    // @ts-ignore
+    const diffCreated = moment().diff(user.createdAt, "days")
 
     if (isAdmin) {
       admins.push(user);
@@ -143,13 +147,23 @@ export async function getUserStats(): Promise<any> {
       monthlyActiveUserCount++;
       monthlyActiveUserSessionCount += (user.sessionCount || 1);
     }
-
+    
+    if (!isAdmin && diffCreated <= 30) {
+      monthlyNewUserCount++;
+    }
+    
     if (!isAdmin && diff <= 1) {
       dailyActiveUserCount++;
       dailyActiveUserSessionCount += (user.sessionCount || 1);
     }
+    
+    if (!isAdmin && diffCreated <= 1) {
+      dailyNewUserCount++;
+    }
 
-    if (flaggedUserIds.has(user.id)) flaggedUserCount++;
+    if (flaggedUserIds.has(user.id)) {
+      flaggedUserCount++;
+    }
 
     // ...
   }
@@ -159,8 +173,10 @@ export async function getUserStats(): Promise<any> {
     admins: admins.length,
     monthlyActiveUsers: monthlyActiveUserCount,
     avgMonthlyActiveUserSessions: Math.round(monthlyActiveUserSessionCount / monthlyActiveUserCount),
+    monthlyNewUsers: monthlyNewUserCount,
     dailyActiveUser: dailyActiveUserCount,
     avgDailyActiveUserSessions: Math.round(dailyActiveUserSessionCount / dailyActiveUserCount),
+    dailyNewUsers: dailyNewUserCount,
     flaggedUsers: flaggedUserCount,
   }
 }
