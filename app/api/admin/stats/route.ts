@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
   const stats = {
     users: userStats.users,
     admins: userStats.admins,
-    flaggedUsers: userStats.flagged,
+    flaggedUsers: userStats.flaggedUsers,
     monthlyNewUsers: userStats.monthlyNewUsers,
     monthlyActiveUsers: userStats.monthlyActiveUsers,
     avgMonthlyActiveUserSessions: userStats.avgMonthlyActiveUserSessions,
