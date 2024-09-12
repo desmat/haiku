@@ -1,7 +1,9 @@
 // middleware.ts
+import moment from "moment";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { userSession } from "./services/users";
+import { saveUser, userSession } from "./services/users";
+import { SESSION_TIMEOUT_SECONDS } from "./types/User";
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
@@ -26,6 +28,16 @@ export async function middleware(request: NextRequest) {
         { status: 403 }
       );
     }
+
+    const now = moment();
+    const diff = now.diff(session.user?.updatedAt || session.user?.createdAt, "seconds");
+    const sessionCount = (session.user?.sessionCount || 1);
+    // console.log("*** middleware", { user: session.user, diff, sessionCount });
+
+    await saveUser({ 
+      ...session.user, 
+      sessionCount: sessionCount + ((diff > SESSION_TIMEOUT_SECONDS) ? 1 : 0)
+    });
   }
 
   return NextResponse.next();

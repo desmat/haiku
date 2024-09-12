@@ -1121,3 +1121,24 @@ export async function getAlbumHaikus(user: User, albumId: string): Promise<Haiku
 
   return [];
 }
+
+export async function getHaikuStats(): Promise<any> {
+  const [
+    haikuIds,
+    likedHaikuIds,
+    flaggedHaikuIds,
+    flaggedAndByFlaggedUserHaikuIds,
+  ] = await Promise.all([
+    store.haikus.ids(),
+    getLikedHaikuIds(),
+    store.flaggedUsers.ids(),
+    getFlaggedHaikuIds(),
+  ]);
+
+  return {
+    haikus: haikuIds.size,
+    likedHaikus: likedHaikuIds.size,
+    flaggedHaikus: flaggedHaikuIds.size,
+    allFlaggedHaikus: flaggedAndByFlaggedUserHaikuIds.size,
+  }
+}

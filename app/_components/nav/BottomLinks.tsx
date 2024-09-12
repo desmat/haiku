@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react';
-import { IoAddCircle, IoHelpCircle, IoHeartSharp, IoHeartOutline, IoFlagSharp, IoFlagOutline, IoEyeSharp, IoEyeOutline } from 'react-icons/io5';
+import { IoAddCircle, IoHelpCircle, IoHeartSharp, IoHeartOutline, IoFlagSharp, IoFlagOutline, IoEyeSharp, IoEyeOutline, IoStatsChart } from 'react-icons/io5';
 import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
 import { BiLogoInstagramAlt } from "react-icons/bi";
 import { RiTwitterFill } from "react-icons/ri";
@@ -535,15 +535,25 @@ export default function BottomLinks({
                 </PopOnClick>
               </div>,
               <div
-                key="restore"
-                onClick={() => !backupInProgress && onBackup && onBackup("restore")}
-                title={backupInProgress ? "Database backup in progress..." : "Restore database"}
+              key="restore"
+              onClick={() => !backupInProgress && onBackup && onBackup("restore")}
+              title={backupInProgress ? "Database backup in progress..." : "Restore database"}
+              className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
+            >
+              <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
+                <BsDatabaseFillUp className="text-[1.5rem] md:text-[1.75rem]" />
+              </PopOnClick>
+            </div>,
+            <div
+                key="stats"
+                onClick={() => !backupInProgress && onBackup && onBackup("stats")}
+                title={backupInProgress ? "Database backup in progress..." : "Get stats"}
                 className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
               >
                 <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
-                  <BsDatabaseFillUp className="text-[1.5rem] md:text-[1.75rem]" />
+                  <IoStatsChart className="text-[1.5rem] md:text-[1.75rem]" />
                 </PopOnClick>
-              </div>
+              </div>,
             ]}
           />
         }
