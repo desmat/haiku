@@ -91,6 +91,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         isAdmin: remoteUser.isAdmin,
         isAnonymous: remoteUser.isAnonymous,
         host: remoteUser.host,
+        sessionCount: remoteUser.sessionCount,
         // token, 
       });
     }
