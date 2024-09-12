@@ -122,12 +122,16 @@ export async function getUserStats(): Promise<any> {
 
   const users = [];
   const admins = [];
-  let monthlyActiveUserCount = 0; // active session in the last 30 days
-  let monthlyActiveUserSessionCount = 0;
   let monthlyNewUserCount = 0;
-  let dailyActiveUserCount = 0; // active session in the last 24 hours
-  let dailyActiveUserSessionCount = 0;
+  let monthlyReturningUserCount = 0; // Returning session in the last 30 days
+  let monthlyReturningUserSessionCount = 0;
+  let monthlyActiveUserCount = 0; // TODO: find a way to measure properly
+  let monthlyActiveUserSessionCount = 0;
   let dailyNewUserCount = 0;
+  let dailyReturningUserCount = 0; // Returning session in the last 24 hours
+  let dailyReturningUserSessionCount = 0;
+  let dailyActiveUserCount = 0; // TODO: find a way to measure properly
+  let dailyActiveUserSessionCount = 0;
   let flaggedUserCount = 0
 
   for (const user of allUsers) {
@@ -144,19 +148,29 @@ export async function getUserStats(): Promise<any> {
     }
 
     if (!isAdmin && diff <= 30) {
+      // @ts-ignore
+      if (user.sessionCount > 1) {
+        monthlyReturningUserCount++;
+        monthlyReturningUserSessionCount += (user.sessionCount || 1);
+      }
       monthlyActiveUserCount++;
       monthlyActiveUserSessionCount += (user.sessionCount || 1);
     }
-    
+
     if (!isAdmin && diffCreated <= 30) {
       monthlyNewUserCount++;
     }
-    
+
     if (!isAdmin && diff <= 1) {
+      // @ts-ignore
+      if (user.sessionCount > 1) {
+        dailyReturningUserCount++;
+        dailyReturningUserSessionCount += (user.sessionCount || 1);
+      }
       dailyActiveUserCount++;
       dailyActiveUserSessionCount += (user.sessionCount || 1);
     }
-    
+
     if (!isAdmin && diffCreated <= 1) {
       dailyNewUserCount++;
     }
@@ -171,12 +185,16 @@ export async function getUserStats(): Promise<any> {
   return {
     users: users.length,
     admins: admins.length,
-    monthlyActiveUsers: monthlyActiveUserCount,
-    avgMonthlyActiveUserSessions: Math.round(monthlyActiveUserSessionCount / monthlyActiveUserCount),
     monthlyNewUsers: monthlyNewUserCount,
-    dailyActiveUser: dailyActiveUserCount,
-    avgDailyActiveUserSessions: Math.round(dailyActiveUserSessionCount / dailyActiveUserCount),
+    monthlyReturningUsers: monthlyReturningUserCount,
+    avgMonthlyReturningUserSessions: Math.round(monthlyReturningUserSessionCount / monthlyReturningUserCount),
+    // monthlyActiveUsers: monthlyActiveUserCount,
+    // avgMonthlyActiveUserSessions: Math.round(monthlyActiveUserSessionCount / monthlyActiveUserCount),
     dailyNewUsers: dailyNewUserCount,
+    dailyReturningUser: dailyReturningUserCount,
+    avgDailyReturningUserSessions: Math.round(dailyReturningUserSessionCount / dailyReturningUserCount),
+    // dailyActiveUser: dailyActiveUserCount,
+    // avgDailyActiveUserSessions: Math.round(dailyActiveUserSessionCount / dailyActiveUserCount),
     flaggedUsers: flaggedUserCount,
   }
 }
