@@ -112,6 +112,7 @@ export async function getFlaggedUserIds(): Promise<Set<any>> {
 }
 
 export async function getUserStats(): Promise<any> {
+  console.log(">> services.users.getUserStats", {});
   const [
     allUsers,
     flaggedUserIds
@@ -121,65 +122,172 @@ export async function getUserStats(): Promise<any> {
   ]);
 
   const users = [];
+  const userIds = new Set();
   const admins = [];
+  const adminIds = new Set();
   let monthlyNewUserCount = 0;
-  let monthlyReturningUserCount = 0; // Returning session in the last 30 days
+  let monthlyReturningUserCount = 0; // returning session in the last 30 days
   let monthlyReturningUserSessionCount = 0;
-  let monthlyActiveUserCount = 0; // TODO: find a way to measure properly
-  let monthlyActiveUserSessionCount = 0;
+  let monthlyActiveUserIds = new Set(); // has created or shared a haiku, started or solved a puzzle in the last 30 days
+  // let monthlyActiveUserSessionCount = 0;
   let dailyNewUserCount = 0;
-  let dailyReturningUserCount = 0; // Returning session in the last 24 hours
+  let dailyReturningUserCount = 0; // returning session in the last 24 hours
   let dailyReturningUserSessionCount = 0;
-  let dailyActiveUserCount = 0; // TODO: find a way to measure properly
-  let dailyActiveUserSessionCount = 0;
+  let dailyActiveUserIds = new Set; // has created or shared a haiku, started or solved a puzzle in the last 24 hours
+  // let dailyActiveUserSessionCount = 0;
   let flaggedUserCount = 0
 
   for (const user of allUsers) {
     const isAdmin = user.isAdmin;
     // @ts-ignore
-    const diff = moment().diff(user.updatedAt || user.createdAt, "days")
+    const diff = moment().diff(user.updatedAt || user.createdAt, "days");
     // @ts-ignore
-    const diffCreated = moment().diff(user.createdAt, "days")
+    const diffCreated = moment().diff(user.createdAt, "days");
 
     if (isAdmin) {
       admins.push(user);
+      adminIds.add(user.id);
     } else {
       users.push(user);
-    }
+      userIds.add(user.id);
 
-    if (!isAdmin && diff <= 30) {
-      // @ts-ignore
-      if (user.sessionCount > 1) {
-        monthlyReturningUserCount++;
-        monthlyReturningUserSessionCount += (user.sessionCount || 1);
+      if (diff <= 30) {
+        // @ts-ignore
+        if (user.sessionCount > 1) {
+          monthlyReturningUserCount++;
+          monthlyReturningUserSessionCount += (user.sessionCount || 1);
+        }
       }
-      monthlyActiveUserCount++;
-      monthlyActiveUserSessionCount += (user.sessionCount || 1);
-    }
 
-    if (!isAdmin && diffCreated <= 30) {
-      monthlyNewUserCount++;
-    }
-
-    if (!isAdmin && diff <= 1) {
-      // @ts-ignore
-      if (user.sessionCount > 1) {
-        dailyReturningUserCount++;
-        dailyReturningUserSessionCount += (user.sessionCount || 1);
+      if (diffCreated <= 30) {
+        monthlyNewUserCount++;
       }
-      dailyActiveUserCount++;
-      dailyActiveUserSessionCount += (user.sessionCount || 1);
+
+      if (diff <= 1) {
+        // @ts-ignore
+        if (user.sessionCount > 1) {
+          dailyReturningUserCount++;
+          dailyReturningUserSessionCount += (user.sessionCount || 1);
+        }
+      }
+
+      if (diffCreated <= 1) {
+        dailyNewUserCount++;
+      }
+
+      if (flaggedUserIds.has(user.id)) {
+        flaggedUserCount++;
+      }
+    }
+  }
+
+  const pageSize = 99; // just below the "pulling more than 100" warning
+  let brokethebank = false;
+
+  for (let i = 0; i < 10; i++) {
+    if (i == 9) {
+      console.warn(">> services.users.getUserStats WARNING: pulling too many haikus");
+      brokethebank = true;
+      break;
     }
 
-    if (!isAdmin && diffCreated <= 1) {
-      dailyNewUserCount++;
+    const haikus = await store.haikus.find({ count: pageSize, offset: pageSize * i });
+    let done = false;
+
+    for (const haiku of haikus) {
+      const diffCreated = moment().diff(haiku.createdAt, "days");
+
+      if (diffCreated > 30) {
+        done = true;
+        break;
+      }
+
+      if (!adminIds.has(haiku.createdBy)) {
+        if (diffCreated <= 30) {
+          monthlyActiveUserIds.add(haiku.createdBy);
+          // TODO monthlyActiveUserSessionCount
+        }
+
+        if (diffCreated <= 1) {
+          dailyActiveUserIds.add(haiku.createdBy);
+          // TODO dailyActiveUserSessionCount
+        }
+      }
     }
 
-    if (flaggedUserIds.has(user.id)) {
-      flaggedUserCount++;
+    if (done) break;
+  }
+
+  for (let i = 0; i < 10; i++) {
+    if (i == 9) {
+      console.warn(">> services.users.getUserStats WARNING: pulling too many userHaikudles");
+      brokethebank = true;
+      break;
     }
 
-    // ...
+    const userHaikudles = await store.userHaikudles.find({ count: pageSize, offset: pageSize * i });
+    let done = false;
+
+    for (const userHaikudle of userHaikudles) {
+      const diffCreated = moment().diff(userHaikudle.updatedAt || userHaikudle.createdAt, "days");
+
+      if (diffCreated > 30) {
+        done = true;
+        break;
+      }
+
+      if (!adminIds.has(userHaikudle.createdBy) && userHaikudle?.haikudle?.moves > 0) {
+        // console.warn(">> services.users.getUserStats", { userHaikudle });
+
+        if (diffCreated <= 30) {
+          monthlyActiveUserIds.add(userHaikudle.createdBy);
+          // TODO monthlyActiveUserSessionCount
+        }
+
+        if (diffCreated <= 1) {
+          dailyActiveUserIds.add(userHaikudle.createdBy);
+          // TODO dailyActiveUserSessionCount
+        }
+      }
+    }
+
+    if (done) break;
+  }
+
+  for (let i = 0; i < 100; i++) {
+    if (i == 99) {
+      console.warn(">> services.users.getUserStats WARNING: pulling too many userHaikus");
+      brokethebank = true;
+      break;
+    }
+
+    const userHaikus = await store.userHaikus.find({ count: pageSize, offset: pageSize * i });
+    let done = false;
+
+    for (const userHaiku of userHaikus) {
+      const diffCreated = moment().diff(userHaiku.updatedAt || userHaiku.createdAt, "days");
+
+      if (diffCreated > 30) {
+        done = true;
+        break;
+      }
+
+      if (!adminIds.has(userHaiku.createdBy) && userHaiku.sharedAt) {
+        // console.warn(">> services.users.getUserStats", { userHaikudle });
+
+        if (diffCreated <= 30) {
+          monthlyActiveUserIds.add(userHaiku.createdBy);
+          // TODO monthlyActiveUserSessionCount
+        }
+
+        if (diffCreated <= 1) {
+          dailyActiveUserIds.add(userHaiku.createdBy);
+          // TODO dailyActiveUserSessionCount
+        }
+      }
+    }
+
+    if (done) break;
   }
 
   return {
@@ -188,12 +296,12 @@ export async function getUserStats(): Promise<any> {
     monthlyNewUsers: monthlyNewUserCount,
     monthlyReturningUsers: monthlyReturningUserCount,
     avgMonthlyReturningUserSessions: Math.round(monthlyReturningUserSessionCount / monthlyReturningUserCount),
-    // monthlyActiveUsers: monthlyActiveUserCount,
+    monthlyActiveUsers: brokethebank ? -1 : monthlyActiveUserIds.size,
     // avgMonthlyActiveUserSessions: Math.round(monthlyActiveUserSessionCount / monthlyActiveUserCount),
     dailyNewUsers: dailyNewUserCount,
     dailyReturningUser: dailyReturningUserCount,
     avgDailyReturningUserSessions: Math.round(dailyReturningUserSessionCount / dailyReturningUserCount),
-    // dailyActiveUser: dailyActiveUserCount,
+    dailyActiveUsers: brokethebank ? -1 : dailyActiveUserIds.size,
     // avgDailyActiveUserSessions: Math.round(dailyActiveUserSessionCount / dailyActiveUserCount),
     flaggedUsers: flaggedUserCount,
   }

@@ -658,7 +658,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     });
 
     return new Promise(async (resolve, reject) => {
-      fetch(`/api/haikus/${haiku.id}/${action}`, {
+      fetch(`/api/haikus/${haikuId}/${action}`, {
         ...await fetchOpts(),
         method: "POST",
         body: JSON.stringify({ value }),

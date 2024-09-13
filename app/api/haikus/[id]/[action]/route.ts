@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { getHaiku, saveUserHaiku, regenerateHaikuImage, regenerateHaikuPoem, updateHaikuImage, likeHaiku, flagHaiku, saveHaiku } from '@/services/haikus';
+import { getHaiku, saveUserHaiku, regenerateHaikuImage, regenerateHaikuPoem, updateHaikuImage, likeHaiku, flagHaiku, saveHaiku, getUserHaiku, createUserHaiku } from '@/services/haikus';
 import { userUsage } from '@/services/usage';
 import { userSession } from '@/services/users';
 import { triggerHaikuShared } from '@/services/webhooks';
@@ -178,9 +178,13 @@ export async function POST(
     console.log(`>> app.api.haiku.[id].[action].POST`, { updatedHaiku });
 
     return NextResponse.json({ haiku: updatedHaiku });
-  } else if (params.action == "share") {    
+  } else if (params.action == "share") {
+    const { user } = await userSession(request)
     const systemUser = { isAdmin: true, id: "(system)" }
-    let haiku = await getHaiku(systemUser, params.id);
+    let [haiku, userHaiku] = await Promise.all([
+      getHaiku(systemUser, params.id), 
+      getUserHaiku(user.id, params.id),
+    ]);
 
     if (!haiku) {
       return NextResponse.json(
@@ -188,6 +192,12 @@ export async function POST(
         { status: 404 }
       );
     }
+
+    if (!userHaiku) {
+      userHaiku = await createUserHaiku(user, haiku);
+    }
+    
+    await saveUserHaiku(user, { ...userHaiku, sharedAt: moment().valueOf() });
 
     if (!haiku.shared && !haiku.dailyHaikuId) {
       const ret = await triggerHaikuShared(haiku);
