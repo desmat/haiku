@@ -14,7 +14,7 @@ import shuffleArray from '@/utils/shuffleArray';
 import { deleteHaikudle, getHaikudle, getUserHaikudle } from './haikudles';
 import * as openai from './openai';
 import { incUserUsage, userUsage } from './usage';
-import { triggerDailyHaikuSaved } from './webhooks';
+import { triggerDailyHaikuSaved, triggerHaikuSaved } from './webhooks';
 import { HaikuAlbum } from '@/types/Album';
 import { getFlaggedUserIds } from './users';
 
@@ -332,7 +332,12 @@ export async function createHaiku(user: User, {
     create = await addToAlbum(user, create, albumId);
   }
 
-  return store.haikus.create(user.id, create);
+  const created = await store.haikus.create(user.id, create);
+
+  const webhookRet = await triggerHaikuSaved(created);
+  // console.log(">> services.haiku.createHaiku", { webhookRet });
+
+  return created;
 }
 
 export async function regenerateHaikuPoem(user: any, haiku: Haiku, albumId?: string): Promise<Haiku> {
@@ -672,12 +677,17 @@ export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Pro
     return completeHaikuPoem(user, haiku);
   }
 
-  return store.haikus.update(user.id, {
+  const updated = await store.haikus.update(user.id, {
     ...haiku,
     version: options.noVersion
       ? version
       : version + 1,
   });
+
+  const webhookRet = await triggerHaikuSaved(updated);
+  // console.log(">> services.haiku.saveHaiku", { webhookRet });
+
+  return updated;
 }
 
 export async function getUserHaiku(userId: string, haikuId: string): Promise<UserHaiku | undefined> {
