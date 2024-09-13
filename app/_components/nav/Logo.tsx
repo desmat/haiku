@@ -27,7 +27,7 @@ export function Logo({
   const onboarding = onboardingElement && onboardingElement.includes("logo");
 
   const ai = (
-    <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[80pt]" : "text-[22pt] md:text-[28pt]"} font-semibold`}>
+    <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[72pt]" : "text-[22pt] md:text-[28pt]"} font-semibold`}>
       AI
     </span>
   );
@@ -51,7 +51,7 @@ export function Logo({
     <Link
       onClick={() => onClick && onClick()}
       href={href || "/"}
-      className={`logo hover:no-underline ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[100pt]" : "text-[26pt] md:text-[32pt]"}`}
+      className={`logo hover:no-underline ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[92pt]" : "text-[26pt] md:text-[32pt]"}`}
     >
       {iconOnly &&
         <div className="HaikuGeniusIcon absolute top-[0.5rem] left-[-0.3rem] md:top-[.5rem] md:left-[-0.7rem] lg:top-[.5rem] lg:left-[-0.6rem]">
@@ -86,13 +86,25 @@ export function Logo({
             } */}
             h
           </StyledLayers>
-          <span className="mt-[0.1rem] sm:mt-[0rem]">{styledAi}</span>
+          <span className="mt-[0rem] sm:mt-[0rem]">{styledAi}</span>
           <StyledLayers
             styles={onboardingElement
               ? styles.slice(0, 1)
               : styles
             }
-          >{isHaikudleMode || isHaikudleSocialImgMode /* || isSocialImgMode */ ? "kudle" : "ku Genius"}</StyledLayers>
+          >{isHaikudleMode || isHaikudleSocialImgMode /* || isSocialImgMode */ ? "kudle" : "ku"}</StyledLayers>
+          <span className="ml-[0.15em]">
+            <StyledLayers
+              styles={onboardingElement
+                ? styles.slice(0, 1)
+                : styles
+              }
+            >
+              <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[72pt]" : "text-[20pt] md:text-[26pt]"} font-normal _md:font-medium`}>
+                genius
+              </span>
+            </StyledLayers>
+          </span>
         </div>
       }
     </Link>
