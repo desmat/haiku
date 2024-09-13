@@ -39,6 +39,8 @@ export async function GET(request: NextRequest) {
     likedHaikus: haikuStats.likedHaikus,
     flaggedHaikus: haikuStats.flaggedHaikus,
     allFlaggedHaikus: haikuStats.allFlaggedHaikus,
+    newHaikus1day: haikuStats.newHaikus1day,
+    newHaikus30days: haikuStats.newHaikus30days
   }
 
   return NextResponse.json(stats);

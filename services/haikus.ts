@@ -1124,19 +1124,58 @@ export async function getAlbumHaikus(user: User, albumId: string): Promise<Haiku
 
 export async function getHaikuStats(): Promise<any> {
   const [
+    adminUserIds,
     haikuIds,
     likedHaikuIds,
     flaggedHaikuIds,
     flaggedAndByFlaggedUserHaikuIds,
   ] = await Promise.all([
+    store.user.ids({ admin: true }),
     store.haikus.ids(),
     getLikedHaikuIds(),
     store.flaggedHaikus.ids(),
     getFlaggedHaikuIds(),
   ]);
 
+  let newHaikus1dayCount = 0; // haikus created not by admin in last 24 hours
+  let newHaikus30daysCount = 0; // haikus created not by admin in last 30 days
+  const pageSize = 99; // just below the "pulling more than 100" warning
+  let brokethebank = false;
+
+  for (let i = 0; i < 10; i++) {
+    if (i == 9) {
+      console.warn(">> services.users.getUserStats WARNING: pulling too many haikus");
+      brokethebank = true;
+      break;
+    }
+
+    const haikus = await store.haikus.find({ count: pageSize, offset: pageSize * i });
+    let done = false;
+
+    for (const haiku of haikus) {
+      const diffCreated = moment().diff(haiku.createdAt, "days");
+
+      if (diffCreated > 30) {
+        done = true;
+        break;
+      }
+
+      if (!adminUserIds.has(haiku.createdBy)) {
+        if (diffCreated <= 30) {
+          newHaikus30daysCount++;
+        }
+
+        if (diffCreated <= 1) {
+          newHaikus1dayCount++;
+        }
+      }
+    }
+  }
+
   return {
     haikus: haikuIds.size,
+    newHaikus1day: newHaikus1dayCount,
+    newHaikus30days: newHaikus30daysCount,
     likedHaikus: likedHaikuIds.size,
     flaggedHaikus: flaggedHaikuIds.size,
     allFlaggedHaikus: flaggedAndByFlaggedUserHaikuIds.size,

@@ -12,6 +12,12 @@ export type User = {
   sessionCount?: number,
 }
 
+export const UserSaveOptions = {
+  lookups: {
+    admin: "isAdmin",
+  },
+};
+
 export type FlaggedUser = {
   id: string,
   userId: string,
