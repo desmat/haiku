@@ -33,7 +33,7 @@ export const formatHaikuText = (haiku: Haiku, mode?: string) => {
   return haiku?.poem
     .map((value: string, i: number) => upperCaseFirstLetter(value))
     .join("\n")
-    + `\n—${haikuTitleAndAuthor.join("")}\n`;
+    + `\n${haikuTitleAndAuthor.join("")}\n`;
 };
 
 /**
