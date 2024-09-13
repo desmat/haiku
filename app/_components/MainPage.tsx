@@ -649,7 +649,6 @@ export default function MainPage({
       setBackupInProgress(true);
       res = await fetch(`/api/admin/stats`, {
         headers: { Authorization: `Bearer ${token}` },
-        method: "POST",
       });
     } else {
       throw `unknown type '${type}'`;
