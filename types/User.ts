@@ -9,7 +9,14 @@ export type User = {
   preferences?: any,
   usage?: Usage,
   host?: string | undefined | null,
+  sessionCount?: number,
 }
+
+export const UserSaveOptions = {
+  lookups: {
+    admin: "isAdmin",
+  },
+};
 
 export type FlaggedUser = {
   id: string,
@@ -28,3 +35,4 @@ export const FlaggedUserSaveOptions = {
 };
 
 export const HAIKUS_PAGE_SIZE = 20;
+export const SESSION_TIMEOUT_SECONDS = 60 * 30 // 30 minutes

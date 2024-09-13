@@ -608,7 +608,7 @@ export default function MainPage({
     );
   }
 
-  const startBackup = async (type: 'backup' | 'backupHaiku' | 'restore' = 'backup') => {
+  const startBackup = async (type: 'backup' | 'backupHaiku' | 'restore' | 'stats' = 'backup') => {
     console.log('>> app._components.MainPage.startBackup()', { type });
 
     const token = await getUserToken();
@@ -645,6 +645,11 @@ export default function MainPage({
         headers: { Authorization: `Bearer ${token}` },
         method: "POST",
       });
+    } else if (type == 'stats') {
+      setBackupInProgress(true);
+      res = await fetch(`/api/admin/stats`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
     } else {
       throw `unknown type '${type}'`;
     }
@@ -658,7 +663,7 @@ export default function MainPage({
     }
 
     const data = await res.json();
-    plainAlert(`${upperCaseFirstLetter(type)}Successful: ${JSON.stringify(data)}`, {
+    plainAlert(`${upperCaseFirstLetter(type)} successful: ${JSON.stringify(data, null, 4)}`, {
       // closeDelay: 3000
     });
   }

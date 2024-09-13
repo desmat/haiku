@@ -33,6 +33,7 @@ export type UserHaiku = {
   generatedBy?: string,
   viewedAt?: number,
   likedAt?: number, // kill?
+  sharedAt?: number,
 };
 
 export const UserHaikuSaveOptions = {

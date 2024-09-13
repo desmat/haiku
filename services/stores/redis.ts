@@ -23,7 +23,7 @@ import { DailyHaiku, DailyHaikuSaveOptions, FlaggedHaiku, FlaggedHaikuSaveOption
 import { HaikuAlbum } from "@/types/Album";
 import { DailyHaikudle, DailyHaikudleSaveOptions, Haikudle, HaikudleSaveOptions, UserHaikudle, UserHaikudleSaveOptions } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
-import { FlaggedUser, FlaggedUserSaveOptions, User } from "@/types/User";
+import { FlaggedUser, FlaggedUserSaveOptions, User, UserSaveOptions } from "@/types/User";
 
 type RedisStoreEntry = {
   id?: string,
@@ -329,7 +329,7 @@ export function create(): Store {
     likedHaikus: new RedisStore<LikedHaiku>("likedhaiku", undefined, LikedHaikuSaveOptions),
     flaggedHaikus: new RedisStore<FlaggedHaiku>("flaggedhaiku", undefined, FlaggedHaikuSaveOptions),
     userUsage: new RedisStore<UserUsage>("haikuuserusage"),
-    user: new RedisStore<User>("haikuuser"),
+    user: new RedisStore<User>("haikuuser", undefined, UserSaveOptions),
     flaggedUsers: new RedisStore<FlaggedUser>("flaggedhaikuuser", undefined, FlaggedUserSaveOptions),
   }
 }
