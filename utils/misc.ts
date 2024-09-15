@@ -19,6 +19,10 @@ export function hashCode(str: string): number {
   return hash;
 }
 
+export function hashId(str: string): string {
+  return Math.abs(hashCode(str)).toString(16);
+}
+
 export function normalizeWord(word: string): string {
   return word && word.replace(/[.,]/, "").toLowerCase();
 }
