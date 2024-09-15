@@ -1154,7 +1154,7 @@ export async function getHaikuStats(): Promise<any> {
 
   for (let i = 0; i < 10; i++) {
     if (i == 9) {
-      console.warn(">> services.users.getUserStats WARNING: pulling too many haikus");
+      console.warn(">> services.users.getHaikuStats WARNING: pulling too many haikus");
       brokethebank = true;
       break;
     }
@@ -1180,12 +1180,14 @@ export async function getHaikuStats(): Promise<any> {
         }
       }
     }
+
+    if (done) break;
   }
 
   return {
     haikus: haikuIds.size,
-    newHaikus1day: newHaikus1dayCount,
-    newHaikus30days: newHaikus30daysCount,
+    newHaikus1day: brokethebank ? -1 : newHaikus1dayCount,
+    newHaikus30days: brokethebank ? -1 : newHaikus30daysCount,
     likedHaikus: likedHaikuIds.size,
     flaggedHaikus: flaggedHaikuIds.size,
     allFlaggedHaikus: flaggedAndByFlaggedUserHaikuIds.size,
