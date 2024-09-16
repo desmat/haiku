@@ -212,8 +212,8 @@ export async function getDailyHaikudle(id?: string, dontCreate?: boolean): Promi
       dailyHaikus,
       flaggedHaikuIds,
     ] = await Promise.all([
-      store.dailyHaikudles.find(),
-      store.dailyHaikus.find(),
+      store.dailyHaikudles.find({ count: 512 }), // not great to pull all these records but they are small and underneat we mget 512
+      store.dailyHaikus.find({ count: 99 }),
       getFlaggedHaikuIds(),
     ]);
     console.log(`>> services.haikudle.getDailyHaikudle creating new daily haikudle`, { previousDailyHaikudles, dailyHaikus, flaggedHaikuIds });
@@ -221,7 +221,7 @@ export async function getDailyHaikudle(id?: string, dontCreate?: boolean): Promi
     const previousDailyHaikuIds = previousDailyHaikudles
       .map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
     let nonDailyhaikus = dailyHaikus
-      .filter((dailyHaiku: DailyHaiku) => `${dailyHaiku.haikuId}`.match(/20\d{6}/) && !previousDailyHaikuIds.includes(dailyHaiku.haikuId));
+      .filter((dailyHaiku: DailyHaiku) => `${dailyHaiku.id}`.match(/20\d{6}/) && !previousDailyHaikuIds.includes(dailyHaiku.haikuId));
     console.log(`>> services.haikudle.getDailyHaikudle creating new daily haikudle`, { previousDailyHaikuIds, nonDailyhaikus });
 
     let randomHaikuId;
