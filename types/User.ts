@@ -4,17 +4,20 @@ export type User = {
   id: string,
   isAnonymous?: boolean,
   isAdmin?: boolean,
+  isInternal?: boolean,
   displayName?: string,
   email?: string,
   preferences?: any,
   usage?: Usage,
   host?: string | undefined | null,
+  referer?: string | undefined | null,
   sessionCount?: number,
 }
 
 export const UserSaveOptions = {
   lookups: {
     admin: "isAdmin",
+    internal: "isInternal",
   },
 };
 
