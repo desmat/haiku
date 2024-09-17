@@ -404,6 +404,7 @@ export default function MainPage({
     if (user?.isAdmin || haiku?.createdBy == user?.id) {
       resetAlert();
       setLoadingUI(true);
+      setGenerating(false);
       const ret = await regenerateHaiku(user, haiku, "poem", { album });
       // console.log('>> app.page.startRegenerateHaiku()', { ret });
       incUserUsage(user, "haikusRegenerated");
@@ -469,6 +470,7 @@ export default function MainPage({
     // resetAlert();
     setLoading(true);
     setLoadingUI(true);
+    setGenerating(false);
     setHaikuId(undefined);
     setHaiku({ ...haiku, poem: undefined }); // keep parts of the old one around to smooth out style transition
     setHaikudle(undefined);
@@ -498,6 +500,7 @@ export default function MainPage({
     // console.log('>> app.page.loadHaiku()', { mode, haikuId });
     resetAlert();
     setLoadingUI(true);
+    setGenerating(false);
     setHaikuId(undefined);
     setHaiku({ ...haiku, poem: undefined }); // keep parts of the old one around to smooth out style transition
     setHaikudle(undefined);
@@ -514,7 +517,7 @@ export default function MainPage({
       })
       : loadHaikus(haikuId || { ...lang && { lang }, ...album && { album } }, mode)
         .then((haikus: Haiku | Haiku[]) => {
-          // console.log('>> app.MainPage.loadHaiku loadHaikus.then', { haikus });
+          console.log('>> app.MainPage.loadHaiku loadHaikus.then', { haikus });
           const loadedHaiku = haikus[0] || haikus;
           setHaiku(loadedHaiku);
           setHaikuId(loadedHaiku?.id);
@@ -531,6 +534,7 @@ export default function MainPage({
       : `/${haikuId || ""}?mode=${mode == "haiku" ? "haikudle" : mode != "haiku" ? "haiku" : process.env.EXPERIENCE_MODE}`
 
     setLoadingUI(true);
+    setGenerating(false);
     window.history.replaceState(null, '', url);
     document.location.href = url;
   };
@@ -809,6 +813,7 @@ export default function MainPage({
     const retryInterval = loadingUI && showcaseMode && setInterval(() => {
       // console.log('>> app.page useEffect [loadingUI, isShowcaseMode] forcing refresh after waiting too long');
       setLoadingUI(false);
+      setGenerating(false);
       document.location.href = `/${haiku?.id || ""}?mode=showcase${_refreshDelay ? `&refreshDelay=${_refreshDelay}${fontSize ? `&fontSize=${encodeURIComponent(fontSize)}` : ""}` : ""}`;
     }, 10000);
 
@@ -868,7 +873,7 @@ export default function MainPage({
             }}
           />
         }
-        <NavOverlay loading={true} mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} />
+        <NavOverlay onClickLogo={loadHaiku} loading={true} mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} />
         {/* <Loading styles={textStyles} /> */}
         <HaikuPage mode={mode} loading={true} haiku={haiku} styles={textStyles} altStyles={altTextStyles} />
       </div>
@@ -876,7 +881,7 @@ export default function MainPage({
   }
 
   if (loaded && !loading && !haiku) {
-    return <NotFound mode={mode} lang={lang} onClickGenerate={startGenerateHaiku} />
+    return <NotFound onClickLogo={loadHaiku} mode={mode} lang={lang} onClickGenerate={startGenerateHaiku} />
   }
 
   return (
@@ -895,12 +900,7 @@ export default function MainPage({
         onboardingElement={onboardingElement}
         onClickGenerate={startGenerateHaiku}
         onClickRandom={loadRandom}
-        onClickLogo={() => {
-          trackEvent("clicked-logo", {
-            userId: user?.id,
-          });
-          loadHaiku();
-        }}
+        onClickLogo={loadHaiku}
         onSwitchMode={switchMode}
         onDelete={!haiku?.error && doDelete}
         onSaveDailyHaiku={!haiku?.error && saveDailyHaiku}
