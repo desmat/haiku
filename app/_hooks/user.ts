@@ -83,6 +83,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         userId: createdUser.id,
         isAdmin: createdUser.isAdmin,
         isAnonymous: createdUser.isAnonymous,
+        isInternal: createdUser.isInternal,
         host: createdUser.host,
         referer: createdUser.referer,
       });
@@ -91,6 +92,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         userId: remoteUser.id,
         isAdmin: remoteUser.isAdmin,
         isAnonymous: remoteUser.isAnonymous,
+        isInternal: remoteUser.isInternal,
         host: remoteUser.host,
         sessionCount: remoteUser.sessionCount,
         referer: remoteUser.referer,
