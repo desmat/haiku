@@ -47,7 +47,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     set({ loading: true });
     const { loadRemote, allHaikus, dailyHaikus, dailyHaikudles } = get();
     let user = { album: options.album, referer: document?.referrer };
-    console.log(">> hooks.user.load()", { options, user });
+    // console.log(">> hooks.user.load()", { options, user });
 
     let createdUser: User | undefined;
     let token = window?.localStorage && window.localStorage.getItem("session");
