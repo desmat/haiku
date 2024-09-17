@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import * as samples from "@/services/stores/samples";
 import delay from '@/utils/delay';
 import { mapToList } from '@/utils/misc';
+import trackEvent from '@/utils/trackEventServer';
 
 const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -23,7 +24,7 @@ function parseJson(input: string) {
   return undefined;
 }
 
-export async function generateBackgroundImage(subject?: string, mood?: string, artStyle?: string, customPrompt?: string, customArtStyles?: string[]): Promise<any> {
+export async function generateBackgroundImage(userId: string, subject?: string, mood?: string, artStyle?: string, customPrompt?: string, customArtStyles?: string[]): Promise<any> {
   console.log(`>> services.openai.generateBackgroundImage`, { subject, mood, artStyle, customPrompt, customArtStyles });
   const imageTypes = customArtStyles || [
     // "charcoal drawing", 
@@ -38,10 +39,10 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     "Post-Impressionism painting",
     "Expressionist painting",
     "Landscape painting",
-    
+
     "Chinese-style ink wash painting",
     "Chinese Shan Shui painting",
-    
+
     "Old-school Japanese-style painting",
 
     // "Japanese woodblock print",
@@ -49,7 +50,7 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     "Japanese Hanga style woodblock print",
     // "Japanese Sosaku-Hanga woodblock print",
     // "Japanese Shin-Hanga woodblock print",
-    
+
     "Japanese-style ink wash painting",
     "Japanese Sumi-e style ink painting",
     // "Japanese Yamato-e style painting",
@@ -60,7 +61,7 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     "Japanese-style watercolor with few large brush strokes and a minimal palete of colors",
 
     // https://www.reddit.com/r/dalle2/comments/1ch4ddv/how_do_i_create_images_with_this_style/
-    "Quick wobbly sketch, colored hastily with watercolors", 
+    "Quick wobbly sketch, colored hastily with watercolors",
 
     // developped for kingfisher
     `A painting that uses the traditional East Asian art techniques of sumi-e or Chinese ink painting, with characteristics such as minimal brush strokes, a focus on natural subjects, and the use of negative space. 
@@ -116,29 +117,42 @@ export async function generateBackgroundImage(subject?: string, mood?: string, a
     };
   }
 
-  // @ts-ignore
-  const response = await openai.images.generate({
-    model: imageModel,
-    prompt,
-    n: 1,
-    size: "1024x1024",
-    // size: "256x256",
-  });
-
   try {
-    console.log(">> services.openai.generateBackgroundImage RESULTS FROM API", { response });
-    return {
-      artStyle: selectedArtStyle,
-      prompt: (response.data[0]["revised_prompt"] || prompt),
+    // @ts-ignore
+    const response = await openai.images.generate({
       model: imageModel,
-      url: response.data[0].url,
-    };
-  } catch (error) {
-    console.error("Error reading results", { error, response });
+      prompt,
+      n: 1,
+      size: "1024x1024",
+      // size: "256x256",
+    });
+
+    try {
+      console.log(">> services.openai.generateBackgroundImage RESULTS FROM API", { response });
+      return {
+        artStyle: selectedArtStyle,
+        prompt: (response.data[0]["revised_prompt"] || prompt),
+        model: imageModel,
+        url: response.data[0].url,
+      };
+    } catch (error) {
+      console.error("Error reading results", { error, response });
+    }
+  } catch (error: any) {
+    await trackEvent("error", {
+      scope: "generate-haiku-image",
+      type: error?.type,
+      code: error?.code,
+      message: error.message,
+      userId,
+    });
+
+    console.error("Error generating haiku image", { type: error.type, code: error.code, message: error.message, error, prompt });
+    throw error;
   }
 }
 
-export async function generateHaiku(language?: string, subject?: string, mood?: string, customPrompt?: string): Promise<any> {
+export async function generateHaiku(userId: string, language?: string, subject?: string, mood?: string, customPrompt?: string): Promise<any> {
   const prompt = `Topic: ${subject || "any"}${mood ? ` Mood: ${mood}` : ""}`;
 
   console.log(`>> services.openai.generateHaiku`, { language, subject, mood, prompt });
@@ -174,37 +188,51 @@ export async function generateHaiku(language?: string, subject?: string, mood?: 
     Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
     Please only include keys "haiku", "subject", "mood", "title" and "lang".
     `;
-  // @ts-ignore
-  const completion = await openai.chat.completions.create({
-    model: languageModel,
-    messages: [
-      {
-        role: 'system',
-        content: systemPrompt
-      },
-      {
-        role: 'user',
-        content: prompt,
-      }
-    ],
-  });
 
-  let response;
   try {
-    console.log(">> services.openai.generateHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
-    response = parseJson(completion.choices[0].message.content);
-    console.log(">> services.openai.generateHaiku RESULTS FROM API", { response });
-    return {
-      prompt: systemPrompt + "\n" + prompt,
-      model: completion.model,
-      response,
-    };
-  } catch (error) {
-    console.error("Error reading results", { error, response, completion });
+    // @ts-ignore
+    const completion = await openai.chat.completions.create({
+      model: languageModel,
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: prompt,
+        }
+      ],
+    });
+
+    let response;
+    try {
+      console.log(">> services.openai.generateHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
+      response = parseJson(completion.choices[0].message.content);
+      console.log(">> services.openai.generateHaiku RESULTS FROM API", { response });
+      return {
+        prompt: systemPrompt + "\n" + prompt,
+        model: completion.model,
+        response,
+      };
+    } catch (error) {
+      console.error("Error reading results", { error, response, completion });
+    }
+  } catch (error: any) {
+    await trackEvent("error", {
+      scope: "generate-haiku-poem",
+      type: error?.type,
+      code: error?.code,
+      message: error.message,
+      userId,
+    });
+
+    console.error("Error generating haiku poem", { type: error.type, code: error.code, message: error.message, error, prompt });
+    throw error;
   }
 }
 
-export async function completeHaiku(poem: string[], language?: string, subject?: string, mood?: string, customPrompt?: string): Promise<any> {
+export async function completeHaiku(userId: string, poem: string[], language?: string, subject?: string, mood?: string, customPrompt?: string): Promise<any> {
   const prompt = `Haiku to complete: "${poem.join(" / ")}"
   ${subject ? `Topic: "${subject}"` : ""}
   ${mood ? ` Mood: "${mood}"` : ""}`;
@@ -226,13 +254,14 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
     };
   }
 
-  // @ts-ignore
-  const completion = await openai.chat.completions.create({
-    model: languageModel,
-    messages: [
-      {
-        role: 'system',
-        content: customPrompt || `
+  try {
+    // @ts-ignore
+    const completion = await openai.chat.completions.create({
+      model: languageModel,
+      messages: [
+        {
+          role: 'system',
+          content: customPrompt || `
           Given an incomplete haiku please complete the haiku. 
           Characters "..." or "…" will be used to indicate a placeholder, please keep the existing word(s) and fill the rest.
           If a line looks like this: "<some one or more words> ..." then keep the word(s) at the beginning and fill the rest.          If a line looks like this: "... <one or more words>" then keep the word(s) at the end and fill the rest.
@@ -247,26 +276,38 @@ export async function completeHaiku(poem: string[], language?: string, subject?:
           Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
           Additionally, please include a very short title that reflects the poem, subject and mood, in the language of the haiku.
           Please only include keys "haiku", "subject", "mood", "title" and "lang".`
-      },
-      {
-        role: 'user',
-        content: prompt,
-      }
-    ],
-  });
+        },
+        {
+          role: 'user',
+          content: prompt,
+        }
+      ],
+    });
 
-  let response;
-  try {
-    console.log(">> services.openai.completeHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
-    response = parseJson(completion.choices[0].message.content);
-    console.log(">> services.openai.completeHaiku RESULTS FROM API", { response });
-    return { prompt, response, model: completion.model };
-  } catch (error) {
-    console.error("Error reading results", { error, response, completion });
+    let response;
+    try {
+      console.log(">> services.openai.completeHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
+      response = parseJson(completion.choices[0].message.content);
+      console.log(">> services.openai.completeHaiku RESULTS FROM API", { response });
+      return { prompt, response, model: completion.model };
+    } catch (error) {
+      console.error("Error reading results", { error, response, completion });
+    }
+  } catch (error: any) {
+    await trackEvent("error", {
+      scope: "complete-haiku-poem",
+      type: error?.type,
+      code: error?.code,
+      message: error.message,
+      userId,
+    });
+
+    console.error("Error copmleting haiku poem", { type: error.type, code: error.code, message: error.message, error, prompt });
+    throw error;
   }
 }
 
-export async function analyzeHaiku(poem: string[]): Promise<any> {
+export async function analyzeHaiku(userId: string, poem: string[]): Promise<any> {
 
   const language = undefined
   const subject = undefined;
@@ -302,32 +343,46 @@ export async function analyzeHaiku(poem: string[]): Promise<any> {
     Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
     Please only include keys "subject", "mood" and "lang".
     `;
-  // @ts-ignore
-  const completion = await openai.chat.completions.create({
-    model: languageModel,
-    messages: [
-      {
-        role: 'system',
-        content: systemPrompt
-      },
-      {
-        role: 'user',
-        content: poem.join("\n"),
-      }
-    ],
-  });
 
-  let response;
   try {
-    console.log(">> services.openai.analyzeHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
-    response = parseJson(completion.choices[0].message.content);
-    console.log(">> services.openai.analyzeHaiku RESULTS FROM API", { response });
-    return {
-      prompt: systemPrompt + "\n" + poem,
-      model: completion.model,
-      response,
-    };
-  } catch (error) {
-    console.error("Error reading results", { error, response, completion });
+    // @ts-ignore
+    const completion = await openai.chat.completions.create({
+      model: languageModel,
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: poem.join("\n"),
+        }
+      ],
+    });
+
+    let response;
+    try {
+      console.log(">> services.openai.analyzeHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
+      response = parseJson(completion.choices[0].message.content);
+      console.log(">> services.openai.analyzeHaiku RESULTS FROM API", { response });
+      return {
+        prompt: systemPrompt + "\n" + poem,
+        model: completion.model,
+        response,
+      };
+    } catch (error) {
+      console.error("Error reading results", { error, response, completion });
+    }
+  } catch (error: any) {
+    await trackEvent("error", {
+      scope: "analyze-haiku-poem",
+      type: error?.type,
+      code: error?.code,
+      message: error.message,
+      userId,
+    });
+
+    console.error("Error analyzing haiku poem", { type: error.type, code: error.code, message: error.message, error, prompt });
+    throw error;
   }
 }

@@ -360,7 +360,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku, albumId?: str
       mood: generatedMood,
       lang: generatedLang,
     }
-  } = await openai.generateHaiku(language, subject, mood, customPoemPrompt);
+  } = await openai.generateHaiku(user.id, language, subject, mood, customPoemPrompt);
   // console.log(">> services.haiku.regenerateHaikuPoem", { ret });
   console.log(">> services.haiku.regenerateHaikuPoem", { poem, generatedSubject, generatedMood, poemPrompt });
 
@@ -417,7 +417,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: strin
     },
     model: languageModel,
     prompt: poemPrompt,
-  } = await openai.completeHaiku(haiku.poem, language, subject, mood, customPoemPrompt);
+  } = await openai.completeHaiku(user.id, haiku.poem, language, subject, mood, customPoemPrompt);
   console.log(">> services.haiku.completeHaikuPoem", { completedPoem, generatedSubject, generatedMood });
 
   // delete corresponding haikudle 
@@ -458,7 +458,7 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
     prompt: imagePrompt,
     artStyle: selectedArtStyle,
     model: imageModel,
-  } = await openai.generateBackgroundImage(haiku.subject || haiku.theme || haiku.title, haiku.mood, artStyle, customImagePrompt, customArtStyles);
+  } = await openai.generateBackgroundImage(user.id, haiku.subject || haiku.theme || haiku.title, haiku.mood, artStyle, customImagePrompt, customArtStyles);
 
   const imageRet = await fetch(openaiUrl);
   // console.log(">> services.haiku.regenerateHaikuImage", { imageRet });
@@ -580,8 +580,8 @@ export async function generateHaiku(user: User, {
       lang: generatedLang,
     }
   } = poem
-      ? await openai.analyzeHaiku(poem)
-      : await openai.generateHaiku(language, subject, mood, customPoemPrompt);
+      ? await openai.analyzeHaiku(user.id, poem)
+      : await openai.generateHaiku(user.id, language, subject, mood, customPoemPrompt);
   // console.log(">> services.haiku.generateHaiku", { ret });
   console.log(">> services.haiku.generateHaiku", { generatedSubject, generatedMood, poemPrompt });
 
@@ -590,7 +590,7 @@ export async function generateHaiku(user: User, {
     prompt: imagePrompt,
     artStyle: selectedArtStyle,
     model: imageModel,
-  } = await openai.generateBackgroundImage(subject || generatedSubject, mood || generatedMood, artStyle, customImagePrompt, customArtStyles);
+  } = await openai.generateBackgroundImage(user.id, subject || generatedSubject, mood || generatedMood, artStyle, customImagePrompt, customArtStyles);
 
   return createHaiku(user, {
     lang: generatedLang || lang || "en",
