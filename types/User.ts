@@ -9,6 +9,7 @@ export type User = {
   preferences?: any,
   usage?: Usage,
   host?: string | undefined | null,
+  referer?: string | undefined | null,
   sessionCount?: number,
 }
 

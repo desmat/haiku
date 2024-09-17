@@ -45,9 +45,9 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
   load: async (options: any = {}) => {
     set({ loading: true });
-    const { loadLocal, loadRemote, allHaikus, dailyHaikus, dailyHaikudles } = get();
-    let user = { album: options.album };
-    // console.log(">> hooks.user.load()", {});
+    const { loadRemote, allHaikus, dailyHaikus, dailyHaikudles } = get();
+    let user = { album: options.album, referer: document?.referrer };
+    console.log(">> hooks.user.load()", { options, user });
 
     let createdUser: User | undefined;
     let token = window?.localStorage && window.localStorage.getItem("session");
@@ -84,6 +84,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         isAdmin: createdUser.isAdmin,
         isAnonymous: createdUser.isAnonymous,
         host: createdUser.host,
+        referer: createdUser.referer,
       });
     } else {
       trackEvent("user-session-loaded", {
@@ -92,6 +93,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         isAnonymous: remoteUser.isAnonymous,
         host: remoteUser.host,
         sessionCount: remoteUser.sessionCount,
+        referer: remoteUser.referer,
         // token, 
       });
     }
