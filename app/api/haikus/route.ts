@@ -43,9 +43,9 @@ export async function GET(request: NextRequest, params?: any) {
     delete query.liked;
     delete query.seen;
 
-    if (!query.lang) {
-      query.lang = "en";
-    }
+    // if (!query.lang) {
+    //   query.lang = "en";
+    // }
 
     let randomHaiku = await getRandomHaiku(user, mode, query, options);
     if (!randomHaiku) {
