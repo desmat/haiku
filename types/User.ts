@@ -4,6 +4,7 @@ export type User = {
   id: string,
   isAnonymous?: boolean,
   isAdmin?: boolean,
+  isInternal?: boolean,
   displayName?: string,
   email?: string,
   preferences?: any,
@@ -16,6 +17,7 @@ export type User = {
 export const UserSaveOptions = {
   lookups: {
     admin: "isAdmin",
+    internal: "isInternal",
   },
 };
 

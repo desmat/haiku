@@ -69,6 +69,7 @@ export async function loadUser(userId: string) {
 export async function saveUser(user: User) {
   console.log(">> services.users.saveUser", { user });
   let savedUser = await store.user.get(user.id);
+  user.isInternal = !!(user.isInternal || user.referer && user.referer.includes("vercel.com"));
 
   // TODO: maybe we'll need to distinguish between user acting and user to save?
 
@@ -121,10 +122,9 @@ export async function getUserStats(): Promise<any> {
     store.flaggedUsers.ids(),
   ]);
 
-  const users = [];
   const userIds = new Set();
-  const admins = [];
   const adminIds = new Set();
+  const internalUserIds = new Set();
   let monthlyNewUserCount = 0;
   let monthlyReturningUserCount = 0; // returning session in the last 30 days
   let monthlyReturningUserSessionCount = 0;
@@ -139,16 +139,16 @@ export async function getUserStats(): Promise<any> {
 
   for (const user of allUsers) {
     const isAdmin = user.isAdmin;
+    const isInternal = user.isInternal;
     // @ts-ignore
     const diff = moment().diff(user.updatedAt || user.createdAt, "days");
     // @ts-ignore
     const diffCreated = moment().diff(user.createdAt, "days");
 
-    if (isAdmin) {
-      admins.push(user);
-      adminIds.add(user.id);
+    if (isAdmin || isInternal) {
+      if (isAdmin) adminIds.add(user.id);
+      if (isInternal) internalUserIds.add(user.id);
     } else {
-      users.push(user);
       userIds.add(user.id);
 
       if (diff <= 30) {
@@ -202,7 +202,7 @@ export async function getUserStats(): Promise<any> {
         break;
       }
 
-      if (!adminIds.has(haiku.createdBy)) {
+      if (!adminIds.has(haiku.createdBy) && !internalUserIds.has(haiku.createdBy)) {
         if (diffCreated <= 30) {
           monthlyActiveUserIds.add(haiku.createdBy);
           // TODO monthlyActiveUserSessionCount
@@ -236,7 +236,7 @@ export async function getUserStats(): Promise<any> {
         break;
       }
 
-      if (!adminIds.has(userHaikudle.createdBy) && userHaikudle?.haikudle?.moves > 0) {
+      if (!adminIds.has(userHaikudle.createdBy) && !internalUserIds.has(userHaikudle.createdBy) && userHaikudle?.haikudle?.moves > 0) {
         // console.warn(">> services.users.getUserStats", { userHaikudle });
 
         if (diffCreated <= 30) {
@@ -272,7 +272,7 @@ export async function getUserStats(): Promise<any> {
         break;
       }
 
-      if (!adminIds.has(userHaiku.createdBy) && userHaiku.sharedAt) {
+      if (!adminIds.has(userHaiku.createdBy) && !internalUserIds.has(userHaiku.createdBy) && userHaiku.sharedAt) {
         // console.warn(">> services.users.getUserStats", { userHaikudle });
 
         if (diffCreated <= 30) {
@@ -291,8 +291,9 @@ export async function getUserStats(): Promise<any> {
   }
 
   return {
-    users: users.length,
-    admins: admins.length,
+    users: userIds.size,
+    admins: adminIds.size,
+    internalUsers: internalUserIds.size,
     monthlyNewUsers: monthlyNewUserCount,
     monthlyReturningUsers: monthlyReturningUserCount,
     avgMonthlyReturningUserSessions: Math.round(monthlyReturningUserSessionCount / monthlyReturningUserCount),

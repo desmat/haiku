@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
   const stats = {
     users: userStats.users,
     admins: userStats.admins,
+    internalUsers: userStats.internalUsers,
     flaggedUsers: userStats.flaggedUsers,
     monthlyNewUsers: userStats.monthlyNewUsers,
     monthlyReturningUsers: userStats.monthlyReturningUsers,

@@ -1135,12 +1135,14 @@ export async function getAlbumHaikus(user: User, albumId: string): Promise<Haiku
 export async function getHaikuStats(): Promise<any> {
   const [
     adminUserIds,
+    internalUserIds,
     haikuIds,
     likedHaikuIds,
     flaggedHaikuIds,
     flaggedAndByFlaggedUserHaikuIds,
   ] = await Promise.all([
     store.user.ids({ admin: true }),
+    store.user.ids({ internal: true }),
     store.haikus.ids(),
     getLikedHaikuIds(),
     store.flaggedHaikus.ids(),
@@ -1170,7 +1172,7 @@ export async function getHaikuStats(): Promise<any> {
         break;
       }
 
-      if (!adminUserIds.has(haiku.createdBy)) {
+      if (!adminUserIds.has(haiku.createdBy) && !internalUserIds.has(haiku.createdBy)) {
         if (diffCreated <= 30) {
           newHaikus30daysCount++;
         }
