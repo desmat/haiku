@@ -99,9 +99,9 @@ export default async function Page({
   }
 
   let haiku = haikudle
-    ? await getHaiku({} as User, haikudle.haikuId, !haikudle?.previousDailyHaikudleId, version)
+    ? await getHaiku({} as User, haikudle.haikuId, !haikudle?.previousDailyHaikudleId, parseInt(version))
     : id
-      ? await getHaiku({} as User, id, false, version)
+      ? await getHaiku({} as User, id, false, parseInt(version))
       : album
         ? await randomAlbumHaiku(album)
         : await todaysHaiku();

@@ -170,13 +170,16 @@ export async function getUserHaikus(user: User, {
   return haikus;
 }
 
-export async function getHaiku(user: User, id: string, hashPoem?: boolean, version?: string): Promise<Haiku | undefined> {
+export async function getHaiku(user: User, id: string, hashPoem?: boolean, version?: number): Promise<Haiku | undefined> {
   console.log(`>> services.haiku.getHaiku`, { id, hashPoem });
 
-  const versionedId = version ? `${id}:${version}` : id;
+  const idAndVersionedId = [
+    id,
+    version && `${id}:${version}`,
+  ];
 
   let [
-    haiku,
+    haikus,
     userLiked,
     haikuLikes,
     flaggedHaiku,
@@ -184,7 +187,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     dailyHaikuIds,
     dailyHaikudleIds,
   ] = await Promise.all([
-    store.haikus.get(versionedId),
+    store.haikus.find({ id: idAndVersionedId }),
     user?.id && store.likedHaikus.get(`${user?.id}:${id}`),
     user.isAdmin && store.likedHaikus.ids({ haiku: id }),
     user.isAdmin && user?.id && store.flaggedHaikus.get(`${user?.id}:${id}`),
@@ -193,14 +196,16 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     user.isAdmin && store.dailyHaikudles.ids({ haikudle: id, count: 1 }),
   ]);
 
+  // get either current or versioned
+  // note the edge case when current version is requested explicitly by its version
+  // since only previous version have the key <id>:<version>
+  let haiku =version && haikus[0]?.version != version
+    ? { ...haikus[1], id }
+    : haikus[0];
+    
   if (!haiku) return;
 
-  if (version) {
-    haiku = { ...haiku, id };
-  }
-
   if (user.isAdmin) {
-    // TODO pull flagged users and see if author of this haiku is flagged
     const flaggedUser = await store.flaggedUsers.get(haiku.createdBy);
     if (flaggedUser) {
       haiku.userFlaggedAt = flaggedUser.updatedAt || flaggedUser.createdAt;

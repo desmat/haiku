@@ -9,6 +9,7 @@ export type Haiku = {
   updatedBy?: string,
   status?: string,
   lang?: string,
+  version?: number,
 } | any;
 
 export const HaikuSaveOptions = {
