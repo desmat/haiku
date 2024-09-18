@@ -763,8 +763,8 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
   // flagged: 8d8d6c60
 
   // include or exclude flagged/liked/seen haikus
-  const filteredHaikuIds = Array.from(haikuIds).filter((id: string) => {
-    return (id != lastHaikuId) && (
+  let filteredHaikuIds = Array.from(haikuIds).filter((id: string) => {
+    return (
       typeof (options.flagged) == "boolean"
         ? options.flagged ? flaggedHaikuIds.has(id) : (!flaggedHaikuIds.has(id))
         : true
@@ -779,7 +779,13 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
       );
   });
 
-  if (!filteredHaikuIds.length) return;
+  if (!filteredHaikuIds.length) {
+    // not found
+    return;
+  } else if (filteredHaikuIds.length > 1) {
+    // exclude special case for only one
+    filteredHaikuIds = Array.from(haikuIds).filter((id: string) => id != lastHaikuId);
+  }
 
   const randomHaikuId = filteredHaikuIds[Math.floor(Math.random() * filteredHaikuIds.length)];
   const randomHaiku = await getHaiku(user, randomHaikuId, mode == "haikudle");
