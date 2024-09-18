@@ -455,7 +455,7 @@ export default function MainPage({
     }
   }
 
-  const loadRandom = () => {
+  const loadRandom = (options?: any) => {
     // console.log('>> app.page.loadRandom()', {});
 
     if (/* haikudleMode && */ !user?.isAdmin && !album) {
@@ -475,7 +475,7 @@ export default function MainPage({
     setHaikudle(undefined);
 
     haikudleMode
-      ? loadHaikudle(haikuId || { random: true, ...lang && { lang }, ...album && { album } })
+      ? loadHaikudle(haikuId || { random: true, ...lang && { lang }, ...album && { album }, ...options })
         .then((haikudles: Haikudle | Haikudle[]) => {
           // console.log('>> app.MainPage.loadPage loadRandom.then', { haikudles });
           const loadedHaikudle = haikudles[0] || haikudles;
@@ -484,7 +484,7 @@ export default function MainPage({
           setHaikudle(loadedHaikudle);
           setLoadingUI(false);
         })
-      : loadHaikus({ random: true, ...lang && { lang }, lastId: haikuId }, mode, undefined, album)
+      : loadHaikus({ random: true, ...lang && { lang }, ...options, ...haikuId && { lastId: haikuId },  }, mode, undefined, album)
         .then((haikus: Haiku | Haiku[]) => {
           // console.log('>> app.MainPage.loadPage loadRandom.then', { haikus });
           const loadedHaiku = haikus[0] || haikus;
@@ -962,7 +962,7 @@ export default function MainPage({
           popPoem={haikudleMode && haikudleSolvedJustNow}
           regenerating={regenerating}
           onboardingElement={onboardingElement}
-          refresh={!haiku?.error && (user?.isAdmin || album) && loadRandom}
+          refresh={!haiku?.error && (user?.isAdmin || album) && (() => loadRandom())}
           saveHaiku={!haiku?.error && !haikudleMode && doSaveHaiku}
           updateTitle={!haiku?.error && !haikudleMode && user?.isAdmin && updateHaikuTitle}
           regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}

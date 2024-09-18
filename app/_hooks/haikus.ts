@@ -242,11 +242,6 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
           return resolve(init(haiku, queryOrId, mode));
         });
       } else {
-        // const modeParams = mode && `mode=${mode || _mode}`;
-        // const queryParams = query && mapToSearchParams(query);
-        // const params = `${queryParams || modeParams ? "?" : ""}${queryParams}${queryParams && modeParams ? "&" : ""}${modeParams}`;
-        // const params = // "?mode=haiku";
-
         const params = mapToSearchParams({
           ...query,
           ...mode && mode != process.env.EXPERIENCE_MODE && { mode },

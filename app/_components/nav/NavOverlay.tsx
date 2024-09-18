@@ -198,7 +198,7 @@ export function NavOverlay({
                   altStyles={altStyles}
                   backupInProgress={backupInProgress}
                   onboardingElement={onboardingElement}
-                  onRefresh={onClickRandom}
+                  onRefresh={(options: any) => onClickRandom(options)}
                   onSwitchMode={onSwitchMode}
                   onDelete={onDelete}
                   onSaveDailyHaiku={onSaveDailyHaiku}
