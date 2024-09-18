@@ -760,8 +760,6 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
 
   console.log('>> services.haiku.getRandomHaiku', { flaggedHaikuIds, likedHaikuIds, seenHaikuIds });
 
-  // flagged: 8d8d6c60
-
   // include or exclude flagged/liked/seen haikus
   let filteredHaikuIds = Array.from(haikuIds).filter((id: string) => {
     return (
