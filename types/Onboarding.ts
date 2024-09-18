@@ -102,7 +102,9 @@ export const haikuPromptSteps = (haiku: Haiku) => [
     focus: "poem",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div>Theme and mood: <i>${haiku.theme}</i> and <i>${haiku.mood}</i></div>      
+        ${typeof(haiku.subject) == "string" ? `<div>Subject: <i>${haiku.subject}</i></div>` : ""}
+        <div>Theme and mood: <i>${haiku.theme}</i> and <i>${haiku.mood}</i></div> 
+        ${typeof(haiku.title) == "string" ? `<div><i>Title: ${haiku.title}</i></div>` : ""} 
         <div>Image style: <i>${haiku.artStyle || "N/A"}</i></div>      
         <!-- <div>Poem prompt: <i>${haiku.poemPrompt || "N/A"}</i></div> -->
         <div>Image prompt: <i>${haiku.imagePrompt || "N/A"}</i></div>
