@@ -182,7 +182,7 @@ export async function POST(
     const { user } = await userSession(request)
     const systemUser = { isAdmin: true, id: "(system)" }
     let [haiku, userHaiku] = await Promise.all([
-      getHaiku(systemUser, params.id), 
+      getHaiku(systemUser, params.id),
       getUserHaiku(user.id, params.id),
     ]);
 
@@ -196,7 +196,7 @@ export async function POST(
     if (!userHaiku) {
       userHaiku = await createUserHaiku(user, haiku);
     }
-    
+
     await saveUserHaiku(user, { ...userHaiku, sharedAt: moment().valueOf() });
 
     if (!haiku.shared && !haiku.dailyHaikuId) {
@@ -242,7 +242,10 @@ export async function POST(
       );
     }
 
-    haiku = await addToAlbum(user, haiku, album);
+    haiku = await saveHaiku(
+      user,
+      await addToAlbum(user, haiku, album),
+      { noVersion: true });
 
     return NextResponse.json({ haiku });
   } else {
