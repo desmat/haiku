@@ -743,6 +743,9 @@ export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<U
 export async function getRandomHaiku(user: User, mode: string, query?: any, options?: any): Promise<Haiku | undefined> {
   console.log(`>> services.haiku.getRandomHaiku`, { query, options });
 
+  const lastHaikuId = query.lastId;
+  delete query.lastId;
+
   let [
     haikuIds,
     flaggedHaikuIds,
@@ -761,7 +764,7 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
 
   // include or exclude flagged/liked/seen haikus
   const filteredHaikuIds = Array.from(haikuIds).filter((id: string) => {
-    return (
+    return (id != lastHaikuId) && (
       typeof (options.flagged) == "boolean"
         ? options.flagged ? flaggedHaikuIds.has(id) : (!flaggedHaikuIds.has(id))
         : true

@@ -455,11 +455,10 @@ export default function MainPage({
     }
   }
 
-  const loadRandom = (options: any = {}) => {
-    // return;
+  const loadRandom = () => {
     // console.log('>> app.page.loadRandom()', {});
 
-    if (/* haikudleMode && */ !user?.isAdmin) {
+    if (/* haikudleMode && */ !user?.isAdmin && !album) {
       return loadHaiku();
     }
 
@@ -485,7 +484,7 @@ export default function MainPage({
           setHaikudle(loadedHaikudle);
           setLoadingUI(false);
         })
-      : loadHaikus({ random: true, ...lang && { lang }, ...album && { album }, ...options }, mode)
+      : loadHaikus({ random: true, ...lang && { lang }, lastId: haikuId }, mode, undefined, album)
         .then((haikus: Haiku | Haiku[]) => {
           // console.log('>> app.MainPage.loadPage loadRandom.then', { haikus });
           const loadedHaiku = haikus[0] || haikus;
@@ -842,7 +841,7 @@ export default function MainPage({
             setHaikudle(loadedHaikudle);
           });
         } else {
-          loadHaikus(haikuId || { ...lang && { lang }, ...album && { album } }, mode, version).then((haikus: Haiku | Haiku[]) => {
+          loadHaikus(haikuId || { ...lang && { lang } }, mode, version, album).then((haikus: Haiku | Haiku[]) => {
             // console.log('>> app.MainPage init loadHaikus.then', { haikus });
             const loadedHaiku = haikus[0] || haikus;
             setHaiku(loadedHaiku);

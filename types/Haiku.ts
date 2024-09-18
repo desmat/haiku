@@ -16,6 +16,7 @@ export const HaikuSaveOptions = {
   lookups: {
     lang: "lang",
     user: "createdBy",
+    album: "albumId",
   },
 };
 

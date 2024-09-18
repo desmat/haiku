@@ -195,15 +195,20 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     return haiku;
   },
 
-  load: async (queryOrId?: object | string, mode?: string, version?: string): Promise<Haiku | Haiku[]> => {
+  load: async (queryOrId?: object | string, mode?: string, version?: string, album?: string): Promise<Haiku | Haiku[]> => {
     const { setLoaded, _mode, init } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    // console.log(">> hooks.haiku.load", { mode, id, query: JSON.stringify(query) });
+    // console.log(">> hooks.haiku.load", { mode, id, version, album, query: JSON.stringify(query) });
 
     return new Promise(async (resolve, reject) => {
       if (id) {
-        const params = mapToSearchParams({ mode, version });
+        const params = mapToSearchParams({ 
+          ...mode && mode != process.env.EXPERIENCE_MODE && { mode },
+          ...typeof(version) != "undefined" && { version }, 
+          ...album && { album} 
+        });
+
         fetch(`/api/haikus/${id}${params ? `?${params}` : ""}`, await fetchOpts()).then(async (res) => {
           const { _haikus } = get();
 
@@ -244,7 +249,8 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
         const params = mapToSearchParams({
           ...query,
-          // ..._mode(mode ? { mode } : {}),
+          ...mode && mode != process.env.EXPERIENCE_MODE && { mode },
+          ...album && { album}, 
         });
 
         fetch(`/api/haikus${params ? "?" : ""}${params}`, await fetchOpts()).then(async (res) => {
