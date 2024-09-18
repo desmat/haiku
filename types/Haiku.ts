@@ -10,6 +10,7 @@ export type Haiku = {
   status?: string,
   lang?: string,
   version?: number,
+  albumId?: string, // TODO change to many-to-many
 } | any;
 
 export const HaikuSaveOptions = {

@@ -31,6 +31,7 @@ export function NavOverlay({
   onSwitchMode,
   onDelete,
   onSaveDailyHaiku,
+  onAddToAlbum,
   onShowAbout,
   onSelectHaiku,
   onChangeRefreshDelay,
@@ -57,6 +58,7 @@ export function NavOverlay({
   onSwitchMode?: any,
   onDelete?: any,
   onSaveDailyHaiku?: any,
+  onAddToAlbum?: any
   onShowAbout?: any,
   onSelectHaiku?: any,
   onChangeRefreshDelay?: any,
@@ -200,6 +202,7 @@ export function NavOverlay({
                   onSwitchMode={onSwitchMode}
                   onDelete={onDelete}
                   onSaveDailyHaiku={onSaveDailyHaiku}
+                  onAddToAlbum={onAddToAlbum}
                   onShowAbout={onShowAbout}
                   onBackup={onBackup}
                   onCopyHaiku={onCopyHaiku}

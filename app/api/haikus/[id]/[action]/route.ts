@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextResponse } from 'next/server'
-import { getHaiku, saveUserHaiku, regenerateHaikuImage, regenerateHaikuPoem, updateHaikuImage, likeHaiku, flagHaiku, saveHaiku, getUserHaiku, createUserHaiku } from '@/services/haikus';
+import { getHaiku, saveUserHaiku, regenerateHaikuImage, regenerateHaikuPoem, updateHaikuImage, likeHaiku, flagHaiku, saveHaiku, getUserHaiku, createUserHaiku, addToAlbum } from '@/services/haikus';
 import { userUsage } from '@/services/usage';
 import { userSession } from '@/services/users';
 import { triggerHaikuShared } from '@/services/webhooks';
@@ -210,6 +210,39 @@ export async function POST(
     } else {
       console.log(`>> app.api.haiku.[id].[action].POST: already shared`, { action: params.action, haiku });
     }
+
+    return NextResponse.json({ haiku });
+  } else if (params.action == "addToAlbum") {
+    const [{ value: album }, { user }] = await Promise.all([
+      request.json(),
+      userSession(request),
+    ]);
+
+    // only admins can update the image directly
+    if (!user.isAdmin) {
+      return NextResponse.json(
+        { success: false, message: 'authorization failed' },
+        { status: 403 }
+      );
+    }
+
+    if (!album) {
+      return NextResponse.json(
+        { success: false, message: 'image url not provided' },
+        { status: 400 }
+      );
+    }
+
+    let haiku = await getHaiku(user, params.id)
+
+    if (!haiku) {
+      return NextResponse.json(
+        { success: false, message: 'haiku not found' },
+        { status: 404 }
+      );
+    }
+
+    haiku = await addToAlbum(user, haiku, album);
 
     return NextResponse.json({ haiku });
   } else {

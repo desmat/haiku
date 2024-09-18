@@ -1118,10 +1118,12 @@ export async function addToAlbum(user: User, haiku: Haiku, albumId: string): Pro
     })
   }
 
-  return {
+  return saveHaiku(user, {
     ...haiku,
     albumId: haikuAlbum.id,
-  }
+  }, {
+    noVersion: true,
+  });
 }
 
 export async function getHaikuAlbum(user: User, albumId: string): Promise<HaikuAlbum | undefined> {

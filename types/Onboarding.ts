@@ -123,6 +123,7 @@ export const haikuPromptSteps = (haiku: Haiku) => [
         ${haiku.dailyHaikudleId ? `<div>Daily haikudle: ${haiku.dailyHaikudleId}</div>` : ""} 
         ${haiku.isIncorrect ? `<div>Incorrect haiku: ${haiku.isIncorrect}</div>` : ""} 
         ${haiku.lang ? `<div>Language: ${locale.getByTag(haiku.lang)?.name} (${haiku.lang})</div>` : ""} 
+        ${haiku.albumId ? `<div>Included in album: ${haiku.albumId}</div>` : ""} 
       </div>`,
     style: { bottom: "50%", transform: "translateY(50%)" },
   },

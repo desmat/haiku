@@ -594,6 +594,14 @@ export default function MainPage({
     }
   }
 
+  const addToAlbum = () => {
+    // console.log('>> app._components.MainPage.addToAlbum()', {});
+    const ret = prompt("Album?");
+    if (ret) {
+      haikuAction(haikuId, "addToAlbum", ret);
+    }
+  }
+
   const changeRefreshDelay = (val: number) => {
     setRefreshDelay(val);
     window.history.replaceState(null, '', `/${haiku?.id || ""}$?mode=showcase&refreshDelay=${val}${fontSize ? `&fontSize=${encodeURIComponent(fontSize)}` : ""}`);
@@ -903,6 +911,7 @@ export default function MainPage({
         onSwitchMode={switchMode}
         onDelete={!haiku?.error && doDelete}
         onSaveDailyHaiku={!haiku?.error && saveDailyHaiku}
+        onAddToAlbum={!haiku?.error && addToAlbum}
         onShowAbout={
           haiku.error && user?.isAdmin
             ? showHaikuError

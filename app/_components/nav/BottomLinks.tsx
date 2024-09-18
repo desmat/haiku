@@ -12,6 +12,7 @@ import { MdHome, MdDelete, MdFacebook } from "react-icons/md";
 import { BsDatabaseFillUp, BsDatabaseFillDown, BsDatabaseDown, BsDatabaseFill } from "react-icons/bs";
 import { FaRandom } from "react-icons/fa";
 import { RiImageFill, RiImageAddLine, RiImageEditLine, RiImageLine } from "react-icons/ri";
+import { BiBookAdd } from "react-icons/bi";
 import useUser from '@/app/_hooks/user';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { formatTimeFromNow } from '@/utils/format';
@@ -94,6 +95,7 @@ export default function BottomLinks({
   onSwitchMode,
   onDelete,
   onSaveDailyHaiku,
+  onAddToAlbum,
   onShowAbout,
   onBackup,
   onCopyHaiku,
@@ -112,7 +114,8 @@ export default function BottomLinks({
   onRefresh: any,
   onSwitchMode: any,
   onDelete: any,
-  onSaveDailyHaiku: any,
+  onSaveDailyHaiku?: any,
+  onAddToAlbum?: any,
   onShowAbout: any,
   onBackup?: any,
   onCopyHaiku?: any,
@@ -490,17 +493,29 @@ export default function BottomLinks({
           </div>
         }
         {user?.isAdmin &&
-          <div
-            key="saveHaiku"
-            className={haiku?.id && onSaveDailyHaiku ? "cursor-pointer" : "opacity-40"}
-            onClick={haiku?.id && onSaveDailyHaiku && onSaveDailyHaiku}
+          <LinkGroup
+            key="addOptions"
             title={`Save as daily ${mode}`}
-          >
-            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
-              <IoAddCircle className="text-[1.5rem] md:text-[1.75rem]" />
-            </PopOnClick>
-
-          </div>
+            disabled={!haiku?.id}
+            onClick={haiku?.id && onSaveDailyHaiku && onSaveDailyHaiku}
+            icon={
+              <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
+                <IoAddCircle className="text-[1.5rem] md:text-[1.75rem]" />
+              </PopOnClick>
+            }
+            links={[
+              <div
+                key="addAlbum"
+                className={haiku?.id ? "cursor-pointer" : "opacity-40"}
+                onClick={() => haiku?.id && onAddToAlbum && onAddToAlbum()}
+                title="Add to album"
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
+                  <BiBookAdd className="text-[1.5rem] md:text-[1.75rem]" />
+                </PopOnClick>
+              </div>,
+            ]}
+          />
         }
         {user?.isAdmin &&
           <LinkGroup
@@ -535,16 +550,16 @@ export default function BottomLinks({
                 </PopOnClick>
               </div>,
               <div
-              key="restore"
-              onClick={() => !backupInProgress && onBackup && onBackup("restore")}
-              title={backupInProgress ? "Database backup in progress..." : "Restore database"}
-              className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
-            >
-              <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
-                <BsDatabaseFillUp className="text-[1.5rem] md:text-[1.75rem]" />
-              </PopOnClick>
-            </div>,
-            <div
+                key="restore"
+                onClick={() => !backupInProgress && onBackup && onBackup("restore")}
+                title={backupInProgress ? "Database backup in progress..." : "Restore database"}
+                className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
+                  <BsDatabaseFillUp className="text-[1.5rem] md:text-[1.75rem]" />
+                </PopOnClick>
+              </div>,
+              <div
                 key="stats"
                 onClick={() => !backupInProgress && onBackup && onBackup("stats")}
                 title={backupInProgress ? "Database backup in progress..." : "Get stats"}
