@@ -37,7 +37,7 @@ const todaysHaikudle = async () => {
 const getTheHaikudle = async (id: string) => {
   const todaysDateCode = moment().format("YYYYMMDD");
   const previousDailyHaikudleIds = (await getDailyHaikudleIds({ haikudle: id }))
-    .filter((id: string) => id < todaysDateCode);  
+    .filter((id: string) => id < todaysDateCode);
   const wasPreviousDailyHaikudle = previousDailyHaikudleIds.length > 0;
 
   const haiku = await getHaiku(user, id, !wasPreviousDailyHaikudle);
@@ -72,7 +72,7 @@ export default async function Page({
   const fontSize = searchParams && searchParams["fontSize"];
   const album = searchParams && searchParams["album"] || process.env.HAIKU_ALBUM;
   const userId = searchParams && searchParams["user"];
-  const noOnboarding = userId || (searchParams && searchParams["noOnboarding"] == "true" || process.env.NO_ONBOARDING == "true");
+  const noOnboarding = !!userId || (searchParams && searchParams["noOnboarding"] == "true" || process.env.NO_ONBOARDING == "true");
 
   // console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
