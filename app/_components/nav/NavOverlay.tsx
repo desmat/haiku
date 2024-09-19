@@ -41,6 +41,7 @@ export function NavOverlay({
   onLikeHaiku,
   onUploadImage,
   onUpdateImage,
+  exitImpersonation,
 }: {
   mode: ExperienceMode,
   loading?: boolean,
@@ -68,6 +69,7 @@ export function NavOverlay({
   onLikeHaiku?: any,
   onUploadImage?: any,
   onUpdateImage?: any,
+  exitImpersonation?: any,
 }) {
   const [user] = useUser((state: any) => [state.user]);
   const onboarding = !!(onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement));
@@ -210,6 +212,7 @@ export function NavOverlay({
                   onLikeHaiku={onLikeHaiku}
                   onUploadImage={onUploadImage}
                   onUpdateImage={onUpdateImage}
+                  exitImpersonation={exitImpersonation}
                 />
               </StyledLayers>
             </PopOnClick>

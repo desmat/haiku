@@ -53,6 +53,11 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     let token = window?.localStorage && window.localStorage.getItem("session");
 
     if (!token) {
+      if (options.user) {
+        // we need to have a local session so that we can validate impersonator is an admin
+        throw 'access denied';
+      }
+
       const ret = await get().createRemote(user);
       createdUser = ret.user;
       token = ret.token;
@@ -78,7 +83,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
     // console.log(">> hooks.user.load()", { createdUser, remoteUser });
 
-    if (createdUser) {
+    if (createdUser && !createdUser.impersonating) {
       trackEvent("user-session-created", {
         userId: createdUser.id,
         isAdmin: createdUser.isAdmin,
@@ -87,7 +92,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         host: createdUser.host,
         referer: createdUser.referer,
       });
-    } else {
+    } else if (remoteUser && !remoteUser.impersonating) {
       trackEvent("user-session-loaded", {
         userId: remoteUser.id,
         isAdmin: remoteUser.isAdmin,
@@ -181,6 +186,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
     const params = mapToSearchParams({
       ...options.album && { album: options.album } || {},
+      ...options.userId && { user: options.userId } || {},
       ...options.count && { count: options.count } || { count: HAIKUS_PAGE_SIZE + 1 },
       ...options.offset && { offset: options.offset } || {},
     });

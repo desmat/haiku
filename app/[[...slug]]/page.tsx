@@ -72,6 +72,7 @@ export default async function Page({
   const fontSize = searchParams && searchParams["fontSize"];
   const noOnboarding = searchParams && searchParams["noOnboarding"] == "true" || process.env.NO_ONBOARDING == "true";
   const album = searchParams && searchParams["album"] || process.env.HAIKU_ALBUM;
+  const userId = searchParams && searchParams["user"];
 
   // console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
@@ -152,6 +153,7 @@ export default async function Page({
         <MainPage
           haiku={haiku}
           haikudle={haikudle}
+          userId={userId}
           album={album}
           mode={mode}
           lang={lang}

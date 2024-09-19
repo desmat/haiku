@@ -102,7 +102,7 @@ export default function GenerateInput({
 
   const onboarding = onboardingElement && onboardingElement.includes("generate");
   const dateCode = moment().format("YYYYMMDD");
-  const exceededUsageLimit = !user?.isAdmin && (user?.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU;
+  const exceededUsageLimit = !user?.isAdmin && (user?.usage && user?.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU;
 
   const handleChange = (e: any) => {
     // const text = (e.originalEvent || e).clipboardData.getData('text/plain');

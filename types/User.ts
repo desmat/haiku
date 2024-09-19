@@ -5,6 +5,7 @@ export type User = {
   isAnonymous?: boolean,
   isAdmin?: boolean,
   isInternal?: boolean,
+  impersonating?: boolean,
   displayName?: string,
   email?: string,
   preferences?: any,
