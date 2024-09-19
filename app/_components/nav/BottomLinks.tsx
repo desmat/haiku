@@ -575,13 +575,12 @@ export default function BottomLinks({
         {mode != "social-img" && user?.isAdmin && process.env.EXPERIENCE_MODE != "haikudle" &&
           <Link
             key="changeMode"
-            href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`}
+            href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haikudle" ? "haiku" : "haikudle"}`}
             className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
             title="Switch between haiku/haikudle mode"
             onClick={async (e: any) => {
               e.preventDefault();
-              haiku?.id && onSwitchMode && onSwitchMode();
-              router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
+              haiku?.id && onSwitchMode && onSwitchMode(mode == "haikudle" ? "haiku" : "haikudle");
             }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
@@ -596,7 +595,7 @@ export default function BottomLinks({
             className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
             title="Switch to showcase mode "
             onClick={(e: any) => {
-              haiku?.id && onSwitchMode && onSwitchMode("showcase");
+              haiku?.id && onSwitchMode && onSwitchMode(mode != "haiku" ? "haiku" : "showcase");
             }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>

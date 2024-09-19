@@ -28,20 +28,20 @@ export async function GET(request: NextRequest, params?: any) {
   console.log('>> app.api.user.GET', { sessionUser, databaseUser, usage });
 
   const user = {
-    ...sessionUser,
-    ...databaseUser,
-  };
+      ...sessionUser,
+      ...databaseUser,
+    };
 
   const count = Number(query.count) || undefined;
   const offset = Number(query.offset) || undefined;
 
   let userHaikus = {
-    haikus: user.isAdmin
+    haikus: user.isAdmin && !query.album
       ? [] // don't need to pull the admin's haikus because we pull all of them later
       : await getUserHaikus(user, { albumId: query.album, count, offset })
   } as any;
 
-  if (user.isAdmin) {
+  if (user.isAdmin && !query.album) {
     const [
       allHaikus,
       dailyHaikus,

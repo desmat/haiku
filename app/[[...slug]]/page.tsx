@@ -71,7 +71,8 @@ export default async function Page({
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
   const fontSize = searchParams && searchParams["fontSize"];
   const noOnboarding = searchParams && searchParams["noOnboarding"] == "true" || process.env.NO_ONBOARDING == "true";
-  const album = process.env.HAIKU_ALBUM;
+  const album = searchParams && searchParams["album"] || process.env.HAIKU_ALBUM;
+
   // console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
   // can't switch modes in puzzle mode

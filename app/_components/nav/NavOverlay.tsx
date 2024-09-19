@@ -76,7 +76,7 @@ export function NavOverlay({
   const handleKeyDown = async (e: any) => {
     // console.log(">> app._component.Nav.handleKeyDown", { mode });
     if (e.key == "Escape" && ["showcase", "social-img"].includes(mode) && onSwitchMode) {
-      onSwitchMode();
+      onSwitchMode("haiku");
       e.preventDefault();
     }
   }
@@ -156,7 +156,7 @@ export function NavOverlay({
             />
             <div
               className="_bg-pink-400 _opacity-50 absolute top-0 left-0 w-full h-full cursor-pointer"
-              onClick={() => user?.isAdmin && onClickRandom ? onClickRandom() : onSwitchMode && onSwitchMode(process.env.EXPERIENCE_MODE)}
+              onClick={() => user?.isAdmin && onClickRandom ? onClickRandom() : onSwitchMode && onSwitchMode("haiku")}
             />
           </PopOnClick>
         </div>
@@ -223,7 +223,7 @@ export function NavOverlay({
             <div
               className={`_bg-pink-400 absolute top-0 left-0 ${user?.isAdmin ? "w-[10vw] z-40" : "w-full z-10"} h-full cursor-pointer`}
               title="Exit showcase mode"
-              onClick={() => onSwitchMode()}
+              onClick={() => onSwitchMode("haiku")}
             />
           }
           {increaseDelay && user?.isAdmin && 
