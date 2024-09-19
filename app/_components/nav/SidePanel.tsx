@@ -175,7 +175,8 @@ export default function SidePanel({
     const nextNumPages = numPages * 2;
     await loadUser({
       count: nextNumPages * pageSize + 1,
-      offset: numPages * pageSize
+      offset: numPages * pageSize,
+      ...user.impersonating && { userId: user.id },
     });
     setNumPages(nextNumPages);
   };
