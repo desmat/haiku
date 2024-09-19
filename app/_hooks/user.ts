@@ -170,6 +170,11 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   save: async (user: any) => {
     // console.log(">> hooks.user.save()", { user });
 
+    if (user.impersonating) {
+      console.warn(">> hooks.user.save() impersonating user", { user });
+      return { user, token: "IMPERSONATE_TOKEN" }; 
+    }
+
     // save remote
     const { user: savedUser, token: savedToken } = await get().saveRemote(user);
     // console.log(">> hooks.user.save()", { savedUser, savedToken });
