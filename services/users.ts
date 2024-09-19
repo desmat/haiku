@@ -60,6 +60,7 @@ export async function userSession(request: any) {
     return {
       token: "FAKE_TOKEN",
       user: {
+        id: query.user,
         ...impersonatedUser,
         impersonating: true,
       },
