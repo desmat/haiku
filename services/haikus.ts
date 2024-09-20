@@ -792,7 +792,7 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
     return;
   } else if (filteredHaikuIds.length > 1) {
     // exclude special case for only one
-    filteredHaikuIds = Array.from(haikuIds).filter((id: string) => id != lastHaikuId);
+    filteredHaikuIds = filteredHaikuIds.filter((id: string) => id != lastHaikuId);
   }
 
   const randomHaikuId = filteredHaikuIds[Math.floor(Math.random() * filteredHaikuIds.length)];

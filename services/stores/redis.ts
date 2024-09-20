@@ -52,7 +52,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
   lookupKeys(value: any, options?: any) {
     options = { ...this.saveOptions, ...options };
-    console.log(`>> services.stores.redis.lookupKeys<${this.key}>.lookupKeys`, { value, options });
+    // console.log(`>> services.stores.redis.lookupKeys<${this.key}>.lookupKeys`, { value, options });
 
     /* 
       create index and lookup sets based on options.lookups
@@ -100,7 +100,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       })
       .flat();
 
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.lookupKeys`, { lookupKeys });
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.lookupKeys`, { lookupKeys });
 
     return lookupKeys;
   }
