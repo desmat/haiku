@@ -117,7 +117,7 @@ export const haikuPromptSteps = (haiku: Haiku) => [
           ? ` <a href="/${haiku.id}">(Load current)</a>`
           : ""}</div>`
         : ""}    
-        <div>Created by: user ${haiku.createdBy} ${formatTimeFromNow(haiku.createdAt || 0)}</div>      
+        <div>Created by: user <a href="/${haiku.id}?user=${haiku.createdBy}">${haiku.createdBy}</a> ${formatTimeFromNow(haiku.createdAt || 0)}</div>      
         ${haiku.updatedBy ? `<div>Updated by: user ${haiku.updatedBy} ${formatTimeFromNow(haiku.updatedAt || 0)}</div>` : ""} 
         ${haiku.dailyHaikuId ? `<div>Daily haiku: ${haiku.dailyHaikuId}</div>` : ""} 
         ${haiku.dailyHaikudleId ? `<div>Daily haikudle: ${haiku.dailyHaikudleId}</div>` : ""} 
