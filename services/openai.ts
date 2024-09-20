@@ -145,6 +145,7 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
       code: error?.code,
       message: error.message,
       userId,
+      request: subject,
     });
 
     console.error("Error generating haiku image", { type: error.type, code: error.code, message: error.message, error, prompt });
@@ -225,6 +226,7 @@ export async function generateHaiku(userId: string, language?: string, subject?:
       code: error?.code,
       message: error.message,
       userId,
+      request: subject,
     });
 
     console.error("Error generating haiku poem", { type: error.type, code: error.code, message: error.message, error, prompt });
@@ -300,6 +302,7 @@ export async function completeHaiku(userId: string, poem: string[], language?: s
       code: error?.code,
       message: error.message,
       userId,
+      request: poem.join(" / "),
     });
 
     console.error("Error copmleting haiku poem", { type: error.type, code: error.code, message: error.message, error, prompt });
@@ -380,6 +383,7 @@ export async function analyzeHaiku(userId: string, poem: string[]): Promise<any>
       code: error?.code,
       message: error.message,
       userId,
+      request: poem.join(" / "),
     });
 
     console.error("Error analyzing haiku poem", { type: error.type, code: error.code, message: error.message, error, prompt });
