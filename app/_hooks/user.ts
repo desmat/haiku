@@ -269,7 +269,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
   addUserHaiku: async (haiku: Haiku, action?: "viewed" | "generated") => {
     const { user, haikus, allHaikus } = get();
-    // console.log(">> hooks.user.addUserHaiku", { haiku, action, user });
+    console.log(">> hooks.user.addUserHaiku", { haiku, action, user });
 
     const token = await get().getToken();
     const opts = token && { headers: { Authorization: `Bearer ${token}` } } || {};
@@ -291,17 +291,6 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
     const { userHaiku } = await res.json();
     // console.log(">> hooks.user.addUserHaiku", { userHaiku });
-
-    useUser.setState({
-      haikus: {
-        ...haikus,
-        [haiku.id]: userHaiku,
-      },
-      allHaikus: user.isAdmin && {
-        ...allHaikus,
-        [haiku.id]: userHaiku
-      },
-    });
   },
 })));
 
