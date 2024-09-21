@@ -16,8 +16,7 @@ Haiku poem assistant by OpenAI's ChatGPT and generative art by DALL-E:
 
 <p align="center">
   <img height="400" alt="Visually striking imagery used in successful ad campaigns" src="https://github.com/user-attachments/assets/d61cb4e9-fd2e-4851-80ec-a3b4e650932c">
-  <img height="400" alt="Haiku daily puzzles, aka Haikudle, progressively revealing the generative visual art. Note the evolution of the UI elements over time" src="https://github.com/desmat/haiku/assets/3298837/1f5711f6-44ff-4a5f-bb29-560cb8ad10f7">
-  
+  <img height="400" alt="Haiku daily puzzles, aka Haikudle, progressively revealing the generative visual art. Note the evolution of the UI elements over time" src="https://github.com/user-attachments/assets/151d91cf-6097-4d8b-8037-4ee88608a272">  
 </p>
 
 ## Live Apps
