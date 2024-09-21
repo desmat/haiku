@@ -7,7 +7,7 @@ Haiku poem assistant by OpenAI's ChatGPT and generative art by DALL-E:
 - **AI-generated background image** matching the generated haiku;
 - **Daily puzzles** with drag-and-drop UX.
 
-## Essays
+### Essays
 
 - [A GenAI Haiku Journey (Part 1)](https://medium.com/@desmat.ca/a-genai-haiku-journey-part-1-a85dbb565165)
 - [A GenAI Haiku Journey (Part 2)](https://medium.com/@desmat.ca/a-genai-haiku-journey-part-2-f5a93a4bb99e)
