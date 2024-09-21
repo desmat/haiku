@@ -45,7 +45,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
   load: async (options: any = {}) => {
     set({ loading: true });
-    const { loadRemote, allHaikus, dailyHaikus, dailyHaikudles } = get();
+    const { loadRemote, haikus, allHaikus, dailyHaikus, dailyHaikudles } = get();
     let user = { album: options.album, referer: document?.referrer };
     // console.log(">> hooks.user.load()", { options, user });
 
@@ -53,6 +53,11 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     let token = window?.localStorage && window.localStorage.getItem("session");
 
     if (!token) {
+      if (options.user) {
+        // we need to have a local session so that we can validate impersonator is an admin
+        throw 'access denied';
+      }
+
       const ret = await get().createRemote(user);
       createdUser = ret.user;
       token = ret.token;
@@ -68,7 +73,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
     const {
       user: remoteUser,
-      haikus,
+      haikus: loadedHaikus,
       allHaikus: loadedAllHaikus,
       dailyHaikus: loadedDailyHaikus,
       dailyHaikudles: loadedDailyHaikudles,
@@ -78,7 +83,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
     // console.log(">> hooks.user.load()", { createdUser, remoteUser });
 
-    if (createdUser) {
+    if (createdUser && !createdUser.impersonating) {
       trackEvent("user-session-created", {
         userId: createdUser.id,
         isAdmin: createdUser.isAdmin,
@@ -87,7 +92,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
         host: createdUser.host,
         referer: createdUser.referer,
       });
-    } else {
+    } else if (remoteUser && !remoteUser.impersonating) {
       trackEvent("user-session-loaded", {
         userId: remoteUser.id,
         isAdmin: remoteUser.isAdmin,
@@ -110,7 +115,10 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       token,
       loaded: true,
       loading: false,
-      haikus: haikus ? listToMap(haikus, { keyFn: (e: any) => e.haikuId }) : {},
+      haikus: {
+        ...haikus,
+        ...loadedHaikus ? listToMap(loadedHaikus, { keyFn: (e: any) => e.haikuId }) : {},
+      },
       allHaikus: {
         ...allHaikus,
         ...loadedAllHaikus ? listToMap(loadedAllHaikus, { keyFn: (e: any) => e.haikuId }) : {},
@@ -165,6 +173,11 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   save: async (user: any) => {
     // console.log(">> hooks.user.save()", { user });
 
+    if (user.impersonating) {
+      console.warn(">> hooks.user.save() impersonating user", { user });
+      return { user, token: "IMPERSONATE_TOKEN" }; 
+    }
+
     // save remote
     const { user: savedUser, token: savedToken } = await get().saveRemote(user);
     // console.log(">> hooks.user.save()", { savedUser, savedToken });
@@ -181,6 +194,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
     const params = mapToSearchParams({
       ...options.album && { album: options.album } || {},
+      ...options.userId && { user: options.userId } || {},
       ...options.count && { count: options.count } || { count: HAIKUS_PAGE_SIZE + 1 },
       ...options.offset && { offset: options.offset } || {},
     });
@@ -255,7 +269,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
   addUserHaiku: async (haiku: Haiku, action?: "viewed" | "generated") => {
     const { user, haikus, allHaikus } = get();
-    // console.log(">> hooks.user.addUserHaiku", { haiku, action, user });
+    console.log(">> hooks.user.addUserHaiku", { haiku, action, user });
 
     const token = await get().getToken();
     const opts = token && { headers: { Authorization: `Bearer ${token}` } } || {};
@@ -277,17 +291,6 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
     const { userHaiku } = await res.json();
     // console.log(">> hooks.user.addUserHaiku", { userHaiku });
-
-    useUser.setState({
-      haikus: {
-        ...haikus,
-        [haiku.id]: userHaiku,
-      },
-      allHaikus: user.isAdmin && {
-        ...allHaikus,
-        [haiku.id]: userHaiku
-      },
-    });
   },
 })));
 

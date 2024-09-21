@@ -15,7 +15,13 @@ export async function GET(request: NextRequest, params?: any) {
   const { user } = await userSession(request);
   console.log('>> app.api.haikus.GET', { query, searchParams: request.nextUrl.searchParams.toString(), user });
 
-  if (query.mode && !["showcase", "social-img", "haikudle-social-img"].includes(query.mode) && query.mode && query.mode != process.env.EXPERIENCE_MODE && !user.isAdmin && !query.album) {
+  if (query.mode
+    && !["showcase", "social-img", "haikudle-social-img"].includes(query.mode)
+    && query.mode
+    && query.mode != process.env.EXPERIENCE_MODE
+    && process.env.EXPERIENCE_MODE != "showcase"
+    && !user.isAdmin
+    && !query.album) {
     return NextResponse.json(
       { success: false, message: 'authorization failed' },
       { status: 403 }

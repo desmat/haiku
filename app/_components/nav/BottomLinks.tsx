@@ -13,6 +13,7 @@ import { BsDatabaseFillUp, BsDatabaseFillDown, BsDatabaseDown, BsDatabaseFill } 
 import { FaRandom } from "react-icons/fa";
 import { RiImageFill, RiImageAddLine, RiImageEditLine, RiImageLine } from "react-icons/ri";
 import { BiBookAdd } from "react-icons/bi";
+import { PiUserSwitchBold } from "react-icons/pi";
 import useUser from '@/app/_hooks/user';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { formatTimeFromNow } from '@/utils/format';
@@ -103,6 +104,7 @@ export default function BottomLinks({
   onLikeHaiku,
   onUploadImage,
   onUpdateImage,
+  exitImpersonation,
 }: {
   mode: ExperienceMode,
   haiku?: Haiku,
@@ -123,6 +125,7 @@ export default function BottomLinks({
   onLikeHaiku?: any,
   onUploadImage?: any,
   onUpdateImage?: any,
+  exitImpersonation?: any,
 }) {
   // console.log("BottomLinks", { lang, haiku })
   const router = useRouter();
@@ -188,6 +191,20 @@ export default function BottomLinks({
             <IoLogoGithub className="text-[1.5rem] md:text-[1.75rem]" />
           </PopOnClick>
         </Link> */}
+        {user?.impersonating &&
+          <StyledLayers styles={altStyles.slice(0, 1)} >
+            <div
+              key="impersonating"
+              className="cursor-pointer"
+              title={`Impersonating user ${user.id}: click to exit`}
+              onClick={exitImpersonation}
+            >
+              <PopOnClick >
+                <PiUserSwitchBold className="text-[2rem] md:text-[2.25rem]" />
+              </PopOnClick>
+            </div>
+          </StyledLayers>
+        }
         {!user?.isAdmin &&
           <Link
             key="web"
@@ -575,13 +592,12 @@ export default function BottomLinks({
         {mode != "social-img" && user?.isAdmin && process.env.EXPERIENCE_MODE != "haikudle" &&
           <Link
             key="changeMode"
-            href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`}
+            href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haikudle" ? "haiku" : "haikudle"}`}
             className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
             title="Switch between haiku/haikudle mode"
             onClick={async (e: any) => {
               e.preventDefault();
-              haiku?.id && onSwitchMode && onSwitchMode();
-              router.push(`/${haiku ? haiku?.id : ""}?mode=${mode == "haiku" ? "haikudle" : "haiku"}`);
+              haiku?.id && onSwitchMode && onSwitchMode(mode == "haikudle" ? "haiku" : "haikudle");
             }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
@@ -596,7 +612,7 @@ export default function BottomLinks({
             className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
             title="Switch to showcase mode "
             onClick={(e: any) => {
-              haiku?.id && onSwitchMode && onSwitchMode("showcase");
+              haiku?.id && onSwitchMode && onSwitchMode(mode != "haiku" ? "haiku" : "showcase");
             }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>

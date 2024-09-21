@@ -263,7 +263,7 @@ export default function HaikuPoem({
         id: haiku?.id,
       });
 
-      return switchMode(showcaseMode ? "" : "showcase");
+      return switchMode(showcaseMode ? "haiku" : "showcase");
     }
 
   }

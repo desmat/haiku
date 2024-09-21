@@ -92,7 +92,7 @@ export default function SidePanel({
     userLoading,
     loadUser,
   ] = useUser((state: any) => [
-    user?.isAdmin && !filter
+    user?.isAdmin && !filter && !album
       ? state.allHaikus ? Object.values(state.allHaikus) : []
       : state.haikus ? Object.values(state.haikus) : [],
     state.dailyHaikus ? Object.values(state.dailyHaikus) : [],
@@ -175,7 +175,8 @@ export default function SidePanel({
     const nextNumPages = numPages * 2;
     await loadUser({
       count: nextNumPages * pageSize + 1,
-      offset: numPages * pageSize
+      offset: numPages * pageSize,
+      ...user.impersonating && { userId: user.id },
     });
     setNumPages(nextNumPages);
   };
@@ -293,7 +294,7 @@ export default function SidePanel({
             <div className="py-2 text-[1.2rem] md:text-[1.2rem]">
               {(!user?.isAdmin || listMode == "haiku") &&
                 <div className="flex flex-row gap-3 group">
-                  {user?.isAdmin &&
+                  {user?.isAdmin && !album &&
                     <div
                       className="cursor-pointer"
                       title="Show daily haikus"
@@ -304,7 +305,7 @@ export default function SidePanel({
                       </StyledLayers>
                     </div>
                   }
-                  {!user?.isAdmin &&
+                  {(!user?.isAdmin || album) &&
                     <StyledLayers styles={styles}>
                       <span className="capitalize">
                         {album ? `${album} Haikus` : "Your Haikus"}
@@ -382,10 +383,10 @@ export default function SidePanel({
                     }}
                   >
                     <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>
-                    {user?.isAdmin &&
+                    {user?.isAdmin && !album && 
                       <span className="font-normal"> generated {formatTimeFromNow(h.createdAt || 0)} by {h.createdBy == user?.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
                     }
-                    {!user?.isAdmin && h.generatedAt &&
+                    {(!user?.isAdmin || album) && h.generatedAt &&
                       <span className="font-normal"> generated {formatTimeFromNow(h.generatedAt)}</span>
                     }
                     {!user?.isAdmin && !h.generatedAt && h.solvedAt &&

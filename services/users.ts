@@ -1,6 +1,7 @@
 import moment from 'moment';
 import { Store } from '@/types/Store';
 import { User } from '@/types/User';
+import { searchParamsToMap } from '@/utils/misc';
 import { decodeJWT, encodeJWT } from "@/utils/jwt";
 
 let store: Store;
@@ -31,6 +32,7 @@ export function getProviderName(user: User): string {
 export async function userSession(request: any) {
   // console.log(">> services.users.userSession", { request });
   const authorization = request.headers.get("Authorization");
+  const query = searchParamsToMap(request.nextUrl.searchParams.toString()) as any;
   // console.log(">> services.users.userSession", { authorization, host: request.headers.get("host") });
 
   let token;
@@ -46,6 +48,24 @@ export async function userSession(request: any) {
   const decodedToken = token && await decodeJWT(token);
   const user = decodedToken.user && await loadUser(decodedToken.user.id);
   // console.log(">> services.users.userSession", { decodedToken, user, adminUserIds: process.env.ADMIN_USER_IDS });
+
+  if (query.user) {
+    if (!user.isAdmin) {
+      console.error("ERROR: only admininstrators can impersonate users", { user, impersonatingUserId: query.user });
+      return;
+    }
+
+    console.warn(">> services.users.userSession loading impersonated user");
+    const impersonatedUser = await loadUser(query.user); 
+    return {
+      token: "FAKE_TOKEN",
+      user: {
+        id: query.user,
+        ...impersonatedUser,
+        impersonating: true,
+      },
+    }
+  }
 
   return {
     ...decodedToken,
@@ -68,6 +88,12 @@ export async function loadUser(userId: string) {
 
 export async function saveUser(user: User) {
   console.log(">> services.users.saveUser", { user });
+
+  if (user.impersonating) {
+    console.warn(">> services.users.saveUser WARNING: not saving impersonated user", { user });
+    return user;
+  }
+
   let savedUser = await store.user.get(user.id);
   user.isInternal = !!(user.isInternal || user.referer && user.referer.includes("vercel.com"));
 

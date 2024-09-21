@@ -197,6 +197,10 @@ export async function POST(
       userHaiku = await createUserHaiku(user, haiku);
     }
 
+    if (!userHaiku) {
+      throw 'unable to get or create userHaiku';
+    }
+
     await saveUserHaiku(user, { ...userHaiku, sharedAt: moment().valueOf() });
 
     if (!haiku.shared && !haiku.dailyHaikuId) {

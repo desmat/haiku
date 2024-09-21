@@ -37,7 +37,7 @@ const todaysHaikudle = async () => {
 const getTheHaikudle = async (id: string) => {
   const todaysDateCode = moment().format("YYYYMMDD");
   const previousDailyHaikudleIds = (await getDailyHaikudleIds({ haikudle: id }))
-    .filter((id: string) => id < todaysDateCode);  
+    .filter((id: string) => id < todaysDateCode);
   const wasPreviousDailyHaikudle = previousDailyHaikudleIds.length > 0;
 
   const haiku = await getHaiku(user, id, !wasPreviousDailyHaikudle);
@@ -70,8 +70,10 @@ export default async function Page({
   let mode = (searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
   const fontSize = searchParams && searchParams["fontSize"];
-  const noOnboarding = searchParams && searchParams["noOnboarding"] == "true" || process.env.NO_ONBOARDING == "true";
-  const album = process.env.HAIKU_ALBUM;
+  const album = searchParams && searchParams["album"] || process.env.HAIKU_ALBUM;
+  const userId = searchParams && searchParams["user"];
+  const noOnboarding = !!userId || (searchParams && searchParams["noOnboarding"] == "true" || process.env.NO_ONBOARDING == "true");
+
   // console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
   // can't switch modes in puzzle mode
@@ -151,6 +153,7 @@ export default async function Page({
         <MainPage
           haiku={haiku}
           haikudle={haikudle}
+          userId={userId}
           album={album}
           mode={mode}
           lang={lang}

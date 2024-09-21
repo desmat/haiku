@@ -705,8 +705,13 @@ export async function getUserHaiku(userId: string, haikuId: string): Promise<Use
   return userHaiku;
 }
 
-export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed" | "generated"): Promise<UserHaiku> {
+export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed" | "generated"): Promise<UserHaiku | undefined> {
   console.log(`>> services.haiku.createUserHaiku`, { user, haiku });
+
+  if (user.impersonating) {
+    console.warn(">> services.users.saveUser WARNING: not saving impersonated user", { user });
+    return;
+  }
 
   const id = `${user.id}:${haiku.id}`;
   const now = moment().valueOf();
@@ -725,8 +730,13 @@ export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed
   return createdUserHaiku;
 }
 
-export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<UserHaiku> {
+export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<UserHaiku | undefined> {
   console.log(`>> services.haiku.saveUserHaiku`, { userHaiku });
+
+  if (user.impersonating) {
+    console.warn(">> services.users.saveUser WARNING: not saving impersonated user", { user });
+    return;
+  }
 
   const existingUserHaiku = await store.userHaikus.get(userHaiku.id);
   let savedUserHaiku: UserHaiku;
@@ -782,7 +792,7 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
     return;
   } else if (filteredHaikuIds.length > 1) {
     // exclude special case for only one
-    filteredHaikuIds = Array.from(haikuIds).filter((id: string) => id != lastHaikuId);
+    filteredHaikuIds = filteredHaikuIds.filter((id: string) => id != lastHaikuId);
   }
 
   const randomHaikuId = filteredHaikuIds[Math.floor(Math.random() * filteredHaikuIds.length)];
