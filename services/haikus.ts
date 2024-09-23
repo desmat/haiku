@@ -16,6 +16,7 @@ import * as openai from './openai';
 import { incUserUsage, userUsage } from './usage';
 import { triggerDailyHaikuSaved, triggerHaikuSaved } from './webhooks';
 import { HaikuAlbum } from '@/types/Album';
+import { notFoundHaiku } from './stores/samples';
 import { getFlaggedUserIds } from './users';
 
 let store: Store;
@@ -789,7 +790,7 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
 
   if (!filteredHaikuIds.length) {
     // not found
-    return;
+    return notFoundHaiku;
   } else if (filteredHaikuIds.length > 1) {
     // exclude special case for only one
     filteredHaikuIds = filteredHaikuIds.filter((id: string) => id != lastHaikuId);
