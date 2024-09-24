@@ -200,10 +200,10 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   // get either current or versioned
   // note the edge case when current version is requested explicitly by its version
   // since only previous version have the key <id>:<version>
-  let haiku =version && haikus[0]?.version != version
+  let haiku = version && haikus[0]?.version != version
     ? { ...haikus[1], id }
     : haikus[0];
-    
+
   if (!haiku) return;
 
   if (user.isAdmin) {
@@ -1152,7 +1152,7 @@ export async function getAlbumHaikus(user: User, albumId: string): Promise<Haiku
   return [];
 }
 
-export async function getHaikuStats(): Promise<any> {
+export async function getHaikuStats(reportAt?: any): Promise<any> {
   const [
     adminUserIds,
     internalUserIds,
@@ -1161,14 +1161,15 @@ export async function getHaikuStats(): Promise<any> {
     flaggedHaikuIds,
     flaggedAndByFlaggedUserHaikuIds,
   ] = await Promise.all([
-    store.user.ids({ admin: true }),
-    store.user.ids({ internal: true }),
+    new Set(), // store.user.ids({ admin: true }),
+    new Set(), // store.user.ids({ internal: true }),
     store.haikus.ids(),
     getLikedHaikuIds(),
     store.flaggedHaikus.ids(),
     getFlaggedHaikuIds(),
   ]);
 
+  reportAt = reportAt || moment();
   let newHaikus1dayCount = 0; // haikus created not by admin in last 24 hours
   let newHaikus30daysCount = 0; // haikus created not by admin in last 30 days
   const pageSize = 99; // just below the "pulling more than 100" warning
@@ -1185,20 +1186,22 @@ export async function getHaikuStats(): Promise<any> {
     let done = false;
 
     for (const haiku of haikus) {
-      const diffCreated = moment().diff(haiku.createdAt, "days");
+      const diffCreated = reportAt.diff(haiku.createdAt, "hours");
 
-      if (diffCreated > 30) {
+
+      if (diffCreated >= 24 * 30) {
         done = true;
         break;
       }
 
-      if (!adminUserIds.has(haiku.createdBy) && !internalUserIds.has(haiku.createdBy)) {
-        if (diffCreated <= 30) {
+      if (diffCreated >= 0 && !adminUserIds.has(haiku.createdBy) && !internalUserIds.has(haiku.createdBy)) {
+        if (diffCreated < 24 * 30) {
           newHaikus30daysCount++;
         }
 
-        if (diffCreated <= 1) {
+        if (diffCreated < 24) {
           newHaikus1dayCount++;
+          console.log(">> services.users.getHaikuStats newHaikus1dayCount", { newHaikus1dayCount, createdAt: moment(haiku.createdAt).format(), diffCreated });
         }
       }
     }

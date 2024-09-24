@@ -56,7 +56,7 @@ export async function userSession(request: any) {
     }
 
     console.warn(">> services.users.userSession loading impersonated user");
-    const impersonatedUser = await loadUser(query.user); 
+    const impersonatedUser = await loadUser(query.user);
     return {
       token: "FAKE_TOKEN",
       user: {
@@ -138,19 +138,22 @@ export async function getFlaggedUserIds(): Promise<Set<any>> {
   return store.flaggedUsers.ids();
 }
 
-export async function getUserStats(): Promise<any> {
+export async function getUserStats(reportAt?: any): Promise<any> {
   console.log(">> services.users.getUserStats", {});
   const [
-    allUsers,
-    flaggedUserIds
+    // allUsers,
+    userIds,
+    adminIds,
+    internalUserIds,
+    flaggedUserIds,
   ] = await Promise.all([
-    store.user.find(),
+    store.user.ids(),
+    store.user.ids({ admin: true }),
+    store.user.ids({ internal: true }),
     store.flaggedUsers.ids(),
   ]);
 
-  const userIds = new Set();
-  const adminIds = new Set();
-  const internalUserIds = new Set();
+  reportAt = reportAt || moment();
   let monthlyNewUserCount = 0;
   let monthlyReturningUserCount = 0; // returning session in the last 30 days
   let monthlyReturningUserSessionCount = 0;
@@ -161,54 +164,78 @@ export async function getUserStats(): Promise<any> {
   let dailyReturningUserSessionCount = 0;
   let dailyActiveUserIds = new Set; // has created or shared a haiku, started or solved a puzzle in the last 24 hours
   // let dailyActiveUserSessionCount = 0;
-  let flaggedUserCount = 0
 
-  for (const user of allUsers) {
-    const isAdmin = user.isAdmin;
-    const isInternal = user.isInternal;
-    // @ts-ignore
-    const diff = moment().diff(user.updatedAt || user.createdAt, "days");
-    // @ts-ignore
-    const diffCreated = moment().diff(user.createdAt, "days");
-
-    if (isAdmin || isInternal) {
-      if (isAdmin) adminIds.add(user.id);
-      if (isInternal) internalUserIds.add(user.id);
-    } else {
-      userIds.add(user.id);
-
-      if (diff <= 30) {
-        // @ts-ignore
-        if (user.sessionCount > 1) {
-          monthlyReturningUserCount++;
-          monthlyReturningUserSessionCount += (user.sessionCount || 1);
-        }
-      }
-
-      if (diffCreated <= 30) {
-        monthlyNewUserCount++;
-      }
-
-      if (diff <= 1) {
-        // @ts-ignore
-        if (user.sessionCount > 1) {
-          dailyReturningUserCount++;
-          dailyReturningUserSessionCount += (user.sessionCount || 1);
-        }
-      }
-
-      if (diffCreated <= 1) {
-        dailyNewUserCount++;
-      }
-
-      if (flaggedUserIds.has(user.id)) {
-        flaggedUserCount++;
-      }
-    }
-  }
-
+  // for (const user of allUsers) {
   const pageSize = 99; // just below the "pulling more than 100" warning
   let brokethebank = false;
+
+  for (let i = 0; i < 100; i++) {
+    if (i == 99) {
+      console.warn(">> services.users.getUserStats WARNING: pulling too many users");
+      brokethebank = true;
+      break;
+    }
+
+    const users = await store.user.find({ count: pageSize, offset: pageSize * i });
+    let done = false;
+
+    for (const user of users) {
+      const isAdmin = user.isAdmin;
+      const isInternal = user.isInternal;
+      // @ts-ignore
+      const diff = reportAt.diff(user.updatedAt || user.createdAt, "hours");
+      // @ts-ignore
+      const diffCreated = reportAt.diff(user.createdAt, "hour");
+
+      if (user.id == "21b3dda8") {
+        console.log("break");
+      }
+
+      if (diff >= 24 * 30) {
+        done = true;
+        break;
+      }
+
+      if (diffCreated >= 0) {
+        if (isAdmin || isInternal) {
+          // if (isAdmin) adminIds.add(user.id);
+          // if (isInternal) internalUserIds.add(user.id);
+        } else {
+          // userIds.add(user.id);
+
+          if (diff < 24 * 30) {
+            if (diff < 24) {
+              // @ts-ignore
+              if (user.sessionCount > 1) {
+                dailyReturningUserCount++;
+                dailyReturningUserSessionCount += (user.sessionCount || 1);
+              }
+            }
+
+            // @ts-ignore
+            if (user.sessionCount > 1) {
+              monthlyReturningUserCount++;
+              monthlyReturningUserSessionCount += (user.sessionCount || 1);
+            }
+          }
+
+          if (diffCreated < 24 * 30) {
+            if (diffCreated < 24) {
+              dailyNewUserCount++;
+            }
+
+            monthlyNewUserCount++;
+          }
+
+          // if (flaggedUserIds.has(user.id)) {
+          //   flaggedUserCount++;
+          // }
+        }
+      }
+    }
+
+    if (done) break;
+  }
 
   for (let i = 0; i < 10; i++) {
     if (i == 9) {
@@ -221,20 +248,20 @@ export async function getUserStats(): Promise<any> {
     let done = false;
 
     for (const haiku of haikus) {
-      const diffCreated = moment().diff(haiku.createdAt, "days");
+      const diffCreated = reportAt.diff(haiku.createdAt, "hours");
 
-      if (diffCreated > 30) {
+      if (diffCreated >= 24 * 30) {
         done = true;
         break;
       }
 
-      if (!adminIds.has(haiku.createdBy) && !internalUserIds.has(haiku.createdBy)) {
-        if (diffCreated <= 30) {
+      if (diffCreated >= 0 && !adminIds.has(haiku.createdBy) && !internalUserIds.has(haiku.createdBy)) {
+        if (diffCreated < 24 * 30) {
           monthlyActiveUserIds.add(haiku.createdBy);
           // TODO monthlyActiveUserSessionCount
         }
 
-        if (diffCreated <= 1) {
+        if (diffCreated < 24) {
           dailyActiveUserIds.add(haiku.createdBy);
           // TODO dailyActiveUserSessionCount
         }
@@ -255,22 +282,22 @@ export async function getUserStats(): Promise<any> {
     let done = false;
 
     for (const userHaikudle of userHaikudles) {
-      const diffCreated = moment().diff(userHaikudle.updatedAt || userHaikudle.createdAt, "days");
+      const diffCreated = reportAt.diff(userHaikudle.updatedAt || userHaikudle.createdAt, "hours");
 
-      if (diffCreated > 30) {
+      if (diffCreated >= 24 * 30) {
         done = true;
         break;
       }
 
-      if (!adminIds.has(userHaikudle.createdBy) && !internalUserIds.has(userHaikudle.createdBy) && userHaikudle?.haikudle?.moves > 0) {
+      if (diffCreated >= 0 && !adminIds.has(userHaikudle.createdBy) && !internalUserIds.has(userHaikudle.createdBy) && userHaikudle?.haikudle?.moves > 0) {
         // console.warn(">> services.users.getUserStats", { userHaikudle });
 
-        if (diffCreated <= 30) {
+        if (diffCreated < 24 * 30) {
           monthlyActiveUserIds.add(userHaikudle.createdBy);
           // TODO monthlyActiveUserSessionCount
         }
 
-        if (diffCreated <= 1) {
+        if (diffCreated < 24) {
           dailyActiveUserIds.add(userHaikudle.createdBy);
           // TODO dailyActiveUserSessionCount
         }
@@ -291,22 +318,22 @@ export async function getUserStats(): Promise<any> {
     let done = false;
 
     for (const userHaiku of userHaikus) {
-      const diffCreated = moment().diff(userHaiku.updatedAt || userHaiku.createdAt, "days");
+      const diffCreated = reportAt.diff(userHaiku.updatedAt || userHaiku.createdAt, "hours");
 
-      if (diffCreated > 30) {
+      if (diffCreated >= 24 * 30) {
         done = true;
         break;
       }
 
-      if (!adminIds.has(userHaiku.createdBy) && !internalUserIds.has(userHaiku.createdBy) && userHaiku.sharedAt) {
+      if (diffCreated >= 0 && !adminIds.has(userHaiku.createdBy) && !internalUserIds.has(userHaiku.createdBy) && userHaiku.sharedAt) {
         // console.warn(">> services.users.getUserStats", { userHaikudle });
 
-        if (diffCreated <= 30) {
+        if (diffCreated < 24 * 30) {
           monthlyActiveUserIds.add(userHaiku.createdBy);
           // TODO monthlyActiveUserSessionCount
         }
 
-        if (diffCreated <= 1) {
+        if (diffCreated < 24) {
           dailyActiveUserIds.add(userHaiku.createdBy);
           // TODO dailyActiveUserSessionCount
         }
@@ -317,19 +344,19 @@ export async function getUserStats(): Promise<any> {
   }
 
   return {
-    users: userIds.size,
+    users: userIds.size - adminIds.size - internalUserIds.size,
     admins: adminIds.size,
     internalUsers: internalUserIds.size,
-    monthlyNewUsers: monthlyNewUserCount,
-    monthlyReturningUsers: monthlyReturningUserCount,
-    avgMonthlyReturningUserSessions: Math.round(monthlyReturningUserSessionCount / monthlyReturningUserCount),
+    monthlyNewUsers: brokethebank ? -1 : monthlyNewUserCount,
+    monthlyReturningUsers: brokethebank ? -1 : monthlyReturningUserCount,
+    avgMonthlyReturningUserSessions: brokethebank ? -1 : Math.round(monthlyReturningUserSessionCount / monthlyReturningUserCount),
     monthlyActiveUsers: brokethebank ? -1 : monthlyActiveUserIds.size,
     // avgMonthlyActiveUserSessions: Math.round(monthlyActiveUserSessionCount / monthlyActiveUserCount),
-    dailyNewUsers: dailyNewUserCount,
-    dailyReturningUser: dailyReturningUserCount,
+    dailyNewUsers: brokethebank ? -1 : dailyNewUserCount,
+    dailyReturningUser: brokethebank ? -1 : dailyReturningUserCount,
     avgDailyReturningUserSessions: Math.round(dailyReturningUserSessionCount / dailyReturningUserCount),
     dailyActiveUsers: brokethebank ? -1 : dailyActiveUserIds.size,
     // avgDailyActiveUserSessions: Math.round(dailyActiveUserSessionCount / dailyActiveUserCount),
-    flaggedUsers: flaggedUserCount,
+    flaggedUsers: flaggedUserIds.size,
   }
 }
