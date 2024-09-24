@@ -95,7 +95,9 @@ export async function saveUser(user: User) {
   }
 
   let savedUser = await store.user.get(user.id);
-  user.isInternal = !!(user.isInternal || user.referer && user.referer.includes("vercel.com"));
+  user.isInternal = !!(user.isInternal
+    || user.referer && user.referer.includes("vercel.com")
+    || user.host && user.host.includes("localhost"));
 
   // TODO: maybe we'll need to distinguish between user acting and user to save?
 
@@ -185,51 +187,36 @@ export async function getUserStats(reportAt?: any): Promise<any> {
       // @ts-ignore
       const diff = reportAt.diff(user.updatedAt || user.createdAt, "hours");
       // @ts-ignore
-      const diffCreated = reportAt.diff(user.createdAt, "hour");
+      const diffCreated = reportAt.diff(user.createdAt, "hours");
 
-      if (user.id == "21b3dda8") {
-        console.log("break");
-      }
-
-      if (diff >= 24 * 30) {
+      if (diffCreated >= 24 * 30) {
         done = true;
         break;
       }
 
-      if (diffCreated >= 0) {
-        if (isAdmin || isInternal) {
-          // if (isAdmin) adminIds.add(user.id);
-          // if (isInternal) internalUserIds.add(user.id);
-        } else {
-          // userIds.add(user.id);
-
-          if (diff < 24 * 30) {
-            if (diff < 24) {
-              // @ts-ignore
-              if (user.sessionCount > 1) {
-                dailyReturningUserCount++;
-                dailyReturningUserSessionCount += (user.sessionCount || 1);
-              }
-            }
-
+      if (diffCreated >= 0 && !isAdmin && !isInternal) {
+        if (diff < 24 * 30) {
+          if (diff < 24) {
             // @ts-ignore
             if (user.sessionCount > 1) {
-              monthlyReturningUserCount++;
-              monthlyReturningUserSessionCount += (user.sessionCount || 1);
+              dailyReturningUserCount++;
+              dailyReturningUserSessionCount += (user.sessionCount || 1);
             }
           }
 
-          if (diffCreated < 24 * 30) {
-            if (diffCreated < 24) {
-              dailyNewUserCount++;
-            }
+          // @ts-ignore
+          if (user.sessionCount > 1) {
+            monthlyReturningUserCount++;
+            monthlyReturningUserSessionCount += (user.sessionCount || 1);
+          }
+        }
 
-            monthlyNewUserCount++;
+        if (diffCreated < 24 * 30) {
+          if (diffCreated < 24) {
+            dailyNewUserCount++;
           }
 
-          // if (flaggedUserIds.has(user.id)) {
-          //   flaggedUserCount++;
-          // }
+          monthlyNewUserCount++;
         }
       }
     }
