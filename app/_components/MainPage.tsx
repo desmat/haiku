@@ -1015,7 +1015,7 @@ export default function MainPage({
         onboardingElement={onboardingElement}
         onClickGenerate={startGenerateHaiku}
         onClickRandom={loadRandom}
-        onClickLogo={loadHaiku}
+        onClickLogo={loadRandom}
         onSwitchMode={switchMode}
         onDelete={!haiku?.error && doDelete}
         onSaveDailyHaiku={!haiku?.error && saveDailyHaiku}
@@ -1074,7 +1074,7 @@ export default function MainPage({
           popPoem={haikudleMode && haikudleSolvedJustNow}
           regenerating={regenerating}
           onboardingElement={onboardingElement}
-          refresh={!haiku?.error && (user?.isAdmin || album) && (() => loadRandom())}
+          refresh={!haiku?.error && (() => loadRandom())}
           saveHaiku={!haiku?.error && !haikudleMode && doSaveHaiku}
           updateTitle={!haiku?.error && !haikudleMode && user?.isAdmin && updateHaikuTitle}
           regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
