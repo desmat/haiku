@@ -181,7 +181,7 @@ export function NavOverlay({
               <div className="onboarding-focus double" />
             }
 
-            <PopOnClick
+            {/* <PopOnClick
               disabled={!onboarding}
               active={onboarding}
             >
@@ -215,7 +215,7 @@ export function NavOverlay({
                   exitImpersonation={exitImpersonation}
                 />
               </StyledLayers>
-            </PopOnClick>
+            </PopOnClick> */}
           </div>
         </div>
       }
