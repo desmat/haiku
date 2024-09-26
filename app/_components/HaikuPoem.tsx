@@ -221,7 +221,7 @@ export default function HaikuPoem({
   updateTitle?: any,
 }) {
   // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
-  fontSize = "80%";
+  fontSize = "90%";
   onboardingElement = "";
 
   const showcaseMode = mode == "showcase";
