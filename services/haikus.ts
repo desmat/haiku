@@ -690,9 +690,11 @@ export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Pro
       : version + 1,
   });
 
-  const webhookRet = await triggerHaikuSaved(updated);
-  // console.log(">> services.haiku.saveHaiku", { webhookRet });
-
+  if (!options.noVersion) {
+    const webhookRet = await triggerHaikuSaved(updated);
+    // console.log(">> services.haiku.saveHaiku", { webhookRet });
+  }
+  
   return updated;
 }
 
