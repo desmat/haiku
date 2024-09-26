@@ -66,7 +66,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
       and lookups: 
       { 
-        user: { userId: "haikuId"},
+        user: { userId: "aifailId"},
         haiku: { haikuId: "userId" }
       }
   
@@ -319,17 +319,17 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
 export function create(): Store {
   return {
-    haikus: new RedisStore<Haiku>("haiku", undefined, HaikuSaveOptions),
-    dailyHaikus: new RedisStore<DailyHaiku>("dailyhaiku", undefined, DailyHaikuSaveOptions),
-    haikuAlbums: new RedisStore<HaikuAlbum>("haikualbum"),
-    haikudles: new RedisStore<Haikudle>("haikudle", undefined, HaikudleSaveOptions),
+    haikus: new RedisStore<Haiku>("aifail", undefined, HaikuSaveOptions),
+    dailyHaikus: new RedisStore<DailyHaiku>("dailyaifail", undefined, DailyHaikuSaveOptions),
+    haikuAlbums: new RedisStore<HaikuAlbum>("aifailalbum"),
+    haikudles: new RedisStore<Haikudle>("aifaildle", undefined, HaikudleSaveOptions),
     dailyHaikudles: new RedisStore<DailyHaikudle>("dailyhaikudle", undefined, DailyHaikudleSaveOptions),
     userHaikudles: new RedisStore<UserHaikudle>("userhaikudle", undefined, UserHaikudleSaveOptions),
-    userHaikus: new RedisStore<UserHaiku>("userhaiku", undefined, UserHaikuSaveOptions),
-    likedHaikus: new RedisStore<LikedHaiku>("likedhaiku", undefined, LikedHaikuSaveOptions),
-    flaggedHaikus: new RedisStore<FlaggedHaiku>("flaggedhaiku", undefined, FlaggedHaikuSaveOptions),
-    userUsage: new RedisStore<UserUsage>("haikuuserusage"),
-    user: new RedisStore<User>("haikuuser", undefined, UserSaveOptions),
+    userHaikus: new RedisStore<UserHaiku>("useraifail", undefined, UserHaikuSaveOptions),
+    likedHaikus: new RedisStore<LikedHaiku>("likedaifail", undefined, LikedHaikuSaveOptions),
+    flaggedHaikus: new RedisStore<FlaggedHaiku>("flaggedaifail", undefined, FlaggedHaikuSaveOptions),
+    userUsage: new RedisStore<UserUsage>("aifailuserusage"),
+    user: new RedisStore<User>("aifailuser", undefined, UserSaveOptions),
     flaggedUsers: new RedisStore<FlaggedUser>("flaggedhaikuuser", undefined, FlaggedUserSaveOptions),
   }
 }
