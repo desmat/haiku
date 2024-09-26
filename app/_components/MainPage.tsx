@@ -23,6 +23,7 @@ import { mapToSearchParams } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
+import delay from '@/utils/delay';
 
 export default function MainPage({
   haiku: _haiku,
@@ -860,6 +861,51 @@ export default function MainPage({
   useEffect(() => {
     // console.log('>> app.page useEffect [haiku?.id, loadingUI, isShowcaseMode, _refreshDelay]', { haiku_id: haiku?.id, loadingUI, isShowcaseMode, _refreshDelay });
 
+
+    const promptTimeout = setTimeout(async () => {
+      const poem = haiku.imagePrompt.split(".")
+        .filter((line: string) => line.trim().length > 0 && line.replaceAll(/\s/g, ""))
+        .map((line: string, i: number) => `${i == 0 && haiku.imageModel ? `${haiku.imageModel.toUpperCase()}: ` : ""}${line.trim()}.`);
+
+      for (let i = 0; i < poem.length; i++) {
+        await delay(250);
+        const words = poem[i].split(/\s/);
+        for (let j = 0; j < words.length; j++) {
+          if (i == 0 && j == 0) continue;
+          await delay(25);
+          const line = words.slice(0, j + 1).join(" ");
+          setHaiku((haiku: Haiku) => {
+            return {
+              ...haiku,
+              poem: [
+                ...poem.slice(0, i),
+                line,
+              ]
+            }
+          })
+        }
+      }
+    }, 4000);
+
+    const initialPromptTimeout = setTimeout(async () => {
+      for (let i = 0; i < 5; i++) {
+        setHaiku((haiku: Haiku) => {
+          return {
+            ...haiku,
+            poem: [`${haiku.imageModel.toUpperCase()}: `],
+          }
+        })
+        await delay(300);
+        setHaiku((haiku: Haiku) => {
+          return {
+            ...haiku,
+            poem: [`${haiku.imageModel.toUpperCase()}: _`],
+          }
+        })
+        await delay(700);
+      }
+    }, 0);
+
     if (showcaseMode && !loadingUI && _refreshDelay) {
       window.history.replaceState(null, '', url(haiku?.id, {
         mode: "showcase",
@@ -877,6 +923,9 @@ export default function MainPage({
     }, 10000);
 
     return () => {
+      promptTimeout && clearTimeout(promptTimeout);
+      initialPromptTimeout && clearTimeout(initialPromptTimeout);
+      
       retryInterval && clearInterval(retryInterval);
 
       if (refreshTimeout) {
@@ -1015,7 +1064,10 @@ export default function MainPage({
         <HaikuPage
           user={user}
           mode={mode}
-          haiku={haikudleSolved ? solvedHaikudleHaiku : haiku}
+          haiku={haikudleSolved ? solvedHaikudleHaiku : {
+            ...haiku,
+
+          }}
           styles={textStyles}
           altStyles={altTextStyles}
           fontSize={fontSize}

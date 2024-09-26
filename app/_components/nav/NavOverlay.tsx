@@ -104,7 +104,7 @@ export function NavOverlay({
 
   return (
     <div className="_bg-pink-200 nav-overlay relative h-full w-full z-1">
-      {!loading && ["haikudle", "haiku"].includes(mode) &&
+      {/* {!loading && ["haikudle", "haiku"].includes(mode) &&
         <GenerateInput
           user={user}
           color={haiku?.color || "#000000"}
@@ -114,10 +114,10 @@ export function NavOverlay({
           generate={onClickGenerate}
           onboardingElement={onboardingElement}
         />
-      }
+      } */}
 
       {["haikudle", "haiku"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} ${loading ? "opacity-40" : ""}`}>
+        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-[50vw] _transform -translate-x-1/2 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} ${loading ? "opacity-40" : ""}`}>
           <div className="onboarding-container">
             {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement || "") &&
               <div className="onboarding-focus" />
@@ -128,7 +128,7 @@ export function NavOverlay({
             <PopOnClick color={haiku?.bgColor} active={onboardingElement == "logo"}>
               {/* TODO: href to support multi-language */}
               <Logo
-                iconOnly={true}
+                iconOnly={false}
                 styles={styles}
                 altStyles={altStyles}
                 mode={mode}

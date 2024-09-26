@@ -308,7 +308,7 @@ export default function SidePanel({
                   {(!user?.isAdmin || album) &&
                     <StyledLayers styles={styles}>
                       <span className="capitalize">
-                        {album ? `${album} Haikus` : "Your Haikus"}
+                        Fails
                       </span>
                     </StyledLayers>
                   }

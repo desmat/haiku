@@ -27,7 +27,7 @@ export function Logo({
   const onboarding = onboardingElement && onboardingElement.includes("logo");
 
   const ai = (
-    <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[72pt]" : "text-[22pt] md:text-[28pt]"} font-semibold`}>
+    <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[72pt]" : "text-[32pt] md:text-[38pt]"} font-semibold`}>
       AI
     </span>
   );
@@ -51,7 +51,7 @@ export function Logo({
     <Link
       onClick={() => onClick && onClick()}
       href={href || "/"}
-      className={`logo hover:no-underline ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[92pt]" : "text-[26pt] md:text-[32pt]"}`}
+      className={`logo hover:no-underline ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[92pt]" : "text-[36pt] md:text-[42pt]"}`}
     >
       {iconOnly &&
         <div className="HaikuGeniusIcon absolute top-[0.5rem] left-[-0.3rem] md:top-[.5rem] md:left-[-0.7rem] lg:top-[.5rem] lg:left-[-0.6rem]">
@@ -72,27 +72,14 @@ export function Logo({
       }
       {!iconOnly &&
         <div className={`HaikuGeniusIcon ${font.architects_daughter.className} flex flex-row`}>
-          <StyledLayers
-            styles={onboardingElement
-              ? styles.slice(0, 1)
-              : styles
-            }
-          >
-            {/* {(isSocialImgMode || isHaikudleSocialImgMode) &&
-              <HaikuGeniusIcon color={styles[0].color} className="h-[10rem] w-[10rem] mt-[2rem] mr-[-3rem]" />
-            }
-            {!(isSocialImgMode || isHaikudleSocialImgMode) &&
-              <HaikuGeniusIcon color={styles[0].color} className="h-[2.8rem] w-[2.8rem] md:h-[3.5rem] md:w-[3.5rem] mt-[0.3rem] mr-[-0.7rem] md:mt-[0.3rem] md:mr-[-0.9rem]" />
-            } */}
-            h
-          </StyledLayers>
+          
           <span className="mt-[0rem] sm:mt-[0rem]">{styledAi}</span>
           <StyledLayers
             styles={onboardingElement
               ? styles.slice(0, 1)
               : styles
             }
-          >{isHaikudleMode || isHaikudleSocialImgMode /* || isSocialImgMode */ ? "kudle" : "ku"}</StyledLayers>
+          >{isHaikudleMode || isHaikudleSocialImgMode /* || isSocialImgMode */ ? "kudle" : "fails"}</StyledLayers>
           <span className="ml-[0.15em]">
             <StyledLayers
               styles={onboardingElement
@@ -101,7 +88,7 @@ export function Logo({
               }
             >
               <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[72pt]" : "text-[20pt] md:text-[26pt]"} font-normal _md:font-medium`}>
-                genius
+                
               </span>
             </StyledLayers>
           </span>
