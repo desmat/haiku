@@ -892,14 +892,14 @@ export default function MainPage({
         setHaiku((haiku: Haiku) => {
           return {
             ...haiku,
-            poem: [`${haiku.imageModel.toUpperCase()}: `],
+            poem: [`${haiku.imageModel && haiku.imageModel.toUpperCase()}: `],
           }
         })
         await delay(300);
         setHaiku((haiku: Haiku) => {
           return {
             ...haiku,
-            poem: [`${haiku.imageModel.toUpperCase()}: _`],
+            poem: [`${haiku.imageModel && haiku.imageModel.toUpperCase()}: _`],
           }
         })
         await delay(700);
@@ -1041,7 +1041,7 @@ export default function MainPage({
           loadHaiku(id);
         }}
         onChangeRefreshDelay={!haiku?.error && changeRefreshDelay}
-        onBackup={!haiku?.error && startBackup}
+        onBackup={/*!haiku?.error && */ startBackup}
         onCopyHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyHaiku}
         onCopyLink={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyLink}
         onLikeHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && likeHaiku}
