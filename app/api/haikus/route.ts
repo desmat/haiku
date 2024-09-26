@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
-import { generateHaiku, getDailyHaiku, getHaiku, getLatestHaikus, createHaiku, getAlbumHaikus, getRandomHaiku, createUserHaiku, getUserHaiku } from '@/services/haikus';
+import { generateHaiku, getDailyHaiku, getHaiku, getLatestHaikus, createHaiku, getAlbumHaikus, getRandomHaiku, createUserHaiku, getUserHaiku, saveUserHaiku } from '@/services/haikus';
 import { userUsage } from '@/services/usage';
 import { userSession } from '@/services/users';
 import { LanguageType } from '@/types/Languages';
@@ -59,10 +59,14 @@ export async function GET(request: NextRequest, params?: any) {
       return NextResponse.json({ haiku: {} }, { status: 404 });
     }
 
-    const userHaiku = await getUserHaiku(user.id, randomHaiku.id);
+    if (/* !user.isAdmin && */ randomHaiku?.createdBy != user.id) {
+      const userHaiku = await getUserHaiku(user.id, randomHaiku.id);
 
-    if (/* !user.isAdmin && */ randomHaiku?.createdBy != user.id && !userHaiku) {
-      await createUserHaiku(user, randomHaiku);
+      if (userHaiku) {
+        await saveUserHaiku(user, userHaiku);
+      } else {
+        await createUserHaiku(user, randomHaiku);
+      }
     }
 
     return NextResponse.json({ haikus: [randomHaiku] });
@@ -74,6 +78,17 @@ export async function GET(request: NextRequest, params?: any) {
   } else if (typeof (query.album) == "string" && query.album) {
     const haikus = await getAlbumHaikus(user, query.album);
     const randomHaiku = haikus[Math.floor(Math.random() * haikus.length)];
+
+    if (/* !user.isAdmin && */ randomHaiku?.createdBy != user.id) {
+      const userHaiku = await getUserHaiku(user.id, randomHaiku.id);
+      
+      if (userHaiku) {
+        await saveUserHaiku(user, userHaiku);
+      } else {
+        await createUserHaiku(user, randomHaiku);
+      }
+    }
+
     return NextResponse.json({ haikus: [randomHaiku] });
   }
 

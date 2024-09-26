@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaiku, deleteHaiku, saveHaiku, getUserHaiku, createUserHaiku, getNextDailyHaikuId, getDailyHaikus } from '@/services/haikus';
+import { getHaiku, deleteHaiku, saveHaiku, getUserHaiku, createUserHaiku, getNextDailyHaikuId, getDailyHaikus, saveUserHaiku } from '@/services/haikus';
 import { deleteHaikudle, getDailyHaikudles, getHaikudle, getUserHaikudle } from '@/services/haikudles';
 import { userSession } from '@/services/users';
 import { DailyHaikudle, Haikudle } from '@/types/Haikudle';
@@ -38,8 +38,12 @@ export async function GET(
     return NextResponse.json({ haiku: {} }, { status: 404 });
   }
 
-  if (/* !user.isAdmin && */ haiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
-    await createUserHaiku(user, haiku);
+  if (/* !user.isAdmin && */ haiku?.createdBy != user.id) {
+    if (userHaiku) {
+      await saveUserHaiku(user, userHaiku);
+    } else {
+      await createUserHaiku(user, haiku);
+    }
   }
 
   console.log('>> app.api.haikus.GET', { haiku, userHaiku });
