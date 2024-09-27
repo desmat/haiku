@@ -246,29 +246,15 @@ export default function HaikuPoem({
   const regeneratePoemAllowed = regeneratePoem && (user?.isAdmin || haiku?.createdBy == user?.id) && regeneratePoem;
   const regenerateImageAllowed = regenerateImage && (user?.isAdmin || haiku?.createdBy == user?.id) && regenerateImage;
   const canRegeneratePoem = regeneratePoemAllowed && !editing && !saving;
-  const canRefresh = true; // !!refresh;
+  const canRefresh = !!refresh;
   const canRegenerateImage = regenerateImageAllowed && !editing && !saving;
+  const refTop = useRef();
+  const refBottom = useRef();
   // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { editing, showcaseMode, canCopy, canSwitchMode });
 
   const handleClickHaiku = (e: any) => {
-    // console.log('>> app._components.HaikuPoem.handleClickHaiku()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
-    // if (showcaseMode && canRefresh) {
-      return refresh(e);
-    // }
-
-    // if (canCopy) {
-    //   return copyHaiku();
-    // }
-
-    // if (canSwitchMode) {
-    //   trackEvent("switched-mode", {
-    //     userId: user?.id,
-    //     id: haiku?.id,
-    //   });
-
-    //   return switchMode(showcaseMode ? "haiku" : "showcase");
-    // }
-
+    // @ts-ignore
+    refTop.current.scrollIntoView({ behavior: 'smooth' });
   }
 
   const startEdit = (inputIndex: number, select?: boolean) => {
@@ -378,7 +364,14 @@ export default function HaikuPoem({
   };
 
   useEffect(() => {
-    // console.log(">> app._component.SidePanel.useEffect", { mode, haiku });
+    // console.log(">> app._component.SidePanel.useEffect haiku.poem", { mode, haiku });
+    // @ts-ignore
+    refBottom.current.scrollIntoView();
+
+  }, [haiku.poem]);
+
+  useEffect(() => {
+    console.log(">> app._component.SidePanel.useEffect", { mode, haiku });
     document.body.addEventListener('keydown', handleKeyDown);
 
     return () => {
@@ -419,6 +412,14 @@ export default function HaikuPoem({
             }
             .poem-line-input div::selection, .poem-title span::selection {
               background: ${haiku?.color || "#000000"}66;
+            }
+            .poem-container {
+              -ms-overflow-style: none; /* for Internet Explorer, Edge */
+              scrollbar-width: none; /* for Firefox */
+              overflow-y: scroll;            
+            }  
+            .poem-container::-webkit-scrollbar {
+              display: none; /* for Chrome, Safari, and Opera */
             }`
         }}
       >
@@ -436,23 +437,32 @@ export default function HaikuPoem({
           disabled={editing || canEdit || showcaseMode || (!canEdit && !canSwitchMode)}
         >
           <div
-            className={`_bg-pink-200 px-[1.5rem] ${canEdit ? "group/edit" : ""} ${saving ? "animate-pulse" : ""}`}
+            className={`poem-container _bg-pink-200 px-[1.5rem] ${canEdit ? "group/edit" : ""} ${saving ? "animate-pulse" : ""}`}
             style={{
               cursor: showcaseMode ? "pointer" : "",
               fontSize,
               // maxWidth: showcaseMode ? "calc(100vw - 64px)" : "800px",
               // minWidth: "200px",
+              maxHeight: "calc(100vh - 6rem)",
             }}
+          // ref={ref}
           >
             <div
               className="_bg-purple-200 flex flex-col _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
               onClick={handleClickHaiku}
-              title={showcaseMode && canRefresh ? "Refresh" : canEdit ? "Click to edit" : canCopy ? "Click to copy haiku poem" : showcaseMode ? "Click to switch to edit mode" : canSwitchMode ? "Click to switch to showcase mode" : ""}
+              title="Hide"
               style={{
-                cursor: showcaseMode ? "pointer" : "",
                 fontSize,
               }}
             >
+              <div
+                className="scroll-target-top _bg-pink-200 pb-[calc(100vh-9rem)] h-[2rem]"
+                // @ts-ignore
+                ref={refTop}
+              >
+                {/* TOP */}
+              </div>
+
               <PopOnClick
                 color={haiku?.bgColor}
                 force={popPoem}
@@ -478,7 +488,7 @@ export default function HaikuPoem({
                         onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
                       >
                         {/* set the width while editing */}
-                        <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-80 flex items-center md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}>
+                        <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-80 flex items-center md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] cursor-s-resize`}>
                           <ControlledInput
                             id={i}
                             activeId={editingLine}
@@ -496,6 +506,14 @@ export default function HaikuPoem({
                   </div>
                 ))}
               </PopOnClick>
+            </div>
+
+            <div
+              className="scroll-target-bottom _bg-yellow-200 h-[0rem]"
+              // @ts-ignore
+              ref={refBottom}
+            >
+              {/* BOTTOM */}
             </div>
 
             {false &&
@@ -517,9 +535,6 @@ export default function HaikuPoem({
                     className="poem-title _transition-all _bg-pink-400"
                     onClick={() => !showcaseMode && updateTitle && updateTitle()}
                     style={{
-                      cursor: updateTitle || canCopy
-                        ? "pointer"
-                        : ""
                     }}
                     title={
                       updateTitle
@@ -561,7 +576,6 @@ export default function HaikuPoem({
                       {editAllowed &&
                         <Link
                           href="#"
-                          className={`${!saving ? "cursor-pointer" : "cursor-default"}`}
                           title="Edit this haiku"
                           onClick={(e: any) => {
                             e.preventDefault();

@@ -171,7 +171,7 @@ export function NavOverlay({
         }}
       />
 
-      {["haiku", "haikudle"].includes(mode) &&
+      {["haiku", "haikudle"].includes(mode) && user?.isAdmin && 
         <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center ${onboardingElement && onboardingElement.startsWith("bottom-links") ? "z-50" : "z-20"}`}>
           <div className="onboarding-container">
             {onboardingElement && ["bottom-links", "_side-panel-and-bottom-links"].includes(onboardingElement) &&
@@ -181,7 +181,7 @@ export function NavOverlay({
               <div className="onboarding-focus double" />
             }
 
-            {/* <PopOnClick
+            <PopOnClick
               disabled={!onboarding}
               active={onboarding}
             >
@@ -215,7 +215,7 @@ export function NavOverlay({
                   exitImpersonation={exitImpersonation}
                 />
               </StyledLayers>
-            </PopOnClick> */}
+            </PopOnClick>
           </div>
         </div>
       }

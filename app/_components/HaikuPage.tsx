@@ -89,16 +89,19 @@ export default function HaikuPage({
         }}
       />
       <div
-        className={` _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute bottom-0 left-0 right-0 bottom-[5vh] ${showcaseMode ? "portrait:bottom-[10vh]" : "_portrait:_bottom-[12vh]"} bottom-[] m-auto w-full h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}
+        className={` _bg-yellow-200 md:text-[26pt] sm:text-[22pt] text-[16pt] absolute left-0 right-0 ${showcaseMode ? "portrait:bottom-[10vh]" : "_portrait:_bottom-[12vh]"} bottom-[] m-auto w-full h-fit ${onboardingElement && ["poem", "poem-actions", "poem-and-poem-actions"].includes(onboardingElement) ? "z-50" : "z-10"} _transition-all `}
         style={{
-          top: poemLayout?.top || poemLayout?.down
-            ? `max(${poemLayout?.top || poemLayout?.down}vh + (100vh - max(min(100vh, 150vw), 100vw)) / 2, ${poemLayout?.top || poemLayout?.down}vh)`
-            : poemLayout?.up
-              ? `max(${-1 * poemLayout.up}vh + (100vh - max(min(100vh, 150vw), 100vw)) / 2, ${-1 * poemLayout.up}vh)`
-              : undefined,
-          bottom: poemLayout?.bottom ? `${poemLayout.bottom}vh` : undefined,
-          marginTop: poemLayout?.top ? 0 : "auto",
-          marginBottom: poemLayout?.bottom ? 0 : "auto",
+          // top: poemLayout?.top || poemLayout?.down
+          //   ? `max(${poemLayout?.top || poemLayout?.down}vh + (100vh - max(min(100vh, 150vw), 100vw)) / 2, ${poemLayout?.top || poemLayout?.down}vh)`
+          //   : poemLayout?.up
+          //     ? `max(${-1 * poemLayout.up}vh + (100vh - max(min(100vh, 150vw), 100vw)) / 2, ${-1 * poemLayout.up}vh)`
+          //     : undefined,
+          // bottom: poemLayout?.bottom ? `${poemLayout.bottom}vh` : undefined,
+          // marginTop: poemLayout?.top ? 0 : "auto",
+          // marginBottom: poemLayout?.bottom ? 0 : "auto",
+          // maxHeight: "calc(100vh - 6rem)",
+          // overflow: "scroll",
+          bottom: user?.isAdmin ? "3rem" : "1.5rem"
         }}
       >
         {canAdjustLayout &&

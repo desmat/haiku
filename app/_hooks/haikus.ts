@@ -176,15 +176,15 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const { setLoaded, _mode, _haikus } = get();
 
 
-    if ((haiku.lang || "en") == "en") {
-      const syllables = haiku.poem
-        .map((line: string) => line.split(/\s/)
-          .map((word: string) => syllable(word))
-          .reduce((a: number, v: number) => a + v, 0))
-      haiku.isIncorrect = !(syllables[0] == 5 && syllables[1] == 7 && syllables[2] == 5)
-        ? `does not follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`
-        : undefined;
-    }
+    // if ((haiku.lang || "en") == "en") {
+    //   const syllables = haiku.poem
+    //     .map((line: string) => line.split(/\s/)
+    //       .map((word: string) => syllable(word))
+    //       .reduce((a: number, v: number) => a + v, 0))
+    //   haiku.isIncorrect = !(syllables[0] == 5 && syllables[1] == 7 && syllables[2] == 5)
+    //     ? `does not follow the correct form of 5/7/5 syllables: ${syllables.join("/")}`
+    //     : undefined;
+    // }
 
     set({
       mode: mode || _mode,
