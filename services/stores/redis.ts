@@ -46,7 +46,7 @@ export class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   redis = new Redis({
     url: process.env.KV_REST_API_URL,
     token: process.env.KV_REST_API_TOKEN,
-  });  
+  });
 
   constructor(key: string, setKey?: string, saveOptions?: any) {
     this.key = key;
@@ -132,7 +132,7 @@ export class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     const match = this.valueKey(query.scan);
     let keys = new Set<string>();
     let nextCursor = "0";
-    
+
     do {
       const ret = await this.redis.scan(nextCursor, { match, type: "json", count: count - keys.size });
       // console.log(`>> services.stores.redis.RedisStore<${this.key}>.scan`, { ret });
@@ -279,19 +279,6 @@ export class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       throw `Cannot update ${this.key}: does not exist: ${value.id}`;
     }
 
-    // update lookups 
-
-    const prevLookupKeys = this.lookupKeys(prevValue, options);
-    console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { prevLookupKeys });
-
-    if (prevLookupKeys && prevLookupKeys.length) {
-      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.update deleting previous lookup keys`, { prevLookupKeys });
-      const response = await Promise.all([
-        ...prevLookupKeys.map((lookupKey: any) => this.redis.zrem(lookupKey[0], lookupKey[1]))
-      ]);
-      console.log(`>> services.stores.redis.RedisStore<${this.key}>.update deleted previous lookup keys`, { response });
-    }
-
     const now = moment().valueOf();
     options = { ...this.saveOptions, ...options }
 
@@ -301,13 +288,30 @@ export class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       updatedBy: userId
     };
 
-    const lookupKeys = this.lookupKeys(updatedValue, options);
-    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { lookupKeys });
+    // optionally update lookups 
+
+    // @ts-ignore
+    const prevLookupKeys = new Map(this.lookupKeys(prevValue, options));
+    // @ts-ignore
+    const lookupKeys = new Map(this.lookupKeys(updatedValue, options));
+    const lookupsToRemove = prevLookupKeys && Array.from(prevLookupKeys)
+      .filter(([k, v]: any) => !lookupKeys || lookupKeys.get(k) != v);
+    const lookupsToAdd = lookupKeys && Array.from(lookupKeys)
+      .filter(([k, v]: any) => !prevLookupKeys || prevLookupKeys.get(k) != v);
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { prevLookupKeys, lookupKeys, prevLookupKeyMap: prevLookupKeys, keysToRemove: lookupsToRemove, keysToAdd: lookupsToAdd });
+
+    if (lookupsToRemove && lookupsToRemove.length) {
+      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.update deleting previous lookup keys`, { prevLookupKeys });
+      const response = await Promise.all([
+        ...lookupsToRemove.map((lookupKey: any) => this.redis.zrem(lookupKey[0], lookupKey[1]))
+      ]);
+      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.update deleted previous lookup keys`, { response });
+    }
 
     const response = await Promise.all([
       this.redis.json.set(this.valueKey(value.id), "$", updatedValue),
       options.expire && this.redis.expire(this.valueKey(value.id), options.expire),
-      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => this.redis.zadd(lookupKey[0], { score: updatedValue.createdAt || updatedValue.updatedAt, member: lookupKey[1] })) : []),
+      ...(lookupsToAdd ? lookupsToAdd.map((lookupKey: any) => this.redis.zadd(lookupKey[0], { score: updatedValue.createdAt || updatedValue.updatedAt, member: lookupKey[1] })) : []),
     ]);
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { response });
