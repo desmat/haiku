@@ -16,7 +16,7 @@
 */
 
 import moment from "moment";
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
 import { kvArrayToObject, uuid } from "@/utils/misc";
 import { GenericStore, Store } from "@/types/Store";
 import { DailyHaiku, DailyHaikuSaveOptions, FlaggedHaiku, FlaggedHaikuSaveOptions, Haiku, HaikuSaveOptions, LikedHaiku, LikedHaikuSaveOptions, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
@@ -37,11 +37,16 @@ type RedisStoreEntry = {
   lang?: string,
 };
 
-class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
+export class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   key: string;
   setKey: string;
   valueKey: (id: string) => string;
   saveOptions: any;
+
+  redis = new Redis({
+    url: process.env.KV_REST_API_URL,
+    token: process.env.KV_REST_API_TOKEN,
+  });  
 
   constructor(key: string, setKey?: string, saveOptions?: any) {
     this.key = key;
@@ -108,7 +113,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   async get(id: string): Promise<T | undefined> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.get`, { id });
 
-    const response = await kv.json.get(this.valueKey(id), "$");
+    const response = (await this.redis.json.get(this.valueKey(id), "$") as any[]);
 
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.get`, { response });
 
@@ -120,8 +125,32 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     return value;
   }
 
+  async scan(query: any = {}): Promise<Set<string>> {
+    console.log(`>> services.stores.redis.RedisStore<${this.key}>.scan`, { query });
+
+    const count = query.count;
+    const match = this.valueKey(query.scan);
+    let keys = new Set<string>();
+    let nextCursor = "0";
+    
+    do {
+      const ret = await this.redis.scan(nextCursor, { match, type: "json", count: count - keys.size });
+      // console.log(`>> services.stores.redis.RedisStore<${this.key}>.scan`, { ret });
+      nextCursor = ret[0];
+      ret[1].forEach((key: string) => keys.size < count && keys.add(key.substring(key.indexOf(':') + 1)));
+    } while (keys.size < count && nextCursor && nextCursor != "0");
+
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.scan`, { keys });
+
+    return keys;
+  }
+
   async ids(query: any = {}): Promise<Set<string>> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.ids`, { query });
+
+    if (query.scan) {
+      return this.scan(query);
+    }
 
     const min = query.offset || 0;
     const max = min + (query.count || 0) - 1;
@@ -147,13 +176,13 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
         /* NOT SUPPORTED FOR NOW
         if (queryVal == "*") {
           // lookup keys via the foos:bars lookup set
-          keys = (await kv.zrange(`${this.setKey}:${queryKey}s`, 0, -1))
+          keys = (await this.kv.zrange(`${this.setKey}:${queryKey}s`, 0, -1))
             // @ts-ignore
             .map((key: string) => `${this.key}:${key}`);
         } else */ if (queryVal) {
           // lookup keys via the foos:bar:123 lookup set
           // @ts-ignore
-          ids = await kv.zrange(`${this.setKey}:${queryKey}:${queryVal}`, min, max, { rev: true });
+          ids = await this.redis.zrange(`${this.setKey}:${queryKey}:${queryVal}`, min, max, { rev: true });
         } else {
           throw `redis.find(query) query must have key and value`;
         }
@@ -162,7 +191,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
       } else {
         // get all keys via the index set
         // @ts-ignore
-        ids = await kv.zrange(`${this.setKey}`, min, max, { rev: true })
+        ids = await this.redis.zrange(`${this.setKey}`, min, max, { rev: true })
       }
     }
 
@@ -197,7 +226,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     const values = blocks && blocks.length > 0
       ? (await Promise.all(
         blocks
-          .map(async (keys: string[]) => (await kv.json.mget(keys, "$"))
+          .map(async (keys: string[]) => (await this.redis.json.mget(keys, "$") as any)
             .flat())))
         .flat()
         .filter((value: any) => value && !value.deletedAt)
@@ -226,10 +255,10 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { lookupKeys });
 
     const responses = await Promise.all([
-      kv.json.set(this.valueKey(createdValue.id), "$", createdValue),
-      options.expire && kv.expire(this.valueKey(createdValue.id), options.expire),
-      !options.noIndex && kv.zadd(this.setKey, { score: createdValue.createdAt, member: createdValue.id }),
-      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => kv.zadd(lookupKey[0], { score: createdValue.createdAt, member: lookupKey[1] })) : []),
+      this.redis.json.set(this.valueKey(createdValue.id), "$", createdValue),
+      options.expire && this.redis.expire(this.valueKey(createdValue.id), options.expire),
+      !options.noIndex && this.redis.zadd(this.setKey, { score: createdValue.createdAt, member: createdValue.id }),
+      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => this.redis.zadd(lookupKey[0], { score: createdValue.createdAt, member: lookupKey[1] })) : []),
     ]);
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.create`, { responses });
@@ -239,7 +268,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 
   async update(userId: string, value: T, options?: any): Promise<T> {
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { value, options });
-    
+
     if (!value.id) {
       throw `Cannot update ${this.key}: null id`;
     }
@@ -258,7 +287,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     if (prevLookupKeys && prevLookupKeys.length) {
       // console.log(`>> services.stores.redis.RedisStore<${this.key}>.update deleting previous lookup keys`, { prevLookupKeys });
       const response = await Promise.all([
-        ...prevLookupKeys.map((lookupKey: any) => kv.zrem(lookupKey[0], lookupKey[1]))
+        ...prevLookupKeys.map((lookupKey: any) => this.redis.zrem(lookupKey[0], lookupKey[1]))
       ]);
       console.log(`>> services.stores.redis.RedisStore<${this.key}>.update deleted previous lookup keys`, { response });
     }
@@ -276,9 +305,9 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     // console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { lookupKeys });
 
     const response = await Promise.all([
-      kv.json.set(this.valueKey(value.id), "$", updatedValue),
-      options.expire && kv.expire(this.valueKey(value.id), options.expire),
-      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => kv.zadd(lookupKey[0], { score: updatedValue.createdAt || updatedValue.updatedAt, member: lookupKey[1] })) : []),
+      this.redis.json.set(this.valueKey(value.id), "$", updatedValue),
+      options.expire && this.redis.expire(this.valueKey(value.id), options.expire),
+      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => this.redis.zadd(lookupKey[0], { score: updatedValue.createdAt || updatedValue.updatedAt, member: lookupKey[1] })) : []),
     ]);
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.update`, { response });
@@ -305,10 +334,10 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
     value.deletedAt = moment().valueOf();
     const response = await Promise.all([
       options.hardDelete
-        ? kv.json.del(this.valueKey(id), "$")
-        : kv.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf(), deletedBy: userId }),
-      kv.zrem(this.setKey, id),
-      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => kv.zrem(lookupKey[0], lookupKey[1])) : []),
+        ? this.redis.json.del(this.valueKey(id), "$")
+        : this.redis.json.set(this.valueKey(id), "$", { ...value, deletedAt: moment().valueOf(), deletedBy: userId }),
+      this.redis.zrem(this.setKey, id),
+      ...(lookupKeys ? lookupKeys.map((lookupKey: any) => this.redis.zrem(lookupKey[0], lookupKey[1])) : []),
     ]);
 
     console.log(`>> services.stores.redis.RedisStore<${this.key}>.delete`, { response });
@@ -318,6 +347,7 @@ class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
 }
 
 export function create(): Store {
+  console.log(`>> services.stores.redis.create`);
   return {
     haikus: new RedisStore<Haiku>("haiku", undefined, HaikuSaveOptions),
     dailyHaikus: new RedisStore<DailyHaiku>("dailyhaiku", undefined, DailyHaikuSaveOptions),
