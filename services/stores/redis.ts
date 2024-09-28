@@ -77,8 +77,8 @@ export class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
   
       we want indexes:
 
-      likedhaiku:123:456 -> value (JSON, the rest are sorted sets)
-      likedhaikus -> all likedhaiku id's (ie 123:456, etc)
+      likedhaiku:123:456 -> value (JSON, the rest are sorted sets, not handled here)
+      likedhaikus -> all likedhaiku id's (ie 123:456, etc, not handled here)
       // NOT SUPPORTED FOR NOW // likedhaikus:users -> all user ids (ie 123, etc) NOTE: this should be a sorted set of user ids with its score as number of haikus liked
       likedhaikus:user:123 -> all likedhaiku id's for the given user (ie 123:456, etc)
       // NOT SUPPORTED FOR NOW // likedhaikus:haikus ->  NOTE: this should be a sorted set of haiku ids with its score as number of users who liked it
@@ -95,17 +95,11 @@ export class RedisStore<T extends RedisStoreEntry> implements GenericStore<T> {
         // TODO validate and log errors
         // @ts-ignore
         const lookupId = value[lookupKey];
+        // foos:bar:123 -> 123:456
+        return [`${this.setKey}:${lookupName}:${lookupId}`, id];
+      }) || [];
 
-        return [
-          // foos -> 123:456
-          [`${this.setKey}`, id],
-          // foos:bar:123 -> 123:456
-          [`${this.setKey}:${lookupName}:${lookupId}`, id],
-        ]
-      })
-      .flat();
-
-    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.lookupKeys`, { lookupKeys });
+    // console.log(`>> services.stores.redis.RedisStore<${this.key}>.lookupKeys`, { options, lookupKeys });
 
     return lookupKeys;
   }
