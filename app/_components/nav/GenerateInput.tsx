@@ -119,9 +119,9 @@ export default function GenerateInput({
   const handleKeyDown = (e: any) => {
     // console.log(">> app._components.Nav.GenerateInput.handleKeyDown()", { e, key: e.key });
     if (e.key == "Escape") {
-      trackEvent("cancelled-generate-haiku", {
-        userId: user?.id,
-      });
+      // trackEvent("cancelled-generate-haiku", {
+      //   userId: user?.id,
+      // });
       setActive(false);
       // @ts-ignore
       ref.current.value = "";
@@ -133,9 +133,9 @@ export default function GenerateInput({
   }
 
   const handleFocus = () => {
-    trackEvent("clicked-generate-haiku-input", {
-      userId: user?.id,
-    });
+    // trackEvent("clicked-generate-haiku-input", {
+    //   userId: user?.id,
+    // });
 
     setActive(true);
     setFocus(true);

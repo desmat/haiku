@@ -382,10 +382,10 @@ export default function MainPage({
 
   const startGenerateHaiku = async (theme?: string) => {
     // console.log('>> app.page.startGenerateHaiku()', { theme });
-    trackEvent("clicked-generate-haiku", {
-      userId: user?.id,
-      theme,
-    });
+    // trackEvent("clicked-generate-haiku", {
+    //   userId: user?.id,
+    //   theme,
+    // });
 
     const subject = typeof (theme) == "undefined"
       ? prompt(`Haiku's theme or subject? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test poem)" : "(For example 'nature', 'cherry blossoms', or leave blank)"}`)
@@ -410,10 +410,10 @@ export default function MainPage({
         }
         setGenerating(false);
       }
-    } else {
-      trackEvent("cancelled-generate-haiku", {
-        userId: user?.id,
-      });
+    // } else {
+    //   trackEvent("cancelled-generate-haiku", {
+    //     userId: user?.id,
+    //   });
     }
   }
 
@@ -458,10 +458,10 @@ export default function MainPage({
         incUserUsage(user, "haikusRegenerated"); // TODO haikuImageRegenerated?
         setHaiku(ret);
         setLoadingUI(false);
-      } else {
-        trackEvent("cancelled-regenerate-image", {
-          userId: user?.id,
-        });
+      // } else {
+      //   trackEvent("cancelled-regenerate-image", {
+      //     userId: user?.id,
+      //   });
       }
     }
   }
@@ -985,10 +985,10 @@ export default function MainPage({
                   : startFirstVisitOnboarding
         }
         onSelectHaiku={(id: string) => {
-          trackEvent("haiku-selected", {
-            userId: user?.id,
-            haikuId: id,
-          });
+          // trackEvent("haiku-selected", {
+          //   userId: user?.id,
+          //   haikuId: id,
+          // });
           loadHaiku(id);
         }}
         onChangeRefreshDelay={!haiku?.error && changeRefreshDelay}
