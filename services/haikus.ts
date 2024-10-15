@@ -176,7 +176,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
 
   const idAndVersionedId = [
     id,
-    version && `${id}:${version}`,
+    typeof(version) == "number" && `${id}:${version}`,
   ];
 
   let [
@@ -200,7 +200,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   // get either current or versioned
   // note the edge case when current version is requested explicitly by its version
   // since only previous version have the key <id>:<version>
-  let haiku = version && haikus[0]?.version != version
+  let haiku = typeof(version) == "number" && haikus[0]?.version != version
     ? { ...haikus[1], id }
     : haikus[0];
 
