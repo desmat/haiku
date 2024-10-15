@@ -116,7 +116,7 @@ export function NavOverlay({
         />
       } */}
 
-      {["haikudle", "haiku"].includes(mode) &&
+      {["haikudle", "haiku"].includes(mode) && false && 
         <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-[50vw] _transform -translate-x-1/2 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} ${loading ? "opacity-40" : ""}`}>
           <div className="onboarding-container">
             {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement || "") &&

@@ -443,7 +443,9 @@ export default function HaikuPoem({
               fontSize,
               // maxWidth: showcaseMode ? "calc(100vw - 64px)" : "800px",
               // minWidth: "200px",
-              maxHeight: "calc(100vh - 6rem)",
+              maxHeight: "100vh",
+              paddingTop: "6rem",
+              paddingBottom: user?.isAdmin ? "2rem" : 0,
             }}
           // ref={ref}
           >
