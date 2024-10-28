@@ -1,17 +1,19 @@
+import { listToMap, mapToList, mapToSearchParams, uuid } from '@desmat/utils';
+import { formatActionInProgress, formatPastAction } from '@desmat/utils/format';
 import { getReasonPhrase } from 'http-status-codes';
 import moment from 'moment';
-import { syllable } from 'syllable';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { error429Haiku, error4xxHaiku, notFoundHaiku, serverErrorHaiku } from '@/services/stores/samples';
 import { Haiku, HaikuAction } from '@/types/Haiku';
 import { User } from '@/types/User';
-import { formatActionInProgress, formatPastAction } from '@/utils/format';
-import { listToMap, mapToList, mapToSearchParams, uuid } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from "./alert";
 import useHaikudle from './haikudle';
 import useUser from './user';
+
+let syllable: any;
+import("syllable").then((s: any) => syllable = s);
 
 async function fetchOpts() {
   const token = await useUser.getState().getToken();

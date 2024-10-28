@@ -237,6 +237,10 @@ function AnimatedAlert({
       />
     )
   }
+
+  return (
+    <></>
+  )
 }
 
 export default function Alert({

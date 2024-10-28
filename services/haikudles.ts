@@ -1,13 +1,14 @@
+import { findHoleInDatecodeSequence, shuffleArray, uuid } from '@desmat/utils';
 import moment from 'moment';
-import { syllable } from 'syllable';
 import { DailyHaiku, Haiku } from '@/types/Haiku';
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { Store } from "@/types/Store";
 import { User } from '@/types/User';
-import { findHoleInDatecodeSequence, uuid } from '@/utils/misc';
-import shuffleArray from '@/utils/shuffleArray';
 import { getDailyHaikus, getFlaggedHaikuIds, getHaiku, getHaikus } from './haikus';
 import { triggerDailyHaikudleSaved } from './webhooks';
+
+let syllable: any;
+import("syllable").then((s: any) => syllable = s);
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)

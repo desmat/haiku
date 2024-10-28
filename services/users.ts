@@ -1,7 +1,7 @@
+import { searchParamsToMap } from '@desmat/utils';
 import moment from 'moment';
 import { Store } from '@/types/Store';
 import { User } from '@/types/User';
-import { searchParamsToMap } from '@/utils/misc';
 import { decodeJWT, encodeJWT } from "@/utils/jwt";
 
 let store: Store;

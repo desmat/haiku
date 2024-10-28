@@ -1,9 +1,9 @@
 'use client'
 
+import { capitalize, upperCaseFirstLetter } from "@desmat/utils/format";
 import moment from "moment";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { syllable } from "syllable";
 import { FaEdit } from "react-icons/fa";
 import { TbReload } from "react-icons/tb";
 import useAlert from "@/app/_hooks/alert";
@@ -11,11 +11,13 @@ import { ExperienceMode } from "@/types/ExperienceMode";
 import { Haiku } from "@/types/Haiku";
 import { USAGE_LIMIT } from "@/types/Usage";
 import { User } from "@/types/User";
-import { capitalize, upperCaseFirstLetter } from "@/utils/format";
 import trackEvent from "@/utils/trackEvent";
 import PopOnClick from "./PopOnClick";
 import { StyledLayers } from "./StyledLayers";
 import { GenerateIcon } from "./nav/GenerateInput";
+
+let syllable: any;
+import("syllable").then((s: any) => syllable = s);
 
 const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
   const title = haiku?.title ?? haiku?.theme;
@@ -507,7 +509,9 @@ export default function HaikuPoem({
                   ? "_bg-yellow-200 fixed w-max right-[1.5rem] bottom-[1rem] flex flex-row"
                   : "_bg-orange-200 flex flex-row w-max ml-[0.5rem] mt-[-0.2rem] md:mt-[0.2rem] leading-5"
                 }
-                style={{ fontSize }}
+                style={{ fontSize,
+                  // display: "none",
+                 }}
               >
                 <div
                   className="poem-title _transition-all _bg-pink-400"

@@ -1,5 +1,5 @@
 
-import { mapToList } from "@/utils/misc";
+import { mapToList } from "@desmat/utils";
 import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, UserHaiku } from "@/types/Haiku";
 import { HaikuAlbum } from "@/types/Album";
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";

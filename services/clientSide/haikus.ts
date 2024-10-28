@@ -1,6 +1,6 @@
+import { hashCode, mapToList, normalizeWord, uuid } from '@desmat/utils';
 import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
 import { Store } from "@/types/Store";
-import { hashCode, mapToList, normalizeWord, uuid } from '@/utils/misc';
 
 let store: Store;
 import(`@/services/stores/${process.env.STORE_TYPE}`)

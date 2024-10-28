@@ -1,5 +1,5 @@
+import { formatTimeFromNow } from "@desmat/utils/format";
 import * as locale from 'locale-codes'
-import { formatTimeFromNow } from "@/utils/format";
 import { Haiku } from "./Haiku";
 
 export type OnboardingStep = {

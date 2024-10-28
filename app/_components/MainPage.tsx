@@ -1,5 +1,7 @@
 'use client'
 
+import { mapToSearchParams } from '@desmat/utils';
+import { upperCaseFirstLetter } from '@desmat/utils/format';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
@@ -18,8 +20,6 @@ import { Haikudle } from '@/types/Haikudle';
 import { LanguageType } from '@/types/Languages';
 import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleGotoHaikuGenius, haikudleOnboardingSteps, notShowcase_notOnboardedFirstTime_onboardedShowcase, showcase_notOnboardedFirstTime, showcase_onboardedFirstTime, showcase_onboardedFirstTime_admin } from '@/types/Onboarding';
 import { User } from '@/types/User';
-import { upperCaseFirstLetter } from '@/utils/format';
-import { mapToSearchParams } from '@/utils/misc';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';

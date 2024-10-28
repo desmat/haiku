@@ -1,10 +1,10 @@
 // middleware.ts
+import { searchParamsToMap } from "@desmat/utils";
 import moment from "moment";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { saveUser, userSession } from "./services/users";
 import { SESSION_TIMEOUT_SECONDS } from "./types/User";
-import { searchParamsToMap } from "./utils/misc";
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;

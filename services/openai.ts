@@ -1,7 +1,6 @@
+import { delay, mapToList } from '@desmat/utils';
 import OpenAI from 'openai';
 import * as samples from "@/services/stores/samples";
-import delay from '@/utils/delay';
-import { mapToList } from '@/utils/misc';
 import trackEvent from '@/utils/trackEventServer';
 
 const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
