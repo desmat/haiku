@@ -1,17 +1,16 @@
+import { RedisStoreRecord } from "@desmat/redis-store";
+
 export type Haiku = {
-  id: string,
-  createdAt: number,
-  createdBy: string,
   theme: string,
   poem: string[],
   bgImage: string,
-  updatedAt?: number,
-  updatedBy?: string,
   status?: string,
   lang?: string,
   version?: number,
   albumId?: string, // TODO change to many-to-many
-} | any;
+  createdBy: string,
+  updatedBy?: string,
+} & RedisStoreRecord | any;
 
 export const HaikuSaveOptions = {
   lookups: {
@@ -22,22 +21,16 @@ export const HaikuSaveOptions = {
 };
 
 export type UserHaiku = {
-  id: string,
   userId: string,
   haikuId: string,
   theme?: string,
-  createdAt?: number,
-  createdBy?: string,
-  updatedAt?: number,
-  updatedBy?: string,
   solvedAt?: number,
   moves?: number, // move to UserHaikudle
   generatedAt?: number,
-  generatedBy?: string,
   viewedAt?: number,
   likedAt?: number, // kill?
   sharedAt?: number,
-};
+} & RedisStoreRecord;
 
 export const UserHaikuSaveOptions = {
   lookups: {
@@ -47,12 +40,11 @@ export const UserHaikuSaveOptions = {
 };
 
 export type LikedHaiku = {
-  id: string,
   haikuId: string,
   userId: string,
-  createdBy: string, 
-  createdAt: string,
-} | any;
+  createdBy: string,
+  updatedBy?: string,
+  }& RedisStoreRecord | any;
 
 export const LikedHaikuSaveOptions = {
   lookups: {
@@ -62,12 +54,11 @@ export const LikedHaikuSaveOptions = {
 };
 
 export type FlaggedHaiku = {
-  id: string,
   haikuId: string,
   userId: string,
-  createdBy: string, 
-  createdAt: string,
-} | any;
+  createdBy: string,
+  updatedBy?: string,
+} & RedisStoreRecord | any;
 
 export const FlaggedHaikuSaveOptions = {
   lookups: {
@@ -77,14 +68,11 @@ export const FlaggedHaikuSaveOptions = {
 };
 
 export type DailyHaiku = {
-  id: string,
   haikuId: string,
-  createdAt?: number,
-  createdBy?: string,
-  updatedAt?: number,
-  updatedBy?: string,
   theme?: string, // ???
-};
+  createdBy: string,
+  updatedBy?: string,
+} & RedisStoreRecord;
 
 export const DailyHaikuSaveOptions = {
   lookups: {

@@ -2,20 +2,16 @@ import { formatBytes } from '@desmat/utils/format';
 import moment from 'moment';
 // import fetch from 'node-fetch';
 import { User } from '@/types/User';
-import { Store } from '@/types/Store';
 import { put } from '@vercel/blob';
-import { UserHaikuSaveOptions } from '@/types/Haiku';
+import { createStore } from './stores/redis';
 
 export const maxDuration = 300;
 
-let store: Store;
-import(`@/services/stores/${process.env.STORE_TYPE}`)
-  .then((s: any) => {
-    console.log(">> services[key].init", { s });
-    store = new s.create();
-  });
-
-// TODO stats function that uses redis .keys and returns just counts of entities
+const store = createStore({
+  url: process.env.KV_REST_API_URL || "NOT_DEFINED",
+  token: process.env.KV_REST_API_TOKEN || "NOT_DEFINED",
+  debug: true,
+});
 
 export async function backup(user: User, entities?: string[], haikuIds?: string[] | null) {
   console.log('>> app.services.admin.backup', { user, entities, haikuIds });

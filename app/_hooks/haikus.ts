@@ -13,7 +13,7 @@ import useHaikudle from './haikudle';
 import useUser from './user';
 
 let syllable: any;
-import("syllable").then((s: any) => syllable = s);
+import("syllable").then((s: any) => syllable = s.syllable);
 
 async function fetchOpts() {
   const token = await useUser.getState().getToken();
@@ -176,7 +176,6 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     // console.log(">> hooks.haiku.init", { mode, id, query: JSON.stringify(query), haiku });
 
     const { setLoaded, _mode, _haikus } = get();
-
 
     if ((haiku.lang || "en") == "en") {
       const syllables = haiku.poem

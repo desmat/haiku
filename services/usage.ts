@@ -2,14 +2,13 @@ import moment from 'moment';
 import { User } from '@/types/User';
 import { Haiku } from '@/types/Haiku';
 import { getHaikus } from '@/services/haikus';
-import { Store } from '@/types/Store';
+import { createStore } from './stores/redis';
 
-let store: Store;
-import(`@/services/stores/${process.env.STORE_TYPE}`)
-  .then((s: any) => {
-    console.log(">> services.haikus.init", { s });
-    store = new s.create();
-  });
+const store = createStore({
+  url: process.env.KV_REST_API_URL || "NOT_DEFINED",
+  token: process.env.KV_REST_API_TOKEN || "NOT_DEFINED",
+  debug: true,
+});
 
 export async function userUsage(user: User) {
   console.log('>> app.services.usage.userUsage', { user });
@@ -46,8 +45,8 @@ export async function incUserUsage(user: User, resource: "haikusCreated" | "haik
   // console.log('>> app.services.usage.incUserUsage', { updatedUserUsage });
 
   if (userUsage) {
-    return store.userUsage.update(user.id, updatedUserUsage, { expire });
+    return store.userUsage.update(updatedUserUsage, { expire });
   } else {
-    return store.userUsage.create(user.id, updatedUserUsage, { expire });
+    return store.userUsage.create(updatedUserUsage, { expire });
   }
 }

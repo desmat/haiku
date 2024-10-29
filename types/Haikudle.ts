@@ -1,12 +1,11 @@
+import { RedisStoreRecord } from "@desmat/redis-store";
+
 export type Haikudle = {
-  id: string,
   haikuId: string,
   status?: string,
-  createdAt?: number,
-  createdBy?: string,
-  updatedAt?: number,
+  createdBy: string,
   updatedBy?: string,
-} | any;
+} & RedisStoreRecord | any;
 
 // not really needed - for consistency
 export const HaikudleSaveOptions = {
@@ -17,18 +16,12 @@ export const HaikudleSaveOptions = {
 };
 
 export type UserHaikudle = {
-  id: string,
   userId: string,
   haikudleId: string,
   haikudle: Haikudle, // kill?
-  createdAt?: number,
-  createdBy?: string,
-  updatedAt?: number,
-  updatedBy?: string,
-  solvedAt?: number,
   moves?: number,
-}
-  | any; // kill?
+  solvedAt?: number,
+} & RedisStoreRecord| any; // kill?
 
 export const UserHaikudleSaveOptions = {
   lookups: {
@@ -38,15 +31,12 @@ export const UserHaikudleSaveOptions = {
 };
 
 export type DailyHaikudle = {
-  id: string,
   haikuId: string,
   haikudleId: string,
-  createdAt?: number,
-  createdBy?: string,
-  updatedAt?: number,
-  updatedBy?: string,
   theme?: string,  // ???
-};
+  createdBy: string,
+  updatedBy?: string,
+} & RedisStoreRecord;
 
 export const DailyHaikudleSaveOptions = {
   lookups: {

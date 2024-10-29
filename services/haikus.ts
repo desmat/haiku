@@ -5,25 +5,24 @@ import * as locale from 'locale-codes'
 import moment from 'moment';
 import { put } from '@vercel/blob';
 import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
-import { Store } from "@/types/Store";
-import { User } from '@/types/User';
+import { HaikuAlbum } from '@/types/Album';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { DailyHaikudle, Haikudle, UserHaikudle } from '@/types/Haikudle';
 import { USAGE_LIMIT } from '@/types/Usage';
+import { User } from '@/types/User';
 import { deleteHaikudle, getHaikudle, getUserHaikudle } from './haikudles';
 import * as openai from './openai';
 import { incUserUsage, userUsage } from './usage';
 import { triggerDailyHaikuSaved, triggerHaikuSaved } from './webhooks';
-import { HaikuAlbum } from '@/types/Album';
+import { createStore } from './stores/redis';
 import { notFoundHaiku } from './stores/samples';
 import { getFlaggedUserIds } from './users';
 
-let store: Store;
-import(`@/services/stores/${process.env.STORE_TYPE}`)
-  .then((s: any) => {
-    console.log(">> services.haikus.init", { s });
-    store = new s.create();
-  });
+const store = createStore({
+  url: process.env.KV_REST_API_URL || "NOT_DEFINED",
+  token: process.env.KV_REST_API_TOKEN || "NOT_DEFINED",
+  debug: true,
+});
 
 export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[]> {
   console.log(">> services.haikus.getHaikus", { query, hashPoem });
@@ -175,7 +174,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
 
   const idAndVersionedId = [
     id,
-    typeof(version) == "number" && `${id}:${version}`,
+    typeof (version) == "number" && `${id}:${version}`,
   ];
 
   let [
@@ -199,7 +198,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   // get either current or versioned
   // note the edge case when current version is requested explicitly by its version
   // since only previous version have the key <id>:<version>
-  let haiku = typeof(version) == "number" && haikus[0]?.version != version
+  let haiku = typeof (version) == "number" && haikus[0]?.version != version
     ? { ...haikus[1], id }
     : haikus[0];
 
@@ -310,6 +309,7 @@ export async function createHaiku(user: User, {
 
   let create = {
     id: haikuId,
+    createdBy: user.id,
     subject,
     title,
     theme,
@@ -337,7 +337,7 @@ export async function createHaiku(user: User, {
     create = await addToAlbum(user, create, albumId);
   }
 
-  const created = await store.haikus.create(user.id, create);
+  const created = await store.haikus.create(create);
 
   const webhookRet = await triggerHaikuSaved(created);
   // console.log(">> services.haiku.createHaiku", { webhookRet });
@@ -426,12 +426,9 @@ export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: strin
   console.log(">> services.haiku.completeHaikuPoem", { completedPoem, generatedSubject, generatedMood });
 
   // delete corresponding haikudle 
-  getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
-    console.log(">> services.haiku.regenerateHaikuPoem", { haikudle });
-    if (haikudle) {
-      deleteHaikudle(user, haikudle.id);
-    }
-  });
+  if (await store.haikudles.exists(haiku.id)) {
+    await deleteHaikudle(user, haiku.id);
+  }
 
   if (!user.isAdmin) {
     incUserUsage(user, "haikusRegenerated");
@@ -641,10 +638,11 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
   ]);
   console.log(">> services.haiku.deleteHaiku", { dailyHaikuIds, userHaikuIds });
 
-  dailyHaikuIds?.size && store.dailyHaikus.delete(user.id, dailyHaikuIds.values().next().value);
-  Array.from(userHaikuIds).map((id: string) => store.userHaikus.delete(user.id, id));
+  const dailyHaikuId = dailyHaikuIds?.size && dailyHaikuIds.values().next().value;
+  dailyHaikuId && store.dailyHaikus.delete(dailyHaikuId);
+  Array.from(userHaikuIds).map((id: string) => store.userHaikus.delete(id));
 
-  return store.haikus.delete(user.id, id);
+  return store.haikus.delete(id);
 }
 
 export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Promise<Haiku> {
@@ -662,9 +660,10 @@ export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Pro
 
   const version = (original.version || 0);
   if (!options.noVersion) {
-    store.haikus.create(user.id, {
+    store.haikus.create({
       ...original,
       id: `${original.id}:${version}`,
+      createdBy: user.id,
       version,
       deprecated: true,
     }, {
@@ -682,8 +681,9 @@ export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Pro
     return completeHaikuPoem(user, haiku);
   }
 
-  const updated = await store.haikus.update(user.id, {
+  const updated = await store.haikus.update({
     ...haiku,
+    updatedBy: user.id,
     version: options.noVersion
       ? version
       : version + 1,
@@ -693,7 +693,7 @@ export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Pro
     const webhookRet = await triggerHaikuSaved(updated);
     // console.log(">> services.haiku.saveHaiku", { webhookRet });
   }
-  
+
   return updated;
 }
 
@@ -726,7 +726,7 @@ export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed
     ...actionKV,
   };
 
-  const createdUserHaiku = await store.userHaikus.create(user.id, userHaiku, UserHaikuSaveOptions);
+  const createdUserHaiku = await store.userHaikus.create(userHaiku);
 
   console.log(`>> services.haiku.createUserHaiku`, { userHaiku: createdUserHaiku });
   return createdUserHaiku;
@@ -740,12 +740,12 @@ export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<U
     return;
   }
 
-  const existingUserHaiku = await store.userHaikus.get(userHaiku.id);
+  const existingUserHaiku = await store.userHaikus.get(userHaiku.id); // TODO .exists
   let savedUserHaiku: UserHaiku;
   if (existingUserHaiku) {
-    savedUserHaiku = await store.userHaikus.update(user.id, userHaiku, UserHaikuSaveOptions);
+    savedUserHaiku = await store.userHaikus.update(userHaiku);
   } else {
-    savedUserHaiku = await store.userHaikus.create(user.id, userHaiku, UserHaikuSaveOptions);
+    savedUserHaiku = await store.userHaikus.create(userHaiku);
   }
 
   console.log(`>> services.haiku.saveUserHaiku`, { savedUserHaiku });
@@ -953,7 +953,7 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
   }
 
   let [dailyHaiku, haiku] = await Promise.all([
-    store.dailyHaikus.get(dateCode),
+    store.dailyHaikus.get(dateCode), // TODO .exists
     store.haikus.get(haikuId),
   ]);
 
@@ -967,9 +967,16 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
 
   let ret;
   if (dailyHaiku) {
-    ret = await store.dailyHaikus.update(user.id, { ...dailyHaiku, ...newDailyHaiku });
+    ret = await store.dailyHaikus.update({
+      ...dailyHaiku,
+      ...newDailyHaiku,
+      updatedBy: user.id
+    });
   } else {
-    ret = await store.dailyHaikus.create(user.id, newDailyHaiku);
+    ret = await store.dailyHaikus.create({
+      ...newDailyHaiku,
+      createdBy: user.id
+    });
   }
 
   const webhookRet = await triggerDailyHaikuSaved(ret);
@@ -981,13 +988,13 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
 export async function likeHaiku(user: User, haiku: Haiku, like?: boolean): Promise<LikedHaiku | undefined> {
   console.log(">> services.haiku.likeHaiku", { user, haiku, like });
   if (like) {
-    return store.likedHaikus.create(user.id, {
+    return store.likedHaikus.create({
       id: `${user.id}:${haiku.id}`,
       userId: user.id,
       haikuId: haiku.id,
     });
   } else {
-    return store.likedHaikus.delete(user.id, `${user.id}:${haiku.id}`);
+    return store.likedHaikus.delete(`${user.id}:${haiku.id}`);
   }
 }
 
@@ -1005,13 +1012,13 @@ export async function getLikedHaikus(): Promise<Haiku[]> {
 export async function flagHaiku(user: User, haiku: Haiku, flag?: boolean): Promise<LikedHaiku | undefined> {
   console.log(">> services.haiku.flagHaiku", { user, haiku, flag });
   if (flag) {
-    return store.flaggedHaikus.create(user.id, {
+    return store.flaggedHaikus.create({
       id: `${user.id}:${haiku.id}`,
       userId: user.id,
       haikuId: haiku.id,
     });
   } else {
-    return store.flaggedHaikus.delete(user.id, `${user.id}:${haiku.id}`);
+    return store.flaggedHaikus.delete(`${user.id}:${haiku.id}`);
   }
 }
 
@@ -1116,17 +1123,17 @@ export async function addToAlbum(user: User, haiku: Haiku, albumId: string): Pro
   console.log(">> services.haiku.addToAlbum", { user, haiku, albumId });
 
   // find album, if not found create
-  let haikuAlbum = await store.haikuAlbums.get(albumId);
+  let haikuAlbum = await store.haikuAlbums.get(albumId); // TODO .exists
   if (!haikuAlbum) {
-    haikuAlbum = await store.haikuAlbums.create(user.id, {
+    haikuAlbum = await store.haikuAlbums.create({
       id: albumId,
       createdBy: user.id,
-      createdAt: moment().valueOf(),
       haikuIds: [haiku.id],
     })
   } else {
-    await store.haikuAlbums.update(user.id, {
+    await store.haikuAlbums.update({
       ...haikuAlbum,
+      updatedBy: user.id,
       haikuIds: [
         ...haikuAlbum.haikuIds,
         haiku.id,

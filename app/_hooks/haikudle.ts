@@ -11,7 +11,7 @@ import { User } from '@/types/User';
 import { notFoundHaiku, notFoundHaikudle } from "@/services/stores/samples";
 
 let syllable: any;
-import("syllable").then((s: any) => syllable = s);
+import("syllable").then((s: any) => syllable = s.syllable);
 
 async function fetchOpts() {
   const token = await useUser.getState().getToken();

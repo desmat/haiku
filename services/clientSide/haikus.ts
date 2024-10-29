@@ -1,13 +1,12 @@
 import { hashCode, mapToList, normalizeWord, uuid } from '@desmat/utils';
 import { DailyHaiku, Haiku, UserHaiku } from "@/types/Haiku";
-import { Store } from "@/types/Store";
+import { createStore } from '../stores/redis';
 
-let store: Store;
-import(`@/services/stores/${process.env.STORE_TYPE}`)
-  .then((s: any) => {
-    console.log(">> services.haikus.init", { s });
-    store = new s.create();
-  });
+const store = createStore({
+  url: process.env.KV_REST_API_URL || "NOT_DEFINED",
+  token: process.env.KV_REST_API_TOKEN || "NOT_DEFINED",
+  debug: true,
+});
 
 export async function getHaiku(id: string, hashPoem?: boolean): Promise<Haiku | undefined> {
   console.log(`>> services.haiku.getHaiku`, { id, hashPoem });

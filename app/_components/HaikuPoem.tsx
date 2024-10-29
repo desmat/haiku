@@ -17,7 +17,7 @@ import { StyledLayers } from "./StyledLayers";
 import { GenerateIcon } from "./nav/GenerateInput";
 
 let syllable: any;
-import("syllable").then((s: any) => syllable = s);
+import("syllable").then((s: any) => syllable = s.syllable);
 
 const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
   const title = haiku?.title ?? haiku?.theme;

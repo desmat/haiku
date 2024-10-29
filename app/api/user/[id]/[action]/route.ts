@@ -27,9 +27,8 @@ export async function POST(
     // }
 
     // add flag entry even if user record does not exist
-    const userToFlag = { id: params.id };
-
-    const flaggedUser = await flagUser(user, userToFlag);
+    const flaggedUser = await flagUser(user, params.id);
+    
     return NextResponse.json({ user: flaggedUser });
   } else {
     return NextResponse.json(
