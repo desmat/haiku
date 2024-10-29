@@ -93,20 +93,17 @@ export async function saveUser(user: User) {
     return user;
   }
 
-  let savedUser = await store.user.get(user.id); // TODO .exists
   user.isInternal = !!(user.isInternal
     || user.referer && user.referer.includes("vercel.com")
     || user.host && user.host.includes("localhost"));
 
   // TODO: maybe we'll need to distinguish between user acting and user to save?
 
-  if (savedUser) {
-    savedUser = await store.user.update(user);
-  } else {
-    savedUser = await store.user.create(user);
+  if (await store.user.exists(user.id)) {
+    return store.user.update(user);
   }
 
-  return savedUser;
+  return store.user.create(user);
 }
 
 export async function createToken(user: User) {
@@ -115,26 +112,22 @@ export async function createToken(user: User) {
 
 export async function flagUser(admin: User, userId: string, reason?: string) {
   console.log(">> services.users.flagUser", { admin, userId, reason });
-  let flaggedUser = await store.flaggedUsers.get(userId); // TODO .exists
 
-  if (flaggedUser) {
-    flaggedUser = await store.flaggedUsers.update({
-      ...flaggedUser,
+  if (await store.flaggedUsers.exists(userId)) {
+    return store.flaggedUsers.update({
       id: userId,
       updatedBy: admin.id,
       userId,
       reason,
     });
-  } else {
-    flaggedUser = await store.flaggedUsers.create({
-      id: userId,
-      createdBy: admin.id,
-      userId,
-      reason,
-    });
   }
 
-  return flaggedUser;
+  return store.flaggedUsers.create({
+    id: userId,
+    createdBy: admin.id,
+    userId,
+    reason,
+  });
 }
 
 export async function getFlaggedUserIds(): Promise<Set<any>> {

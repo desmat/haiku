@@ -740,16 +740,11 @@ export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<U
     return;
   }
 
-  const existingUserHaiku = await store.userHaikus.get(userHaiku.id); // TODO .exists
-  let savedUserHaiku: UserHaiku;
-  if (existingUserHaiku) {
-    savedUserHaiku = await store.userHaikus.update(userHaiku);
-  } else {
-    savedUserHaiku = await store.userHaikus.create(userHaiku);
+  if (await store.userHaikus.exists(userHaiku.id)) {
+    return store.userHaikus.update(userHaiku);
   }
 
-  console.log(`>> services.haiku.saveUserHaiku`, { savedUserHaiku });
-  return savedUserHaiku;
+  return store.userHaikus.create(userHaiku);
 }
 
 export async function getRandomHaiku(user: User, mode: string, query?: any, options?: any): Promise<Haiku | undefined> {
@@ -952,8 +947,8 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
     throw `Unauthorized`;
   }
 
-  let [dailyHaiku, haiku] = await Promise.all([
-    store.dailyHaikus.get(dateCode), // TODO .exists
+  let [dailyHaikuExists, haiku] = await Promise.all([
+    store.dailyHaikus.exists(dateCode),
     store.haikus.get(haikuId),
   ]);
 
@@ -966,9 +961,8 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
   };
 
   let ret;
-  if (dailyHaiku) {
+  if (dailyHaikuExists) {
     ret = await store.dailyHaikus.update({
-      ...dailyHaiku,
       ...newDailyHaiku,
       updatedBy: user.id
     });
@@ -1123,7 +1117,7 @@ export async function addToAlbum(user: User, haiku: Haiku, albumId: string): Pro
   console.log(">> services.haiku.addToAlbum", { user, haiku, albumId });
 
   // find album, if not found create
-  let haikuAlbum = await store.haikuAlbums.get(albumId); // TODO .exists
+  let haikuAlbum = await store.haikuAlbums.get(albumId);
   if (!haikuAlbum) {
     haikuAlbum = await store.haikuAlbums.create({
       id: albumId,
