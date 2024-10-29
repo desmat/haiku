@@ -302,18 +302,18 @@ export default function HaikuPoem({
 
     setSaving(true);
 
-    const syllables = haiku?.poem
-      .map((value: string, i: number) => (updatedPoem[i] || value || "").split(/\s/)
-        .map((word: string) => syllable(word))
-        .reduce((a: number, v: number) => a + v, 0))
-    // console.log('>> app._components.HaikuPoem.finishEdit()', { syllables });
+    // const syllables = haiku?.poem
+    //   .map((value: string, i: number) => (updatedPoem[i] || value || "").split(/\s/)
+    //     .map((word: string) => syllable(word))
+    //     .reduce((a: number, v: number) => a + v, 0))
+    // // console.log('>> app._components.HaikuPoem.finishEdit()', { syllables });
 
     const updatedOpen = haiku?.poem
       .map((value: string, i: number) => {
         if (updatedPoem[i] == "") return "...";
         if (updatedPoem[i] && (updatedPoem[i].includes("...") || updatedPoem[i].includes("…"))) return updatedPoem[i].trim();
-        if ((i == 0 || i == 2) && syllables[i] <= 3) return `... ${(updatedPoem[i] || value).trim()} ...`;
-        if (i == 1 && syllables[i] <= 5) return `... ${(updatedPoem[i] || value).trim()} ...`;
+        // if ((i == 0 || i == 2) && syllables[i] <= 3) return `... ${(updatedPoem[i] || value).trim()} ...`;
+        // if (i == 1 && syllables[i] <= 5) return `... ${(updatedPoem[i] || value).trim()} ...`;
         return updatedPoem[i] || value;
       });
 
