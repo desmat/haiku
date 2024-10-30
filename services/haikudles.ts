@@ -183,12 +183,13 @@ export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<H
     return store.userHaikudles.update({
       ...userHaikudle,
       haikudle,
-      updatedBy: user.id
+      updatedBy: user.id,
     });
   }
 
   userHaikudle = {
     id: userHaikudleId,
+    createdBy: user.id,
     userId: user.id,
     haikudleId: haikudle.id,
     haikudle,

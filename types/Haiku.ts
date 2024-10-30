@@ -26,6 +26,8 @@ export type UserHaiku = {
   theme?: string,
   solvedAt?: number,
   moves?: number, // move to UserHaikudle
+  createdBy: string,
+  updatedBy: string,
   generatedAt?: number,
   viewedAt?: number,
   likedAt?: number, // kill?

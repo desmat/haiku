@@ -384,7 +384,7 @@ export default function SidePanel({
                   >
                     <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>
                     {user?.isAdmin && !album && 
-                      <span className="font-normal"> generated {formatTimeFromNow(h.createdAt || 0)} by {h.userId == user?.id ? "you" : `${isUserAdmin(h.userId) ? "admin" : "user"} ${h.userId}`}</span>
+                      <span className="font-normal"> generated {formatTimeFromNow(h.createdAt || 0)} by {h.createdBy == user?.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
                     }
                     {(!user?.isAdmin || album) && h.generatedAt &&
                       <span className="font-normal"> generated {formatTimeFromNow(h.generatedAt)}</span>

@@ -718,6 +718,7 @@ export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed
   const actionKV = action ? { [`${action}At`]: now } : {};
   const userHaiku = {
     id,
+    createdBy: user.id,
     userId: user.id,
     haikuId: haiku.id,
     theme: haiku.theme,
@@ -739,10 +740,10 @@ export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<U
   }
 
   if (await store.userHaikus.exists(userHaiku.id)) {
-    return store.userHaikus.update(userHaiku);
+    return store.userHaikus.update({ ...userHaiku, updatedBy: user.id });
   }
 
-  return store.userHaikus.create(userHaiku);
+  return store.userHaikus.create({ ...userHaiku, createdBy: user.id });
 }
 
 export async function getRandomHaiku(user: User, mode: string, query?: any, options?: any): Promise<Haiku | undefined> {
