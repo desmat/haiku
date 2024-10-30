@@ -5,9 +5,7 @@ import { getHaikus } from '@/services/haikus';
 import { createStore } from './stores/redis';
 
 const store = createStore({
-  url: process.env.KV_REST_API_URL || "NOT_DEFINED",
-  token: process.env.KV_REST_API_TOKEN || "NOT_DEFINED",
-  debug: true,
+  // debug: true,
 });
 
 export async function userUsage(user: User) {

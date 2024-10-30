@@ -12,7 +12,7 @@ export type Haiku = {
   updatedBy?: string,
 } & RedisStoreRecord | any;
 
-export const HaikuSaveOptions = {
+export const HaikuOptions = {
   lookups: {
     lang: "lang",
     user: "createdBy",
@@ -32,7 +32,7 @@ export type UserHaiku = {
   sharedAt?: number,
 } & RedisStoreRecord;
 
-export const UserHaikuSaveOptions = {
+export const UserHaikuOptions = {
   lookups: {
     user: "userId",
     haiku: "haikuId",
@@ -46,7 +46,7 @@ export type LikedHaiku = {
   updatedBy?: string,
   }& RedisStoreRecord | any;
 
-export const LikedHaikuSaveOptions = {
+export const LikedHaikuOptions = {
   lookups: {
     user: "userId",
     haiku: "haikuId",
@@ -60,7 +60,7 @@ export type FlaggedHaiku = {
   updatedBy?: string,
 } & RedisStoreRecord | any;
 
-export const FlaggedHaikuSaveOptions = {
+export const FlaggedHaikuOptions = {
   lookups: {
     user: "userId",
     haiku: "haikuId",
@@ -74,7 +74,7 @@ export type DailyHaiku = {
   updatedBy?: string,
 } & RedisStoreRecord;
 
-export const DailyHaikuSaveOptions = {
+export const DailyHaikuOptions = {
   lookups: {
     haiku: "haikuId",
   },

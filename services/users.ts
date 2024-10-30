@@ -5,9 +5,7 @@ import { decodeJWT, encodeJWT } from "@/utils/jwt";
 import { createStore } from './stores/redis';
 
 const store = createStore({
-  url: process.env.KV_REST_API_URL || "NOT_DEFINED",
-  token: process.env.KV_REST_API_TOKEN || "NOT_DEFINED",
-  debug: true,
+  // debug: true,
 });
 
 export function getUserName(user: User): string {

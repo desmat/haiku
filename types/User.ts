@@ -15,7 +15,7 @@ export type User = {
   sessionCount?: number,
 } & RedisStoreRecord;
 
-export const UserSaveOptions = {
+export const UserOptions = {
   lookups: {
     admin: "isAdmin",
     internal: "isInternal",
@@ -29,7 +29,7 @@ export type FlaggedUser = {
   reason?: string,
 } & RedisStoreRecord;
 
-export const FlaggedUserSaveOptions = {
+export const FlaggedUserOptions = {
   lookups: {
     user: "userId",
   },

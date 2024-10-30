@@ -8,7 +8,7 @@ export type Haikudle = {
 } & RedisStoreRecord | any;
 
 // not really needed - for consistency
-export const HaikudleSaveOptions = {
+export const HaikudleOptions = {
   lookups: {
     haiku: "haikuId",
     user: "createdBy",
@@ -23,7 +23,7 @@ export type UserHaikudle = {
   solvedAt?: number,
 } & RedisStoreRecord| any; // kill?
 
-export const UserHaikudleSaveOptions = {
+export const UserHaikudleOptions = {
   lookups: {
     user: "userId",
     haikudle: "haikudleId",
@@ -38,7 +38,7 @@ export type DailyHaikudle = {
   updatedBy?: string,
 } & RedisStoreRecord;
 
-export const DailyHaikudleSaveOptions = {
+export const DailyHaikudleOptions = {
   lookups: {
     haikudle: "haikudleId",
   },

@@ -8,9 +8,7 @@ import { createStore } from './stores/redis';
 export const maxDuration = 300;
 
 const store = createStore({
-  url: process.env.KV_REST_API_URL || "NOT_DEFINED",
-  token: process.env.KV_REST_API_TOKEN || "NOT_DEFINED",
-  debug: true,
+  // debug: true,
 });
 
 export async function backup(user: User, entities?: string[], haikuIds?: string[] | null) {

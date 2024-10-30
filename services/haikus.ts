@@ -4,7 +4,7 @@ import chroma from 'chroma-js';
 import * as locale from 'locale-codes'
 import moment from 'moment';
 import { put } from '@vercel/blob';
-import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, UserHaiku, UserHaikuSaveOptions } from "@/types/Haiku";
+import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, UserHaiku, UserHaikuOptions } from "@/types/Haiku";
 import { HaikuAlbum } from '@/types/Album';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { DailyHaikudle, Haikudle, UserHaikudle } from '@/types/Haikudle';
@@ -19,9 +19,7 @@ import { notFoundHaiku } from './stores/samples';
 import { getFlaggedUserIds } from './users';
 
 const store = createStore({
-  url: process.env.KV_REST_API_URL || "NOT_DEFINED",
-  token: process.env.KV_REST_API_TOKEN || "NOT_DEFINED",
-  debug: true,
+  // debug: true,
 });
 
 export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[]> {
