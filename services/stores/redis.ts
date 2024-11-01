@@ -1,4 +1,4 @@
-import { RedisStore } from "@desmat/redis-store";
+import RedisStore from "@desmat/redis-store";
 import { HaikuAlbum } from "@/types/Album";
 import { DailyHaiku, DailyHaikuOptions, FlaggedHaiku, FlaggedHaikuOptions, Haiku, HaikuOptions, LikedHaiku, LikedHaikuOptions, UserHaiku, UserHaikuOptions } from "@/types/Haiku";
 import { DailyHaikudle, DailyHaikudleOptions, Haikudle, HaikudleOptions, UserHaikudle, UserHaikudleOptions } from "@/types/Haikudle";

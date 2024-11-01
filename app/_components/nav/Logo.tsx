@@ -93,18 +93,20 @@ export function Logo({
               : styles
             }
           >{isHaikudleMode || isHaikudleSocialImgMode /* || isSocialImgMode */ ? "kudle" : "ku"}</StyledLayers>
-          <span className="ml-[0.15em]">
-            <StyledLayers
-              styles={onboardingElement
-                ? styles.slice(0, 1)
-                : styles
-              }
-            >
-              <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[72pt]" : "text-[20pt] md:text-[26pt]"} font-normal _md:font-medium`}>
-                genius
-              </span>
-            </StyledLayers>
-          </span>
+          {!isHaikudleMode && !isHaikudleSocialImgMode &&
+            <span className="ml-[0.15em]">
+              <StyledLayers
+                styles={onboardingElement
+                  ? styles.slice(0, 1)
+                  : styles
+                }
+              >
+                <span className={`${font.inter.className} tracking-[-2px] ml-[1px] mr-[2px] ${isSocialImgMode || isHaikudleSocialImgMode ? "text-[72pt]" : "text-[20pt] md:text-[26pt]"} font-normal _md:font-medium`}>
+                  genius
+                </span>
+              </StyledLayers>
+            </span>
+          }
         </div>
       }
     </Link>
