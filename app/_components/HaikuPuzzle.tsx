@@ -1,9 +1,9 @@
 'use client'
 
+import { upperCaseFirstLetter } from "@desmat/utils/format";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 import useHaikudle from '@/app/_hooks/haikudle';
 import { Haiku } from "@/types/Haiku";
-import { upperCaseFirstLetter } from "@/utils/format";
 import { StyledLayers } from "./StyledLayers";
 
 export default function HaikuPuzzle({

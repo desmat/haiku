@@ -1,17 +1,17 @@
+import { hashCode, listToMap, mapToSearchParams, normalizeWord, shuffleArray } from '@desmat/utils';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { syllable } from 'syllable'
 import useUser from './user';
-import { hashCode, listToMap, mapToSearchParams, normalizeWord, uuid } from '@/utils/misc';
 import { Haiku } from '@/types/Haiku';
 import trackEvent from '@/utils/trackEvent';
-import shuffleArray from "@/utils/shuffleArray";
 import { Haikudle } from '@/types/Haikudle';
 import useAlert from './alert';
 import moment from 'moment';
 import { User } from '@/types/User';
 import { notFoundHaiku, notFoundHaikudle } from "@/services/stores/samples";
-import useHaikus from './haikus';
+
+let syllable: any;
+import("syllable").then((s: any) => syllable = s.syllable);
 
 async function fetchOpts() {
   const token = await useUser.getState().getToken();

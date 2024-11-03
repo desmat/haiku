@@ -1,5 +1,6 @@
 'use client'
 
+import { formatTimeFromNow } from '@desmat/utils/format';
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react';
@@ -16,7 +17,6 @@ import { BiBookAdd } from "react-icons/bi";
 import { PiUserSwitchBold } from "react-icons/pi";
 import useUser from '@/app/_hooks/user';
 import { ExperienceMode } from '@/types/ExperienceMode';
-import { formatTimeFromNow } from '@/utils/format';
 import { Haiku } from '@/types/Haiku';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import trackEvent from '@/utils/trackEvent';

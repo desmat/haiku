@@ -1,19 +1,18 @@
+import { RedisStoreRecord } from "@desmat/redis-store";
+
 export type Haiku = {
-  id: string,
-  createdAt: number,
-  createdBy: string,
   theme: string,
   poem: string[],
   bgImage: string,
-  updatedAt?: number,
-  updatedBy?: string,
   status?: string,
   lang?: string,
   version?: number,
   albumId?: string, // TODO change to many-to-many
-} | any;
+  createdBy: string,
+  updatedBy?: string,
+} & RedisStoreRecord | any;
 
-export const HaikuSaveOptions = {
+export const HaikuOptions = {
   lookups: {
     lang: "lang",
     user: "createdBy",
@@ -22,24 +21,20 @@ export const HaikuSaveOptions = {
 };
 
 export type UserHaiku = {
-  id: string,
   userId: string,
   haikuId: string,
   theme?: string,
-  createdAt?: number,
-  createdBy?: string,
-  updatedAt?: number,
-  updatedBy?: string,
   solvedAt?: number,
   moves?: number, // move to UserHaikudle
+  createdBy: string,
+  updatedBy: string,
   generatedAt?: number,
-  generatedBy?: string,
   viewedAt?: number,
   likedAt?: number, // kill?
   sharedAt?: number,
-};
+} & RedisStoreRecord;
 
-export const UserHaikuSaveOptions = {
+export const UserHaikuOptions = {
   lookups: {
     user: "userId",
     haiku: "haikuId",
@@ -47,14 +42,13 @@ export const UserHaikuSaveOptions = {
 };
 
 export type LikedHaiku = {
-  id: string,
   haikuId: string,
   userId: string,
-  createdBy: string, 
-  createdAt: string,
-} | any;
+  createdBy: string,
+  updatedBy?: string,
+  }& RedisStoreRecord | any;
 
-export const LikedHaikuSaveOptions = {
+export const LikedHaikuOptions = {
   lookups: {
     user: "userId",
     haiku: "haikuId",
@@ -62,14 +56,13 @@ export const LikedHaikuSaveOptions = {
 };
 
 export type FlaggedHaiku = {
-  id: string,
   haikuId: string,
   userId: string,
-  createdBy: string, 
-  createdAt: string,
-} | any;
+  createdBy: string,
+  updatedBy?: string,
+} & RedisStoreRecord | any;
 
-export const FlaggedHaikuSaveOptions = {
+export const FlaggedHaikuOptions = {
   lookups: {
     user: "userId",
     haiku: "haikuId",
@@ -77,16 +70,13 @@ export const FlaggedHaikuSaveOptions = {
 };
 
 export type DailyHaiku = {
-  id: string,
   haikuId: string,
-  createdAt?: number,
-  createdBy?: string,
-  updatedAt?: number,
-  updatedBy?: string,
   theme?: string, // ???
-};
+  createdBy: string,
+  updatedBy?: string,
+} & RedisStoreRecord;
 
-export const DailyHaikuSaveOptions = {
+export const DailyHaikuOptions = {
   lookups: {
     haiku: "haikuId",
   },

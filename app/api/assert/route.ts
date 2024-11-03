@@ -1,6 +1,6 @@
+import { searchParamsToMap } from '@desmat/utils';
 import { NextRequest, NextResponse } from 'next/server'
 import { userSession } from '@/services/users';
-import { searchParamsToMap } from '@/utils/misc';
 
 
 export async function GET(request: NextRequest, params?: any) {

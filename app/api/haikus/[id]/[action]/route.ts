@@ -180,7 +180,7 @@ export async function POST(
     return NextResponse.json({ haiku: updatedHaiku });
   } else if (params.action == "share") {
     const { user } = await userSession(request)
-    const systemUser = { isAdmin: true, id: "(system)" }
+    const systemUser = { isAdmin: true, id: "(system)", createdAt: -1 }
     let [haiku, userHaiku] = await Promise.all([
       getHaiku(systemUser, params.id),
       getUserHaiku(user.id, params.id),

@@ -1,7 +1,7 @@
+import { RedisStoreRecord } from "@desmat/redis-store";
 import { Usage } from "./Usage";
 
 export type User = {
-  id: string,
   isAnonymous?: boolean,
   isAdmin?: boolean,
   isInternal?: boolean,
@@ -13,9 +13,9 @@ export type User = {
   host?: string | undefined | null,
   referer?: string | undefined | null,
   sessionCount?: number,
-}
+} & RedisStoreRecord;
 
-export const UserSaveOptions = {
+export const UserOptions = {
   lookups: {
     admin: "isAdmin",
     internal: "isInternal",
@@ -23,16 +23,13 @@ export const UserSaveOptions = {
 };
 
 export type FlaggedUser = {
-  id: string,
   userId: string,
-  createdBy?: string,
-  createdAt?: number,
+  createdBy: string,
   updatedBy?: string,
-  updatedAt?: number,
   reason?: string,
-};
+} & RedisStoreRecord;
 
-export const FlaggedUserSaveOptions = {
+export const FlaggedUserOptions = {
   lookups: {
     user: "userId",
   },

@@ -1,15 +1,12 @@
+import { searchParamsToMap } from '@desmat/utils';
 import moment from 'moment';
-import { Store } from '@/types/Store';
 import { User } from '@/types/User';
-import { searchParamsToMap } from '@/utils/misc';
 import { decodeJWT, encodeJWT } from "@/utils/jwt";
+import { createStore } from './stores/redis';
 
-let store: Store;
-import(`@/services/stores/${process.env.STORE_TYPE}`)
-  .then((s: any) => {
-    console.log(">> services.users.init", { s });
-    store = new s.create();
-  });
+const store = createStore({
+  // debug: true,
+});
 
 export function getUserName(user: User): string {
   return user?.isAnonymous
@@ -94,46 +91,41 @@ export async function saveUser(user: User) {
     return user;
   }
 
-  let savedUser = await store.user.get(user.id);
   user.isInternal = !!(user.isInternal
     || user.referer && user.referer.includes("vercel.com")
     || user.host && user.host.includes("localhost"));
 
   // TODO: maybe we'll need to distinguish between user acting and user to save?
 
-  if (savedUser) {
-    savedUser = await store.user.update(user.id, user);
-  } else {
-    savedUser = await store.user.create(user.id, user);
+  if (await store.user.exists(user.id)) {
+    return store.user.update(user);
   }
 
-  return savedUser;
+  return store.user.create(user);
 }
 
 export async function createToken(user: User) {
   return encodeJWT({ user });
 }
 
-export async function flagUser(admin: User, user: User, reason?: string) {
-  console.log(">> services.users.flagUser", { admin, user, reason });
-  let flaggedUser = await store.flaggedUsers.get(user.id);
+export async function flagUser(admin: User, userId: string, reason?: string) {
+  console.log(">> services.users.flagUser", { admin, userId, reason });
 
-  if (flaggedUser) {
-    flaggedUser = await store.flaggedUsers.update(admin.id, {
-      ...flaggedUser,
-      id: user.id,
-      userId: user.id,
-      reason,
-    });
-  } else {
-    flaggedUser = await store.flaggedUsers.create(admin.id, {
-      id: user.id,
-      userId: user.id,
+  if (await store.flaggedUsers.exists(userId)) {
+    return store.flaggedUsers.update({
+      id: userId,
+      updatedBy: admin.id,
+      userId,
       reason,
     });
   }
 
-  return flaggedUser;
+  return store.flaggedUsers.create({
+    id: userId,
+    createdBy: admin.id,
+    userId,
+    reason,
+  });
 }
 
 export async function getFlaggedUserIds(): Promise<Set<any>> {
@@ -312,16 +304,16 @@ export async function getUserStats(reportAt?: any): Promise<any> {
         break;
       }
 
-      if (diffCreated >= 0 && !adminIds.has(userHaiku.createdBy) && !internalUserIds.has(userHaiku.createdBy) && userHaiku.sharedAt) {
+      if (diffCreated >= 0 && !adminIds.has(userHaiku.userId) && !internalUserIds.has(userHaiku.userId) && userHaiku.sharedAt) {
         // console.warn(">> services.users.getUserStats", { userHaikudle });
 
         if (diffCreated < 24 * 30) {
-          monthlyActiveUserIds.add(userHaiku.createdBy);
+          monthlyActiveUserIds.add(userHaiku.userId);
           // TODO monthlyActiveUserSessionCount
         }
 
         if (diffCreated < 24) {
-          dailyActiveUserIds.add(userHaiku.createdBy);
+          dailyActiveUserIds.add(userHaiku.userId);
           // TODO dailyActiveUserSessionCount
         }
       }
