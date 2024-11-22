@@ -48,24 +48,24 @@ async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudl
     });
 
   if (shuffle) {
-    // always set first 2 and last words correct
+    // always set first ~and last words~word correct
     let correctWords = [
-      words.splice(0, 2),
-      words.splice(words.length - 1, 1),
+      words.splice(0, 1),
+      // words.splice(words.length - 1, 1),
     ];
 
     words = [
       ...correctWords[0],
       ...shuffleArray(words),
-      ...correctWords[1],
+      // ...correctWords[1],
     ];
   }
 
-  const numWords = words.length;
-  const numLines = haiku.poem.length;
-  const inProgress = haikudle?.inProgress || Array.from(new Array(numLines))
-    .map((e: any, i: number) => words.slice((i * numWords / numLines), ((i + 1) * numWords / numLines)));
-
+  // arrange words such that first ~and last are~is correct, 
+  // rest is shuffled but each line has correct number of words
+  const inProgress = haikudle?.inProgress || haiku.poem
+    .map((line: string) => words.splice(0, line.split(/\s/).length))
+      
   haikudle = {
     ...haikudle,
     inProgress,
@@ -198,12 +198,13 @@ export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<H
   return store.userHaikudles.create(userHaikudle);
 }
 
-export async function getDailyHaikudle(id?: string, dontCreate?: boolean): Promise<DailyHaikudle | undefined> {
+export async function getDailyHaikudle(id?: string, dontCreate?: boolean): Promise<any | undefined> {
   console.log(`>> services.haikudle.getDailyHaikudle`, { id });
 
   if (!id) id = moment().format("YYYYMMDD");
 
   let dailyHaikudle = await store.dailyHaikudles.get(id);
+  let haikudle;
   console.log(`>> services.haikudle.getDailyHaikudle`, { id, dailyHaikudle });
 
   if (!dailyHaikudle && dontCreate) {
@@ -243,13 +244,15 @@ export async function getDailyHaikudle(id?: string, dontCreate?: boolean): Promi
 
     console.log(`>> services.haikudle.getDailyHaikudle creating new daily haikudle`, { randomHaikuId });
 
-    const randomHaikudle = await createHaikudle(systemUser, { id: randomHaikuId, haikuId: randomHaikuId });
-    console.log('>> services.haikudle.getDailyHaikudle creating new daily haikudle', { randomHaikuId, randomHaikudle });
+    haikudle = await createHaikudle(systemUser, { id: randomHaikuId, haikuId: randomHaikuId });
+    console.log('>> services.haikudle.getDailyHaikudle creating new daily haikudle', { randomHaikuId, haikudle });
 
-    dailyHaikudle = await saveDailyHaikudle(systemUser, id, randomHaikudle.haikuId, randomHaikudle.id);
+    dailyHaikudle = await saveDailyHaikudle(systemUser, id, haikudle.haikuId, haikudle.id);
+  } else {
+    haikudle = await store.haikudles.get(dailyHaikudle.haikudleId);
   }
 
-  return dailyHaikudle;
+  return { haikudle, dailyHaikudle };
 }
 
 export async function getDailyHaikudleIds(query?: any): Promise<string[]> {

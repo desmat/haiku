@@ -10,22 +10,20 @@ export async function GET(request: NextRequest, params?: any) {
 
   const { user } = await userSession(request);
 
-  let todaysHaikudle = await getDailyHaikudle();
+  let { haikudle, dailyHaikudle } = await getDailyHaikudle();
 
-  console.log('>> app.api.haikudles.GET', { todaysHaikudle });
+  console.log('>> app.api.haikudles.GET', { dailyHaikudle });
 
-  if (!todaysHaikudle) {
-    return NextResponse.json({ todaysHaikudle: {} }, { status: 404 });
+  if (!dailyHaikudle) {
+    return NextResponse.json({ dailyHaikudle: {} }, { status: 404 });
   }
 
   let [
     haiku,
-    haikudle,
     userHaikudle
   ] = await Promise.all([
-    getHaiku(user, todaysHaikudle.haikuId, true),
-    getHaikudle(user, todaysHaikudle.haikuId),
-    getUserHaikudle(user?.id, todaysHaikudle?.haikuId),
+    getHaiku(user, dailyHaikudle.haikuId, true),
+    getUserHaikudle(user?.id, dailyHaikudle?.haikuId),
   ]);
 
   console.log('>> app.api.haikudles.GET', { haiku, haikudle, userHaikudle });
