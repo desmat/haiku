@@ -116,11 +116,11 @@ export async function restore(user: User, url: string) {
             result[`${key}_skipped`] = (result[`${key}_skipped`] || 0) + 1;
 
             // @ts-ignore
-            // await store[key].update("(system)", value, options);
+            // await store[key].update(value, options);
             // result[`${key}_updated`] = (result[`${key}_updated`] || 0) + 1;
           } else {
             // @ts-ignore
-            await store[key].create("", value, options);
+            await store[key].create(value, options);
             result[`${key}_created`] = (result[`${key}_created`] || 0) + 1;
           }
         })
