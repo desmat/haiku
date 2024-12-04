@@ -3,10 +3,11 @@ import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/react';
 import Alert from '@/app/_components/Alert';
 import '@/app/globals.css';
-import { metadata as rootMetadata, metaUrl, appName, appDescription } from '@/app/layout';
+import { metadata as rootMetadata, metaUrl, appName, appDescription } from '@/app/NOPElayout';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
 import { getDailyHaikudle } from '@/services/haikudles';
 import { User } from '@/types/User';
+import { inter } from '../font';
 
 const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 
@@ -57,6 +58,7 @@ export default async function Layout({
   params?: any,
 }) {
   let haikuId = params?.slug && params.slug[0];
+  const url = `${metaUrl}${params?.slug && params.slug[0] + "/" || ""}`
 
   // not sure what's going on here (only when deployed to vercel)
   if (haikuId == "index") {
@@ -89,20 +91,21 @@ export default async function Layout({
     ...(isHaikudleMode
       ? [`https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`]
       : [
-          `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}_${haiku?.version || 0}.png`,
-          // `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}.png`,
-        ]),
+        `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}_${haiku?.version || 0}.png`,
+        // `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}.png`,
+      ]),
   ];
   console.log('>> app.[[..slug]].layout.render()', { images });
 
   metadata = {
-    metadataBase: new URL(`${metaUrl}${params?.slug && params.slug[0] || ""}`),
+    metadataBase: new URL(url),
     openGraph: {
       title: rootMetadata.title || "",
       description: rootMetadata.description || "",
       type: "website",
       // url: metaUrl,
-      url: `${metaUrl}${params?.slug && params.slug[0] || ""}`,
+      // url: `${metaUrl}${params?.slug && params.slug[0] || ""}`,
+      url,
       images,
     }
   }
@@ -110,23 +113,38 @@ export default async function Layout({
   console.log('>> app.[[..slug]].layout.render()', { metadata });
 
   return (
-    <section>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
+    <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="canonical" href={url} key="canonical" />
+        <meta property="fb:app_id" content={process.env.FB_APP_ID}></meta>
+        <meta name="facebook-domain-verification" content="db7teiurqqk7esipbaxtnklep23oy9" />
+      </head>
+      <body
+        className={inter.className}
+        style={{
+          backgroundColor: "#aaaaaa"
+        }}
+      >
+        <section>
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
             body {
               background-color: ${haiku?.bgColor || "#aaaaaa"};
             }
           `
-        }}
-      />
-      <div className="flex flex-col lg:flex-row">
-        <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
-          {children}
-        </div>
-      </div>
-      <Analytics />
-      <Alert />
-    </section >
+            }}
+          />
+          <div className="flex flex-col lg:flex-row">
+            <div className="_bg-blue-500 ml-0 _mt-10 _lg: _ml-32 _lg: mt-0 w-screen min-h-[calc(100dvh-2rem)] lg:min-h-screen">
+              {children}
+            </div>
+          </div>
+          <Analytics />
+          <Alert />
+        </section >
+      </body>
+    </html>
   )
 }
