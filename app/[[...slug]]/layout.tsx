@@ -89,7 +89,7 @@ export default async function Layout({
     ...(isHaikudleMode
       ? [`https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`]
       : [
-          `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}_${haiku.version || 0}.png`,
+          `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}_${haiku?.version || 0}.png`,
           // `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}.png`,
         ]),
   ];
@@ -101,7 +101,7 @@ export default async function Layout({
       title: rootMetadata.title || "",
       description: rootMetadata.description || "",
       type: "website",
-      url: metaUrl,
+      url: `${metaUrl}${params?.slug && params.slug[0]}`,
       images,
     }
   }
