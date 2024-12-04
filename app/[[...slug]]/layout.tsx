@@ -39,9 +39,9 @@ if (isHaikudleMode) {
     "https://haikudle.ai/social_img_haikudle.png",
   ];
 } else {
-  // metaImages = [
-  //   haikuGeniusMetaImages[Math.floor(Math.random() * haikuGeniusMetaImages.length)]
-  // ];
+  metaImages = [
+    haikuGeniusMetaImages[Math.floor(Math.random() * haikuGeniusMetaImages.length)]
+  ];
 }
 
 export let metadata: Metadata = {
@@ -85,7 +85,7 @@ export default async function Layout({
   // console.log('>> app.[[..slug]].layout.render()', { haiku });
 
   const images = [
-    ...metaImages,
+    // ...metaImages,
     isHaikudleMode
       ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`
       : `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}.png`,
