@@ -81,14 +81,14 @@ export default async function Layout({
     }
   }
 
-  const haiku = { bgColor: "" };  //await getHaiku(user, haikuId);
+  const haiku = await getHaiku({ id: "(system)" } as User, haikuId);
   // console.log('>> app.[[..slug]].layout.render()', { haiku });
 
   const images = [
     // ...metaImages,
     isHaikudleMode
       ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`
-      : `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}.png`,
+      : `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}_${haiku.version || 0}.png`,
   ];
   console.log('>> app.[[..slug]].layout.render()', { images });
 
