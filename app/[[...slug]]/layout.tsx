@@ -39,9 +39,9 @@ if (isHaikudleMode) {
     "https://haikudle.ai/social_img_haikudle.png",
   ];
 } else {
-  metaImages = [
-    haikuGeniusMetaImages[Math.floor(Math.random() * haikuGeniusMetaImages.length)]
-  ];
+  // metaImages = [
+  //   haikuGeniusMetaImages[Math.floor(Math.random() * haikuGeniusMetaImages.length)]
+  // ];
 }
 
 export let metadata: Metadata = {
