@@ -28,10 +28,8 @@ const randomAlbumHaiku = async (albumId: string) => {
 }
 
 const todaysHaikudle = async () => {
-  const todaysDailyHaikudle = await getDailyHaikudle();
-  if (todaysDailyHaikudle?.haikudleId) {
-    return getHaikudle(user, todaysDailyHaikudle?.haikudleId);
-  }
+  const { haikudle } = await getDailyHaikudle();
+  return haikudle;
 }
 
 const getTheHaikudle = async (id: string) => {

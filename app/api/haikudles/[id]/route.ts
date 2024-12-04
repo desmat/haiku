@@ -16,15 +16,19 @@ export async function GET(
   const { user } = await userSession(request);
 
   const todaysDateCode = moment().format("YYYYMMDD");
-  const previousDailyHaikudleIds = (await getDailyHaikudleIds({ haikudle: params.id }))
-    .filter((id: string) => id < todaysDateCode);  
+  const dailyHaikudleIds = await getDailyHaikudleIds({ haikudle: params.id });
+  const todaysDailyHaikudleIds = dailyHaikudleIds
+    .filter((id: string) => id == todaysDateCode);
+  const isTodaysDailyHaikudle = todaysDailyHaikudleIds.length > 0;
+  const previousDailyHaikudleIds = dailyHaikudleIds
+    .filter((id: string) => id < todaysDateCode);
   const wasPreviousDailyHaikudle = previousDailyHaikudleIds.length > 0;
 
   let [
     haiku,
     haikudle,
   ] = await Promise.all([
-    getHaiku(user, params.id, !wasPreviousDailyHaikudle),
+    getHaiku(user, params.id, isTodaysDailyHaikudle || !wasPreviousDailyHaikudle),
     getHaikudle(user, params.id),
   ]);
   const myHaiku = undefined; //!user.isAdmin && haiku?.createdBy == user.id && await getHaiku(user, params.id);
@@ -44,7 +48,7 @@ export async function GET(
     haikudle: {
       ...haikudle,
       ...userHaikudle?.haikudle,
-      previousDailyHaikudleId: previousDailyHaikudleIds[0],
+      previousDailyHaikudleId: isTodaysDailyHaikudle ? undefined : previousDailyHaikudleIds[0],
       haiku: myHaiku || haiku,
     }
   });
