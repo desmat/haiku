@@ -101,10 +101,12 @@ export default async function Layout({
       title: rootMetadata.title || "",
       description: rootMetadata.description || "",
       type: "website",
-      url: `${metaUrl}${params?.slug && params.slug[0]}`,
+      url: `${metaUrl}${params?.slug && params.slug[0] || ""}`,
       images,
     }
   }
+
+  console.log('>> app.[[..slug]].layout.render()', { metadata });
 
   return (
     <section>
