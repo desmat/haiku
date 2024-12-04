@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/react';
 import Alert from '@/app/_components/Alert';
 import '@/app/globals.css';
-import { metadata as rootMetadata, metaUrl } from '@/app/layout';
+import { metadata as rootMetadata, metaUrl, appName, appDescription } from '@/app/layout';
 import { getDailyHaiku, getHaiku } from '@/services/haikus';
 import { getDailyHaikudle } from '@/services/haikudles';
 import { User } from '@/types/User';
@@ -101,7 +101,8 @@ export default async function Layout({
       title: rootMetadata.title || "",
       description: rootMetadata.description || "",
       type: "website",
-      url: `${metaUrl}${params?.slug && params.slug[0] || ""}`,
+      url: metaUrl,
+      // url: `${metaUrl}${params?.slug && params.slug[0] || ""}`,
       images,
     }
   }
