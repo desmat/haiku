@@ -85,10 +85,10 @@ export default async function Layout({
   // console.log('>> app.[[..slug]].layout.render()', { haiku });
 
   const images = [
+    ...metaImages,
     isHaikudleMode
       ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`
       : `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}.png`,
-    ...metaImages,
   ];
   console.log('>> app.[[..slug]].layout.render()', { images });
 
