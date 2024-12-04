@@ -325,7 +325,7 @@ export async function createHaiku(user: User, {
     bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),
     lang,
-    shared: true, // be sure to keep in sync with triggerHaikuShared below
+    sharedVersioned: true, // be sure to keep in sync with triggerHaikuShared below
   } as Haiku;
 
   if (!user.isAdmin) {
@@ -340,7 +340,7 @@ export async function createHaiku(user: User, {
 
   const webhookRet = await Promise.all([
     triggerHaikuSaved(created),
-    triggerHaikuShared(created), // be sure to keep in sync with `shared: true` above
+    triggerHaikuShared(created), // be sure to keep in sync with `sharedVersioned: true` above
   ]);
   // console.log(">> services.haiku.createHaiku", { webhookRet });
 
@@ -496,7 +496,7 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
     color: sortedColors[0].darken(0.5).hex(),
     bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),
-    shared: true, // XXX
+    sharedVersioned: true, // be sure to keep in sync with triggerHaikuShared below
   } as Haiku;
 
   if (!user.isAdmin) {
@@ -505,8 +505,12 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   }
 
   const savedHaiku = await saveHaiku(user, updatedHaiku);
-  const ret = await triggerHaikuShared(savedHaiku); // XXX
-  // console.log XXX
+
+  const webhookRet = await Promise.all([
+    triggerHaikuSaved(savedHaiku),
+    triggerHaikuShared(savedHaiku), // be sure to keep in sync with `sharedVersioned: true` above
+  ]);
+  // console.log(">> services.haiku.regenerateHaikuImage", { webhookRet });
 
   return savedHaiku;
 }
@@ -544,11 +548,20 @@ export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, 
     color: sortedColors[0].darken(0.5).hex(),
     bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),
+    sharedVersioned: true, // be sure to keep in sync with triggerHaikuShared below
   } as Haiku;
 
   // TODO: trigger haiku shared
 
-  return saveHaiku(user, updatedHaiku);
+  const savedHaiku = await saveHaiku(user, updatedHaiku);
+
+  const webhookRet = await Promise.all([
+    triggerDailyHaikuSaved(savedHaiku),
+    triggerHaikuShared(savedHaiku), // be sure to keep in sync with `sharedVersioned: true` above
+  ]);
+  // console.log(">> services.haikudle.updateHaikuImage", { webhookRet });
+
+  return savedHaiku;
 }
 
 export async function generateHaiku(user: User, {
@@ -696,16 +709,11 @@ export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Pro
     version: options.noVersion
       ? version
       : version + 1,
-    // shared: options.noVersion
-    //   ? original.shared
-    //   : true,
   });
 
   if (!options.noVersion) {
-    const webhookRet = await Promise.all([
-      triggerHaikuSaved(updated),
-      // triggerHaikuShared(updated), // be sure to keep in sync with `shared: true` above
-    ]);    // console.log(">> services.haiku.saveHaiku", { webhookRet });
+    const webhookRet = await triggerHaikuSaved(updated);
+    // console.log(">> services.haiku.saveHaiku", { webhookRet });
   }
 
   return updated;
