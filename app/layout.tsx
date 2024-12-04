@@ -55,7 +55,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <head>
+      {/* <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="canonical" href={metaUrl} key="canonical" />
         <meta property="fb:app_id" content={process.env.FB_APP_ID}></meta>
@@ -66,11 +66,11 @@ export default function RootLayout({
         style={{
           backgroundColor: "#aaaaaa"
         }}
-      >
+      > */}
         {children}
-        <Analytics />
+        {/* <Analytics />
         <Alert />
-      </body>
+      </body> */}
     </html>
   )
 }

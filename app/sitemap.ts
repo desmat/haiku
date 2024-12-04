@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { MetadataRoute } from 'next'
 import { getDailyHaiku } from '@/services/haikus';
-import { metaUrl } from './NOPElayout';
+import { metaUrl } from './layout';
  
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const latestDailyHaiku = await getDailyHaiku();
