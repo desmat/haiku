@@ -101,8 +101,8 @@ export default async function Layout({
       title: rootMetadata.title || "",
       description: rootMetadata.description || "",
       type: "website",
-      url: metaUrl,
-      // url: `${metaUrl}${params?.slug && params.slug[0] || ""}`,
+      // url: metaUrl,
+      url: `${metaUrl}${params?.slug && params.slug[0] || ""}`,
       images,
     }
   }
