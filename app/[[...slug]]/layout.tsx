@@ -96,7 +96,7 @@ export default async function Layout({
   console.log('>> app.[[..slug]].layout.render()', { images });
 
   metadata = {
-    ...metadata,
+    metadataBase: new URL(`${metaUrl}${params?.slug && params.slug[0] || ""}`),
     openGraph: {
       title: rootMetadata.title || "",
       description: rootMetadata.description || "",
