@@ -90,7 +90,7 @@ export default async function Layout({
       ? [`https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`]
       : [
           `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}_${haiku.version || 0}.png`,
-          `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}.png`,
+          // `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}.png`,
         ]),
   ];
   console.log('>> app.[[..slug]].layout.render()', { images });
