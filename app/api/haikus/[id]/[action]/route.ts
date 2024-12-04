@@ -203,7 +203,7 @@ export async function POST(
 
     await saveUserHaiku(user, { ...userHaiku, sharedAt: moment().valueOf() });
 
-    if (!haiku.shared && !haiku.dailyHaikuId) {
+    // if (!haiku.shared && !haiku.dailyHaikuId) {
       const ret = await triggerHaikuShared(haiku);
       if (ret) {
         haiku = await saveHaiku(systemUser, {
@@ -211,9 +211,9 @@ export async function POST(
           shared: true,
         }, { noVersion: true });
       }
-    } else {
-      console.log(`>> app.api.haiku.[id].[action].POST: already shared`, { action: params.action, haiku });
-    }
+    // } else {
+    //   console.log(`>> app.api.haiku.[id].[action].POST: already shared`, { action: params.action, haiku });
+    // }
 
     return NextResponse.json({ haiku });
   } else if (params.action == "addToAlbum") {
