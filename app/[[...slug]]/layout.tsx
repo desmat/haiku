@@ -45,11 +45,6 @@ if (isHaikudleMode) {
   ];
 }
 
-// export let metadata: Metadata = {
-//   ...rootMetadata,
-//   title: `${isHaikudleMode ? "Haikudle" : "Haiku Genius"} - ${rootMetadata.title}`,
-// }
-
 export default async function Layout({
   children,
   params,
@@ -87,13 +82,10 @@ export default async function Layout({
   // console.log('>> app.[[..slug]].layout.render()', { haiku });
 
   const images = [
-    // ...metaImages,
-    ...(isHaikudleMode
-      ? [`https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}.png`]
-      : [
-        `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}_${haiku?.version || 0}.png`,
-        // `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}.png`,
-      ]),
+    ...metaImages,
+    isHaikudleMode
+      ? `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikudle/${haikuId}_${haiku?.version || 0}.png`
+      : `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haikuId}_${haiku?.version || 0}.pngBAD`
   ];
   console.log('>> app.[[..slug]].layout.render()', { images });
 
@@ -116,15 +108,15 @@ export default async function Layout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="canonical" href={url} key="canonical" />
         <meta property="fb:app_id" content={process.env.FB_APP_ID}></meta>
-        <meta property="og:title" content={metadata.openGraph.title}/>
-        <meta property="og:description" content={metadata.openGraph.description}/>
-        <meta property="og:url" content={metadata.openGraph.url}/>
-        <meta property="og:image" content={metadata.openGraph.images[0]}/>
-        <meta property="og:type" content="website"/>
-        <meta name="twitter:card" content="summary_large_image"/>
-        <meta name="twitter:title" content={metadata.openGraph.title}/>
-        <meta name="twitter:description" content={metadata.openGraph.description}/>
-        <meta name="twitter:image" content={metadata.openGraph.images[0]}/>
+        <meta property="og:title" content={metadata.openGraph.title} />
+        <meta property="og:description" content={metadata.openGraph.description} />
+        <meta property="og:url" content={metadata.openGraph.url} />
+        <meta property="og:image" content={metadata.openGraph.images[0]} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={metadata.openGraph.title} />
+        <meta name="twitter:description" content={metadata.openGraph.description} />
+        <meta name="twitter:image" content={metadata.openGraph.images[0]} />
       </head>
       <body
         className={inter.className}
@@ -136,10 +128,10 @@ export default async function Layout({
           <style
             dangerouslySetInnerHTML={{
               __html: `
-            body {
-              background-color: ${haiku?.bgColor || "#aaaaaa"};
-            }
-          `
+                body {
+                  background-color: ${haiku?.bgColor || "#aaaaaa"};
+                }
+              `
             }}
           />
           <div className="flex flex-col lg:flex-row">

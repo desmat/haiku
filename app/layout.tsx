@@ -55,22 +55,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      {/* <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="canonical" href={metaUrl} key="canonical" />
-        <meta property="fb:app_id" content={process.env.FB_APP_ID}></meta>
-        <meta name="facebook-domain-verification" content="db7teiurqqk7esipbaxtnklep23oy9" />
-      </head>
-      <body
-        className={inter.className}
-        style={{
-          backgroundColor: "#aaaaaa"
-        }}
-      > */}
-        {children}
-        {/* <Analytics />
-        <Alert />
-      </body> */}
+      {children}
     </html>
   )
 }
