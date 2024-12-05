@@ -129,8 +129,6 @@ export async function POST(
       );
     }
 
-    delete haiku.shared;
-
     const imageRet = await fetch(url);
     // console.log(">> app.api.haiku.[id].[action].POST", { imageRet });  
     const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
@@ -171,8 +169,6 @@ export async function POST(
       );
     }
 
-    delete haiku.shared;
-
     const imageBuffer = Buffer.from(await parts[0].arrayBuffer());
     const updatedHaiku = await updateHaikuImage(user, haiku, imageBuffer, parts[0].type);
     console.log(`>> app.api.haiku.[id].[action].POST`, { updatedHaiku });
@@ -203,12 +199,12 @@ export async function POST(
 
     await saveUserHaiku(user, { ...userHaiku, sharedAt: moment().valueOf() });
 
-    if (!haiku.shared && !haiku.dailyHaikuId) {
+    if (!haiku.sharedVersioned) {
       const ret = await triggerHaikuShared(haiku);
       if (ret) {
         haiku = await saveHaiku(systemUser, {
           ...haiku,
-          shared: true,
+          sharedVersioned: true,
         }, { noVersion: true });
       }
     } else {
