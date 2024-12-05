@@ -199,7 +199,7 @@ export async function POST(
 
     await saveUserHaiku(user, { ...userHaiku, sharedAt: moment().valueOf() });
 
-    if (!haiku.sharedVersioned && !haiku.dailyHaikuId) {
+    if (!haiku.sharedVersioned) {
       const ret = await triggerHaikuShared(haiku);
       if (ret) {
         haiku = await saveHaiku(systemUser, {

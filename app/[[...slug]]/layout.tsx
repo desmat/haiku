@@ -100,11 +100,9 @@ export default async function Layout({
   const metadata = {
     metadataBase: new URL(url),
     openGraph: {
-      title: rootMetadata.title || "",
+      title: `${rootMetadata.title}`,
       description: rootMetadata.description || "",
       type: "website",
-      // url: metaUrl,
-      // url: `${metaUrl}${params?.slug && params.slug[0] || ""}`,
       url,
       images,
     }
@@ -118,13 +116,14 @@ export default async function Layout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="canonical" href={url} key="canonical" />
         <meta property="fb:app_id" content={process.env.FB_APP_ID}></meta>
-        <meta name="facebook-domain-verification" content="db7teiurqqk7esipbaxtnklep23oy9" />
+        <meta property="og:title" content={metadata.openGraph.title}/>
+        <meta property="og:description" content={metadata.openGraph.description}/>
         <meta property="og:url" content={metadata.openGraph.url}/>
         <meta property="og:image" content={metadata.openGraph.images[0]}/>
         <meta property="og:type" content="website"/>
         <meta name="twitter:card" content="summary_large_image"/>
-        <meta name="twitter:title" content="AI-Powered Haiku Poetry and Generative Art - Daily featured haikus, haiku generator, smart poem editor, visual art generator, always free, no signup required."/>
-        <meta name="twitter:description" content="Create and share your haiku masterpieces with beautiful generated art — no signup required. Haiku Genius integrates cutting-edge AI technology to elevate your poetic experience to new heights. Craft haiku poems seamlessly with our AI assistant and share your creations with stunning AI-generated imagery, powered by OpenAI&#x27;s ChatGPT and DALL-E. Explore daily featured haikus and experience AI-assisted creativity and discover the limitless possibilities of poetic exploration with Haiku Genius."/>
+        <meta name="twitter:title" content={metadata.openGraph.title}/>
+        <meta name="twitter:description" content={metadata.openGraph.description}/>
         <meta name="twitter:image" content={metadata.openGraph.images[0]}/>
       </head>
       <body
