@@ -73,10 +73,10 @@ export function NavOverlay({
 }) {
   const [user] = useUser((state: any) => [state.user]);
   const onboarding = !!(onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement));
-  // console.log(">> app._component.Nav.render", { mode, haikuId: haiku?.id });
+  // console.log("app._component.Nav.render", { mode, haikuId: haiku?.id });
 
   const handleKeyDown = async (e: any) => {
-    // console.log(">> app._component.Nav.handleKeyDown", { mode });
+    // console.log("app._component.Nav.handleKeyDown", { mode });
     if (e.key == "Escape" && ["showcase", "social-img"].includes(mode) && onSwitchMode) {
       onSwitchMode("haiku");
       e.preventDefault();
@@ -94,7 +94,7 @@ export function NavOverlay({
   }
 
   useEffect(() => {
-    // console.log(">> app._component.Nav.useEffect", { mode, haiku });
+    // console.log("app._component.Nav.useEffect", { mode, haiku });
     document.body.addEventListener('keydown', handleKeyDown);
 
     return () => {

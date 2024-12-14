@@ -7,7 +7,7 @@ const store = createStore({
 });
 
 export async function getHaiku(id: string, hashPoem?: boolean): Promise<Haiku | undefined> {
-  console.log(`>> services.haiku.getHaiku`, { id, hashPoem });
+  console.log(`services.haiku.getHaiku`, { id, hashPoem });
 
   let haiku = await store.haikus.get(id);
 
@@ -25,14 +25,14 @@ export async function getHaiku(id: string, hashPoem?: boolean): Promise<Haiku | 
     usage: {},
   };
 
-  console.log(`>> services.haiku.getHaiku`, { id, haiku });
+  console.log(`services.haiku.getHaiku`, { id, haiku });
   return haiku;
 }
 
 export async function getDailyHaiku(id: string): Promise<DailyHaiku | undefined> {
-  console.log(`>> services.haiku.getDailyHaiku`, { id });
+  console.log(`services.haiku.getDailyHaiku`, { id });
 
   const dailyHaiku = await store.dailyHaikus.get(id);
-  console.log(`>> services.haiku.getDailyHaiku`, { id, dailyHaiku });
+  console.log(`services.haiku.getDailyHaiku`, { id, dailyHaiku });
   return dailyHaiku;
 }

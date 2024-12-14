@@ -40,7 +40,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     style?: any,
     customActions?: any,
   } = {}) => {
-    // console.log(">> hooks.alert.error", { message });
+    // console.log("hooks.alert.error", { message });
     if (closeDelay) {
       const { setCloseTimeout } = get();
       setCloseTimeout(closeDelay);
@@ -69,7 +69,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     style?: any,
     customActions?: any,
   } = {}) => {
-    // console.log(">> hooks.alert.error", { message, closeDelay });
+    // console.log("hooks.alert.error", { message, closeDelay });
     get()._alert("error", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
@@ -86,7 +86,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     style?: any,
     customActions?: any,
   } = {}) => {
-    // console.log(">> hooks.alert.warning", { message, closeDelay });
+    // console.log("hooks.alert.warning", { message, closeDelay });
     get()._alert("warning", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
@@ -103,7 +103,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     style?: any,
     customActions?: any,
   } = {}) => {
-    // console.log(">> hooks.alert.info", { message });
+    // console.log("hooks.alert.info", { message });
     get()._alert("info", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
@@ -120,7 +120,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     style?: any,
     customActions?: any,
   } = {}) => {
-    // console.log(">> hooks.alert.success", { message });
+    // console.log("hooks.alert.success", { message });
     get()._alert("success", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 
@@ -137,7 +137,7 @@ const useAlert: any = create(devtools((set: any, get: any) => ({
     style?: any,
     customActions?: any
   } = {}) => {
-    // console.log(">> hooks.alert.plain", { message, onDismiss, closeLabel, closeDelay, style });
+    // console.log("hooks.alert.plain", { message, onDismiss, closeLabel, closeDelay, style });
     get()._alert("plain", message, { onDismiss, closeLabel, closeDelay, style, customActions });
   },
 

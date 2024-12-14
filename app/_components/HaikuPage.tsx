@@ -47,7 +47,7 @@ export default function HaikuPage({
   switchMode?: any,
   adjustLayout?: any,
 }) {
-  // console.log('>> app._components.HaikuPage.render()', { loading, mode, id: haiku?.id, poem: haiku?.poem, popPoem, haiku });
+  // console.log('app._components.HaikuPage.render()', { loading, mode, id: haiku?.id, poem: haiku?.poem, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   // const [user] = useUser((state: any) => [state.user]);
   const blurValue = loading ? 40 : 0;
@@ -56,7 +56,7 @@ export default function HaikuPage({
     ? haiku?.layout?.poem
     : {};
   const canAdjustLayout = !!adjustLayout && showcaseMode;
-  // console.log('>> app._components.HaikuPage.render()', { poemLayout });
+  // console.log('app._components.HaikuPage.render()', { poemLayout });
 
   return (
     <div>

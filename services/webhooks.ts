@@ -3,7 +3,7 @@ import { DailyHaikudle } from "@/types/Haikudle";
 
 export async function triggerHaikuSaved(haiku: Haiku) {
   const url = process.env.WEBHOOK_HAIKU_CREATED;
-  console.log('>> app.services.webhooks.triggerHaikuCreated', { haiku, url });
+  console.log('app.services.webhooks.triggerHaikuCreated', { haiku, url });
 
   if (!url) {
     console.warn(">> app.services.webhooks.triggerHaikuCreated WARNING: WEBHOOK_HAIKU_CREATED variable not set");
@@ -19,20 +19,20 @@ export async function triggerHaikuSaved(haiku: Haiku) {
     console.error(">> app.services.webhooks.triggerHaikuCreated ERROR", { res });
   }
 
-  // console.log('>> app.services.webhooks.triggerHaikuCreated', { res });
+  // console.log('app.services.webhooks.triggerHaikuCreated', { res });
 
   // const ret = await res.json();
-  // console.log('>> app.services.webhooks.triggerHaikuCreated', { ret });
+  // console.log('app.services.webhooks.triggerHaikuCreated', { ret });
 
   const ret = await res.text();
-  console.log('>> app.services.webhooks.triggerHaikuCreated', { ret });
+  console.log('app.services.webhooks.triggerHaikuCreated', { ret });
 
   return ret;
 }
 
 export async function triggerDailyHaikuSaved(dailyHaiku: DailyHaiku) {
   const url = process.env.WEBHOOK_DAILY_HAIKU_SAVED;
-  console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { dailyHaiku, url });
+  console.log('app.services.webhooks.triggerDailyHaikuSaved', { dailyHaiku, url });
 
   if (!url) {
     console.warn(">> app.services.webhooks.triggerDailyHaikuSaved WARNING: WEBHOOK_DAILY_HAIKU_SAVED variable not set");
@@ -48,20 +48,20 @@ export async function triggerDailyHaikuSaved(dailyHaiku: DailyHaiku) {
     console.error(">> app.services.webhooks.triggerDailyHaikuSaved ERROR", { res });
   }
 
-  // console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { res });
+  // console.log('app.services.webhooks.triggerDailyHaikuSaved', { res });
 
   // const ret = await res.json();
-  // console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { ret });
+  // console.log('app.services.webhooks.triggerDailyHaikuSaved', { ret });
 
   const ret = await res.text();
-  console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { ret });
+  console.log('app.services.webhooks.triggerDailyHaikuSaved', { ret });
 
   return ret;
 }
 
 export async function triggerDailyHaikudleSaved(dailyHaikudle: DailyHaikudle) {
   const url = process.env.WEBHOOK_DAILY_HAIKUDLE_SAVED;
-  console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { dailyHaikudle, url });
+  console.log('app.services.webhooks.triggerDailyHaikudleSaved', { dailyHaikudle, url });
 
   if (!url) {
     console.warn(">> app.services.webhooks.triggerDailyHaikudleSaved WARNING: WEBHOOK_DAILY_HAIKUDLE_SAVED variable not set");
@@ -77,20 +77,20 @@ export async function triggerDailyHaikudleSaved(dailyHaikudle: DailyHaikudle) {
     console.error(">> app.services.webhooks.triggerDailyHaikudleSaved ERROR", { res });
   }
 
-  // console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { res });
+  // console.log('app.services.webhooks.triggerDailyHaikudleSaved', { res });
 
   // const ret = await res.json();
-  // console.log('>> app.services.webhooks.triggerDailyHaikuSaved', { ret });
+  // console.log('app.services.webhooks.triggerDailyHaikuSaved', { ret });
 
   const ret = await res.text();
-  console.log('>> app.services.webhooks.triggerDailyHaikudleSaved', { ret });
+  console.log('app.services.webhooks.triggerDailyHaikudleSaved', { ret });
 
   return ret;
 }
 
 export async function triggerHaikuShared(haiku: Haiku) {
   const url = process.env.WEBHOOK_HAIKU_SHARED;
-  console.log('>> app.services.webhooks.triggerHaikuShared', { haiku, url });
+  console.log('app.services.webhooks.triggerHaikuShared', { haiku, url });
 
   if (!url) {
     console.warn(">> app.services.webhooks.triggerHaikuShared WARNING: WEBHOOK_HAIKU_SHARED variable not set");
@@ -107,13 +107,13 @@ export async function triggerHaikuShared(haiku: Haiku) {
     return false;
   }
 
-  // console.log('>> app.services.webhooks.triggerHaikuShared', { res });
+  // console.log('app.services.webhooks.triggerHaikuShared', { res });
 
   // const ret = await res.json();
-  // console.log('>> app.services.webhooks.triggerHaikuShared', { ret });
+  // console.log('app.services.webhooks.triggerHaikuShared', { ret });
 
   const ret = await res.text();
-  console.log('>> app.services.webhooks.triggerHaikuShared', { ret });
+  console.log('app.services.webhooks.triggerHaikuShared', { ret });
 
   return true;
 }

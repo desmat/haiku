@@ -23,7 +23,7 @@ export default function HaikudlePage({
   regenerating?: boolean,
   onboardingElement?: string | undefined,
 }) {
-  // console.log('>> app._components.HaikudlePage.render()', { mode, id: haiku.id, poem: haiku.poem, haiku, onboardingElement});
+  // console.log('app._components.HaikudlePage.render()', { mode, id: haiku.id, poem: haiku.poem, haiku, onboardingElement});
 
   const [user] = useUser((state: any) => [state.user]);
   // TODO move to hook store
@@ -43,7 +43,7 @@ export default function HaikudlePage({
     state.previousDailyHaikudleId,
   ]);
 
-  // console.log('>> app._components.HaikudlePage.render()', { solved, haiku, inProgress });
+  // console.log('app._components.HaikudlePage.render()', { solved, haiku, inProgress });
 
   const blurCurve = [0, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20];
   const saturateCurve = [1, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6];
@@ -67,10 +67,10 @@ export default function HaikudlePage({
   if (typeof (saturateValue) != "number") {
     saturateValue = saturateCurve[saturateCurve.length - 1];
   }
-  // console.log('>> app._components.HaikudlePage.render()', { numWords, numCorrectWords, blurValue });
+  // console.log('app._components.HaikudlePage.render()', { numWords, numCorrectWords, blurValue });
 
   const handleDragStart = (result: any) => {
-    // console.log('>> app._components.HaikudlePage.handleDragStart()', { result });
+    // console.log('app._components.HaikudlePage.handleDragStart()', { result });
 
     setSelectedWord({
       word: inProgress.flat().find((w: any) => w?.id == result.draggableId),
@@ -80,7 +80,7 @@ export default function HaikudlePage({
   }
 
   const handleDragEnd = (result: any) => {
-    // console.log('>> app._components.HaikudlePage.handleDragEnd()', { result });
+    // console.log('app._components.HaikudlePage.handleDragEnd()', { result });
 
     setSelectedWord(undefined);
 

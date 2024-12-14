@@ -17,7 +17,7 @@ export default function PopOnClick({
 }) {
   const [pop, setPop] = useState(false);
   const doPop = () => {
-    // console.log(">> PopOnClick.doPop");
+    // console.log("PopOnClick.doPop");
     setPop(true);
     setTimeout(() => setPop(false), 100);
   };

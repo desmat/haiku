@@ -5,7 +5,7 @@ import { getHaikuStats } from '@/services/haikus';
 export const maxDuration = 300;
 
 export async function GET(request: NextRequest) {
-  console.log('>> app.api.admin.stats.GET', {});
+  console.log('app.api.admin.stats.GET', {});
 
   const { user } = await userSession(request);
 

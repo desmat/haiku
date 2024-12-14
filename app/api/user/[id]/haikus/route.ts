@@ -6,7 +6,7 @@ export async function POST(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  console.log('>> app.api.user.[id].haikus.POST', { request, id: params.id });
+  console.log('app.api.user.[id].haikus.POST', { request, id: params.id });
 
   const { user } = await userSession(request);
   const { haiku, action } = await request.json();

@@ -15,12 +15,12 @@ import("syllable").then((s: any) => syllable = s.syllable);
 
 async function fetchOpts() {
   const token = await useUser.getState().getToken();
-  // console.log(">> hooks.haiku.fetchOpts", { token });
+  // console.log("hooks.haiku.fetchOpts", { token });
   return token && { headers: { Authorization: `Bearer ${token}` } } || {};
 }
 
 const checkCorrect = (inProgress: any, solution: any) => {
-  // console.log("*** checkCorrect", { inProgress, solution });
+  // console.log("checkCorrect", { inProgress, solution });
   inProgress
     .forEach((line: any[], lineNum: number) => line
       .forEach((w: any, wordNum: number) => {
@@ -30,16 +30,16 @@ const checkCorrect = (inProgress: any, solution: any) => {
       }));
 
 
-  // console.log("*** checkCorrect returning", { inProgress });
+  // console.log("checkCorrect returning", { inProgress });
   return inProgress;
 }
 
 const isSolved = (inProgress: any, solution: any) => {
-  // console.log("*** isSolved", { inProgress });
+  // console.log("isSolved", { inProgress });
 
   checkCorrect(inProgress, solution); // side effects yuk!
   const ret = inProgress.flat().reduce((a: boolean, m: any, i: number) => a && m.correct, true);
-  // console.log("*** isSolved", { ret });
+  // console.log("isSolved", { ret });
   return ret;
 }
 
@@ -92,7 +92,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   ...initialState,
 
   reset: () => {
-    // console.log(">> hooks.haiku.reset", {});
+    // console.log("hooks.haiku.reset", {});
     return new Promise(async (resolve) => {
       set(initialState);
       resolve(true);
@@ -101,7 +101,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   init: async (haikudle: Haikudle, hashSolution?: boolean) => {
     const haiku = haikudle?.haiku;
-    // console.log(">> hooks.haikudle.init", { haiku, haikudle, hashSolution });
+    // console.log("hooks.haikudle.init", { haiku, haikudle, hashSolution });
 
     const solution = hashSolution && haiku.poem
       .map((line: string) => line.split(/\s+/)
@@ -129,7 +129,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   solve: () => {
     const { inProgress, words, solution } = get();
-    // console.log(">> hooks.haikudle.solve", { words, solution, inProgress });
+    // console.log("hooks.haikudle.solve", { words, solution, inProgress });
 
     const solvedInProgress = [
       solution[0].map((w: string) => {
@@ -172,7 +172,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   },
 
   move: async (haikudleId: string, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
-    // console.log(">> hooks.haikudle.move", { haikudleId, word, fromLine, fromOffset, toLine, toOffset });
+    // console.log("hooks.haikudle.move", { haikudleId, word, fromLine, fromOffset, toLine, toOffset });
     const { haiku, inProgress, solution, onSolved, moves } = get();
 
     if (moves == 0) {
@@ -204,7 +204,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       moves: moves + 1,
     });
 
-    // console.log(">> hooks.haikudle.move", { inProgress: JSON.stringify(inProgress) });
+    // console.log("hooks.haikudle.move", { inProgress: JSON.stringify(inProgress) });
 
     fetch(`/api/haikudles/${haikudleId}`, {
       ...await fetchOpts(),
@@ -230,12 +230,12 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         return;
       }
 
-      // console.log(">> hooks.haikudle.move", { res });
+      // console.log("hooks.haikudle.move", { res });
     });
   },
 
   swap: async (haikudleId: string, word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
-    // console.log(">> hooks.haikudle.swap", { fromLine, fromOffset, toLine, toOffset });
+    // console.log("hooks.haikudle.swap", { fromLine, fromOffset, toLine, toOffset });
     const { haiku, inProgress, solution, onSolved, moves } = get();
 
     if (moves == 0) {
@@ -291,7 +291,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
         return;
       }
 
-      // console.log(">> hooks.haikudle.swap", { res });
+      // console.log("hooks.haikudle.swap", { res });
     });
   },
 
@@ -300,7 +300,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
   loaded: (idOrQuery?: object | string) => {
     const { _loaded } = get();
-    // console.log(">> hooks.haikudle.loaded", { idOrQuery, _loaded });
+    // console.log("hooks.haikudle.loaded", { idOrQuery, _loaded });
 
     if (!idOrQuery) {
       return _loaded[JSON.stringify({})];
@@ -359,7 +359,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
     const { setLoaded } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    // console.log(">> hooks.haikudle.load", { id, query: JSON.stringify(query) });
+    // console.log("hooks.haikudle.load", { id, query: JSON.stringify(query) });
 
     set({ ready: false});
 
@@ -445,7 +445,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   },
 
   create: async (user: User, haikudle: Haikudle) => {
-    // console.log(">> hooks.haikudle.create", { user, haikudle });
+    // console.log("hooks.haikudle.create", { user, haikudle });
     const { _haikudles, setLoaded } = get();
 
     // optimistic
@@ -515,7 +515,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   },
 
   delete: async (id: string) => {
-    // console.log(">> hooks.haikudle.delete id:", id);
+    // console.log("hooks.haikudle.delete id:", id);
 
     if (!id) {
       throw `Cannot delete haikudle with null id`;

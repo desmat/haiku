@@ -25,6 +25,6 @@ export const supportedLanguages = {
 };
 
 export const isSupportedLanguage = (lang: any): boolean => {
-  // console.log("** types.Languages.isSupportedLanguage", { lang });
+  // console.log(" types.Languages.isSupportedLanguage", { lang });
   return Object.keys(supportedLanguages).includes(lang);
 };

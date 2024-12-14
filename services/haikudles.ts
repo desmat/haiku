@@ -27,13 +27,13 @@ export async function getHaikudles(query?: any): Promise<Haikudle[]> {
 }
 
 async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudle> {
-  console.log(`>> services.haikudle.createInProgress`, { user, haikudle });
+  console.log(`services.haikudle.createInProgress`, { user, haikudle });
 
   const haiku = await getHaiku(user, haikudle.haikuId);
   if (!haiku) throw `Haiku not found: ${haikudle.haikuId}`;
 
   const shuffle = !user || user.isAdmin || !user.isAdmin && user.id != haiku.createdBy;
-  console.log(`>> services.haikudle.createInProgress`, { haiku, user, shuffle });
+  console.log(`services.haikudle.createInProgress`, { haiku, user, shuffle });
 
   let words = haiku.poem
     .join(" ")
@@ -76,10 +76,10 @@ async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudl
 }
 
 export async function getHaikudle(user: User, id: string): Promise<Haikudle | undefined> {
-  console.log(`>> services.haikudle.getHaikudle`, { id });
+  console.log(`services.haikudle.getHaikudle`, { id });
 
   let haikudle = await store.haikudles.get(id);
-  console.log(`>> services.haikudle.getHaikudle`, { id, haikudle });
+  console.log(`services.haikudle.getHaikudle`, { id, haikudle });
 
   if (!haikudle) {
     haikudle = await createHaikudle(user, {
@@ -92,13 +92,13 @@ export async function getHaikudle(user: User, id: string): Promise<Haikudle | un
     haikudle = await createInProgress(user, haikudle);
   }
 
-  console.log(`>> services.haikudle.getHaikudle`, { haikudle });
+  console.log(`services.haikudle.getHaikudle`, { haikudle });
 
   return haikudle;
 }
 
 export async function createHaikudle(user: User, haikudle: Haikudle): Promise<Haikudle> {
-  console.log(">> services.haikudle.createHaikudle", { user, haikudle });
+  console.log("services.haikudle.createHaikudle", { user, haikudle });
 
   let newHaikudle = {
     id: haikudle.id,
@@ -116,7 +116,7 @@ export async function createHaikudle(user: User, haikudle: Haikudle): Promise<Ha
 }
 
 export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
-  console.log(">> services.haikudle.deleteHaikudle", { id, user });
+  console.log("services.haikudle.deleteHaikudle", { id, user });
 
   if (!id) {
     throw `Cannot delete haikudle with null id`;
@@ -148,7 +148,7 @@ export async function deleteHaikudle(user: any, id: string): Promise<Haikudle> {
 }
 
 export async function saveHaikudle(user: any, haikudle: Haikudle): Promise<Haikudle> {
-  console.log(">> services.haikudle.saveHaikudle", { haikudle, user });
+  console.log("services.haikudle.saveHaikudle", { haikudle, user });
 
   if (!(haikudle.createdBy == user.id || user.isAdmin)) {
     throw `Unauthorized`;
@@ -161,16 +161,16 @@ export async function saveHaikudle(user: any, haikudle: Haikudle): Promise<Haiku
 }
 
 export async function getUserHaikudle(userId: string, haikudleId: string): Promise<UserHaikudle | undefined> {
-  console.log(`>> services.haikudle.getUserHaikudle`, { userId, haikudleId });
+  console.log(`services.haikudle.getUserHaikudle`, { userId, haikudleId });
 
   const userHaikudleId = `${userId}:${haikudleId}`;
   const userHaikudle = await store.userHaikudles.get(userHaikudleId);
-  console.log(`>> services.haikudle.getUserHaikudle`, { userHaikudleId, userHaikudle });
+  console.log(`services.haikudle.getUserHaikudle`, { userHaikudleId, userHaikudle });
   return userHaikudle;
 }
 
 export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<Haikudle> {
-  console.log(">> services.haikudle.saveUserHaikudle", { haikudle, user });
+  console.log("services.haikudle.saveUserHaikudle", { haikudle, user });
 
   if (!user) {
     throw `Unauthorized`;
@@ -199,13 +199,13 @@ export async function saveUserHaikudle(user: any, haikudle: Haikudle): Promise<H
 }
 
 export async function getDailyHaikudle(id?: string, dontCreate?: boolean): Promise<any | undefined> {
-  console.log(`>> services.haikudle.getDailyHaikudle`, { id });
+  console.log(`services.haikudle.getDailyHaikudle`, { id });
 
   if (!id) id = moment().format("YYYYMMDD");
 
   let dailyHaikudle = await store.dailyHaikudles.get(id);
   let haikudle;
-  console.log(`>> services.haikudle.getDailyHaikudle`, { id, dailyHaikudle });
+  console.log(`services.haikudle.getDailyHaikudle`, { id, dailyHaikudle });
 
   if (!dailyHaikudle && dontCreate) {
     return
@@ -222,13 +222,13 @@ export async function getDailyHaikudle(id?: string, dontCreate?: boolean): Promi
       store.dailyHaikus.find({ count: 99 }),
       getFlaggedHaikuIds(),
     ]);
-    console.log(`>> services.haikudle.getDailyHaikudle creating new daily haikudle`, { previousDailyHaikudles, dailyHaikus, flaggedHaikuIds });
+    console.log(`services.haikudle.getDailyHaikudle creating new daily haikudle`, { previousDailyHaikudles, dailyHaikus, flaggedHaikuIds });
 
     const previousDailyHaikuIds = previousDailyHaikudles
       .map((dailyHaikudle: DailyHaikudle) => dailyHaikudle.haikuId);
     let nonDailyhaikus = dailyHaikus
       .filter((dailyHaiku: DailyHaiku) => `${dailyHaiku.id}`.match(/20\d{6}/) && !previousDailyHaikuIds.includes(dailyHaiku.haikuId));
-    console.log(`>> services.haikudle.getDailyHaikudle creating new daily haikudle`, { previousDailyHaikuIds, nonDailyhaikus });
+    console.log(`services.haikudle.getDailyHaikudle creating new daily haikudle`, { previousDailyHaikuIds, nonDailyhaikus });
 
     let randomHaikuId;
     if (nonDailyhaikus.length) {
@@ -242,10 +242,10 @@ export async function getDailyHaikudle(id?: string, dontCreate?: boolean): Promi
       console.warn(`>> services.haikudle.getDailyHaikudle WARNING: ran out of liked or non-daily haikus, picking from the lot`, { randomHaikuId });
     }
 
-    console.log(`>> services.haikudle.getDailyHaikudle creating new daily haikudle`, { randomHaikuId });
+    console.log(`services.haikudle.getDailyHaikudle creating new daily haikudle`, { randomHaikuId });
 
     haikudle = await createHaikudle(systemUser, { id: randomHaikuId, haikuId: randomHaikuId });
-    console.log('>> services.haikudle.getDailyHaikudle creating new daily haikudle', { randomHaikuId, haikudle });
+    console.log('services.haikudle.getDailyHaikudle creating new daily haikudle', { randomHaikuId, haikudle });
 
     dailyHaikudle = await saveDailyHaikudle(systemUser, id, haikudle.haikuId, haikudle.id);
   } else {
@@ -256,7 +256,7 @@ export async function getDailyHaikudle(id?: string, dontCreate?: boolean): Promi
 }
 
 export async function getDailyHaikudleIds(query?: any): Promise<string[]> {
-  console.log(`>> services.haiku.getDailyHaikudleIds`, { query });
+  console.log(`services.haiku.getDailyHaikudleIds`, { query });
   let dailyHaikudleIds = Array.from(await store.dailyHaikudles.ids(query))
     .map((id: any) => `${id}`)
     .filter((id: string) => id && id.match(/20\d{6}/))
@@ -271,7 +271,7 @@ export async function getDailyHaikudleIds(query?: any): Promise<string[]> {
 }
 
 export async function getDailyHaikudles(query?: any): Promise<DailyHaikudle[]> {
-  console.log(`>> services.haiku.getDailyHaikudles`, { query });
+  console.log(`services.haiku.getDailyHaikudles`, { query });
   const dailyHaikudleDateCodes = await getDailyHaikudleIds(query);
   const dailyHaikudles = await store.dailyHaikudles.find({ id: dailyHaikudleDateCodes })
   const dailyHaikudleIds = dailyHaikudles
@@ -322,7 +322,7 @@ export async function getNextDailyHaikudleId(): Promise<string> {
 
 
 export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: string, haikudleId: string): Promise<DailyHaikudle> {
-  console.log(">> services.haikudle.saveDailyHaikudle", { user, dateCode, haikuId, haikudleId });
+  console.log("services.haikudle.saveDailyHaikudle", { user, dateCode, haikuId, haikudleId });
 
   if (!user) {
     throw `Unauthorized`;
@@ -360,7 +360,7 @@ export async function saveDailyHaikudle(user: any, dateCode: string, haikuId: st
   }
 
   const webhookRet = await triggerDailyHaikudleSaved(ret);
-  // console.log(">> services.haikudle.saveDailyHaikudle", { webhookRet });
+  // console.log("services.haikudle.saveDailyHaikudle", { webhookRet });
 
   return ret;
 }

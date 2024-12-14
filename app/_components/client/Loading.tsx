@@ -11,10 +11,10 @@ export default function Loading({ styles = [] }: { styles?: any }) {
   const [intervalId, setIntervalId] = useState<any>();
   const intervalValue = 4500;
   const initialTimeoutValue = intervalValue * 1 / 3;
-  // console.log('>> app._components.client.Loading', { seed, random: seedrandom(`${seed}`)(), loadingMessage });
+  // console.log('app._components.client.Loading', { seed, random: seedrandom(`${seed}`)(), loadingMessage });
 
   useEffect(() => {
-    // console.log('>> app._components.client.Loading useEffect', { loadingMessage });
+    // console.log('app._components.client.Loading useEffect', { loadingMessage });
 
     if (!intervalId && loadingMessages?.length) {
       setTimeout(() => {

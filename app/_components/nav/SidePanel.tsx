@@ -106,7 +106,7 @@ export default function SidePanel({
   //   loadUser().then((u: User) => user = u);
   // }
 
-  // console.log(">> app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles, styles, altStyles });
+  // console.log("app._component.Nav.SidePanel.render()", { user, userHaikus,panelOpened, panelAnimating, dailyHaikudles: userDailyHaikudles, styles, altStyles });
 
   const onClickLogo = () => {
     toggleMenuOpened();
@@ -114,7 +114,7 @@ export default function SidePanel({
   }
 
   const toggleMenuOpened = () => {
-    // console.log(">> app._component.SidePanel.toggleMenuOpened", {});
+    // console.log("app._component.SidePanel.toggleMenuOpened", {});
     if (onboardingElement) return;
 
     setPanelAnimating(true);
@@ -131,7 +131,7 @@ export default function SidePanel({
   }
 
   const handleKeyDown = async (e: any) => {
-    // console.log(">> app._component.SidePanel.handleKeyDown", { panelOpened, panelAnimating });
+    // console.log("app._component.SidePanel.handleKeyDown", { panelOpened, panelAnimating });
     if (e.key == "Escape") {
       setPanelOpened(false);
     }
@@ -140,7 +140,7 @@ export default function SidePanel({
   const isUserAdmin = (userId?: string): boolean => {
     // @ts-ignore
     const ret = (process.env.ADMIN_USER_IDS || "").split(",").includes(userId);
-    // console.log(">> app._component.SidePanel.isUserAdmin", { userId, adminUserIds: process.env.ADMIN_USER_IDS, isUserAdmin: ret });
+    // console.log("app._component.SidePanel.isUserAdmin", { userId, adminUserIds: process.env.ADMIN_USER_IDS, isUserAdmin: ret });
     return ret;
   };
 
@@ -200,7 +200,7 @@ export default function SidePanel({
   }
 
   useEffect(() => {
-    // console.log(">> app._component.Nav.useEffect", { mode, haiku });
+    // console.log("app._component.Nav.useEffect", { mode, haiku });
     document.body.addEventListener('keydown', handleKeyDown);
 
     return () => {

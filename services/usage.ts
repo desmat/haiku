@@ -9,7 +9,7 @@ const store = createStore({
 });
 
 export async function userUsage(user: User) {
-  console.log('>> app.services.usage.userUsage', { user });
+  console.log('app.services.usage.userUsage', { user });
 
   const dateCode = moment().format("YYYYMMDD");
   const id = `${user.id}:${dateCode}`;
@@ -40,7 +40,7 @@ export async function incUserUsage(user: User, resource: "haikusCreated" | "haik
     usage: updatedUsage,
   }
 
-  // console.log('>> app.services.usage.incUserUsage', { updatedUserUsage });
+  // console.log('app.services.usage.incUserUsage', { updatedUserUsage });
 
   if (userUsage) {
     return store.userUsage.update(updatedUserUsage, { expire });

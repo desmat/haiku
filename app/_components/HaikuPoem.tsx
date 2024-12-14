@@ -72,7 +72,7 @@ export function ControlledInput({
   const maxLength = 100; // kinda unreasonable for a haiku line but won't break the UI
   const [active, setActive] = useState(false);
   const ref = useRef();
-  // console.log('>> app._components.PoemLineInput.render()', { id, activeId, select, value });
+  // console.log('app._components.PoemLineInput.render()', { id, activeId, select, value });
 
   // https://stackoverflow.com/questions/6139107/programmatically-select-text-in-a-contenteditable-html-element
   function selectElementContents(el: any) {
@@ -134,7 +134,7 @@ export function ControlledInput({
   }
 
   function handleKeyDown(e: any) {
-    // console.log('>> app._components.PoemLineInput.handleKeyDown()', { e, key: e.key, selection: window.getSelection(), ref });
+    // console.log('app._components.PoemLineInput.handleKeyDown()', { e, key: e.key, selection: window.getSelection(), ref });
     const val = e.target.innerText;
     if (["Delete", "Backspace", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key) || e.metaKey) {
       // always allow
@@ -148,11 +148,11 @@ export function ControlledInput({
   }
 
   useEffect(() => {
-    // console.log('>> app._components.PoemLineInput.useEffect()', { id, activeId, visible, ref, value, updatedLine: localValue });
+    // console.log('app._components.PoemLineInput.useEffect()', { id, activeId, visible, ref, value, updatedLine: localValue });
 
     if (typeof (activeId) == "number") {
       if (activeId == id && typeof (value) == "string" && !active) {
-        // console.log('>> app._components.PoemLineInput.useEffect() setFocus', { id, activeId, visible, select, value, updatedLine: localValue });
+        // console.log('app._components.PoemLineInput.useEffect() setFocus', { id, activeId, visible, select, value, updatedLine: localValue });
         setActive(true);
 
         // https://stackoverflow.com/questions/2388164/set-focus-on-div-contenteditable-element      
@@ -165,7 +165,7 @@ export function ControlledInput({
           selectElementContents(ref.current);
         }
       } else {
-        // console.log('>> app._components.PoemLineInput.useEffect() resetting', { id, visible, value, updatedLine: localValue, ref });
+        // console.log('app._components.PoemLineInput.useEffect() resetting', { id, visible, value, updatedLine: localValue, ref });
         setActive(false);
         // ref?.current && ref.current.blur();
       }
@@ -222,7 +222,7 @@ export default function HaikuPoem({
   switchMode?: any,
   updateTitle?: any,
 }) {
-  // console.log('>> app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
+  // console.log('app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   const onboarding = typeof (onboardingElement) == "string"
   const maxHaikuTheme = showcaseMode ? 32 : 18;
@@ -247,10 +247,10 @@ export default function HaikuPoem({
   const canRegeneratePoem = regeneratePoemAllowed && !editing && !saving;
   const canRefresh = !!refresh;
   const canRegenerateImage = regenerateImageAllowed && !editing && !saving;
-  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { editing, showcaseMode, canCopy, canSwitchMode });
+  // console.log('app._components.HaikuPage.HaikuPoem.render()', { editing, showcaseMode, canCopy, canSwitchMode });
 
   const handleClickHaiku = (e: any) => {
-    // console.log('>> app._components.HaikuPoem.handleClickHaiku()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
+    // console.log('app._components.HaikuPoem.handleClickHaiku()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
     if (showcaseMode && canRefresh) {
       return refresh(e);
     }
@@ -271,19 +271,19 @@ export default function HaikuPoem({
   }
 
   const startEdit = (inputIndex: number, select?: boolean) => {
-    // console.log('>> app._components.HaikuPoem.startEdit()', { inputIndex, select, updatedPoem });
+    // console.log('app._components.HaikuPoem.startEdit()', { inputIndex, select, updatedPoem });
     setEditingLine(inputIndex);
     setSelection(!!select);
   }
 
   const cancelEdit = () => {
-    // console.log('>> app._components.HaikuPoem.cancelEdit()', { haiku, poem: haiku?.poem, updatedLines: updatedPoem });
+    // console.log('app._components.HaikuPoem.cancelEdit()', { haiku, poem: haiku?.poem, updatedLines: updatedPoem });
     setUpdatedPoem([]);
     setEditingLine(undefined);
   }
 
   const finishEdit = async () => {
-    // console.log('>> app._components.HaikuPoem.finishEdit()', { haiku, poem: haiku?.poem, updatedLines: updatedPoem });
+    // console.log('app._components.HaikuPoem.finishEdit()', { haiku, poem: haiku?.poem, updatedLines: updatedPoem });
     setEditingLine(undefined);
     setAboutToEditLine(undefined);
 
@@ -306,7 +306,7 @@ export default function HaikuPoem({
       .map((value: string, i: number) => (updatedPoem[i] || value || "").split(/\s/)
         .map((word: string) => syllable(word))
         .reduce((a: number, v: number) => a + v, 0))
-    // console.log('>> app._components.HaikuPoem.finishEdit()', { syllables });
+    // console.log('app._components.HaikuPoem.finishEdit()', { syllables });
 
     const updatedOpen = haiku?.poem
       .map((value: string, i: number) => {
@@ -323,9 +323,9 @@ export default function HaikuPoem({
         originalPoem: haiku?.originalPoem || haiku?.poem,
         poem: updatedOpen,
       });
-      // console.log('>> app._components.HaikuPoem.finishEdit()', {});
+      // console.log('app._components.HaikuPoem.finishEdit()', {});
     } catch (error: any) {
-      // console.log('>> app._components.HaikuPoem.finishEdit()', { error });
+      // console.log('app._components.HaikuPoem.finishEdit()', { error });
       // assumption that saveHaiku store showed an error alert
     }
 
@@ -334,7 +334,7 @@ export default function HaikuPoem({
   }
 
   const handlePoemLineKeyDown = (e: any, lineNumber: number) => {
-    // console.log(">> app._components.HaikuPoem.handlePoemLineKeyDown", { e, key: e.key, lineNumber });
+    // console.log("app._components.HaikuPoem.handlePoemLineKeyDown", { e, key: e.key, lineNumber });
     if (e.key == "Escape") {
       cancelEdit();
     } else if (e.key == "Enter") {
@@ -362,14 +362,14 @@ export default function HaikuPoem({
   };
 
   const handleInputChange = (value: string, lineNumber: number) => {
-    // console.log('>> app._components.HaikuPoem.handleInputChange()', { value, lineNumber });
+    // console.log('app._components.HaikuPoem.handleInputChange()', { value, lineNumber });
     const update = [...updatedPoem];
     update[lineNumber] = upperCaseFirstLetter(value);
     setUpdatedPoem(update);
   };
 
   const handleKeyDown = async (e: any) => {
-    // console.log(">> app._component.SidePanel.handleKeyDown", { e, key: e.key });
+    // console.log("app._component.SidePanel.handleKeyDown", { e, key: e.key });
     if (e.key == "Tab" && !editing) {
       e.preventDefault();
       startEdit(e.shiftKey ? haiku?.poem.length - 1 : 0, true);
@@ -377,7 +377,7 @@ export default function HaikuPoem({
   };
 
   useEffect(() => {
-    // console.log(">> app._component.SidePanel.useEffect", { mode, haiku });
+    // console.log("app._component.SidePanel.useEffect", { mode, haiku });
     document.body.addEventListener('keydown', handleKeyDown);
 
     return () => {

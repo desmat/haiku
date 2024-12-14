@@ -12,7 +12,7 @@ export default function Link({
   target?: string,
   useClient?: boolean
 }) {
-  // console.log('>> components.Link.render()', { isActive });
+  // console.log('components.Link.render()', { isActive });
 
   const styleSet = new Set(style && style.split(/\s+/));
   const computedClassName = "  "

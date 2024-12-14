@@ -17,19 +17,19 @@ async function getTodaysHaikuId() {
 
   if (isHaikudleMode) {
     const todaysDailyHaikudle = await getDailyHaikudle(todaysDateCode, true);
-    // console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaikudle });
+    // console.log('app.[[..slug]].layout.render()', { todaysDailyHaikudle });
     if (!todaysDailyHaikudle) console.warn('>> app.[[..slug]].layout.render() WARNING: todays daily haikudle not created', {});
     return todaysDailyHaikudle?.haikuId;
   }
 
   const todaysDailyHaiku = await getDailyHaiku(todaysDateCode, true);
-  // console.log('>> app.[[..slug]].layout.render()', { todaysDailyHaiku });
+  // console.log('app.[[..slug]].layout.render()', { todaysDailyHaiku });
   if (!todaysDailyHaiku) console.warn('>> app.[[..slug]].layout.render() WARNING: todays daily haiku not created', {});
   return todaysDailyHaiku?.haikuId;
 }
 
 async function getHaikuSocialImg(haiku: Haiku) {
-  // console.log('>> app.[[..slug]].layout.getSocialImg()', { haiku });
+  // console.log('app.[[..slug]].layout.getSocialImg()', { haiku });
 
   if (haiku && haiku.sharedVersioned) {
     return `https://iwpybzbnjyjnfzli.public.blob.vercel-storage.com/social_img_haikugenius/${haiku?.id}_${haiku?.version || 0}.png`
@@ -81,17 +81,17 @@ export default async function Layout({
     haikuId = undefined;
   }
 
-  // console.log('>> app.[[..slug]].layout.render()', { haikuId, slug: params?.slug, params });
+  // console.log('app.[[..slug]].layout.render()', { haikuId, slug: params?.slug, params });
 
   const haiku = await getHaiku({ id: "(system)" } as User, haikuId || await getTodaysHaikuId());
-  console.log('>> app.[[..slug]].layout.render()', { haiku });
+  console.log('app.[[..slug]].layout.render()', { haiku });
 
   const images = [
     isHaikudleMode
       ? await getHaikudleSocialImg(haiku)
       : await getHaikuSocialImg(haiku),
   ];
-  console.log('>> app.[[..slug]].layout.render()', { images });
+  console.log('app.[[..slug]].layout.render()', { images });
 
   const metadata = {
     metadataBase: new URL(url),
@@ -103,7 +103,7 @@ export default async function Layout({
       images,
     }
   }
-  console.log('>> app.[[..slug]].layout.render()', { metadata });
+  console.log('app.[[..slug]].layout.render()', { metadata });
 
   return (
     <>

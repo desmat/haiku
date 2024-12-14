@@ -6,7 +6,7 @@ import { userSession } from '@/services/users';
 // export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  console.log('>> app.api.haiku.[id].daily POST', {});
+  console.log('app.api.haiku.[id].daily POST', {});
 
   const { user } = await userSession(request);
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const data: any = await request.json();
   const { dateCode, haikuId } = data;
 
-  console.log('>> app.api.haikus.[id].daily POST', { dateCode, haikuId });
+  console.log('app.api.haikus.[id].daily POST', { dateCode, haikuId });
 
   const haiku = await getHaiku(user, haikuId);
 

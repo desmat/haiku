@@ -13,7 +13,7 @@ export const maxDuration = 300;
 export async function GET(request: NextRequest, params?: any) {
   const query = searchParamsToMap(request.nextUrl.searchParams.toString()) as any;
   const { user } = await userSession(request);
-  console.log('>> app.api.haikus.GET', { query, searchParams: request.nextUrl.searchParams.toString(), user });
+  console.log('app.api.haikus.GET', { query, searchParams: request.nextUrl.searchParams.toString(), user });
 
   if (query.mode
     && !["showcase", "social-img", "haikudle-social-img"].includes(query.mode)
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest, params?: any) {
 
   const todaysDailyHaiku = await getDailyHaiku();
   const todaysHaiku = await getHaiku(user, todaysDailyHaiku?.haikuId || "");
-  console.log('>> app.api.haiku.GET', { todaysDailyHaiku, todaysHaiku });
+  console.log('app.api.haiku.GET', { todaysDailyHaiku, todaysHaiku });
 
   if (!todaysHaiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest, params?: any) {
 
 export async function POST(request: NextRequest) {
   const contentType = request.headers.get("content-type");
-  console.log('>> app.api.haiku.POST', { contentType });
+  console.log('app.api.haiku.POST', { contentType });
 
   let subject: string | undefined;
   let lang: LanguageType | undefined;
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     album = formData.get("album") as string;
     imageFile = formData.get("image") as File;
 
-    console.log(">> app.api.haiku.POST", { title, poemString, imageFile });
+    console.log("app.api.haiku.POST", { title, poemString, imageFile });
   } else {
     // assume json
     const data: any = await request.json();
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
       poem = subject.split(/\n/).filter(Boolean)
       subject = undefined;
     }
-    console.log('>> app.api.haiku.POST', { lang, subject, mood, artStyle, poem, album });
+    console.log('app.api.haiku.POST', { lang, subject, mood, artStyle, poem, album });
   }
 
   const { user } = await userSession(request);
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
     // @ts-ignore
     haiku = await createHaiku(user, { title, poem, imageBuffer, imageType, albumId: album });
   } else {
-    // console.log('>> app.api.haiku.POST generating new haiku', { lang, subject, mood, artStyle });    
+    // console.log('app.api.haiku.POST generating new haiku', { lang, subject, mood, artStyle });    
     haiku = await generateHaiku(user, { lang, subject, mood, artStyle, poem, albumId: album })
   }
 

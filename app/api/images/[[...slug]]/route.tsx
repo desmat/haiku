@@ -6,7 +6,7 @@ export async function PUT(
   request: NextRequest,
   { params, searchParams }: { params: { slug: any }, searchParams?: { [key: string]: string | undefined }, }
 ) {
-  console.log('>> app.api.images.[[slug]].PUT', { params, searchParams });
+  console.log('app.api.images.[[slug]].PUT', { params, searchParams });
   const { user } = await userSession(request);
 
   if (!user.isAdmin) {
@@ -24,11 +24,11 @@ export async function PUT(
   }
 
   const formData = await request.formData();
-  console.log(">> app.api.images.[[slug]].PUT", { formData });
+  console.log("app.api.images.[[slug]].PUT", { formData });
   
   const parts: File[] = [];
   formData.forEach((part: FormDataEntryValue) => parts.push(part as File));
-  console.log(">> app.api.images.[[slug]].PUT", { parts });
+  console.log("app.api.images.[[slug]].PUT", { parts });
 
   const filename = params.slug.join("/")
   const blob = await put(filename, parts[0], {
@@ -36,7 +36,7 @@ export async function PUT(
     addRandomSuffix: false,
   });
 
-  console.log('>> app.api.images.[[slug]].PUT', { blob });
+  console.log('app.api.images.[[slug]].PUT', { blob });
 
   return NextResponse.json(blob);
 }

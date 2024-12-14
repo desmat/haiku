@@ -10,7 +10,7 @@ export const loadingMessages = [
 
 export default function Loading({ styles = [] }: { styles?: any }) {
   const loadingMessage = "";
-  // console.log('>> app._components.Loading', { seed, random: seedrandom(`${seed}`)(), loadingMessage });
+  // console.log('app._components.Loading', { seed, random: seedrandom(`${seed}`)(), loadingMessage });
 
   return (
     <Suspense

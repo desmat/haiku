@@ -27,7 +27,7 @@ function TypedAlert({
   closeLabel?: string,
   customActions?: any
 }) {
-  // console.log('>> app._components.Alert.Alert.render()', { message, type, closed, style });
+  // console.log('app._components.Alert.Alert.render()', { message, type, closed, style });
   let icon: any;
   let colorClasses: any;
 
@@ -177,16 +177,16 @@ function AnimatedAlert({
   let [dismissedAt, setDismissedAt] = useState<number | undefined>();
 
   useEffect(() => {
-    // console.log('>> app._components.Alert.AnimatedAlert.render() useEffect', { message, lastMessage, timestamp });
+    // console.log('app._components.Alert.AnimatedAlert.render() useEffect', { message, lastMessage, timestamp });
 
     // make the thing pulse a bit when same message but was not dismissed
     if (lastMessage && (message == lastMessage) && !dismissedAt) {
-      // console.log('>> app._components.Alert.AnimatedAlert.render() useEffect starting pulse', { message, lastMessage, timestamp });
+      // console.log('app._components.Alert.AnimatedAlert.render() useEffect starting pulse', { message, lastMessage, timestamp });
       dismissedAt = timestamp; // not quite sure why but there's a race condition causing a visual glitch and this fixes it
       setDismissedAt(moment().valueOf());
 
       setTimeout(() => {
-        // console.log('>> app._components.Alert.AnimatedAlert.render() useEffect finishing pulse', { message, lastMessage, timestamp });
+        // console.log('app._components.Alert.AnimatedAlert.render() useEffect finishing pulse', { message, lastMessage, timestamp });
         setDismissedAt(undefined);
       }, 50);
     }
@@ -205,12 +205,12 @@ function AnimatedAlert({
   }, [message, timestamp]);
 
   useEffect(() => {
-    // console.log('>> app._components.Alert.AnimatedAlert.render() useEffect', { closedTimestamp });
+    // console.log('app._components.Alert.AnimatedAlert.render() useEffect', { closedTimestamp });
     handleClose();
   }, [closedTimestamp]);
 
   const handleKeyDown = async (e: any) => {
-    // console.log(">> app._components.Alert.AnimatedAlert.handleKeyDown", { e });
+    // console.log("app._components.Alert.AnimatedAlert.handleKeyDown", { e });
     if (e.key == "Escape") {
       handleClose();
     }
@@ -222,7 +222,7 @@ function AnimatedAlert({
     setTimeout(reset, 50);
   }
 
-  // console.log('>> app._components.Alert.AnimatedAlert.render()', { message, timestamp, lastMessage, dismissedAt });
+  // console.log('app._components.Alert.AnimatedAlert.render()', { message, timestamp, lastMessage, dismissedAt });
 
   if (message) {
     return (
@@ -268,7 +268,7 @@ export default function Alert({
     state.customActions,
   ]);
 
-  // console.log('>> app._components.Alert.Error.render()', { message, _message });
+  // console.log('app._components.Alert.Error.render()', { message, _message });
 
   return (
     <AnimatedAlert

@@ -14,7 +14,7 @@ export async function GET(
 ) {
   const query = searchParamsToMap(request.nextUrl.searchParams.toString()) as any;
   const { user } = await userSession(request);
-  console.log('>> app.api.haiku.[id].GET', { params });
+  console.log('app.api.haiku.[id].GET', { params });
 
   if (query.mode
     && !["showcase", "social-img", "haikudle-social-img"].includes(query.mode)
@@ -46,7 +46,7 @@ export async function GET(
     }
   }
 
-  console.log('>> app.api.haikus.GET', { haiku, userHaiku });
+  console.log('app.api.haikus.GET', { haiku, userHaiku });
 
   return NextResponse.json({ haiku });
 }
@@ -55,7 +55,7 @@ export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  console.log('>> app.api.haiku.[id].PUT', { params });
+  console.log('app.api.haiku.[id].PUT', { params });
 
   const { user } = await userSession(request)
   const haiku = await getHaiku(user, params.id);
@@ -98,7 +98,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  console.log('>> app.api.haiku.DELETE', { params });
+  console.log('app.api.haiku.DELETE', { params });
 
   const { user } = await userSession(request)
 

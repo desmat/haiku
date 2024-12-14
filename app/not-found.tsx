@@ -16,7 +16,7 @@ export default function NotFound({
   onClickGenerate?: any,
   onClickLogo?: any
 }) {
-  // console.log('>> app.NotFound.render()');
+  // console.log('app.NotFound.render()');
   const { textStyles, altTextStyles } = haikuStyles(notFoundHaiku);
 
   return (

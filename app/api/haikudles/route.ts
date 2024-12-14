@@ -6,13 +6,13 @@ import { getHaiku } from '@/services/haikus';
 
 export async function GET(request: NextRequest, params?: any) {
   const query = searchParamsToMap(request.nextUrl.searchParams.toString());
-  console.log('>> app.api.haikudles.GET', { query, searchParams: request.nextUrl.searchParams.toString() });
+  console.log('app.api.haikudles.GET', { query, searchParams: request.nextUrl.searchParams.toString() });
 
   const { user } = await userSession(request);
 
   let { haikudle, dailyHaikudle } = await getDailyHaikudle();
 
-  console.log('>> app.api.haikudles.GET', { dailyHaikudle });
+  console.log('app.api.haikudles.GET', { dailyHaikudle });
 
   if (!dailyHaikudle) {
     return NextResponse.json({ dailyHaikudle: {} }, { status: 404 });
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest, params?: any) {
     getUserHaikudle(user?.id, dailyHaikudle?.haikuId),
   ]);
 
-  console.log('>> app.api.haikudles.GET', { haiku, haikudle, userHaikudle });
+  console.log('app.api.haikudles.GET', { haiku, haikudle, userHaikudle });
 
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest, params?: any) {
 }
 
 export async function POST(request: Request) {
-  console.log('>> app.api.haikudles.POST');
+  console.log('app.api.haikudles.POST');
 
   // TODO: move this to api/haikudle/id/daily to follow haiku pattern
 
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
   const data: any = await request.json();
   const haikudle = data.haikudle;
 
-  console.log('>> app.api.haikus.POST', { haikudle });
+  console.log('app.api.haikus.POST', { haikudle });
 
   // TODO create haikudle with same ID as the haiku, and the daily haikudle with id YYYYMMDD
 

@@ -13,7 +13,7 @@ export async function POST(
   request: Request,
   { params }: { params: { id: string, action: string } }
 ) {
-  console.log(`>> app.api.haiku.[id].[action].POST`, { params });
+  console.log(`app.api.haiku.[id].[action].POST`, { params });
 
   if (["like", "un-like"].includes(params.action)) {
     const { user } = await userSession(request);
@@ -59,7 +59,7 @@ export async function POST(
     let { haiku, part, artStyle, album }: any = await request.json();
     part = part || "poem";
 
-    console.log(`>> app.api.haiku.[id].[action].POST`, { action: params.action, haiku, part });
+    console.log(`app.api.haiku.[id].[action].POST`, { action: params.action, haiku, part });
 
     const { user } = await userSession(request);
     let reachedUsageLimit = false; // actually _will_ reach usage limit shortly
@@ -77,7 +77,7 @@ export async function POST(
 
       const usage = await userUsage(user);
       const { haikusRegenerated } = usage[moment().format("YYYYMMDD")];
-      console.log('>> app.api.haiku.regenerate.POST', { haikusRegenerated, usage });
+      console.log('app.api.haiku.regenerate.POST', { haikusRegenerated, usage });
 
       if ((haikusRegenerated || 0) >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU) {
         return NextResponse.json(
@@ -120,7 +120,7 @@ export async function POST(
     }
 
     const haiku = await getHaiku(user, params.id);
-    console.log(`>> app.api.haiku.[id].[action].POST`, { action: params.action, url, haiku });
+    console.log(`app.api.haiku.[id].[action].POST`, { action: params.action, url, haiku });
 
     if (!haiku) {
       return NextResponse.json(
@@ -130,13 +130,13 @@ export async function POST(
     }
 
     const imageRet = await fetch(url);
-    // console.log(">> app.api.haiku.[id].[action].POST", { imageRet });  
+    // console.log("app.api.haiku.[id].[action].POST", { imageRet });  
     const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
-    // console.log(">> app.api.haiku.[id].[action].POST", { imageBuffer });
+    // console.log("app.api.haiku.[id].[action].POST", { imageBuffer });
     const fileExtensionMatch = url.match(/.*(?:\.(jpg|jpeg|gif|png|svg)).*/i);
-    // console.log(">> app.api.haiku.[id].[action].POST", { url, fileExtensionMatch });
+    // console.log("app.api.haiku.[id].[action].POST", { url, fileExtensionMatch });
     const updatedHaiku = await updateHaikuImage(user, haiku, imageBuffer, fileExtensionMatch ? `image/${fileExtensionMatch[1]}` : undefined);
-    console.log(`>> app.api.haiku.[id].[action].POST`, { updatedHaiku });
+    console.log(`app.api.haiku.[id].[action].POST`, { updatedHaiku });
 
     return NextResponse.json({ haiku: updatedHaiku });
   } else if (params.action == "uploadImage") {
@@ -153,14 +153,14 @@ export async function POST(
       );
     }
 
-    // console.log(`>> app.api.haiku.[id].[action].POST`, { action: params.action, formData });
+    // console.log(`app.api.haiku.[id].[action].POST`, { action: params.action, formData });
 
     const parts: File[] = [];
     formData.forEach((part: FormDataEntryValue) => parts.push(part as File));
-    // console.log(">> app.api.haiku.[id].[action].POST", { parts });
+    // console.log("app.api.haiku.[id].[action].POST", { parts });
 
     const haiku = await getHaiku(user, params.id);
-    console.log(`>> app.api.haiku.[id].[action].POST`, { action: params.action, haiku });
+    console.log(`app.api.haiku.[id].[action].POST`, { action: params.action, haiku });
 
     if (!haiku) {
       return NextResponse.json(
@@ -171,7 +171,7 @@ export async function POST(
 
     const imageBuffer = Buffer.from(await parts[0].arrayBuffer());
     const updatedHaiku = await updateHaikuImage(user, haiku, imageBuffer, parts[0].type);
-    console.log(`>> app.api.haiku.[id].[action].POST`, { updatedHaiku });
+    console.log(`app.api.haiku.[id].[action].POST`, { updatedHaiku });
 
     return NextResponse.json({ haiku: updatedHaiku });
   } else if (params.action == "share") {
@@ -208,7 +208,7 @@ export async function POST(
         }, { noVersion: true });
       }
     } else {
-      console.log(`>> app.api.haiku.[id].[action].POST: already shared`, { action: params.action, haiku });
+      console.log(`app.api.haiku.[id].[action].POST: already shared`, { action: params.action, haiku });
     }
 
     return NextResponse.json({ haiku });

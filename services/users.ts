@@ -27,10 +27,10 @@ export function getProviderName(user: User): string {
 }
 
 export async function userSession(request: any) {
-  // console.log(">> services.users.userSession", { request });
+  // console.log("services.users.userSession", { request });
   const authorization = request.headers.get("Authorization");
   const query = searchParamsToMap(request.nextUrl.searchParams.toString()) as any;
-  // console.log(">> services.users.userSession", { authorization, host: request.headers.get("host") });
+  // console.log("services.users.userSession", { authorization, host: request.headers.get("host") });
 
   let token;
   if (authorization?.startsWith("Bearer ")) {
@@ -44,7 +44,7 @@ export async function userSession(request: any) {
 
   const decodedToken = token && await decodeJWT(token);
   const user = decodedToken.user && await loadUser(decodedToken.user.id);
-  // console.log(">> services.users.userSession", { decodedToken, user, adminUserIds: process.env.ADMIN_USER_IDS });
+  // console.log("services.users.userSession", { decodedToken, user, adminUserIds: process.env.ADMIN_USER_IDS });
 
   if (query.user) {
     if (!user.isAdmin) {
@@ -77,14 +77,14 @@ export async function userSession(request: any) {
 }
 
 export async function loadUser(userId: string) {
-  console.log(">> services.users.loadUser", { userId });
+  console.log("services.users.loadUser", { userId });
   let loadedUser = await store.user.get(userId);
 
   return loadedUser;
 }
 
 export async function saveUser(user: User) {
-  console.log(">> services.users.saveUser", { user });
+  console.log("services.users.saveUser", { user });
 
   if (user.impersonating) {
     console.warn(">> services.users.saveUser WARNING: not saving impersonated user", { user });
@@ -109,7 +109,7 @@ export async function createToken(user: User) {
 }
 
 export async function flagUser(admin: User, userId: string, reason?: string) {
-  console.log(">> services.users.flagUser", { admin, userId, reason });
+  console.log("services.users.flagUser", { admin, userId, reason });
 
   if (await store.flaggedUsers.exists(userId)) {
     return store.flaggedUsers.update({
@@ -133,7 +133,7 @@ export async function getFlaggedUserIds(): Promise<Set<any>> {
 }
 
 export async function getUserStats(reportAt?: any): Promise<any> {
-  console.log(">> services.users.getUserStats", {});
+  console.log("services.users.getUserStats", {});
   const [
     // allUsers,
     userIds,

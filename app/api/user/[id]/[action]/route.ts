@@ -8,7 +8,7 @@ export async function POST(
   request: Request,
   { params }: { params: { id: string, action: string } }
 ) {
-  console.log(`>> app.api.user.[id].[action].POST`, { params });
+  console.log(`app.api.user.[id].[action].POST`, { params });
 
   if (["flag"].includes(params.action)) {
     const { user } = await userSession(request);

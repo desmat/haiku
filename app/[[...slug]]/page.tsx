@@ -72,7 +72,7 @@ export default async function Page({
   const userId = searchParams && searchParams["user"];
   const noOnboarding = !!userId || (searchParams && searchParams["noOnboarding"] == "true" || process.env.NO_ONBOARDING == "true");
 
-  // console.log('>> app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
+  // console.log('app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
   // can't switch modes in puzzle mode
   if (process.env.EXPERIENCE_MODE == "haikudle" && mode != process.env.EXPERIENCE_MODE) {

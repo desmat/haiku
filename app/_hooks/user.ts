@@ -34,7 +34,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   getToken: async () => {
-    // console.log(">> hooks.user.getToken()", {});
+    // console.log("hooks.user.getToken()", {});
     const { loaded, token, load } = get();
     if (!loaded) {
       return (await load()).token;
@@ -47,7 +47,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     set({ loading: true });
     const { loadRemote, haikus, allHaikus, dailyHaikus, dailyHaikudles } = get();
     let user = { album: options.album, referer: document?.referrer };
-    // console.log(">> hooks.user.load()", { options, user });
+    // console.log("hooks.user.load()", { options, user });
 
     let createdUser: User | undefined;
     let token = window?.localStorage && window.localStorage.getItem("session");
@@ -81,7 +81,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       nextDailyHaikudleId,
     } = await loadRemote(token, options);
 
-    // console.log(">> hooks.user.load()", { createdUser, remoteUser });
+    // console.log("hooks.user.load()", { createdUser, remoteUser });
 
     if (createdUser && !createdUser.impersonating) {
       trackEvent("user-session-created", {
@@ -171,7 +171,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   save: async (user: any) => {
-    // console.log(">> hooks.user.save()", { user });
+    // console.log("hooks.user.save()", { user });
 
     if (user.impersonating) {
       console.warn(">> hooks.user.save() impersonating user", { user });
@@ -180,7 +180,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
     // save remote
     const { user: savedUser, token: savedToken } = await get().saveRemote(user);
-    // console.log(">> hooks.user.save()", { savedUser, savedToken });
+    // console.log("hooks.user.save()", { savedUser, savedToken });
 
     // save local
     window?.localStorage && window.localStorage.setItem("session", savedToken || "");
@@ -190,7 +190,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   loadRemote: async (token: string, options: any = {}) => {
-    // console.log(">> hooks.user.loadRemote()", { token, options });
+    // console.log("hooks.user.loadRemote()", { token, options });
 
     const params = mapToSearchParams({
       ...options.album && { album: options.album } || {},
@@ -217,7 +217,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
   },
 
   createRemote: async (user: any) => {
-    // console.log(">> hooks.user.createRemote()", { user });
+    // console.log("hooks.user.createRemote()", { user });
 
     const res = await fetch(`/api/user`, {
       // ...await fetchOpts(),
@@ -235,13 +235,13 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     }
 
     const { user: updatedUser, token: updatedToken } = await res.json();
-    // console.log(">> hooks.user.createRemote()", { updatedToken, updatedUser });
+    // console.log("hooks.user.createRemote()", { updatedToken, updatedUser });
 
     return { user: updatedUser, token: updatedToken };
   },
 
   saveRemote: async (user: any) => {
-    // console.log(">> hooks.user.saveRemote()", { user });
+    // console.log("hooks.user.saveRemote()", { user });
 
     const token = await get().getToken();
     const opts = token && { headers: { Authorization: `Bearer ${token}` } } || {};
@@ -262,14 +262,14 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     }
 
     const { user: updatedUser, token: updatedToken } = await res.json();
-    // console.log(">> hooks.user.saveRemote()", { updatedToken, updatedUser });
+    // console.log("hooks.user.saveRemote()", { updatedToken, updatedUser });
 
     return { user: updatedUser, token: updatedToken };
   },
 
   addUserHaiku: async (haiku: Haiku, action?: "viewed" | "generated") => {
     const { user, haikus, allHaikus } = get();
-    console.log(">> hooks.user.addUserHaiku", { haiku, action, user });
+    console.log("hooks.user.addUserHaiku", { haiku, action, user });
 
     const token = await get().getToken();
     const opts = token && { headers: { Authorization: `Bearer ${token}` } } || {};
@@ -290,7 +290,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
     }
 
     const { userHaiku } = await res.json();
-    // console.log(">> hooks.user.addUserHaiku", { userHaiku });
+    // console.log("hooks.user.addUserHaiku", { userHaiku });
   },
 })));
 

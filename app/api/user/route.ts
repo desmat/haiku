@@ -9,7 +9,7 @@ import { getDailyHaikudles, getNextDailyHaikudleId } from '@/services/haikudles'
 export async function GET(request: NextRequest, params?: any) {
   const query = searchParamsToMap(request.nextUrl.searchParams.toString()) as any;
   const { user: sessionUser } = await userSession(request);
-  console.log('>> app.api.user.GET', { sessionUser, params, query });
+  console.log('app.api.user.GET', { sessionUser, params, query });
 
   if (!sessionUser) {
     return NextResponse.json(
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest, params?: any) {
     userUsage(sessionUser),
   ]);
 
-  console.log('>> app.api.user.GET', { sessionUser, databaseUser, usage });
+  console.log('app.api.user.GET', { sessionUser, databaseUser, usage });
 
   const user = {
       ...sessionUser,
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest, params?: any) {
 export async function POST(
   request: Request,
 ) {
-  console.log('>> app.api.user.POST', {});
+  console.log('app.api.user.POST', {});
 
   const [
     // { user: userFromSession },
@@ -93,7 +93,7 @@ export async function POST(
     request.json(),
   ]);
 
-  console.log('>> app.api.user.POST', { userFromRequest });
+  console.log('app.api.user.POST', { userFromRequest });
 
   // if (userFromSession) {
   //   return NextResponse.json(

@@ -24,7 +24,7 @@ function parseJson(input: string) {
 }
 
 export async function generateBackgroundImage(userId: string, subject?: string, mood?: string, artStyle?: string, customPrompt?: string, customArtStyles?: string[]): Promise<any> {
-  console.log(`>> services.openai.generateBackgroundImage`, { subject, mood, artStyle, customPrompt, customArtStyles });
+  console.log(`services.openai.generateBackgroundImage`, { subject, mood, artStyle, customPrompt, customArtStyles });
   const imageTypes = customArtStyles || [
     // "charcoal drawing", 
     // "pencil drawing",
@@ -89,7 +89,7 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
     Make the art extremely minimal and low-key, with very few brush strokes, 
     The image should not contain any writing of characters of any kind.
   `;
-  console.log(`>> services.openai.generateBackgroundImage`, { prompt });
+  console.log(`services.openai.generateBackgroundImage`, { prompt });
 
   // for testing
   if (process.env.OPENAI_API_KEY == "DEBUG") {
@@ -127,7 +127,7 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
     });
 
     try {
-      console.log(">> services.openai.generateBackgroundImage RESULTS FROM API", { response });
+      console.log("services.openai.generateBackgroundImage RESULTS FROM API", { response });
       return {
         artStyle: selectedArtStyle,
         prompt: (response.data[0]["revised_prompt"] || prompt),
@@ -155,7 +155,7 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
 export async function generateHaiku(userId: string, language?: string, subject?: string, mood?: string, customPrompt?: string): Promise<any> {
   const prompt = `Topic: ${subject || "any"}${mood ? ` Mood: ${mood}` : ""}`;
 
-  console.log(`>> services.openai.generateHaiku`, { language, subject, mood, prompt });
+  console.log(`services.openai.generateHaiku`, { language, subject, mood, prompt });
 
   if (process.env.OPENAI_API_KEY == "DEBUG") {
     // for testing
@@ -207,9 +207,9 @@ export async function generateHaiku(userId: string, language?: string, subject?:
 
     let response;
     try {
-      console.log(">> services.openai.generateHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
+      console.log("services.openai.generateHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
       response = parseJson(completion.choices[0].message.content);
-      console.log(">> services.openai.generateHaiku RESULTS FROM API", { response });
+      console.log("services.openai.generateHaiku RESULTS FROM API", { response });
       return {
         prompt: systemPrompt + "\n" + prompt,
         model: completion.model,
@@ -238,7 +238,7 @@ export async function completeHaiku(userId: string, poem: string[], language?: s
   ${subject ? `Topic: "${subject}"` : ""}
   ${mood ? ` Mood: "${mood}"` : ""}`;
 
-  console.log(`>> services.openai.completeHaiku`, { language, subject, mood, prompt });
+  console.log(`services.openai.completeHaiku`, { language, subject, mood, prompt });
 
   if (process.env.OPENAI_API_KEY == "DEBUG") {
     // for testing
@@ -287,9 +287,9 @@ export async function completeHaiku(userId: string, poem: string[], language?: s
 
     let response;
     try {
-      console.log(">> services.openai.completeHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
+      console.log("services.openai.completeHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
       response = parseJson(completion.choices[0].message.content);
-      console.log(">> services.openai.completeHaiku RESULTS FROM API", { response });
+      console.log("services.openai.completeHaiku RESULTS FROM API", { response });
       return { prompt, response, model: completion.model };
     } catch (error) {
       console.error("Error reading results", { error, response, completion });
@@ -314,7 +314,7 @@ export async function analyzeHaiku(userId: string, poem: string[]): Promise<any>
   const language = undefined
   const subject = undefined;
   const mood = undefined;
-  console.log(`>> services.openai.analyzeHaiku`, { language, subject, mood });
+  console.log(`services.openai.analyzeHaiku`, { language, subject, mood });
 
   if (process.env.OPENAI_API_KEY == "DEBUG") {
     // for testing
@@ -364,9 +364,9 @@ export async function analyzeHaiku(userId: string, poem: string[]): Promise<any>
 
     let response;
     try {
-      console.log(">> services.openai.analyzeHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
+      console.log("services.openai.analyzeHaiku RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
       response = parseJson(completion.choices[0].message.content);
-      console.log(">> services.openai.analyzeHaiku RESULTS FROM API", { response });
+      console.log("services.openai.analyzeHaiku RESULTS FROM API", { response });
       return {
         prompt: systemPrompt + "\n" + poem,
         model: completion.model,

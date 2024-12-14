@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
   const method = request.method;
   const thing = request.nextUrl.toString();
   const query = searchParamsToMap(request.nextUrl.searchParams.toString()) as any;
-  // console.log("*** middleware", { path, thing, query });
+  // console.log("middleware", { path, thing, query });
 
   if (path == "/api/user" && method == "POST") {
     // allow new users to create a new session
@@ -20,10 +20,10 @@ export async function middleware(request: NextRequest) {
 
   if (path.startsWith("/api/")) {
     const session = await userSession(request);
-    // console.log("*** middleware", { session });
+    // console.log("middleware", { session });
 
     if (!session?.user) {
-      // console.log("*** middleware NOPE", { session });
+      // console.log("middleware NOPE", { session });
 
       return NextResponse.json(
         { success: false, message: 'authorization failed' },
@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
     const now = moment();
     const diff = now.diff(session.user?.updatedAt || session.user?.createdAt, "seconds");
     const sessionCount = (session.user?.sessionCount || 1);
-    // console.log("*** middleware", { user: session.user, diff, sessionCount });
+    // console.log("middleware", { user: session.user, diff, sessionCount });
 
     await saveUser({
       ...session.user,

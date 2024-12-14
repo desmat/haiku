@@ -12,7 +12,7 @@ const store = createStore({
 });
 
 export async function backup(user: User, entities?: string[], haikuIds?: string[] | null) {
-  console.log('>> app.services.admin.backup', { user, entities, haikuIds });
+  console.log('app.services.admin.backup', { user, entities, haikuIds });
 
   const keys = Object.keys(store)
     .filter((key: string) => {
@@ -44,25 +44,25 @@ export async function backup(user: User, entities?: string[], haikuIds?: string[
 
                 const previousVersionIds = Array.from(Array(currentValue.version || 0).keys())
                   .map((version: number) => `${currentValue.id}:${version}`);
-                // console.log('>> app.services.admin.backup', { previousVersionIds });
+                // console.log('app.services.admin.backup', { previousVersionIds });
 
                 const previousValues = previousVersionIds?.length > 0
                   // @ts-ignore
                   ? await store[k].find({ id: previousVersionIds })
                   : [];
-                // console.log('>> app.services.admin.backup', { previousValues });
+                // console.log('app.services.admin.backup', { previousValues });
 
                 return [currentValue, ...previousValues];
               })
           );
 
-          // console.log('>> app.services.admin.backup', { k, v: versionedValues[i] });
+          // console.log('app.services.admin.backup', { k, v: versionedValues[i] });
           return [k, versionedValues.flat()]
         })
     )
   );
 
-  console.log('>> app.services.admin.backup', { keyValues });
+  console.log('app.services.admin.backup', { keyValues });
   // return keyValues;
 
   const p = require('/package.json');
@@ -78,22 +78,22 @@ export async function backup(user: User, entities?: string[], haikuIds?: string[
 
 
 export async function restore(user: User, url: string) {
-  console.log('>> app.services.admin.restore', { user, url });
+  console.log('app.services.admin.restore', { user, url });
 
   const res = await fetch(url);
-  // console.log('>> app.services.admin.restore', { res });
+  // console.log('app.services.admin.restore', { res });
 
   if (res.status != 200) {
     console.error(`Error fetching '${url}': ${res.statusText} (${res.status})`)
   }
 
   const data = await res.json();
-  console.log('>> app.services.admin.restore', { data });
+  console.log('app.services.admin.restore', { data });
 
   const result = {} as any;
   await Promise.all(
     Object.entries(data).map(async ([key, values]: any) => {
-      // console.log('>> app.services.admin.restore', { key, values });
+      // console.log('app.services.admin.restore', { key, values });
       if (!Array.isArray(values)) {
         console.warn('>> app.services.admin.restore UNEXPECTED VALUES TYPE', { key, values });
         return;
@@ -128,7 +128,7 @@ export async function restore(user: User, url: string) {
     })
   );
 
-  console.log('>> app.services.admin.restore >>>RESULTS<<<', { result });
+  console.log('app.services.admin.restore >>>RESULTS<<<', { result });
 
   return result;
 }

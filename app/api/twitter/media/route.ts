@@ -7,7 +7,7 @@ import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
   const { user: sessionUser } = await userSession(request);
-  console.log('>> app.api.twitter.oauth1.GET', { sessionUser });
+  console.log('app.api.twitter.oauth1.GET', { sessionUser });
 
   if (!sessionUser) {
     return NextResponse.json(
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   }
 
   const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
-  console.log(">> app.api.twitter.oauth1.GET", { imageBuffer });
+  console.log("app.api.twitter.oauth1.GET", { imageBuffer });
 
   const imageBlob = new Blob([imageBuffer], { type: "image/png" })
 
@@ -80,14 +80,14 @@ export async function POST(request: NextRequest) {
     method: request_data.method,
     body: formData,
   });
-  console.log('>> app.api.twitter.oauth1.GET', { res });
+  console.log('app.api.twitter.oauth1.GET', { res });
 
   if (res.status != 200) {
     console.error(`Error posting '${request_data.url}': ${res.statusText} (${res.status})`)
   }
 
   const data = await res.json();
-  console.log('>> app.api.twitter.oauth1.GET', { data });
+  console.log('app.api.twitter.oauth1.GET', { data });
 
   return NextResponse.json({ data });
 

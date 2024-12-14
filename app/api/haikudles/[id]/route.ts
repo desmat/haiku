@@ -11,7 +11,7 @@ export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  console.log('>> app.api.haikudle.[id].GET', { params });
+  console.log('app.api.haikudle.[id].GET', { params });
 
   const { user } = await userSession(request);
 
@@ -32,7 +32,7 @@ export async function GET(
     getHaikudle(user, params.id),
   ]);
   const myHaiku = undefined; //!user.isAdmin && haiku?.createdBy == user.id && await getHaiku(user, params.id);
-  // console.log('>> app.api.haikudles.GET', { haiku, haikudle, dailyHaikudle, myHaiku });
+  // console.log('app.api.haikudles.GET', { haiku, haikudle, dailyHaikudle, myHaiku });
 
   if (!haiku) {
     return NextResponse.json({ haiku: {} }, { status: 404 });
@@ -58,7 +58,7 @@ export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  console.log('>> app.api.haikudle.[id].PUT', { params });
+  console.log('app.api.haikudle.[id].PUT', { params });
 
   const { user } = await userSession(request);
 
@@ -80,7 +80,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  console.log('>> app.api.haikudle.DELETE', { params });
+  console.log('app.api.haikudle.DELETE', { params });
 
   const { user } = await userSession(request)
 

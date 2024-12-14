@@ -17,7 +17,7 @@ import("syllable").then((s: any) => syllable = s.syllable);
 
 async function fetchOpts() {
   const token = await useUser.getState().getToken();
-  // console.log(">> hooks.haiku.fetchOpts", { token });
+  // console.log("hooks.haiku.fetchOpts", { token });
   return token && { headers: { Authorization: `Bearer ${token}` } } || {};
 }
 
@@ -80,7 +80,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   ...initialState,
 
   reset: () => {
-    // console.log(">> hooks.haiku.reset", {});
+    // console.log("hooks.haiku.reset", {});
     return new Promise(async (resolve) => {
       set(initialState);
       resolve(true);
@@ -89,16 +89,16 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
   get: (id: string) => {
     const { _haikus } = get();
-    // console.log(">> hooks.haiku.get", { id, _haikus });
+    // console.log("hooks.haiku.get", { id, _haikus });
     return _haikus[id];
   },
 
   getRandom: () => {
     const { _haikus } = get();
-    // console.log(">> hooks.haiku.getRandom", { _haikus });
+    // console.log("hooks.haiku.getRandom", { _haikus });
     const haikus = mapToList(_haikus);
     const haiku = haikus[Math.floor(Math.random() * haikus.length)];
-    // console.log(">> hooks.haiku.getRandom", { haiku });
+    // console.log("hooks.haiku.getRandom", { haiku });
 
     return haiku;
   },
@@ -115,7 +115,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
   loaded: (idOrQuery?: object | string) => {
     const { _loaded } = get();
-    // console.log(">> hooks.haiku.loaded", { idOrQuery, _loaded });
+    // console.log("hooks.haiku.loaded", { idOrQuery, _loaded });
 
     if (!idOrQuery) {
       return _loaded[JSON.stringify({})];
@@ -173,7 +173,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   init: async (haiku: Haiku, queryOrId?: object | string, mode?: string): Promise<Haiku | Haiku[]> => {
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    // console.log(">> hooks.haiku.init", { mode, id, query: JSON.stringify(query), haiku });
+    // console.log("hooks.haiku.init", { mode, id, query: JSON.stringify(query), haiku });
 
     const { setLoaded, _mode, _haikus } = get();
 
@@ -200,7 +200,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     const { setLoaded, _mode, init } = get();
     const query = typeof (queryOrId) == "object" && queryOrId;
     const id = typeof (queryOrId) == "string" && queryOrId;
-    // console.log(">> hooks.haiku.load", { mode, id, version, query: JSON.stringify(query) });
+    // console.log("hooks.haiku.load", { mode, id, version, query: JSON.stringify(query) });
 
     return new Promise(async (resolve, reject) => {
       if (id) {
@@ -309,7 +309,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   create: async (user: User, name: string) => {
-    // console.log(">> hooks.haiku.create", { name });
+    // console.log("hooks.haiku.create", { name });
     const { _haikus, setLoaded, init } = get();
 
     // optimistic
@@ -363,7 +363,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   save: async (user: User, haiku: Haiku, options: {}) => {
-    // console.log(">> hooks.haiku.save", { haiku });
+    // console.log("hooks.haiku.save", { haiku });
     const { _haikus, init } = get();
 
     // optimistic
@@ -416,7 +416,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   generate: async (user: User, request: any) => {
-    // console.log(">> hooks.haiku.generate", { request });
+    // console.log("hooks.haiku.generate", { request });
     const { _haikus, init } = get();
 
     // optimistic
@@ -452,7 +452,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
         }
 
         const { haiku: generated, reachedUsageLimit } = await res.json();
-        // console.log(">> hooks.haiku.create", { generated, reachedUsageLimit });
+        // console.log("hooks.haiku.create", { generated, reachedUsageLimit });
 
         trackEvent("haiku-generated", {
           id: generated.id,
@@ -482,7 +482,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   regenerate: async (user: User, haiku: Haiku, part: undefined | "poem" | "image", options: any = {}) => {
-    // console.log(">> hooks.haiku.regenerate", { haiku });
+    // console.log("hooks.haiku.regenerate", { haiku });
     const { _haikus, init } = get();
 
     const regenerating = {
@@ -537,7 +537,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   delete: async (id: string) => {
-    // console.log(">> hooks.haiku.delete id:", id);
+    // console.log("hooks.haiku.delete id:", id);
 
     if (!id) {
       throw `Cannot delete haiku with null id`;
@@ -594,7 +594,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   createDailyHaiku: async (dateCode: string, haikuId: string) => {
-    // console.log(">> hooks.haiku.createDailyHaiku", { dateCode, haikuId });
+    // console.log("hooks.haiku.createDailyHaiku", { dateCode, haikuId });
     const { init } = get();
 
     return new Promise(async (resolve, reject) => {
@@ -624,7 +624,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   action: async (haikuId: string, action: HaikuAction, value?: any) => {
-    // console.log(">> hooks.haiku.action", { haikuId, action, value });
+    // console.log("hooks.haiku.action", { haikuId, action, value });
     const { _haikus, init } = get();
     const haiku = _haikus[haikuId];
     const userState = await useUser.getState();
@@ -695,7 +695,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
   },
 
   uploadImage: async (haikuId: string, file: File) => {
-    // console.log(">> hooks.haiku.uploadImage", { haikuId, file });
+    // console.log("hooks.haiku.uploadImage", { haikuId, file });
     const { _haikus, init } = get();
     const haiku = _haikus[haikuId];
     const userState = await useUser.getState();

@@ -12,7 +12,7 @@ export default async function LoadingPage({
   mode?: string,
   haiku?: Haiku,
 }) {
-  // console.log('>> app.loading.render()', { mode, haikuId: haiku?.id });
+  // console.log('app.loading.render()', { mode, haikuId: haiku?.id });
 
   const _mode = (mode || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const fontColor = "#555555";

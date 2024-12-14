@@ -17,7 +17,7 @@ export default function HaikuPuzzle({
   selectedWord: any,
   setSelectedWord: any,
 }) {
-  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { haiku });
+  // console.log('app._components.HaikuPage.HaikuPoem.render()', { haiku });
   const [
     inProgress,
     swap,
@@ -30,10 +30,10 @@ export default function HaikuPuzzle({
 
   const poem = inProgress
 
-  // console.log('>> app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
+  // console.log('app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
 
   const handleClickWord = (word: any, lineNumber: number, wordNumber: number) => {
-    // console.log('>> app._components.HaikuPage.handleClickWord()', { word, lineNumber, wordNumber });
+    // console.log('app._components.HaikuPage.handleClickWord()', { word, lineNumber, wordNumber });
 
     if (word.id == selectedWord?.word?.id) {
       setSelectedWord(undefined);

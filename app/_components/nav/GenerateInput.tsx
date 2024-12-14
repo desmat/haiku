@@ -98,7 +98,7 @@ export default function GenerateInput({
   const [intervalId, setIntervalId] = useState<any | undefined>();
   const [inputRows, setInputRows] = useState(1);
   const ref = useRef();
-  // console.log('>> app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
+  // console.log('app._components.PoemLineInput.render()', { id, activeId, visible, select, value, updatedLine: localValue });
 
   const onboarding = onboardingElement && onboardingElement.includes("generate");
   const dateCode = moment().format("YYYYMMDD");
@@ -117,7 +117,7 @@ export default function GenerateInput({
   }
 
   const handleKeyDown = (e: any) => {
-    // console.log(">> app._components.Nav.GenerateInput.handleKeyDown()", { e, key: e.key });
+    // console.log("app._components.Nav.GenerateInput.handleKeyDown()", { e, key: e.key });
     if (e.key == "Escape") {
       // trackEvent("cancelled-generate-haiku", {
       //   userId: user?.id,
@@ -156,7 +156,7 @@ export default function GenerateInput({
 
   const handleClickedGenerate = () => {
     // @ts-ignore
-    // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate()', { ref, active, value: ref.current.value, focus });
+    // console.log('app._components.Nav.GenerateInput.handleClickedGenerate()', { ref, active, value: ref.current.value, focus });
 
     setActive(false);
     setFocus(false);
@@ -164,7 +164,7 @@ export default function GenerateInput({
     // @ts-ignore
     ref.current.blur();
 
-    // console.log('>> app._components.Nav.GenerateInput.handleClickedGenerate() generate');
+    // console.log('app._components.Nav.GenerateInput.handleClickedGenerate() generate');
     // @ts-ignore
     const theme = focus || ref.current.value ? ref.current.value : haikuTheme.split("…")[1].trim();
     generate && generate(theme);

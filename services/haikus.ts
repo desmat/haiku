@@ -23,7 +23,7 @@ const store = createStore({
 });
 
 export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[]> {
-  console.log(">> services.haikus.getHaikus", { query, hashPoem });
+  console.log("services.haikus.getHaikus", { query, hashPoem });
   let haikus = (await store.haikus.find({ ...query, count: 100 }))
     .filter((haiku: Haiku) => haiku && !haiku.deprecated && !haiku.deprecatedAt);
   // note that we started with .deprecated but moved to .deprecatedAt
@@ -46,7 +46,7 @@ export async function getHaikus(query?: any, hashPoem?: boolean): Promise<Haiku[
 }
 
 export async function getHaikuIds(query?: any): Promise<Set<any>> {
-  console.log(">> services.haikus.getHaikuIds", { query });
+  console.log("services.haikus.getHaikuIds", { query });
   // note: some ids get converted to numbers for some reason
   return new Set(Array.from(await store.haikus.ids(query)).map((id: any) => `${id}`));
 }
@@ -62,7 +62,7 @@ export async function getUserHaikus(user: User, {
   count?: number,
   offset?: number
 }): Promise<Haiku[]> {
-  console.log(`>> services.haiku.getUserHaikus`, { user, all, albumId, count, offset });
+  console.log(`services.haiku.getUserHaikus`, { user, all, albumId, count, offset });
 
   let haikus;
 
@@ -103,7 +103,7 @@ export async function getUserHaikus(user: User, {
           }),
         ]);
 
-    console.log(`>> services.haiku.getUserHaikus`, { userHaikus, userHaikudles, generatedHaikus });
+    console.log(`services.haiku.getUserHaikus`, { userHaikus, userHaikudles, generatedHaikus });
 
     const haikuIds = Array.from(new Set([
       ...generatedHaikus.map((haiku: Haiku) => haiku.id),
@@ -112,7 +112,7 @@ export async function getUserHaikus(user: User, {
     ]));
     haikus = (await store.haikus.find({ id: haikuIds }))
       .filter((haiku: Haiku) => haiku && !haiku.deprecated && !haiku.deprecatedAt);
-    console.log(`>> services.haiku.getUserHaikus`, { haikuIds, justThoseHaikus: haikus });
+    console.log(`services.haiku.getUserHaikus`, { haikuIds, justThoseHaikus: haikus });
 
     const generatedHaikuLookup = new Map(generatedHaikus
       .map((h: Haiku) => [h.id, {
@@ -132,7 +132,7 @@ export async function getUserHaikus(user: User, {
         moves: uh.haikudle?.moves,
       }]));
 
-    console.log(`>> services.haiku.getUserHaikus`, { userHaikuLookup, userHaikudleLookup, generatedHaikuLookup });
+    console.log(`services.haiku.getUserHaikus`, { userHaikuLookup, userHaikudleLookup, generatedHaikuLookup });
 
     haikus = haikus
       .map((haiku: Haiku) => {
@@ -168,7 +168,7 @@ export async function getUserHaikus(user: User, {
 }
 
 export async function getHaiku(user: User, id: string, hashPoem?: boolean, version?: number): Promise<Haiku | undefined> {
-  console.log(`>> services.haiku.getHaiku`, { id, hashPoem });
+  console.log(`services.haiku.getHaiku`, { id, hashPoem });
 
   const idAndVersionedId = [
     id,
@@ -226,7 +226,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     }
   }
 
-  console.log(`>> services.haiku.getHaiku`, { id, haiku });
+  console.log(`services.haiku.getHaiku`, { id, haiku });
   return haiku;
 }
 
@@ -268,7 +268,7 @@ export async function createHaiku(user: User, {
   lang?: LanguageType,
   albumId?: string,
 }): Promise<Haiku> {
-  console.log(">> services.haiku.createHaiku", { user, theme, poem, imageUrl });
+  console.log("services.haiku.createHaiku", { user, theme, poem, imageUrl });
 
   if (!imageBuffer && !imageUrl) {
     throw 'neither imageBuffer or imageUrl provided';
@@ -279,19 +279,19 @@ export async function createHaiku(user: User, {
 
   if (!imageBuffer && imageUrl) {
     const imageRet = await fetch(imageUrl);
-    // console.log(">> services.haiku.createHaiku", { imageRet });
+    // console.log("services.haiku.createHaiku", { imageRet });
     imageBuffer = Buffer.from(await imageRet.arrayBuffer());
   }
 
   const getColors = require('get-image-colors');
   const colors = await getColors(imageBuffer, imageType || 'image/png');
-  // console.log(">> services.haiku.createHaiku", { colors });
+  // console.log("services.haiku.createHaiku", { colors });
   // sort by darkness and pick darkest for foreground, lightest for background
   const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
 
   const sizeOf = require('buffer-image-size');
   const dimensions = sizeOf(imageBuffer);
-  // console.log(">> services.haiku.createHaiku", { imageWidth: dimensions.width, imageHeight: dimensions.height });
+  // console.log("services.haiku.createHaiku", { imageWidth: dimensions.width, imageHeight: dimensions.height });
 
   const haikuId = uuid();
 
@@ -301,7 +301,7 @@ export async function createHaiku(user: User, {
       access: 'public',
       addRandomSuffix: false,
     });
-    // console.log(">> services.haiku.createHaiku", { subject, filename, blob });
+    // console.log("services.haiku.createHaiku", { subject, filename, blob });
     imageUrl = blob.url;
   }
 
@@ -342,7 +342,7 @@ export async function createHaiku(user: User, {
     triggerHaikuSaved(created),
     triggerHaikuShared(created), // be sure to keep in sync with `sharedVersioned: true` above
   ]);
-  // console.log(">> services.haiku.createHaiku", { webhookRet });
+  // console.log("services.haiku.createHaiku", { webhookRet });
 
   return created;
 }
@@ -351,7 +351,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku, albumId?: str
   const lang = (haiku.lang || "en") as LanguageType;
   const subject = haiku.subject || haiku.theme || haiku.title;
   const mood = undefined;
-  console.log(">> services.haiku.regenerateHaikuPoem", { lang, subject, mood, user });
+  console.log("services.haiku.regenerateHaikuPoem", { lang, subject, mood, user });
   const language = locale.getByTag(lang)?.name
 
   const album = albumId && await store.haikuAlbums.get(albumId);
@@ -368,12 +368,12 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku, albumId?: str
       lang: generatedLang,
     }
   } = await openai.generateHaiku(user.id, language, subject, mood, customPoemPrompt);
-  // console.log(">> services.haiku.regenerateHaikuPoem", { ret });
-  console.log(">> services.haiku.regenerateHaikuPoem", { poem, generatedSubject, generatedMood, poemPrompt });
+  // console.log("services.haiku.regenerateHaikuPoem", { ret });
+  console.log("services.haiku.regenerateHaikuPoem", { poem, generatedSubject, generatedMood, poemPrompt });
 
   // delete corresponding haikudle 
   getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
-    console.log(">> services.haiku.regenerateHaikuPoem", { haikudle });
+    console.log("services.haiku.regenerateHaikuPoem", { haikudle });
     if (haikudle) {
       deleteHaikudle(user, haikudle.id);
     }
@@ -400,12 +400,12 @@ export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: strin
   const subject = haiku.subject || haiku.theme || haiku.title;
   const mood = haiku.mood;
   const language = supportedLanguages[lang]?.name;
-  console.log(">> services.haiku.completeHaikuPoem", { subject, mood, user });
+  console.log("services.haiku.completeHaikuPoem", { subject, mood, user });
 
   // a bit akward to do this here and in this way but we're just covering a narrow case
   const usage = await userUsage(user);
   const { haikusRegenerated } = usage[moment().format("YYYYMMDD")];
-  // console.log('>> services.haiku.completeHaikuPoem', { haikusRegenerated, usage });
+  // console.log('services.haiku.completeHaikuPoem', { haikusRegenerated, usage });
 
   if (haikusRegenerated && haikusRegenerated >= USAGE_LIMIT.DAILY_REGENERATE_HAIKU) {
     throw 'exceeded daily limit';
@@ -425,7 +425,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: strin
     model: languageModel,
     prompt: poemPrompt,
   } = await openai.completeHaiku(user.id, haiku.poem, language, subject, mood, customPoemPrompt);
-  console.log(">> services.haiku.completeHaikuPoem", { completedPoem, generatedSubject, generatedMood });
+  console.log("services.haiku.completeHaikuPoem", { completedPoem, generatedSubject, generatedMood });
 
   // delete corresponding haikudle 
   if (await store.haikudles.exists(haiku.id)) {
@@ -449,7 +449,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: strin
 }
 
 export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: string, albumId?: string): Promise<Haiku> {
-  console.log(">> services.haiku.regenerateHaikuImage", { user, haiku });
+  console.log("services.haiku.regenerateHaikuImage", { user, haiku });
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
   debugOpenai && console.warn(`>> services.haiku.regenerateHaikuImage: DEBUG mode: not uploading to blob store`);
 
@@ -465,15 +465,15 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   } = await openai.generateBackgroundImage(user.id, haiku.subject || haiku.theme || haiku.title, haiku.mood, artStyle, customImagePrompt, customArtStyles);
 
   const imageRet = await fetch(openaiUrl);
-  // console.log(">> services.haiku.regenerateHaikuImage", { imageRet });
+  // console.log("services.haiku.regenerateHaikuImage", { imageRet });
 
   const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
-  // console.log(">> services.haiku.generateHaiku", { imageBuffer });
+  // console.log("services.haiku.generateHaiku", { imageBuffer });
 
   const getColors = require('get-image-colors')
 
   const colors = await getColors(imageBuffer, 'image/png');
-  // console.log(">> services.haiku.generateHaiku", { colors });
+  // console.log("services.haiku.generateHaiku", { colors });
 
   // sort by darkness and pick darkest for foreground, lightest for background
   const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
@@ -484,7 +484,7 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
     access: 'public',
     addRandomSuffix: false,
   });
-  // console.log(">> services.haiku.generateHaiku", { subject, filename, blob });
+  // console.log("services.haiku.generateHaiku", { subject, filename, blob });
 
   let updatedHaiku = {
     ...haiku,
@@ -510,24 +510,24 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
     triggerHaikuSaved(savedHaiku),
     triggerHaikuShared(savedHaiku), // be sure to keep in sync with `sharedVersioned: true` above
   ]);
-  // console.log(">> services.haiku.regenerateHaikuImage", { webhookRet });
+  // console.log("services.haiku.regenerateHaikuImage", { webhookRet });
 
   return savedHaiku;
 }
 
 export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, type: string = "image/png"): Promise<Haiku> {
-  console.log(">> services.haiku.updateHaikuImage", { user, haiku, buffer, type });
+  console.log("services.haiku.updateHaikuImage", { user, haiku, buffer, type });
 
   const getColors = require('get-image-colors');
   const colors = await getColors(buffer, type);
-  // console.log(">> services.haiku.updateHaikuImage", { colors });
+  // console.log("services.haiku.updateHaikuImage", { colors });
 
   // sort by darkness and pick darkest for foreground, lightest for background
   const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
 
   const sizeOf = require('buffer-image-size');
   const dimensions = sizeOf(buffer);
-  // console.log(">> services.haiku.updateHaikuImage", { imageWidth: dimensions.width, imageHeight: dimensions.height });
+  // console.log("services.haiku.updateHaikuImage", { imageWidth: dimensions.width, imageHeight: dimensions.height });
 
   const haikuId = uuid();
   const filename = `haiku-${haikuId}-custom-${moment().format("YYYYMMDD_HHmmss")}-${(haiku.version || 0) + 1}.png`;
@@ -535,7 +535,7 @@ export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, 
     access: 'public',
     addRandomSuffix: false,
   });
-  // console.log(">> services.haiku.updateHaikuImage", { filename, blob });
+  // console.log("services.haiku.updateHaikuImage", { filename, blob });
 
   let updatedHaiku = {
     ...haiku,
@@ -559,7 +559,7 @@ export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, 
     triggerDailyHaikuSaved(savedHaiku),
     triggerHaikuShared(savedHaiku), // be sure to keep in sync with `sharedVersioned: true` above
   ]);
-  // console.log(">> services.haikudle.updateHaikuImage", { webhookRet });
+  // console.log("services.haikudle.updateHaikuImage", { webhookRet });
 
   return savedHaiku;
 }
@@ -583,7 +583,7 @@ export async function generateHaiku(user: User, {
   // image?: Buffer,
   albumId?: string,
 }): Promise<Haiku> {
-  console.log(">> services.haiku.generateHaiku", { lang, subject, mood, poem, user });
+  console.log("services.haiku.generateHaiku", { lang, subject, mood, poem, user });
   const language = supportedLanguages[lang || "en"].name;
   const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
   debugOpenai && console.warn(`>> services.haiku.generateHaiku: DEBUG mode: not uploading to blob store`);
@@ -606,8 +606,8 @@ export async function generateHaiku(user: User, {
   } = poem
       ? await openai.analyzeHaiku(user.id, poem)
       : await openai.generateHaiku(user.id, language, subject, mood, customPoemPrompt);
-  // console.log(">> services.haiku.generateHaiku", { ret });
-  console.log(">> services.haiku.generateHaiku", { generatedSubject, generatedMood, poemPrompt });
+  // console.log("services.haiku.generateHaiku", { ret });
+  console.log("services.haiku.generateHaiku", { generatedSubject, generatedMood, poemPrompt });
 
   const {
     url: imageUrl,
@@ -634,7 +634,7 @@ export async function generateHaiku(user: User, {
 }
 
 export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
-  console.log(">> services.haiku.deleteHaiku", { id, user });
+  console.log("services.haiku.deleteHaiku", { id, user });
 
   if (!id) {
     throw `Cannot delete haiku with null id`;
@@ -658,7 +658,7 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
     store.dailyHaikus.ids({ haiku: id }),
     store.userHaikus.ids({ haiku: id }),
   ]);
-  console.log(">> services.haiku.deleteHaiku", { dailyHaikuIds, userHaikuIds });
+  console.log("services.haiku.deleteHaiku", { dailyHaikuIds, userHaikuIds });
 
   const dailyHaikuId = dailyHaikuIds?.size && dailyHaikuIds.values().next().value;
   dailyHaikuId && store.dailyHaikus.delete(dailyHaikuId);
@@ -668,7 +668,7 @@ export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
 }
 
 export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Promise<Haiku> {
-  console.log(">> services.haiku.saveHaiku", { haiku, user });
+  console.log("services.haiku.saveHaiku", { haiku, user });
 
   if (!(haiku.createdBy == user.id || user.isAdmin)) {
     throw `Unauthorized`;
@@ -713,24 +713,24 @@ export async function saveHaiku(user: any, haiku: Haiku, options: any = {}): Pro
 
   if (!options.noVersion) {
     const webhookRet = await triggerHaikuSaved(updated);
-    // console.log(">> services.haiku.saveHaiku", { webhookRet });
+    // console.log("services.haiku.saveHaiku", { webhookRet });
   }
 
   return updated;
 }
 
 export async function getUserHaiku(userId: string, haikuId: string): Promise<UserHaiku | undefined> {
-  console.log(`>> services.haiku.getUserHaiku`, { userId, haikuId });
+  console.log(`services.haiku.getUserHaiku`, { userId, haikuId });
 
   const id = `${userId}:${haikuId}`
   const userHaiku = await store.userHaikus.get(id);
 
-  console.log(`>> services.haiku.getUserHaiku`, { userHaiku });
+  console.log(`services.haiku.getUserHaiku`, { userHaiku });
   return userHaiku;
 }
 
 export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed" | "generated"): Promise<UserHaiku | undefined> {
-  console.log(`>> services.haiku.createUserHaiku`, { user, haiku });
+  console.log(`services.haiku.createUserHaiku`, { user, haiku });
 
   if (user.impersonating) {
     console.warn(">> services.users.saveUser WARNING: not saving impersonated user", { user });
@@ -751,12 +751,12 @@ export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed
 
   const createdUserHaiku = await store.userHaikus.create(userHaiku);
 
-  console.log(`>> services.haiku.createUserHaiku`, { userHaiku: createdUserHaiku });
+  console.log(`services.haiku.createUserHaiku`, { userHaiku: createdUserHaiku });
   return createdUserHaiku;
 }
 
 export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<UserHaiku | undefined> {
-  console.log(`>> services.haiku.saveUserHaiku`, { userHaiku });
+  console.log(`services.haiku.saveUserHaiku`, { userHaiku });
 
   if (user.impersonating) {
     console.warn(">> services.users.saveUser WARNING: not saving impersonated user", { user });
@@ -771,7 +771,7 @@ export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<U
 }
 
 export async function getRandomHaiku(user: User, mode: string, query?: any, options?: any): Promise<Haiku | undefined> {
-  console.log(`>> services.haiku.getRandomHaiku`, { query, options });
+  console.log(`services.haiku.getRandomHaiku`, { query, options });
 
   const lastHaikuId = query.lastId;
   delete query.lastId;
@@ -788,7 +788,7 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
     typeof (options.seen) == "boolean" ? getSeenHaikuIds(user.id) : new Set(),
   ]);
 
-  console.log('>> services.haiku.getRandomHaiku', { flaggedHaikuIds, likedHaikuIds, seenHaikuIds });
+  console.log('services.haiku.getRandomHaiku', { flaggedHaikuIds, likedHaikuIds, seenHaikuIds });
 
   // include or exclude flagged/liked/seen haikus
   let filteredHaikuIds = Array.from(haikuIds).filter((id: string) => {
@@ -823,7 +823,7 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
     return undefined;
   }
 
-  console.log('>> services.haiku.getRandomHaiku', { filteredHaikuIds, randomHaikuId, randomHaiku });
+  console.log('services.haiku.getRandomHaiku', { filteredHaikuIds, randomHaikuId, randomHaiku });
 
   const [numLikes, userHaiku, userHaikudle] = await Promise.all([
     getHaikuNumLikes(randomHaiku.id),
@@ -842,12 +842,12 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
 }
 
 export async function getDailyHaiku(id?: string, dontCreate?: boolean): Promise<DailyHaiku | undefined> {
-  console.log(`>> services.haiku.getDailyHaiku`, { id });
+  console.log(`services.haiku.getDailyHaiku`, { id });
 
   if (!id) id = moment().format("YYYYMMDD");
 
   let dailyHaiku = await store.dailyHaikus.get(id);
-  console.log(`>> services.haiku.getDailyHaiku`, { id, dailyHaiku });
+  console.log(`services.haiku.getDailyHaiku`, { id, dailyHaiku });
 
   if (!dailyHaiku && dontCreate) {
     return;
@@ -877,14 +877,14 @@ export async function getDailyHaiku(id?: string, dontCreate?: boolean): Promise<
     const nonDailyhaikuIds = filteredHaikuIds
       .filter((haikuId: string) => haikuId && !flaggedHaikuIds.has(haikuId) && !previousDailyHaikuIds.has(haikuId));
 
-    console.log('>> services.haiku.getDailyHaiku creating daily haiku', { haikuIds, filteredHaikuIds, previousDailyHaikuIds, likedHaikuIds, nonDailyLikedHaikuIds, nonDailyhaikuIds });
+    console.log('services.haiku.getDailyHaiku creating daily haiku', { haikuIds, filteredHaikuIds, previousDailyHaikuIds, likedHaikuIds, nonDailyLikedHaikuIds, nonDailyhaikuIds });
 
     // pick from liked haikus, else all haikus
     const randomHaikuId = nonDailyLikedHaikuIds.length
       ? shuffleArray(nonDailyLikedHaikuIds)[0]
       : shuffleArray(nonDailyhaikuIds)[0]
 
-    console.log('>> services.haiku.getDailyHaiku creating daily haiku', { randomHaikuId });
+    console.log('services.haiku.getDailyHaiku creating daily haiku', { randomHaikuId });
 
     let randomHaiku = await store.haikus.get(randomHaikuId);
 
@@ -899,7 +899,7 @@ export async function getDailyHaiku(id?: string, dontCreate?: boolean): Promise<
       }
     }
 
-    console.log('>> services.haiku.getDailyHaiku creating daily haiku', { randomHaikuId, randomHaiku });
+    console.log('services.haiku.getDailyHaiku creating daily haiku', { randomHaikuId, randomHaiku });
 
     dailyHaiku = await saveDailyHaiku({ id: "(system)" } as User, id, randomHaiku.id);
   }
@@ -908,7 +908,7 @@ export async function getDailyHaiku(id?: string, dontCreate?: boolean): Promise<
 }
 
 export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
-  console.log(`>> services.haiku.getDailyHaikus`, { query });
+  console.log(`services.haiku.getDailyHaikus`, { query });
   let allDailyHaikuIds = Array.from(await store.dailyHaikus.ids())
     .map((id: any) => `${id}`)
     .filter((id: string) => id && id.match(/20\d{6}/))
@@ -964,7 +964,7 @@ export async function getNextDailyHaikuId(): Promise<string> {
 }
 
 export async function saveDailyHaiku(user: any, dateCode: string, haikuId: string): Promise<DailyHaiku> {
-  console.log(">> services.haiku.saveDailyHaiku", { user, dateCode, haikuId });
+  console.log("services.haiku.saveDailyHaiku", { user, dateCode, haikuId });
 
   if (!user) {
     throw `Unauthorized`;
@@ -997,13 +997,13 @@ export async function saveDailyHaiku(user: any, dateCode: string, haikuId: strin
   }
 
   const webhookRet = await triggerDailyHaikuSaved(ret);
-  // console.log(">> services.haikudle.saveDailyHaiku", { webhookRet });
+  // console.log("services.haikudle.saveDailyHaiku", { webhookRet });
 
   return ret;
 }
 
 export async function likeHaiku(user: User, haiku: Haiku, like?: boolean): Promise<LikedHaiku | undefined> {
-  console.log(">> services.haiku.likeHaiku", { user, haiku, like });
+  console.log("services.haiku.likeHaiku", { user, haiku, like });
   if (like) {
     return store.likedHaikus.create({
       id: `${user.id}:${haiku.id}`,
@@ -1016,18 +1016,18 @@ export async function likeHaiku(user: User, haiku: Haiku, like?: boolean): Promi
 }
 
 export async function getLikedHaikus(): Promise<Haiku[]> {
-  console.log(">> services.haiku.getLikedHaikus", {});
+  console.log("services.haiku.getLikedHaikus", {});
 
   const likedHaikus = await store.likedHaikus.find(); // TODO .keys then split and Set
   const haikuIds = Array.from(new Set(likedHaikus.map((likedHaiku: LikedHaiku) => likedHaiku.haikuId)))
   const haikus = await store.haikus.find({ id: haikuIds });
-  // console.log(">> services.haiku.getLikedHaikus", { likedHaikus, haikuIds, haikus });
+  // console.log("services.haiku.getLikedHaikus", { likedHaikus, haikuIds, haikus });
 
   return haikus;
 }
 
 export async function flagHaiku(user: User, haiku: Haiku, flag?: boolean): Promise<LikedHaiku | undefined> {
-  console.log(">> services.haiku.flagHaiku", { user, haiku, flag });
+  console.log("services.haiku.flagHaiku", { user, haiku, flag });
   if (flag) {
     return store.flaggedHaikus.create({
       id: `${user.id}:${haiku.id}`,
@@ -1040,17 +1040,17 @@ export async function flagHaiku(user: User, haiku: Haiku, flag?: boolean): Promi
 }
 
 export async function getFlaggedHaikus(): Promise<Haiku[]> {
-  console.log(">> services.haiku.getFlaggedHaikus", {});
+  console.log("services.haiku.getFlaggedHaikus", {});
 
   const haikuIds = Array.from(await getFlaggedHaikuIds());
   const haikus = await store.haikus.find({ id: haikuIds });
-  // console.log(">> services.haiku.getFlaggedHaikus", { flaggedHaikus, haikuIds, haikus });
+  // console.log("services.haiku.getFlaggedHaikus", { flaggedHaikus, haikuIds, haikus });
 
   return haikus;
 }
 
 export async function getFlaggedHaikuIds(): Promise<Set<any>> {
-  console.log(">> services.haiku.getFlaggedHaikuIds", {});
+  console.log("services.haiku.getFlaggedHaikuIds", {});
 
   const flaggedHaikuIds = Array.from(await store.flaggedHaikus.ids())
     .map((id: string) => id && id.split(":")[1])
@@ -1070,7 +1070,7 @@ export async function getFlaggedHaikuIds(): Promise<Set<any>> {
 }
 
 export async function getLikedHaikuIds(): Promise<Set<any>> {
-  console.log(">> services.haiku.getLikedHaikuIds", {});
+  console.log("services.haiku.getLikedHaikuIds", {});
 
   const ids = Array.from(await store.likedHaikus.ids())
     .map((id: string) => id && id.split(":")[1])
@@ -1080,7 +1080,7 @@ export async function getLikedHaikuIds(): Promise<Set<any>> {
 }
 
 export async function getSeenHaikuIds(userId: string): Promise<Set<any>> {
-  console.log(">> services.haiku.getSeenHaikuIds", {});
+  console.log("services.haiku.getSeenHaikuIds", {});
 
   const seedIds = Array.from(await store.userHaikus.ids({ user: userId }))
     .map((id: string) => id && id.split(":")[1])
@@ -1105,7 +1105,7 @@ export async function getSeenHaikuIds(userId: string): Promise<Set<any>> {
 export async function getLatestHaikus(fromDate?: number, toDate?: number): Promise<Haiku[]> {
   const now = moment();
   const yesterday = moment().add(-1, "days").valueOf()
-  console.log(">> services.haiku.getLatestHaikus", { fromDate, toDate, now: now.valueOf() });
+  console.log("services.haiku.getLatestHaikus", { fromDate, toDate, now: now.valueOf() });
 
   // typical usecase for this is to pick up latest haikus between yesterday and now,
   // so for efficiency let's try with increasing batch sizes instead of pulling
@@ -1129,7 +1129,7 @@ export async function getLatestHaikus(fromDate?: number, toDate?: number): Promi
     offset += batchSize;
     batchSize *= 2;
 
-    console.log(">> services.haiku.getLatestHaikus", { batchSize, offset, haikus, latest });
+    console.log("services.haiku.getLatestHaikus", { batchSize, offset, haikus, latest });
 
   } while (true);
 
@@ -1137,7 +1137,7 @@ export async function getLatestHaikus(fromDate?: number, toDate?: number): Promi
 }
 
 export async function addToAlbum(user: User, haiku: Haiku, albumId: string): Promise<Haiku> {
-  console.log(">> services.haiku.addToAlbum", { user, haiku, albumId });
+  console.log("services.haiku.addToAlbum", { user, haiku, albumId });
 
   // find album, if not found create
   let haikuAlbum = await store.haikuAlbums.get(albumId);
@@ -1162,12 +1162,12 @@ export async function addToAlbum(user: User, haiku: Haiku, albumId: string): Pro
 }
 
 export async function getHaikuAlbum(user: User, albumId: string): Promise<HaikuAlbum | undefined> {
-  console.log(">> services.haiku.getHaikuAlbum", { user, albumId });
+  console.log("services.haiku.getHaikuAlbum", { user, albumId });
   return store.haikuAlbums.get(albumId);
 }
 
 export async function getAlbumHaikus(user: User, albumId: string): Promise<Haiku[]> {
-  console.log(">> services.haiku.getAlbumHaikus", { user, albumId });
+  console.log("services.haiku.getAlbumHaikus", { user, albumId });
   const haikuAlbum = albumId && await store.haikuAlbums.get(albumId);
 
   if (haikuAlbum && haikuAlbum.haikuIds) {
@@ -1226,7 +1226,7 @@ export async function getHaikuStats(reportAt?: any): Promise<any> {
 
         if (diffCreated < 24) {
           newHaikus1dayCount++;
-          console.log(">> services.users.getHaikuStats newHaikus1dayCount", { newHaikus1dayCount, createdAt: moment(haiku.createdAt).format(), diffCreated });
+          console.log("services.users.getHaikuStats newHaikus1dayCount", { newHaikus1dayCount, createdAt: moment(haiku.createdAt).format(), diffCreated });
         }
       }
     }

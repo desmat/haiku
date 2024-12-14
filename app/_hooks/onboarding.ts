@@ -31,7 +31,7 @@ const useOnboarding: any = create(devtools((set: any, get: any) => ({
     const done = typeof (nextStepOffset) != "number";    
     const lastStep = !done && nextStepOffset >= steps.length - 1;
 
-    // console.log(">> hooks.useOnboarding.nextStep", { step, nextStepOffset, done, lastStep, steps, onDismiss, onComplete });
+    // console.log("hooks.useOnboarding.nextStep", { step, nextStepOffset, done, lastStep, steps, onDismiss, onComplete });
 
     if (done) {
       return //finish();
@@ -71,13 +71,13 @@ const useOnboarding: any = create(devtools((set: any, get: any) => ({
     const { nextStep } = get();
 
     // const interval = setInterval(async () => {
-    //   console.log(">> hooks.useOnboarding.start", { steps });
+    //   console.log("hooks.useOnboarding.start", { steps });
     //   nextStep();
     // }, 2000);
 
     // avoid race condition
     setTimeout(async () => {
-      // console.log(">> hooks.useOnboarding.start", { onDismiss, onComplete });
+      // console.log("hooks.useOnboarding.start", { onDismiss, onComplete });
       nextStep();
     }, 100);
 
@@ -91,7 +91,7 @@ const useOnboarding: any = create(devtools((set: any, get: any) => ({
 
   finish: async () => {
     const { reset, interval } = get();
-    // console.log(">> hooks.useOnboarding.finish", { reset, interval });
+    // console.log("hooks.useOnboarding.finish", { reset, interval });
 
     if (interval) {
       clearInterval(interval);

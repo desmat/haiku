@@ -83,7 +83,7 @@ export default function RootLayout({
   params?: any,
   searchParams?: any,
 }) {
-  // console.log('>> app.layout.render()', { slug: params.slug, params, searchParams });
+  // console.log('app.layout.render()', { slug: params.slug, params, searchParams });
 
   return (
     <html lang="en">

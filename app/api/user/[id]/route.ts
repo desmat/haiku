@@ -5,7 +5,7 @@ export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  console.log('>> app.api.user.[id].PUT', { params });
+  console.log('app.api.user.[id].PUT', { params });
 
   const [
     { user: sessionUser },
@@ -17,7 +17,7 @@ export async function PUT(
     loadUser(params.id),
   ]);
 
-  console.log('>> app.api.user.[id].PUT', { sessionUser, requestUser, databaseUser });
+  console.log('app.api.user.[id].PUT', { sessionUser, requestUser, databaseUser });
 
   if (!sessionUser) {
     return NextResponse.json(

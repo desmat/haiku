@@ -5,7 +5,7 @@ import { restore } from '@/services/admin';
 export const maxDuration = 300;
 
 export async function POST(request: NextRequest) {
-  console.log('>> app.api.admin.restore.POST', {});
+  console.log('app.api.admin.restore.POST', {});
 
   const { user } = await userSession(request);
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   }
 
   const ret = await restore(user, filename);
-  console.log('>> app.api.admin.restore.POST', { ret });
+  console.log('app.api.admin.restore.POST', { ret });
 
   return NextResponse.json(ret);
 }

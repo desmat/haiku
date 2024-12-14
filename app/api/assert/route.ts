@@ -6,7 +6,7 @@ import { userSession } from '@/services/users';
 export async function GET(request: NextRequest, params?: any) {
   const query = searchParamsToMap(request.nextUrl.searchParams.toString()) as any;
   const { user } = await userSession(request);
-  console.log('>> app.api.assert.GET', { query, searchParams: request.nextUrl.searchParams.toString(), user });
+  console.log('app.api.assert.GET', { query, searchParams: request.nextUrl.searchParams.toString(), user });
 
   return NextResponse.json(
     { success: false, message: 'not implemented' },
@@ -17,10 +17,10 @@ export async function GET(request: NextRequest, params?: any) {
 
 export async function POST(request: NextRequest) {
   const { user: sessionUser } = await userSession(request);
-  console.log('>> app.api.assert.POST', { sessionUser });
+  console.log('app.api.assert.POST', { sessionUser });
 
   const { regex, data } = await request.json();
-  console.log('>> app.api.assert.POST', { regex, data });
+  console.log('app.api.assert.POST', { regex, data });
 
   if (!data) {
     return NextResponse.json(
