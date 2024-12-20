@@ -842,9 +842,11 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
 }
 
 export async function getDailyHaiku(id?: string, dontCreate?: boolean): Promise<DailyHaiku | undefined> {
-  console.log(`services.haiku.getDailyHaiku`, { id });
+  console.log(`services.haiku.getDailyHaiku`, { id, dontCreate });
 
-  if (!id) id = moment().format("YYYYMMDD");
+  if (!id) id = process.env.DAILY_HAIKU_PREVIEW == "true" 
+    ? moment().add(1, "day").format("YYYYMMDD")
+    : moment().format("YYYYMMDD");
 
   let dailyHaiku = await store.dailyHaikus.get(id);
   console.log(`services.haiku.getDailyHaiku`, { id, dailyHaiku });
