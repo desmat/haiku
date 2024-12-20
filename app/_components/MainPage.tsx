@@ -57,7 +57,7 @@ export default function MainPage({
   let [haikuId, setHaikuId] = useState(_haiku?.id);
   const [generating, setGenerating] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
-  const REFRESH_DELAY = 24 * 60 * 60 * 1000; // every day
+  const REFRESH_DELAY = 12 * 60 * 60 * 1000; // twice a day
   const [_refreshDelay, setRefreshDelay] = useState(refreshDelay || REFRESH_DELAY);
   const [refreshTimeout, setRefreshTimeout] = useState<any>();
   const [backupInProgress, setBackupInProgress] = useState(false);
