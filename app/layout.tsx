@@ -22,9 +22,9 @@ export const appDescription = isHaikudleMode
   "Explore daily haiku puzzles and discover the limitless poetic and artistic possibilities with Haikudle."
   // TODO isShowcaseMode for dailyhaiku
   : "Create and share your haiku masterpieces with beautiful generated art — no signup required. " +
-  "Haiku Genius integrates cutting-edge AI technology to elevate your poetic experience to new heights. " +
+  `${isShowcaseMode ? "Daily Haiku" : "Haiku Genius"} integrates cutting-edge AI technology to elevate your poetic experience to new heights. ` +
   "Craft haiku poems seamlessly with our AI assistant and share your creations with stunning AI-generated imagery, powered by OpenAI's ChatGPT and DALL-E. " +
-  "Explore daily featured haikus and experience AI-assisted creativity and discover the limitless possibilities of poetic exploration with Haiku Genius.";
+  `Explore daily featured haikus and experience AI-assisted creativity and discover the limitless possibilities of poetic exploration with ${isShowcaseMode ? "Daily Haiku" : "Haiku Genius"}.`;
 
 export const metaUrl = isHaikudleMode
   ? "https://haikudle.ai/"
