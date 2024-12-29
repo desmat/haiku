@@ -209,7 +209,7 @@ export default function MainPage({
 
     const params = mapToSearchParams(query);
 
-    return `/${id ? id : ""}${params ? `?${params}` : ""}`;
+    return `/${id /* && !haiku.isCurrentDailyHaiku */ ? id : ""}${params ? `?${params}` : ""}`;
   }
 
   // TODO update haikudle onboarding with this variation
@@ -575,7 +575,11 @@ export default function MainPage({
 
     console.log('app.page.switchMode()', { _newMode });
 
-    const _url = url(haikuId, { ..._newMode && { mode: _newMode } });
+    const newHaikuId = haiku.isCurrentDailyHaiku 
+      ? undefined
+      : haikuId;
+
+    const _url = url(newHaikuId, { ..._newMode && { mode: _newMode } });
 
     setLoadingUI(true);
     setGenerating(false);

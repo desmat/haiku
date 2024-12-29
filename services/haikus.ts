@@ -189,8 +189,8 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     user.isAdmin && store.likedHaikus.ids({ haiku: id }),
     user.isAdmin && user?.id && store.flaggedHaikus.get(`${user?.id}:${id}`),
     user.isAdmin && store.flaggedHaikus.ids({ haiku: id }),
-    user.isAdmin && store.dailyHaikus.ids({ haiku: id, count: 1 }),
-    user.isAdmin && store.dailyHaikudles.ids({ haikudle: id, count: 1 }),
+    /*user.isAdmin && */store.dailyHaikus.ids({ haiku: id }),
+    user.isAdmin && store.dailyHaikudles.ids({ haikudle: id }),
   ]);
 
   // get either current or versioned
@@ -212,8 +212,17 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     haiku.flaggedAt = flaggedHaiku?.createdAt;
     haiku.numLikes = haikuLikes && haikuLikes.size;
     haiku.numFlags = haikuflags && haikuflags.size;
-    haiku.dailyHaikuId = dailyHaikuIds && dailyHaikuIds.size && dailyHaikuIds.values().next().value;
-    haiku.dailyHaikudleId = dailyHaikudleIds && dailyHaikudleIds.size && dailyHaikudleIds.values().next().value;
+    haiku.dailyHaikuId = dailyHaikuIds && Array.from(dailyHaikuIds).sort().reverse()[0];
+    haiku.dailyHaikudleId = dailyHaikudleIds && Array.from(dailyHaikudleIds).sort().reverse()[0];
+  }
+
+  const dailyHaikuId = process.env.DAILY_HAIKU_PREVIEW == "true" 
+  ? moment().add(1, "day").format("YYYYMMDD")
+  : moment().format("YYYYMMDD");
+
+  // @ts-ignore: dailyHaikuIds sometimes has integers instead of strings
+  if (dailyHaikuIds.has(dailyHaikuId) || dailyHaikuIds.has(parseInt(dailyHaikuId))) {
+    haiku.isCurrentDailyHaiku = true;
   }
 
   if (hashPoem) {
