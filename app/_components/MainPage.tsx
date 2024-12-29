@@ -861,9 +861,6 @@ export default function MainPage({
     // console.log('app.page useEffect [haiku?.id, loadingUI, isShowcaseMode, _refreshDelay]', { haiku_id: haiku?.id, loadingUI, isShowcaseMode, _refreshDelay });
 
     if (showcaseMode && !loadingUI && _refreshDelay) {
-      window.history.replaceState(null, '', url(haiku?.id, {
-        mode: "showcase",
-      }));
       setRefreshTimeout(setTimeout(loadHaiku, _refreshDelay));
     }
 
@@ -966,7 +963,7 @@ export default function MainPage({
         onboardingElement={onboardingElement}
         onClickGenerate={startGenerateHaiku}
         onClickRandom={loadRandom}
-        onClickLogo={loadHaiku}
+        onClickLogo={() => document.location.href = "/"}
         onSwitchMode={switchMode}
         onDelete={!haiku?.error && doDelete}
         onSaveDailyHaiku={!haiku?.error && saveDailyHaiku}
