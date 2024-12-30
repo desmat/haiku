@@ -33,6 +33,7 @@ const todaysHaikudle = async () => {
 }
 
 const getTheHaikudle = async (id: string) => {
+  // console.log('app.[[...slugs]].page.getTheHaikudle()', { id });
   const todaysDateCode = moment().format("YYYYMMDD");
   const previousDailyHaikudleIds = (await getDailyHaikudleIds({ haikudle: id }))
     .filter((id: string) => id < todaysDateCode);

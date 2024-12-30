@@ -170,6 +170,8 @@ export async function getUserHaikus(user: User, {
 export async function getHaiku(user: User, id: string, hashPoem?: boolean, version?: number): Promise<Haiku | undefined> {
   console.log(`services.haiku.getHaiku`, { id, hashPoem });
 
+  if (!id) return undefined;
+  
   const idAndVersionedId = [
     id,
     typeof (version) == "number" && `${id}:${version}`,
@@ -189,10 +191,10 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     user.isAdmin && store.likedHaikus.ids({ haiku: id }),
     user.isAdmin && user?.id && store.flaggedHaikus.get(`${user?.id}:${id}`),
     user.isAdmin && store.flaggedHaikus.ids({ haiku: id }),
-    /*user.isAdmin && */store.dailyHaikus.ids({ haiku: id }),
+    /* user.isAdmin && */ store.dailyHaikus.ids({ haiku: id }),
     user.isAdmin && store.dailyHaikudles.ids({ haikudle: id }),
   ]);
-
+  console.log(`services.haiku.getHaiku`, { dailyHaikuIds });
   // get either current or versioned
   // note the edge case when current version is requested explicitly by its version
   // since only previous version have the key <id>:<version>
@@ -221,7 +223,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   : moment().format("YYYYMMDD");
 
   // @ts-ignore: dailyHaikuIds sometimes has integers instead of strings
-  if (dailyHaikuIds.has(dailyHaikuId) || dailyHaikuIds.has(parseInt(dailyHaikuId))) {
+  if (dailyHaikuIds && (dailyHaikuIds.has(dailyHaikuId) || dailyHaikuIds.has(parseInt(dailyHaikuId)))) {
     haiku.isCurrentDailyHaiku = true;
   }
 

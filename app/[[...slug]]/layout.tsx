@@ -13,18 +13,19 @@ import { inter } from '../font';
 const isHaikudleMode = process.env.EXPERIENCE_MODE == "haikudle";
 
 async function getTodaysHaikuId() {
+  // console.log('app.[[..slug]].layout.getTodaysHaikuId()', { });
   const todaysDateCode = moment().format("YYYYMMDD");
 
   if (isHaikudleMode) {
     const todaysDailyHaikudle = await getDailyHaikudle(todaysDateCode, true);
-    // console.log('app.[[..slug]].layout.render()', { todaysDailyHaikudle });
-    if (!todaysDailyHaikudle) console.warn('>> app.[[..slug]].layout.render() WARNING: todays daily haikudle not created', {});
+    // console.log('app.[[..slug]].layout.getTodaysHaikuId()', { todaysDailyHaikudle });
+    if (!todaysDailyHaikudle) console.warn('>> app.[[..slug]].layout.getTodaysHaikuId() WARNING: todays daily haikudle not created', {});
     return todaysDailyHaikudle?.haikuId;
   }
 
   const todaysDailyHaiku = await getDailyHaiku(todaysDateCode, true);
   // console.log('app.[[..slug]].layout.render()', { todaysDailyHaiku });
-  if (!todaysDailyHaiku) console.warn('>> app.[[..slug]].layout.render() WARNING: todays daily haiku not created', {});
+  if (!todaysDailyHaiku) console.warn('>> app.[[..slug]].layout.getTodaysHaikuId() WARNING: todays daily haiku not created', {});
   return todaysDailyHaiku?.haikuId;
 }
 
