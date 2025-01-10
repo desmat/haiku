@@ -959,6 +959,10 @@ export async function getDailyHaikus(query?: any): Promise<DailyHaiku[]> {
 }
 
 export async function getNextDailyHaikuId(): Promise<string> {
+  if (process.env.DAILY_HAIKU_PREVIEW) {
+    return moment().add(1, "day").format("YYYYMMDD");
+  }
+  
   const todayDatecode = moment().format("YYYYMMDD");
   const todaysDatecodeInt = parseInt(todayDatecode);
 
