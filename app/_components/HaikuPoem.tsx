@@ -25,8 +25,8 @@ const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
     title && !title.startsWith("Art by") && !title.startsWith("-") && !title.startsWith("—") && !title.startsWith("—")
       ? `"${capitalize(title)}", `
       : title
-      ? `${title}, `
-      : undefined,
+        ? `${title}, `
+        : undefined,
     `${mode == "haikudle" ? "haikudle.ai" : "haikugenius.ai"}/${haiku?.id}`
   ];
 }
@@ -477,7 +477,7 @@ export default function HaikuPoem({
                         onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
                       >
                         {/* set the width while editing */}
-                        <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""}`}>
+                        <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""} ${showcaseMode ? "leading-[1.75rem]" : ""}`}>
                           <ControlledInput
                             id={i}
                             activeId={editingLine}
@@ -509,9 +509,10 @@ export default function HaikuPoem({
                   ? "_bg-yellow-200 fixed w-max right-[1.5rem] bottom-[1rem] flex flex-row"
                   : "_bg-orange-200 flex flex-row w-max ml-[0.5rem] mt-[-0.2rem] md:mt-[0.2rem] leading-5"
                 }
-                style={{ fontSize,
+                style={{
+                  fontSize,
                   // display: "none",
-                 }}
+                }}
               >
                 <div
                   className="poem-title _transition-all _bg-pink-400"
