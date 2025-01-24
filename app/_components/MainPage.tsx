@@ -197,14 +197,12 @@ export default function MainPage({
     query = {
       ...mode && { mode },
       ...fontSize && { fontSize: encodeURIComponent(fontSize) },
-      ...album && { album },
       ...((query?.mode || mode) == "showcase" && _refreshDelay && _refreshDelay != REFRESH_DELAY) && { refreshDelay: _refreshDelay },
       ...userId && { user: userId },
       ...query,
     }
 
     if (query.mode == process.env.EXPERIENCE_MODE) delete query.mode;
-    if (query.album == process.env.HAIKU_ALBUM) delete query.album;
     if (!query.user) delete query.user; // cleanup the url
 
     const params = mapToSearchParams(query);
