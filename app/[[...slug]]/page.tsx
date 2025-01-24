@@ -60,6 +60,9 @@ export default async function Page({
   params: { slug: any }
   searchParams?: { [key: string]: string | undefined },
 }) {
+  const host = (await headers()).get("host");
+  const split = host && host.split(/[\.:]/);
+  const subdomain = split && split.length >= 3 && split[0] || split && split.length >= 2 && split[1] == "localhost" && split[0];
   const versionSeparator = "%3A"; // url-encoded ':'
   const ids =
     searchParams && searchParams["id"] && searchParams["id"].split(versionSeparator) ||
@@ -70,7 +73,7 @@ export default async function Page({
   let mode = (searchParams && searchParams["mode"] || process.env.EXPERIENCE_MODE) as ExperienceMode || "haiku";
   const refreshDelay = searchParams && Number(searchParams["refreshDelay"]);
   const fontSize = searchParams && searchParams["fontSize"];
-  const album = searchParams && searchParams["album"] || process.env.HAIKU_ALBUM;
+  const album = process.env.HAIKU_ALBUM || subdomain && !["preview"].includes(subdomain) && subdomain || undefined;
   const userId = searchParams && searchParams["user"];
   const noOnboarding = !!userId || (searchParams && searchParams["noOnboarding"] == "true" || process.env.NO_ONBOARDING == "true");
 
@@ -81,13 +84,6 @@ export default async function Page({
     mode = "haikudle";
   }
 
-  const headersList = await headers();
-  const host = headersList.get('host');
-  const split = host && host.split(/[\.:]/);
-  const subdomain = split && split.length >= 3 && split[0] || split && split.length >= 2 && split[1] == "localhost" && split[0];
-  const referer = headersList.get('referer');
-
-  console.log('app.[[...slugs]].page.render()', { host, split, subdomain, referer });
 
   if (lang && !isSupportedLanguage(lang)) {
     return <NotFound mode={mode} />
