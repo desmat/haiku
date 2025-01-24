@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import { Suspense } from 'react';
 import HaikuPage from '@/app/_components/HaikuPage';
 import MainPage from '@/app/_components/MainPage';
@@ -73,12 +74,15 @@ export default async function Page({
   const userId = searchParams && searchParams["user"];
   const noOnboarding = !!userId || (searchParams && searchParams["noOnboarding"] == "true" || process.env.NO_ONBOARDING == "true");
 
-  // console.log('app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
+  console.log('app.[[...slugs]].page.render()', { slug: params.slug, searchParams, id, version, lang, mode });
 
   // can't switch modes in puzzle mode
   if (process.env.EXPERIENCE_MODE == "haikudle" && mode != process.env.EXPERIENCE_MODE) {
     mode = "haikudle";
   }
+
+  const headersList = await headers();
+  console.log('app.[[...slugs]].page.render()', { host: headersList.get('host') });
 
   if (lang && !isSupportedLanguage(lang)) {
     return <NotFound mode={mode} />
