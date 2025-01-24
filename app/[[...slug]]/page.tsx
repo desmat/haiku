@@ -82,7 +82,10 @@ export default async function Page({
   }
 
   const headersList = await headers();
-  console.log('app.[[...slugs]].page.render()', { host: headersList.get('host') });
+  const host = headersList.get('host');
+  const split = host && host.split(/[\.:]/);
+  const subdomain = split && split.length >= 3 && split[0] || split && split.length >= 2 && split[1] == "localhost" && split[0];
+  console.log('app.[[...slugs]].page.render()', { host, split, subdomain });
 
   if (lang && !isSupportedLanguage(lang)) {
     return <NotFound mode={mode} />
