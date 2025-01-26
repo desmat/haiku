@@ -22,7 +22,7 @@ import("syllable").then((s: any) => syllable = s.syllable);
 const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
   const title = haiku?.title ?? haiku?.theme;
   return [
-    title && !title.startsWith("Art by") && !title.startsWith("-") && !title.startsWith("—") && !title.startsWith("—")
+    title && !title.toLowerCase().startsWith("art by") && !title.toLowerCase().startsWith("by") && !title.startsWith("-") && !title.startsWith("—") && !title.startsWith("—") && !title.startsWith('"')
       ? `"${capitalize(title)}", `
       : title
         ? `${title}, `
