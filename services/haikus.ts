@@ -1153,6 +1153,10 @@ export async function getLatestHaikus(fromDate?: number, toDate?: number): Promi
   return latest;
 }
 
+export async function getHaikuAlbums(query?: any): Promise<HaikuAlbum[]> {
+  return store.haikuAlbums.find(query);
+}
+
 export async function addToAlbum(user: User, haiku: Haiku, albumId: string): Promise<Haiku> {
   console.log("services.haiku.addToAlbum", { user, haiku, albumId });
 
