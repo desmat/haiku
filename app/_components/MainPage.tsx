@@ -48,6 +48,10 @@ export default function MainPage({
   noOnboarding?: boolean | undefined,
 }) {
   // console.log('app.MainPage.render()', { mode, lang, _haiku, _haikudle });
+  const host = window?.location?.hostname;
+  const split = host && host.split(/[\.:]/);
+  const subdomain = split && split.length >= 3 && split[0] || split && split.length >= 2 && split[1] == "localhost" && split[0];
+  // console.log('app.MainPage.render()', { subdomain });
 
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
@@ -204,7 +208,7 @@ export default function MainPage({
     }
 
     if (query.mode == process.env.EXPERIENCE_MODE) delete query.mode;
-    if (query.album == process.env.HAIKU_ALBUM) delete query.album;
+    if (query.album == process.env.HAIKU_ALBUM || query.album == subdomain) delete query.album;
     if (!query.user) delete query.user; // cleanup the url
 
     const params = mapToSearchParams(query);
