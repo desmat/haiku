@@ -45,7 +45,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
 
   load: async (options: any = {}) => {
     set({ loading: true });
-    const { loadRemote, haikus, allHaikus, dailyHaikus, dailyHaikudles } = get();
+    const { loadRemote, haikus, allHaikus, dailyHaikus, dailyHaikudles, albums } = get();
     let user = { album: options.album, referer: document?.referrer };
     // console.log("hooks.user.load()", { options, user });
 
@@ -77,6 +77,7 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       allHaikus: loadedAllHaikus,
       dailyHaikus: loadedDailyHaikus,
       dailyHaikudles: loadedDailyHaikudles,
+      albums: loadedAlbums,
       nextDailyHaikuId,
       nextDailyHaikudleId,
     } = await loadRemote(token, options);
@@ -130,6 +131,10 @@ const useUser: any = create(devtools((set: any, get: any) => ({
       dailyHaikudles: {
         ...dailyHaikudles,
         ...loadedDailyHaikudles ? listToMap(loadedDailyHaikudles, { keyFn: (e: any) => e.haikuId }) : {},
+      },
+      albums: {
+        ...albums,
+        ...loadedAlbums ? listToMap(loadedAlbums) : {},
       },
       nextDailyHaikuId,
       nextDailyHaikudleId,

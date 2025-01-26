@@ -3,7 +3,7 @@ import moment from 'moment';
 import { NextRequest, NextResponse } from 'next/server'
 import { createToken, loadUser, saveUser, userSession } from '@/services/users';
 import { userUsage } from '@/services/usage';
-import { getDailyHaikus, getNextDailyHaikuId, getUserHaikus } from '@/services/haikus';
+import { getDailyHaikus, getHaikuAlbums, getNextDailyHaikuId, getUserHaikus } from '@/services/haikus';
 import { getDailyHaikudles, getNextDailyHaikudleId } from '@/services/haikudles';
 
 export async function GET(request: NextRequest, params?: any) {
@@ -47,10 +47,12 @@ export async function GET(request: NextRequest, params?: any) {
       allHaikus,
       dailyHaikus,
       dailyHaikudles,
+      albums,
     ] = await Promise.all([
       getUserHaikus(user, { all: true, count, offset }),
       getDailyHaikus({ count, offset }),
       getDailyHaikudles({ count, offset }),
+      getHaikuAlbums({ count, offset }),
     ]);
 
     const [
@@ -66,6 +68,7 @@ export async function GET(request: NextRequest, params?: any) {
       allHaikus,
       dailyHaikus,
       dailyHaikudles,
+      albums,
       nextDailyHaikuId,
       nextDailyHaikudleId,
     }

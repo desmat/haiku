@@ -12,6 +12,7 @@ import PopOnClick from '@/app/_components/PopOnClick';
 import { StyledLayers } from '@/app/_components/StyledLayers';
 import useUser from '@/app/_hooks/user';
 import { ExperienceMode } from '@/types/ExperienceMode';
+import { HaikuAlbum } from '@/types/Album';
 import { UserHaiku } from '@/types/Haiku';
 import { DailyHaikudle } from '@/types/Haikudle';
 import { HAIKUS_PAGE_SIZE, User } from '@/types/User';
@@ -79,7 +80,7 @@ export default function SidePanel({
   const [panelPinned, setPanelPinned] = useState(false);
   const pageSize = HAIKUS_PAGE_SIZE;
   const [numPages, setNumPages] = useState(1);
-  const [listMode, setListMode] = useState<"haiku" | "dailyHaiku" | "dailyHaikudle">("haiku");
+  const [listMode, setListMode] = useState<"haiku" | "dailyHaiku" | "dailyHaikudle" | "album">("haiku");
   type FilterType = "generated" | "liked" | "viewed"
   const [filter, setFilter] = useState<FilterType | undefined>();
   const onboarding = !!(onboardingElement && ["side-panel", "side-panel-and-bottom-links"].includes(onboardingElement));
@@ -88,6 +89,7 @@ export default function SidePanel({
     userHaikus,
     userDailyHaikus,
     userDailyHaikudles,
+    albums,
     userLoaded,
     userLoading,
     loadUser,
@@ -97,6 +99,7 @@ export default function SidePanel({
       : state.haikus ? Object.values(state.haikus) : [],
     state.dailyHaikus ? Object.values(state.dailyHaikus) : [],
     state.dailyHaikudles ? Object.values(state.dailyHaikudles) : [],
+    state.albums ? Object.values(state.albums) : [],
     state.loaded,
     state.loading,
     state.load,
@@ -156,6 +159,8 @@ export default function SidePanel({
         return !!haiku.likedAt;
       case "viewed":
         return !haiku.likedAt && !!haiku.viewedAt;
+      default:
+        true;
     }
 
     return true;
@@ -166,7 +171,9 @@ export default function SidePanel({
     ? userHaikus
     : listMode == "dailyHaiku"
       ? userDailyHaikus
-      : userDailyHaikudles)
+      : listMode == "dailyHaikudle"
+        ? userDailyHaikudles
+        : albums)
     .filter(filterBy)
     .length > numPages * pageSize);
 
@@ -356,11 +363,22 @@ export default function SidePanel({
               {user?.isAdmin && listMode == "dailyHaikudle" &&
                 <div
                   className="cursor-pointer"
+                  title="Show Albums"
+                  onClick={() => setListMode("album")}
+                >
+                  <StyledLayers styles={styles}>
+                    Daily Haikudles
+                  </StyledLayers>
+                </div>
+              }
+              {user?.isAdmin && listMode == "album" &&
+                <div
+                  className="cursor-pointer"
                   title="Show Haikus"
                   onClick={() => setListMode("haiku")}
                 >
                   <StyledLayers styles={styles}>
-                    Daily Haikudles
+                    Albums
                   </StyledLayers>
                 </div>
               }
@@ -383,7 +401,7 @@ export default function SidePanel({
                     }}
                   >
                     <span className="capitalize font-semibold">&quot;{h.theme}&quot;</span>
-                    {user?.isAdmin && !album && 
+                    {user?.isAdmin && !album &&
                       <span className="font-normal"> generated {formatTimeFromNow(h.createdAt || 0)} by {h.createdBy == user?.id ? "you" : `${isUserAdmin(h.createdBy) ? "admin" : "user"} ${h.createdBy}`}</span>
                     }
                     {(!user?.isAdmin || album) && h.generatedAt &&
@@ -421,6 +439,21 @@ export default function SidePanel({
                     <span className="capitalize font-semibold">&quot;{dh.theme}&quot;</span>
                     <span className="font-normal"> {dh.id == moment().format("YYYYMMDD") ? "Today" : moment(dh.id).format('MMMM Do YYYY')}</span>
                   </Link>
+                </StyledLayers>
+              ))
+            }
+            {["album"].includes(listMode) && user?.isAdmin && (panelAnimating || panelOpened) && albums
+              // .filter((h: Haiku) => h.createdBy == user?.id)
+              .sort((a: any, b: any) => b.id - a.id)
+              .slice(0, numPages * pageSize) // more than that and things blow up on safari
+              .map((ha: HaikuAlbum, i: number) => (
+                <StyledLayers key={i} styles={altStyles}>
+                  <a
+                    href={`?album=${ha.id}`}
+                  >
+                    <span className="capitalize font-semibold">{ha.id}</span>
+                    <span className="font-normal"> {ha.haikuIds.length} haiku{ha.haikuIds.length == 1 ? "" : "s"}</span>
+                  </a>
                 </StyledLayers>
               ))
             }
