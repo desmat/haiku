@@ -75,7 +75,7 @@ export default async function Page({
   const fontSize = searchParams && searchParams["fontSize"];
   const album = process.env.HAIKU_ALBUM || 
     searchParams && searchParams["album"] ||
-    subdomain && !["preview", "haiku", "haikudle"].includes(subdomain) && subdomain || 
+    subdomain && !["preview", "haiku", "haikudle"].includes(subdomain) && !host.endsWith("vercel.app") && subdomain || 
     undefined;
   const userId = searchParams && searchParams["user"];
   const noOnboarding = !!userId || (searchParams && searchParams["noOnboarding"] == "true" || process.env.NO_ONBOARDING == "true");
