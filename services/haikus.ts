@@ -1207,8 +1207,8 @@ export async function getHaikuStats(reportAt?: any): Promise<any> {
     flaggedHaikuIds,
     flaggedAndByFlaggedUserHaikuIds,
   ] = await Promise.all([
-    new Set(), // store.user.ids({ admin: true }),
-    new Set(), // store.user.ids({ internal: true }),
+    store.user.ids({ admin: true }),
+    store.user.ids({ internal: true }),
     store.haikus.ids(),
     getLikedHaikuIds(),
     store.flaggedHaikus.ids(),
