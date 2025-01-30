@@ -1,5 +1,7 @@
 import { RedisStoreRecord } from "@desmat/redis-store";
 
+export type Season = "winter" | "spring" | "summer" | "fall";
+
 export type Haiku = {
   theme: string,
   poem: string[],
@@ -10,6 +12,8 @@ export type Haiku = {
   albumId?: string, // TODO change to many-to-many
   createdBy: string,
   updatedBy?: string,
+  season?: Season,
+  credits?: string,
 } & RedisStoreRecord | any;
 
 export const HaikuOptions = {

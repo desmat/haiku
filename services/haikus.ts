@@ -4,7 +4,7 @@ import chroma from 'chroma-js';
 import * as locale from 'locale-codes'
 import moment from 'moment';
 import { put } from '@vercel/blob';
-import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, UserHaiku, UserHaikuOptions } from "@/types/Haiku";
+import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, Season, UserHaiku, UserHaikuOptions } from "@/types/Haiku";
 import { HaikuAlbum } from '@/types/Album';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { DailyHaikudle, Haikudle, UserHaikudle } from '@/types/Haikudle';
@@ -249,6 +249,7 @@ export async function createHaiku(user: User, {
   title,
   theme,
   subject,
+  season,
   poem,
   imageBuffer,
   imageType,
@@ -265,6 +266,7 @@ export async function createHaiku(user: User, {
   title?: string,
   theme?: string,
   subject?: string,
+  season?: Season,
   poem: string[],
   // note: either imageBuffer or imageUrl should be provided
   imageBuffer?: Buffer,
@@ -322,6 +324,7 @@ export async function createHaiku(user: User, {
     subject,
     title,
     theme,
+    season,
     poem,
     bgImage: imageUrl,
     bgImageDimensions: dimensions,
@@ -345,6 +348,10 @@ export async function createHaiku(user: User, {
 
   if (albumId) {
     create = await addToAlbum(user, create, albumId);
+  }
+
+  if (create.season) {
+    create = await addToAlbum(user, create, create.season);
   }
 
   const created = await store.haikus.create(create);
@@ -377,10 +384,11 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku, albumId?: str
       subject: generatedSubject,
       mood: generatedMood,
       lang: generatedLang,
+      season: generatedSeason,
     }
   } = await openai.generateHaiku(user.id, language, subject, mood, customPoemPrompt);
   // console.log("services.haiku.regenerateHaikuPoem", { ret });
-  console.log("services.haiku.regenerateHaikuPoem", { poem, generatedSubject, generatedMood, poemPrompt });
+  console.log("services.haiku.regenerateHaikuPoem", { poem, generatedSubject, generatedMood, generatedSeason, poemPrompt });
 
   // delete corresponding haikudle 
   getHaikudle(user, haiku.id).then(async (haikudle: Haikudle) => {
@@ -400,6 +408,7 @@ export async function regenerateHaikuPoem(user: any, haiku: Haiku, albumId?: str
     title: generatedTitle,
     theme: generatedSubject,
     mood: generatedMood,
+    season: generatedSeason,
     lang: generatedLang || lang || "en",
     poemPrompt,
     languageModel,
@@ -432,6 +441,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: strin
       subject: generatedSubject,
       mood: generatedMood,
       lang: generatedLang,
+      season: generatedSeason,
     },
     model: languageModel,
     prompt: poemPrompt,
@@ -453,6 +463,7 @@ export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: strin
     title: generatedTitle,
     theme: generatedSubject,
     mood: generatedMood,
+    season: generatedSeason,
     lang: generatedLang,
     languageModel,
     poemPrompt,
@@ -613,12 +624,13 @@ export async function generateHaiku(user: User, {
       title: generatedTitle,
       mood: generatedMood,
       lang: generatedLang,
+      season: generatedSeason
     }
   } = poem
       ? await openai.analyzeHaiku(user.id, poem)
       : await openai.generateHaiku(user.id, language, subject, mood, customPoemPrompt);
   // console.log("services.haiku.generateHaiku", { ret });
-  console.log("services.haiku.generateHaiku", { generatedSubject, generatedMood, poemPrompt });
+  console.log("services.haiku.generateHaiku", { generatedSubject, generatedMood, generatedSeason, poemPrompt });
 
   const {
     url: imageUrl,
@@ -633,6 +645,7 @@ export async function generateHaiku(user: User, {
     theme: generatedSubject,
     title: generatedTitle,
     mood: generatedMood,
+    season: generatedSeason,
     artStyle: selectedArtStyle,
     poemPrompt,
     languageModel,

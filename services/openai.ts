@@ -184,28 +184,68 @@ export async function generateHaiku(userId: string, language?: string, subject?:
     Be sure to respect the rules of 5, 7, 5 syllables for each line, respectively.
     If the topic specifies a language, or is in another language, please generate the haiku in that language.
     Also include in the response, in maximum 3 words, what were the subject (in the language requested) and mood (in English) of the haiku.
-    Additionally, please include a very short title that reflects the poem, subject and mood, in the language of the haiku.
+    Additionally, please include a very short title of 1, 2 or 3 words that reflects the poem, subject and mood, in the language of the haiku.
     The subject should be in the same language of the haiku.
     Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
-    Please only include keys "haiku", "subject", "mood", "title" and "lang".
+    Also, if haiku is about a season (summer/fall/winter/spring) please indicate which one, otherwise don't.
+    Please only include keys "haiku", "subject", "mood", "title", "lang", and optionally "season".
 
     Example input:
     \`\`\`
     Topic: cherry blossoms
     \`\`\`
-
-    Example output: 
+    Example output:
     \`\`\`json
     {
         "haiku": [
             "Pink blossoms gather,",
-            "Whispers of spring in the breeze,",
+            "Soft whispers in the breeze,",
             "Fleeting beauty falls."
         ],
         "subject": "cherry blossoms",
         "mood": "tranquil",
         "title": "Fleeting Beauty",
-        "lang": "en"
+        "lang": "en",
+        "season": "spring",
+    }
+    \`\`\`
+
+    Example input:
+    \`\`\`
+    Topic: night
+    \`\`\`
+    Example output:
+    \`\`\`json
+    {
+        "haiku": [
+          "Moon casts her soft glow,",
+          "Whispers of night serenade,",
+          "Dreams in shadows flow."
+        ],
+        "subject": "night",
+        "mood": "calm",
+        "title": "Flowing Dreams",
+        "lang": "en",
+    }
+    \`\`\`
+
+    Example input:
+    \`\`\`
+    Topic: butterfly
+    \`\`\`
+    Example output:
+    \`\`\`json
+    {
+        "haiku": [
+          "Gentle wings alight,",
+          "Dancing on a summer breeze,",
+          "Nature's fleeting grace.",
+        ],
+        "subject": "butterfly",
+        "mood": "tranquil",
+        "title": "A Butterfly",
+        "lang": "en",
+        "season": "summer"
     }
     \`\`\`
     `;
@@ -300,8 +340,8 @@ export async function completeHaiku(userId: string, poem: string[], language?: s
           Also, please fix up any extraneous white spaces, punctuation, incorrect capitalized words, typos or incorrectly words.
           Also include in the response, in fewest number of words, what were the subject (in the language requested) and mood (in English) of the haiku. 
           Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
-          Additionally, please include a very short title that reflects the poem, subject and mood, in the language of the haiku.
-          Please only include keys "haiku", "subject", "mood", "title" and "lang".`
+          Also, if haiku is about a season (summer/fall/winter/spring) please indicate which one, otherwise don't.
+          Please only include keys "haiku", "subject", "mood", "title", "lang", and optionally "season".`
         },
         {
           role: 'user',
@@ -368,7 +408,8 @@ export async function analyzeHaiku(userId: string, poem: string[]): Promise<any>
     please respond, in fewest number of words, what were the subject (in the language of the poem) and mood (in English) of the haiku.
     The subject should be in the same language of the haiku. 
     Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
-    Please only include keys "subject", "mood" and "lang".
+    Also, if haiku is about a season (summer/fall/winter/spring) please indicate which one, otherwise don't.
+    Please only include keys "subject", "mood", "lang", and optionally "season".
     `;
 
   try {
