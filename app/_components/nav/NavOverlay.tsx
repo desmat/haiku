@@ -186,7 +186,7 @@ export function NavOverlay({
           className={`
             fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center 
             ${onboardingElement && onboardingElement.startsWith("bottom-links") ? "z-50" : "z-20"} 
-            opacity-30 hover:opacity-100 transition-opacity
+            ${onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement) ? "" : "opacity-30"} hover:opacity-100 transition-opacity
           `}
         >
           <div className="onboarding-container">

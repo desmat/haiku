@@ -196,7 +196,7 @@ export default function GenerateInput({
       className={`GenerateInput _bg-pink-200 absolute
         top-[0.8rem] md:top-[0.8rem] right-[3.2rem] md:right-[3.8rem] md:left-1/2 lg:transform md:-translate-x-1/2
         w-[calc(100vw-6.5rem)] md:w-[600px]
-        opacity-50 hover:opacity-100 transition-opacity
+        ${onboarding ? "" : "opacity-50"} hover:opacity-100 transition-opacity
       `}
       style={{ zIndex: onboarding ? "50" : "20" }}
     >

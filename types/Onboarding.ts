@@ -19,7 +19,7 @@ export const haikuOnboardingSteps = [
         <div>Follow the next steps to learn all about <b>Haiku Genius</b>.</div>
       </div>
     `,
-    style: { bottom: "50%", transform: "translateY(50%)" },
+    style: { bottom: "10%" },
   },
   {
     focus: "poem",

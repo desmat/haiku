@@ -233,7 +233,7 @@ export default function SidePanel({
       {/* button to open side panel */}
       {true && //(!panelOpened && !panelAnimating) &&
         <OpenCloseButton
-        className="opacity-30 hover:opacity-100 transition-opacity"
+        className={`${onboarding ? "" : "opacity-30"} hover:opacity-100 transition-opacity`}
           styles={styles}
           title="Open side panel"
           onboardingElement={onboardingElement}
