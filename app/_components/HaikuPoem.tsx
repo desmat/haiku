@@ -23,7 +23,7 @@ const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
   const title = haiku?.title ?? haiku?.theme;
   return [
     title && !title.toLowerCase().startsWith("art by") && !title.toLowerCase().startsWith("by") && !title.startsWith("-") && !title.startsWith("—") && !title.startsWith("—") && !title.startsWith('"')
-      ? `"${capitalize(title)}", `
+      ? `"${capitalize(title)}"`
       : title
         ? `${title}, `
         : undefined,
@@ -539,11 +539,12 @@ export default function HaikuPoem({
                           : styles
                     }
                   >
-                    <span
+                    <span 
+                      className="opacity-80 hover:opacity-100"
                       dangerouslySetInnerHTML={{
                         __html: `${formatHaikuTitleAndAuthor(haiku, mode).join((haiku?.title?.length ?? haiku?.theme?.length) > maxHaikuTheme
-                          ? "<br/>&nbsp;"
-                          : "")}`
+                          ? "<br/>"
+                          : ", ")}`
                       }}
                     />
                   </StyledLayers>
