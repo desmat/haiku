@@ -52,7 +52,7 @@ export default function HaikuPage({
   // const [user] = useUser((state: any) => [state.user]);
   const blurValue = loading ? 40 : 0;
   const saturateValue = loading ? 0.6 : 1;
-  const poemLayout = showcaseMode && !regenerating && !loading
+  const poemLayout = /* showcaseMode && */ !regenerating && !loading
     ? haiku?.layout?.poem
     : {};
   const canAdjustLayout = !!adjustLayout && showcaseMode;

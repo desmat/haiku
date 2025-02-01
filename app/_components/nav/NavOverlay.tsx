@@ -117,7 +117,12 @@ export function NavOverlay({
       }
 
       {["haikudle", "haiku"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} ${loading ? "opacity-40" : ""}`}>
+        <div 
+          className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 
+            ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} 
+            ${loading ? "opacity-30" : "opacity-30 hover:opacity-100 transition-opacity"} 
+          `}
+        >
           <div className="onboarding-container">
             {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement || "") &&
               <div className="onboarding-focus" />
@@ -147,7 +152,12 @@ export function NavOverlay({
         </div>
       }
       {["social-img", "haikudle-social-img"].includes(mode) &&
-        <div className={`${font.architects_daughter.className} absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}>
+        <div 
+          className={`
+            ${font.architects_daughter.className} absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30 
+            opacity-30 hover:opacity-100 transition-opacity
+          `}
+        >
           <PopOnClick color={haiku?.bgColor}>
             {/* TODO: href to support multi-language */}
             <Logo
@@ -172,7 +182,13 @@ export function NavOverlay({
       />
 
       {["haiku", "haikudle"].includes(mode) &&
-        <div className={`fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center ${onboardingElement && onboardingElement.startsWith("bottom-links") ? "z-50" : "z-20"}`}>
+        <div 
+          className={`
+            fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center 
+            ${onboardingElement && onboardingElement.startsWith("bottom-links") ? "z-50" : "z-20"} 
+            opacity-30 hover:opacity-100 transition-opacity
+          `}
+        >
           <div className="onboarding-container">
             {onboardingElement && ["bottom-links", "_side-panel-and-bottom-links"].includes(onboardingElement) &&
               <div className="onboarding-focus" />

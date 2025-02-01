@@ -20,11 +20,13 @@ import trackEvent from '@/utils/trackEvent';
 import { Logo } from './Logo';
 
 function OpenCloseButton({
+  className,
   styles,
   title,
   onboardingElement,
   onClick,
 }: {
+  className?: string,
   styles: any,
   title?: string,
   onboardingElement?: string,
@@ -34,7 +36,10 @@ function OpenCloseButton({
 
   return (
     <div
-      className={`_bg-pink-200 open-side-panel-icon ${font.architects_daughter.className} absolute top-0 right-0 md:p-[0.8rem] mt-[0.1rem] md:mt-[0.1rem] p-[0.6rem] ${onboarding ? "z-50" : "z-20"} cursor-pointer`}
+      className={`_bg-pink-200 open-side-panel-icon ${font.architects_daughter.className} absolute top-0 right-0 
+        md:p-[0.8rem] mt-[0.1rem] md:mt-[0.1rem] p-[0.6rem] cursor-pointer
+        ${onboarding ? "z-50" : "z-20"} ${className}
+      `}
       onClick={onClick}
       title={title}
     >
@@ -228,6 +233,7 @@ export default function SidePanel({
       {/* button to open side panel */}
       {true && //(!panelOpened && !panelAnimating) &&
         <OpenCloseButton
+        className="opacity-30 hover:opacity-100 transition-opacity"
           styles={styles}
           title="Open side panel"
           onboardingElement={onboardingElement}

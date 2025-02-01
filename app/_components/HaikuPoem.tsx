@@ -245,8 +245,8 @@ export default function HaikuPoem({
   const regeneratePoemAllowed = regeneratePoem && (user?.isAdmin || haiku?.createdBy == user?.id) && regeneratePoem;
   const regenerateImageAllowed = regenerateImage && (user?.isAdmin || haiku?.createdBy == user?.id) && regenerateImage;
   const canRegeneratePoem = regeneratePoemAllowed && !editing && !saving;
-  const canRefresh = !!refresh;
   const canRegenerateImage = regenerateImageAllowed && !editing && !saving;
+  const canRefresh = !!refresh;
   // console.log('app._components.HaikuPage.HaikuPoem.render()', { editing, showcaseMode, canCopy, canSwitchMode });
 
   const handleClickHaiku = (e: any) => {
@@ -435,7 +435,7 @@ export default function HaikuPoem({
           disabled={editing || canEdit || showcaseMode || (!canEdit && !canSwitchMode)}
         >
           <div
-            className={`_bg-pink-200 px-[1.5rem] ${canEdit ? "group/edit" : ""} ${saving ? "animate-pulse" : ""}`}
+            className={`_bg-pink-200 px-[1.5rem] ${canEdit ? "group" : ""} ${saving ? "animate-pulse" : ""}`}
             style={{
               cursor: showcaseMode ? "pointer" : "",
               fontSize,
@@ -551,7 +551,9 @@ export default function HaikuPoem({
 
                 {!showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed) &&
                   <div
-                    className="onboarding-container group/actions _bg-yellow-200 flex flex-row gap-2 mt-auto md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.2rem] sm:pb-[0.5rem] pb-[0.4rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]"
+                    className={`onboarding-container group/actions _bg-yellow-200 flex flex-row gap-2 
+                      mt-auto md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.2rem] sm:pb-[0.5rem] pb-[0.4rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]
+                      ${editing ? "" : "opacity-60"} group-hover:opacity-100 transition-opacity`}
                   >
                     {onboardingElement && ["poem-actions"].includes(onboardingElement) &&
                       <div className="onboarding-focus" />
@@ -609,7 +611,7 @@ export default function HaikuPoem({
                             <StyledLayers styles={altStyles || []}>
                               <PopOnClick>
                                 <GenerateIcon
-                                  onClick={() => canRegeneratePoem && regeneratePoem()}
+                                  onClick={canRegeneratePoem && regeneratePoem}
                                   sizeOverwrite={`
                                   h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 
                                   ${canRegeneratePoem || onboardingElement == "poem-actions" ? "cursor-pointer opacity-100" : "opacity-60"} 
@@ -640,8 +642,8 @@ export default function HaikuPoem({
                                 <TbReload
                                   onClick={() => canRegenerateImage && regenerateImage()}
                                   className={`
-                                  h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 
-                                  ${canRegeneratePoem || onboardingElement == "poem-actions" ? "cursor-pointer opacity-100" : "opacity-60"} 
+                                    h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 
+                                    ${canRegenerateImage || onboardingElement == "poem-actions" ? "cursor-pointer opacity-100" : "opacity-60"} 
                                 `}
                                 />
                               </PopOnClick>
