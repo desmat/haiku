@@ -30,7 +30,7 @@ export default function AdjustLayoutControls({
         title="Center poem"
       />
       <div
-        className="bg-blue-200 opacity-30 w-[40vw] h-[5rem] left-[50%] translate-x-[-50%] top-0 fixed cursor-move z-20"
+        className="bg-blue-200 opacity-30 w-[40vw] h-[8rem] left-[50%] translate-x-[-50%] top-0 fixed cursor-move z-20"
         onClick={(e: any) => {
           adjustLayoutClamped({
             top: poemLayout?.top ? 5 : 15,
@@ -39,7 +39,7 @@ export default function AdjustLayoutControls({
         title="Move poem to top"
       />
       <div
-        className="bg-blue-200 opacity-30 w-[40vw] h-[5rem] left-[50%] translate-x-[-50%] bottom-0 fixed cursor-move z-20"
+        className="bg-blue-200 opacity-30 w-[40vw] h-[8rem] left-[50%] translate-x-[-50%] bottom-0 fixed cursor-move z-20"
         onClick={(e: any) => {
           adjustLayoutClamped({
             bottom: poemLayout?.bottom ? 5 : 15
