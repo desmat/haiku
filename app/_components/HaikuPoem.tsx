@@ -389,7 +389,7 @@ export default function HaikuPoem({
   return (
     <div className="relative">
       {/* allow editors to click out and finish */}
-      {!showcaseMode &&
+      {!showcaseMode && editing &&
         <div
           className={`_bg-pink-100 fixed top-0 left-0 w-full h-full ${saving ? " opacity-50" : ""}`}
           onClick={() => editing && finishEdit()}

@@ -55,7 +55,7 @@ export default function HaikuPage({
   const poemLayout = /* showcaseMode && */ !regenerating && !loading
     ? haiku?.layout?.poem
     : {};
-  const canAdjustLayout = !!adjustLayout && showcaseMode;
+  const canAdjustLayout = !!adjustLayout /* && showcaseMode */;
   // console.log('app._components.HaikuPage.render()', { poemLayout });
 
   return (
@@ -112,7 +112,7 @@ export default function HaikuPage({
         }
         {!regenerating && !loading && mode != "social-img" && mode != "haikudle-social-img" && !haiku.poemHashed &&
           <div
-            className="_xtall:bg-orange-400 _tall:bg-pink-200 _wide:bg-yellow-200 relative z-20"
+            className="_bg-pink-200 _xtall:bg-orange-400 _tall:bg-pink-200 _wide:bg-yellow-200 relative z-20"
           >
             <HaikuPoem
               user={user}
