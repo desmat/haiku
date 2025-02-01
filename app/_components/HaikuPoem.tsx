@@ -15,6 +15,7 @@ import trackEvent from "@/utils/trackEvent";
 import PopOnClick from "./PopOnClick";
 import { StyledLayers } from "./StyledLayers";
 import { GenerateIcon } from "./nav/GenerateInput";
+import { classNames } from "@desmat/utils";
 
 let syllable: any;
 import("syllable").then((s: any) => syllable = s.syllable);
@@ -531,16 +532,10 @@ export default function HaikuPoem({
                   }
                 >
                   <StyledLayers
-                    styles={
-                      saving
-                        ? styles.slice(0, 3)
-                        : onboardingElement && !onboardingElement.includes("poem")
-                          ? styles.slice(0, 2)
-                          : styles
-                    }
+                    className={showcaseMode ? "" : "opacity-70 hover:opacity-100"}
+                    styles={styles.slice(0, 3)}
                   >
                     <span 
-                      className="opacity-80 hover:opacity-100"
                       dangerouslySetInnerHTML={{
                         __html: `${formatHaikuTitleAndAuthor(haiku, mode).join((haiku?.title?.length ?? haiku?.theme?.length) > maxHaikuTheme
                           ? "<br/>"
