@@ -1,9 +1,10 @@
 import { findHoleInDatecodeSequence, hashCode, normalizeWord, shuffleArray, uuid } from '@desmat/utils';
 import { byCreatedAtDesc } from '@desmat/utils/sort';
+import { put } from '@vercel/blob';
 import chroma from 'chroma-js';
 import * as locale from 'locale-codes'
 import moment from 'moment';
-import { put } from '@vercel/blob';
+import * as sharp from 'sharp';
 import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, Season, UserHaiku, UserHaikuOptions } from "@/types/Haiku";
 import { HaikuAlbum } from '@/types/Album';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
@@ -171,7 +172,7 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
   console.log(`services.haiku.getHaiku`, { id, hashPoem });
 
   if (!id) return undefined;
-  
+
   const idAndVersionedId = [
     id,
     typeof (version) == "number" && `${id}:${version}`,
@@ -218,9 +219,9 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     haiku.dailyHaikudleId = dailyHaikudleIds && Array.from(dailyHaikudleIds).sort().reverse()[0];
   }
 
-  const dailyHaikuId = process.env.DAILY_HAIKU_PREVIEW == "true" 
-  ? moment().add(1, "day").format("YYYYMMDD")
-  : moment().format("YYYYMMDD");
+  const dailyHaikuId = process.env.DAILY_HAIKU_PREVIEW == "true"
+    ? moment().add(1, "day").format("YYYYMMDD")
+    : moment().format("YYYYMMDD");
 
   // @ts-ignore: dailyHaikuIds sometimes has integers instead of strings
   if (dailyHaikuIds && (dailyHaikuIds.has(dailyHaikuId) || dailyHaikuIds.has(parseInt(dailyHaikuId)))) {
@@ -262,6 +263,7 @@ export async function createHaiku(user: User, {
   imageModel,
   lang,
   albumId,
+  layout,
 }: {
   title?: string,
   theme?: string,
@@ -280,8 +282,9 @@ export async function createHaiku(user: User, {
   imageModel?: string,
   lang?: LanguageType,
   albumId?: string,
+  layout?: any,
 }): Promise<Haiku> {
-  console.log("services.haiku.createHaiku", { user, theme, poem, imageUrl });
+  console.log("services.haiku.createHaiku", { user, theme, poem, imageUrl, imageBuffer });
 
   if (!imageBuffer && !imageUrl) {
     throw 'neither imageBuffer or imageUrl provided';
@@ -308,9 +311,9 @@ export async function createHaiku(user: User, {
 
   const haikuId = uuid();
 
-  if (!debug && imageBuffer) {
+  if (/* !debug && */ imageBuffer) {
     const filename = `haiku-${haikuId}-${theme?.replaceAll(/\W/g, "_").toLowerCase()}.png`;
-    const blob = !debug && await put(filename, imageBuffer, {
+    const blob = /* !debug && */ await put(filename, imageBuffer, {
       access: 'public',
       addRandomSuffix: false,
     });
@@ -340,6 +343,7 @@ export async function createHaiku(user: User, {
     colorPalette: sortedColors.map((c: any) => c.hex()),
     lang,
     sharedVersioned: true, // be sure to keep in sync with triggerHaikuShared below
+    layout,
   } as Haiku;
 
   if (!user.isAdmin) {
@@ -537,6 +541,52 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   return savedHaiku;
 }
 
+export async function updateLayout(user: any, haiku: Haiku, imageBuffer?: any) {
+  console.log("services.haiku.updateLayout", { haiku });
+  if (!imageBuffer) {
+    const imageRet = await fetch(haiku.bgImage);
+    imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+  }
+  // console.log("services.haiku.updateLayout", { imageBuffer });
+
+  // @ts-ignore
+  const resized = await sharp(imageBuffer).resize(128, 128).toBuffer();
+  // console.log("services.haiku.updateLayout", { resized });
+
+  // const base64 = imageBuffer.toString("base64");
+  const base64 = resized.toString("base64");
+  // console.log("services.haiku.updateLayout", { base64 });
+
+  const {
+    model: imageAnalysisModel,
+    prompt: imageAnalysisPrompt,
+    response: {
+      colors: imageAnalysisColors,
+      alignment: imageAnalysisAlignment,
+    }
+  } = await openai.analyzeImage(user.id, base64);
+  console.log("services.haiku.updateLayout", { imageAnalysisColors, imageAnalysisAlignment });
+
+  const Alignments = {
+    "top": { top: 10 },
+    "top-down": { top: 15 },
+    "bottom": { bottom: 10 },
+    "bottom-up": { bottom: 15 },
+    "center": {},
+    "center-up": { up: 15 },
+    "center-down": { up: -15 },
+  }
+
+  // @ts-ignore
+  const alignment = Alignments[`${imageAnalysisAlignment}`];
+  const layout = alignment
+    ? { poem: alignment }
+    : undefined;
+  console.log("services.haiku.updateLayout", { layout, alignment });
+
+  return { ...haiku, layout };
+}
+
 export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, type: string = "image/png"): Promise<Haiku> {
   console.log("services.haiku.updateHaikuImage", { user, haiku, buffer, type });
 
@@ -638,23 +688,36 @@ export async function generateHaiku(user: User, {
     artStyle: selectedArtStyle,
     model: imageModel,
   } = await openai.generateBackgroundImage(user.id, subject || generatedSubject, mood || generatedMood, artStyle, customImagePrompt, customArtStyles);
+  // console.log("services.haiku.generateHaiku", { imageUrl });
 
-  return createHaiku(user, {
-    lang: generatedLang || lang || "en",
-    subject,
-    theme: generatedSubject,
-    title: generatedTitle,
-    mood: generatedMood,
-    season: generatedSeason,
-    artStyle: selectedArtStyle,
-    poemPrompt,
-    languageModel,
-    imagePrompt,
-    imageModel,
-    imageUrl,
-    poem: poem || generatedPoem || [],
-    albumId,
-  });
+  const imageRet = await fetch(imageUrl);
+  const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+  // console.log("services.haiku.generateHaiku", { imageBuffer });
+
+  return createHaiku(
+    user,
+    // await updateLayout(
+    //   user,
+      {
+        lang: generatedLang || lang || "en",
+        subject,
+        theme: generatedSubject,
+        title: generatedTitle,
+        mood: generatedMood,
+        season: generatedSeason,
+        artStyle: selectedArtStyle,
+        poemPrompt,
+        languageModel,
+        imagePrompt,
+        imageModel,
+        imageUrl,
+        imageBuffer,
+        poem: poem || generatedPoem || [],
+        albumId,
+      },
+    //   imageBuffer
+    // )
+  );
 }
 
 export async function deleteHaiku(user: any, id: string): Promise<Haiku> {
@@ -868,7 +931,7 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
 export async function getDailyHaiku(id?: string, dontCreate?: boolean): Promise<DailyHaiku | undefined> {
   console.log(`services.haiku.getDailyHaiku`, { id, dontCreate });
 
-  if (!id) id = process.env.DAILY_HAIKU_PREVIEW == "true" 
+  if (!id) id = process.env.DAILY_HAIKU_PREVIEW == "true"
     ? moment().add(1, "day").format("YYYYMMDD")
     : moment().format("YYYYMMDD");
 
@@ -975,7 +1038,7 @@ export async function getNextDailyHaikuId(): Promise<string> {
   if (process.env.DAILY_HAIKU_PREVIEW) {
     return moment().add(1, "day").format("YYYYMMDD");
   }
-  
+
   const todayDatecode = moment().format("YYYYMMDD");
   const todaysDatecodeInt = parseInt(todayDatecode);
 

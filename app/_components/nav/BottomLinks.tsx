@@ -105,6 +105,7 @@ export default function BottomLinks({
   onUploadImage,
   onUpdateImage,
   exitImpersonation,
+  updateLayout,
 }: {
   mode: ExperienceMode,
   haiku?: Haiku,
@@ -126,6 +127,7 @@ export default function BottomLinks({
   onUploadImage?: any,
   onUpdateImage?: any,
   exitImpersonation?: any,
+  updateLayout?: any,
 }) {
   // console.log("BottomLinks", { lang, haiku })
   const router = useRouter();
@@ -593,11 +595,12 @@ export default function BottomLinks({
           <Link
             key="changeMode"
             href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haikudle" ? "haiku" : "haikudle"}`}
-            className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
+            className={haiku?.id /* && onSwitchMode */ ? "cursor-pointer" : "opacity-40"}
             title="Switch between haiku/haikudle mode"
             onClick={async (e: any) => {
               e.preventDefault();
-              haiku?.id && onSwitchMode && onSwitchMode(mode == "haikudle" ? "haiku" : "haikudle");
+              // haiku?.id && onSwitchMode && onSwitchMode(mode == "haikudle" ? "haiku" : "haikudle");
+              haiku?.id && updateLayout && updateLayout();
             }}
           >
             <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>

@@ -414,10 +414,10 @@ export default function MainPage({
         }
         setGenerating(false);
       }
-    // } else {
-    //   trackEvent("cancelled-generate-haiku", {
-    //     userId: user?.id,
-    //   });
+      // } else {
+      //   trackEvent("cancelled-generate-haiku", {
+      //     userId: user?.id,
+      //   });
     }
   }
 
@@ -462,10 +462,10 @@ export default function MainPage({
         incUserUsage(user, "haikusRegenerated"); // TODO haikuImageRegenerated?
         setHaiku(ret);
         setLoadingUI(false);
-      // } else {
-      //   trackEvent("cancelled-regenerate-image", {
-      //     userId: user?.id,
-      //   });
+        // } else {
+        //   trackEvent("cancelled-regenerate-image", {
+        //     userId: user?.id,
+        //   });
       }
     }
   }
@@ -579,7 +579,7 @@ export default function MainPage({
 
     console.log('app.page.switchMode()', { _newMode });
 
-    const newHaikuId = haiku.isCurrentDailyHaiku 
+    const newHaikuId = haiku.isCurrentDailyHaiku
       ? undefined
       : haikuId;
 
@@ -597,7 +597,7 @@ export default function MainPage({
   }, 500);
 
   const adjustLayout = async (layout: any) => {
-    // console.log('app.page.adjustLayout()', { layout });
+    console.log('app.page.adjustLayout()', { layout });
     const updatedHaiku = {
       ...haiku,
       layout: {
@@ -653,6 +653,14 @@ export default function MainPage({
     if (ret) {
       haikuAction(haikuId, "addToAlbum", ret);
     }
+  }
+
+  const updateLayout = async () => {
+    // console.log('app._components.MainPage.updateLayout()', {});
+    setLoadingUI(true);
+    const updatedHaiku = await haikuAction(haikuId, "updateLayout");
+    setHaiku(updatedHaiku);
+    setLoadingUI(false);
   }
 
   const changeRefreshDelay = (val: number) => {
@@ -1004,6 +1012,7 @@ export default function MainPage({
         onUploadImage={!haiku?.error && uploadImage}
         onUpdateImage={!haiku?.error && updateHaikuImage}
         exitImpersonation={exitImpersonation}
+        updateLayout={updateLayout}
       />
 
       {isPuzzleMode &&

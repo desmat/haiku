@@ -42,6 +42,7 @@ export function NavOverlay({
   onUploadImage,
   onUpdateImage,
   exitImpersonation,
+  updateLayout,
 }: {
   mode: ExperienceMode,
   loading?: boolean,
@@ -70,6 +71,7 @@ export function NavOverlay({
   onUploadImage?: any,
   onUpdateImage?: any,
   exitImpersonation?: any,
+  updateLayout?: any,
 }) {
   const [user] = useUser((state: any) => [state.user]);
   const onboarding = !!(onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement));
@@ -117,7 +119,7 @@ export function NavOverlay({
       }
 
       {["haikudle", "haiku"].includes(mode) &&
-        <div 
+        <div
           className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 
             ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} 
             ${loading ? "opacity-30" : "opacity-30 hover:opacity-100 transition-opacity"} 
@@ -152,7 +154,7 @@ export function NavOverlay({
         </div>
       }
       {["social-img", "haikudle-social-img"].includes(mode) &&
-        <div 
+        <div
           className={`
             ${font.architects_daughter.className} absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30 
             opacity-30 hover:opacity-100 transition-opacity
@@ -182,7 +184,7 @@ export function NavOverlay({
       />
 
       {["haiku", "haikudle"].includes(mode) &&
-        <div 
+        <div
           className={`
             fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center 
             ${onboardingElement && onboardingElement.startsWith("bottom-links") ? "z-50" : "z-20"} 
@@ -229,6 +231,7 @@ export function NavOverlay({
                   onUploadImage={onUploadImage}
                   onUpdateImage={onUpdateImage}
                   exitImpersonation={exitImpersonation}
+                  updateLayout={updateLayout}
                 />
               </StyledLayers>
             </PopOnClick>
@@ -245,14 +248,14 @@ export function NavOverlay({
               onClick={() => onSwitchMode("haiku")}
             />
           }
-          {increaseDelay && user?.isAdmin && 
+          {increaseDelay && user?.isAdmin &&
             <div
               className="_bg-yellow-400 absolute bottom-0 left-0 w-[10vw] h-[10vw] z-40 cursor-pointer"
               title="Increase refresh time"
               onClick={increaseDelay}
             />
           }
-          {decreaseDelay && user?.isAdmin && 
+          {decreaseDelay && user?.isAdmin &&
             <div
               className="_bg-yellow-400 absolute bottom-0 right-0 w-[10vw] h-[10vw] z-40 cursor-pointer"
               title="Decrease refresh time"

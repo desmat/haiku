@@ -8,6 +8,7 @@ const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
 });
 
 const languageModel = "gpt-4o";
+const smallLanguageModel = "gpt-4o-mini"
 // const languageModel = "gpt-4";
 // const languageModel = "gpt-3.5-turbo";
 const imageModel = "dall-e-3";
@@ -452,6 +453,97 @@ export async function analyzeHaiku(userId: string, poem: string[]): Promise<any>
     });
 
     console.error("Error analyzing haiku poem", { type: error.type, code: error.code, message: error.message, error, prompt });
+    throw error;
+  }
+}
+
+export async function analyzeImage(userId: string, imageBase64: string): Promise<any> {
+  console.log(`services.openai.analyzeImage`, { userId });
+
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
+    console.warn(`>> services.openai.analyzeImage: DEBUG mode: returning dummy response`);
+    // await delay(3000);
+    return {
+      response: {
+        prompt: "<system prompt>",
+        // TODO somethingsomethingsomething
+        model: "debug",
+      }
+    };
+  }
+
+  // ... generate a haiku in ${language || "English"} and respond ...
+  const systemPrompt = `
+    Given the image please analyse and provide:    
+    
+    1. Vertical alignment for a 3-line haiku poem to be overlayed.
+       Take into into consideration negative space, points of interest and focus, aesthetics and balance.
+       We'll prefer to position the poem in the area with most negative space and not on top of interesting details.
+       The poem's text will be dark colored with bright drop shadows, and so the visual balance should be taken into consideration.
+       Generally centered or up from center will be preferred, top or down from top if the point of focus is in the center, but sometimes buttom or up from bottom will make sense when there's a large negative space there.
+       If a person or animal is featured in the image we should NEVER cover their faces with the poem.
+       If a moon or sun is pictured it's often nice to have the poem close, balancing against the point of focus, or sometimes slightly overlapping when around the center, but not if it compromises aesthetics of the composition.
+       The poem will take 2/3 of the width and 1/5 of the height of the square image.
+       Given the width we can only adjust the alignment vertically and so the alignment options are:
+        - center,
+        - up from center,
+        - down from center,
+        - top,
+        - down from top,
+        - bottom,
+        - up from bottom,
+
+    Please only respond in JSON format with the key 'alignment' (one of 'center'|'center-up'|'center-down'|'top'|'top-down'|'bottom'|'bottom-up')
+    `;
+
+  try {
+    // @ts-ignore
+    const completion = await openai.chat.completions.create({
+      model: languageModel,
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              "type": "image_url",
+              "image_url": { "url": `data:image/jpeg;base64,${imageBase64}` },
+            }
+          ]
+        },
+      ],
+    });
+
+    let response;
+
+    try {
+      console.log("services.openai.analyzeImage RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
+      response = parseJson(completion.choices[0].message.content);
+      console.log("services.openai.analyzeImage RESULTS FROM API", { response });
+      return {
+        prompt: systemPrompt,
+        model: completion.model,
+        response,
+      };
+    } catch (error) {
+      console.error("Error reading results", { error, response, completion });
+    }
+  } catch (error: any) {
+    // TODO
+    // await trackEvent("error", {
+    //   scope: "analyze-haiku-poem",
+    //   type: error?.type,
+    //   code: error?.code,
+    //   message: error.message,
+    //   userId,
+    //   request: poem.join(" / "),
+    // });
+
+    console.error("Error analyzing image", { type: error.type, code: error.code, message: error.message, error, prompt });
     throw error;
   }
 }
