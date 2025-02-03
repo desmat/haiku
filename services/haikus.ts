@@ -4,7 +4,7 @@ import { put } from '@vercel/blob';
 import chroma from 'chroma-js';
 import * as locale from 'locale-codes'
 import moment from 'moment';
-import * as sharp from 'sharp';
+// import * as sharp from 'sharp';
 import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, Season, UserHaiku, UserHaikuOptions } from "@/types/Haiku";
 import { HaikuAlbum } from '@/types/Album';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
@@ -541,51 +541,51 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   return savedHaiku;
 }
 
-export async function updateLayout(user: any, haiku: Haiku, imageBuffer?: any) {
-  console.log("services.haiku.updateLayout", { haiku });
-  if (!imageBuffer) {
-    const imageRet = await fetch(haiku.bgImage);
-    imageBuffer = Buffer.from(await imageRet.arrayBuffer());
-  }
-  // console.log("services.haiku.updateLayout", { imageBuffer });
+// export async function updateLayout(user: any, haiku: Haiku, imageBuffer?: any) {
+//   console.log("services.haiku.updateLayout", { haiku });
+//   if (!imageBuffer) {
+//     const imageRet = await fetch(haiku.bgImage);
+//     imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+//   }
+//   // console.log("services.haiku.updateLayout", { imageBuffer });
 
-  // @ts-ignore
-  const resized = await sharp(imageBuffer).resize(128, 128).toBuffer();
-  // console.log("services.haiku.updateLayout", { resized });
+//   // @ts-ignore
+//   const resized = await sharp(imageBuffer).resize(128, 128).toBuffer();
+//   // console.log("services.haiku.updateLayout", { resized });
 
-  // const base64 = imageBuffer.toString("base64");
-  const base64 = resized.toString("base64");
-  // console.log("services.haiku.updateLayout", { base64 });
+//   // const base64 = imageBuffer.toString("base64");
+//   const base64 = resized.toString("base64");
+//   // console.log("services.haiku.updateLayout", { base64 });
 
-  const {
-    model: imageAnalysisModel,
-    prompt: imageAnalysisPrompt,
-    response: {
-      colors: imageAnalysisColors,
-      alignment: imageAnalysisAlignment,
-    }
-  } = await openai.analyzeImage(user.id, base64);
-  console.log("services.haiku.updateLayout", { imageAnalysisColors, imageAnalysisAlignment });
+//   const {
+//     model: imageAnalysisModel,
+//     prompt: imageAnalysisPrompt,
+//     response: {
+//       colors: imageAnalysisColors,
+//       alignment: imageAnalysisAlignment,
+//     }
+//   } = await openai.analyzeImage(user.id, base64);
+//   console.log("services.haiku.updateLayout", { imageAnalysisColors, imageAnalysisAlignment });
 
-  const Alignments = {
-    "top": { top: 10 },
-    "top-down": { top: 15 },
-    "bottom": { bottom: 10 },
-    "bottom-up": { bottom: 15 },
-    "center": {},
-    "center-up": { up: 15 },
-    "center-down": { up: -15 },
-  }
+//   const Alignments = {
+//     "top": { top: 10 },
+//     "top-down": { top: 15 },
+//     "bottom": { bottom: 10 },
+//     "bottom-up": { bottom: 15 },
+//     "center": {},
+//     "center-up": { up: 15 },
+//     "center-down": { up: -15 },
+//   }
 
-  // @ts-ignore
-  const alignment = Alignments[`${imageAnalysisAlignment}`];
-  const layout = alignment
-    ? { poem: alignment }
-    : undefined;
-  console.log("services.haiku.updateLayout", { layout, alignment });
+//   // @ts-ignore
+//   const alignment = Alignments[`${imageAnalysisAlignment}`];
+//   const layout = alignment
+//     ? { poem: alignment }
+//     : undefined;
+//   console.log("services.haiku.updateLayout", { layout, alignment });
 
-  return { ...haiku, layout };
-}
+//   return { ...haiku, layout };
+// }
 
 export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, type: string = "image/png"): Promise<Haiku> {
   console.log("services.haiku.updateHaikuImage", { user, haiku, buffer, type });
