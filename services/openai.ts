@@ -88,7 +88,9 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
     ${selectedArtStyle},
     on the theme of ${subject || "any"}${mood ? `, with a mood of ${mood}` : ""}.
     Make the art extremely minimal and low-key, with very few brush strokes, 
-    The image should not contain any writing of characters of any kind.
+    The image should not contain any writing or characters of any kind.
+    There should be some negative space where a small poem will be overlayed.
+    If the composition has a central point of interest it should be either up or down from the center.
   `;
   console.log(`services.openai.generateBackgroundImage`, { prompt });
 
