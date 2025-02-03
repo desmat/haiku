@@ -13,30 +13,30 @@ import { User } from '@/types/User';
 
 const haikuThemeSuggestions = [
   "Create a haiku about… ",
-  "Create a haiku about… ",
-  "Create a haiku about… ",
-  "Create a haiku about… ",
-  "Create a haiku about… ",
-  "Create a haiku about… nature",
-  "Create a haiku about… mountains",
-  "Create a haiku about… cherry blossoms",
-  "Create a haiku about… spring",
-  "Create a haiku about… summer",
-  "Create a haiku about… autumn",
-  "Create a haiku about… winter",
-  "Create a haiku about… flowers",
-  "Create a haiku about… summer in Paris",
-  "Create a haiku about… evening in Paris in French",
-  "Create a haiku about… city at night",
-  "Create a haiku about… springtime in Kyoto",
-  "Create a haiku about… rainy morning",
-  "Create a haiku about… sunset on the ocean",
-  "Create a haiku about… sunrise on the lake",
-  "Crea un haiku sobre… la lluvia de la mañana",
-  "के बारे में एक हाइकु बनाएं… एक शांतिपूर्ण नदी",
-  "について俳句を作ってみましょう… 桜",
-  "創建一個俳句關於… 河流和山脈",
-  "Tạo một bài thơ haiku về… những bông hoa",
+  // "Create a haiku about… ",
+  // "Create a haiku about… ",
+  // "Create a haiku about… ",
+  // "Create a haiku about… ",
+  // "Create a haiku about… nature",
+  // "Create a haiku about… mountains",
+  // "Create a haiku about… cherry blossoms",
+  // "Create a haiku about… spring",
+  // "Create a haiku about… summer",
+  // "Create a haiku about… autumn",
+  // "Create a haiku about… winter",
+  // "Create a haiku about… flowers",
+  // "Create a haiku about… summer in Paris",
+  // "Create a haiku about… evening in Paris in French",
+  // "Create a haiku about… city at night",
+  // "Create a haiku about… springtime in Kyoto",
+  // "Create a haiku about… rainy morning",
+  // "Create a haiku about… sunset on the ocean",
+  // "Create a haiku about… sunrise on the lake",
+  // "Crea un haiku sobre… la lluvia de la mañana",
+  // "के बारे में एक हाइकु बनाएं… एक शांतिपूर्ण नदी",
+  // "について俳句を作ってみましょう… 桜",
+  // "創建一個俳句關於… 河流和山脈",
+  // "Tạo một bài thơ haiku về… những bông hoa",
 ];
 
 export function GenerateIcon({
@@ -211,7 +211,7 @@ export default function GenerateInput({
                 dangerouslySetInnerHTML={{
                   __html: `
                   .GenerateInput {
-                    opacity: ${onboarding || active ? "1" : "0.5"};
+                    opacity: ${onboarding || active || focus ? "1" : "0.5"};
                   }
                   .GenerateInput:hover {
                     opacity: 1;
