@@ -26,7 +26,7 @@ const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
     title && !title.toLowerCase().startsWith("art by") && !title.toLowerCase().startsWith("by") && !title.startsWith("-") && !title.startsWith("—") && !title.startsWith("—") && !title.startsWith('"')
       ? `"${capitalize(title)}"`
       : title
-        ? `${title}, `
+        ? `${title}`
         : undefined,
     `${mode == "haikudle" ? "haikudle.ai" : "haikugenius.ai"}/${haiku?.id}`
   ];
@@ -38,7 +38,7 @@ export const formatHaikuText = (haiku: Haiku, mode?: string) => {
   return haiku?.poem
     .map((value: string, i: number) => upperCaseFirstLetter(value))
     .join("\n")
-    + `\n${haikuTitleAndAuthor.join("")}\n`;
+    + `\n${haikuTitleAndAuthor.join(", ")}\n`;
 };
 
 /**
