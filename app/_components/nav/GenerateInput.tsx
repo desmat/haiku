@@ -193,7 +193,7 @@ export default function GenerateInput({
           setActive(false);
         }
       }}
-      className={`GenerateInput _bg-pink-200 absolute
+      className={`GenerateInput overlayed-control _bg-pink-200 absolute
         top-[0.8rem] md:top-[0.8rem] right-[3.2rem] md:right-[3.8rem] md:left-1/2 lg:transform md:-translate-x-1/2
         w-[calc(100vw-6.5rem)] md:w-[600px] transition-opacity
       `}

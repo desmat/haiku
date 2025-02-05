@@ -238,3 +238,15 @@ ul {
   top: 50vh;
   width: 100%;
 }
+
+.overlayed-control {
+  opacity: 0.3;
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* hover on any and all will show up */
+:has(.overlayed-control:hover) .overlayed-control {
+  opacity: 1;
+}

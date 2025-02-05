@@ -122,7 +122,7 @@ export function NavOverlay({
         <div
           className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 
             ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} 
-            ${loading ? "opacity-30" : "opacity-30 hover:opacity-100 transition-opacity"} 
+            ${loading ? "opacity-30" : "overlayed-control"}
           `}
         >
           <div className="onboarding-container">
@@ -155,10 +155,7 @@ export function NavOverlay({
       }
       {["social-img", "haikudle-social-img"].includes(mode) &&
         <div
-          className={`
-            ${font.architects_daughter.className} absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30 
-            opacity-30 hover:opacity-100 transition-opacity
-          `}
+          className={`${font.architects_daughter.className} overlayed-control absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}
         >
           <PopOnClick color={haiku?.bgColor}>
             {/* TODO: href to support multi-language */}
@@ -188,7 +185,7 @@ export function NavOverlay({
           className={`
             fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center 
             ${onboardingElement && onboardingElement.startsWith("bottom-links") ? "z-50" : "z-20"} 
-            ${onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement) ? "" : "opacity-30"} hover:opacity-100 transition-opacity
+            ${onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement) ? "" : "overlayed-control"}
           `}
         >
           <div className="onboarding-container">
