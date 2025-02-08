@@ -549,8 +549,9 @@ export async function updateLayout(user: any, haiku: Haiku, imageBuffer?: any) {
   }
   // console.log("services.haiku.updateLayout", { imageBuffer });
 
+  const size = 256;
   // @ts-ignore
-  const resized = await sharp(imageBuffer).resize(128, 128).toBuffer();
+  const resized = await sharp(imageBuffer).resize(size, size).toBuffer();
   // console.log("services.haiku.updateLayout", { resized });
 
   // const base64 = imageBuffer.toString("base64");
@@ -563,22 +564,25 @@ export async function updateLayout(user: any, haiku: Haiku, imageBuffer?: any) {
     response: {
       colors: imageAnalysisColors,
       alignment: imageAnalysisAlignment,
+      pointOfInterest: imagePointOfInterest,
+      negativeSpace: imageNegativeSpace,
     }
   } = await openai.analyzeImage(user.id, base64);
-  console.log("services.haiku.updateLayout", { imageAnalysisColors, imageAnalysisAlignment });
+  console.log("services.haiku.updateLayout", { imageAnalysisColors, imagePointOfInterest, imageNegativeSpace, imageAnalysisAlignment });
 
   const Alignments = {
-    "top": { top: 10 },
-    "top-down": { top: 15 },
-    "bottom": { bottom: 10 },
-    "bottom-up": { bottom: 15 },
+    "top": { top: 15 },
+    // "top-down": { top: 15 },
+    "bottom": { bottom: 15 },
+    // "bottom-up": { bottom: 15 },
     "center": {},
-    "center-up": { up: 15 },
-    "center-down": { up: -15 },
+    "center-up": { up: 10 },
+    "center-down": { up: -10 },
   }
 
   // @ts-ignore
   const alignment = Alignments[`${imageAnalysisAlignment}`];
+  if (!alignment) console.warn("services.haiku.updateLayout WARNING: invalid alignment", { imageAnalysisAlignment });
   const layout = alignment
     ? { poem: alignment }
     : undefined;

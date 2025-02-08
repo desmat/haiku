@@ -477,26 +477,36 @@ export async function analyzeImage(userId: string, imageBase64: string): Promise
 
   // ... generate a haiku in ${language || "English"} and respond ...
   const systemPrompt = `
-    Given the image please analyse and provide:    
+    Given the image please analyse and provide:
     
-    1. Vertical alignment for a 3-line haiku poem to be overlayed.
-       Take into into consideration negative space, points of interest and focus, aesthetics and balance.
-       We'll prefer to position the poem in the area with most negative space and not on top of interesting details.
-       The poem's text will be dark colored with bright drop shadows, and so the visual balance should be taken into consideration.
-       Generally centered or up from center will be preferred, top or down from top if the point of focus is in the center, but sometimes buttom or up from bottom will make sense when there's a large negative space there.
-       If a person or animal is featured in the image we should NEVER cover their faces with the poem.
-       If a moon or sun is pictured it's often nice to have the poem close, balancing against the point of focus, or sometimes slightly overlapping when around the center, but not if it compromises aesthetics of the composition.
-       The poem will take 2/3 of the width and 1/5 of the height of the square image.
-       Given the width we can only adjust the alignment vertically and so the alignment options are:
-        - center,
-        - up from center,
-        - down from center,
-        - top,
-        - down from top,
-        - bottom,
-        - up from bottom,
+    1. The point of interest in the image, if any.
+    This can be a tree, architecture, an animal, a person, the sun or moon, etc.
+    If the point of intest takes the majority of the image then return undefined.
+    If there are eyes from a person or animal, that will be the point of interest.
+    Please specify the area containing this point of interest, if any:
+    - top third: \`top\`
+    - center: \`center\`
+    - bottom third: \`bottom\`
+    - did not find a point of interest: \`null\`
 
-    Please only respond in JSON format with the key 'alignment' (one of 'center'|'center-up'|'center-down'|'top'|'top-down'|'bottom'|'bottom-up')
+    2. The area with the most empty or negative space. 
+    Note that there often is not, in cases where the point of intest takes the whole area, or the image is well balanced. In such cases return undefined.
+    Please specify the area containing this space, if any:
+    - top third: \`top\`
+    - center: \`center\`
+    - bottom third: \`bottom\`
+    - did not find an area of negative space: \`null\`
+
+    3. the position for a 3-line haiku poem to be overlayed.
+    The poem will take most of the width and 1/3 of the height of the square image.
+    Choose the position in the area of negative space, if any, and not on top of the point of interest, if any.
+    If there is no obvious place in the image please choose center.
+    Please specify on which position will work best to overlay the poem:
+    - top third: \`top\`
+    - center (default if did not find a good location): \`center\`
+    - bottom third: \`bottom\`
+
+    Please only respond in JSON format with the keys \`pointOfInterest\`, \`negativeSpace\` and \`alignment\`, all of which can only be one of \`top\`, \`center\`, \`bottom\`, \`null\`.
     `;
 
   try {
