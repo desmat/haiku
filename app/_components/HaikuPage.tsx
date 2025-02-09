@@ -105,6 +105,8 @@ export default function HaikuPage({
           <AdjustLayoutControls
             layout={haiku.layout}
             adjustLayout={adjustLayout}
+            styles={styles}
+            altStyles={altStyles}
           />
         }
         {(regenerating || loading) &&
