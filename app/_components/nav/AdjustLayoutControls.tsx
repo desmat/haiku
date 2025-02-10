@@ -85,7 +85,7 @@ export default function AdjustLayoutControls({
       }
       {!(poemLayout?.top && poemLayout?.top <= 10) &&
         <div
-          className="_bg-pink-200 _opacity-30 w-[60vw] h-10 left-[50%] translate-x-[-50%] -top-10 absolute cursor-n-resize z-20 flex justify-center items-center opacity-80 hover:opacity-100"
+          className="_bg-pink-200 _opacity-30 w-[60vw] h-10 left-[50%] translate-x-[-50%] -top-10 absolute cursor-n-resize z-20 flex justify-center items-end opacity-80 hover:opacity-100"
           onClick={(e: any) => {
             adjustLayoutClamped({
               top: poemLayout?.top ? poemLayout.top - 5 : undefined,
@@ -125,7 +125,7 @@ export default function AdjustLayoutControls({
       </div> */}
       {!(poemLayout?.bottom && poemLayout?.bottom <= 10) &&
         <div
-          className="_bg-pink-200 _opacity-30 w-[60vw] h-10 left-[50%] translate-x-[-50%] -bottom-10 absolute cursor-s-resize z-20 flex justify-center items-center opacity-80 hover:opacity-100"
+          className="_bg-pink-200 _opacity-30 w-[60vw] h-10 left-[50%] translate-x-[-50%] -bottom-10 absolute cursor-s-resize z-20 flex justify-center items-start opacity-80 hover:opacity-100"
           onClick={(e: any) => {
             adjustLayoutClamped({
               top: poemLayout?.top ? poemLayout.top + 5 : undefined,
