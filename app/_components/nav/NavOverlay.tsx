@@ -155,7 +155,7 @@ export function NavOverlay({
       }
       {["social-img", "haikudle-social-img"].includes(mode) &&
         <div
-          className={`${font.architects_daughter.className} overlayed-control absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}
+          className={`${font.architects_daughter.className} absolute top-0 left-0 right-0 bottom-0 m-auto w-fit h-fit z-30`}
         >
           <PopOnClick color={haiku?.bgColor}>
             {/* TODO: href to support multi-language */}
