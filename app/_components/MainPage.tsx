@@ -168,7 +168,7 @@ export default function MainPage({
     state.start,
   ]);
 
-  const alignAllowed = !showcaseMode && (user?.isAdmin || haiku?.createdBy == user?.id);
+  const alignAllowed = user?.isAdmin || haiku?.createdBy == user?.id;
   const loaded = haikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
   let [loading, setLoading] = useState(false);
   let [loadingUI, setLoadingUI] = useState(false);
