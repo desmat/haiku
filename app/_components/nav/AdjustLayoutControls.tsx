@@ -54,7 +54,7 @@ export default function AdjustLayoutControls({
           }
         </div>
       }
-      {(!poemLayout?.top || poemLayout?.top > 15) &&
+      {(!poemLayout?.top || poemLayout?.top > 15) && (!poemLayout?.up || poemLayout.up <= 35) &&
         <div
           className="_bg-blue-200 _opacity-30 w-40 h-[6rem] left-[50%] translate-x-[-50%] top-0 fixed z-30 flex justify-center items-end opacity-80 hover:opacity-100"
           style={{ cursor: adminMode ? "move" : "pointer" }}
@@ -74,7 +74,7 @@ export default function AdjustLayoutControls({
           }
         </div>
       }
-      {(!poemLayout?.bottom || poemLayout?.bottom > 15) &&
+      {(!poemLayout?.bottom || poemLayout?.bottom > 15) && (!poemLayout?.up || poemLayout.up >= -45) &&
         <div
           className="_bg-blue-200 _opacity-30 w-40 h-[6rem] left-[50%] translate-x-[-50%] bottom-0 fixed z-30 flex justify-center items-start opacity-80 hover:opacity-100"
           style={{ cursor: adminMode ? "move" : "pointer" }}
