@@ -27,6 +27,8 @@ export default function HaikuPage({
   copyHaiku,
   switchMode,
   adjustLayout,
+  aligning,
+  setAligning,
 }: {
   user?: User,
   mode: ExperienceMode,
@@ -46,6 +48,8 @@ export default function HaikuPage({
   copyHaiku?: any,
   switchMode?: any,
   adjustLayout?: any,
+  aligning?: boolean,
+  setAligning?: any,
 }) {
   // console.log('app._components.HaikuPage.render()', { loading, mode, id: haiku?.id, poem: haiku?.poem, popPoem, haiku });
   const showcaseMode = mode == "showcase";
@@ -101,10 +105,13 @@ export default function HaikuPage({
           marginBottom: poemLayout?.bottom ? 0 : "auto",
         }}
       >
-        {canAdjustLayout &&
+        {canAdjustLayout && (user?.isAdmin || aligning) &&
           <AdjustLayoutControls
             layout={haiku.layout}
             adjustLayout={adjustLayout}
+            styles={styles}
+            altStyles={altStyles}
+            adminMode={user?.isAdmin && !aligning}
           />
         }
         {(regenerating || loading) &&
@@ -130,6 +137,8 @@ export default function HaikuPage({
               copyHaiku={copyHaiku}
               switchMode={switchMode}
               updateTitle={updateTitle}
+              aligning={aligning}
+              setAligning={setAligning}
             />
           </div>
         }
