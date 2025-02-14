@@ -119,7 +119,7 @@ export default function AdjustLayoutControls({
         </div>
       }
       <div
-        className="_bg-pink-400 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] top-[-3.5rem] absolute z-30 flex justify-center items-end opacity-80 hover:opacity-100"
+        className="_bg-pink-400 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] top-[-4.5rem] absolute z-30 flex justify-center items-end opacity-80 hover:opacity-100"
         style={{ cursor: adminMode ? "n-resize" : "pointer" }}
         onClick={(e: any) => {
           adjustLayoutClamped({
@@ -141,7 +141,7 @@ export default function AdjustLayoutControls({
       </div>
       {!(poemLayout?.bottom && poemLayout?.bottom <= 10) &&
         <div
-          className="_bg-pink-200 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] bottom-[-2rem] absolute z-30 flex justify-center items-end opacity-80 hover:opacity-100"
+          className="_bg-pink-200 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] bottom-[-2.5rem] absolute z-30 flex justify-center items-end opacity-80 hover:opacity-100"
           style={{ cursor: adminMode ? "s-resize" : "pointer" }}
           onClick={(e: any) => {
             adjustLayoutClamped({
@@ -163,7 +163,7 @@ export default function AdjustLayoutControls({
         </div>
       }
       <div
-        className="_bg-pink-400 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] bottom-[-4.5rem] absolute z-30 flex justify-center items-start opacity-80 hover:opacity-100"
+        className="_bg-pink-400 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] bottom-[-5rem] absolute z-30 flex justify-center items-start opacity-80 hover:opacity-100"
         style={{ cursor: adminMode ? "s-resize" : "pointer" }}
         onClick={(e: any) => {
           adjustLayoutClamped({
