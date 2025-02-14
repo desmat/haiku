@@ -36,7 +36,7 @@ export default function AdjustLayoutControls({
         && !(poemLayout?.bottom && poemLayout?.bottom >= 20)
         && !(!poemLayout?.top && !poemLayout?.bottom) &&
         <div
-          className="_bg-blue-400 _opacity-30 w-40 h-40 left-[50%] translate-x-[-50%] top-[50%] translate-y-[-50%] fixed z-30 flex justify-center items-center opacity-80 hover:opacity-100"
+          className="_bg-blue-400 _opacity-30 w-40 h-20 left-[50%] translate-x-[-50%] top-[50%] translate-y-[-50%] fixed z-30 flex justify-center items-center opacity-80 hover:opacity-100"
           style={{ cursor: adminMode ? "move" : "pointer" }}
           onClick={(e: any) => {
             adjustLayoutClamped({ poem: {} });
@@ -54,7 +54,7 @@ export default function AdjustLayoutControls({
           }
         </div>
       }
-      {(!poemLayout?.top || poemLayout?.top > 15) && (!poemLayout?.up || poemLayout.up <= 35) &&
+      {(!poemLayout?.top || poemLayout?.top > 15) &&
         <div
           className="_bg-blue-200 _opacity-30 w-40 h-[6rem] left-[50%] translate-x-[-50%] top-0 fixed z-30 flex justify-center items-end opacity-80 hover:opacity-100"
           style={{ cursor: adminMode ? "move" : "pointer" }}
@@ -74,7 +74,7 @@ export default function AdjustLayoutControls({
           }
         </div>
       }
-      {(!poemLayout?.bottom || poemLayout?.bottom > 15) && (!poemLayout?.up || poemLayout.up >= -45) &&
+      {(!poemLayout?.bottom || poemLayout?.bottom > 15) && 
         <div
           className="_bg-blue-200 _opacity-30 w-40 h-[6rem] left-[50%] translate-x-[-50%] bottom-0 fixed z-30 flex justify-center items-start opacity-80 hover:opacity-100"
           style={{ cursor: adminMode ? "move" : "pointer" }}
@@ -97,7 +97,7 @@ export default function AdjustLayoutControls({
       }
       {!(poemLayout?.top && poemLayout?.top <= 10) &&
         <div
-          className="_bg-pink-200 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] -top-10 absolute z-30 flex justify-center items-end opacity-80 hover:opacity-100"
+          className="_bg-pink-200 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] top-[-2rem] absolute z-30 flex justify-center items-start opacity-80 hover:opacity-100"
           style={{ cursor: adminMode ? "n-resize" : "pointer" }}
           onClick={(e: any) => {
             adjustLayoutClamped({
@@ -118,32 +118,30 @@ export default function AdjustLayoutControls({
           }
         </div>
       }
-      {adminMode &&
-        <div
-          className="_bg-pink-400 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] -top-20 absolute z-30 flex justify-center items-end opacity-80 hover:opacity-100"
-          style={{ cursor: adminMode ? "n-resize" : "pointer" }}
-          onClick={(e: any) => {
-            adjustLayoutClamped({
-              top: poemLayout?.top ? poemLayout.top - 15 : undefined,
-              bottom: poemLayout?.bottom ? poemLayout.bottom + 15 : undefined,
-              up: poemLayout?.top ? undefined : (poemLayout?.up || 0) + 15,
-            });
-            e.preventDefault();
-          }}
-          title="Move poem up more"
-        >
-          {!adminMode &&
-            <StyledLayers styles={altStyles || []}>
-              <PopOnClick>
-                <BsChevronDoubleUp className=" text-[2.0rem]" />
-              </PopOnClick>
-            </StyledLayers>
-          }
-        </div>
-      }
+      <div
+        className="_bg-pink-400 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] top-[-3.5rem] absolute z-30 flex justify-center items-end opacity-80 hover:opacity-100"
+        style={{ cursor: adminMode ? "n-resize" : "pointer" }}
+        onClick={(e: any) => {
+          adjustLayoutClamped({
+            top: poemLayout?.top ? poemLayout.top - 15 : undefined,
+            bottom: poemLayout?.bottom ? poemLayout.bottom + 15 : undefined,
+            up: poemLayout?.top ? undefined : (poemLayout?.up || 0) + 15,
+          });
+          e.preventDefault();
+        }}
+        title="Move poem up more"
+      >
+        {!adminMode &&
+          <StyledLayers styles={altStyles || []}>
+            <PopOnClick>
+              <BsChevronDoubleUp className=" text-[2.0rem]" />
+            </PopOnClick>
+          </StyledLayers>
+        }
+      </div>
       {!(poemLayout?.bottom && poemLayout?.bottom <= 10) &&
         <div
-          className="_bg-pink-200 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] -bottom-10 absolute z-30 flex justify-center items-start opacity-80 hover:opacity-100"
+          className="_bg-pink-200 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] bottom-[-2rem] absolute z-30 flex justify-center items-end opacity-80 hover:opacity-100"
           style={{ cursor: adminMode ? "s-resize" : "pointer" }}
           onClick={(e: any) => {
             adjustLayoutClamped({
@@ -164,29 +162,27 @@ export default function AdjustLayoutControls({
           }
         </div>
       }
-      {adminMode &&
-        <div
-          className="_bg-pink-400 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] -bottom-20 absolute z-30 flex justify-center items-start opacity-80 hover:opacity-100"
-          style={{ cursor: adminMode ? "s-resize" : "pointer" }}
-          onClick={(e: any) => {
-            adjustLayoutClamped({
-              top: poemLayout?.top ? poemLayout.top + 15 : undefined,
-              bottom: poemLayout?.bottom ? poemLayout.bottom - 15 : undefined,
-              up: poemLayout?.top ? undefined : (poemLayout?.up || 0) - 15,
-            });
-            e.preventDefault();
-          }}
-          title="Move poem down more"
-        >
-          {!adminMode &&
-            <StyledLayers styles={altStyles || []}>
-              <PopOnClick>
-                <BsChevronDoubleDown className=" text-[2.0rem]" />
-              </PopOnClick>
-            </StyledLayers>
-          }
-        </div>
-      }
+      <div
+        className="_bg-pink-400 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] bottom-[-4.5rem] absolute z-30 flex justify-center items-start opacity-80 hover:opacity-100"
+        style={{ cursor: adminMode ? "s-resize" : "pointer" }}
+        onClick={(e: any) => {
+          adjustLayoutClamped({
+            top: poemLayout?.top ? poemLayout.top + 15 : undefined,
+            bottom: poemLayout?.bottom ? poemLayout.bottom - 15 : undefined,
+            up: poemLayout?.top ? undefined : (poemLayout?.up || 0) - 15,
+          });
+          e.preventDefault();
+        }}
+        title="Move poem down more"
+      >
+        {!adminMode &&
+          <StyledLayers styles={altStyles || []}>
+            <PopOnClick>
+              <BsChevronDoubleDown className=" text-[2.0rem]" />
+            </PopOnClick>
+          </StyledLayers>
+        }
+      </div>
     </div>
   )
 }
