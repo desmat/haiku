@@ -565,10 +565,11 @@ export async function updateLayout(user: any, haiku: Haiku, imageBuffer?: any) {
       colors: imageAnalysisColors,
       alignment: imageAnalysisAlignment,
       pointOfInterest: imagePointOfInterest,
+      personOrAnimalOfInterest: imagePersonOrAnimalOfInterest,
       negativeSpace: imageNegativeSpace,
     }
   } = await openai.analyzeImage(user.id, base64);
-  console.log("services.haiku.updateLayout", { imageAnalysisColors, imagePointOfInterest, imageNegativeSpace, imageAnalysisAlignment });
+  console.log("services.haiku.updateLayout", { imageAnalysisColors, imagePointOfInterest, imagePersonOrAnimalOfInterest, imageNegativeSpace, imageAnalysisAlignment });
 
   const Alignments = {
     "top": { top: 15 },

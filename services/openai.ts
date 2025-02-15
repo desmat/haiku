@@ -478,7 +478,7 @@ export async function analyzeImage(userId: string, imageBase64: string): Promise
   // ... generate a haiku in ${language || "English"} and respond ...
   const systemPrompt = `
     Given the image please analyse and provide:
-    
+
     1. The point of interest in the image, if any.
     This can be a tree, architecture, an animal, a person, the sun or moon, etc.
     If the point of intest takes the majority of the image then return undefined.
@@ -489,7 +489,14 @@ export async function analyzeImage(userId: string, imageBase64: string): Promise
     - bottom third: \`bottom\`
     - did not find a point of interest: \`null\`
 
-    2. The area with the most empty or negative space. 
+    2. If a person, persons, animal or animals' are featured 
+    please specify the top of their face or eyes, if any: 
+    - top third area (0 -> 1/3 height): \`top\`
+    - center third area (1/3 -> 2/3 height): \`center\`
+    - bottom third area (2/3 -> 3/3 height): \`bottom\`
+    - did not find a point of interest: \`null\`
+
+    3. The area with the most empty or negative space. 
     Note that there often is not, in cases where the point of intest takes the whole area, or the image is well balanced. In such cases return undefined.
     Please specify the area containing this space, if any:
     - top third: \`top\`
@@ -497,16 +504,20 @@ export async function analyzeImage(userId: string, imageBase64: string): Promise
     - bottom third: \`bottom\`
     - did not find an area of negative space: \`null\`
 
-    3. the position for a 3-line haiku poem to be overlayed.
+    4. the position for a 3-line haiku poem to be overlayed.
     The poem will take most of the width and 1/3 of the height of the square image.
-    Choose the position in the area of negative space, if any, and not on top of the point of interest, if any.
+    Choose the position in the area of negative space, if any, and away from the point of interest, if any.
+    If the moon or sun are features it's often nice to position the poem to touch it.
+    If a person, persons, animal or animals are prominently featured make sure the position will ABOSOLUTELY NOT be covering it their face and so prefer to position below their face, even if this is in the negative space.
+    IMPORTANT: IF PERSON, PEOPLE, ANIMAL OR ANIMALS ARE IN THE CENTER CHOOSE \`bottom\`.
+    IMPORTANT: IF PERSON, PEOPLE, ANIMAL OR ANIMALS ARE IN THE BOTTOM CHOOSE \`center\` or \`top\`.
     If there is no obvious place in the image please choose center.
     Please specify on which position will work best to overlay the poem:
     - top third: \`top\`
     - center (default if did not find a good location): \`center\`
     - bottom third: \`bottom\`
 
-    Please only respond in JSON format with the keys \`pointOfInterest\`, \`negativeSpace\` and \`alignment\`, all of which can only be one of \`top\`, \`center\`, \`bottom\`, \`null\`.
+    Please only respond in JSON format with the keys \`pointOfInterest\`, \`personOrAnimalOfInterest\`, \`negativeSpace\` and \`alignment\`, all of which can only be one of \`top\`, \`center\`, \`bottom\`, \`null\`.
     `;
 
   try {
