@@ -38,7 +38,7 @@ function LinkGroup({
   links: any[],
 }) {
   const [linksVisible, setLinksVisible] = useState(false);
-  
+
   // for testing
   // useEffect(() => {
   //   const interval = setInterval(() => setChildrenVisible(!childrenVisible), 1000);
@@ -287,37 +287,45 @@ export default function BottomLinks({
             title="Flag"
             disabled={!haiku?.bgImage}
             icon={
-              <div
-                key="heart"
-                title={`${haiku?.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user?.isAdmin ? `(${haiku?.numLikes} like${!haiku?.numLikes || haiku?.numLikes > 1 ? "s" : ""})` : ""}`}
-                className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
-                onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.likedAt ? "un-like" : "like")}
+              <StyledLayers
+                styles={haiku?.likedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
               >
-                {user?.isAdmin && haiku?.numLikes > 0 && !(haiku?.numFlags || haiku?.userFlaggedAt) &&
-                  <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-blue-600" />
-                }
-                {user?.isAdmin && (haiku?.numFlags || haiku?.userFlaggedAt) &&
-                  <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-red-600" />
-                }
-                <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>
-                  <IoHeartSharp className="text-[1.75rem] md:text-[2rem]" />
-                </PopOnClick>
-              </div>
+                <div
+                  key="heart"
+                  title={`${haiku?.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user?.isAdmin ? `(${haiku?.numLikes} like${!haiku?.numLikes || haiku?.numLikes > 1 ? "s" : ""})` : ""}`}
+                  className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
+                  onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.likedAt ? "un-like" : "like")}
+                >
+                  {user?.isAdmin && haiku?.numLikes > 0 && !(haiku?.numFlags || haiku?.userFlaggedAt) &&
+                    <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-blue-600" />
+                  }
+                  {user?.isAdmin && (haiku?.numFlags || haiku?.userFlaggedAt) &&
+                    <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-red-600" />
+                  }
+                  <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>
+                    <IoHeartSharp className="text-[1.75rem] md:text-[2rem]" />
+                  </PopOnClick>
+                </div>
+              </StyledLayers>
             }
             links={[
-              <div
-                key="flag"
-                title={`${haiku?.userFlaggedAt ? `This haiku's author was flagged ${formatTimeFromNow(haiku.userFlaggedAt || 0)}` : haiku?.flaggedAt ? "Un-flag this haiku" : "Flag this haiku"} ${user?.isAdmin ? `(flagged ${haiku?.numFlags} time${!haiku?.numFlags || haiku?.numFlags > 1 ? "s" : ""})` : ""}`}
-                className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
-                onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.flaggedAt ? "un-flag" : "flag")}
+              <StyledLayers
+                styles={haiku?.flaggedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
               >
-                {user?.isAdmin && (haiku?.numFlags || haiku?.userFlaggedAt) &&
-                  <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-red-600" />
-                }
-                <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>
-                  <IoFlagSharp className="text-[1.5rem] md:text-[1.75rem] p-[0.1rem] mb-[0.15rem] ml-[0.1rem]" />
-                </PopOnClick>
-              </div>
+                <div
+                  key="flag"
+                  title={`${haiku?.userFlaggedAt ? `This haiku's author was flagged ${formatTimeFromNow(haiku.userFlaggedAt || 0)}` : haiku?.flaggedAt ? "Un-flag this haiku" : "Flag this haiku"} ${user?.isAdmin ? `(flagged ${haiku?.numFlags} time${!haiku?.numFlags || haiku?.numFlags > 1 ? "s" : ""})` : ""}`}
+                  className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
+                  onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.flaggedAt ? "un-flag" : "flag")}
+                >
+                  {user?.isAdmin && (haiku?.numFlags || haiku?.userFlaggedAt) &&
+                    <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-red-600" />
+                  }
+                  <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>
+                    <IoFlagSharp className="text-[1.5rem] md:text-[1.75rem] p-[0.1rem] mb-[0.15rem] ml-[0.1rem]" />
+                  </PopOnClick>
+                </div>
+              </StyledLayers>
             ]}
           />
         }
@@ -496,7 +504,7 @@ export default function BottomLinks({
             ]}
           />
         }
-        {user?.isAdmin && haiku?.id && 
+        {user?.isAdmin && haiku?.id &&
           <LinkGroup
             key="imageOptions"
             title="Image options"
@@ -653,7 +661,7 @@ export default function BottomLinks({
               </div>,
             ]}
           />
-        }       
+        }
         {mode != "social-img" && haiku?.id && user?.isAdmin && process.env.EXPERIENCE_MODE != "haikudle" &&
           <LinkGroup
             key="modes"
@@ -674,7 +682,7 @@ export default function BottomLinks({
                 </PopOnClick>
               </div>
             }
-            links={[            
+            links={[
               <Link
                 key="socialImgMode"
                 href={`/${haiku ? haiku?.id : ""}?mode=social-img`}
