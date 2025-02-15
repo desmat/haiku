@@ -32,7 +32,7 @@ function OpenCloseButton({
   onboardingElement?: string,
   onClick?: any,
 }) {
-  const onboarding = false; //onboardingElement && onboardingElement.includes("side-panel");
+  const onboarding = onboardingElement && onboardingElement.includes("side-panel");
 
   return (
     <div
@@ -44,13 +44,8 @@ function OpenCloseButton({
       title={title}
     >
       <StyledLayers styles={styles}>
-        <PopOnClick>
-          <div className="onboarding-container" style={{ width: "auto" }}>
-            {onboarding &&
-              <div className="onboarding-focus" />
-            }
-            <IoMenu className="h-7 w-7 md:h-8 md:w-8" />
-          </div>
+        <PopOnClick active={!!onboarding} >
+          <IoMenu className="h-7 w-7 md:h-8 md:w-8" />
         </PopOnClick>
       </StyledLayers>
     </div>
@@ -233,7 +228,7 @@ export default function SidePanel({
       {/* button to open side panel */}
       {true && //(!panelOpened && !panelAnimating) &&
         <OpenCloseButton
-        className={`${onboarding ? "" : "overlayed-control"}`}
+          className={`${onboarding ? "" : "overlayed-control"}`}
           styles={styles}
           title="Open side panel"
           onboardingElement={onboardingElement}

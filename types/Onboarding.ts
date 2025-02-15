@@ -8,7 +8,7 @@ export type OnboardingStep = {
   style?: any | undefined,
 };
 
-export const haikuOnboardingSteps = [
+export const haikuOnboardingSteps = (haiku: Haiku) => [
   {
     focus: "",
     message: `
@@ -19,7 +19,7 @@ export const haikuOnboardingSteps = [
         <div>Follow the next steps to learn all about <b>Haiku Genius</b>.</div>
       </div>
     `,
-    style: { bottom: "0.5rem" },
+    style: { bottom: 0 }
   },
   {
     focus: "poem",
@@ -29,7 +29,9 @@ export const haikuOnboardingSteps = [
         <div>AI-generated content is often good, but sometimes less so! Haiku creators start with a generated poem, then their creativity takes over.</div>
       </div>
     `,
-    style: { bottom: "0.5rem" },
+    style: haiku?.layout?.poem?.top || haiku?.layout?.poem?.up >= 10
+      ? { bottom: 0 }
+      : { top: 0 },
   },
   {
     focus: "generate",
@@ -39,7 +41,7 @@ export const haikuOnboardingSteps = [
         <div>To create your own haiku hit the <b>✨</b> button at the top of the screen, maybe specify <b>theme or subject in any language</b> and AI will get you started. The rest is up to!</div>
       </div>
     `,
-    style: { bottom: "0.5rem" },
+    style: { bottom: "50%", transform: "translateY(50%)" },
   },
   {
     focus: "side-panel-and-bottom-links",
@@ -51,7 +53,7 @@ export const haikuOnboardingSteps = [
         <div>Enjoy <b>Haiku Genius!</b></div>        
       </div>
     `,
-    style: { bottom: "10%" },
+    style: { bottom: "50%", transform: "translateY(50%)" },
   },
 ];
 
@@ -68,8 +70,8 @@ export const haikuGeneratedOnboardingSteps = (haiku: Haiku) => [
         <div>Level up your creativity with AI! Save with empty or incomplete lines, or use "..." placeholders for <b>AI to fill in.</b>
       </div>`,
     style: haiku?.layout?.poem?.top || haiku?.layout?.poem?.up >= 10
-      ? { bottom: "0.5rem" }
-      : { top: "0.5rem" },
+      ? { bottom: 0 }
+      : { top: 0 },
   },
 ];
 
@@ -84,7 +86,7 @@ export const haikuMultiLanguageSteps = (haiku: Haiku) => [
         <div>To generate a haiku poem in any language, simply ask in the language you want, or specify the language directly.</div>
         <div>For example <i>Summer in Paris <b>in French</b></i>, <i>Lluvia de la mañana <b>en español</b></i>, <b>桜の花が咲く</b>, <b>शांतिपूर्ण नदी</b>, etc.</div>
       </div>`,
-    style: { bottom: "0.5rem" },
+    style: { bottom: 0 },
   },
 ];
 
@@ -95,7 +97,7 @@ export const haikudleGotoHaikuGenius = (haiku: Haiku) => [
         <div>Want more haiku poems without the puzzles?</div>
         <div><b><a href="https://haikugenius.ai/" target="_blank">Haiku Genius</a></b> features a daily haiku with beautiful generative art, a poem generator and editor, and access to the official social media pages so you won't miss a single one!</div>
       </div>`,
-    style: { bottom: "0.5rem" },
+    style: { bottom: 0 },
   },
 ];
 
@@ -156,7 +158,7 @@ export const haikudleOnboardingSteps = [
         <div>Daily puzzles only last for the day: solve and share before time runs out!</div>
       </div>
     `,
-    style: { bottom: "0.5rem" },
+    style: { bottom: 0 },
   },
   {
     focus: "generate",
@@ -166,7 +168,7 @@ export const haikudleOnboardingSteps = [
         <div>To create your very own haikus hit the <b>✨</b> button at the top of the screen and pick a theme or subject: AI will get you started writing a poem and will generate art work to match.</div>
       </div>
     `,
-    style: { bottom: "0.5rem" },
+    style: { bottom: 0 },
   },
   {
     focus: "side-panel-and-bottom-links",
@@ -177,7 +179,7 @@ export const haikudleOnboardingSteps = [
         <div>Enjoy <b>Haikudle!</b></div>        
       </div>
     `,
-    style: { bottom: "0.5rem" },
+    style: { bottom: 0 },
   },
 ];
 
@@ -188,7 +190,7 @@ export const showcase_onboardedFirstTime = [
         <div>This showcase mode displays today’s haiku in fullscreen with no distractions.</div>
         <div>Tap or click anywhere on the screen to return.</div>
       </div>`,
-    style: { bottom: "0.5rem" },
+    style: { bottom: 0 },
   },
 ];
 
@@ -199,7 +201,7 @@ export const showcase_onboardedFirstTime_admin = [
         <div>This showcase mode displays today's haiku in fullscreen with no distractions.</div>
         <div>Tap or click the haiku poem to load another at random, and on the left of the screen to return to editor mode.</div>
       </div>`,
-    style: { bottom: "0.5rem" },
+    style: { bottom: 0 },
   },
 ];
 
@@ -211,7 +213,7 @@ export const showcase_notOnboardedFirstTime = (haiku: Haiku) => [
         <div>For the best experience on mobile hit the <b>Add to Home Screen</b> under the <b>Share</b> or <b>three-dot menu icon</b>.</div>
         <div>Tap or click anywhere to switch to Haiku Genius editor mode.</div>
       </div>`,
-    style: { bottom: "0.5rem" },
+    style: { bottom: 0 },
   },
 ];
 
@@ -222,6 +224,6 @@ export const notShowcase_notOnboardedFirstTime_onboardedShowcase = [
         <div>In this mode you can create, share and view previous haikus. Follow the next steps to learn more.</div>
         <div>Tap or click the haiku poem to return to Daily Haiku showcase mode.</div>
       </div>`,
-    style: { bottom: "0.5rem" },
+    style: { bottom: 0 },
   },
 ];

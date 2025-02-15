@@ -308,7 +308,7 @@ export default function MainPage({
 
     const firstStep = user?.preferences?.onboardedShowcase
       ? notShowcase_notOnboardedFirstTime_onboardedShowcase[0]
-      : haikuOnboardingSteps[0];
+      : haikuOnboardingSteps(haiku)[0];
 
     // show first message normally then show as onboarding: 
     // first step is just a plain alert, rest of steps are onboarding
@@ -329,7 +329,7 @@ export default function MainPage({
             });
 
             startOnboarding(
-              haikuOnboardingSteps.slice(1),
+              haikuOnboardingSteps(haiku).slice(1),
               () => {
                 saveUserOnboarded();
                 trackEvent("onboarding-dismissed", {
