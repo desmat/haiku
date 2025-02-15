@@ -193,9 +193,9 @@ export default function GenerateInput({
           setActive(false);
         }
       }}
-      className={`GenerateInput _bg-pink-200 absolute
+      className={`GenerateInput overlayed-control _bg-pink-200 absolute
         top-[0.8rem] md:top-[0.8rem] right-[3.2rem] md:right-[3.8rem] md:left-1/2 lg:transform md:-translate-x-1/2
-        w-[calc(100vw-6.5rem)] md:w-[600px]
+        w-[calc(100vw-6.5rem)] md:w-[600px] transition-opacity
       `}
       style={{ zIndex: onboarding ? "50" : "20" }}
     >
@@ -210,6 +210,12 @@ export default function GenerateInput({
               <style
                 dangerouslySetInnerHTML={{
                   __html: `
+                  .GenerateInput {
+                    opacity: ${onboarding || active || focus ? "1" : "0.5"};
+                  }
+                  .GenerateInput:hover {
+                    opacity: 1;
+                  }
                   .haiku-theme-input textarea {
                     background: none;
                     _background: pink; /* for debugging */
@@ -220,7 +226,7 @@ export default function GenerateInput({
                     height: auto;
                     WebkitTextStroke: 0.5px ${bgColor};
                     -webkit-text-stroke: 1.25px ${color}66;
-                    text-stroke: 1.0px ${color}66;
+                    text-stroke: 1.0px ${color}66;                   
                   }
                   .haiku-theme-input.poem-line-${/* !editing && */ /* !saving &&  !onboarding && aboutToEditLine */ 42} input {
                     outline: none;

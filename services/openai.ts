@@ -8,6 +8,7 @@ const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
 });
 
 const languageModel = "gpt-4o";
+const smallLanguageModel = "gpt-4o-mini"
 // const languageModel = "gpt-4";
 // const languageModel = "gpt-3.5-turbo";
 const imageModel = "dall-e-3";
@@ -87,7 +88,9 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
     ${selectedArtStyle},
     on the theme of ${subject || "any"}${mood ? `, with a mood of ${mood}` : ""}.
     Make the art extremely minimal and low-key, with very few brush strokes, 
-    The image should not contain any writing of characters of any kind.
+    The image should not contain any writing or characters of any kind.
+    There should be some negative space where a small poem will be overlayed.
+    If the composition has a central point of interest it should be either up or down from the center.
   `;
   console.log(`services.openai.generateBackgroundImage`, { prompt });
 
@@ -452,6 +455,107 @@ export async function analyzeHaiku(userId: string, poem: string[]): Promise<any>
     });
 
     console.error("Error analyzing haiku poem", { type: error.type, code: error.code, message: error.message, error, prompt });
+    throw error;
+  }
+}
+
+export async function analyzeImage(userId: string, imageBase64: string): Promise<any> {
+  console.log(`services.openai.analyzeImage`, { userId });
+
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
+    console.warn(`>> services.openai.analyzeImage: DEBUG mode: returning dummy response`);
+    // await delay(3000);
+    return {
+      response: {
+        prompt: "<system prompt>",
+        // TODO somethingsomethingsomething
+        model: "debug",
+      }
+    };
+  }
+
+  // ... generate a haiku in ${language || "English"} and respond ...
+  const systemPrompt = `
+    Given the image please analyse and provide:
+    
+    1. The point of interest in the image, if any.
+    This can be a tree, architecture, an animal, a person, the sun or moon, etc.
+    If the point of intest takes the majority of the image then return undefined.
+    If there are eyes from a person or animal, that will be the point of interest.
+    Please specify the area containing this point of interest, if any:
+    - top third: \`top\`
+    - center: \`center\`
+    - bottom third: \`bottom\`
+    - did not find a point of interest: \`null\`
+
+    2. The area with the most empty or negative space. 
+    Note that there often is not, in cases where the point of intest takes the whole area, or the image is well balanced. In such cases return undefined.
+    Please specify the area containing this space, if any:
+    - top third: \`top\`
+    - center: \`center\`
+    - bottom third: \`bottom\`
+    - did not find an area of negative space: \`null\`
+
+    3. the position for a 3-line haiku poem to be overlayed.
+    The poem will take most of the width and 1/3 of the height of the square image.
+    Choose the position in the area of negative space, if any, and not on top of the point of interest, if any.
+    If there is no obvious place in the image please choose center.
+    Please specify on which position will work best to overlay the poem:
+    - top third: \`top\`
+    - center (default if did not find a good location): \`center\`
+    - bottom third: \`bottom\`
+
+    Please only respond in JSON format with the keys \`pointOfInterest\`, \`negativeSpace\` and \`alignment\`, all of which can only be one of \`top\`, \`center\`, \`bottom\`, \`null\`.
+    `;
+
+  try {
+    // @ts-ignore
+    const completion = await openai.chat.completions.create({
+      model: languageModel,
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              "type": "image_url",
+              "image_url": { "url": `data:image/jpeg;base64,${imageBase64}` },
+            }
+          ]
+        },
+      ],
+    });
+
+    let response;
+
+    try {
+      console.log("services.openai.analyzeImage RESULTS FROM API", { completion, content: completion.choices[0]?.message?.content });
+      response = parseJson(completion.choices[0].message.content);
+      console.log("services.openai.analyzeImage RESULTS FROM API", { response });
+      return {
+        prompt: systemPrompt,
+        model: completion.model,
+        response,
+      };
+    } catch (error) {
+      console.error("Error reading results", { error, response, completion });
+    }
+  } catch (error: any) {
+    // TODO
+    // await trackEvent("error", {
+    //   scope: "analyze-haiku-poem",
+    //   type: error?.type,
+    //   code: error?.code,
+    //   message: error.message,
+    //   userId,
+    //   request: poem.join(" / "),
+    // });
+
+    console.error("Error analyzing image", { type: error.type, code: error.code, message: error.message, error, prompt });
     throw error;
   }
 }

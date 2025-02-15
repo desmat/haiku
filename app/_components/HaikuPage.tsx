@@ -27,6 +27,8 @@ export default function HaikuPage({
   copyHaiku,
   switchMode,
   adjustLayout,
+  aligning,
+  setAligning,
 }: {
   user?: User,
   mode: ExperienceMode,
@@ -46,16 +48,18 @@ export default function HaikuPage({
   copyHaiku?: any,
   switchMode?: any,
   adjustLayout?: any,
+  aligning?: boolean,
+  setAligning?: any,
 }) {
   // console.log('app._components.HaikuPage.render()', { loading, mode, id: haiku?.id, poem: haiku?.poem, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   // const [user] = useUser((state: any) => [state.user]);
   const blurValue = loading ? 40 : 0;
   const saturateValue = loading ? 0.6 : 1;
-  const poemLayout = showcaseMode && !regenerating && !loading
+  const poemLayout = /* showcaseMode && */ !regenerating && !loading
     ? haiku?.layout?.poem
     : {};
-  const canAdjustLayout = !!adjustLayout && showcaseMode;
+  const canAdjustLayout = !!adjustLayout /* && showcaseMode */;
   // console.log('app._components.HaikuPage.render()', { poemLayout });
 
   return (
@@ -101,10 +105,13 @@ export default function HaikuPage({
           marginBottom: poemLayout?.bottom ? 0 : "auto",
         }}
       >
-        {canAdjustLayout &&
+        {canAdjustLayout && (user?.isAdmin || aligning) &&
           <AdjustLayoutControls
             layout={haiku.layout}
             adjustLayout={adjustLayout}
+            styles={styles}
+            altStyles={altStyles}
+            adminMode={user?.isAdmin && !aligning}
           />
         }
         {(regenerating || loading) &&
@@ -112,7 +119,7 @@ export default function HaikuPage({
         }
         {!regenerating && !loading && mode != "social-img" && mode != "haikudle-social-img" && !haiku.poemHashed &&
           <div
-            className="_xtall:bg-orange-400 _tall:bg-pink-200 _wide:bg-yellow-200 relative z-20"
+            className="_bg-pink-200 _xtall:bg-orange-400 _tall:bg-pink-200 _wide:bg-yellow-200 relative z-20"
           >
             <HaikuPoem
               user={user}
@@ -130,6 +137,8 @@ export default function HaikuPage({
               copyHaiku={copyHaiku}
               switchMode={switchMode}
               updateTitle={updateTitle}
+              aligning={aligning}
+              setAligning={setAligning}
             />
           </div>
         }

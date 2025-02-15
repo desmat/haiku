@@ -65,6 +65,7 @@ export default function MainPage({
   const [_refreshDelay, setRefreshDelay] = useState(refreshDelay || REFRESH_DELAY);
   const [refreshTimeout, setRefreshTimeout] = useState<any>();
   const [backupInProgress, setBackupInProgress] = useState(false);
+  const [aligning, _setAligning] = useState(false);
   const previousDailyHaikudleId = haiku?.previousDailyHaikudleId || haikudle?.previousDailyHaikudleId;
 
   // console.log('app.MainPage.render()', { previousDailyHaikudleId });
@@ -167,6 +168,7 @@ export default function MainPage({
     state.start,
   ]);
 
+  const alignAllowed = user?.isAdmin || haiku?.createdBy == user?.id;
   const loaded = haikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
   let [loading, setLoading] = useState(false);
   let [loadingUI, setLoadingUI] = useState(false);
@@ -414,10 +416,10 @@ export default function MainPage({
         }
         setGenerating(false);
       }
-    // } else {
-    //   trackEvent("cancelled-generate-haiku", {
-    //     userId: user?.id,
-    //   });
+      // } else {
+      //   trackEvent("cancelled-generate-haiku", {
+      //     userId: user?.id,
+      //   });
     }
   }
 
@@ -462,10 +464,10 @@ export default function MainPage({
         incUserUsage(user, "haikusRegenerated"); // TODO haikuImageRegenerated?
         setHaiku(ret);
         setLoadingUI(false);
-      // } else {
-      //   trackEvent("cancelled-regenerate-image", {
-      //     userId: user?.id,
-      //   });
+        // } else {
+        //   trackEvent("cancelled-regenerate-image", {
+        //     userId: user?.id,
+        //   });
       }
     }
   }
@@ -579,7 +581,7 @@ export default function MainPage({
 
     console.log('app.page.switchMode()', { _newMode });
 
-    const newHaikuId = haiku.isCurrentDailyHaiku 
+    const newHaikuId = haiku.isCurrentDailyHaiku
       ? undefined
       : haikuId;
 
@@ -597,7 +599,7 @@ export default function MainPage({
   }, 500);
 
   const adjustLayout = async (layout: any) => {
-    // console.log('app.page.adjustLayout()', { layout });
+    console.log('app.page.adjustLayout()', { layout });
     const updatedHaiku = {
       ...haiku,
       layout: {
@@ -653,6 +655,14 @@ export default function MainPage({
     if (ret) {
       haikuAction(haikuId, "addToAlbum", ret);
     }
+  }
+
+  const updateLayout = async () => {
+    // console.log('app._components.MainPage.updateLayout()', {});
+    setLoadingUI(true);
+    const updatedHaiku = await haikuAction(haikuId, "updateLayout");
+    setHaiku(updatedHaiku);
+    setLoadingUI(false);
   }
 
   const changeRefreshDelay = (val: number) => {
@@ -820,6 +830,16 @@ export default function MainPage({
     window.location.href = url(haikuId, { user: undefined });
   }
 
+  const setAligning = (v: boolean) => {
+    if (!v) {
+      trackEvent("haiku-aligned", {
+        userId: user?.id,
+      });
+    }
+
+    _setAligning(v);
+  }
+
   useEffect(() => {
     // console.log('app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
     // @ts-ignore
@@ -946,7 +966,15 @@ export default function MainPage({
         }
         <NavOverlay onClickLogo={loadHaiku} loading={true} mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} />
         {/* <Loading styles={textStyles} /> */}
-        <HaikuPage mode={mode} loading={true} haiku={haiku} styles={textStyles} altStyles={altTextStyles} />
+        <HaikuPage
+          mode={mode}
+          loading={true}
+          haiku={haiku}
+          styles={textStyles}
+          altStyles={altTextStyles}
+          aligning={aligning}
+          setAligning={setAligning}
+        />
       </div>
     )
   }
@@ -1004,6 +1032,7 @@ export default function MainPage({
         onUploadImage={!haiku?.error && uploadImage}
         onUpdateImage={!haiku?.error && updateHaikuImage}
         exitImpersonation={exitImpersonation}
+        updateLayout={updateLayout}
       />
 
       {isPuzzleMode &&
@@ -1034,7 +1063,9 @@ export default function MainPage({
           regenerateImage={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
           copyHaiku={!haiku?.error && copyHaiku}
           switchMode={switchMode}
-          adjustLayout={user?.isAdmin && adjustLayout}
+          adjustLayout={alignAllowed && adjustLayout}
+          aligning={aligning}
+          setAligning={setAligning}
         />
       }
     </div>
