@@ -236,7 +236,7 @@ export function NavOverlay({
         </div>
       }
 
-      {["showcase", "social-img"].includes(mode) &&
+      {["showcase", "social-img", "haikudle-social-img"].includes(mode) &&
         <>
           {onSwitchMode &&
             <div
