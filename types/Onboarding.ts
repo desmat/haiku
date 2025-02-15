@@ -51,7 +51,7 @@ export const haikuOnboardingSteps = [
         <div>Enjoy <b>Haiku Genius!</b></div>        
       </div>
     `,
-    style: { bottom: "0.5rem" },
+    style: { bottom: "10%" },
   },
 ];
 
