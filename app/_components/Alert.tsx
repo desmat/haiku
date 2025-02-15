@@ -100,7 +100,7 @@ function TypedAlert({
             <div className="flex-shrink-0">
               {icon}
             </div>
-            <div className={`_bg-yellow-200 ${icon ? "ml-3" : ""}`}>
+            <div className={`_bg-yellow-200 ${icon ? "ml-3" : ""} w-full`}>
               <div
                 className={`text-md font-medium ${colorClasses[3]}`}
                 dangerouslySetInnerHTML={{ __html: message }}
