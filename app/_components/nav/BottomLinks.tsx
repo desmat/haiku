@@ -310,10 +310,10 @@ export default function BottomLinks({
             }
             links={[
               <StyledLayers
+                key="flag"
                 styles={haiku?.flaggedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
               >
                 <div
-                  key="flag"
                   title={`${haiku?.userFlaggedAt ? `This haiku's author was flagged ${formatTimeFromNow(haiku.userFlaggedAt || 0)}` : haiku?.flaggedAt ? "Un-flag this haiku" : "Flag this haiku"} ${user?.isAdmin ? `(flagged ${haiku?.numFlags} time${!haiku?.numFlags || haiku?.numFlags > 1 ? "s" : ""})` : ""}`}
                   className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
                   onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.flaggedAt ? "un-flag" : "flag")}
