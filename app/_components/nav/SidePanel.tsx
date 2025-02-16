@@ -306,7 +306,7 @@ export default function SidePanel({
                     <div
                       className="cursor-pointer"
                       title="Show daily haikus"
-                      onClick={() => setListMode("dailyHaiku")}
+                      onClick={() => setListMode("album")}
                     >
                       <StyledLayers styles={styles}>
                         All Haikus
@@ -365,7 +365,7 @@ export default function SidePanel({
                 <div
                   className="cursor-pointer"
                   title="Show Albums"
-                  onClick={() => setListMode("album")}
+                  onClick={() => setListMode("haiku")}
                 >
                   <StyledLayers styles={styles}>
                     Daily Haikudles
@@ -376,7 +376,7 @@ export default function SidePanel({
                 <div
                   className="cursor-pointer"
                   title="Show Haikus"
-                  onClick={() => setListMode("haiku")}
+                  onClick={() => setListMode("dailyHaiku")}
                 >
                   <StyledLayers styles={styles}>
                     Albums
