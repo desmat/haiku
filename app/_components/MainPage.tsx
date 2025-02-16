@@ -522,7 +522,6 @@ export default function MainPage({
         random: true,
         ...lang && { lang },
         ...options,
-        ...haikuId && { lastId: haikuId },
         ...album && { album },
         ...userId && { user: userId },
       }, mode).then((haikus: Haiku | Haiku[]) => {

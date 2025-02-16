@@ -73,6 +73,19 @@ export const FlaggedHaikuOptions = {
   },
 };
 
+export type ViewedHaiku = {
+  haikuId: string,
+  userId: string,
+  createdBy: string,
+} & RedisStoreRecord | any;
+
+export const ViewedHaikuOptions = {
+  lookups: {
+    user: "userId",
+    haiku: "haikuId",
+  },
+};
+
 export type DailyHaiku = {
   haikuId: string,
   theme?: string, // ???

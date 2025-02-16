@@ -1,10 +1,9 @@
 import { searchParamsToMap } from '@desmat/utils';
 import { NextRequest, NextResponse } from 'next/server'
-import { getHaiku, deleteHaiku, saveHaiku, getUserHaiku, createUserHaiku, getNextDailyHaikuId, getDailyHaikus, saveUserHaiku } from '@/services/haikus';
-import { deleteHaikudle, getDailyHaikudles, getHaikudle, getUserHaikudle } from '@/services/haikudles';
+import { getHaiku, deleteHaiku, saveHaiku, getUserHaiku, createUserHaiku, getNextDailyHaikuId, getDailyHaikus, saveUserHaiku, createViewedHaiku } from '@/services/haikus';
+import { deleteHaikudle, getHaikudle, getUserHaikudle } from '@/services/haikudles';
 import { userSession } from '@/services/users';
-import { DailyHaikudle, Haikudle } from '@/types/Haikudle';
-import { DailyHaiku } from '@/types/Haiku';
+import { Haikudle } from '@/types/Haikudle';
 
 export const maxDuration = 300;
 
@@ -40,9 +39,15 @@ export async function GET(
 
   if (/* !user.isAdmin && */ haiku?.createdBy != user.id) {
     if (userHaiku) {
-      await saveUserHaiku(user, userHaiku);
+      await Promise.all([
+        saveUserHaiku(user, userHaiku),
+        createViewedHaiku(user, haiku), // TODO maybe move into saveUserHaiku and createUserHaiku?
+      ])
     } else {
-      await createUserHaiku(user, haiku);
+      await Promise.all([
+        createUserHaiku(user, haiku),
+        createViewedHaiku(user, haiku),
+      ])
     }
   }
 

@@ -5,7 +5,7 @@ import chroma from 'chroma-js';
 import * as locale from 'locale-codes'
 import moment from 'moment';
 import * as sharp from 'sharp';
-import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, Season, UserHaiku, UserHaikuOptions } from "@/types/Haiku";
+import { DailyHaiku, Haiku, LikedHaiku, Season, ViewedHaiku, UserHaiku, UserHaikuOptions } from "@/types/Haiku";
 import { HaikuAlbum } from '@/types/Album';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { DailyHaikudle, Haikudle, UserHaikudle } from '@/types/Haikudle';
@@ -709,23 +709,23 @@ export async function generateHaiku(user: User, {
     user,
     // await updateLayout(
     //   user,
-      {
-        lang: generatedLang || lang || "en",
-        subject,
-        theme: generatedSubject,
-        title: generatedTitle,
-        mood: generatedMood,
-        season: generatedSeason,
-        artStyle: selectedArtStyle,
-        poemPrompt,
-        languageModel,
-        imagePrompt,
-        imageModel,
-        imageUrl,
-        imageBuffer,
-        poem: poem || generatedPoem || [],
-        albumId,
-      },
+    {
+      lang: generatedLang || lang || "en",
+      subject,
+      theme: generatedSubject,
+      title: generatedTitle,
+      mood: generatedMood,
+      season: generatedSeason,
+      artStyle: selectedArtStyle,
+      poemPrompt,
+      languageModel,
+      imagePrompt,
+      imageModel,
+      imageUrl,
+      imageBuffer,
+      poem: poem || generatedPoem || [],
+      albumId,
+    },
     //   imageBuffer
     // )
   );
@@ -831,7 +831,7 @@ export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed
   console.log(`services.haiku.createUserHaiku`, { user, haiku });
 
   if (user.impersonating) {
-    console.warn(">> services.users.saveUser WARNING: not saving impersonated user", { user });
+    console.warn(">> services.haiku.createUserHaiku WARNING: not saving impersonated user", { user });
     return;
   }
 
@@ -853,6 +853,28 @@ export async function createUserHaiku(user: User, haiku: Haiku, action?: "viewed
   return createdUserHaiku;
 }
 
+export async function createViewedHaiku(user: User, haiku: Haiku): Promise<UserHaiku | undefined> {
+  console.log(`services.haiku.createViewedHaiku`, { user, haiku });
+
+  if (user.impersonating) {
+    console.warn(">> services.haikus.createViewedHaiku WARNING: not saving impersonated user", { user });
+    return;
+  }
+
+  const id = `${user.id}:${haiku.id}`;
+  const seenHaiku: ViewedHaiku = {
+    id,
+    haikuId: haiku.id,
+    userId: user.id,
+    createdBy: user.id,
+  };
+
+  const createdViewedHaiku = await store.viewedHaikus.create(seenHaiku);
+
+  console.log(`services.haiku.createViewedHaiku`, { userHaiku: createdViewedHaiku });
+  return createdViewedHaiku;
+}
+
 export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<UserHaiku | undefined> {
   console.log(`services.haiku.saveUserHaiku`, { userHaiku });
 
@@ -871,22 +893,19 @@ export async function saveUserHaiku(user: User, userHaiku: UserHaiku): Promise<U
 export async function getRandomHaiku(user: User, mode: string, query?: any, options?: any): Promise<Haiku | undefined> {
   console.log(`services.haiku.getRandomHaiku`, { query, options });
 
-  const lastHaikuId = query.lastId;
-  delete query.lastId;
-
   let [
     haikuIds,
     flaggedHaikuIds,
     likedHaikuIds,
     seenHaikuIds,
+    recentlyViewedUserHaikuIds, 
   ] = await Promise.all([
     getHaikuIds(query),
     typeof (options.flagged) == "boolean" ? getFlaggedHaikuIds() : new Set(),
     typeof (options.liked) == "boolean" ? getLikedHaikuIds() : new Set(),
     typeof (options.seen) == "boolean" ? getSeenHaikuIds(user.id) : new Set(),
+    store.viewedHaikus.ids({ user: user.id, count: 10 }) // don't look further than 10
   ]);
-
-  console.log('services.haiku.getRandomHaiku', { flaggedHaikuIds, likedHaikuIds, seenHaikuIds });
 
   // include or exclude flagged/liked/seen haikus
   let filteredHaikuIds = Array.from(haikuIds).filter((id: string) => {
@@ -905,13 +924,29 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
       );
   });
 
+  console.log('services.haiku.getRandomHaiku', { haikuIds, flaggedHaikuIds, likedHaikuIds, seenHaikuIds, filteredHaikuIds });
+
   if (!filteredHaikuIds.length) {
     // not found
     return notFoundHaiku;
-  } else if (filteredHaikuIds.length > 1) {
-    // exclude special case for only one
-    filteredHaikuIds = filteredHaikuIds.filter((id: string) => id != lastHaikuId);
   }
+
+  // improve next random haiku logic: exclude those recently viewed
+  let recentlyViewedHaikuIds = Array.from(recentlyViewedUserHaikuIds)
+    .map((id: string) => id?.split(':')[1])
+    .filter((id: string) => filteredHaikuIds.includes(id));
+
+  if (recentlyViewedHaikuIds.length > 5) {
+    recentlyViewedHaikuIds = recentlyViewedHaikuIds.slice(0, Math.floor(filteredHaikuIds.length / (3 / 2)));
+  } else {
+    // special case for small sets: not enough, night degenerate into always picking the last seen and so not random
+    recentlyViewedHaikuIds = recentlyViewedHaikuIds.slice(0, Math.floor(filteredHaikuIds.length / 2));
+  }
+
+  if (recentlyViewedHaikuIds.length < filteredHaikuIds.length) {
+    filteredHaikuIds = filteredHaikuIds.filter((id: string) => !recentlyViewedHaikuIds.includes(id));
+  }
+  console.log('services.haiku.getRandomHaiku', { recentlySeenHaikuIds: recentlyViewedHaikuIds, filteredHaikuIds });
 
   const randomHaikuId = filteredHaikuIds[Math.floor(Math.random() * filteredHaikuIds.length)];
   const randomHaiku = await getHaiku(user, randomHaikuId, mode == "haikudle");
@@ -923,18 +958,19 @@ export async function getRandomHaiku(user: User, mode: string, query?: any, opti
 
   console.log('services.haiku.getRandomHaiku', { filteredHaikuIds, randomHaikuId, randomHaiku });
 
-  const [numLikes, userHaiku, userHaikudle] = await Promise.all([
-    getHaikuNumLikes(randomHaiku.id),
-    getUserHaiku(user.id, randomHaiku.id),
-    getUserHaikudle(user?.id, randomHaiku.id),
+  const [numLikes, userHaiku, /* userHaikudle, */ seenHaiku] = await Promise.all([
+    user.isAdmin && getHaikuNumLikes(randomHaiku.id),
+    !user.isAdmin && getUserHaiku(user.id, randomHaiku.id),
+    // !user.isAdmin && getUserHaikudle(user?.id, randomHaiku.id), // I don't think we need thi
+    createViewedHaiku(user, randomHaiku),
   ]);
 
-  if (!user.isAdmin && randomHaiku?.createdBy != user.id && !userHaiku && !userHaikudle) {
+  if (!user.isAdmin && randomHaiku?.createdBy != user.id && !userHaiku /* && !userHaikudle */) {
     createUserHaiku(user, randomHaiku);
   }
 
-  randomHaiku.numLikes = numLikes;
-  randomHaiku.likedAt = userHaiku?.likedAt;
+  if (numLikes) randomHaiku.numLikes = numLikes;
+  if (userHaiku) randomHaiku.likedAt = userHaiku.likedAt;
 
   return randomHaiku;
 }
