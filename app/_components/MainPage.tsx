@@ -833,6 +833,7 @@ export default function MainPage({
   const setAligning = (v: boolean) => {
     if (!v) {
       trackEvent("haiku-aligned", {
+        id: haiku?.id,
         userId: user?.id,
       });
     }
