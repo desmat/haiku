@@ -112,9 +112,9 @@ export const haikuPromptSteps = (haiku: Haiku) => [
         ${typeof (haiku.title) == "string" ? `<div class="ellipsis-2" title="${haiku.title}">Title: <i>${haiku.title}</i></div>` : ""} 
         ${typeof (haiku.season) == "string" ? `<div class="ellipsis-2" title="${haiku.season}">Season: <i>${haiku.season}</i></div>` : ""} 
         ${typeof (haiku.credits) == "string" ? `<div class="ellipsis-2" title="${haiku.credits}">Credits: <i>${haiku.credits}</i></div>` : ""} 
-        <div class="ellipsis-2" title="${haiku.artStyle.replaceAll('"', "'")}">Image style: <i>${haiku.artStyle || "N/A"}</i></div>      
-        <div class="ellipsis-2" title="${haiku.poemPrompt.replaceAll('"', "'") }">Poem prompt: <i>${haiku.poemPrompt || "N/A"}</i></div>
-        <div class="ellipsis-2" title="${haiku.imagePrompt.replaceAll('"', "'") }">Image prompt: <i>${haiku.imagePrompt || "N/A"}</i></div>
+        <div class="ellipsis-2" title="${haiku.artStyle?.replaceAll('"', "'")}">Image style: <i>${haiku.artStyle || "N/A"}</i></div>      
+        <div class="ellipsis-2" title="${haiku.poemPrompt?.replaceAll('"', "'") }">Poem prompt: <i>${haiku.poemPrompt || "N/A"}</i></div>
+        <div class="ellipsis-2" title="${haiku.imagePrompt?.replaceAll('"', "'") }">Image prompt: <i>${haiku.imagePrompt || "N/A"}</i></div>
         ${haiku.version || haiku.deprecated || haiku.deprecatedAt
         ? `<div>Version: ${haiku.version}
             ${haiku.version
