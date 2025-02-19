@@ -639,7 +639,7 @@ export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, 
   const savedHaiku = await saveHaiku(user, updatedHaiku);
 
   const webhookRet = await Promise.all([
-    triggerDailyHaikuSaved(savedHaiku),
+    triggerHaikuSaved(savedHaiku),
     triggerHaikuShared(savedHaiku), // be sure to keep in sync with `sharedVersioned: true` above
   ]);
   // console.log("services.haikudle.updateHaikuImage", { webhookRet });
