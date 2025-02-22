@@ -83,6 +83,7 @@ export default function GenerateInput({
   styles,
   altStyles,
   generate,
+  generatingTheme,
   onboardingElement,
 }: {
   user: User,
@@ -91,6 +92,7 @@ export default function GenerateInput({
   styles?: any,
   altStyles?: any,
   generate?: any,
+  generatingTheme?: string,
   onboardingElement?: string | undefined,
 }) {
   const [active, setActive] = useState(false);
@@ -105,7 +107,8 @@ export default function GenerateInput({
   const onboarding = onboardingElement && onboardingElement.includes("generate");
   const dateCode = moment().format("YYYYMMDD");
   const exceededUsageLimit = !user?.isAdmin && (user?.usage && user?.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU;
-
+  const placeholder = generatingTheme == "" ? "Creating a haiku..." : generatingTheme ? `Creating a haiku about ${generatingTheme}...` : haikuTheme;
+  
   const handleChange = (e: any) => {
     // const text = (e.originalEvent || e).clipboardData.getData('text/plain');
     // console.log("handleChange", { text });
@@ -274,9 +277,8 @@ export default function GenerateInput({
                   //@ts-ignore
                   ref={ref}
                   maxLength={256}
-                  placeholder={`${haikuTheme}`}
+                  placeholder={placeholder}
                   disabled={exceededUsageLimit || !generate}
-                  value={undefined}
                   onChange={handleChange}
                   onFocus={handleFocus}
                   onBlur={handleBlur}

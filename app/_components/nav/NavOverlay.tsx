@@ -25,6 +25,7 @@ export function NavOverlay({
   refreshDelay = 12 * 60 * 60 * 1000,
   backupInProgress,
   onboardingElement,
+  generatingTheme,
   onClickLogo,
   onClickGenerate,
   onClickRandom,
@@ -54,6 +55,7 @@ export function NavOverlay({
   refreshDelay?: number,
   backupInProgress?: boolean,
   onboardingElement?: string,
+  generatingTheme?: string,
   onClickLogo?: any,
   onClickGenerate?: any,
   onClickRandom?: any,
@@ -114,7 +116,8 @@ export function NavOverlay({
           styles={styles}
           altStyles={altStyles}
           generate={!loading && onClickGenerate}
-          onboardingElement={onboardingElement}          
+          onboardingElement={onboardingElement}   
+          generatingTheme={generatingTheme}
         />
       }
 
