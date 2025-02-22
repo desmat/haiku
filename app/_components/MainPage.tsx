@@ -953,7 +953,7 @@ export default function MainPage({
   if (loadingUI || generating || haikudleMode && !previousDailyHaikudleId && !haikudleReady) {
     // console.log('app.MainPage.render() loading page? YUP!', { loadingUI, generating, haikudleMode, haikudleLoaded, haikudleReady, thing: haikudleMode && !haikudleLoaded && !haikudleReady });
     return (
-      <div>
+      <div className="_bg-yellow-200 main-page relative h-[100vh] w-[100vw]">
         {haiku?.bgColor &&
           <style
             dangerouslySetInnerHTML={{
@@ -965,7 +965,13 @@ export default function MainPage({
             }}
           />
         }
-        <NavOverlay onClickLogo={loadHaiku} loading={true} mode={mode} styles={textStyles.slice(0, textStyles.length - 3)} altStyles={altTextStyles} />
+        <NavOverlay
+          onClickLogo={loadHaiku}
+          loading={true}
+          mode={mode}
+          styles={textStyles.slice(0, textStyles.length - 3)}
+          altStyles={altTextStyles}
+        />
         {/* <Loading styles={textStyles} /> */}
         <HaikuPage
           mode={mode}
@@ -1001,7 +1007,7 @@ export default function MainPage({
         onClickGenerate={startGenerateHaiku}
         onClickRandom={loadRandom}
         onClickLogo={() => document.location.href = "/"}
-        onSwitchMode={switchMode}
+        onSwitchMode={!haiku?.error && switchMode}
         onDelete={!haiku?.error && doDelete}
         onSaveDailyHaiku={!haiku?.error && saveDailyHaiku}
         onAddToAlbum={!haiku?.error && addToAlbum}
@@ -1063,7 +1069,7 @@ export default function MainPage({
           regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
           regenerateImage={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
           copyHaiku={!haiku?.error && copyHaiku}
-          switchMode={switchMode}
+          switchMode={!haiku?.error && switchMode}
           adjustLayout={alignAllowed && adjustLayout}
           aligning={aligning}
           setAligning={setAligning}

@@ -285,7 +285,7 @@ export default function BottomLinks({
           <LinkGroup
             key="flagOptions"
             title="Flag"
-            disabled={!haiku?.bgImage}
+            disabled={!haiku?.id || !onLikeHaiku}
             icon={
               <StyledLayers
                 styles={haiku?.likedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
@@ -293,7 +293,7 @@ export default function BottomLinks({
                 <div
                   key="heart"
                   title={`${haiku?.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user?.isAdmin ? `(${haiku?.numLikes} like${!haiku?.numLikes || haiku?.numLikes > 1 ? "s" : ""})` : ""}`}
-                  className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
+                  className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative"}
                   onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.likedAt ? "un-like" : "like")}
                 >
                   {user?.isAdmin && haiku?.numLikes > 0 && !(haiku?.numFlags || haiku?.userFlaggedAt) &&
@@ -374,14 +374,14 @@ export default function BottomLinks({
         {user?.isAdmin &&
           <LinkGroup
             key="share"
-            className={haiku?.id ? "cursor-pointer" : "opacity-40"}
+            disabled={!haiku?.id || !onCopyLink && !onCopyHaiku}
             title="Share"
             icon={
               <Link
                 key="link"
                 href={`/${haiku?.id}`}
                 title="Copy link to share"
-                className={haiku?.id && onCopyLink ? "cursor-copy" : "opacity-40"}
+                className={haiku?.id && onCopyLink ? "cursor-copy" : "cursor-default"}
                 onClick={(e: any) => {
                   e.preventDefault();
                   haiku?.id && onCopyLink && onCopyLink()
@@ -508,7 +508,7 @@ export default function BottomLinks({
           <LinkGroup
             key="imageOptions"
             title="Image options"
-            disabled={!haiku?.bgImage}
+            disabled={!haiku?.bgImage || !onUploadImage && !onUpdateImage}
             icon={
               <Link
                 key="downloadImage"
@@ -566,7 +566,7 @@ export default function BottomLinks({
           <LinkGroup
             key="addOptions"
             title={`Save as daily ${mode}`}
-            disabled={!haiku?.id}
+            disabled={!haiku?.id || !onSaveDailyHaiku && !onAddToAlbum}
             onClick={haiku?.id && onSaveDailyHaiku && onSaveDailyHaiku}
             icon={
               <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
@@ -592,7 +592,7 @@ export default function BottomLinks({
             key="options"
             title={backupInProgress ? "Database backup in progress..." : "Configs"}
             disabled={!haiku?.bgImage || backupInProgress || !onBackup}
-            className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
+            className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : ""}
             icon={
               <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
                 <FaGear className="text-[1.5rem] md:text-[1.75rem] p-[0.1rem]" />
@@ -665,12 +665,11 @@ export default function BottomLinks({
         {mode != "social-img" && haiku?.id && user?.isAdmin && process.env.EXPERIENCE_MODE != "haikudle" &&
           <LinkGroup
             key="modes"
-            className={haiku?.id ? "cursor-pointer" : "opacity-40"}
+            disabled={!haiku?.id || !onSwitchMode}
             title="Switch mode"
             icon={
               <div
                 key="changeMode"
-                className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
                 title="Switch between haiku/haikudle mode"
                 onClick={async (e: any) => {
                   e.preventDefault();
@@ -716,9 +715,10 @@ export default function BottomLinks({
           <Link
             key="socialImgMode"
             href={`/${haiku ? haiku?.id : ""}?mode=showcase`}
-            className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
+            className={haiku?.id && onSwitchMode ? "cursor-pointer" : "cursor-default opacity-40"}
             title="Switch to showcase mode "
             onClick={(e: any) => {
+              e.preventDefault();
               haiku?.id && onSwitchMode && onSwitchMode(mode != "haiku" ? "haiku" : "showcase");
             }}
           >

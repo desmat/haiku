@@ -106,23 +106,23 @@ export function NavOverlay({
 
   return (
     <div className="_bg-pink-200 nav-overlay relative h-full w-full z-1">
-      {!loading && ["haikudle", "haiku"].includes(mode) &&
+      {["haikudle", "haiku"].includes(mode) &&
         <GenerateInput
           user={user}
           color={haiku?.color || "#000000"}
           bgColor={haiku?.bgColor || "#ffffff"}
           styles={styles}
           altStyles={altStyles}
-          generate={onClickGenerate}
-          onboardingElement={onboardingElement}
+          generate={!loading && onClickGenerate}
+          onboardingElement={onboardingElement}          
         />
       }
 
       {["haikudle", "haiku"].includes(mode) &&
         <div
-          className={`${font.architects_daughter.className} absolute top-[-0.1rem] left-2.5 md:left-3.5 
+          className={`${font.architects_daughter.className} overlayed-control absolute top-[-0.1rem] left-2.5 md:left-3.5 
             ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} 
-            ${loading ? "opacity-30" : "overlayed-control"}
+            ${loading ? "" : "overlayed-control"}
           `}
         >
           <div className="onboarding-container">
@@ -262,7 +262,7 @@ export function NavOverlay({
         </>
       }
 
-      {!loading && ["haiku", "haikudle"].includes(mode) &&
+      {["haiku", "haikudle"].includes(mode) &&
         <SidePanel
           user={user}
           album={album}

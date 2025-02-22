@@ -248,7 +248,7 @@ export default function SidePanel({
       />
 
       <div
-        className={`_bg-pink-200 absolute top-0 h-full ${onboarding ? "z-50" : "z-20"} ${!onboarding && "transition-[right]"} _blur-[10px]`}
+        className={`_bg-pink-200 side-panel-body absolute top-0 h-full ${onboarding ? "z-50" : "z-20"} ${!onboarding && "transition-[right]"} _blur-[10px]`}
         style={{
           backgroundColor: `${styles[styles.length - 1]?.color ? styles[styles.length - 1]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
           backdropFilter: "blur(10px)",
