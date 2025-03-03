@@ -80,7 +80,7 @@ export async function triggerDailyHaikudleSaved(dailyHaikudle: DailyHaikudle) {
   // console.log('app.services.webhooks.triggerDailyHaikudleSaved', { res });
 
   // const ret = await res.json();
-  // console.log('app.services.webhooks.triggerDailyHaikuSaved', { ret });
+  // console.log('app.services.webhooks.triggerDailyHaikudleSaved', { ret });
 
   const ret = await res.text();
   console.log('app.services.webhooks.triggerDailyHaikudleSaved', { ret });

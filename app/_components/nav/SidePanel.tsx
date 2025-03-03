@@ -32,7 +32,7 @@ function OpenCloseButton({
   onboardingElement?: string,
   onClick?: any,
 }) {
-  const onboarding = false; //onboardingElement && onboardingElement.includes("side-panel");
+  const onboarding = onboardingElement && onboardingElement.includes("side-panel");
 
   return (
     <div
@@ -44,13 +44,8 @@ function OpenCloseButton({
       title={title}
     >
       <StyledLayers styles={styles}>
-        <PopOnClick>
-          <div className="onboarding-container" style={{ width: "auto" }}>
-            {onboarding &&
-              <div className="onboarding-focus" />
-            }
-            <IoMenu className="h-7 w-7 md:h-8 md:w-8" />
-          </div>
+        <PopOnClick active={!!onboarding} >
+          <IoMenu className="h-7 w-7 md:h-8 md:w-8" />
         </PopOnClick>
       </StyledLayers>
     </div>
@@ -233,7 +228,7 @@ export default function SidePanel({
       {/* button to open side panel */}
       {true && //(!panelOpened && !panelAnimating) &&
         <OpenCloseButton
-        className={`${onboarding ? "" : "overlayed-control"}`}
+          className={`${onboarding ? "" : "overlayed-control"}`}
           styles={styles}
           title="Open side panel"
           onboardingElement={onboardingElement}
@@ -253,7 +248,7 @@ export default function SidePanel({
       />
 
       <div
-        className={`_bg-pink-200 absolute top-0 h-full ${onboarding ? "z-50" : "z-20"} ${!onboarding && "transition-[right]"} _blur-[10px]`}
+        className={`_bg-pink-200 side-panel-body absolute top-0 h-full ${onboarding ? "z-50" : "z-20"} ${!onboarding && "transition-[right]"} _blur-[10px]`}
         style={{
           backgroundColor: `${styles[styles.length - 1]?.color ? styles[styles.length - 1]?.color + "88" : "RGBA(0, 0, 0, 0.5)"}`,
           backdropFilter: "blur(10px)",
@@ -311,7 +306,7 @@ export default function SidePanel({
                     <div
                       className="cursor-pointer"
                       title="Show daily haikus"
-                      onClick={() => setListMode("dailyHaiku")}
+                      onClick={() => setListMode("album")}
                     >
                       <StyledLayers styles={styles}>
                         All Haikus
@@ -370,7 +365,7 @@ export default function SidePanel({
                 <div
                   className="cursor-pointer"
                   title="Show Albums"
-                  onClick={() => setListMode("album")}
+                  onClick={() => setListMode("haiku")}
                 >
                   <StyledLayers styles={styles}>
                     Daily Haikudles
@@ -381,7 +376,7 @@ export default function SidePanel({
                 <div
                   className="cursor-pointer"
                   title="Show Haikus"
-                  onClick={() => setListMode("haiku")}
+                  onClick={() => setListMode("dailyHaiku")}
                 >
                   <StyledLayers styles={styles}>
                     Albums

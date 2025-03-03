@@ -358,6 +358,8 @@ export async function createHaiku(user: User, {
     create = await addToAlbum(user, create, create.season);
   }
 
+  create = await updateLayout(user, create, imageBuffer);
+
   const created = await store.haikus.create(create);
 
   const webhookRet = await Promise.all([
@@ -530,6 +532,8 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
     incUserUsage(user, "haikusRegenerated");
   }
 
+  updatedHaiku = await updateLayout(user, updatedHaiku, imageBuffer);
+
   const savedHaiku = await saveHaiku(user, updatedHaiku);
 
   const webhookRet = await Promise.all([
@@ -630,10 +634,12 @@ export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, 
 
   // TODO: trigger haiku shared
 
+  updatedHaiku = await updateLayout(user, updatedHaiku, buffer);
+
   const savedHaiku = await saveHaiku(user, updatedHaiku);
 
   const webhookRet = await Promise.all([
-    triggerDailyHaikuSaved(savedHaiku),
+    triggerHaikuSaved(savedHaiku),
     triggerHaikuShared(savedHaiku), // be sure to keep in sync with `sharedVersioned: true` above
   ]);
   // console.log("services.haikudle.updateHaikuImage", { webhookRet });

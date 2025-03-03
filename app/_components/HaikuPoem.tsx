@@ -483,8 +483,9 @@ export default function HaikuPoem({
                 active={!!(onboardingElement && onboardingElement.includes("poem"))}
               >
                 {haiku?.poem.map((poemLine: string, i: number) => (
-                  <div key={i} className="md:my-[0.05rem] sm:my-[0.03rem] my-[0.15rem] _transition-all">
-                    <StyledLayers styles={
+                  <StyledLayers
+                    key={i}
+                    styles={
                       aboutToEdit || editing || saving
                         ? styles.slice(0, 1)
                         : onboardingElement && !onboardingElement.includes("poem")
@@ -493,30 +494,29 @@ export default function HaikuPoem({
                             ? styles.slice(0, 3)
                             : styles
                     }>
-                      <div
-                        className="relative m-[0rem] _transition-all"
-                        onKeyDown={(e: any) => (canEdit || editing) && handlePoemLineKeyDown(e, i)}
-                        onMouseOver={() => canEdit && setAboutToEditLine(i)}
-                        onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
-                        onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
-                      >
-                        {/* set the width while editing */}
-                        <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 md:min-h-[3.5rem] sm:min-h-[3rem] min-h-[2.5rem] ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""} ${showcaseMode ? "leading-[2rem]" : ""}`}>
-                          <ControlledInput
-                            id={i}
-                            activeId={editingLine}
-                            value={upperCaseFirstLetter(saving
-                              ? typeof (updatedPoem[i]) == "string"
-                                ? updatedPoem[i]
-                                : upperCaseFirstLetter(poemLine)
-                              : upperCaseFirstLetter(poemLine))}
-                            select={select}
-                            onChange={(value: string) => handleInputChange(value, i)}
-                          />
-                        </div>
+                    <div
+                      className="relative m-[0rem] _transition-all"
+                      onKeyDown={(e: any) => (canEdit || editing) && handlePoemLineKeyDown(e, i)}
+                      onMouseOver={() => canEdit && setAboutToEditLine(i)}
+                      onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
+                      onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
+                    >
+                      {/* set the width while editing */}
+                      <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""} ${showcaseMode ? "md:my-[0.8rem] sm:my-[0.6rem] my-[0.3rem] md:leading-[2.8rem] sm:leading-[2.4rem] leading-[2rem]" : ""}`}>
+                        <ControlledInput
+                          id={i}
+                          activeId={editingLine}
+                          value={upperCaseFirstLetter(saving
+                            ? typeof (updatedPoem[i]) == "string"
+                              ? updatedPoem[i]
+                              : upperCaseFirstLetter(poemLine)
+                            : upperCaseFirstLetter(poemLine))}
+                          select={select}
+                          onChange={(value: string) => handleInputChange(value, i)}
+                        />
                       </div>
-                    </StyledLayers>
-                  </div>
+                    </div>
+                  </StyledLayers>
                 ))}
               </PopOnClick>
             </div>

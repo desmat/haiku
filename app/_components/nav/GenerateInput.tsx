@@ -44,18 +44,20 @@ export function GenerateIcon({
   sizeOverwrite,
   style,
   children,
+  disabled,
 }: {
   onClick?: any,
   sizeOverwrite?: string,
   style?: any
   children?: React.ReactNode,
+  disabled?: boolean,
 }) {
   const icon = <IoSparkles style={style} className={`_bg-orange-600 _hover: _text-purple-100 ${sizeOverwrite || "h-5 w-5 md:h-7 md:w-7 md:mt-[-0.3rem] mt-[-0.4rem]"}`} />;
 
   return (
     <Link
       className="generate-icon flex flex-row m-auto gap-2 hover:no-underline"
-      style={{ cursor: style || onClick ? "pointer" : "default" }}
+      style={{ cursor: !disabled && (style || onClick) ? "pointer" : "default" }}
       href="#"
       onClick={(e: any) => {
         e.preventDefault();
@@ -81,6 +83,7 @@ export default function GenerateInput({
   styles,
   altStyles,
   generate,
+  generatingTheme,
   onboardingElement,
 }: {
   user: User,
@@ -89,6 +92,7 @@ export default function GenerateInput({
   styles?: any,
   altStyles?: any,
   generate?: any,
+  generatingTheme?: string,
   onboardingElement?: string | undefined,
 }) {
   const [active, setActive] = useState(false);
@@ -103,7 +107,8 @@ export default function GenerateInput({
   const onboarding = onboardingElement && onboardingElement.includes("generate");
   const dateCode = moment().format("YYYYMMDD");
   const exceededUsageLimit = !user?.isAdmin && (user?.usage && user?.usage[dateCode]?.haikusCreated || 0) >= USAGE_LIMIT.DAILY_CREATE_HAIKU;
-
+  const placeholder = generatingTheme == "" ? "Creating a haiku..." : generatingTheme ? `Creating a haiku about ${generatingTheme}...` : haikuTheme;
+  
   const handleChange = (e: any) => {
     // const text = (e.originalEvent || e).clipboardData.getData('text/plain');
     // console.log("handleChange", { text });
@@ -185,7 +190,7 @@ export default function GenerateInput({
   return (
     <div
       onMouseOver={() => {
-        !exceededUsageLimit && setActive(true);
+        !exceededUsageLimit && generate && setActive(true);
       }}
       onMouseOut={() => {
         // @ts-ignore
@@ -193,9 +198,10 @@ export default function GenerateInput({
           setActive(false);
         }
       }}
-      className={`GenerateInput overlayed-control _bg-pink-200 absolute
+      className={`GenerateInput _bg-pink-200 absolute
         top-[0.8rem] md:top-[0.8rem] right-[3.2rem] md:right-[3.8rem] md:left-1/2 lg:transform md:-translate-x-1/2
         w-[calc(100vw-6.5rem)] md:w-[600px] transition-opacity
+        ${generate ? "overlayed-control" : "disabled"}
       `}
       style={{ zIndex: onboarding ? "50" : "20" }}
     >
@@ -213,7 +219,7 @@ export default function GenerateInput({
                   .GenerateInput {
                     opacity: ${onboarding || active || focus ? "1" : "0.5"};
                   }
-                  .GenerateInput:hover {
+                  .GenerateInput:not(.disabled):hover {
                     opacity: 1;
                   }
                   .haiku-theme-input textarea {
@@ -271,9 +277,8 @@ export default function GenerateInput({
                   //@ts-ignore
                   ref={ref}
                   maxLength={256}
-                  placeholder={`${haikuTheme}`}
-                  disabled={exceededUsageLimit}
-                  value={undefined}
+                  placeholder={placeholder}
+                  disabled={exceededUsageLimit || !generate}
                   onChange={handleChange}
                   onFocus={handleFocus}
                   onBlur={handleBlur}
@@ -283,7 +288,7 @@ export default function GenerateInput({
                     mt-[-0.1rem] mr-[-0.1rem] mb-0 ml-0 md:mt-[0.1rem] md:mr-[0rem]      
                   `}
                   style={{
-                    cursor: exceededUsageLimit ? "not-allowed" : "text",
+                    cursor: exceededUsageLimit ? "not-allowed" : generate ? "text" : "default",
                     resize: "none",
                   }}
                   title={exceededUsageLimit
@@ -303,10 +308,12 @@ export default function GenerateInput({
                 onMouseUp={() => clickingGenerate && !exceededUsageLimit && handleClickedGenerate()}
                 title={exceededUsageLimit ? "Exceeded daily limit: try again later" : "Create a new haiku"}
               >
-                <PopOnClick>
+                <PopOnClick disabled={!generate}>
                   <StyledLayers styles={altStyles.slice(0, 2)}>
-                    <GenerateIcon style={{ cursor: exceededUsageLimit ? "not-allowed" : "pointer" }}>
-                    </GenerateIcon>
+                    <GenerateIcon
+                      disabled={!generate}
+                      style={{ cursor: exceededUsageLimit ? "not-allowed" : generate ? "pointer" : "default" }}
+                    />
                   </StyledLayers>
                 </PopOnClick>
               </div>

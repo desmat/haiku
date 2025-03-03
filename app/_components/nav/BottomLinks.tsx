@@ -3,25 +3,24 @@
 import { formatTimeFromNow } from '@desmat/utils/format';
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react';
-import { IoAddCircle, IoHelpCircle, IoHeartSharp, IoHeartOutline, IoFlagSharp, IoFlagOutline, IoEyeSharp, IoEyeOutline, IoStatsChart } from 'react-icons/io5';
-import { FaShare, FaExpand, FaCopy } from "react-icons/fa";
-import { BiLogoInstagramAlt } from "react-icons/bi";
-import { RiTwitterFill } from "react-icons/ri";
+import { useRef, useState } from 'react';
+import { BiLogoInstagramAlt, BiBookAdd } from "react-icons/bi";
+import { BsDatabaseFillUp, BsDatabaseFillDown, BsDatabaseDown } from "react-icons/bs";
+import { FaShare, FaExpand, FaCopy, FaArrowsAlt, FaRandom } from "react-icons/fa";
+import { FaGear } from "react-icons/fa6";
 import { HiSwitchVertical, } from "react-icons/hi";
+import { IoAddCircle, IoHelpCircle, IoHeartSharp, IoHeartOutline, IoFlagSharp, IoEyeOutline, IoStatsChart, IoShareSocialOutline } from 'react-icons/io5';
 import { MdHome, MdDelete, MdFacebook } from "react-icons/md";
-import { BsDatabaseFillUp, BsDatabaseFillDown, BsDatabaseDown, BsDatabaseFill } from "react-icons/bs";
-import { FaRandom } from "react-icons/fa";
-import { RiImageFill, RiImageAddLine, RiImageEditLine, RiImageLine } from "react-icons/ri";
-import { BiBookAdd } from "react-icons/bi";
 import { PiUserSwitchBold } from "react-icons/pi";
+import { RiTwitterFill, RiImageFill, RiImageAddLine, RiImageEditLine } from "react-icons/ri";
+import { TbSocial } from 'react-icons/tb';
+import { StyledLayers } from '@/app/_components/StyledLayers';
+import PopOnClick from '@/app/_components//PopOnClick';
 import useUser from '@/app/_hooks/user';
 import { ExperienceMode } from '@/types/ExperienceMode';
 import { Haiku } from '@/types/Haiku';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import trackEvent from '@/utils/trackEvent';
-import { StyledLayers } from '../StyledLayers';
-import PopOnClick from '../PopOnClick';
 
 function LinkGroup({
   icon,
@@ -283,44 +282,54 @@ export default function BottomLinks({
           <MdMail className="text-[1.5rem] md:text-[1.75rem]" />
         </Link> */}
         {user?.isAdmin &&
-          <StyledLayers
-            styles={haiku?.likedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
-          >
-            <div
-              key="heart"
-              title={`${haiku?.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user?.isAdmin ? `(${haiku?.numLikes} like${!haiku?.numLikes || haiku?.numLikes > 1 ? "s" : ""})` : ""}`}
-              className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
-              onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.likedAt ? "un-like" : "like")}
-            >
-              {user?.isAdmin && haiku?.numLikes > 0 &&
-                <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-blue-600" />
-              }
-              <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>
-                <IoHeartSharp className="text-[1.75rem] md:text-[2rem]" />
-              </PopOnClick>
-            </div>
-          </StyledLayers>
+          <LinkGroup
+            key="flagOptions"
+            title="Flag"
+            disabled={!haiku?.id || !onLikeHaiku}
+            icon={
+              <StyledLayers
+                styles={haiku?.likedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
+              >
+                <div
+                  key="heart"
+                  title={`${haiku?.likedAt ? "Un-like this haiku" : "Like this haiku"} ${user?.isAdmin ? `(${haiku?.numLikes} like${!haiku?.numLikes || haiku?.numLikes > 1 ? "s" : ""})` : ""}`}
+                  className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative"}
+                  onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.likedAt ? "un-like" : "like")}
+                >
+                  {user?.isAdmin && haiku?.numLikes > 0 && !(haiku?.numFlags || haiku?.userFlaggedAt) &&
+                    <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-blue-600" />
+                  }
+                  {user?.isAdmin && (haiku?.numFlags || haiku?.userFlaggedAt) &&
+                    <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-red-600" />
+                  }
+                  <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>
+                    <IoHeartSharp className="text-[1.75rem] md:text-[2rem]" />
+                  </PopOnClick>
+                </div>
+              </StyledLayers>
+            }
+            links={[
+              <StyledLayers
+                key="flag"
+                styles={haiku?.flaggedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
+              >
+                <div
+                  title={`${haiku?.userFlaggedAt ? `This haiku's author was flagged ${formatTimeFromNow(haiku.userFlaggedAt || 0)}` : haiku?.flaggedAt ? "Un-flag this haiku" : "Flag this haiku"} ${user?.isAdmin ? `(flagged ${haiku?.numFlags} time${!haiku?.numFlags || haiku?.numFlags > 1 ? "s" : ""})` : ""}`}
+                  className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
+                  onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.flaggedAt ? "un-flag" : "flag")}
+                >
+                  {user?.isAdmin && (haiku?.numFlags || haiku?.userFlaggedAt) &&
+                    <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.5rem] h-[0.5rem] bg-red-600" />
+                  }
+                  <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>
+                    <IoFlagSharp className="text-[1.5rem] md:text-[1.75rem] p-[0.1rem] mb-[0.15rem] ml-[0.1rem]" />
+                  </PopOnClick>
+                </div>
+              </StyledLayers>
+            ]}
+          />
         }
-        {user?.isAdmin &&
-          <StyledLayers
-            styles={haiku?.flaggedAt ? altStyles.slice(0, 1) : styles.slice(0, 0)}
-          >
-            <div
-              key="flag"
-              title={`${haiku?.userFlaggedAt ? `This haiku's author was flagged ${formatTimeFromNow(haiku.userFlaggedAt || 0)}` : haiku?.flaggedAt ? "Un-flag this haiku" : "Flag this haiku"} ${user?.isAdmin ? `(flagged ${haiku?.numFlags} time${!haiku?.numFlags || haiku?.numFlags > 1 ? "s" : ""})` : ""}`}
-              className={haiku?.id && onLikeHaiku ? "cursor-pointer relative" : "relative opacity-40"}
-              onClick={(e: any) => haiku?.id && onLikeHaiku && onLikeHaiku(haiku?.flaggedAt ? "un-flag" : "flag")}
-            >
-              {user?.isAdmin && (haiku?.numFlags || haiku?.userFlaggedAt) &&
-                <div className="absolute top-[-0.1rem] right-[-0.1rem] rounded-full w-[0.6rem] h-[0.6rem] bg-red-600" />
-              }
-              <PopOnClick color={haiku?.bgColor} disabled={!(haiku?.id && onLikeHaiku)}>
-                <IoFlagSharp className="text-[1.5rem] md:text-[1.75rem]" />
-              </PopOnClick>
-            </div>
-          </StyledLayers>
-        }
-        {true && //user?.isAdmin &&
+        {!user?.isAdmin &&
           <div
             key="copy"
             className={haiku?.id && onCopyHaiku ? "cursor-copy" : "opacity-40"}
@@ -336,7 +345,7 @@ export default function BottomLinks({
             </PopOnClick>
           </div>
         }
-        {true &&
+        {!user?.isAdmin &&
           <div className="onboarding-container">
             {onboardingElement == "bottom-links-share" &&
               <div className="onboarding-focus" />
@@ -364,6 +373,64 @@ export default function BottomLinks({
         }
         {user?.isAdmin &&
           <LinkGroup
+            key="share"
+            disabled={!haiku?.id || !onCopyLink && !onCopyHaiku}
+            title="Share"
+            icon={
+              <Link
+                key="link"
+                href={`/${haiku?.id}`}
+                title="Copy link to share"
+                className={haiku?.id && onCopyLink ? "cursor-copy" : "cursor-default"}
+                onClick={(e: any) => {
+                  e.preventDefault();
+                  haiku?.id && onCopyLink && onCopyLink()
+                }}
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onCopyLink}>
+                  <FaShare className="text-[1.5rem] md:text-[1.75rem] p-[0.1rem]" />
+                </PopOnClick>
+              </Link>
+            }
+            links={[
+              // <Link
+              //   key="link"
+              //   href={`/${haiku?.id}`}
+              //   title="Copy link to share"
+              //   className={haiku?.id && onCopyLink ? "cursor-copy" : "opacity-40"}
+              //   onClick={(e: any) => {
+              //     e.preventDefault();
+              //     haiku?.id && onCopyLink && onCopyLink()
+              //   }}
+              // >
+              //   <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onCopyLink}>
+              //     <FaLink className="text-[1.5rem] md:text-[1.75rem] p-[0.2rem]" />
+              //   </PopOnClick>
+              // </Link>,
+              <div
+                key="copy"
+                className={haiku?.id && onCopyHaiku ? "cursor-copy" : "opacity-40"}
+                title="Copy haiku poem"
+                onClick={() => {
+                  if (haiku?.id && onCopyHaiku) {
+                    trackEvent("haiku-copied", {
+                      userId: user?.id,
+                      id: haiku.id,
+                      location: "bottom-links",
+                    });
+                    onCopyHaiku();
+                  }
+                }}
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onCopyHaiku}>
+                  <FaCopy className="text-[1.5rem] md:text-[1.75rem] p-[0.2rem] ml-[-0.1rem]" />
+                </PopOnClick>
+              </div>,
+            ]}
+          />
+        }
+        {user?.isAdmin &&
+          <LinkGroup
             key="randomOptions"
             title="Load random"
             disabled={!haiku?.id || !onRefresh}
@@ -381,7 +448,7 @@ export default function BottomLinks({
                 title="Load random (not liked or flagged)"
               >
                 <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
-                  <IoHeartSharp className="text-[1.5rem] md:text-[1.75rem]" />
+                  <IoHeartSharp className="text-[1.5rem] md:text-[1.75rem] p-[0.1rem]" />
                 </PopOnClick>
               </div>,
               <div
@@ -391,7 +458,7 @@ export default function BottomLinks({
                 title="Load random (not liked or flagged)"
               >
                 <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
-                  <IoHeartOutline className="text-[1.5rem] md:text-[1.75rem]" />
+                  <IoHeartOutline className="text-[1.5rem] md:text-[1.75rem] p-[0.05rem]" />
                 </PopOnClick>
               </div>,
               // <div
@@ -401,7 +468,7 @@ export default function BottomLinks({
               //   title="Load random (not liked or flagged)"
               // >
               //   <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
-              //     <IoEyeSharp className="text-[1.5rem] md:text-[1.75rem]" />
+              //     <IoEyeSharp className="text-[1.5rem] md:text-[1.75rem] p-[0.05rem]" />
               //   </PopOnClick>
               // </div>,
               <div
@@ -411,7 +478,7 @@ export default function BottomLinks({
                 title="Load random (not liked or flagged)"
               >
                 <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
-                  <IoEyeOutline className="text-[1.5rem] md:text-[1.75rem]" />
+                  <IoEyeOutline className="text-[1.5rem] md:text-[1.75rem] p-[0.05rem]" />
                 </PopOnClick>
               </div>,
               <div
@@ -421,7 +488,7 @@ export default function BottomLinks({
                 title="Load random (not liked or flagged)"
               >
                 <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
-                  <IoFlagSharp className="text-[1.5rem] md:text-[1.75rem]" />
+                  <IoFlagSharp className="text-[1.5rem] md:text-[1.75rem] p-[0.05rem]" />
                 </PopOnClick>
               </div>,
               // <div
@@ -437,18 +504,12 @@ export default function BottomLinks({
             ]}
           />
         }
-        {user?.isAdmin &&
+        {user?.isAdmin && haiku?.id &&
           <LinkGroup
             key="imageOptions"
             title="Image options"
-            disabled={!haiku?.bgImage}
+            disabled={!haiku?.bgImage || !onUploadImage && !onUpdateImage}
             icon={
-              <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
-                <RiImageFill className="text-[1.75rem] md:text-[2rem]" />
-              </PopOnClick>
-            }
-            links={[
-              user?.isAdmin && haiku?.id &&
               <Link
                 key="downloadImage"
                 title="Download background image"
@@ -456,9 +517,11 @@ export default function BottomLinks({
                 target="_blank"
               >
                 <PopOnClick color={haiku?.bgColor} disabled={!haiku?.bgImage}>
-                  <RiImageLine className="text-[1.75rem] md:text-[2rem]" />
+                  <RiImageFill className="text-[1.75rem] md:text-[2rem]" />
                 </PopOnClick>
-              </Link>,
+              </Link>
+            }
+            links={[
               user?.isAdmin && haiku?.id && onUploadImage &&
               <div
                 key="uploadImage"
@@ -470,7 +533,7 @@ export default function BottomLinks({
                 }}
               >
                 <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onUploadImage}>
-                  <RiImageAddLine className="text-[1.75rem] md:text-[2rem]" />
+                  <RiImageAddLine className="text-[1.75rem] md:text-[2rem] p-[0.05rem]" />
                 </PopOnClick>
                 <input
                   //@ts-ignore
@@ -493,29 +556,17 @@ export default function BottomLinks({
                 onClick={onUpdateImage}
               >
                 <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onUpdateImage}>
-                  <RiImageEditLine className="text-[1.75rem] md:text-[2rem]" />
+                  <RiImageEditLine className="text-[1.75rem] md:text-[2rem] p-[0.1rem]" />
                 </PopOnClick>
               </div>,
             ]}
           />
         }
         {user?.isAdmin &&
-          <div
-            key="deleteHaiku"
-            className={haiku?.id && onDelete ? "cursor-pointer" : "opacity-40"}
-            onClick={() => haiku?.id && onDelete && onDelete()}
-            title="Delete"
-          >
-            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
-              <MdDelete className="text-[1.75rem] md:text-[2rem]" />
-            </PopOnClick>
-          </div>
-        }
-        {user?.isAdmin &&
           <LinkGroup
             key="addOptions"
             title={`Save as daily ${mode}`}
-            disabled={!haiku?.id}
+            disabled={!haiku?.id || !onSaveDailyHaiku && !onAddToAlbum}
             onClick={haiku?.id && onSaveDailyHaiku && onSaveDailyHaiku}
             icon={
               <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
@@ -538,13 +589,13 @@ export default function BottomLinks({
         }
         {user?.isAdmin &&
           <LinkGroup
-            key="backupOptions"
-            title={backupInProgress ? "Database backup in progress..." : "Backup database"}
+            key="options"
+            title={backupInProgress ? "Database backup in progress..." : "Configs"}
             disabled={!haiku?.bgImage || backupInProgress || !onBackup}
-            className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
+            className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : ""}
             icon={
               <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id}>
-                <BsDatabaseFill className="text-[1.5rem] md:text-[1.75rem]" />
+                <FaGear className="text-[1.5rem] md:text-[1.75rem] p-[0.1rem]" />
               </PopOnClick>
             }
             links={[
@@ -555,7 +606,7 @@ export default function BottomLinks({
                 className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
               >
                 <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
-                  <BsDatabaseDown className="text-[1.5rem] md:text-[1.75rem]" />
+                  <BsDatabaseDown className="text-[1.5rem] md:text-[1.75rem] p-[0.05rem]" />
                 </PopOnClick>
               </div>,
               <div
@@ -565,7 +616,7 @@ export default function BottomLinks({
                 className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
               >
                 <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
-                  <BsDatabaseFillDown className="text-[1.5rem] md:text-[1.75rem]" />
+                  <BsDatabaseFillDown className="text-[1.5rem] md:text-[1.75rem] p-[0.1rem]" />
                 </PopOnClick>
               </div>,
               <div
@@ -575,7 +626,7 @@ export default function BottomLinks({
                 className={backupInProgress ? "_opacity-50 animate-pulse cursor-not-allowed" : onBackup ? "cursor-pointer" : "opacity-40"}
               >
                 <PopOnClick color={haiku?.bgColor} disabled={backupInProgress || !haiku?.id || !onBackup}>
-                  <BsDatabaseFillUp className="text-[1.5rem] md:text-[1.75rem]" />
+                  <BsDatabaseFillUp className="text-[1.5rem] md:text-[1.75rem] p-[0.1rem]" />
                 </PopOnClick>
               </div>,
               <div
@@ -588,33 +639,86 @@ export default function BottomLinks({
                   <IoStatsChart className="text-[1.5rem] md:text-[1.75rem]" />
                 </PopOnClick>
               </div>,
+              <div
+                key="deleteHaiku"
+                className={haiku?.id && onDelete ? "cursor-pointer" : "opacity-40"}
+                onClick={() => haiku?.id && onDelete && onDelete()}
+                title="Delete"
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
+                  <MdDelete className="text-[1.5rem] md:text-[1.75rem]" />
+                </PopOnClick>
+              </div>,
+              <div
+                key="alignHaiku"
+                className={haiku?.id && onDelete ? "cursor-pointer" : "opacity-40"}
+                onClick={(e: any) => haiku?.id && updateLayout && updateLayout()}
+                title="Align poem"
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onDelete}>
+                  <FaArrowsAlt className="text-[1.5rem] md:text-[1.75rem] p-[0.15rem]" />
+                </PopOnClick>
+              </div>,
             ]}
           />
         }
-        {mode != "social-img" && user?.isAdmin && process.env.EXPERIENCE_MODE != "haikudle" &&
-          <Link
-            key="changeMode"
-            href={`/${haiku ? haiku?.id : ""}?mode=${mode == "haikudle" ? "haiku" : "haikudle"}`}
-            className={haiku?.id /* && onSwitchMode */ ? "cursor-pointer" : "opacity-40"}
-            title="Switch between haiku/haikudle mode"
-            onClick={async (e: any) => {
-              e.preventDefault();
-              // haiku?.id && onSwitchMode && onSwitchMode(mode == "haikudle" ? "haiku" : "haikudle");
-              haiku?.id && updateLayout && updateLayout();
-            }}
-          >
-            <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
-              <HiSwitchVertical className="text-[1.75rem] md:text-[2rem]" />
-            </PopOnClick>
-          </Link>
+        {mode != "social-img" && haiku?.id && user?.isAdmin && process.env.EXPERIENCE_MODE != "haikudle" &&
+          <LinkGroup
+            key="modes"
+            disabled={!haiku?.id || !onSwitchMode}
+            title="Switch mode"
+            icon={
+              <div
+                key="changeMode"
+                title="Switch between haiku/haikudle mode"
+                onClick={async (e: any) => {
+                  e.preventDefault();
+                  haiku?.id && onSwitchMode && onSwitchMode(mode == "haikudle" ? "haiku" : "haikudle");
+                }}
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
+                  <HiSwitchVertical className="text-[1.75rem] md:text-[2rem]" />
+                </PopOnClick>
+              </div>
+            }
+            links={[
+              <Link
+                key="socialImgMode"
+                href={`/${haiku ? haiku?.id : ""}?mode=social-img`}
+                className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
+                title="Switch to social-img mode"
+                onClick={(e: any) => {
+                  haiku?.id && onSwitchMode && onSwitchMode("social-img");
+                }}
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
+                  <TbSocial className="text-[1.75rem] md:text-[2rem] p-[0.1rem]" />
+                </PopOnClick>
+              </Link>,
+              <Link
+                key="haikudleSocialImgMode"
+                href={`/${haiku ? haiku?.id : ""}?mode=haikudle-social-img`}
+                className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
+                title="Switch to haikudle-social-img mode"
+                onClick={(e: any) => {
+                  haiku?.id && onSwitchMode && onSwitchMode("haikudle-social-img");
+                }}
+              >
+                <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onSwitchMode}>
+                  <IoShareSocialOutline className="text-[1.75rem] md:text-[2rem] p-[0.1rem]" />
+                </PopOnClick>
+              </Link>,
+            ]}
+          />
         }
         {user?.isAdmin && process.env.EXPERIENCE_MODE != "haikudle" &&
           <Link
             key="socialImgMode"
             href={`/${haiku ? haiku?.id : ""}?mode=showcase`}
-            className={haiku?.id && onSwitchMode ? "cursor-pointer" : "opacity-40"}
+            className={haiku?.id && onSwitchMode ? "cursor-pointer" : "cursor-default opacity-40"}
             title="Switch to showcase mode "
             onClick={(e: any) => {
+              e.preventDefault();
               haiku?.id && onSwitchMode && onSwitchMode(mode != "haiku" ? "haiku" : "showcase");
             }}
           >

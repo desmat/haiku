@@ -91,16 +91,16 @@ function TypedAlert({
 
   return (
     <div 
-      className={`Alert _border-[1px] ${colorClasses[5]} border-solid fixed bottom-3 left-3 md:left-[calc(50vw-(700px/2))] _lg:_left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-50"}`}
+      className={`Alert _border-[1px] ${colorClasses[5]} border-solid fixed  my-[0.75rem] bottom-0 left-[0.75rem] md:left-[calc(50vw-(700px/2))] _lg:_left-[calc(50vw-((700px-8rem)/2))] ${closed ? "_-z-10" : "z-50"}`}
       style={style}
       >
-      <div className={`_bg-pink-200 ${closed ? "opacity-0" : "opacity-100"} transition-all rounded-sm ${colorClasses[0]} p-[0.8rem] w-[calc(100vw-1.5rem)] md:w-[700px] shadow-md hover:shadow-lg`}>
+      <div className={`_bg-pink-200 ${closed ? "opacity-0" : "opacity-100"} transition-all rounded-sm ${colorClasses[0]} p-[0.8rem] w-[calc(100vw-0.75rem-0.75rem)] md:w-[700px] shadow-md hover:shadow-lg`}>
         <div className="flex flex-col gap-[0.4rem] ">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               {icon}
             </div>
-            <div className={`_bg-yellow-200 ${icon ? "ml-3" : ""}`}>
+            <div className={`_bg-yellow-200 ${icon ? "ml-3" : ""} w-full`}>
               <div
                 className={`text-md font-medium ${colorClasses[3]}`}
                 dangerouslySetInnerHTML={{ __html: message }}
