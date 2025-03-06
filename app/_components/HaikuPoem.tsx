@@ -495,7 +495,7 @@ export default function HaikuPoem({
                             : styles
                     }>
                     <div
-                      className="relative m-[0rem] _transition-all"
+                      className="relative m-[0rem] _transition-all pb-[0.5px]"
                       onKeyDown={(e: any) => (canEdit || editing) && handlePoemLineKeyDown(e, i)}
                       onMouseOver={() => canEdit && setAboutToEditLine(i)}
                       onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
