@@ -513,7 +513,7 @@ export default function BottomLinks({
               <Link
                 key="downloadImage"
                 title="Download background image"
-                href={haiku?.bgImage}
+                href={`${haiku?.bgImage}`}
                 target="_blank"
               >
                 <PopOnClick color={haiku?.bgColor} disabled={!haiku?.bgImage}>

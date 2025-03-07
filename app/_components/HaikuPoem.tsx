@@ -495,14 +495,14 @@ export default function HaikuPoem({
                             : styles
                     }>
                     <div
-                      className="relative m-[0rem] _transition-all pb-[0.5px]"
+                      className="relative m-[0rem] _transition-all"
                       onKeyDown={(e: any) => (canEdit || editing) && handlePoemLineKeyDown(e, i)}
                       onMouseOver={() => canEdit && setAboutToEditLine(i)}
                       onMouseOut={() => canEdit && setAboutToEditLine(undefined)}
                       onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
                     >
                       {/* set the width while editing */}
-                      <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""} ${showcaseMode ? "md:my-[0.8rem] sm:my-[0.6rem] my-[0.3rem] md:leading-[2.8rem] sm:leading-[2.4rem] leading-[2rem]" : ""}`}>
+                      <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""} ${showcaseMode ? "md:my-[0.8rem] sm:my-[0.6rem] my-[0.3rem] md:leading-[3.5rem] sm:leading-[2.6rem] leading-[2rem]" : ""}`}>
                         <ControlledInput
                           id={i}
                           activeId={editingLine}
