@@ -229,7 +229,7 @@ export default function HaikuPoem({
   // console.log('app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   const onboarding = typeof (onboardingElement) == "string"
-  const maxHaikuTheme = showcaseMode ? 32 : 18;
+  const maxHaikuTheme = showcaseMode ? 28 : 18;
   const dateCode = moment().format("YYYYMMDD");
 
   const [updatedPoem, setUpdatedPoem] = useState<string[]>([]);
@@ -525,7 +525,7 @@ export default function HaikuPoem({
               className="_bg-red-400 relative md:text-[16pt] sm:text-[14pt] text-[12pt]"
               style={{
                 // background: "pink",
-                fontSize: "60%",
+                fontSize: showcaseMode ? "40%" : "70%",
               }}
             >
               <div
@@ -539,26 +539,29 @@ export default function HaikuPoem({
                 }}
               >
                 <div
-                  className="poem-title _transition-all _bg-pink-400"
-                  onClick={() => !showcaseMode && updateTitle && updateTitle()}
-                  style={{
-                    cursor: updateTitle || canCopy
-                      ? "pointer"
-                      : ""
-                  }}
-                  title={
-                    updateTitle
-                      ? "Update title" :
-                      canCopy
-                        ? "Copy to clipboard"
-                        : ""
-                  }
+                  className="poem-title relative _transition-all _bg-pink-400"
                 >
                   <StyledLayers
-                    className={showcaseMode ? "" : "opacity-70 hover:opacity-100"}
+                    className={showcaseMode
+                      ? "md:leading-[2rem] sm:leading-[1.8rem] leading-[1.4rem]"
+                      : "opacity-70 hover:opacity-100 md:leading-[1.75rem] sm:leading-[1.5rem] leading-[1rem]"}
                     styles={styles.slice(0, 3)}
                   >
                     <span
+                      onClick={() => !showcaseMode && updateTitle && updateTitle()}
+                      style={{
+                        cursor: updateTitle || canCopy
+                          ? "pointer"
+                          : ""
+                      }}
+                      title={
+                        updateTitle
+                          ? "Update title" :
+                          canCopy
+                            ? "Copy to clipboard"
+                            : ""
+                      }
+
                       dangerouslySetInnerHTML={{
                         __html: `${formatHaikuTitleAndAuthor(haiku, mode).join((haiku?.title?.length ?? haiku?.theme?.length) > maxHaikuTheme
                           ? "<br/>"
@@ -566,16 +569,23 @@ export default function HaikuPoem({
                       }}
                     />
                   </StyledLayers>
-                </div>
 
-                {!showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed) &&
-                  <div className="relative">
-                    <div className="absolute">
+                  {!showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed) &&
+                    <div
+                      className="_bg-blue-200 absolute"
+                      style={{
+                        top: "50%",
+                        right: 0,
+                        transform: "translate(calc(100% + 0.5rem), calc(-50% - 0.1rem))"
+                      }}
+                      onClick={(e) => e.preventDefault()}
+                    >
                       <div
                         className={`
-                          onboarding-container group/actions _bg-yellow-200 flex flex-row gap-1 
-                          mt-auto md:pt-[0rem] sm:pt-[0.0rem] md:pb-[0.2rem] sm:pb-[0.5rem] pb-[0.4rem] md:pl-[0.9rem] sm:pl-[0.7rem] pl-[0.5rem]
+                          onboarding-container group/actions _bg-yellow-200 flex flex-row gap-[0.35rem] 
+                          
                           ${editing || aligning ? "" : "opacity-60"} group-hover:opacity-100 transition-opacity`}
+                        onClick={(e) => e.preventDefault()}
                       >
                         {onboardingElement && ["poem-actions"].includes(onboardingElement) &&
                           <div className="onboarding-focus" />
@@ -602,7 +612,7 @@ export default function HaikuPoem({
                             <StyledLayers styles={altStyles || []}>
                               <PopOnClick>
                                 <FaEdit className={`
-                            h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 
+                            h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 
                             ${editing || onboardingElement == "poem-actions"
                                     ? "opacity-100"
                                     : saving || !canClickEdit
@@ -635,7 +645,7 @@ export default function HaikuPoem({
                             <StyledLayers styles={altStyles || []}>
                               <PopOnClick>
                                 <FaArrowsAlt className={`
-                                  h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 
+                                  h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 
                                   ${aligning || onboardingElement == "poem-actions"
                                     ? "opacity-100"
                                     : canAlign
@@ -707,8 +717,8 @@ export default function HaikuPoem({
                         }
                       </div>
                     </div>
-                  </div>
-                }
+                  }
+                </div>
               </div>
             </div>
           </div>
