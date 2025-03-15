@@ -709,23 +709,23 @@ export async function generateHaiku(user: User, {
     user,
     // await updateLayout(
     //   user,
-      {
-        lang: generatedLang || lang || "en",
-        subject,
-        theme: generatedSubject,
-        title: generatedTitle,
-        mood: generatedMood,
-        season: generatedSeason,
-        artStyle: selectedArtStyle,
-        poemPrompt,
-        languageModel,
-        imagePrompt,
-        imageModel,
-        imageUrl,
-        imageBuffer,
-        poem: poem || generatedPoem || [],
-        albumId,
-      },
+    {
+      lang: generatedLang || lang || "en",
+      subject,
+      theme: generatedSubject,
+      title: generatedTitle,
+      mood: generatedMood,
+      season: generatedSeason,
+      artStyle: selectedArtStyle,
+      poemPrompt,
+      languageModel,
+      imagePrompt,
+      imageModel,
+      imageUrl,
+      imageBuffer,
+      poem: poem || generatedPoem || [],
+      albumId,
+    },
     //   imageBuffer
     // )
   );
@@ -953,29 +953,44 @@ export async function getDailyHaiku(id?: string, dontCreate?: boolean): Promise<
     return;
   } else if (!dailyHaiku) {
     // create daily haiku if none for today
+
+    // figure out current season so that we can find haikus to exclude
+    const seasonNum = Math.floor(parseInt(id.slice(4, 6)) / 3)
+    const seasons = ["winter", "spring", "summer", "fall", "winter"];
+    const currentSeason = seasons[seasonNum];
+
     const [
       haikuIds,
       previousDailyHaikus,
       likedHaikuIds,
       flaggedHaikuIds,
+      seasonAlbumsToExclude,
     ] = await Promise.all([
       getHaikuIds(),
       store.dailyHaikus.find(),
       store.likedHaikus.ids(),
       getFlaggedHaikuIds(),
+      store.haikuAlbums.find({ id: seasons.filter((s) => s != currentSeason) })
     ]);
 
+    const haikuIdsOutOfSeason = new Set(seasonAlbumsToExclude.flatMap((a) => a.haikuIds));
+    console.log('services.haiku.getDailyHaiku season', { seasonAlbums: seasonAlbumsToExclude, currentSeason, haikuIdsOutOfSeason });
+
     const filteredHaikuIds = Array.from(haikuIds)
-      .filter((id: string) => !flaggedHaikuIds.has(id));
+      .filter((id: string) => !flaggedHaikuIds.has(id) && !haikuIdsOutOfSeason.has(id));
     const previousDailyHaikuIds = new Set(
       previousDailyHaikus
-        .map((dailyHaiku: DailyHaiku) => dailyHaiku?.haikuId)
-    );
+        .map((dailyHaiku: DailyHaiku) => dailyHaiku?.haikuId));
     const nonDailyLikedHaikuIds = Array.from(likedHaikuIds)
       .map((id: string) => id && id.split(":")[1])
-      .filter((haikuId: string) => haikuId && !flaggedHaikuIds.has(haikuId) && !previousDailyHaikuIds.has(haikuId));
+      .filter((haikuId: string) => haikuId &&
+        !flaggedHaikuIds.has(haikuId) &&
+        !haikuIdsOutOfSeason.has(haikuId) &&
+        !previousDailyHaikuIds.has(haikuId));
     const nonDailyhaikuIds = filteredHaikuIds
-      .filter((haikuId: string) => haikuId && !flaggedHaikuIds.has(haikuId) && !previousDailyHaikuIds.has(haikuId));
+      .filter((haikuId: string) => haikuId &&
+        !flaggedHaikuIds.has(haikuId) &&
+        !previousDailyHaikuIds.has(haikuId));
 
     console.log('services.haiku.getDailyHaiku creating daily haiku', { haikuIds, filteredHaikuIds, previousDailyHaikuIds, likedHaikuIds, nonDailyLikedHaikuIds, nonDailyhaikuIds });
 
