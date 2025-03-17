@@ -452,7 +452,7 @@ export default function HaikuPoem({
             style={{
               cursor: showcaseMode ? "pointer" : "",
               fontSize,
-              maxWidth: showcaseMode ? "calc(100vw - 64px)" : "800px",
+              maxWidth: "800px",
               minWidth: "200px",
             }}
           >
