@@ -116,7 +116,7 @@ export function NavOverlay({
           styles={styles}
           altStyles={altStyles}
           generate={!loading && onClickGenerate}
-          onboardingElement={onboardingElement}   
+          onboardingElement={onboardingElement}
           generatingTheme={generatingTheme}
         />
       }
@@ -178,7 +178,13 @@ export function NavOverlay({
       <div
         className={`absolute top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-10`}
         style={{
-          background: `radial-gradient(circle at center, white, #868686 35%, ${styles[0]?.color || "#000000"} 70%)`,
+          background: `radial-gradient(circle at 50% ${haiku?.layout?.poem?.bottom
+            ? 90 - haiku?.layout?.poem?.bottom
+            : haiku?.layout?.poem?.top
+              ? 10 + haiku?.layout?.poem?.top
+              : haiku?.layout?.poem?.up
+                ? 45 - haiku?.layout?.poem?.up / 2
+                : 45}%, white, ${styles[0]?.bgColor || "lightgrey"} 35%, ${styles[0]?.color || "black"} 60%)`,
           opacity: 0.2,
         }}
       />
