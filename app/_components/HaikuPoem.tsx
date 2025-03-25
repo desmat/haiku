@@ -380,7 +380,7 @@ export default function HaikuPoem({
 
   const handleKeyDown = (e: any) => {
     // console.log("app._component.HaikuPoem.handleKeyDown", { e, key: e.key, editing, aligning });
-    if (["Escape", "Enter"].includes(e.key)) {
+    if (["Escape", "Enter"].includes(e.key) && aligning) {
       e.preventDefault();
       setAligning && setAligning(false);
     } else if (e.key == "Tab" && !editing) {
@@ -396,7 +396,7 @@ export default function HaikuPoem({
     return () => {
       document.body.removeEventListener('keydown', handleKeyDown)
     }
-  }, []);
+  }, [editing, aligning]);
 
   return (
     <div className="relative">
