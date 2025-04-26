@@ -1034,9 +1034,9 @@ export default function MainPage({
         }}
         onChangeRefreshDelay={!haiku?.error && changeRefreshDelay}
         onBackup={!haiku?.error && startBackup}
-        onCopyHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyHaiku}
-        onCopyLink={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && copyLink}
-        onLikeHaiku={!haiku?.error && (haikudleMode && haikudleSolved || !haikudleMode) && likeHaiku}
+        onCopyHaiku={!haiku?.error && (isPuzzleMode && haikudleSolved || !isPuzzleMode) && copyHaiku}
+        onCopyLink={!haiku?.error && (isPuzzleMode && haikudleSolved || !isPuzzleMode) && copyLink}
+        onLikeHaiku={!haiku?.error && (isPuzzleMode && haikudleSolved || !isPuzzleMode) && likeHaiku}
         onUploadImage={!haiku?.error && uploadImage}
         onUpdateImage={!haiku?.error && updateHaikuImage}
         exitImpersonation={exitImpersonation}
