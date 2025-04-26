@@ -217,6 +217,8 @@ export async function getHaiku(user: User, id: string, hashPoem?: boolean, versi
     haiku.numFlags = haikuflags && haikuflags.size;
     haiku.dailyHaikuId = dailyHaikuIds && Array.from(dailyHaikuIds).sort().reverse()[0];
     haiku.dailyHaikudleId = dailyHaikudleIds && Array.from(dailyHaikudleIds).sort().reverse()[0];
+  } else {
+    haiku = cleanupHaikuForNonAdmins(haiku);
   }
 
   const dailyHaikuId = process.env.DAILY_HAIKU_PREVIEW == "true"
@@ -360,13 +362,17 @@ export async function createHaiku(user: User, {
 
   create = await updateLayout(user, create, imageBuffer);
 
-  const created = await store.haikus.create(create);
+  let created = await store.haikus.create(create);
 
   const webhookRet = await Promise.all([
     triggerHaikuSaved(created),
     triggerHaikuShared(created), // be sure to keep in sync with `sharedVersioned: true` above
   ]);
   // console.log("services.haiku.createHaiku", { webhookRet });
+
+  if (!user.isAdmin) {
+    created = cleanupHaikuForNonAdmins(created);
+  }
 
   return created;
 }
@@ -1365,4 +1371,23 @@ export async function getHaikuStats(reportAt?: any): Promise<any> {
     flaggedHaikus: flaggedHaikuIds.size,
     allFlaggedHaikus: flaggedAndByFlaggedUserHaikuIds.size,
   }
+}
+
+function cleanupHaikuForNonAdmins(haiku: Haiku) {
+  delete haiku.artStyle;
+  delete haiku.imageModel;
+  delete haiku.imagePrompt;
+  delete haiku.languageModel;
+  delete haiku.likedAt;
+  delete haiku.mood;
+  delete haiku.numFlags;
+  delete haiku.numLikes;
+  delete haiku.poemPrompt;
+  delete haiku.sharedVersioned;
+  delete haiku.status;
+  delete haiku.subject;
+  delete haiku.theme;
+  delete haiku.title;
+
+  return haiku;
 }
