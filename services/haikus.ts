@@ -1385,9 +1385,9 @@ function cleanupHaikuForNonAdmins(haiku: Haiku) {
   delete haiku.poemPrompt;
   delete haiku.sharedVersioned;
   delete haiku.status;
-  delete haiku.subject;
-  delete haiku.theme;
-  delete haiku.title;
+  // delete haiku.subject;
+  // delete haiku.theme;
+  //delete haiku.title;
 
   return haiku;
 }
