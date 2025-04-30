@@ -407,11 +407,11 @@ export async function analyzeHaiku(userId: string, poem: string[]): Promise<any>
 
   // ... generate a haiku in ${language || "English"} and respond ...
   const systemPrompt = `
-    Given a haiku poem of any language, 
-    please respond, in fewest number of words, what were the subject (in the language of the poem) and mood (in English) of the haiku.
-    The subject should be in the same language of the haiku. 
+    Given a poem of any language, 
+    please respond, in fewest number of words, what were the subject (in the language of the poem) and mood (in English) of the poem.
+    The subject should be in the same language of the poem. 
     Also include in the response the language code in which the poem was generated, using the official ISO 639-1 standard language code.
-    Also, if haiku is about a season (summer/fall/winter/spring) please indicate which one, otherwise don't.
+    Also, if the poem is a haiku about a season (summer/fall/winter/spring) please indicate which one, otherwise don't.
     Please only include keys "subject", "mood", "lang", and optionally "season".
     `;
 
