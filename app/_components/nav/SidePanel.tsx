@@ -1,6 +1,6 @@
 'use client'
 
-import * as sort from '@desmat/utils/sort';
+import { sortBy } from '@desmat/utils';
 import { formatTimeFromNow } from '@desmat/utils/format';
 import moment from 'moment';
 import Link from 'next/link'
@@ -387,7 +387,7 @@ export default function SidePanel({
             {/* note: don't render when not opened to save on resources */}
             {listMode == "haiku" && (panelAnimating || panelOpened) && userHaikus
               .filter(filterBy)
-              .sort(user?.isAdmin ? sort.byCreatedAtDesc : sortByAllFields)
+              .sort(user?.isAdmin ? sortBy("createdAt", "desc") : sortByAllFields)
               .slice(0, numPages * pageSize) // more than that and things blow up on safari
               .map((h: UserHaiku, i: number) => (
                 <StyledLayers key={i} styles={altStyles}>

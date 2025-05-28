@@ -1,5 +1,5 @@
 import { findHoleInDatecodeSequence, hashCode, normalizeWord, shuffleArray, uuid } from '@desmat/utils';
-import { byCreatedAtDesc } from '@desmat/utils/sort';
+import { sortBy } from '@desmat/utils';
 import { put } from '@vercel/blob';
 import chroma from 'chroma-js';
 import * as locale from 'locale-codes'
@@ -1243,7 +1243,7 @@ export async function getLatestHaikus(fromDate?: number, toDate?: number): Promi
   do {
     const haikus = (await store.haikus.find({ count: batchSize, offset }))
       .filter((haiku: Haiku) => haiku.createdAt >= (fromDate || yesterday) && haiku.createdAt <= (toDate || now))
-      .sort(byCreatedAtDesc);
+      .sort(sortBy('createdAt', 'desc'));
 
     if (!haikus.length) break;
 
