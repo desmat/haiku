@@ -15,8 +15,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const data: any = await request.json();
-  console.log('app.api.twitter.tweet.POST', { data: JSON.stringify(data) });
+  // const data: any = await request.json();
+  // console.log('app.api.twitter.tweet.POST', { data: JSON.stringify(data) });
+
+  const formData = await request.formData();
+  const text = formData.get("text") as string;
+  const mediaId = formData.get("media_id") as string;
+  console.log('app.api.twitter.tweet.POST', { text, mediaId });
+
   throw 'HALT!'
 
   // @ts-ignore

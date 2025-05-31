@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
   const formData = new FormData()
   formData.append("media", imageBlob, "image.png");
   
-
   // @ts-ignore
   const oauth = OAuth({
     consumer: {
