@@ -49,9 +49,10 @@ export async function POST(request: NextRequest) {
   const data = {
     text,
     media: {
-      "media_id:": [mediaId]
+      "media_ids:": [mediaId]
     }
   }
+  console.log('app.api.twitter.tweet.POST', { data: JSON.stringify(data) });
 
   const requestData = {
     url: 'https://api.twitter.com/2/tweets',
