@@ -81,14 +81,15 @@ export async function POST(request: NextRequest) {
   });
   console.log('app.api.twitter.media.POST', { res });
 
-  if (res.status != 200) {
+  const ret = await res.json();
+  console.log('app.api.twitter.media.POST', { data: ret });
+
+  if (res.status != 200 || ret.status != 200) {
     console.error(`Error posting '${requestData.url}': ${res.statusText} (${res.status})`)
+    return NextResponse.json(ret, { status: res.status, statusText: res.statusText });
   }
 
-  const data = await res.json();
-  console.log('app.api.twitter.media.POST', { data });
-
-  return NextResponse.json(data);
+  return NextResponse.json(ret);
 
 }
 
