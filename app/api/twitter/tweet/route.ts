@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
   const mediaId = formData.get("media_id") as string;
   console.log('app.api.twitter.tweet.POST', { text, mediaId });
 
-  throw 'HALT!'
+  // throw 'HALT!'
 
   // @ts-ignore
   const oauth = OAuth({
@@ -44,6 +44,13 @@ export async function POST(request: NextRequest) {
   const token = {
     key: process.env.TWITTER_ACCESS_TOKEN,
     secret: process.env.TWITTER_TOKEN_SECRET,
+  }
+
+  const data = {
+    text,
+    media: {
+      "media_id:": [mediaId]
+    }
   }
 
   const requestData = {
