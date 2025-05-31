@@ -16,6 +16,8 @@ export async function POST(request: NextRequest) {
   }
 
   const data: any = await request.json();
+  console.log('app.api.twitter.tweet.POST', { data: JSON.stringify(data) });
+  throw 'HALT!'
 
   // @ts-ignore
   const oauth = OAuth({
