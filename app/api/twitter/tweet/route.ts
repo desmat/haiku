@@ -4,10 +4,9 @@ import { createToken, loadUser, saveUser, userSession } from '@/services/users';
 import OAuth from 'oauth-1.0a';
 import crypto from 'crypto';
 
-
 export async function POST(request: NextRequest) {
   const { user: sessionUser } = await userSession(request);
-  console.log('app.api.twitter.media.POST', { sessionUser });
+  console.log('app.api.twitter.tweet.POST', { sessionUser });
 
   if (!sessionUser) {
     return NextResponse.json(
@@ -16,31 +15,31 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const mediaUrl = request.nextUrl.searchParams.get("mediaUrl");
+  // const mediaUrl = request.nextUrl.searchParams.get("mediaUrl");
 
-  if (!mediaUrl) {
-    return NextResponse.json(
-      { success: false, message: 'missing required parameter: mediaUrl' },
-      { status: 400 }
-    );
-  }
+  // // if (!mediaUrl) {
+  // //   return NextResponse.json(
+  // //     { success: false, message: 'missing required parameter: mediaUrl' },
+  // //     { status: 400 }
+  // //   );
+  // // }
 
-  const imageRes = await fetch(mediaUrl || "");
+  // // const imageRes = await fetch(mediaUrl || "");
 
-  if (!imageRes) {
-    return NextResponse.json(
-      { success: false, message: 'unable to pull image from mediaUrl' },
-      { status: 400 }
-    );
-  }
+  // // if (!imageRes) {
+  // //   return NextResponse.json(
+  // //     { success: false, message: 'unable to pull image from mediaUrl' },
+  // //     { status: 400 }
+  // //   );
+  // // }
 
-  const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
-  console.log("app.api.twitter.media.POST", { imageBuffer });
+  // // const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
+  // // console.log("app.api.twitter.tweet.POST", { imageBuffer });
 
-  const imageBlob = new Blob([imageBuffer], { type: "image/png" })
+  // // const imageBlob = new Blob([imageBuffer], { type: "image/png" })
 
-  const formData = new FormData()
-  formData.append("media", imageBlob, "image.png");
+  // const formData = new FormData()
+  // formData.append("media", imageBlob, "image.png");
   
 
   // @ts-ignore
@@ -65,9 +64,9 @@ export async function POST(request: NextRequest) {
   }
 
   const request_data = {
-    url: 'https://upload.twitter.com/1.1/media/upload.json?media_category=tweet_image',
+    url: 'https://api.x.com/1.1/statuses/update.json?status=hello',
     method: 'POST',
-    data: formData,
+    // data: formData,
   }
 
   const header = oauth.toHeader(oauth.authorize(request_data, token));
@@ -78,18 +77,16 @@ export async function POST(request: NextRequest) {
       // "content-type": "form-data",
     },
     method: request_data.method,
-    body: formData,
   });
-  console.log('app.api.twitter.media.POST', { res });
+  console.log('app.api.twitter.tweet.POST', { res });
 
   if (res.status != 200) {
     console.error(`Error posting '${request_data.url}': ${res.statusText} (${res.status})`)
   }
 
   const data = await res.json();
-  console.log('app.api.twitter.media.POST', { data });
+  console.log('app.api.twitter.tweet.POST', { data });
 
   return NextResponse.json({ data });
 
 }
-
