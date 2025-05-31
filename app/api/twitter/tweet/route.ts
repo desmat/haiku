@@ -72,12 +72,13 @@ export async function POST(request: NextRequest) {
   });
   console.log('app.api.twitter.tweet.POST', { res });
 
-  if (res.status != 200) {
-    console.error(`Error posting '${requestData.url}': ${res.statusText} (${res.status})`)
-  }
-
   const ret = await res.json();
   console.log('app.api.twitter.tweet.POST', { ret });
+
+  if (res.status != 200 || ret.status != 200) {
+    console.error(`Error posting '${requestData.url}': ${res.statusText} (${res.status})`)
+    return NextResponse.json(ret, { status: res.status, statusText: res.statusText });
+  }
 
   return NextResponse.json(ret);
 }
