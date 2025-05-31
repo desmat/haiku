@@ -64,32 +64,32 @@ export async function POST(request: NextRequest) {
     secret: process.env.TWITTER_TOKEN_SECRET,
   }
 
-  const request_data = {
+  const requestData = {
     url: 'https://upload.twitter.com/1.1/media/upload.json?media_category=tweet_image',
     method: 'POST',
     data: formData,
   }
 
-  const header = oauth.toHeader(oauth.authorize(request_data, token));
+  const header = oauth.toHeader(oauth.authorize(requestData, token));
 
-  const res = await fetch(request_data.url, {
+  const res = await fetch(requestData.url, {
     headers: {
       ...header,
       // "content-type": "form-data",
     },
-    method: request_data.method,
-    body: formData,
+    method: requestData.method,
+    body: requestData.data,
   });
   console.log('app.api.twitter.media.POST', { res });
 
   if (res.status != 200) {
-    console.error(`Error posting '${request_data.url}': ${res.statusText} (${res.status})`)
+    console.error(`Error posting '${requestData.url}': ${res.statusText} (${res.status})`)
   }
 
   const data = await res.json();
   console.log('app.api.twitter.media.POST', { data });
 
-  return NextResponse.json({ data });
+  return NextResponse.json(data);
 
 }
 

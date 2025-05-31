@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createToken, loadUser, saveUser, userSession } from '@/services/users';
+import { userSession } from '@/services/users';
 
 import OAuth from 'oauth-1.0a';
 import crypto from 'crypto';
@@ -15,32 +15,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // const mediaUrl = request.nextUrl.searchParams.get("mediaUrl");
-
-  // // if (!mediaUrl) {
-  // //   return NextResponse.json(
-  // //     { success: false, message: 'missing required parameter: mediaUrl' },
-  // //     { status: 400 }
-  // //   );
-  // // }
-
-  // // const imageRes = await fetch(mediaUrl || "");
-
-  // // if (!imageRes) {
-  // //   return NextResponse.json(
-  // //     { success: false, message: 'unable to pull image from mediaUrl' },
-  // //     { status: 400 }
-  // //   );
-  // // }
-
-  // // const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
-  // // console.log("app.api.twitter.tweet.POST", { imageBuffer });
-
-  // // const imageBlob = new Blob([imageBuffer], { type: "image/png" })
-
-  // const formData = new FormData()
-  // formData.append("media", imageBlob, "image.png");
-  
+  const data: any = await request.json();
 
   // @ts-ignore
   const oauth = OAuth({
@@ -63,30 +38,30 @@ export async function POST(request: NextRequest) {
     secret: process.env.TWITTER_TOKEN_SECRET,
   }
 
-  const request_data = {
-    url: 'https://api.x.com/1.1/statuses/update.json?status=hello',
+  const requestData = {
+    url: 'https://api.twitter.com/2/tweets',
     method: 'POST',
-    // data: formData,
+    // data: JSON.stringify(data)
   }
 
-  const header = oauth.toHeader(oauth.authorize(request_data, token));
+  const header = oauth.toHeader(oauth.authorize(requestData, token));
 
-  const res = await fetch(request_data.url, {
+  const res = await fetch(requestData.url, {
     headers: {
       ...header,
-      // "content-type": "form-data",
+      "content-type": "application/json",
     },
-    method: request_data.method,
+    method: requestData.method,
+    body: JSON.stringify(data)
   });
   console.log('app.api.twitter.tweet.POST', { res });
 
   if (res.status != 200) {
-    console.error(`Error posting '${request_data.url}': ${res.statusText} (${res.status})`)
+    console.error(`Error posting '${requestData.url}': ${res.statusText} (${res.status})`)
   }
 
-  const data = await res.json();
-  console.log('app.api.twitter.tweet.POST', { data });
+  const ret = await res.json();
+  console.log('app.api.twitter.tweet.POST', { ret });
 
-  return NextResponse.json({ data });
-
+  return NextResponse.json(ret);
 }
