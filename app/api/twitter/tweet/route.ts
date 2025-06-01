@@ -46,12 +46,10 @@ export async function POST(request: NextRequest) {
     secret: process.env.TWITTER_TOKEN_SECRET,
   }
 
-  const data = {
-    text,
-    media: {
-      "media_ids:": [mediaId]
-    }
-  }
+  const data: any = {};
+  if (text) data.text = text;
+  if (mediaId) data.media = { "media_ids:": [mediaId] };
+
   console.log('app.api.twitter.tweet.POST', { data: JSON.stringify(data) });
 
   const requestData = {
