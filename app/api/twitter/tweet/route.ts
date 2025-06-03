@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createToken, loadUser, saveUser, userSession } from '@/services/users';
+import { userSession } from '@/services/users';
 
 import OAuth from 'oauth-1.0a';
 import crypto from 'crypto';
 
-
 export async function POST(request: NextRequest) {
   const { user: sessionUser } = await userSession(request);
-  console.log('app.api.twitter.media.POST', { sessionUser });
+  console.log('app.api.twitter.tweet.POST', { sessionUser });
 
   if (!sessionUser) {
     return NextResponse.json(
@@ -16,32 +15,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const mediaUrl = request.nextUrl.searchParams.get("mediaUrl");
+  // const data: any = await request.json();
+  // console.log('app.api.twitter.tweet.POST', { data: JSON.stringify(data) });
 
-  if (!mediaUrl) {
-    return NextResponse.json(
-      { success: false, message: 'missing required parameter: mediaUrl' },
-      { status: 400 }
-    );
-  }
+  const formData = await request.formData();
+  const text = formData.get("text") as string;
+  const mediaId = formData.get("media_id") as string;
+  console.log('app.api.twitter.tweet.POST', { text, mediaId });
 
-  const imageRes = await fetch(mediaUrl || "");
+  // throw 'HALT!'
 
-  if (!imageRes) {
-    return NextResponse.json(
-      { success: false, message: 'unable to pull image from mediaUrl' },
-      { status: 400 }
-    );
-  }
-
-  const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
-  console.log("app.api.twitter.media.POST", { imageBuffer });
-
-  const imageBlob = new Blob([imageBuffer], { type: "image/png" })
-
-  const formData = new FormData()
-  formData.append("media", imageBlob, "image.png");
-  
   // @ts-ignore
   const oauth = OAuth({
     consumer: {
@@ -63,10 +46,16 @@ export async function POST(request: NextRequest) {
     secret: process.env.TWITTER_TOKEN_SECRET,
   }
 
+  const data: any = {};
+  if (text) data.text = text;
+  if (mediaId) data.media = { "media_ids": [mediaId] };
+
+  console.log('app.api.twitter.tweet.POST', { data: JSON.stringify(data) });
+
   const requestData = {
-    url: 'https://upload.twitter.com/1.1/media/upload.json?media_category=tweet_image',
+    url: 'https://api.twitter.com/2/tweets',
     method: 'POST',
-    data: formData,
+    // data: JSON.stringify(data)
   }
 
   const header = oauth.toHeader(oauth.authorize(requestData, token));
@@ -74,15 +63,15 @@ export async function POST(request: NextRequest) {
   const res = await fetch(requestData.url, {
     headers: {
       ...header,
-      // "content-type": "form-data",
+      "content-type": "application/json",
     },
     method: requestData.method,
-    body: requestData.data,
+    body: JSON.stringify(data)
   });
-  console.log('app.api.twitter.media.POST', { res });
+  console.log('app.api.twitter.tweet.POST', { res });
 
   const ret = await res.json();
-  console.log('app.api.twitter.media.POST', { data: ret });
+  console.log('app.api.twitter.tweet.POST', { ret });
 
   if (res.status != 200 || ret.status != 200) {
     console.error(`Error posting '${requestData.url}': ${res.statusText} (${res.status})`)
@@ -90,6 +79,4 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json(ret);
-
 }
-
