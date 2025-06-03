@@ -77,11 +77,16 @@ export async function GET(request: NextRequest, params?: any) {
     return NextResponse.json({ haikus: latest });
   } else if (typeof (query.album) == "string" && query.album) {
     const haikus = await getAlbumHaikus(user, query.album);
+
+    if (!haikus?.length) {
+      return NextResponse.json({ haikus: [] }, { status: 404 });
+    }
+
     const randomHaiku = haikus[Math.floor(Math.random() * haikus.length)];
 
     if (/* !user.isAdmin && */ randomHaiku?.createdBy != user.id) {
       const userHaiku = await getUserHaiku(user.id, randomHaiku.id);
-      
+
       if (userHaiku) {
         await saveUserHaiku(user, userHaiku);
       } else {
