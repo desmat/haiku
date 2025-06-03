@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
   const data: any = {};
   if (text) data.text = text;
-  if (mediaId) data.media = { "media_ids:": [mediaId] };
+  if (mediaId) data.media = { "media_ids": [mediaId] };
 
   console.log('app.api.twitter.tweet.POST', { data: JSON.stringify(data) });
 
