@@ -1383,7 +1383,7 @@ function cleanupHaikuForNonAdmins(haiku: Haiku) {
   delete haiku.numFlags;
   delete haiku.numLikes;
   delete haiku.poemPrompt;
-  delete haiku.sharedVersioned;
+  // delete haiku.sharedVersioned; // needed for social-img
   delete haiku.status;
 
   return haiku;
