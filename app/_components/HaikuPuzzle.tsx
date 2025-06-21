@@ -103,12 +103,12 @@ export default function HaikuPuzzle({
                                     filter: w?.correct
                                       ? undefined
                                       : snapshot.isDragging
-                                        ? `drop-shadow(0px 1px 5px rgb(0 0 0 / 0.9))`
+                                        ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
                                         : selectedWord?.word?.id == w?.id
-                                          ? `drop-shadow(0px 1px 3px rgb(0 0 0 / 0.9))`
+                                          ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
                                           : selectedWord
-                                            ? `drop-shadow(0px 1px 1px rgb(0 0 0 / 0.5))`
-                                            : `drop-shadow(0px 1px 1px rgb(0 0 0 / 0.2))`,
+                                            ? `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`
+                                            : `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`,
                                   }}
                                 >
                                   {j == 0 && w?.correct &&
