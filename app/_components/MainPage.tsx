@@ -189,7 +189,7 @@ export default function MainPage({
 
   const isPuzzleMode = haikudleMode &&
     !haikudleSolved &&
-    (!previousDailyHaikudleId || user?.isAdmin);
+    (!previousDailyHaikudleId /* || user?.isAdmin */);
   //&& (!(haiku?.createdBy == user?.id) || user?.isAdmin);
   // console.log('app.MainPage.render()', { isPuzzleMode, haikudleSolved, previousDailyHaikudleId, user_isAdmin: user?.isAdmin, haiku_createdBy: haiku?.createdBy });
 
@@ -950,7 +950,7 @@ export default function MainPage({
 
   // console.log('app.MainPage.render() loading page?', { loadingUI, generating, haikudleMode, haikudleLoaded, haikudleReady, thing: haikudleMode && !haikudleLoaded && !haikudleReady });
 
-  if (loadingUI || typeof(generating) != "undefined" || haikudleMode && !previousDailyHaikudleId && !haikudleReady) {
+  if (loadingUI || typeof (generating) != "undefined" || haikudleMode && !previousDailyHaikudleId && !haikudleReady) {
     // console.log('app.MainPage.render() loading page? YUP!', { loadingUI, generating, haikudleMode, haikudleLoaded, haikudleReady, thing: haikudleMode && !haikudleLoaded && !haikudleReady });
     return (
       <div className="_bg-yellow-200 main-page relative h-[100vh] w-[100vw]">
@@ -1057,7 +1057,7 @@ export default function MainPage({
         <HaikuPage
           user={user}
           mode={mode}
-          haiku={haikudleSolved ? solvedHaikudleHaiku : haiku}
+          haiku={haikudleSolved ? { ...solvedHaikudleHaiku, layout: undefined } : haiku}
           styles={textStyles}
           altStyles={altTextStyles}
           fontSize={fontSize}

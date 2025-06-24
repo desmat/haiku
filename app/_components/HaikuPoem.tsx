@@ -522,7 +522,7 @@ export default function HaikuPoem({
             </div>
 
             <div
-              className="_bg-red-400 relative md:text-[16pt] sm:text-[14pt] text-[12pt]"
+              className="_bg-red-400 absolute md:text-[16pt] sm:text-[14pt] text-[12pt]"
               style={{
                 // background: "pink",
                 fontSize: showcaseMode ? "50%" : "60%",
