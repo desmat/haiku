@@ -399,7 +399,7 @@ export default function HaikuPoem({
   }, [editing, aligning]);
 
   return (
-    <div className="relative">
+    <div className="_bg-orange-200 relative">
       {/* allow editors to click out and finish */}
       {!showcaseMode && (editing || aligning) &&
         <div

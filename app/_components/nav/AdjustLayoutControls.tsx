@@ -1,5 +1,6 @@
 'use client'
 
+import { classNames } from "@desmat/utils";
 import { BsChevronBarUp, BsChevronCompactDown, BsChevronCompactUp, BsChevronDoubleDown, BsChevronDoubleUp, BsChevronDown, BsChevronUp } from "react-icons/bs";
 import { StyledLayers } from "../StyledLayers";
 import PopOnClick from "../PopOnClick";
@@ -31,13 +32,19 @@ export default function AdjustLayoutControls({
   };
 
   return (
-    <div className="adjust-layout-controls">
+    <div className={classNames(
+      "adjust-layout-controls absolute left-[50%] h-full",
+      adminMode && "z-0"
+    )}>
       {!(poemLayout?.top && poemLayout?.top >= 20)
         && !(poemLayout?.bottom && poemLayout?.bottom >= 20)
         && !(!poemLayout?.top && !poemLayout?.bottom) &&
         <div
-          className="_bg-blue-400 _opacity-30 w-40 h-20 left-[50%] translate-x-[-50%] top-[50%] translate-y-[-50%] fixed z-30 flex justify-center items-center opacity-80 hover:opacity-100"
-          style={{ cursor: adminMode ? "move" : "pointer" }}
+          className="_bg-blue-400 _opacity-30 h-20 left-[50%] translate-x-[-50%] top-[50%] translate-y-[-50%] fixed z-30 flex justify-center items-center opacity-80 hover:opacity-100"
+          style={{
+            cursor: adminMode ? "move" : "pointer",
+            width: adminMode ? "10rem" : "2.5rem"
+          }}
           onClick={(e: any) => {
             adjustLayoutClamped({ poem: {} });
             e.preventDefault();
@@ -56,8 +63,11 @@ export default function AdjustLayoutControls({
       }
       {(!poemLayout?.top || poemLayout?.top > 15) &&
         <div
-          className="_bg-blue-200 _opacity-30 w-40 h-[6rem] left-[50%] translate-x-[-50%] top-0 fixed z-30 flex justify-center items-end opacity-80 hover:opacity-100"
-          style={{ cursor: adminMode ? "move" : "pointer" }}
+          className="_bg-blue-200 _opacity-30 h-[6rem] left-[50%] translate-x-[-50%] top-0 fixed z-30 flex justify-center items-end opacity-80 hover:opacity-100"
+          style={{
+            cursor: adminMode ? "move" : "pointer",
+            width: adminMode ? "10rem" : "2.5rem"
+          }}
           onClick={(e: any) => {
             adjustLayoutClamped({
               top: 15,
@@ -74,10 +84,13 @@ export default function AdjustLayoutControls({
           }
         </div>
       }
-      {(!poemLayout?.bottom || poemLayout?.bottom > 15) && 
+      {(!poemLayout?.bottom || poemLayout?.bottom > 15) &&
         <div
-          className="_bg-blue-200 _opacity-30 w-40 h-[6rem] left-[50%] translate-x-[-50%] bottom-0 fixed z-30 flex justify-center items-start opacity-80 hover:opacity-100"
-          style={{ cursor: adminMode ? "move" : "pointer" }}
+          className="_bg-blue-200 _opacity-30 h-[6rem] left-[50%] translate-x-[-50%] bottom-0 fixed z-30 flex justify-center items-start opacity-80 hover:opacity-100"
+          style={{
+            cursor: adminMode ? "move" : "pointer",
+            width: adminMode ? "10rem" : "2.5rem"
+          }}
           onClick={(e: any) => {
             adjustLayoutClamped({
               bottom: 15
@@ -97,8 +110,11 @@ export default function AdjustLayoutControls({
       }
       {!(poemLayout?.top && poemLayout?.top <= 10) &&
         <div
-          className="_bg-pink-200 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] top-[-2rem] absolute z-30 flex justify-center items-start opacity-80 hover:opacity-100"
-          style={{ cursor: adminMode ? "n-resize" : "pointer" }}
+          className="_bg-pink-200 _opacity-30 h-10 left-[50%] translate-x-[-50%] top-[-2rem] absolute z-30 flex justify-center items-start opacity-80 hover:opacity-100"
+          style={{
+            cursor: adminMode ? "n-resize" : "pointer",
+            width: adminMode ? "10rem" : "2.5rem"
+          }}
           onClick={(e: any) => {
             adjustLayoutClamped({
               top: poemLayout?.top ? poemLayout.top - 5 : undefined,
@@ -119,8 +135,11 @@ export default function AdjustLayoutControls({
         </div>
       }
       <div
-        className="_bg-pink-400 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] top-[-4.5rem] absolute z-30 flex justify-center items-end opacity-80 hover:opacity-100"
-        style={{ cursor: adminMode ? "n-resize" : "pointer" }}
+        className="_bg-pink-400 _opacity-30 h-10 left-[50%] translate-x-[-50%] top-[-4.5rem] absolute z-30 flex justify-center items-end opacity-80 hover:opacity-100"
+        style={{
+          cursor: adminMode ? "n-resize" : "pointer",
+          width: adminMode ? "10rem" : "2.5rem"
+        }}
         onClick={(e: any) => {
           adjustLayoutClamped({
             top: poemLayout?.top ? poemLayout.top - 15 : undefined,
@@ -141,8 +160,11 @@ export default function AdjustLayoutControls({
       </div>
       {!(poemLayout?.bottom && poemLayout?.bottom <= 10) &&
         <div
-          className="_bg-pink-200 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] bottom-[-2.5rem] absolute z-30 flex justify-center items-end opacity-80 hover:opacity-100"
-          style={{ cursor: adminMode ? "s-resize" : "pointer" }}
+          className="_bg-pink-200 _opacity-30 h-10 left-[50%] translate-x-[-50%] bottom-[-2.5rem] absolute z-30 flex justify-center items-end opacity-80 hover:opacity-100"
+          style={{
+            cursor: adminMode ? "s-resize" : "pointer",
+            width: adminMode ? "10rem" : "2.5rem"
+          }}
           onClick={(e: any) => {
             adjustLayoutClamped({
               top: poemLayout?.top ? poemLayout.top + 5 : undefined,
@@ -163,8 +185,11 @@ export default function AdjustLayoutControls({
         </div>
       }
       <div
-        className="_bg-pink-400 _opacity-30 w-40 h-10 left-[50%] translate-x-[-50%] bottom-[-5rem] absolute z-30 flex justify-center items-start opacity-80 hover:opacity-100"
-        style={{ cursor: adminMode ? "s-resize" : "pointer" }}
+        className="_bg-pink-400 _opacity-30 h-10 left-[50%] translate-x-[-50%] bottom-[-5rem] absolute z-30 flex justify-center items-start opacity-80 hover:opacity-100"
+        style={{
+          cursor: adminMode ? "s-resize" : "pointer",
+          width: adminMode ? "10rem" : "2.5rem"
+        }}
         onClick={(e: any) => {
           adjustLayoutClamped({
             top: poemLayout?.top ? poemLayout.top + 15 : undefined,
