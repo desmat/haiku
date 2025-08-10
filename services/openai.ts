@@ -7,8 +7,8 @@ const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const languageModel = "gpt-4o";
-const smallLanguageModel = "gpt-4o-mini"
+const languageModel = "gpt-5-mini";
+// const smallLanguageModel = "gpt-4o-mini"
 // const languageModel = "gpt-4";
 // const languageModel = "gpt-3.5-turbo";
 const imageModel = "dall-e-3";
