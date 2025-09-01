@@ -63,6 +63,13 @@ export async function POST(request: NextRequest) {
     secret: process.env.TWITTER_TOKEN_SECRET,
   }
 
+  console.log("app.api.twitter.media.POST", { 
+    consumer_key: process.env.TWITTER_CONSUMER_KEY, 
+    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+    token_key: process.env.TWITTER_ACCESS_TOKEN,
+    token_secret: process.env.TWITTER_TOKEN_SECRET,
+   });
+
   const requestData = {
     url: 'https://upload.twitter.com/1.1/media/upload.json?media_category=tweet_image',
     method: 'POST',
