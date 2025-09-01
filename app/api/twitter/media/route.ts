@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
   const res = await fetch(requestData.url, {
     headers: {
       ...header,
-      "content-type": "form-data",
+      "content-type": "multipart/form-data",
     },
     method: requestData.method,
     body: requestData.data,
