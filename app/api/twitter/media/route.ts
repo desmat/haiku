@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createToken, loadUser, saveUser, userSession } from '@/services/users';
+import { userSession } from '@/services/users';
 
 import OAuth from 'oauth-1.0a';
 import crypto from 'crypto';
-
 
 export async function POST(request: NextRequest) {
   const { user: sessionUser } = await userSession(request);
@@ -37,6 +36,7 @@ export async function POST(request: NextRequest) {
   const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
   console.log("app.api.twitter.media.POST", { imageBuffer });
 
+  // @ts-ignore
   const imageBlob = new Blob([imageBuffer], { type: "image/png" })
 
   const formData = new FormData()
@@ -63,17 +63,10 @@ export async function POST(request: NextRequest) {
     secret: process.env.TWITTER_TOKEN_SECRET,
   }
 
-  console.log("app.api.twitter.media.POST", { 
-    consumer_key: process.env.TWITTER_CONSUMER_KEY, 
-    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-    token_key: process.env.TWITTER_ACCESS_TOKEN,
-    token_secret: process.env.TWITTER_TOKEN_SECRET,
-   });
-
   const requestData = {
     url: 'https://upload.twitter.com/1.1/media/upload.json?media_category=tweet_image',
     method: 'POST',
-    data: formData,
+    // data: formData,
   }
 
   const header = oauth.toHeader(oauth.authorize(requestData, token));
@@ -82,28 +75,26 @@ export async function POST(request: NextRequest) {
 
   const res = await fetch(requestData.url, {
     headers: {
-      ...header,
-      // "content-type": "multipart/form-data",
+      ...header,     
     },
     method: requestData.method,
-    body: requestData.data,
+    body: formData,
   });
   console.log('app.api.twitter.media.POST', { res });
 
-  // if (res.status != 200) {
-  //   console.error(`Error posting '${requestData.url}': ${res.statusText} (${res.status})`)
-  //   return NextResponse.json(res, { status: res.status, statusText: res.statusText });
-  // }
+  if (res.status != 200) {
+    console.error(`Error posting '${requestData.url}': ${res.statusText} (${res.status})`)
+    return NextResponse.json(res, { status: res.status, statusText: res.statusText });
+  }
 
   const ret = await res.json();
   console.log('app.api.twitter.media.POST', { data: ret });
 
-  if (!ret.data?.media_id) {
+  if (!ret.media_id) {
     console.error(`Error posting '${requestData.url}'`, { ret })
     return NextResponse.json(ret);
   }
 
   return NextResponse.json(ret);
-
 }
 
