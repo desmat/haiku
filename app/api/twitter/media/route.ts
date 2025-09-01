@@ -78,6 +78,8 @@ export async function POST(request: NextRequest) {
 
   const header = oauth.toHeader(oauth.authorize(requestData, token));
 
+  console.log("app.api.twitter.media.POST", { header }); 
+  
   const res = await fetch(requestData.url, {
     headers: {
       ...header,
