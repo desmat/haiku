@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
   const imageBlob = new Blob([imageBuffer], { type: "image/png" })
 
   const formData = new FormData()
-  formData.append("media", imageBlob, "image.png");
+  formData.append("media", imageBlob);
   
   // @ts-ignore
   const oauth = OAuth({
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
   const res = await fetch(requestData.url, {
     headers: {
       ...header,
-      "content-type": "multipart/form-data",
+      // "content-type": "multipart/form-data",
     },
     method: requestData.method,
     body: requestData.data,
