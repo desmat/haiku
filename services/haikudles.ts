@@ -38,6 +38,7 @@ async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudl
   let words = haiku.poem
     .join(" ")
     .split(/\s/)
+    .filter(Boolean)
     .map((w: string, i: number) => {
       const word = w.toLowerCase().replace(/[]/, "")
       return {
@@ -63,9 +64,9 @@ async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudl
 
   // arrange words such that first ~and last are~is correct, 
   // rest is shuffled but each line has correct number of words
-  const inProgress = haikudle?.inProgress || haiku.poem
-    .map((line: string) => words.splice(0, line.split(/\s/).length))
-      
+  const inProgress = haikudle?.inProgress  || haiku.poem
+    .map((line: string) => words.splice(0, line.split(/\s/).filter(Boolean).length));
+
   haikudle = {
     ...haikudle,
     inProgress,
