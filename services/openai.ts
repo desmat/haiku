@@ -88,7 +88,7 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
     ${selectedArtStyle},
     on the theme of ${subject || "any"}${mood ? `, with a mood of ${mood}` : ""}.
     Make the art extremely minimal and low-key, with very few brush strokes, 
-    The image should not contain any writing or characters of any kind.
+    The image should NOT contain any writing, letters, numbers, Hanzi, Kanji, or characters of any kind.
     There should be some negative space where a small poem will be overlayed.
     If the composition has a central point of interest it should be either up or down from the center.
   `;
@@ -513,6 +513,7 @@ export async function analyzeImage(userId: string, imageBase64: string): Promise
     IMPORTANT: IF PERSON, PEOPLE, ANIMAL OR ANIMALS ARE IN THE CENTER CHOOSE \`bottom\`.
     IMPORTANT: IF PERSON, PEOPLE, ANIMAL OR ANIMALS ARE IN THE BOTTOM CHOOSE THE POSITION OF THE NEGATIVE SPACE, EITHER \`top\` or \`center\`.
     If there is no obvious place in the image please choose center.
+    Generally favor center or top position.
     Please specify on which position will work best to overlay the poem:
     - top third: \`top\`
     - center (default if did not find a good location): \`center\`
