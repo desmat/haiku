@@ -482,16 +482,16 @@ export async function analyzeImage(userId: string, imageBase64: string): Promise
 
     1. The point of interest in the image, if any.
     This can be a tree, architecture, an animal, a person, the sun or moon, etc.
-    If the point of intest takes the majority of the image then return undefined.
+    If the point of intest takes the majority of the image then return null.
     If there are eyes from a person or animal, that will be the point of interest.
+    If the point of interest is off to the side then return null.
     Please specify the area containing this point of interest, if any:
     - top third: \`top\`
     - center: \`center\`
     - bottom third: \`bottom\`
-    - did not find a point of interest: \`null\`
+    - did not find a point of interest, or the point of interest is off to the side: \`null\`
 
-    2. If a person, persons, animal or animals' are featured 
-    please specify the top of their face or eyes, if any: 
+    2. If a person, persons, animal or animals' are featured please specify the center of their face or eyes, if any: 
     - top third area (0 -> 1/3 height): \`top\`
     - center third area (1/3 -> 2/3 height): \`center\`
     - bottom third area (2/3 -> 3/3 height): \`bottom\`
