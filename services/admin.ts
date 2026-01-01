@@ -68,11 +68,13 @@ export async function backup(user: User, entities?: string[], haikuIds?: string[
   const p = require('/package.json');
   const filename = `backups/${p.name}_${p.version}_${moment().format("YYYYMMDD_kkmmss")}.json`;
   const buffer = Buffer.from(JSON.stringify(keyValues), 'utf8');
+  // @ts-ignore
   const blob = await put(filename, buffer, {
     access: 'public',
     addRandomSuffix: false,
   });
 
+  // @ts-ignore
   return { filename: blob.pathname, size: formatBytes(Buffer.byteLength(buffer)), url: blob.url };
 }
 
