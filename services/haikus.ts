@@ -315,6 +315,7 @@ export async function createHaiku(user: User, {
 
   if (/* !debug && */ imageBuffer) {
     const filename = `haiku-${haikuId}-${theme?.replaceAll(/\W/g, "_").toLowerCase()}.png`;
+    // @ts-ignore
     const blob = /* !debug && */ await put(filename, imageBuffer, {
       access: 'public',
       addRandomSuffix: false,
@@ -514,6 +515,7 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
 
   const haikuId = uuid();
   const filename = `haiku-${haikuId}-${haiku.theme?.replaceAll(/\W/g, "_").toLowerCase()}-${(haiku.version || 0) + 1}.png`;
+  // @ts-ignore
   const blob = !debugOpenai && await put(filename, imageBuffer, {
     access: 'public',
     addRandomSuffix: false,
@@ -618,6 +620,7 @@ export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, 
 
   const haikuId = uuid();
   const filename = `haiku-${haikuId}-custom-${moment().format("YYYYMMDD_HHmmss")}-${(haiku.version || 0) + 1}.png`;
+  // @ts-ignore
   const blob = await put(filename, buffer, {
     access: 'public',
     addRandomSuffix: false,
