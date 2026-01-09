@@ -147,6 +147,7 @@ export const haikudleOnboardingSteps = [
         <!-- <div>Want more haiku poems without the puzzles?</div> -->
         <!-- <div><b><a href="https://haikugenius.ai/" target="_blank">Haiku Genius</a></b> features a daily haiku with beautiful generative art, a poem generator and editor, and access to the official social media pages so you won't miss a single one!</div> -->
       </div>`,
+      
     style: { bottom: "50%", transform: "translateY(50%)" },
   },
   {
