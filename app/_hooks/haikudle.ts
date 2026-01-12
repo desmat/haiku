@@ -267,32 +267,32 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       moves: moves + 1,
     });
 
-    fetch(`/api/haikudles/${haikudleId}`, {
-      ...await fetchOpts(),
-      method: "PUT",
-      body: JSON.stringify({
-        haikudle: {
-          id: haikudleId,
-          haikuId: haiku.id,
-          solved,
-          moves: moves + 1,
-          inProgress,
-        }
-      }),
-    }).then(async (res) => {
-      if (res.status != 200) {
-        trackEvent("error", {
-          type: "save-haikudle",
-          code: res.status,
-          id: haikudleId,
-          userId: (await useUser.getState()).user.id,
-        });
-        useAlert.getState().error(`Error saving haikudle: ${res.status} (${res.statusText})`);
-        return;
-      }
+    // fetch(`/api/haikudles/${haikudleId}`, {
+    //   ...await fetchOpts(),
+    //   method: "PUT",
+    //   body: JSON.stringify({
+    //     haikudle: {
+    //       id: haikudleId,
+    //       haikuId: haiku.id,
+    //       solved,
+    //       moves: moves + 1,
+    //       inProgress,
+    //     }
+    //   }),
+    // }).then(async (res) => {
+    //   if (res.status != 200) {
+    //     trackEvent("error", {
+    //       type: "save-haikudle",
+    //       code: res.status,
+    //       id: haikudleId,
+    //       userId: (await useUser.getState()).user.id,
+    //     });
+    //     useAlert.getState().error(`Error saving haikudle: ${res.status} (${res.statusText})`);
+    //     return;
+    //   }
 
-      // console.log("hooks.haikudle.swap", { res });
-    });
+    //   // console.log("hooks.haikudle.swap", { res });
+    // });
   },
 
   // 
