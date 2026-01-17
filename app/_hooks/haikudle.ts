@@ -172,7 +172,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   },
 
   move: async (haikudleId: string, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
-    // console.log("hooks.haikudle.move", { haikudleId, word, fromLine, fromOffset, toLine, toOffset });
+    console.log("hooks.haikudle.move", { haikudleId, fromLine, fromOffset, toLine, toOffset });
     const { haiku, inProgress, solution, onSolved, moves } = get();
 
     if (moves == 0) {
@@ -184,6 +184,18 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
 
     const [spliced] = inProgress[fromLine].splice(fromOffset, 1);
     inProgress[toLine].splice(toOffset, 0, spliced);
+
+    // moved from one line to another: kick out the last one
+    if (fromLine != toLine) {
+      console.log("hooks.haikudle.move different line!", { haikudleId, fromLine, fromOffset, toLine, toOffset });
+
+      // const [kicked] = inProgress[toLine].splice(-1);
+      const [kicked] = inProgress[toLine].slice(-1);
+      console.log("hooks.haikudle.move different line!", { kicked, inProgress });
+
+      inProgress[fromLine].push({ ...kicked, moveTo: true });
+      kicked.moveFrom = true;
+    }
 
     checkCorrect(inProgress, solution); // side effects yuk!
     const solved = isSolved(inProgress, solution);
@@ -231,6 +243,26 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       }
 
       // console.log("hooks.haikudle.move", { res });
+    });
+  },
+
+  cleanupMove: () => {
+    const { inProgress } = get();
+
+    inProgress.forEach((line) => {
+      let toSplice = -1;
+      line.forEach((w, i) => {
+        delete w.ghost;
+        delete w.moveTo;
+
+        if (w.moveFrom) toSplice = i;
+      });
+
+      if (toSplice > -1) line.splice(toSplice, 1)
+    });
+
+    set({
+      inProgress
     });
   },
 
