@@ -245,7 +245,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
       // console.log("hooks.haikudle.move", { res });
     });
   },
-
+ 
   cleanupMove: () => {
     const { inProgress } = get();
 
