@@ -114,6 +114,7 @@ export default function HaikuPuzzle({
                               {/* <StyledLayers key={i} styles={w?.correct ? styles : [styles[0]]}> */}
                               <div
                                 style={styles[0]}
+                                className="relative"
                               >
                                 <div
                                   className={`px-1 ${w?.correct ? "" : "m-1"} _transition-all ${!w?.correct && "draggable-notsure-why-cant-inline"}`}
