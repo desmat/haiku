@@ -32,8 +32,8 @@ export default function HaikuPuzzle({
 
   const poem = inProgress
 
-  const moveFromRef = useRef();
-  const moveToRef = useRef();
+  const moveFromRef = useRef<any>();
+  const moveToRef = useRef<any>();
 
   // console.log('app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
 
@@ -122,13 +122,8 @@ export default function HaikuPuzzle({
                                     backgroundColor: w?.correct
                                       ? undefined
                                       : haiku?.bgColor || "lightgrey",
-                                    _outline: w.moveFrom ? "yellow 2px solid" : w.moveTo ? "red 2px solid" : undefined,
+                                    // outline: w.moveFrom ? "yellow 2px solid" : w.moveTo ? "red 2px solid" : undefined,
                                     opacity: w.moveTo ? "0" : undefined,
-                                    // position: w.ghost ? "absolute" : undefined,
-                                    // top: w.ghost ? 0 : undefined,
-                                    // left: w.ghost ? 0 : undefined,
-                                    // transform: w.ghost ? "translateY(calc(-50% - 4px))" : undefined,
-                                    // transform: w.ghost ? "translate(-104px, 29px)" : undefined,                                    
                                     filter: w?.correct
                                       ? undefined
                                       : snapshot.isDragging

@@ -249,9 +249,9 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   cleanupMove: () => {
     const { inProgress } = get();
 
-    inProgress.forEach((line) => {
+    inProgress.forEach((line: any[]) => {
       let toSplice = -1;
-      line.forEach((w, i) => {
+      line.forEach((w: any, i: number) => {
         delete w.ghost;
         delete w.moveTo;
 
