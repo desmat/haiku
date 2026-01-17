@@ -235,7 +235,7 @@ const useHaikudle: any = create(devtools((set: any, get: any) => ({
   },
 
   swap: async (haikudleId: string, word: any, fromLine: number, fromOffset: number, toLine: number, toOffset: number) => {
-    // console.log("hooks.haikudle.swap", { fromLine, fromOffset, toLine, toOffset });
+    console.log("hooks.haikudle.swap", { haikudleId, word, fromLine, fromOffset, toLine, toOffset });
     const { haiku, inProgress, solution, onSolved, moves } = get();
 
     if (moves == 0) {
