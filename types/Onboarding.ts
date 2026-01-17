@@ -141,12 +141,13 @@ export const haikudleOnboardingSteps = [
     focus: "",
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-        <div><b>Haiku</b>: a Japanese poetic form that consists of three lines, with 5/7/5 syllable per line, traditionally evoking images of the natural world. Learn more <b><a href="https://en.wikipedia.org/wiki/Haiku" target="_blank">here</a></b>.</div>
-        <div><b>Wordle</b>: a word game with a single daily solution, with all players attempting to guess the same word. Learn more <b><a href="https://en.wikipedia.org/wiki/Wordle" target="_blank">here</a></b>.</div>
-        <div>Unscramble the poem to solve today's haiku puzzle and reveal the art work!</div>
-        <div>Want more haiku poems without the puzzles?</div>
-        <div><b><a href="https://haikugenius.ai/" target="_blank">Haiku Genius</a></b> features a daily haiku with beautiful generative art, a poem generator and editor, and access to the official social media pages so you won't miss a single one!</div>
+        <div>Today's Haiku Challenge</div>
+        <div>Drag-and-drop highlighted words to place them in the correct order and reveal the day's unique  reflection. Solve, and share with friends today. Return tomorrow for your new Daily Haiku!</div>
+        <div><a href="https://en.wikipedia.org/wiki/Haiku">Learn more about the Power of Haiku</a></div>
+        <!-- <div>Want more haiku poems without the puzzles?</div> -->
+        <!-- <div><b><a href="https://haikugenius.ai/" target="_blank">Haiku Genius</a></b> features a daily haiku with beautiful generative art, a poem generator and editor, and access to the official social media pages so you won't miss a single one!</div> -->
       </div>`,
+      
     style: { bottom: "50%", transform: "translateY(50%)" },
   },
   {
