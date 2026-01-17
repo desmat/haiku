@@ -2,9 +2,9 @@
 
 import { upperCaseFirstLetter } from "@desmat/utils/format";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
+import { useEffect, useRef } from "react";
 import useHaikudle from '@/app/_hooks/haikudle';
 import { Haiku } from "@/types/Haiku";
-import { StyledLayers } from "./StyledLayers";
 
 export default function HaikuPuzzle({
   haiku,
@@ -21,14 +21,19 @@ export default function HaikuPuzzle({
   const [
     inProgress,
     swap,
+    cleanupMove,
     haikudleId,
   ] = useHaikudle((state: any) => [
     state.inProgress,
     state.swap,
+    state.cleanupMove,
     state.haikudleId,
   ]);
 
   const poem = inProgress
+
+  const moveFromRef = useRef();
+  const moveToRef = useRef();
 
   // console.log('app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
 
@@ -55,6 +60,22 @@ export default function HaikuPuzzle({
       });
     }
   }
+
+  useEffect(() => {
+    if (moveFromRef.current && moveToRef.current) {
+      const { x: fromX, y: fromY, height: fromHeight } = moveFromRef.current?.getBoundingClientRect()
+      const { x: toX, y: toY } = moveToRef.current?.getBoundingClientRect()
+
+      moveFromRef.current.style.position = "absolute";
+      moveFromRef.current.style.top = `calc(-${fromHeight}px / 2 - 4px)`;
+      moveFromRef.current.style.left = `0px`;
+      moveFromRef.current.style["transition-property"] = "transform";
+      moveFromRef.current.style["transition-duration"] = "250ms";
+      moveFromRef.current.style.transform = `translate(${toX - fromX}px, ${toY - fromY}px)`;
+
+      setTimeout(cleanupMove, 350);
+    }
+  }, [JSON.stringify(poem)])
 
   return (
     <>
@@ -95,11 +116,19 @@ export default function HaikuPuzzle({
                                 style={styles[0]}
                               >
                                 <div
-                                  className={`px-1 ${w?.correct ? "" : "m-1"} transition-all ${!w?.correct && "draggable-notsure-why-cant-inline"}`}
+                                  className={`px-1 ${w?.correct ? "" : "m-1"} _transition-all ${!w?.correct && "draggable-notsure-why-cant-inline"}`}
+                                  ref={w.moveFrom ? moveFromRef : w.moveTo ? moveToRef : undefined}
                                   style={{
                                     backgroundColor: w?.correct
                                       ? undefined
                                       : haiku?.bgColor || "lightgrey",
+                                    _outline: w.moveFrom ? "yellow 2px solid" : w.moveTo ? "red 2px solid" : undefined,
+                                    opacity: w.moveTo ? "0" : undefined,
+                                    // position: w.ghost ? "absolute" : undefined,
+                                    // top: w.ghost ? 0 : undefined,
+                                    // left: w.ghost ? 0 : undefined,
+                                    // transform: w.ghost ? "translateY(calc(-50% - 4px))" : undefined,
+                                    // transform: w.ghost ? "translate(-104px, 29px)" : undefined,                                    
                                     filter: w?.correct
                                       ? undefined
                                       : snapshot.isDragging
@@ -118,7 +147,7 @@ export default function HaikuPuzzle({
                                     w?.word
                                   }
                                 </div>
-                              {/* </StyledLayers> */}
+                                {/* </StyledLayers> */}
                               </div>
                             </span>
                           )
