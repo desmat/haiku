@@ -66,7 +66,7 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
     "Quick wobbly sketch, colored hastily with watercolors",
 
     // developped for kingfisher
-    `A painting that uses the traditional East Asian art techniques of sumi-e or Chinese ink painting, with characteristics such as minimal brush strokes, a focus on natural subjects, and the use of negative space. 
+    `painting that uses the traditional East Asian art techniques of sumi-e or Chinese ink painting, with characteristics such as minimal brush strokes, a focus on natural subjects, and the use of negative space. 
     Employ a selective use of color to add a layer of emphasis and contrast, enhancing the overall aesthetic without detracting from the simplicity and elegance that define this art style.
     The painting should use very imperfect almost hasty strokes. No detailed brush strokes. 
     There should be at most 8 brush strokes using only dark ink with a few colourful accents with an ink of bright color like orange, pink, red, etc.
@@ -86,10 +86,10 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
 
   const selectedArtStyle = artStyle || imageTypes && Array.isArray(imageTypes) && imageTypes.length > 0 && imageTypes[Math.floor(Math.random() * imageTypes.length)] || undefined;
   const prompt = customPrompt || `
-    Respond with a slightly muted, 
+    Respond with a, 
     ${selectedArtStyle},
     on the theme of ${subject || "any"}${mood ? `, with a mood of ${mood}` : ""}.
-    Make the art minimal with few brush strokes, 
+    Make the art low-key and minimal.
     The image should NOT contain any writing, letters, numbers, Hanzi, Kanji, or characters of any kind.
     There should be some negative space where a small poem will be overlayed.
     If the composition has a central point of interest it should be either up or down from the center.
