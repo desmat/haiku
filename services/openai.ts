@@ -11,6 +11,7 @@ const languageModel = "gpt-5-mini";
 // const smallLanguageModel = "gpt-4o-mini"
 // const languageModel = "gpt-4";
 // const languageModel = "gpt-3.5-turbo";
+
 const imageModel = "gpt-image-2";
 // const imageModel = "dall-e-3";
 // const imageModel = "dall-e-2";
