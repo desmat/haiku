@@ -11,7 +11,8 @@ const languageModel = "gpt-5-mini";
 // const smallLanguageModel = "gpt-4o-mini"
 // const languageModel = "gpt-4";
 // const languageModel = "gpt-3.5-turbo";
-const imageModel = "dall-e-3";
+const imageModel = "gpt-image-2";
+// const imageModel = "dall-e-3";
 // const imageModel = "dall-e-2";
 
 function parseJson(input: string) {
@@ -84,10 +85,10 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
 
   const selectedArtStyle = artStyle || imageTypes && Array.isArray(imageTypes) && imageTypes.length > 0 && imageTypes[Math.floor(Math.random() * imageTypes.length)] || undefined;
   const prompt = customPrompt || `
-    Respond with an extremely muted, almost monochromatic colors, 
+    Respond with a slightly muted, 
     ${selectedArtStyle},
     on the theme of ${subject || "any"}${mood ? `, with a mood of ${mood}` : ""}.
-    Make the art extremely minimal and low-key, with very few brush strokes, 
+    Make the art minimal with few brush strokes, 
     The image should NOT contain any writing, letters, numbers, Hanzi, Kanji, or characters of any kind.
     There should be some negative space where a small poem will be overlayed.
     If the composition has a central point of interest it should be either up or down from the center.
@@ -126,16 +127,17 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
       prompt,
       n: 1,
       size: "1024x1024",
-      // size: "256x256",
+      quality: 'low'
     });
 
     try {
       console.log("services.openai.generateBackgroundImage RESULTS FROM API", { response });
       return {
         artStyle: selectedArtStyle,
-        prompt: (response.data[0]["revised_prompt"] || prompt),
+        // prompt: (response.data[0]["revised_prompt"] || prompt),
+        prompt,
         model: imageModel,
-        url: response.data[0].url,
+        data: response.data[0],
       };
     } catch (error) {
       console.error("Error reading results", { error, response });
