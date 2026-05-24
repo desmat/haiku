@@ -128,7 +128,7 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
       prompt,
       n: 1,
       size: "1024x1024",
-      quality: 'high'
+      quality: 'auto'
     });
 
     try {
