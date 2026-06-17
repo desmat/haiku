@@ -285,6 +285,10 @@ export default function HaikuPuzzle({
                   ref={(el) => {
                     if (w?.id) wordRefs.current[w.id] = el;
                   }}
+                  // the transition timing makes this jarring!
+                  style={{
+                    visibility: isDragging ? "hidden" : undefined,
+                  }}
                   draggable={!w?.correct}
                   onClick={() => !w?.correct && handleClickWord(w, i, j)}
                   onDragStart={(event) => handleDragStart(event, w, i, j)}
@@ -316,11 +320,13 @@ export default function HaikuPuzzle({
                           : isDragTarget
                             ? "translateY(-2px) scale(1.04)"
                             : undefined,
+                        position: isIdleDragHint ? "relative" : undefined,
+                        zIndex: isIdleDragHint ? 1 : undefined,
                         opacity: isDragTarget ? 0.35 : undefined,
                         outline: isDragTarget ? "1px solid rgb(0 0 0 / 0.35)" : undefined,
                         filter: w?.correct
                           ? undefined
-                          : isDragging || selectedWord?.word?.id == w?.id || isDragTarget
+                          : isDragging || isIdleDragHint || selectedWord?.word?.id == w?.id || isDragTarget
                             ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
                             : selectedWord || draggingWord
                               ? `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`
