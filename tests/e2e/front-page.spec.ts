@@ -42,6 +42,27 @@ async function expectPoemLines(page: Page) {
     .toBe(3);
 }
 
+async function expectVisibleOverlayedControls(page: Page, expected: 'present' | 'absent') {
+  const visibleOverlayedControlCount = () =>
+    page.locator('.overlayed-control').evaluateAll((elements) =>
+      elements.filter((element) => {
+        const style = window.getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.visibility !== 'hidden'
+          && style.display !== 'none'
+          && Number(style.opacity) > 0
+          && rect.width > 0
+          && rect.height > 0;
+      }).length
+    );
+
+  if (expected === 'present') {
+    await expect.poll(visibleOverlayedControlCount).toBeGreaterThan(0);
+  } else {
+    await expect.poll(visibleOverlayedControlCount).toBe(0);
+  }
+}
+
 async function pauseAtEnd(page: Page) {
   const endPauseMs = Number(process.env.PLAYWRIGHT_END_PAUSE_MS || 0);
   if (endPauseMs > 0) {
@@ -56,6 +77,7 @@ for (const mode of ['haiku', 'showcase']) {
     await page.goto(`/?mode=${mode}&noOnboarding=true`);
     await expectBackgroundImage(page);
     await expectPoemLines(page);
+    await expectVisibleOverlayedControls(page, mode === 'haiku' ? 'present' : 'absent');
     await pauseAtEnd(page);
 
     expectNoPageIssues();
