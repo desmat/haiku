@@ -33,8 +33,10 @@ export default function HaikuPuzzle({
   const poem = inProgress
   const [draggingWord, setDraggingWord] = useState<any>();
   const [dragOverWordId, setDragOverWordId] = useState<string>();
+  const [idleDragHint, setIdleDragHint] = useState<any>();
   const [layoutAnimation, setLayoutAnimation] = useState<any>();
   const ignoreNextClick = useRef(false);
+  const dragActivityOccurred = useRef(false);
   const poemRef = useRef<HTMLDivElement | null>(null);
   const wordRefs = useRef<{ [key: string]: HTMLSpanElement | null }>({});
   const preSwapPoemRect = useRef<DOMRect>();
@@ -75,7 +77,9 @@ export default function HaikuPuzzle({
     if (word?.correct) return;
 
     const dragWord = { word, lineNumber, wordNumber };
+    dragActivityOccurred.current = true;
     ignoreNextClick.current = true;
+    setIdleDragHint(undefined);
     setDraggingWord(dragWord);
     setSelectedWord(dragWord);
     event.dataTransfer.effectAllowed = "move";
@@ -122,6 +126,64 @@ export default function HaikuPuzzle({
     setDraggingWord(undefined);
     setDragOverWordId(undefined);
   }
+
+  useEffect(() => {
+    dragActivityOccurred.current = false;
+    setIdleDragHint(undefined);
+  }, [haikudleId]);
+
+  useEffect(() => {
+    if (dragActivityOccurred.current || draggingWord || idleDragHint || layoutAnimation) return;
+
+    const timeout = window.setTimeout(() => {
+      if (dragActivityOccurred.current) return;
+
+      const unsolvedWords = poem
+        .flatMap((line: any[], lineNumber: number) => line
+          .map((word: any, wordNumber: number) => ({ word, lineNumber, wordNumber })))
+        .filter(({ word }: any) => word?.id && !word?.correct);
+
+      if (unsolvedWords.length < 2) return;
+
+      const target = unsolvedWords[0];
+      const sourceCandidates = unsolvedWords.slice(1);
+      const source = sourceCandidates[Math.floor(Math.random() * sourceCandidates.length)];
+      const sourceRect = wordRefs.current[source.word.id]?.getBoundingClientRect();
+      const targetRect = wordRefs.current[target.word.id]?.getBoundingClientRect();
+
+      if (!sourceRect || !targetRect) return;
+
+      setIdleDragHint({
+        wordId: source.word.id,
+        dx: ((targetRect.left + targetRect.width / 2) - (sourceRect.left + sourceRect.width / 2)) * 1 / 2,
+        dy: ((targetRect.top + targetRect.height / 2) - (sourceRect.top + sourceRect.height / 2)) * 1 / 2,
+        returning: false,
+      });
+    }, 5000);
+
+    return () => window.clearTimeout(timeout);
+  }, [draggingWord, haikudleId, idleDragHint, layoutAnimation, poem]);
+
+  useEffect(() => {
+    if (!idleDragHint) return;
+
+    if (idleDragHint.returning) {
+      const clearTimeoutId = window.setTimeout(() => {
+        setIdleDragHint(undefined);
+      }, 500);
+
+      return () => window.clearTimeout(clearTimeoutId);
+    }
+
+    const returnTimeout = window.setTimeout(() => {
+      setIdleDragHint({
+        ...idleDragHint,
+        returning: true,
+      });
+    }, 650);
+
+    return () => window.clearTimeout(returnTimeout);
+  }, [idleDragHint]);
 
   useLayoutEffect(() => {
     const rects = preSwapRects.current;
@@ -214,6 +276,7 @@ export default function HaikuPuzzle({
             {poem[i].map((w: any, j: number) => {
               const isDragging = draggingWord?.word?.id == w?.id;
               const isDragTarget = dragOverWordId == w?.id;
+              const isIdleDragHint = idleDragHint?.wordId == w?.id;
               const layoutOffset = layoutAnimation?.offsets?.[w?.id];
               const isDisplacedTarget = layoutAnimation?.targetWordId == w?.id;
               return (
@@ -235,13 +298,21 @@ export default function HaikuPuzzle({
                     style={styles[0]}
                   >
                     <div
-                      className={`px-1 ${w?.correct ? "" : "m-1"} ${layoutAnimation?.settling ? "transition-none" : isDisplacedTarget ? "transition-all duration-[240ms] ease-out" : "transition-all duration-[200ms] ease-out"} ${!w?.correct && "cursor-grab active:cursor-grabbing draggable-notsure-why-cant-inline"}`}
+                      className={`px-1 ${w?.correct ? "" : "m-1"} ${layoutAnimation?.settling ? "transition-none" : isIdleDragHint ? "transition-transform duration-[650ms] ease-in-out" : isDisplacedTarget ? "transition-all duration-[240ms] ease-out" : "transition-all duration-[200ms] ease-out"} ${!w?.correct && "cursor-grab active:cursor-grabbing draggable-notsure-why-cant-inline"}`}
                       style={{
+                        transitionTimingFunction: isIdleDragHint && idleDragHint.returning
+                          ? "cubic-bezier(.34, 1.56, .64, 0.95)"
+                          : undefined,
+                        transitionDuration: isIdleDragHint && idleDragHint.returning
+                          ? "300ms"
+                          : undefined,
                         backgroundColor: w?.correct
                           ? undefined
                           : haiku?.bgColor || "lightgrey",
                         transform: layoutOffset && layoutAnimation.settling
                           ? `translate(${layoutOffset.dx}px, ${layoutOffset.dy}px)`
+                          : isIdleDragHint && !idleDragHint.returning
+                            ? `translate(${idleDragHint.dx}px, ${idleDragHint.dy}px)`
                           : isDragTarget
                             ? "translateY(-2px) scale(1.04)"
                             : undefined,
