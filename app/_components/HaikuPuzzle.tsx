@@ -33,10 +33,12 @@ export default function HaikuPuzzle({
   const [pointerDrag, setPointerDrag] = useState<any>();
   const [dragOverWordId, setDragOverWordId] = useState<string>();
   const [idleDragHint, setIdleDragHint] = useState<any>();
+  const [idleDragOverWordId, setIdleDragOverWordId] = useState<string>();
   const [layoutAnimation, setLayoutAnimation] = useState<any>();
   const dragActivityOccurred = useRef(false);
   const poemRef = useRef<HTMLDivElement | null>(null);
   const wordRefs = useRef<{ [key: string]: HTMLSpanElement | null }>({});
+  const wordTileRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const hiddenSourceRef = useRef<HTMLSpanElement | null>(null);
   const preSwapPoemRect = useRef<DOMRect>();
   const preSwapRects = useRef<{ [key: string]: DOMRect }>({});
@@ -139,11 +141,12 @@ export default function HaikuPuzzle({
 
       setIdleDragHint({
         wordId: source.word.id,
-        dx: ((targetRect.left + targetRect.width / 2) - (sourceRect.left + sourceRect.width / 2)) * 1 / 2,
-        dy: ((targetRect.top + targetRect.height / 2) - (sourceRect.top + sourceRect.height / 2)) * 1 / 2,
+        targetWordId: target.word.id,
+        dx: ((targetRect.left + targetRect.width / 2) - (sourceRect.left + sourceRect.width / 2)) * 9 / 10,
+        dy: ((targetRect.top + targetRect.height / 2) - (sourceRect.top + sourceRect.height / 2)) * 9 / 10,
         returning: false,
       });
-    }, 5000);
+    }, 2000);
 
     return () => window.clearTimeout(timeout);
   }, [draggingWord, haikudleId, idleDragHint, layoutAnimation, poem]);
@@ -168,6 +171,58 @@ export default function HaikuPuzzle({
 
     return () => window.clearTimeout(returnTimeout);
   }, [idleDragHint]);
+
+  useEffect(() => {
+    if (!idleDragHint || idleDragHint.returning) {
+      setIdleDragOverWordId(undefined);
+      return;
+    }
+
+    let frame = 0;
+    let lastOverWordId: string | undefined;
+
+    const checkOverlap = () => {
+      const sourceRect = wordTileRefs.current[idleDragHint.wordId]?.getBoundingClientRect();
+      const overWord = sourceRect
+        ? poem
+          .flatMap((line: any[]) => line)
+          .filter((word: any) => word?.id && !word?.correct && word.id != idleDragHint.wordId)
+          .map((word: any) => {
+            const targetRect = wordTileRefs.current[word.id]?.getBoundingClientRect();
+            if (
+              !targetRect ||
+              sourceRect.left >= targetRect.right ||
+              sourceRect.right <= targetRect.left ||
+              sourceRect.top >= targetRect.bottom ||
+              sourceRect.bottom <= targetRect.top
+            ) {
+              return undefined;
+            }
+
+            const overlapWidth = Math.min(sourceRect.right, targetRect.right) - Math.max(sourceRect.left, targetRect.left);
+            const overlapHeight = Math.min(sourceRect.bottom, targetRect.bottom) - Math.max(sourceRect.top, targetRect.top);
+            return { wordId: word.id, overlapArea: overlapWidth * overlapHeight };
+          })
+          .filter(Boolean)
+          .sort((a: any, b: any) => b.overlapArea - a.overlapArea)[0]
+        : undefined;
+      const overWordId = overWord?.wordId;
+
+      if (overWordId != lastOverWordId) {
+        lastOverWordId = overWordId;
+        setIdleDragOverWordId(overWordId);
+      }
+
+      frame = window.requestAnimationFrame(checkOverlap);
+    }
+
+    frame = window.requestAnimationFrame(checkOverlap);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      setIdleDragOverWordId(undefined);
+    };
+  }, [idleDragHint, poem]);
 
   useLayoutEffect(() => {
     const rects = preSwapRects.current;
@@ -353,8 +408,9 @@ export default function HaikuPuzzle({
             {poem[i].map((w: any, j: number) => {
               const isDragging = draggingWord?.word?.id == w?.id;
               const isPreviewSource = pointerPreview?.word?.id == w?.id;
-              const isDragTarget = dragOverWordId == w?.id;
               const isIdleDragHint = idleDragHint?.wordId == w?.id;
+              const isIdleDragHintTarget = idleDragOverWordId == w?.id;
+              const isDragTarget = dragOverWordId == w?.id || isIdleDragHintTarget;
               const layoutOffset = layoutAnimation?.offsets?.[w?.id];
               const isDisplacedTarget = layoutAnimation?.targetWordId == w?.id;
               return (
@@ -368,6 +424,8 @@ export default function HaikuPuzzle({
                   data-word-number={j}
                   style={{
                     visibility: isPreviewSource || isDragging ? "hidden" : undefined,
+                    position: isIdleDragHint ? "relative" : undefined,
+                    zIndex: isIdleDragHint ? 50 : undefined,
                     touchAction: "none",
                   }}
                   onPointerDown={(event) => handlePointerDown(event, w, i, j)}
@@ -377,6 +435,9 @@ export default function HaikuPuzzle({
                     style={styles[0]}
                   >
                     <div
+                      ref={(el) => {
+                        if (w?.id) wordTileRefs.current[w.id] = el;
+                      }}
                       className={`px-1 ${w?.correct ? "" : "m-1"} ${layoutAnimation?.settling ? "transition-none" : isIdleDragHint ? "transition-transform duration-[650ms] ease-in-out" : isDisplacedTarget ? "transition-[transform,filter,opacity] duration-[240ms] ease-out" : "transition-[transform,filter,opacity] duration-[200ms] ease-out"} ${!w?.correct && "cursor-grab active:cursor-grabbing draggable-notsure-why-cant-inline"}`}
                       style={{
                         transitionTimingFunction: isIdleDragHint && idleDragHint.returning
@@ -394,7 +455,7 @@ export default function HaikuPuzzle({
                             ? `translate(${idleDragHint.dx}px, ${idleDragHint.dy}px)`
                             : undefined,
                         position: isIdleDragHint ? "relative" : undefined,
-                        zIndex: isIdleDragHint ? 1 : undefined,
+                        zIndex: isIdleDragHint ? 50 : undefined,
                         opacity: isDragTarget ? 0.2 : undefined,
                         filter: w?.correct
                           ? undefined
