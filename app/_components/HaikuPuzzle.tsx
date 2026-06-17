@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef, useState, type DragEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { upperCaseFirstLetter } from "@desmat/utils/format";
 import useHaikudle from '@/app/_hooks/haikudle';
 import { Haiku } from "@/types/Haiku";
@@ -9,13 +9,9 @@ import { StyledLayers } from "./StyledLayers";
 export default function HaikuPuzzle({
   haiku,
   styles,
-  selectedWord,
-  setSelectedWord,
 }: {
   haiku: Haiku,
   styles: any[],
-  selectedWord: any,
-  setSelectedWord: any,
 }) {
   // console.log('app._components.HaikuPage.HaikuPoem.render()', { haiku });
   const [
@@ -31,79 +27,25 @@ export default function HaikuPuzzle({
   ]);
 
   const poem = inProgress
+  const [pointerPress, setPointerPress] = useState<any>();
+  const [pointerPreview, setPointerPreview] = useState<any>();
   const [draggingWord, setDraggingWord] = useState<any>();
+  const [pointerDrag, setPointerDrag] = useState<any>();
   const [dragOverWordId, setDragOverWordId] = useState<string>();
   const [idleDragHint, setIdleDragHint] = useState<any>();
   const [layoutAnimation, setLayoutAnimation] = useState<any>();
-  const ignoreNextClick = useRef(false);
   const dragActivityOccurred = useRef(false);
   const poemRef = useRef<HTMLDivElement | null>(null);
   const wordRefs = useRef<{ [key: string]: HTMLSpanElement | null }>({});
+  const hiddenSourceRef = useRef<HTMLSpanElement | null>(null);
   const preSwapPoemRect = useRef<DOMRect>();
   const preSwapRects = useRef<{ [key: string]: DOMRect }>({});
   const preSwapTargetWordId = useRef<string>();
 
   // console.log('app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
 
-  const handleClickWord = (word: any, lineNumber: number, wordNumber: number) => {
-    // console.log('app._components.HaikuPage.handleClickWord()', { word, lineNumber, wordNumber });
-    if (ignoreNextClick.current) {
-      ignoreNextClick.current = false;
-      return;
-    }
-
-    if (word.id == selectedWord?.word?.id) {
-      setSelectedWord(undefined);
-    } else if (selectedWord) {
-      swap(
-        haikudleId,
-        selectedWord.word,
-        selectedWord.lineNumber,
-        selectedWord.wordNumber,
-        lineNumber,
-        wordNumber,
-      );
-      setSelectedWord(undefined);
-    } else {
-      setSelectedWord({
-        word,
-        lineNumber,
-        wordNumber,
-      });
-    }
-  }
-
-  const handleDragStart = (event: DragEvent, word: any, lineNumber: number, wordNumber: number) => {
-    if (word?.correct) return;
-
-    const dragWord = { word, lineNumber, wordNumber };
-    dragActivityOccurred.current = true;
-    ignoreNextClick.current = true;
-    setIdleDragHint(undefined);
-    setDraggingWord(dragWord);
-    setSelectedWord(dragWord);
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", word?.id || "");
-  }
-
-  const handleDragOver = (event: DragEvent, word: any) => {
-    if (!draggingWord || word?.correct || draggingWord.word?.id == word?.id) return;
-
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-    setDragOverWordId(word?.id);
-  }
-
-  const handleDragLeave = (word: any) => {
-    if (dragOverWordId == word?.id) {
-      setDragOverWordId(undefined);
-    }
-  }
-
-  const handleDrop = (event: DragEvent, word: any, lineNumber: number, wordNumber: number) => {
-    event.preventDefault();
-
-    if (draggingWord && !word?.correct && draggingWord.word?.id != word?.id) {
+  const swapDraggedWord = useCallback((dragWord: any, word: any, lineNumber: number, wordNumber: number) => {
+    if (dragWord && !word?.correct && dragWord.word?.id != word?.id) {
       preSwapTargetWordId.current = word?.id;
       preSwapPoemRect.current = poemRef.current?.getBoundingClientRect();
       preSwapRects.current = Object.fromEntries(
@@ -114,18 +56,60 @@ export default function HaikuPuzzle({
 
       swap(
         haikudleId,
-        draggingWord.word,
-        draggingWord.lineNumber,
-        draggingWord.wordNumber,
+        dragWord.word,
+        dragWord.lineNumber,
+        dragWord.wordNumber,
         lineNumber,
         wordNumber,
       );
     }
+  }, [haikudleId, swap]);
 
-    setSelectedWord(undefined);
-    setDraggingWord(undefined);
-    setDragOverWordId(undefined);
+  const getPointerTarget = useCallback((clientX: number, clientY: number) => {
+    const targetEl = document
+      .elementFromPoint(clientX, clientY)
+      ?.closest("[data-word-id]") as HTMLElement | null;
+    const lineNumber = Number(targetEl?.dataset?.lineNumber);
+    const wordNumber = Number(targetEl?.dataset?.wordNumber);
+    const word = poem[lineNumber]?.[wordNumber];
+
+    if (!targetEl || !word || word?.id != targetEl.dataset.wordId) return undefined;
+
+    return {
+      word,
+      lineNumber,
+      wordNumber,
+    };
+  }, [poem]);
+
+  const handlePointerDown = (event: ReactPointerEvent, word: any, lineNumber: number, wordNumber: number) => {
+    if (word?.correct) return;
+
+    const sourceRect = wordRefs.current[word?.id]?.getBoundingClientRect();
+    if (!sourceRect) return;
+
+    event.preventDefault();
+    const press = {
+      word,
+      lineNumber,
+      wordNumber,
+      startX: event.clientX,
+      startY: event.clientY,
+      offsetX: event.clientX - sourceRect.left,
+      offsetY: event.clientY - sourceRect.top,
+      width: sourceRect.width,
+      x: event.clientX,
+      y: event.clientY,
+    };
+    setPointerPress(press);
   }
+
+  useLayoutEffect(() => {
+    if (pointerPreview || !hiddenSourceRef.current) return;
+
+    hiddenSourceRef.current.style.visibility = "";
+    hiddenSourceRef.current = null;
+  }, [pointerPreview]);
 
   useEffect(() => {
     dragActivityOccurred.current = false;
@@ -248,14 +232,84 @@ export default function HaikuPuzzle({
     return () => window.clearTimeout(timeout);
   }, [layoutAnimation]);
 
-  const handleDragEnd = () => {
-    setSelectedWord(undefined);
-    setDraggingWord(undefined);
-    setDragOverWordId(undefined);
-    window.setTimeout(() => {
-      ignoreNextClick.current = false;
-    }, 0);
-  }
+  useEffect(() => {
+    if (!pointerPress) return;
+
+    const finishDrag = (event: PointerEvent) => {
+      if (pointerDrag) {
+        const target = getPointerTarget(event.clientX, event.clientY);
+
+        if (target) {
+          swapDraggedWord(pointerDrag, target.word, target.lineNumber, target.wordNumber);
+        }
+      }
+
+      setPointerPress(undefined);
+      setPointerPreview(undefined);
+      setDraggingWord(undefined);
+      setPointerDrag(undefined);
+      setDragOverWordId(undefined);
+    }
+
+    const moveDrag = (event: PointerEvent) => {
+      const dx = event.clientX - pointerPress.startX;
+      const dy = event.clientY - pointerPress.startY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      let activeDrag = pointerDrag;
+
+      if (!activeDrag && distance > 4) {
+        activeDrag = {
+          word: pointerPress.word,
+          lineNumber: pointerPress.lineNumber,
+          wordNumber: pointerPress.wordNumber,
+          offsetX: pointerPress.offsetX,
+          offsetY: pointerPress.offsetY,
+          width: pointerPress.width,
+          x: event.clientX,
+          y: event.clientY,
+        };
+        const sourceEl = wordRefs.current[pointerPress.word?.id];
+        if (sourceEl) {
+          if (hiddenSourceRef.current && hiddenSourceRef.current != sourceEl) {
+            hiddenSourceRef.current.style.visibility = "";
+          }
+          hiddenSourceRef.current = sourceEl;
+          sourceEl.style.visibility = "hidden";
+        }
+        dragActivityOccurred.current = true;
+        setIdleDragHint(undefined);
+        setDraggingWord(activeDrag);
+      }
+
+      if (!activeDrag) return;
+
+      event.preventDefault();
+      activeDrag = {
+        ...activeDrag,
+        x: event.clientX,
+        y: event.clientY,
+      };
+      setPointerPreview(activeDrag);
+      setPointerDrag(activeDrag);
+
+      const target = getPointerTarget(event.clientX, event.clientY);
+      setDragOverWordId(
+        target && !target.word?.correct && target.word?.id != activeDrag.word?.id
+          ? target.word.id
+          : undefined
+      );
+    }
+
+    window.addEventListener("pointermove", moveDrag);
+    window.addEventListener("pointerup", finishDrag, { once: true });
+    window.addEventListener("pointercancel", finishDrag, { once: true });
+
+    return () => {
+      window.removeEventListener("pointermove", moveDrag);
+      window.removeEventListener("pointerup", finishDrag);
+      window.removeEventListener("pointercancel", finishDrag);
+    };
+  }, [getPointerTarget, pointerDrag, pointerPress, swapDraggedWord]);
 
   return (
     <div
@@ -275,6 +329,7 @@ export default function HaikuPuzzle({
           >
             {poem[i].map((w: any, j: number) => {
               const isDragging = draggingWord?.word?.id == w?.id;
+              const isPreviewSource = pointerPreview?.word?.id == w?.id;
               const isDragTarget = dragOverWordId == w?.id;
               const isIdleDragHint = idleDragHint?.wordId == w?.id;
               const layoutOffset = layoutAnimation?.offsets?.[w?.id];
@@ -285,24 +340,21 @@ export default function HaikuPuzzle({
                   ref={(el) => {
                     if (w?.id) wordRefs.current[w.id] = el;
                   }}
-                  // the transition timing makes this jarring!
+                  data-word-id={w?.id}
+                  data-line-number={i}
+                  data-word-number={j}
                   style={{
-                    visibility: isDragging ? "hidden" : undefined,
+                    visibility: isPreviewSource || isDragging ? "hidden" : undefined,
+                    touchAction: "none",
                   }}
-                  draggable={!w?.correct}
-                  onClick={() => !w?.correct && handleClickWord(w, i, j)}
-                  onDragStart={(event) => handleDragStart(event, w, i, j)}
-                  onDragOver={(event) => handleDragOver(event, w)}
-                  onDragLeave={() => handleDragLeave(w)}
-                  onDrop={(event) => handleDrop(event, w, i, j)}
-                  onDragEnd={handleDragEnd}
+                  onPointerDown={(event) => handlePointerDown(event, w, i, j)}
                 >
                   {/* <StyledLayers key={i} styles={w?.correct ? styles : [styles[0]]}> */}
                   <div
                     style={styles[0]}
                   >
                     <div
-                      className={`px-1 ${w?.correct ? "" : "m-1"} ${layoutAnimation?.settling ? "transition-none" : isIdleDragHint ? "transition-transform duration-[650ms] ease-in-out" : isDisplacedTarget ? "transition-all duration-[240ms] ease-out" : "transition-all duration-[200ms] ease-out"} ${!w?.correct && "cursor-grab active:cursor-grabbing draggable-notsure-why-cant-inline"}`}
+                      className={`px-1 ${w?.correct ? "" : "m-1"} ${layoutAnimation?.settling ? "transition-none" : isIdleDragHint ? "transition-transform duration-[650ms] ease-in-out" : isDisplacedTarget ? "transition-[transform,filter,opacity] duration-[240ms] ease-out" : "transition-[transform,filter,opacity] duration-[200ms] ease-out"} ${!w?.correct && "cursor-grab active:cursor-grabbing draggable-notsure-why-cant-inline"}`}
                       style={{
                         transitionTimingFunction: isIdleDragHint && idleDragHint.returning
                           ? "cubic-bezier(.34, 1.56, .64, 0.95)"
@@ -326,9 +378,9 @@ export default function HaikuPuzzle({
                         outline: isDragTarget ? "1px solid rgb(0 0 0 / 0.35)" : undefined,
                         filter: w?.correct
                           ? undefined
-                          : isDragging || isIdleDragHint || selectedWord?.word?.id == w?.id || isDragTarget
+                          : isDragging || isIdleDragHint || isDragTarget
                             ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
-                            : selectedWord || draggingWord
+                            : draggingWord
                               ? `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`
                               : `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`,
                       }}
@@ -348,6 +400,30 @@ export default function HaikuPuzzle({
           </div>
         )
       })}
+      {pointerPreview &&
+        <div
+          className="fixed z-[9999] pointer-events-none select-none"
+          style={{
+            left: pointerPreview.x - pointerPreview.offsetX,
+            top: pointerPreview.y - pointerPreview.offsetY,
+            width: pointerPreview.width,
+          }}
+        >
+          <div style={styles[0]}>
+            <div
+              className="px-1 m-1 cursor-grabbing"
+              style={{
+                backgroundColor: haiku?.bgColor || "lightgrey",
+                filter: pointerDrag
+                  ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
+                  : `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`,
+              }}
+            >
+              {pointerPreview.word?.word}
+            </div>
+          </div>
+        </div>
+      }
     </div>
   )
 }

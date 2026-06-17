@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from "react";
 import useHaikudle from '@/app/_hooks/haikudle';
 import useUser from "@/app/_hooks/user";
 import * as font from "@/app/font";
@@ -25,8 +24,6 @@ export default function HaikudlePage({
   // console.log('app._components.HaikudlePage.render()', { mode, id: haiku.id, poem: haiku.poem, haiku, onboardingElement});
 
   const [user] = useUser((state: any) => [state.user]);
-  // TODO move to hook store
-  const [selectedWord, setSelectedWord] = useState<any>();
 
   const [
     solved,
@@ -88,8 +85,6 @@ export default function HaikudlePage({
             <HaikuPuzzle
               haiku={haiku}
               styles={styles}
-              selectedWord={selectedWord}
-              setSelectedWord={setSelectedWord}
             />
           </div>
         }
