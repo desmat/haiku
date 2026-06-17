@@ -372,7 +372,7 @@ export default function HaikuPuzzle({
     const timeout = window.setTimeout(() => {
       setPointerPreview(undefined);
       setDraggingWord(undefined);
-    }, 500);
+    }, 300);
 
     return () => window.clearTimeout(timeout);
   }, [pointerPreview]);
@@ -491,7 +491,7 @@ export default function HaikuPuzzle({
               className="px-1 m-1 cursor-grabbing"
               style={{
                 backgroundColor: haiku?.bgColor || "lightgrey",
-                filter: pointerDrag
+                filter: pointerDrag || pointerPreview.returning
                   ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
                   : `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`,
               }}
