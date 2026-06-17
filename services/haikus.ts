@@ -493,16 +493,13 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   const customArtStyles = album && album.artStyles || undefined;
 
   const {
-    url: openaiUrl,
+    data: imageData,
     prompt: imagePrompt,
     artStyle: selectedArtStyle,
     model: imageModel,
   } = await openai.generateBackgroundImage(user.id, haiku.subject || haiku.theme || haiku.title, haiku.mood, artStyle, customImagePrompt, customArtStyles);
 
-  const imageRet = await fetch(openaiUrl);
-  // console.log("services.haiku.regenerateHaikuImage", { imageRet });
-
-  const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+  const imageBuffer = Buffer.from(imageData.b64_json, 'base64');
   // console.log("services.haiku.generateHaiku", { imageBuffer });
 
   const getColors = require('get-image-colors')
@@ -703,15 +700,14 @@ export async function generateHaiku(user: User, {
   console.log("services.haiku.generateHaiku", { generatedSubject, generatedMood, generatedSeason, poemPrompt });
 
   const {
-    url: imageUrl,
+    data: imageData,
     prompt: imagePrompt,
     artStyle: selectedArtStyle,
     model: imageModel,
   } = await openai.generateBackgroundImage(user.id, subject || generatedSubject, mood || generatedMood, artStyle, customImagePrompt, customArtStyles);
   // console.log("services.haiku.generateHaiku", { imageUrl });
 
-  const imageRet = await fetch(imageUrl);
-  const imageBuffer = Buffer.from(await imageRet.arrayBuffer());
+  const imageBuffer = Buffer.from(imageData.b64_json, 'base64');
   // console.log("services.haiku.generateHaiku", { imageBuffer });
 
   return createHaiku(
@@ -730,7 +726,7 @@ export async function generateHaiku(user: User, {
       languageModel,
       imagePrompt,
       imageModel,
-      imageUrl,
+      // imageUrl,
       imageBuffer,
       poem: poem || generatedPoem || [],
       albumId,
