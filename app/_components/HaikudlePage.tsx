@@ -102,7 +102,7 @@ export default function HaikudlePage({
         onDragEnd={handleDragEnd}
       >
         <div
-          className="_bg-pink-200 absolute top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0 opacity-100"
+          className="bgImage-container _bg-pink-200 absolute top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-0 opacity-100"
           style={{
             backgroundImage: `url("${haiku?.bgImage}")`,
             backgroundPosition: "center",
@@ -116,7 +116,7 @@ export default function HaikudlePage({
             <Loading styles={styles} />
           }
           {!regenerating &&
-            <div className="_bg-pink-200 onboarding-container">
+            <div className="_bg-pink-200 onboarding-container" data-testid="haikudle-puzzle">
               {onboardingElement == "puzzle" &&
                 <div className="onboarding-focus double" />
               }
