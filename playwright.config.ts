@@ -10,9 +10,9 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npm run dev -- --hostname 127.0.0.1 --port 3017',
+    command: 'mkdir -p test-results && : > test-results/webserver.log && npm run dev -- --hostname 127.0.0.1 --port 3017 2>&1 | tee -a test-results/webserver.log',
     url: 'http://localhost:3017',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120_000,
     env: {
       ...process.env,
