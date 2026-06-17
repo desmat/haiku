@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "NODE_OPTIONS=--no-warnings next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "PLAYWRIGHT_SLOW_MO=250 PLAYWRIGHT_END_PAUSE_MS=3000 playwright test --headed"
   },
   "dependencies": {
     "@desmat/redis-store": "^1.2.1",
@@ -49,6 +51,7 @@
     "zustand": "^4.5.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "@types/chroma-js": "^2.4.5",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/seedrandom": "^3.0.8",
