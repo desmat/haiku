@@ -3,7 +3,7 @@
 import { mapToSearchParams } from '@desmat/utils';
 import { upperCaseFirstLetter } from '@desmat/utils/format';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { Haiku, haikuStyles } from "@/types/Haiku";
 import { NavOverlay } from '@/app/_components/nav/NavOverlay';
@@ -172,6 +172,8 @@ export default function MainPage({
   const loaded = haikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
   let [loading, setLoading] = useState(false);
   let [loadingUI, setLoadingUI] = useState(false);
+  const [solvedRevealInProgress, setSolvedRevealInProgress] = useState(false);
+  const previousSolvedJustNow = useRef(false);
 
   // console.log('app.MainPage.render()', { loadingUI, generating, haikudleLoaded, haikudleReady });
 
@@ -192,6 +194,8 @@ export default function MainPage({
     (!previousDailyHaikudleId /* || user?.isAdmin */);
   //&& (!(haiku?.createdBy == user?.id) || user?.isAdmin);
   // console.log('app.MainPage.render()', { isPuzzleMode, haikudleSolved, previousDailyHaikudleId, user_isAdmin: user?.isAdmin, haiku_createdBy: haiku?.createdBy });
+  const showPuzzlePage = isPuzzleMode || solvedRevealInProgress;
+  const showHaikuPage = !isPuzzleMode && !solvedRevealInProgress;
 
   const { textStyles, altTextStyles } = haikuStyles(haiku);
 
@@ -842,6 +846,24 @@ export default function MainPage({
   }
 
   useEffect(() => {
+    if (!haikudleMode || !haikudleSolvedJustNow) {
+      previousSolvedJustNow.current = false;
+      setSolvedRevealInProgress(false);
+      return;
+    }
+
+    if (previousSolvedJustNow.current) return;
+
+    previousSolvedJustNow.current = true;
+    setSolvedRevealInProgress(true);
+    const timeoutId = setTimeout(() => {
+      setSolvedRevealInProgress(false);
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [haikudleMode, haikudleSolvedJustNow]);
+
+  useEffect(() => {
     // console.log('app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
     // @ts-ignore
     let timeoutId;
@@ -1043,7 +1065,7 @@ export default function MainPage({
         updateLayout={updateLayout}
       />
 
-      {isPuzzleMode &&
+      {showPuzzlePage &&
         <HaikudlePage
           mode={mode}
           haiku={haiku}
@@ -1053,7 +1075,7 @@ export default function MainPage({
         />
       }
 
-      {!isPuzzleMode &&
+      {showHaikuPage &&
         <HaikuPage
           user={user}
           mode={mode}

@@ -1,7 +1,7 @@
 'use client'
 
+import { useEffect, useLayoutEffect, useRef, useState, type DragEvent } from "react";
 import { upperCaseFirstLetter } from "@desmat/utils/format";
-import { Draggable, Droppable } from "@hello-pangea/dnd";
 import useHaikudle from '@/app/_hooks/haikudle';
 import { Haiku } from "@/types/Haiku";
 import { StyledLayers } from "./StyledLayers";
@@ -22,18 +22,33 @@ export default function HaikuPuzzle({
     inProgress,
     swap,
     haikudleId,
+    moves,
   ] = useHaikudle((state: any) => [
     state.inProgress,
     state.swap,
     state.haikudleId,
+    state.moves,
   ]);
 
   const poem = inProgress
+  const [draggingWord, setDraggingWord] = useState<any>();
+  const [dragOverWordId, setDragOverWordId] = useState<string>();
+  const [layoutAnimation, setLayoutAnimation] = useState<any>();
+  const ignoreNextClick = useRef(false);
+  const poemRef = useRef<HTMLDivElement | null>(null);
+  const wordRefs = useRef<{ [key: string]: HTMLSpanElement | null }>({});
+  const preSwapPoemRect = useRef<DOMRect>();
+  const preSwapRects = useRef<{ [key: string]: DOMRect }>({});
+  const preSwapTargetWordId = useRef<string>();
 
   // console.log('app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
 
   const handleClickWord = (word: any, lineNumber: number, wordNumber: number) => {
     // console.log('app._components.HaikuPage.handleClickWord()', { word, lineNumber, wordNumber });
+    if (ignoreNextClick.current) {
+      ignoreNextClick.current = false;
+      return;
+    }
 
     if (word.id == selectedWord?.word?.id) {
       setSelectedWord(undefined);
@@ -56,84 +71,206 @@ export default function HaikuPuzzle({
     }
   }
 
+  const handleDragStart = (event: DragEvent, word: any, lineNumber: number, wordNumber: number) => {
+    if (word?.correct) return;
+
+    const dragWord = { word, lineNumber, wordNumber };
+    ignoreNextClick.current = true;
+    setDraggingWord(dragWord);
+    setSelectedWord(dragWord);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", word?.id || "");
+  }
+
+  const handleDragOver = (event: DragEvent, word: any) => {
+    if (!draggingWord || word?.correct || draggingWord.word?.id == word?.id) return;
+
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    setDragOverWordId(word?.id);
+  }
+
+  const handleDragLeave = (word: any) => {
+    if (dragOverWordId == word?.id) {
+      setDragOverWordId(undefined);
+    }
+  }
+
+  const handleDrop = (event: DragEvent, word: any, lineNumber: number, wordNumber: number) => {
+    event.preventDefault();
+
+    if (draggingWord && !word?.correct && draggingWord.word?.id != word?.id) {
+      preSwapTargetWordId.current = word?.id;
+      preSwapPoemRect.current = poemRef.current?.getBoundingClientRect();
+      preSwapRects.current = Object.fromEntries(
+        Object.entries(wordRefs.current)
+          .filter((entry): entry is [string, HTMLSpanElement] => Boolean(entry[1]))
+          .map(([wordId, el]) => [wordId, el.getBoundingClientRect()])
+      );
+
+      swap(
+        haikudleId,
+        draggingWord.word,
+        draggingWord.lineNumber,
+        draggingWord.wordNumber,
+        lineNumber,
+        wordNumber,
+      );
+    }
+
+    setSelectedWord(undefined);
+    setDraggingWord(undefined);
+    setDragOverWordId(undefined);
+  }
+
+  useLayoutEffect(() => {
+    const rects = preSwapRects.current;
+    const previousPoemRect = preSwapPoemRect.current;
+    if (!Object.keys(rects).length && !previousPoemRect) return;
+
+    const newPoemRect = poemRef.current?.getBoundingClientRect();
+    const poemOffset = previousPoemRect && newPoemRect
+      ? {
+        dx: previousPoemRect.left - newPoemRect.left,
+        dy: previousPoemRect.top - newPoemRect.top,
+      }
+      : undefined;
+
+    const offsets = Object.fromEntries(
+      Object.entries(rects)
+        .map(([wordId, rect]) => {
+          const newRect = wordRefs.current[wordId]?.getBoundingClientRect();
+          if (!newRect) return undefined;
+
+          const dx = rect.left - newRect.left - (poemOffset?.dx || 0);
+          const dy = rect.top - newRect.top - (poemOffset?.dy || 0);
+          if (!dx && !dy) return undefined;
+
+          return [wordId, { dx, dy }];
+        })
+        .filter(Boolean) as [string, { dx: number, dy: number }][]
+    );
+
+    preSwapRects.current = {};
+    preSwapPoemRect.current = undefined;
+    const targetWordId = preSwapTargetWordId.current;
+    preSwapTargetWordId.current = undefined;
+    if (!Object.keys(offsets).length && !poemOffset?.dx && !poemOffset?.dy) return;
+
+    setLayoutAnimation({
+      offsets,
+      poemOffset,
+      targetWordId,
+      settling: true,
+    });
+  }, [moves]);
+
+  useEffect(() => {
+    if (!layoutAnimation) return;
+
+    if (layoutAnimation.settling) {
+      const frame = window.requestAnimationFrame(() => {
+        setLayoutAnimation({
+          ...layoutAnimation,
+          settling: false,
+        });
+      });
+
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    const timeout = window.setTimeout(() => {
+      setLayoutAnimation(undefined);
+    }, 240);
+
+    return () => window.clearTimeout(timeout);
+  }, [layoutAnimation]);
+
+  const handleDragEnd = () => {
+    setSelectedWord(undefined);
+    setDraggingWord(undefined);
+    setDragOverWordId(undefined);
+    window.setTimeout(() => {
+      ignoreNextClick.current = false;
+    }, 0);
+  }
+
   return (
-    <>
+    <div
+      ref={poemRef}
+      className={layoutAnimation?.settling ? "transition-none" : "transition-transform duration-[200ms] ease-out"}
+      style={{
+        transform: layoutAnimation?.poemOffset && layoutAnimation.settling
+          ? `translate(${layoutAnimation.poemOffset.dx}px, ${layoutAnimation.poemOffset.dy}px)`
+          : undefined,
+      }}
+    >
       {poem.map((s: string, i: number) => {
         return (
-          <Droppable
+          <div
             key={`${i}`}
-            droppableId={`${i}`}
-            direction="horizontal"
+            className={`_bg-purple-200 flex flex-row items-center justify-start my-0 px-5 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-full select-none`}
           >
-            {(provided, snapshot) => {
+            {poem[i].map((w: any, j: number) => {
+              const isDragging = draggingWord?.word?.id == w?.id;
+              const isDragTarget = dragOverWordId == w?.id;
+              const layoutOffset = layoutAnimation?.offsets?.[w?.id];
+              const isDisplacedTarget = layoutAnimation?.targetWordId == w?.id;
               return (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  className={`_bg-purple-200 flex flex-row items-center justify-start my-0 px-5 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-full select-none`}
+                <span
+                  key={w?.id || `${i}-${j}`}
+                  ref={(el) => {
+                    if (w?.id) wordRefs.current[w.id] = el;
+                  }}
+                  draggable={!w?.correct}
+                  onClick={() => !w?.correct && handleClickWord(w, i, j)}
+                  onDragStart={(event) => handleDragStart(event, w, i, j)}
+                  onDragOver={(event) => handleDragOver(event, w)}
+                  onDragLeave={() => handleDragLeave(w)}
+                  onDrop={(event) => handleDrop(event, w, i, j)}
+                  onDragEnd={handleDragEnd}
                 >
-                  {poem[i].map((w: any, j: number) => {
-                    return (
-                      <Draggable
-                        key={`word-${i}-${j}`}
-                        draggableId={`word-${i}-${j}`}
-                        index={j}
-                        isDragDisabled={w?.correct}
-                        shouldRespectForcePress={true}
-                      // timeForLongPress={0}
-                      >
-                        {(provided, snapshot) => {
-                          return (
-                            <span
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              onMouseDown={() => !w?.correct && handleClickWord(w, i, j)}
-                            >
-                              {/* <StyledLayers key={i} styles={w?.correct ? styles : [styles[0]]}> */}
-                              <div
-                                style={styles[0]}
-                              >
-                                <div
-                                  className={`px-1 ${w?.correct ? "" : "m-1"} transition-all ${!w?.correct && "draggable-notsure-why-cant-inline"}`}
-                                  style={{
-                                    backgroundColor: w?.correct
-                                      ? undefined
-                                      : haiku?.bgColor || "lightgrey",
-                                    filter: w?.correct
-                                      ? undefined
-                                      : snapshot.isDragging
-                                        ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
-                                        : selectedWord?.word?.id == w?.id
-                                          ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
-                                          : selectedWord
-                                            ? `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`
-                                            : `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`,
-                                  }}
-                                >
-                                  {j == 0 && w?.correct &&
-                                    upperCaseFirstLetter(w?.word)
-                                  }
-                                  {!(j == 0 && w?.correct) &&
-                                    w?.word
-                                  }
-                                </div>
-                              {/* </StyledLayers> */}
-                              </div>
-                            </span>
-                          )
-                        }}
-                      </Draggable>
-                    )
-                  })}
-                  {provided.placeholder}
-                </div>
+                  {/* <StyledLayers key={i} styles={w?.correct ? styles : [styles[0]]}> */}
+                  <div
+                    style={styles[0]}
+                  >
+                    <div
+                      className={`px-1 ${w?.correct ? "" : "m-1"} ${layoutAnimation?.settling ? "transition-none" : isDisplacedTarget ? "transition-all duration-[240ms] ease-out" : "transition-all duration-[200ms] ease-out"} ${!w?.correct && "cursor-grab active:cursor-grabbing draggable-notsure-why-cant-inline"}`}
+                      style={{
+                        backgroundColor: w?.correct
+                          ? undefined
+                          : haiku?.bgColor || "lightgrey",
+                        transform: layoutOffset && layoutAnimation.settling
+                          ? `translate(${layoutOffset.dx}px, ${layoutOffset.dy}px)`
+                          : isDragTarget
+                            ? "translateY(-2px) scale(1.04)"
+                            : undefined,
+                        opacity: isDragTarget ? 0.35 : undefined,
+                        outline: isDragTarget ? "1px solid rgb(0 0 0 / 0.35)" : undefined,
+                        filter: w?.correct
+                          ? undefined
+                          : isDragging || selectedWord?.word?.id == w?.id || isDragTarget
+                            ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
+                            : selectedWord || draggingWord
+                              ? `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`
+                              : `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`,
+                      }}
+                    >
+                      {j == 0 && w?.correct &&
+                        upperCaseFirstLetter(w?.word)
+                      }
+                      {!(j == 0 && w?.correct) &&
+                        w?.word
+                      }
+                    </div>
+                  {/* </StyledLayers> */}
+                  </div>
+                </span>
               )
-            }}
-          </Droppable>
+            })}
+          </div>
         )
       })}
-    </>
+    </div>
   )
 }
-
