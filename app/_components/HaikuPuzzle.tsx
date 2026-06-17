@@ -43,6 +43,7 @@ export default function HaikuPuzzle({
   const preSwapPoemRect = useRef<DOMRect>();
   const preSwapRects = useRef<{ [key: string]: DOMRect }>({});
   const preSwapTargetWordId = useRef<string>();
+  const idleHintShown = useRef(false);
 
   // console.log('app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
 
@@ -115,6 +116,7 @@ export default function HaikuPuzzle({
 
   useEffect(() => {
     dragActivityOccurred.current = false;
+    idleHintShown.current = false;
     setIdleDragHint(undefined);
   }, [haikudleId]);
 
@@ -146,7 +148,8 @@ export default function HaikuPuzzle({
         dy: ((targetRect.top + targetRect.height / 2) - (sourceRect.top + sourceRect.height / 2)) * 4 / 5,
         returning: false,
       });
-    }, 2000);
+      idleHintShown.current = true;
+    }, idleHintShown.current ? 2000 : 5000);
 
     return () => window.clearTimeout(timeout);
   }, [draggingWord, haikudleId, idleDragHint, layoutAnimation, poem]);
@@ -157,7 +160,7 @@ export default function HaikuPuzzle({
     if (idleDragHint.returning) {
       const clearTimeoutId = window.setTimeout(() => {
         setIdleDragHint(undefined);
-      }, 500);
+      }, 300);
 
       return () => window.clearTimeout(clearTimeoutId);
     }
@@ -430,7 +433,9 @@ export default function HaikuPuzzle({
                           : undefined,
                         transitionDuration: isIdleDragHint && idleDragHint.returning
                           ? "300ms"
-                          : undefined,
+                          : isIdleDragHintTarget
+                            ? "80ms"
+                            : undefined,
                         backgroundColor: w?.correct
                           ? undefined
                           : haiku?.bgColor || "lightgrey",
