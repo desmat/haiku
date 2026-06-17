@@ -142,8 +142,8 @@ export default function HaikuPuzzle({
       setIdleDragHint({
         wordId: source.word.id,
         targetWordId: target.word.id,
-        dx: ((targetRect.left + targetRect.width / 2) - (sourceRect.left + sourceRect.width / 2)) * 9 / 10,
-        dy: ((targetRect.top + targetRect.height / 2) - (sourceRect.top + sourceRect.height / 2)) * 9 / 10,
+        dx: ((targetRect.left + targetRect.width / 2) - (sourceRect.left + sourceRect.width / 2)) * 4 / 5,
+        dy: ((targetRect.top + targetRect.height / 2) - (sourceRect.top + sourceRect.height / 2)) * 4 / 5,
         returning: false,
       });
     }, 2000);
@@ -179,38 +179,23 @@ export default function HaikuPuzzle({
     }
 
     let frame = 0;
-    let lastOverWordId: string | undefined;
+    let lastOverTarget = false;
 
     const checkOverlap = () => {
       const sourceRect = wordTileRefs.current[idleDragHint.wordId]?.getBoundingClientRect();
-      const overWord = sourceRect
-        ? poem
-          .flatMap((line: any[]) => line)
-          .filter((word: any) => word?.id && !word?.correct && word.id != idleDragHint.wordId)
-          .map((word: any) => {
-            const targetRect = wordTileRefs.current[word.id]?.getBoundingClientRect();
-            if (
-              !targetRect ||
-              sourceRect.left >= targetRect.right ||
-              sourceRect.right <= targetRect.left ||
-              sourceRect.top >= targetRect.bottom ||
-              sourceRect.bottom <= targetRect.top
-            ) {
-              return undefined;
-            }
+      const targetRect = wordTileRefs.current[idleDragHint.targetWordId]?.getBoundingClientRect();
+      const isOverTarget = Boolean(
+        sourceRect &&
+        targetRect &&
+        sourceRect.left < targetRect.right &&
+        sourceRect.right > targetRect.left &&
+        sourceRect.top < targetRect.bottom &&
+        sourceRect.bottom > targetRect.top
+      );
 
-            const overlapWidth = Math.min(sourceRect.right, targetRect.right) - Math.max(sourceRect.left, targetRect.left);
-            const overlapHeight = Math.min(sourceRect.bottom, targetRect.bottom) - Math.max(sourceRect.top, targetRect.top);
-            return { wordId: word.id, overlapArea: overlapWidth * overlapHeight };
-          })
-          .filter(Boolean)
-          .sort((a: any, b: any) => b.overlapArea - a.overlapArea)[0]
-        : undefined;
-      const overWordId = overWord?.wordId;
-
-      if (overWordId != lastOverWordId) {
-        lastOverWordId = overWordId;
-        setIdleDragOverWordId(overWordId);
+      if (isOverTarget != lastOverTarget) {
+        lastOverTarget = isOverTarget;
+        setIdleDragOverWordId(isOverTarget ? idleDragHint.targetWordId : undefined);
       }
 
       frame = window.requestAnimationFrame(checkOverlap);
@@ -222,7 +207,7 @@ export default function HaikuPuzzle({
       window.cancelAnimationFrame(frame);
       setIdleDragOverWordId(undefined);
     };
-  }, [idleDragHint, poem]);
+  }, [idleDragHint]);
 
   useLayoutEffect(() => {
     const rects = preSwapRects.current;
