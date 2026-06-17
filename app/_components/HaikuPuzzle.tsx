@@ -238,9 +238,19 @@ export default function HaikuPuzzle({
     const finishDrag = (event: PointerEvent) => {
       if (pointerDrag) {
         const target = getPointerTarget(event.clientX, event.clientY);
+        const canSwap = target && !target.word?.correct && target.word?.id != pointerDrag.word?.id;
 
-        if (target) {
+        if (canSwap) {
           swapDraggedWord(pointerDrag, target.word, target.lineNumber, target.wordNumber);
+        } else {
+          setPointerPreview({
+            ...pointerDrag,
+            returning: true,
+          });
+          setPointerPress(undefined);
+          setPointerDrag(undefined);
+          setDragOverWordId(undefined);
+          return;
         }
       }
 
@@ -265,6 +275,8 @@ export default function HaikuPuzzle({
           offsetX: pointerPress.offsetX,
           offsetY: pointerPress.offsetY,
           width: pointerPress.width,
+          startX: pointerPress.startX,
+          startY: pointerPress.startY,
           x: event.clientX,
           y: event.clientY,
         };
@@ -310,6 +322,17 @@ export default function HaikuPuzzle({
       window.removeEventListener("pointercancel", finishDrag);
     };
   }, [getPointerTarget, pointerDrag, pointerPress, swapDraggedWord]);
+
+  useEffect(() => {
+    if (!pointerPreview?.returning) return;
+
+    const timeout = window.setTimeout(() => {
+      setPointerPreview(undefined);
+      setDraggingWord(undefined);
+    }, 500);
+
+    return () => window.clearTimeout(timeout);
+  }, [pointerPreview]);
 
   return (
     <div
@@ -369,13 +392,10 @@ export default function HaikuPuzzle({
                           ? `translate(${layoutOffset.dx}px, ${layoutOffset.dy}px)`
                           : isIdleDragHint && !idleDragHint.returning
                             ? `translate(${idleDragHint.dx}px, ${idleDragHint.dy}px)`
-                          : isDragTarget
-                            ? "translateY(-2px) scale(1.04)"
                             : undefined,
                         position: isIdleDragHint ? "relative" : undefined,
                         zIndex: isIdleDragHint ? 1 : undefined,
-                        opacity: isDragTarget ? 0.35 : undefined,
-                        outline: isDragTarget ? "1px solid rgb(0 0 0 / 0.35)" : undefined,
+                        opacity: isDragTarget ? 0.2 : undefined,
                         filter: w?.correct
                           ? undefined
                           : isDragging || isIdleDragHint || isDragTarget
@@ -404,9 +424,15 @@ export default function HaikuPuzzle({
         <div
           className="fixed z-[9999] pointer-events-none select-none"
           style={{
-            left: pointerPreview.x - pointerPreview.offsetX,
-            top: pointerPreview.y - pointerPreview.offsetY,
+            left: (pointerPreview.startX ?? pointerPreview.x) - pointerPreview.offsetX,
+            top: (pointerPreview.startY ?? pointerPreview.y) - pointerPreview.offsetY,
             width: pointerPreview.width,
+            transform: pointerPreview.returning
+              ? undefined
+              : `translate(${pointerPreview.x - (pointerPreview.startX ?? pointerPreview.x)}px, ${pointerPreview.y - (pointerPreview.startY ?? pointerPreview.y)}px)`,
+            transitionProperty: "transform",
+            transitionDuration: pointerPreview.returning ? "300ms" : "0ms",
+            transitionTimingFunction: pointerPreview.returning ? "cubic-bezier(.34, 1.56, .64, 0.95)" : undefined,
           }}
         >
           <div style={styles[0]}>
