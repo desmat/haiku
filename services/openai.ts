@@ -513,8 +513,6 @@ export async function analyzeImage(userId: string, imageBase64: string): Promise
     Choose the position in the area of negative space, if any, and away from the point of interest, if any.
     If the moon or sun are features it's often nice to position the poem to touch it.
     If a person, persons, animal or animals are prominently featured make sure the position will ABOSOLUTELY NOT be covering it their face and so prefer to position below their face, even if this is in the negative space.
-    IMPORTANT: IF PERSON, PEOPLE, ANIMAL OR ANIMALS ARE IN THE CENTER CHOOSE \`bottom\`.
-    IMPORTANT: IF PERSON, PEOPLE, ANIMAL OR ANIMALS ARE IN THE BOTTOM CHOOSE THE POSITION OF THE NEGATIVE SPACE, EITHER \`top\` or \`center\`.
     If there is no obvious place in the image please choose center.
     Generally favor center or top position.
     Please specify on which position will work best to overlay the poem:
