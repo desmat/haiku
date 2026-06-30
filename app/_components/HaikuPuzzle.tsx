@@ -31,7 +31,7 @@ export default function HaikuPuzzle({
   const [pointerPreview, setPointerPreview] = useState<any>();
   const [draggingWord, setDraggingWord] = useState<any>();
   const [pointerDrag, setPointerDrag] = useState<any>();
-  const [dragOverWordId, setDragOverWordId] = useState<string>();
+  const [dragOverTarget, setDragOverTarget] = useState<any>();
   const [idleDragHint, setIdleDragHint] = useState<any>();
   const [idleDragOverWordId, setIdleDragOverWordId] = useState<string>();
   const [layoutAnimation, setLayoutAnimation] = useState<any>();
@@ -146,6 +146,9 @@ export default function HaikuPuzzle({
         targetWordId: target.word.id,
         dx: ((targetRect.left + targetRect.width / 2) - (sourceRect.left + sourceRect.width / 2)) * 4 / 5,
         dy: ((targetRect.top + targetRect.height / 2) - (sourceRect.top + sourceRect.height / 2)) * 4 / 5,
+        targetDx: sourceRect.left - targetRect.left,
+        targetDy: sourceRect.top - targetRect.top,
+        targetRect: { left: targetRect.left, top: targetRect.top, right: targetRect.right, bottom: targetRect.bottom },
         returning: false,
       });
       idleHintShown.current = true;
@@ -186,7 +189,7 @@ export default function HaikuPuzzle({
 
     const checkOverlap = () => {
       const sourceRect = wordTileRefs.current[idleDragHint.wordId]?.getBoundingClientRect();
-      const targetRect = wordTileRefs.current[idleDragHint.targetWordId]?.getBoundingClientRect();
+      const targetRect = idleDragHint.targetRect;
       const isOverTarget = Boolean(
         sourceRect &&
         targetRect &&
@@ -292,7 +295,7 @@ export default function HaikuPuzzle({
           });
           setPointerPress(undefined);
           setPointerDrag(undefined);
-          setDragOverWordId(undefined);
+          setDragOverTarget(undefined);
           return;
         }
       }
@@ -301,7 +304,7 @@ export default function HaikuPuzzle({
       setPointerPreview(undefined);
       setDraggingWord(undefined);
       setPointerDrag(undefined);
-      setDragOverWordId(undefined);
+      setDragOverTarget(undefined);
     }
 
     const moveDrag = (event: PointerEvent) => {
@@ -311,6 +314,8 @@ export default function HaikuPuzzle({
       let activeDrag = pointerDrag;
 
       if (!activeDrag && distance > 4) {
+        const sourceEl = wordRefs.current[pointerPress.word?.id];
+        const sourceRect = sourceEl?.getBoundingClientRect();
         activeDrag = {
           word: pointerPress.word,
           lineNumber: pointerPress.lineNumber,
@@ -322,8 +327,8 @@ export default function HaikuPuzzle({
           startY: pointerPress.startY,
           x: event.clientX,
           y: event.clientY,
+          sourceRect: sourceRect ? { left: sourceRect.left, top: sourceRect.top } : undefined,
         };
-        const sourceEl = wordRefs.current[pointerPress.word?.id];
         if (sourceEl) {
           if (hiddenSourceRef.current && hiddenSourceRef.current != sourceEl) {
             hiddenSourceRef.current.style.visibility = "";
@@ -348,9 +353,16 @@ export default function HaikuPuzzle({
       setPointerDrag(activeDrag);
 
       const target = getPointerTarget(event.clientX, event.clientY);
-      setDragOverWordId(
-        target && !target.word?.correct && target.word?.id != activeDrag.word?.id
-          ? target.word.id
+      const validTarget = target && !target.word?.correct && target.word?.id != activeDrag.word?.id;
+      const targetRect = validTarget ? wordRefs.current[target.word.id]?.getBoundingClientRect() : undefined;
+
+      setDragOverTarget(
+        validTarget && targetRect && activeDrag.sourceRect
+          ? {
+            wordId: target.word.id,
+            dx: activeDrag.sourceRect.left - targetRect.left,
+            dy: activeDrag.sourceRect.top - targetRect.top,
+          }
           : undefined
       );
     }
@@ -398,7 +410,7 @@ export default function HaikuPuzzle({
               const isPreviewSource = pointerPreview?.word?.id == w?.id;
               const isIdleDragHint = idleDragHint?.wordId == w?.id;
               const isIdleDragHintTarget = idleDragOverWordId == w?.id;
-              const isDragTarget = dragOverWordId == w?.id || isIdleDragHintTarget;
+              const isDragTarget = dragOverTarget?.wordId == w?.id || isIdleDragHintTarget;
               const layoutOffset = layoutAnimation?.offsets?.[w?.id];
               const isDisplacedTarget = layoutAnimation?.targetWordId == w?.id;
               return (
@@ -415,7 +427,7 @@ export default function HaikuPuzzle({
                     position: isIdleDragHint ? "relative" : undefined,
                     zIndex: isIdleDragHint ? 50 : undefined,
                     touchAction: "none",
-                    marginLeft: j === 0 ? "-1.25em" : undefined,
+                    marginLeft: j === 0 ? "-1.5em" : undefined,
                   }}
                   onPointerDown={(event) => handlePointerDown(event, w, i, j)}
                 >
@@ -444,9 +456,13 @@ export default function HaikuPuzzle({
                           ? `translate(${layoutOffset.dx}px, ${layoutOffset.dy}px)`
                           : isIdleDragHint && !idleDragHint.returning
                             ? `translate(${idleDragHint.dx}px, ${idleDragHint.dy}px)`
-                            : undefined,
-                        position: isIdleDragHint ? "relative" : undefined,
-                        zIndex: isIdleDragHint ? 50 : undefined,
+                            : isIdleDragHintTarget
+                              ? `translate(${idleDragHint?.targetDx}px, ${idleDragHint?.targetDy}px)`
+                              : dragOverTarget?.wordId == w?.id
+                                ? `translate(${dragOverTarget.dx}px, ${dragOverTarget.dy}px)`
+                                : undefined,
+                        position: isIdleDragHint || isDragTarget ? "relative" : undefined,
+                        zIndex: isIdleDragHint ? 50 : isDragTarget ? -1 : undefined,
                         opacity: isDragTarget ? 0.2 : undefined,
                         filter: w?.correct
                           ? undefined
