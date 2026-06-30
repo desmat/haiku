@@ -425,7 +425,7 @@ export default function HaikuPuzzle({
                   style={{
                     visibility: isPreviewSource || isDragging ? "hidden" : undefined,
                     position: isIdleDragHint ? "relative" : undefined,
-                    zIndex: isIdleDragHint ? 50 : undefined,
+                    zIndex: isIdleDragHint ? 50 : isDragTarget ? 0 : 1,
                     touchAction: "none",
                     marginLeft: j === 0 ? "-1.5em" : undefined,
                   }}
@@ -461,8 +461,8 @@ export default function HaikuPuzzle({
                               : dragOverTarget?.wordId == w?.id
                                 ? `translate(${dragOverTarget.dx}px, ${dragOverTarget.dy}px)`
                                 : undefined,
-                        position: isIdleDragHint || isDragTarget ? "relative" : undefined,
-                        zIndex: isIdleDragHint ? 50 : isDragTarget ? -1 : undefined,
+                        position: "relative",
+                        zIndex: isIdleDragHint ? 50 : isDragTarget ? -1 : 0,
                         opacity: isDragTarget ? 0.2 : undefined,
                         filter: w?.correct
                           ? undefined
