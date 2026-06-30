@@ -380,7 +380,7 @@ export default function HaikuPuzzle({
   return (
     <div
       ref={poemRef}
-      className={layoutAnimation?.settling ? "transition-none" : "transition-transform duration-[200ms] ease-out"}
+      className={`max-w-[92vw] ${layoutAnimation?.settling ? "transition-none" : "transition-transform duration-[200ms] ease-out"}`}
       style={{
         transform: layoutAnimation?.poemOffset && layoutAnimation.settling
           ? `translate(${layoutAnimation.poemOffset.dx}px, ${layoutAnimation.poemOffset.dy}px)`
@@ -391,7 +391,7 @@ export default function HaikuPuzzle({
         return (
           <div
             key={`${i}`}
-            className={`_bg-purple-200 flex flex-row items-center justify-start my-0 px-5 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-full select-none`}
+            className={`_bg-purple-200 flex flex-row flex-wrap items-center justify-start mt-2 first:mt-0 pl-9 pr-5 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-full select-none`}
           >
             {poem[i].map((w: any, j: number) => {
               const isDragging = draggingWord?.word?.id == w?.id;
@@ -415,6 +415,7 @@ export default function HaikuPuzzle({
                     position: isIdleDragHint ? "relative" : undefined,
                     zIndex: isIdleDragHint ? 50 : undefined,
                     touchAction: "none",
+                    marginLeft: j === 0 ? "-1.25em" : undefined,
                   }}
                   onPointerDown={(event) => handlePointerDown(event, w, i, j)}
                 >
