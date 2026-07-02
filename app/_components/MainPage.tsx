@@ -846,7 +846,10 @@ export default function MainPage({
   }
 
   useEffect(() => {
-    if (!haikudleMode || !haikudleSolvedJustNow) {
+    // note: solvedJustNow is set on every move; haikudleSolved is what flips
+    // when the puzzle completes, solvedJustNow only distinguishes solving from
+    // loading an already-solved haikudle
+    if (!haikudleMode || !haikudleSolved || !haikudleSolvedJustNow) {
       previousSolvedJustNow.current = false;
       setSolvedRevealInProgress(false);
       return;
@@ -856,12 +859,14 @@ export default function MainPage({
 
     previousSolvedJustNow.current = true;
     setSolvedRevealInProgress(true);
+    // hold the puzzle page long enough for the last drop to settle and the
+    // word tiles to fade out before swapping in the completed poem
     const timeoutId = setTimeout(() => {
       setSolvedRevealInProgress(false);
-    }, 100);
+    }, 200);
 
     return () => clearTimeout(timeoutId);
-  }, [haikudleMode, haikudleSolvedJustNow]);
+  }, [haikudleMode, haikudleSolved, haikudleSolvedJustNow]);
 
   useEffect(() => {
     // console.log('app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });

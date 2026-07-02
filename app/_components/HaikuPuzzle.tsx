@@ -44,6 +44,7 @@ export default function HaikuPuzzle({
   const preSwapRects = useRef<{ [key: string]: DOMRect }>({});
   const preSwapTargetWordId = useRef<string>();
   const preSwapDroppedWordId = useRef<string>();
+  const preSwapIncorrectWordIds = useRef<Set<string>>();
   const idleHintShown = useRef(false);
 
   // console.log('app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
@@ -52,6 +53,12 @@ export default function HaikuPuzzle({
     if (dragWord && !word?.correct && dragWord.word?.id != word?.id) {
       preSwapTargetWordId.current = word?.id;
       preSwapDroppedWordId.current = dragWord.word?.id;
+      preSwapIncorrectWordIds.current = new Set(
+        poem
+          .flat()
+          .filter((w: any) => w?.id && !w?.correct)
+          .map((w: any) => w.id)
+      );
       preSwapPoemRect.current = poemRef.current?.getBoundingClientRect();
       preSwapRects.current = Object.fromEntries(
         Object.entries(wordRefs.current)
@@ -85,7 +92,7 @@ export default function HaikuPuzzle({
         wordNumber,
       );
     }
-  }, [haikudleId, swap]);
+  }, [haikudleId, poem, swap]);
 
   const getPointerTarget = useCallback((clientX: number, clientY: number) => {
     const targetEl = document
@@ -268,13 +275,21 @@ export default function HaikuPuzzle({
     preSwapTargetWordId.current = undefined;
     const droppedWordId = preSwapDroppedWordId.current;
     preSwapDroppedWordId.current = undefined;
-    if (!Object.keys(offsets).length && !poemOffset?.dx && !poemOffset?.dy) return;
+    const justCorrectWordIds = Object.fromEntries(
+      poem
+        .flat()
+        .filter((w: any) => w?.id && w?.correct && preSwapIncorrectWordIds.current?.has(w.id))
+        .map((w: any) => [w.id, true])
+    );
+    preSwapIncorrectWordIds.current = undefined;
+    if (!Object.keys(offsets).length && !poemOffset?.dx && !poemOffset?.dy && !Object.keys(justCorrectWordIds).length) return;
 
     setLayoutAnimation({
       offsets,
       poemOffset,
       targetWordId,
       droppedWordId,
+      justCorrectWordIds: Object.keys(justCorrectWordIds).length ? justCorrectWordIds : undefined,
       settling: true,
     });
   }, [moves]);
@@ -295,7 +310,7 @@ export default function HaikuPuzzle({
 
     const timeout = window.setTimeout(() => {
       setLayoutAnimation(undefined);
-    }, 240);
+    }, layoutAnimation.justCorrectWordIds ? 400 : 240);
 
     return () => window.clearTimeout(timeout);
   }, [layoutAnimation]);
@@ -436,6 +451,10 @@ export default function HaikuPuzzle({
               const layoutOffset = layoutAnimation?.offsets?.[w?.id];
               const isDisplacedTarget = layoutAnimation?.targetWordId == w?.id;
               const isDroppedWord = layoutAnimation?.droppedWordId == w?.id;
+              const isJustCorrect = layoutAnimation?.justCorrectWordIds?.[w?.id];
+              // words that just became correct keep their tile look through the
+              // settling frame, then fade it out
+              const styleAsTile = !w?.correct || (isJustCorrect && layoutAnimation?.settling);
               return (
                 <span
                   key={w?.id || `${i}-${j}`}
@@ -462,7 +481,7 @@ export default function HaikuPuzzle({
                       ref={(el) => {
                         if (w?.id) wordTileRefs.current[w.id] = el;
                       }}
-                      className={`px-1 ${w?.correct ? "" : "m-1"} ${layoutAnimation?.settling ? "transition-none" : isIdleDragHint ? "transition-transform duration-[650ms] ease-in-out" : isDisplacedTarget ? "transition-[transform,filter,opacity] duration-[240ms] ease-out" : "transition-[transform,filter,opacity] duration-[200ms] ease-out"} ${!w?.correct && "cursor-grab active:cursor-grabbing draggable-notsure-why-cant-inline"}`}
+                      className={`px-1 ${w?.correct ? "" : "m-1"} ${layoutAnimation?.settling ? "transition-none" : isIdleDragHint ? "transition-transform duration-[650ms] ease-in-out" : isJustCorrect ? "transition-[transform,filter,opacity,background-color] duration-[400ms] ease-out" : isDisplacedTarget ? "transition-[transform,filter,opacity] duration-[240ms] ease-out" : "transition-[transform,filter,opacity] duration-[200ms] ease-out"} ${!w?.correct && "cursor-grab active:cursor-grabbing draggable-notsure-why-cant-inline"}`}
                       style={{
                         transitionTimingFunction: isIdleDragHint && idleDragHint.returning
                           ? "cubic-bezier(.34, 1.56, .64, 0.95)"
@@ -472,9 +491,9 @@ export default function HaikuPuzzle({
                           : isIdleDragHintTarget
                             ? "80ms"
                             : undefined,
-                        backgroundColor: w?.correct
-                          ? undefined
-                          : haiku?.bgColor || "lightgrey",
+                        backgroundColor: styleAsTile
+                          ? haiku?.bgColor || "lightgrey"
+                          : undefined,
                         transform: layoutOffset && layoutAnimation.settling
                           ? `translate(${layoutOffset.dx}px, ${layoutOffset.dy}px)`
                           : isIdleDragHint && !idleDragHint.returning
@@ -487,7 +506,7 @@ export default function HaikuPuzzle({
                         position: "relative",
                         zIndex: isIdleDragHint ? 50 : isDragTarget ? -1 : 0,
                         opacity: isDragTarget || (isDisplacedTarget && layoutAnimation?.settling) ? 0.2 : undefined,
-                        filter: w?.correct
+                        filter: !styleAsTile
                           ? undefined
                           : isDragging || isIdleDragHint || isDragTarget || ((isDroppedWord || isDisplacedTarget) && layoutAnimation?.settling)
                             ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
