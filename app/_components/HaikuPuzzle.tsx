@@ -43,6 +43,7 @@ export default function HaikuPuzzle({
   const preSwapPoemRect = useRef<DOMRect>();
   const preSwapRects = useRef<{ [key: string]: DOMRect }>({});
   const preSwapTargetWordId = useRef<string>();
+  const preSwapDroppedWordId = useRef<string>();
   const idleHintShown = useRef(false);
 
   // console.log('app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
@@ -50,12 +51,30 @@ export default function HaikuPuzzle({
   const swapDraggedWord = useCallback((dragWord: any, word: any, lineNumber: number, wordNumber: number) => {
     if (dragWord && !word?.correct && dragWord.word?.id != word?.id) {
       preSwapTargetWordId.current = word?.id;
+      preSwapDroppedWordId.current = dragWord.word?.id;
       preSwapPoemRect.current = poemRef.current?.getBoundingClientRect();
       preSwapRects.current = Object.fromEntries(
         Object.entries(wordRefs.current)
           .filter((entry): entry is [string, HTMLSpanElement] => Boolean(entry[1]))
           .map(([wordId, el]) => [wordId, el.getBoundingClientRect()])
       );
+
+      // both words already previewed the swap during the drag: the dropped
+      // word settles from where it was released, and the displaced word from
+      // the vacated slot its ghost was shown in
+      const vacatedRect = preSwapRects.current[dragWord.word?.id];
+      if (dragWord.word?.id) {
+        preSwapRects.current[dragWord.word.id] = {
+          left: dragWord.x - dragWord.offsetX,
+          top: dragWord.y - dragWord.offsetY,
+        } as DOMRect;
+      }
+      if (word?.id && vacatedRect) {
+        preSwapRects.current[word.id] = {
+          left: vacatedRect.left,
+          top: vacatedRect.top,
+        } as DOMRect;
+      }
 
       swap(
         haikudleId,
@@ -247,12 +266,15 @@ export default function HaikuPuzzle({
     preSwapPoemRect.current = undefined;
     const targetWordId = preSwapTargetWordId.current;
     preSwapTargetWordId.current = undefined;
+    const droppedWordId = preSwapDroppedWordId.current;
+    preSwapDroppedWordId.current = undefined;
     if (!Object.keys(offsets).length && !poemOffset?.dx && !poemOffset?.dy) return;
 
     setLayoutAnimation({
       offsets,
       poemOffset,
       targetWordId,
+      droppedWordId,
       settling: true,
     });
   }, [moves]);
@@ -413,6 +435,7 @@ export default function HaikuPuzzle({
               const isDragTarget = dragOverTarget?.wordId == w?.id || isIdleDragHintTarget;
               const layoutOffset = layoutAnimation?.offsets?.[w?.id];
               const isDisplacedTarget = layoutAnimation?.targetWordId == w?.id;
+              const isDroppedWord = layoutAnimation?.droppedWordId == w?.id;
               return (
                 <span
                   key={w?.id || `${i}-${j}`}
@@ -463,10 +486,10 @@ export default function HaikuPuzzle({
                                 : undefined,
                         position: "relative",
                         zIndex: isIdleDragHint ? 50 : isDragTarget ? -1 : 0,
-                        opacity: isDragTarget ? 0.2 : undefined,
+                        opacity: isDragTarget || (isDisplacedTarget && layoutAnimation?.settling) ? 0.2 : undefined,
                         filter: w?.correct
                           ? undefined
-                          : isDragging || isIdleDragHint || isDragTarget
+                          : isDragging || isIdleDragHint || isDragTarget || ((isDroppedWord || isDisplacedTarget) && layoutAnimation?.settling)
                             ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
                             : draggingWord
                               ? `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`
