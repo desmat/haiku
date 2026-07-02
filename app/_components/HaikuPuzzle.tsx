@@ -56,6 +56,10 @@ export default function HaikuPuzzle({
   const preSwapTargetWordId = useRef<string>();
   const preSwapDroppedWordId = useRef<string>();
   const preSwapIncorrectWordIds = useRef<Set<string>>();
+  // displacement preview is debounced so words merely crossed by a fast drag
+  // don't twitch; refs (not state) so the per-move closures stay accurate
+  const dragOverCandidate = useRef<{ wordId: string, timeout: number }>();
+  const committedDragOverWordId = useRef<string>();
   const idleHintShown = useRef(false);
 
   // console.log('app._components.HaikuPage.HaikuPoem.render()', { poem, solved });
@@ -77,21 +81,26 @@ export default function HaikuPuzzle({
           .map(([wordId, el]) => [wordId, el.getBoundingClientRect()])
       );
 
-      // both words already previewed the swap during the drag: the dropped
-      // word settles from where it was released, and the displaced word from
-      // the vacated slot its ghost was shown in
-      const vacatedRect = preSwapRects.current[dragWord.word?.id];
+      // the dropped word settles from where it was released, and the
+      // displaced word from wherever its preview ghost currently is (fully in
+      // the vacated slot, mid-flight, or not shown at all on a quick drop)
       if (dragWord.word?.id) {
         preSwapRects.current[dragWord.word.id] = {
           left: dragWord.x - dragWord.offsetX,
           top: dragWord.y - dragWord.offsetY,
         } as DOMRect;
       }
-      if (word?.id && vacatedRect) {
-        preSwapRects.current[word.id] = {
-          left: vacatedRect.left,
-          top: vacatedRect.top,
-        } as DOMRect;
+      if (word?.id) {
+        const spanRect = preSwapRects.current[word.id];
+        const tileEl = wordTileRefs.current[word.id];
+        const transform = tileEl ? getComputedStyle(tileEl).transform : undefined;
+        if (spanRect && transform && transform != "none") {
+          const matrix = new DOMMatrixReadOnly(transform);
+          preSwapRects.current[word.id] = {
+            left: spanRect.left + matrix.e,
+            top: spanRect.top + matrix.f,
+          } as DOMRect;
+        }
       }
 
       swap(
@@ -345,6 +354,15 @@ export default function HaikuPuzzle({
   useEffect(() => {
     if (!pointerPress) return;
 
+    const clearDragOver = () => {
+      if (dragOverCandidate.current) {
+        window.clearTimeout(dragOverCandidate.current.timeout);
+        dragOverCandidate.current = undefined;
+      }
+      committedDragOverWordId.current = undefined;
+      setDragOverTarget(undefined);
+    }
+
     const finishDrag = (event: PointerEvent) => {
       if (pointerDrag) {
         const target = getPointerTarget(event.clientX, event.clientY);
@@ -359,7 +377,7 @@ export default function HaikuPuzzle({
           });
           setPointerPress(undefined);
           setPointerDrag(undefined);
-          setDragOverTarget(undefined);
+          clearDragOver();
           return;
         }
       }
@@ -368,7 +386,7 @@ export default function HaikuPuzzle({
       setPointerPreview(undefined);
       setDraggingWord(undefined);
       setPointerDrag(undefined);
-      setDragOverTarget(undefined);
+      clearDragOver();
     }
 
     const moveDrag = (event: PointerEvent) => {
@@ -419,16 +437,33 @@ export default function HaikuPuzzle({
       const target = getPointerTarget(event.clientX, event.clientY);
       const validTarget = target && !target.word?.correct && target.word?.id != activeDrag.word?.id;
       const targetRect = validTarget ? wordRefs.current[target.word.id]?.getBoundingClientRect() : undefined;
+      const targetData = validTarget && targetRect && activeDrag.sourceRect
+        ? {
+          wordId: target.word.id,
+          dx: activeDrag.sourceRect.left - targetRect.left,
+          dy: activeDrag.sourceRect.top - targetRect.top,
+        }
+        : undefined;
 
-      setDragOverTarget(
-        validTarget && targetRect && activeDrag.sourceRect
-          ? {
-            wordId: target.word.id,
-            dx: activeDrag.sourceRect.left - targetRect.left,
-            dy: activeDrag.sourceRect.top - targetRect.top,
-          }
-          : undefined
-      );
+      if (!targetData) {
+        clearDragOver();
+      } else if (committedDragOverWordId.current != targetData.wordId) {
+        if (committedDragOverWordId.current) {
+          committedDragOverWordId.current = undefined;
+          setDragOverTarget(undefined);
+        }
+        if (dragOverCandidate.current?.wordId != targetData.wordId) {
+          if (dragOverCandidate.current) window.clearTimeout(dragOverCandidate.current.timeout);
+          dragOverCandidate.current = {
+            wordId: targetData.wordId,
+            timeout: window.setTimeout(() => {
+              dragOverCandidate.current = undefined;
+              committedDragOverWordId.current = targetData.wordId;
+              setDragOverTarget(targetData);
+            }, 100),
+          };
+        }
+      }
     }
 
     window.addEventListener("pointermove", moveDrag);
