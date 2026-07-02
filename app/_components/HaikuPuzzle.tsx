@@ -507,7 +507,7 @@ export default function HaikuPuzzle({
         return (
           <div
             key={`${i}`}
-            className={`_bg-purple-200 flex flex-row flex-wrap items-center justify-start mt-2 first:mt-0 pl-9 pr-5 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-full select-none`}
+            className={`_bg-purple-200 flex flex-row flex-wrap items-center justify-start mt-2 first:mt-0 pr-5 sm:min-h-[2.8rem] md:min-h-[3.4rem] min-h-[2.4rem] h-fit w-full select-none`}
           >
             {poem[i].map((w: any, j: number) => {
               const isDragging = draggingWord?.word?.id == w?.id;
@@ -536,7 +536,9 @@ export default function HaikuPuzzle({
                     position: isIdleDragHint ? "relative" : undefined,
                     zIndex: isIdleDragHint ? 50 : isDragTarget ? 0 : 1,
                     touchAction: "none",
-                    marginLeft: j === 0 ? "-1.5em" : undefined,
+                    // the line's former pl-9 minus the first word's -1.5em pull,
+                    // as a margin on the first word so wrapped rows start flush
+                    marginLeft: j === 0 ? "calc(2.25rem - 1.5em)" : undefined,
                   }}
                   onPointerDown={(event) => handlePointerDown(event, w, i, j)}
                 >
