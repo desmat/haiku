@@ -83,6 +83,7 @@ export default function HaikudlePage({
               <div className="onboarding-focus double" />
             }
             <HaikuPuzzle
+              mode={mode}
               haiku={haiku}
               styles={styles}
             />

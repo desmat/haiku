@@ -146,7 +146,6 @@ export default function MainPage({
     createHaikudle,
     haikudleInProgress,
     haikudleSolved,
-    haikudleSolvedJustNow,
   ] = useHaikudle((state: any) => [
     state.ready,
     state.loaded(haikuId || { lang }),
@@ -155,7 +154,6 @@ export default function MainPage({
     state.create,
     state.inProgress,
     state.solved,
-    state.solvedJustNow,
   ]);
 
   // let [haikudleLoaded, setHaikudleLoaded] = useState(false);
@@ -172,8 +170,6 @@ export default function MainPage({
   const loaded = haikudleMode ? (haikudleLoaded && haikudleReady) /* || haikusLoaded */ : haikusLoaded;
   let [loading, setLoading] = useState(false);
   let [loadingUI, setLoadingUI] = useState(false);
-  const [solvedRevealInProgress, setSolvedRevealInProgress] = useState(false);
-  const previousSolvedJustNow = useRef(false);
 
   // console.log('app.MainPage.render()', { loadingUI, generating, haikudleLoaded, haikudleReady });
 
@@ -194,8 +190,10 @@ export default function MainPage({
     (!previousDailyHaikudleId /* || user?.isAdmin */);
   //&& (!(haiku?.createdBy == user?.id) || user?.isAdmin);
   // console.log('app.MainPage.render()', { isPuzzleMode, haikudleSolved, previousDailyHaikudleId, user_isAdmin: user?.isAdmin, haiku_createdBy: haiku?.createdBy });
-  const showPuzzlePage = isPuzzleMode || solvedRevealInProgress;
-  const showHaikuPage = !isPuzzleMode && !solvedRevealInProgress;
+  // the puzzle page handles the completed state itself (no component swap on
+  // solve); HaikuPage only shows for previous dailies and non-haikudle modes
+  const showPuzzlePage = haikudleMode && !previousDailyHaikudleId;
+  const showHaikuPage = !showPuzzlePage;
 
   const { textStyles, altTextStyles } = haikuStyles(haiku);
 
@@ -846,29 +844,6 @@ export default function MainPage({
   }
 
   useEffect(() => {
-    // note: solvedJustNow is set on every move; haikudleSolved is what flips
-    // when the puzzle completes, solvedJustNow only distinguishes solving from
-    // loading an already-solved haikudle
-    if (!haikudleMode || !haikudleSolved || !haikudleSolvedJustNow) {
-      previousSolvedJustNow.current = false;
-      setSolvedRevealInProgress(false);
-      return;
-    }
-
-    if (previousSolvedJustNow.current) return;
-
-    previousSolvedJustNow.current = true;
-    setSolvedRevealInProgress(true);
-    // hold the puzzle page long enough for the last drop to settle and the
-    // word tiles to fade out before swapping in the completed poem
-    const timeoutId = setTimeout(() => {
-      setSolvedRevealInProgress(false);
-    }, 200);
-
-    return () => clearTimeout(timeoutId);
-  }, [haikudleMode, haikudleSolved, haikudleSolvedJustNow]);
-
-  useEffect(() => {
     // console.log('app.page useEffect []', { user, haikudleReady, previousDailyHaikudleId, userGeneratedHaiku, preferences: user?.preferences, test: !user?.preferences?.onboarded });
     // @ts-ignore
     let timeoutId;
@@ -1088,7 +1063,6 @@ export default function MainPage({
           styles={textStyles}
           altStyles={altTextStyles}
           fontSize={fontSize}
-          popPoem={haikudleMode && haikudleSolvedJustNow}
           regenerating={regenerating}
           onboardingElement={onboardingElement}
           refresh={!haiku?.error && (user?.isAdmin || album) && (() => loadRandom())}

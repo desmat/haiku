@@ -1,6 +1,6 @@
 'use client'
 
-import { capitalize, upperCaseFirstLetter } from "@desmat/utils/format";
+import { upperCaseFirstLetter } from "@desmat/utils/format";
 import moment from "moment";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -12,24 +12,13 @@ import { Haiku } from "@/types/Haiku";
 import { USAGE_LIMIT } from "@/types/Usage";
 import { User } from "@/types/User";
 import trackEvent from "@/utils/trackEvent";
+import HaikuTitle, { formatHaikuTitleAndAuthor } from "./HaikuTitle";
 import PopOnClick from "./PopOnClick";
 import { StyledLayers } from "./StyledLayers";
 import { GenerateIcon } from "./nav/GenerateInput";
 
 let syllable: any;
 import("syllable").then((s: any) => syllable = s.syllable);
-
-const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
-  const title = haiku?.title ?? haiku?.theme;
-  return [
-    title && !title.toLowerCase().startsWith("art by") && !title.toLowerCase().startsWith("by") && !title.startsWith("-") && !title.startsWith("—") && !title.startsWith("—") && !title.startsWith('"')
-      ? `"${capitalize(title)}"`
-      : title
-        ? `${title}`
-        : undefined,
-    `${mode == "haikudle" ? "haikudle.ai" : "haikugenius.ai"}/${haiku?.id}`
-  ];
-}
 
 export const formatHaikuText = (haiku: Haiku, mode?: string) => {
   const haikuTitleAndAuthor = formatHaikuTitleAndAuthor(haiku, mode);
@@ -229,7 +218,6 @@ export default function HaikuPoem({
   // console.log('app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   const onboarding = typeof (onboardingElement) == "string"
-  const maxHaikuTheme = showcaseMode ? 28 : 18;
   const dateCode = moment().format("YYYYMMDD");
 
   const [updatedPoem, setUpdatedPoem] = useState<string[]>([]);
@@ -521,56 +509,22 @@ export default function HaikuPoem({
               </PopOnClick>
             </div>
 
-            <div
-              className="_bg-red-400 absolute md:text-[16pt] sm:text-[14pt] text-[12pt]"
-              style={{
-                // background: "pink",
-                fontSize: showcaseMode ? "50%" : "60%",
-              }}
+            <HaikuTitle
+              haiku={haiku}
+              mode={mode}
+              styles={styles}
+              fontSize={fontSize}
+              onClick={() => !showcaseMode && updateTitle && updateTitle()}
+              cursor={updateTitle || canCopy ? "pointer" : ""}
+              title={
+                updateTitle
+                  ? "Update title" :
+                  canCopy
+                    ? "Copy to clipboard"
+                    : ""
+              }
             >
-              <div
-                className={showcaseMode
-                  ? "_bg-yellow-200 fixed w-max right-[1.5rem] bottom-[1rem] flex flex-row"
-                  : "_bg-orange-200 flex flex-row w-max ml-[0.5rem] mt-[-0.2rem] md:mt-[0.2rem] leading-5"
-                }
-                style={{
-                  fontSize,
-                  // display: "none",
-                }}
-              >
-                <div
-                  className="poem-title relative _transition-all _bg-pink-400"
-                >
-                  <StyledLayers
-                    className={showcaseMode
-                      ? "md:leading-[2rem] sm:leading-[1.8rem] leading-[1.4rem]"
-                      : "opacity-70 hover:opacity-100 md:leading-[1.75rem] sm:leading-[1.5rem] leading-[1rem]"}
-                    styles={styles.slice(0, 3)}
-                  >
-                    <span
-                      onClick={() => !showcaseMode && updateTitle && updateTitle()}
-                      style={{
-                        cursor: updateTitle || canCopy
-                          ? "pointer"
-                          : ""
-                      }}
-                      title={
-                        updateTitle
-                          ? "Update title" :
-                          canCopy
-                            ? "Copy to clipboard"
-                            : ""
-                      }
-
-                      dangerouslySetInnerHTML={{
-                        __html: `${formatHaikuTitleAndAuthor(haiku, mode).join((haiku?.title?.length ?? haiku?.theme?.length) > maxHaikuTheme
-                          ? "<br/>"
-                          : ", ")}`
-                      }}
-                    />
-                  </StyledLayers>
-
-                  {!showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed) &&
+              {!showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed) &&
                     <div
                       className="_bg-blue-200 absolute"
                       style={{
@@ -717,10 +671,8 @@ export default function HaikuPoem({
                         }
                       </div>
                     </div>
-                  }
-                </div>
-              </div>
-            </div>
+              }
+            </HaikuTitle>
           </div>
         </PopOnClick >
       </div>

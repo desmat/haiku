@@ -3,13 +3,17 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { upperCaseFirstLetter } from "@desmat/utils/format";
 import useHaikudle from '@/app/_hooks/haikudle';
+import { ExperienceMode } from "@/types/ExperienceMode";
 import { Haiku } from "@/types/Haiku";
+import HaikuTitle from "./HaikuTitle";
 import { StyledLayers } from "./StyledLayers";
 
 export default function HaikuPuzzle({
+  mode,
   haiku,
   styles,
 }: {
+  mode: ExperienceMode,
   haiku: Haiku,
   styles: any[],
 }) {
@@ -19,11 +23,13 @@ export default function HaikuPuzzle({
     swap,
     haikudleId,
     moves,
+    solved,
   ] = useHaikudle((state: any) => [
     state.inProgress,
     state.swap,
     state.haikudleId,
     state.moves,
+    state.solved,
   ]);
 
   const poem = inProgress
@@ -35,6 +41,11 @@ export default function HaikuPuzzle({
   const [idleDragHint, setIdleDragHint] = useState<any>();
   const [idleDragOverWordId, setIdleDragOverWordId] = useState<string>();
   const [layoutAnimation, setLayoutAnimation] = useState<any>();
+  // the solved "flash" (full glow layers + title) waits for the final drop
+  // animation to finish; solvedFlash starts true when loading an
+  // already-solved haikudle
+  const [solvedFlash, setSolvedFlash] = useState(!!solved);
+  const pendingSolvedFlash = useRef(false);
   const dragActivityOccurred = useRef(false);
   const poemRef = useRef<HTMLDivElement | null>(null);
   const wordRefs = useRef<{ [key: string]: HTMLSpanElement | null }>({});
@@ -284,6 +295,8 @@ export default function HaikuPuzzle({
     preSwapIncorrectWordIds.current = undefined;
     if (!Object.keys(offsets).length && !poemOffset?.dx && !poemOffset?.dy && !Object.keys(justCorrectWordIds).length) return;
 
+    if (solved) pendingSolvedFlash.current = true;
+
     setLayoutAnimation({
       offsets,
       poemOffset,
@@ -310,10 +323,24 @@ export default function HaikuPuzzle({
 
     const timeout = window.setTimeout(() => {
       setLayoutAnimation(undefined);
-    }, layoutAnimation.justCorrectWordIds ? 400 : 240);
+      if (pendingSolvedFlash.current) {
+        pendingSolvedFlash.current = false;
+        setSolvedFlash(true);
+      }
+    }, 110);
 
     return () => window.clearTimeout(timeout);
   }, [layoutAnimation]);
+
+  useEffect(() => {
+    if (!solved) {
+      pendingSolvedFlash.current = false;
+      setSolvedFlash(false);
+    } else if (!pendingSolvedFlash.current) {
+      // solved without a drop animation (ex: loaded already solved)
+      setSolvedFlash(true);
+    }
+  }, [solved]);
 
   useEffect(() => {
     if (!pointerPress) return;
@@ -429,7 +456,7 @@ export default function HaikuPuzzle({
   return (
     <div
       ref={poemRef}
-      className={`max-w-[92vw] ${layoutAnimation?.settling ? "transition-none" : "transition-transform duration-[200ms] ease-out"}`}
+      className={`max-w-[92vw] ${layoutAnimation?.settling ? "transition-none" : "transition-transform duration-[55ms] ease-out"}`}
       style={{
         transform: layoutAnimation?.poemOffset && layoutAnimation.settling
           ? `translate(${layoutAnimation.poemOffset.dx}px, ${layoutAnimation.poemOffset.dy}px)`
@@ -473,15 +500,12 @@ export default function HaikuPuzzle({
                   }}
                   onPointerDown={(event) => handlePointerDown(event, w, i, j)}
                 >
-                  {/* <StyledLayers key={i} styles={w?.correct ? styles : [styles[0]]}> */}
-                  <div
-                    style={styles[0]}
-                  >
+                  <StyledLayers styles={solvedFlash ? styles : [styles[0]]}>
                     <div
                       ref={(el) => {
                         if (w?.id) wordTileRefs.current[w.id] = el;
                       }}
-                      className={`px-1 ${w?.correct ? "" : "m-1"} ${layoutAnimation?.settling ? "transition-none" : isIdleDragHint ? "transition-transform duration-[650ms] ease-in-out" : isJustCorrect ? "transition-[transform,filter,opacity,background-color] duration-[400ms] ease-out" : isDisplacedTarget ? "transition-[transform,filter,opacity] duration-[240ms] ease-out" : "transition-[transform,filter,opacity] duration-[200ms] ease-out"} ${!w?.correct && "cursor-grab active:cursor-grabbing draggable-notsure-why-cant-inline"}`}
+                      className={`px-1 ${w?.correct ? "" : "m-1"} ${layoutAnimation?.settling ? "transition-none" : isIdleDragHint ? "transition-transform duration-[650ms] ease-in-out" : isJustCorrect ? "transition-[transform,filter,opacity,background-color] duration-[110ms] ease-out" : isDisplacedTarget ? "transition-[transform,filter,opacity] duration-[110ms] ease-out" : "transition-[transform,filter,opacity] duration-[55ms] ease-out"} ${!w?.correct && "cursor-grab active:cursor-grabbing draggable-notsure-why-cant-inline"}`}
                       style={{
                         transitionTimingFunction: isIdleDragHint && idleDragHint.returning
                           ? "cubic-bezier(.34, 1.56, .64, 0.95)"
@@ -490,7 +514,9 @@ export default function HaikuPuzzle({
                           ? "300ms"
                           : isIdleDragHintTarget
                             ? "80ms"
-                            : undefined,
+                            : draggingWord
+                              ? "200ms"
+                              : undefined,
                         backgroundColor: styleAsTile
                           ? haiku?.bgColor || "lightgrey"
                           : undefined,
@@ -522,14 +548,32 @@ export default function HaikuPuzzle({
                         w?.word
                       }
                     </div>
-                  {/* </StyledLayers> */}
-                  </div>
+                  </StyledLayers>
                 </span>
               )
             })}
           </div>
         )
       })}
+      {/* fades in once solved; absolute (like in HaikuPoem) so it doesn't
+          affect the poem's centering; the margin lines the title up with the
+          first word's text edge (line pl-9 - 1.5em pull + px-1 tile padding
+          - the title's own 0.5rem indent) */}
+      <div
+        className="transition-opacity duration-[500ms] ease-out"
+        style={{
+          opacity: solvedFlash ? 1 : 0,
+          pointerEvents: solvedFlash ? undefined : "none",
+          transitionDelay: solvedFlash ? "250ms" : "0ms",
+          marginLeft: "calc(2rem - 1.5em)",
+        }}
+      >
+        <HaikuTitle
+          haiku={haiku}
+          mode={mode}
+          styles={styles}
+        />
+      </div>
       {pointerPreview &&
         <div
           className="fixed z-[9999] pointer-events-none select-none"
