@@ -166,6 +166,11 @@ export default function HaikuPuzzle({
     setIdleDragHint(undefined);
   }, [haikudleId]);
 
+  useEffect(() => () => {
+    // don't let a pending displacement-preview commit fire after unmount
+    if (dragOverCandidate.current) window.clearTimeout(dragOverCandidate.current.timeout);
+  }, []);
+
   useEffect(() => {
     if (dragActivityOccurred.current || draggingWord || idleDragHint || layoutAnimation) return;
 
@@ -571,9 +576,7 @@ export default function HaikuPuzzle({
                           ? undefined
                           : isDragging || isIdleDragHint || isDragTarget || ((isDroppedWord || isDisplacedTarget) && layoutAnimation?.settling)
                             ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
-                            : draggingWord
-                              ? `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`
-                              : `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`,
+                            : `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`,
                       }}
                     >
                       {j == 0 && w?.correct &&

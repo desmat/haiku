@@ -3,7 +3,7 @@
 import { mapToSearchParams } from '@desmat/utils';
 import { upperCaseFirstLetter } from '@desmat/utils/format';
 import moment from 'moment';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { Haiku, haikuStyles } from "@/types/Haiku";
 import { NavOverlay } from '@/app/_components/nav/NavOverlay';
