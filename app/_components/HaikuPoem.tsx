@@ -530,12 +530,13 @@ export default function HaikuPoem({
             >
               <div
                 className={showcaseMode
-                  ? "_bg-yellow-200 fixed w-max right-[1.5rem] bottom-[1rem] flex flex-row"
+                  ? "_bg-yellow-200 fixed w-max right-[1.5rem] flex flex-row"
                   : "_bg-orange-200 flex flex-row w-max ml-[0.5rem] mt-[-0.2rem] md:mt-[0.2rem] leading-5"
                 }
                 style={{
                   fontSize,
-                  // display: "none",
+                  top: showcaseMode && haiku?.layout?.poem?.bottom ? "1rem" : undefined,
+                  bottom: showcaseMode && !haiku?.layout?.poem?.bottom ? "1rem" : undefined
                 }}
               >
                 <div
