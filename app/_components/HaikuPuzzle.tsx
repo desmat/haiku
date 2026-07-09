@@ -542,7 +542,9 @@ export default function HaikuPuzzle({
                   }}
                   onPointerDown={(event) => handlePointerDown(event, w, i, j)}
                 >
-                  <StyledLayers styles={solvedFlash ? styles : [styles[0]]}>
+                  {/* the styled layers live inside the transformed tile: Safari
+                      clips transformed descendants of filtered (drop-shadow)
+                      ancestors, cutting the tile while it slides */}
                     <div
                       ref={(el) => {
                         if (w?.id) wordTileRefs.current[w.id] = el;
@@ -572,7 +574,11 @@ export default function HaikuPuzzle({
                                 ? `translate(${dragOverTarget.dx}px, ${dragOverTarget.dy}px)`
                                 : undefined,
                         position: "relative",
-                        zIndex: isIdleDragHint ? 50 : isDragTarget ? -1 : 0,
+                        // never negative: Safari drops negative-z elements inside
+                        // filtered (StyledLayers) ancestors once the transition
+                        // ends; the span-level zIndex already layers the ghost
+                        // under its neighbors
+                        zIndex: isIdleDragHint ? 50 : 0,
                         opacity: isDragTarget || (isDisplacedTarget && layoutAnimation?.settling) ? 0.2 : undefined,
                         filter: !styleAsTile
                           ? undefined
@@ -581,15 +587,16 @@ export default function HaikuPuzzle({
                             : `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`,
                       }}
                     >
-                      {j == 0 && w?.correct &&
-                        upperCaseFirstLetter(w?.word)
-                      }
-                      {!(j == 0 && w?.correct) &&
-                        w?.word
-                      }
+                      <StyledLayers styles={solvedFlash ? styles : [styles[0]]}>
+                        {j == 0 && w?.correct &&
+                          upperCaseFirstLetter(w?.word)
+                        }
+                        {!(j == 0 && w?.correct) &&
+                          w?.word
+                        }
+                      </StyledLayers>
                     </div>
-                  </StyledLayers>
-                </span>
+                  </span>
               )
             })}
           </div>
@@ -629,16 +636,16 @@ export default function HaikuPuzzle({
             transitionTimingFunction: pointerPreview.returning ? "cubic-bezier(.34, 1.56, .64, 0.95)" : undefined,
           }}
         >
-          <div style={styles[0]}>
-            <div
-              className="px-1 m-1 cursor-grabbing"
-              style={{
-                backgroundColor: haiku?.bgColor || "lightgrey",
-                filter: pointerDrag || pointerPreview.returning
-                  ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
-                  : `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`,
-              }}
-            >
+          <div
+            className="px-1 m-1 cursor-grabbing"
+            style={{
+              backgroundColor: haiku?.bgColor || "lightgrey",
+              filter: pointerDrag || pointerPreview.returning
+                ? `drop-shadow(0px 3px 5px rgb(0 0 0 / 1))`
+                : `drop-shadow(0px 2px 3px rgb(0 0 0 / 0.5))`,
+            }}
+          >
+            <div style={styles[0]}>
               {pointerPreview.word?.word}
             </div>
           </div>
