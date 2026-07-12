@@ -7,7 +7,7 @@ const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const languageModel = "gpt-5-mini";
+const languageModel = "gpt-5.6-luna";
 // const smallLanguageModel = "gpt-4o-mini"
 // const languageModel = "gpt-4";
 // const languageModel = "gpt-3.5-turbo";
@@ -265,6 +265,7 @@ export async function generateHaiku(userId: string, language?: string, subject?:
     // @ts-ignore
     const completion = await openai.chat.completions.create({
       model: languageModel,
+      reasoning_effort: "none",
       messages: [
         {
           role: 'system',
