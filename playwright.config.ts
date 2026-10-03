@@ -21,6 +21,8 @@ export default defineConfig({
       STORE_TYPE: 'memory',
       AI_MOCK: 'true',
       BLOB_MOCK: 'true',
+      // Leaves time to see the streamed preview.
+      AI_MOCK_IMAGE_MS: '3000',
     },
   },
   projects: [

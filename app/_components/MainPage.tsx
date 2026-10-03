@@ -5,7 +5,7 @@ import { upperCaseFirstLetter } from '@desmat/utils/format';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
-import { Haiku, haikuStyles } from "@/types/Haiku";
+import { Haiku, HaikuStreamEvent, haikuStyles } from "@/types/Haiku";
 import { NavOverlay } from '@/app/_components/nav/NavOverlay';
 import Loading from "@/app/_components/Loading";
 import HaikuPage from '@/app/_components/HaikuPage';
@@ -24,6 +24,25 @@ import { isAiMock } from '@/utils/mocks';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
+
+// Partials sharpen as they arrive. The final image is sharp.
+const previewBlur = [16, 8, 3];
+
+function previewImageUrl(image: string, contentType: string) {
+  const bytes = Uint8Array.from(atob(image), (c) => c.charCodeAt(0));
+  return URL.createObjectURL(new Blob([bytes], { type: contentType }));
+}
+
+// Swapping in an image that hasn't loaded flashes the background colour.
+function preloadImage(src?: string, timeoutMs = 5000) {
+  return new Promise<void>((resolve) => {
+    if (!src) return resolve();
+    const image = new Image();
+    image.onload = image.onerror = () => resolve();
+    setTimeout(resolve, timeoutMs);
+    image.src = src;
+  });
+}
 
 export default function MainPage({
   haiku: _haiku,
@@ -62,6 +81,8 @@ export default function MainPage({
   let [haikuId, setHaikuId] = useState(_haiku?.id);
   const [generating, setGenerating] = useState<string | undefined>(undefined);
   const [regenerating, setRegenerating] = useState(false);
+  // Overrides on the current haiku while a generation streams in.
+  const [preview, setPreview] = useState<any>();
   const REFRESH_DELAY = 12 * 60 * 60 * 1000; // twice a day
   const [_refreshDelay, setRefreshDelay] = useState(refreshDelay || REFRESH_DELAY);
   const [refreshTimeout, setRefreshTimeout] = useState<any>();
@@ -194,7 +215,8 @@ export default function MainPage({
   //&& (!(haiku?.createdBy == user?.id) || user?.isAdmin);
   // console.log('app.MainPage.render()', { isPuzzleMode, haikudleSolved, previousDailyHaikudleId, user_isAdmin: user?.isAdmin, haiku_createdBy: haiku?.createdBy });
 
-  const { textStyles, altTextStyles } = haikuStyles(haiku);
+  const previewHaiku = preview && { ...haiku, ...preview };
+  const { textStyles, altTextStyles } = haikuStyles(previewHaiku || haiku);
 
   // console.log('app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
 
@@ -387,6 +409,39 @@ export default function MainPage({
     );
   }
 
+  useEffect(() => {
+    const url = preview?.bgImage;
+    return () => {
+      url?.startsWith("blob:") && URL.revokeObjectURL(url);
+    };
+  }, [preview?.bgImage]);
+
+  // `base` applies once the first event arrives.
+  const showPreview = (base: any) => (event: HaikuStreamEvent) => {
+    if (event.type == "poem") {
+      // Haikudle: the poem is the puzzle.
+      if (haikudleMode) return;
+
+      const { type, ...poem } = event;
+      setPreview((preview: any) => ({ ...base, ...preview, ...poem }));
+    } else if (event.type == "partial" || event.type == "image") {
+      const { image, contentType, color, bgColor, colorPalette } = event;
+      const bgImage = previewImageUrl(image, contentType);
+      const blur = event.type == "partial" ? previewBlur[event.index] ?? 0 : 0;
+
+      setPreview((preview: any) => ({
+        ...base,
+        ...preview,
+        bgImage,
+        bgImageDimensions: undefined,
+        color,
+        bgColor,
+        colorPalette,
+        blur,
+      }));
+    }
+  };
+
   const startGenerateHaiku = async (theme?: string) => {
     // console.log('app.page.startGenerateHaiku()', { theme });
     // trackEvent("clicked-generate-haiku", {
@@ -403,19 +458,26 @@ export default function MainPage({
 
       resetAlert();
       setGenerating(subject);
-      const ret = await generateHaiku(user, { lang, subject, artStyle, album });
-      // console.log('app.page.startGenerateHaiku()', { ret });
 
-      if (ret?.id) {
-        incUserUsage(user, "haikusCreated");
-        if (haikudleMode) {
-          loadHaiku(ret.id);
-        } else {
-          setHaikuId(ret.id);
-          setHaiku(ret);
-          window.history.replaceState(null, '', url(ret.id));
+      try {
+        // Not yet saved: no id, so no link under the poem.
+        const ret = await generateHaiku(user, { lang, subject, artStyle, album }, { onEvent: showPreview({ id: undefined }) });
+        // console.log('app.page.startGenerateHaiku()', { ret });
+
+        if (ret?.id) {
+          await preloadImage(ret.bgImage);
+          incUserUsage(user, "haikusCreated");
+          if (haikudleMode) {
+            loadHaiku(ret.id);
+          } else {
+            setHaikuId(ret.id);
+            setHaiku(ret);
+            window.history.replaceState(null, '', url(ret.id));
+          }
+          setGenerating(undefined);
         }
-        setGenerating(undefined);
+      } finally {
+        setPreview(undefined);
       }
       // } else {
       //   trackEvent("cancelled-generate-haiku", {
@@ -460,11 +522,18 @@ export default function MainPage({
       if (typeof (artStyle) == "string") {
         resetAlert();
         setLoadingUI(true);
-        const ret = await regenerateHaiku(user, haiku, "image", { artStyle, album });
-        // console.log('app.page.startRegenerateHaiku()', { ret });
-        incUserUsage(user, "haikusRegenerated"); // TODO haikuImageRegenerated?
-        setHaiku(ret);
-        setLoadingUI(false);
+
+        try {
+          // The poem stays: show it over the new image as it sharpens.
+          const ret = await regenerateHaiku(user, haiku, "image", { artStyle, album }, { onEvent: showPreview({ poem: haiku.poem }) });
+          // console.log('app.page.startRegenerateHaiku()', { ret });
+          await preloadImage(ret?.bgImage);
+          incUserUsage(user, "haikusRegenerated"); // TODO haikuImageRegenerated?
+          setHaiku(ret);
+          setLoadingUI(false);
+        } finally {
+          setPreview(undefined);
+        }
         // } else {
         //   trackEvent("cancelled-regenerate-image", {
         //     userId: user?.id,
@@ -955,12 +1024,12 @@ export default function MainPage({
     // console.log('app.MainPage.render() loading page? YUP!', { loadingUI, generating, haikudleMode, haikudleLoaded, haikudleReady, thing: haikudleMode && !haikudleLoaded && !haikudleReady });
     return (
       <div className="_bg-yellow-200 main-page relative h-[100vh] w-[100vw]">
-        {haiku?.bgColor &&
+        {(previewHaiku || haiku)?.bgColor &&
           <style
             dangerouslySetInnerHTML={{
               __html: `
                 body {
-                  background-color: ${haiku?.bgColor};         
+                  background-color: ${(previewHaiku || haiku)?.bgColor};         
                 }
               `
             }}
@@ -978,7 +1047,8 @@ export default function MainPage({
         <HaikuPage
           mode={mode}
           loading={true}
-          haiku={haiku}
+          haiku={previewHaiku || haiku}
+          preview={preview}
           styles={textStyles}
           altStyles={altTextStyles}
           aligning={aligning}
