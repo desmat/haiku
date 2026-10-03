@@ -8,7 +8,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { Haiku, HaikuStreamEvent, haikuStyles } from "@/types/Haiku";
 import { NavOverlay } from '@/app/_components/nav/NavOverlay';
 import Loading from "@/app/_components/Loading";
-import HaikuPage from '@/app/_components/HaikuPage';
+import HaikuPage, { bgImagePreviewMs, bgImageRevealMs } from '@/app/_components/HaikuPage';
 import useAlert from '@/app/_hooks/alert';
 import useHaikus from "@/app/_hooks/haikus";
 import useHaikudle from '@/app/_hooks/haikudle';
@@ -26,21 +26,29 @@ import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
 
 // Partials sharpen as they arrive. The final image is sharp.
-const previewBlur = [16, 8, 3];
+const previewBlur = [24, 12, 4];
 
 function previewImageUrl(image: string, contentType: string) {
   const bytes = Uint8Array.from(atob(image), (c) => c.charCodeAt(0));
   return URL.createObjectURL(new Blob([bytes], { type: contentType }));
 }
 
-// Swapping in an image that hasn't loaded flashes the background colour.
+// The palette changes with the image, over the same time, so it doesn't lead.
+function withColorTransition(styles: any[], ms: number) {
+  if (!ms) return styles;
+  const transition = ["color", "filter", "-webkit-text-stroke-color", "--haiku-color", "--haiku-bg-color"]
+    .map((p) => `${p} ${ms}ms ease-out`).join(", ");
+  return styles.map((style) => ({ ...style, transition }));
+}
+
+// Swapping in an image that isn't decoded paints without it for a moment.
 function preloadImage(src?: string, timeoutMs = 5000) {
   return new Promise<void>((resolve) => {
     if (!src) return resolve();
     const image = new Image();
-    image.onload = image.onerror = () => resolve();
-    setTimeout(resolve, timeoutMs);
     image.src = src;
+    image.decode().then(() => resolve(), () => resolve());
+    setTimeout(resolve, timeoutMs);
   });
 }
 
@@ -83,6 +91,8 @@ export default function MainPage({
   const [regenerating, setRegenerating] = useState(false);
   // Overrides on the current haiku while a generation streams in.
   const [preview, setPreview] = useState<any>();
+  // One-shot: the saved haiku eases in from the loading page or preview it replaces.
+  const [revealing, setRevealing] = useState(false);
   const REFRESH_DELAY = 12 * 60 * 60 * 1000; // twice a day
   const [_refreshDelay, setRefreshDelay] = useState(refreshDelay || REFRESH_DELAY);
   const [refreshTimeout, setRefreshTimeout] = useState<any>();
@@ -216,7 +226,10 @@ export default function MainPage({
   // console.log('app.MainPage.render()', { isPuzzleMode, haikudleSolved, previousDailyHaikudleId, user_isAdmin: user?.isAdmin, haiku_createdBy: haiku?.createdBy });
 
   const previewHaiku = preview && { ...haiku, ...preview };
-  const { textStyles, altTextStyles } = haikuStyles(previewHaiku || haiku);
+  const colorTransitionMs = preview?.bgImage ? bgImagePreviewMs : revealing ? bgImageRevealMs : 0;
+  const styles = haikuStyles(previewHaiku || haiku);
+  const textStyles = withColorTransition(styles.textStyles, colorTransitionMs);
+  const altTextStyles = withColorTransition(styles.altTextStyles, colorTransitionMs);
 
   // console.log('app.MainPage.render()', { haikuId, mode, loaded, loading, user, haiku });
 
@@ -412,22 +425,17 @@ export default function MainPage({
   useEffect(() => {
     const url = preview?.bgImage;
     return () => {
-      url?.startsWith("blob:") && URL.revokeObjectURL(url);
+      // The saved haiku crossfades from it.
+      url?.startsWith("blob:") && setTimeout(() => URL.revokeObjectURL(url), bgImageRevealMs + 500);
     };
   }, [preview?.bgImage]);
 
-  // `base` applies once the first event arrives.
-  const showPreview = (base: any) => (event: HaikuStreamEvent) => {
-    if (event.type == "poem") {
-      // Haikudle: the poem is the puzzle.
-      if (haikudleMode) return;
-
-      const { type, ...poem } = event;
-      setPreview((preview: any) => ({ ...base, ...preview, ...poem }));
-    } else if (event.type == "partial" || event.type == "image") {
+  // `base` applies once the first image arrives.
+  const showPreview = (base: any = {}) => (event: HaikuStreamEvent) => {
+    if (event.type == "partial") {
       const { image, contentType, color, bgColor, colorPalette } = event;
       const bgImage = previewImageUrl(image, contentType);
-      const blur = event.type == "partial" ? previewBlur[event.index] ?? 0 : 0;
+      const blur = previewBlur[event.index] ?? 0;
 
       setPreview((preview: any) => ({
         ...base,
@@ -440,6 +448,12 @@ export default function MainPage({
         blur,
       }));
     }
+  };
+
+  // Same render as the swap: the transition has to be in place when the image and blur change.
+  const reveal = () => {
+    setRevealing(true);
+    setTimeout(() => setRevealing(false), bgImageRevealMs + 500);
   };
 
   const startGenerateHaiku = async (theme?: string) => {
@@ -460,8 +474,7 @@ export default function MainPage({
       setGenerating(subject);
 
       try {
-        // Not yet saved: no id, so no link under the poem.
-        const ret = await generateHaiku(user, { lang, subject, artStyle, album }, { onEvent: showPreview({ id: undefined }) });
+        const ret = await generateHaiku(user, { lang, subject, artStyle, album }, { onEvent: showPreview() });
         // console.log('app.page.startGenerateHaiku()', { ret });
 
         if (ret?.id) {
@@ -470,6 +483,7 @@ export default function MainPage({
           if (haikudleMode) {
             loadHaiku(ret.id);
           } else {
+            reveal();
             setHaikuId(ret.id);
             setHaiku(ret);
             window.history.replaceState(null, '', url(ret.id));
@@ -529,11 +543,12 @@ export default function MainPage({
           // console.log('app.page.startRegenerateHaiku()', { ret });
           await preloadImage(ret?.bgImage);
           incUserUsage(user, "haikusRegenerated"); // TODO haikuImageRegenerated?
+          reveal();
           setHaiku(ret);
           setLoadingUI(false);
         } finally {
           setPreview(undefined);
-        }
+          }
         // } else {
         //   trackEvent("cancelled-regenerate-image", {
         //     userId: user?.id,
@@ -1045,6 +1060,8 @@ export default function MainPage({
         />
         {/* <Loading styles={textStyles} /> */}
         <HaikuPage
+          // Same key in both branches: the background element, and its transitions, carry over.
+          key="haiku-page"
           mode={mode}
           loading={true}
           haiku={previewHaiku || haiku}
@@ -1126,9 +1143,11 @@ export default function MainPage({
 
       {!isPuzzleMode &&
         <HaikuPage
+          key="haiku-page"
           user={user}
           mode={mode}
           haiku={haikudleSolved ? { ...solvedHaikudleHaiku, layout: undefined } : haiku}
+          revealing={revealing}
           styles={textStyles}
           altStyles={altTextStyles}
           fontSize={fontSize}

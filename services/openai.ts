@@ -100,7 +100,7 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
 
   if (isAiMock()) {
     console.warn(`>> services.openai.generateBackgroundImage: AI_MOCK mode: returning mock response`);
-    return mockGenerateBackgroundImage({ prompt, artStyle: selectedArtStyle, subject, onPartialImage });
+    return mockGenerateBackgroundImage({ prompt, artStyle: selectedArtStyle, subject, onPartialImage, partialImages });
   }
 
   try {
@@ -142,8 +142,9 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
   }
 }
 
-// Measured: 3 partials add 229 output tokens (13%) and no time. The first arrives ~30% in.
-const partialImages = 3;
+// One is enough. Measured with 1–3: the first arrives at ~6–7s whatever the count, with the same
+// composition as the final. Each partial adds ~77 output tokens (4%).
+const partialImages = 1;
 
 // Same shape as the non-streaming response.
 async function generateStreamingImage(prompt: string, onPartialImage: (partial: PartialImage) => Promise<void>) {

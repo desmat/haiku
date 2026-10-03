@@ -27,9 +27,7 @@ export type HaikuPreviewImage = {
 // Newline-delimited JSON from the generate and regenerate-image routes, requested with
 // `Accept: application/x-ndjson`. `haiku` or `error` ends the stream.
 export type HaikuStreamEvent =
-  | { type: "poem", poem: string[], title?: string, theme?: string, mood?: string, lang?: string }
   | { type: "partial", index: number } & HaikuPreviewImage
-  | { type: "image" } & HaikuPreviewImage
   | { type: "haiku", haiku: Haiku, reachedUsageLimit?: boolean }
   | { type: "error", status: number, message: string };
 
