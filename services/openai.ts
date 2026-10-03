@@ -7,14 +7,9 @@ const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const languageModel = "gpt-5.6-luna";
-// const smallLanguageModel = "gpt-4o-mini"
-// const languageModel = "gpt-4";
-// const languageModel = "gpt-3.5-turbo";
+const languageModel = "gpt-6-luna";
 
-const imageModel = "gpt-image-2";
-// const imageModel = "dall-e-3";
-// const imageModel = "dall-e-2";
+const imageModel = "gpt-image-2.5-flare";
 
 function parseJson(input: string) {
   // response from openai api sometimes returns ```json\n ... ```
