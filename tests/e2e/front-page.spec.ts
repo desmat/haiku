@@ -164,28 +164,30 @@ test('generating a haiku renders a new haiku with a background image', async ({ 
   await expectNoPageIssues();
 });
 
-test('regenerating the image of a generated haiku returns the updated haiku', async ({ page }) => {
+test('regenerating the image of a generated haiku renders the updated haiku', async ({ page }) => {
   const expectNoPageIssues = trackPageIssues(page);
 
   const generated = page.waitForResponse((response) =>
     response.request().method() === 'POST' && new URL(response.url()).pathname === '/api/haikus'
   );
   await generateHaiku(page);
-  const generateResponse = await generated;
-  const { haiku } = await generateResponse.json();
-  const authorization = generateResponse.request().headers()['authorization'];
+  const { haiku } = await (await generated).json();
   expect(haiku.version ?? 0).toBe(0);
 
-  // The creator in the browser can differ from the user that generated (two anonymous users
-  // race at first load), so the UI control isn't reliable. Call the API as the generator.
-  const regenerated = await page.request.post(`/api/haikus/${haiku.id}/regenerate`, {
-    headers: { authorization },
-    data: { haiku, part: 'image' },
-  });
-  expect(regenerated.status()).toBe(200);
-  const body = await regenerated.json();
+  const regenerated = page.waitForResponse((response) =>
+    response.request().method() === 'POST' && new URL(response.url()).pathname === `/api/haikus/${haiku.id}/regenerate`
+  );
+  // The click handler is on the icon, not its titled wrapper.
+  await page.getByTitle("Regenerate this haiku's art with the same theme", { exact: true }).locator('svg').click();
+  const response = await regenerated;
+  expect(response.status()).toBe(200);
+  const body = await response.json();
   expect(body.haiku.id).toBe(haiku.id);
+  expect(body.haiku.version).toBe(1);
   expect(body.haiku.bgImage).toMatch(/^data:image\/png;base64,/);
+
+  await expectBackgroundImage(page);
+  await expectPoemLines(page);
 
   await pauseAtEnd(page);
   await expectNoPageIssues();
