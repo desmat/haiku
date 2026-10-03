@@ -1,6 +1,5 @@
 import { findHoleInDatecodeSequence, hashCode, normalizeWord, shuffleArray, uuid } from '@desmat/utils';
 import { sortBy } from '@desmat/utils';
-import { put } from '@vercel/blob';
 import chroma from 'chroma-js';
 import * as locale from 'locale-codes'
 import moment from 'moment';
@@ -11,11 +10,12 @@ import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { DailyHaikudle, Haikudle, UserHaikudle } from '@/types/Haikudle';
 import { USAGE_LIMIT } from '@/types/Usage';
 import { User } from '@/types/User';
+import { putBlob } from './blob';
 import { deleteHaikudle, getHaikudle, getUserHaikudle } from './haikudles';
 import * as openai from './openai';
 import { incUserUsage, userUsage } from './usage';
 import { triggerDailyHaikuSaved, triggerHaikuSaved, triggerHaikuShared } from './webhooks';
-import { createStore } from './stores/redis';
+import { createStore } from './stores';
 import { notFoundHaiku } from './stores/samples';
 import { getFlaggedUserIds } from './users';
 
@@ -292,9 +292,6 @@ export async function createHaiku(user: User, {
     throw 'neither imageBuffer or imageUrl provided';
   }
 
-  const debug = process.env.OPENAI_API_KEY == "DEBUG";
-  debug && console.warn(`>> services.haiku.createHaiku: DEBUG mode: not uploading to blob store`);
-
   if (!imageBuffer && imageUrl) {
     const imageRet = await fetch(imageUrl);
     // console.log("services.haiku.createHaiku", { imageRet });
@@ -313,10 +310,10 @@ export async function createHaiku(user: User, {
 
   const haikuId = uuid();
 
-  if (/* !debug && */ imageBuffer) {
+  if (imageBuffer) {
     const filename = `haiku-${haikuId}-${theme?.replaceAll(/\W/g, "_").toLowerCase()}.png`;
     // @ts-ignore
-    const blob = /* !debug && */ await put(filename, imageBuffer, {
+    const blob = await putBlob(filename, imageBuffer, {
       access: 'public',
       addRandomSuffix: false,
     });
@@ -485,8 +482,6 @@ export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: strin
 
 export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: string, albumId?: string): Promise<Haiku> {
   console.log("services.haiku.regenerateHaikuImage", { user, haiku });
-  const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
-  debugOpenai && console.warn(`>> services.haiku.regenerateHaikuImage: DEBUG mode: not uploading to blob store`);
 
   const album = albumId && await store.haikuAlbums.get(albumId);
   const customImagePrompt = album && album.imagePrompt;
@@ -513,7 +508,7 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
   const haikuId = uuid();
   const filename = `haiku-${haikuId}-${haiku.theme?.replaceAll(/\W/g, "_").toLowerCase()}-${(haiku.version || 0) + 1}.png`;
   // @ts-ignore
-  const blob = !debugOpenai && await put(filename, imageBuffer, {
+  const blob = await putBlob(filename, imageBuffer, {
     access: 'public',
     addRandomSuffix: false,
   });
@@ -525,7 +520,7 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
     imagePrompt,
     imageModel,
     // @ts-ignore
-    bgImage: debugOpenai ? openaiUrl : blob.url,
+    bgImage: blob.url,
     color: sortedColors[0].darken(0.5).hex(),
     bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
     colorPalette: sortedColors.map((c: any) => c.hex()),
@@ -618,7 +613,7 @@ export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, 
   const haikuId = uuid();
   const filename = `haiku-${haikuId}-custom-${moment().format("YYYYMMDD_HHmmss")}-${(haiku.version || 0) + 1}.png`;
   // @ts-ignore
-  const blob = await put(filename, buffer, {
+  const blob = await putBlob(filename, buffer, {
     access: 'public',
     addRandomSuffix: false,
   });
@@ -674,8 +669,6 @@ export async function generateHaiku(user: User, {
 }): Promise<Haiku> {
   console.log("services.haiku.generateHaiku", { lang, subject, mood, poem, user });
   const language = supportedLanguages[lang || "en"].name;
-  const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
-  debugOpenai && console.warn(`>> services.haiku.generateHaiku: DEBUG mode: not uploading to blob store`);
 
   const album = albumId && await store.haikuAlbums.get(albumId);
   const customPoemPrompt = album && album.poemPrompt;
