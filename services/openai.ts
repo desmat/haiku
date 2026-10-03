@@ -21,7 +21,14 @@ function parseJson(input: string) {
   return undefined;
 }
 
-export async function generateBackgroundImage(userId: string, subject?: string, mood?: string, artStyle?: string, customPrompt?: string, customArtStyles?: string[]): Promise<any> {
+export type PartialImage = { index: number, b64_json: string };
+
+export async function generateBackgroundImage(userId: string, subject?: string, mood?: string, artStyle?: string, customPrompt?: string, customArtStyles?: string[], {
+  onPartialImage,
+}: {
+  // Streams the image. Partials cost extra output tokens, so only stream when someone is watching.
+  onPartialImage?: (partial: PartialImage) => Promise<void>,
+} = {}): Promise<any> {
   console.log(`services.openai.generateBackgroundImage`, { subject, mood, artStyle, customPrompt, customArtStyles });
   const imageTypes = customArtStyles || [
     // "charcoal drawing", 
@@ -93,18 +100,20 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
 
   if (isAiMock()) {
     console.warn(`>> services.openai.generateBackgroundImage: AI_MOCK mode: returning mock response`);
-    return mockGenerateBackgroundImage({ prompt, artStyle: selectedArtStyle, subject });
+    return mockGenerateBackgroundImage({ prompt, artStyle: selectedArtStyle, subject, onPartialImage });
   }
 
   try {
-    // @ts-ignore
-    const response = await openai.images.generate({
-      model: imageModel,
-      prompt,
-      n: 1,
-      size: "1024x1024",
-      quality: 'high'
-    });
+    const response = onPartialImage
+      ? await generateStreamingImage(prompt, onPartialImage)
+      // @ts-ignore
+      : await openai.images.generate({
+        model: imageModel,
+        prompt,
+        n: 1,
+        size: "1024x1024",
+        quality: 'high'
+      });
 
     try {
       console.log("services.openai.generateBackgroundImage RESULTS FROM API", { response });
@@ -131,6 +140,33 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
     console.error("Error generating haiku image", { type: error.type, code: error.code, message: error.message, error, prompt });
     throw error;
   }
+}
+
+// Measured: 3 partials add 229 output tokens (13%) and no time. The first arrives ~30% in.
+const partialImages = 3;
+
+// Same shape as the non-streaming response.
+async function generateStreamingImage(prompt: string, onPartialImage: (partial: PartialImage) => Promise<void>) {
+  // @ts-ignore
+  const stream = await openai.images.generate({
+    model: imageModel,
+    prompt,
+    n: 1,
+    size: "1024x1024",
+    quality: 'high',
+    stream: true,
+    partial_images: partialImages,
+  });
+
+  for await (const event of stream) {
+    if (event.type == "image_generation.partial_image") {
+      await onPartialImage({ index: event.partial_image_index, b64_json: event.b64_json });
+    } else if (event.type == "image_generation.completed") {
+      return { data: [{ b64_json: event.b64_json }] };
+    }
+  }
+
+  throw new Error("image stream ended without a completed event");
 }
 
 export async function generateHaiku(userId: string, language?: string, subject?: string, mood?: string, customPrompt?: string): Promise<any> {

@@ -1,6 +1,8 @@
 import { readdir, readFile } from 'fs/promises';
 import path from 'path';
-import { hashCode } from '@desmat/utils';
+import sharp from 'sharp';
+import { delay, hashCode } from '@desmat/utils';
+import type { PartialImage } from './openai';
 
 // Mocks return exactly the shapes the callers in services/haikus.ts read.
 // Prompt-building stays in openai.ts and only the API call is replaced, so
@@ -20,13 +22,49 @@ const mockPoem = (subject?: string) => [
   "written by no one.",
 ];
 
-export async function mockGenerateBackgroundImage({ prompt, artStyle, subject }: {
+// Timed like the real API: partials at ~30%, 55% and 80% of the total.
+const mockPartials = [
+  { at: 0.3, blur: 24 },
+  { at: 0.55, blur: 12 },
+  { at: 0.8, blur: 4, blankBottom: 0.14 },
+];
+
+async function mockPartialImage(image: Buffer, { blur, blankBottom }: { blur: number, blankBottom?: number }) {
+  const size = 512;
+  const partial = sharp(image).resize(size, size).blur(blur);
+  // Like a real partial sent before its bottom rows were rendered.
+  const band = blankBottom && Math.round(size * blankBottom);
+
+  return (band
+    ? partial.composite([{
+      input: { create: { width: size, height: band, channels: 3, background: "#fdfdfd" } },
+      top: size - band,
+      left: 0,
+    }])
+    : partial
+  ).png().toBuffer();
+}
+
+export async function mockGenerateBackgroundImage({ prompt, artStyle, subject, onPartialImage }: {
   prompt: string,
   artStyle?: string,
   subject?: string,
+  onPartialImage?: (partial: PartialImage) => Promise<void>,
 }) {
   const file = await pickBackground(subject);
-  const b64_json = (await readFile(path.join(backgroundsDir, file))).toString("base64");
+  const image = await readFile(path.join(backgroundsDir, file));
+  const durationMs = Number(process.env.AI_MOCK_IMAGE_MS || 0);
+  const start = Date.now();
+  const waitUntil = (fraction: number) => delay(Math.max(0, start + durationMs * fraction - Date.now()));
+
+  if (onPartialImage) {
+    for (let index = 0; index < mockPartials.length; index++) {
+      await waitUntil(mockPartials[index].at);
+      await onPartialImage({ index, b64_json: (await mockPartialImage(image, mockPartials[index])).toString("base64") });
+    }
+  }
+  await waitUntil(1);
+  const b64_json = image.toString("base64");
 
   return {
     artStyle,

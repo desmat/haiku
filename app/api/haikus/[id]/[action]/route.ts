@@ -5,6 +5,7 @@ import { userUsage } from '@/services/usage';
 import { userSession } from '@/services/users';
 import { triggerHaikuShared } from '@/services/webhooks';
 import { USAGE_LIMIT } from '@/types/Usage';
+import { acceptsNdjson, ndjsonResponse } from '@/utils/ndjson';
 
 export const maxDuration = 300;
 // export const dynamic = 'force-dynamic';
@@ -92,6 +93,14 @@ export async function POST(
     if (!["image", "poem"].includes(part)) throw `Regenerate part not supported: ${part}`;
 
     if (part == "image") delete haiku.shared;
+
+    if (part == "image" && acceptsNdjson(request)) {
+      return ndjsonResponse(async (send) => ({
+        type: "haiku",
+        haiku: await regenerateHaikuImage(user, haiku, artStyle, album, { onEvent: send }),
+        reachedUsageLimit,
+      }));
+    }
 
     const updatedHaiku = part == "image"
       ? await regenerateHaikuImage(user, haiku, artStyle, album)
