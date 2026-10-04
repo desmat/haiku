@@ -193,7 +193,6 @@ export default function MainPage({
     createHaikudle,
     haikudleInProgress,
     haikudleSolved,
-    haikudleSolvedJustNow,
   ] = useHaikudle((state: any) => [
     state.ready,
     state.loaded(haikuId || { lang }),
@@ -202,7 +201,6 @@ export default function MainPage({
     state.create,
     state.inProgress,
     state.solved,
-    state.solvedJustNow,
   ]);
 
   // let [haikudleLoaded, setHaikudleLoaded] = useState(false);
@@ -239,6 +237,10 @@ export default function MainPage({
     (!previousDailyHaikudleId /* || user?.isAdmin */);
   //&& (!(haiku?.createdBy == user?.id) || user?.isAdmin);
   // console.log('app.MainPage.render()', { isPuzzleMode, haikudleSolved, previousDailyHaikudleId, user_isAdmin: user?.isAdmin, haiku_createdBy: haiku?.createdBy });
+  // the puzzle page handles the completed state itself (no component swap on
+  // solve); HaikuPage only shows for previous dailies and non-haikudle modes
+  const showPuzzlePage = haikudleMode && !previousDailyHaikudleId;
+  const showHaikuPage = !showPuzzlePage;
 
   const previewHaiku = preview && { ...haiku, ...preview };
   const colorTransitionMs = preview?.bgImage ? bgImagePreviewMs : revealing ? bgImageRevealMs : 0;
@@ -1199,7 +1201,7 @@ export default function MainPage({
         updateLayout={updateLayout}
       />
 
-      {isPuzzleMode &&
+      {showPuzzlePage &&
         <HaikudlePage
           mode={mode}
           haiku={haiku}
@@ -1209,7 +1211,7 @@ export default function MainPage({
         />
       }
 
-      {!isPuzzleMode &&
+      {showHaikuPage &&
         <HaikuPage
           key="haiku-page"
           user={user}
@@ -1220,7 +1222,6 @@ export default function MainPage({
           styles={textStyles}
           altStyles={altTextStyles}
           fontSize={fontSize}
-          popPoem={haikudleMode && haikudleSolvedJustNow}
           regenerating={regenerating}
           onboardingElement={onboardingElement}
           refresh={!haiku?.error && (user?.isAdmin || album) && (() => loadRandom())}

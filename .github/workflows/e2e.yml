@@ -1,0 +1,52 @@
+name: E2E tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      # Sessions are signed JWTs. A throwaway key pair keeps secrets out of CI.
+      - name: Generate session signing keys
+        run: |
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$RUNNER_TEMP/auth.pem"
+          {
+            echo "AUTH_PRIVATE_KEY<<EOF"
+            cat "$RUNNER_TEMP/auth.pem"
+            echo "EOF"
+            echo "AUTH_PUBLIC_KEY<<EOF"
+            openssl pkey -in "$RUNNER_TEMP/auth.pem" -pubout
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+          rm "$RUNNER_TEMP/auth.pem"
+
+      - run: npm run test:e2e
+
+      # Traces, failure snapshots and the dev-server log.
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 14

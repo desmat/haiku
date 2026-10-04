@@ -4,6 +4,9 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false,
   workers: 1,
+  forbidOnly: !!process.env.CI,
+  // Traces record on first retry only.
+  retries: process.env.CI ? 1 : 0,
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:3017',

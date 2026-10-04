@@ -1,4 +1,4 @@
-import { findHoleInDatecodeSequence, shuffleArray, uuid } from '@desmat/utils';
+import { findHoleInDatecodeSequence, normalizeWord, shuffleArray, uuid } from '@desmat/utils';
 import moment from 'moment';
 import { DailyHaiku, Haiku } from '@/types/Haiku';
 import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
@@ -24,6 +24,26 @@ export async function getHaikudles(query?: any): Promise<Haikudle[]> {
   }
 
   return haikudles.filter(Boolean);
+}
+
+const scrambleAttempts = 100;
+
+// The client checks each slot by normalized word, so a repeated word is correct in
+// any of its slots. A random shuffle misses every slot about 1 time in 3.
+// A word repeated in over half the slots can't miss them all: keep the fewest in place.
+function scrambleWords(words: any[]) {
+  const solution = words.map((w: any) => normalizeWord(w.word));
+  const inPlace = (scrambled: any[]) => scrambled
+    .filter((w: any, i: number) => normalizeWord(w.word) == solution[i])
+    .length;
+
+  let best = words;
+  for (let attempt = 0; attempt < scrambleAttempts && inPlace(best); attempt++) {
+    const scrambled = shuffleArray([...words]);
+    if (inPlace(scrambled) < inPlace(best)) best = scrambled;
+  }
+
+  return best;
 }
 
 async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudle> {
@@ -57,7 +77,7 @@ async function createInProgress(user: User, haikudle: Haikudle): Promise<Haikudl
 
     words = [
       ...correctWords[0],
-      ...shuffleArray(words),
+      ...scrambleWords(words),
       // ...correctWords[1],
     ];
   }
