@@ -5,8 +5,9 @@ import moment from 'moment';
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { error429Haiku, error4xxHaiku, notFoundHaiku, serverErrorHaiku } from '@/services/stores/samples';
-import { Haiku, HaikuAction } from '@/types/Haiku';
+import { Haiku, HaikuAction, HaikuStreamEvent } from '@/types/Haiku';
 import { User } from '@/types/User';
+import { isNdjson, readNdjson } from '@/utils/ndjson';
 import trackEvent from '@/utils/trackEvent';
 import useAlert from "./alert";
 import useHaikudle from './haikudle';
@@ -54,6 +55,30 @@ async function handleErrorResponse(res: any, resourceType: string, resourceId: s
   errorHaiku.error = errorMessage;
 
   return errorHaiku;
+}
+
+// Asks for a progress stream only when someone listens: streamed images cost more.
+async function streamingFetchOpts(onEvent?: (event: HaikuStreamEvent) => void) {
+  const opts: any = await fetchOpts();
+  return onEvent
+    ? { ...opts, headers: { ...opts.headers, Accept: "application/x-ndjson" } }
+    : opts;
+}
+
+// A streamed response ends with a `haiku` or `error` event.
+async function readHaikuResponse(res: Response, onEvent?: (event: HaikuStreamEvent) => void) {
+  if (!isNdjson(res)) return res.json();
+
+  let final: any = { type: "error", status: 500, message: "Stream ended early" };
+  await readNdjson(res, (event: HaikuStreamEvent) => {
+    if (["haiku", "error"].includes(event.type)) {
+      final = event;
+    } else {
+      onEvent && onEvent(event);
+    }
+  });
+
+  return final;
 }
 
 type HaikuMap = { [key: string]: Haiku | undefined; };
@@ -415,7 +440,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     });
   },
 
-  generate: async (user: User, request: any) => {
+  generate: async (user: User, request: any, { onEvent }: { onEvent?: (event: HaikuStreamEvent) => void } = {}) => {
     // console.log("hooks.haiku.generate", { request });
     const { _haikus, init } = get();
 
@@ -439,19 +464,25 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
     return new Promise(async (resolve, reject) => {
       fetch(`/api/haikus`, {
-        ...await fetchOpts(),
+        ...await streamingFetchOpts(onEvent),
         method: "POST",
         body: JSON.stringify({ request }),
       }).then(async (res) => {
-        const { _haikus } = get();
-        const { addUserHaiku } = useUser.getState();
-
         if (res.status != 200) {
           handleErrorResponse(res, "generate-haiku", undefined, `Error generating haiku`);
           return reject(res.statusText);
         }
 
-        const { haiku: generated, reachedUsageLimit } = await res.json();
+        const ret = await readHaikuResponse(res, onEvent);
+        if (ret.type == "error") {
+          handleErrorResponse({ status: ret.status, statusText: ret.message }, "generate-haiku", undefined, `Error generating haiku`);
+          return reject(ret.message);
+        }
+
+        // Read after the stream: other updates may have landed meanwhile.
+        const { _haikus } = get();
+        const { addUserHaiku } = useUser.getState();
+        const { haiku: generated, reachedUsageLimit } = ret;
         // console.log("hooks.haiku.create", { generated, reachedUsageLimit });
 
         trackEvent("haiku-generated", {
@@ -481,7 +512,7 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
     });
   },
 
-  regenerate: async (user: User, haiku: Haiku, part: undefined | "poem" | "image", options: any = {}) => {
+  regenerate: async (user: User, haiku: Haiku, part: undefined | "poem" | "image", options: any = {}, { onEvent }: { onEvent?: (event: HaikuStreamEvent) => void } = {}) => {
     // console.log("hooks.haiku.regenerate", { haiku });
     const { _haikus, init } = get();
 
@@ -495,18 +526,23 @@ const useHaikus: any = create(devtools((set: any, get: any) => ({
 
     return new Promise(async (resolve, reject) => {
       fetch(`/api/haikus/${haiku.id}/regenerate`, {
-        ...await fetchOpts(),
+        ...await streamingFetchOpts(onEvent),
         method: "POST",
         body: JSON.stringify({ haiku, part, ...options }),
       }).then(async (res) => {
-        const { _haikus } = get();
-
         if (res.status != 200) {
           handleErrorResponse(res, "regenerate-haiku", haiku.id, `Error regenerating haiku`);
           return reject(res.statusText);
         }
 
-        const { haiku: regenerated, reachedUsageLimit } = await res.json();
+        const ret = await readHaikuResponse(res, onEvent);
+        if (ret.type == "error") {
+          handleErrorResponse({ status: ret.status, statusText: ret.message }, "regenerate-haiku", haiku.id, `Error regenerating haiku`);
+          return reject(ret.message);
+        }
+
+        const { _haikus } = get();
+        const { haiku: regenerated, reachedUsageLimit } = ret;
 
         trackEvent("haiku-regenerated", {
           id: regenerated.id,

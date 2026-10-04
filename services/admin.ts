@@ -2,8 +2,8 @@ import { formatBytes } from '@desmat/utils/format';
 import moment from 'moment';
 // import fetch from 'node-fetch';
 import { User } from '@/types/User';
-import { put } from '@vercel/blob';
-import { createStore } from './stores/redis';
+import { putBlob } from './blob';
+import { createStore } from './stores';
 
 export const maxDuration = 300;
 
@@ -69,7 +69,7 @@ export async function backup(user: User, entities?: string[], haikuIds?: string[
   const filename = `backups/${p.name}_${p.version}_${moment().format("YYYYMMDD_kkmmss")}.json`;
   const buffer = Buffer.from(JSON.stringify(keyValues), 'utf8');
   // @ts-ignore
-  const blob = await put(filename, buffer, {
+  const blob = await putBlob(filename, buffer, {
     access: 'public',
     addRandomSuffix: false,
   });

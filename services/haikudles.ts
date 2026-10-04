@@ -5,7 +5,7 @@ import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { User } from '@/types/User';
 import { getDailyHaikus, getFlaggedHaikuIds, getHaiku, getHaikus } from './haikus';
 import { triggerDailyHaikudleSaved } from './webhooks';
-import { createStore } from './stores/redis';
+import { createStore } from './stores';
 
 let syllable: any;
 import("syllable").then((s: any) => syllable = s.syllable);

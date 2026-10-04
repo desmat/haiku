@@ -8,6 +8,9 @@ import { User } from "@/types/User";
 import HaikuPoem from "./HaikuPoem";
 import Loading from "./Loading";
 
+export const bgImagePreviewMs = 12_000;
+export const bgImageRevealMs = 500;
+
 export default function HaikuPage({
   user,
   mode,
@@ -18,6 +21,8 @@ export default function HaikuPage({
   popPoem,
   regenerating,
   loading,
+  preview,
+  revealing,
   onboardingElement,
   refresh,
   saveHaiku,
@@ -39,6 +44,9 @@ export default function HaikuPage({
   popPoem?: boolean,
   regenerating?: boolean,
   loading?: boolean,
+  preview?: { poem?: string[], bgImage?: string, blur?: number },
+  // Just replaced a loading page or preview: ease from its blur and image.
+  revealing?: boolean,
   onboardingElement?: string,
   refresh?: any,
   saveHaiku?: any,
@@ -54,8 +62,10 @@ export default function HaikuPage({
   // console.log('app._components.HaikuPage.render()', { loading, mode, id: haiku?.id, poem: haiku?.poem, popPoem, haiku });
   const showcaseMode = mode == "showcase";
   // const [user] = useUser((state: any) => [state.user]);
-  const blurValue = loading ? 40 : 0;
-  const saturateValue = loading ? 0.6 : 1;
+  const previewImage = loading && preview?.bgImage;
+  const previewPoem = loading && preview?.poem;
+  const blurValue = previewImage ? preview.blur || 0 : loading ? 40 : 0;
+  const saturateValue = loading && !previewImage ? 0.6 : 1;
   const poemLayout = /* showcaseMode && */ !regenerating && !loading
     ? haiku?.layout?.poem
     : {};
@@ -73,7 +83,13 @@ export default function HaikuPage({
           backgroundRepeat: "no-repeat",
           backgroundColor: haiku?.bgColor || "#aaaaaa",
           filter: `brightness(1.2) blur(${blurValue}px) saturate(${saturateValue}) `,
-          transition: loading ? "filter 0.2s ease-out" : "filter 0.1s ease-out",
+          // Chrome and Safari crossfade background-image. Firefox swaps it. Transitions start from
+          // the current value, so a preview still easing in hands over smoothly.
+          transition: previewImage
+            ? ["filter", "background-image", "background-color"].map((p) => `${p} ${bgImagePreviewMs}ms ease-out`).join(", ")
+            : revealing
+              ? ["filter", "background-image", "background-color"].map((p) => `${p} ${bgImageRevealMs}ms ease-out`).join(", ")
+              : loading ? "filter 0.2s ease-out" : "filter 0.1s ease-out",
           // allow clipping horizontal edges up to a point
           top: "50dvh",
           left: "50vw",
@@ -114,12 +130,13 @@ export default function HaikuPage({
             adminMode={user?.isAdmin && !aligning}
           />
         }
-        {(regenerating || loading) &&
+        {(regenerating || loading) && !previewPoem &&
           <Loading styles={styles} />
         }
-        {!regenerating && !loading && mode != "social-img" && mode != "haikudle-social-img" && !haiku.poemHashed &&
+        {!regenerating && (!loading || previewPoem) && mode != "social-img" && mode != "haikudle-social-img" && !haiku.poemHashed &&
           <div
             className="_bg-pink-200 _xtall:bg-orange-400 _tall:bg-pink-200 _wide:bg-yellow-200 relative z-20"
+            style={revealing ? { animation: `haiku-fade-in ${bgImageRevealMs}ms ease-out` } : undefined}
           >
             <HaikuPoem
               user={user}

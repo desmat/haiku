@@ -178,13 +178,19 @@ export function NavOverlay({
       <div
         className={`absolute top-0 left-0 _bg-pink-200 min-w-[100vw] min-h-[100vh] z-10`}
         style={{
+          // Gradients don't transition. These registered properties do (globals.css).
+          ...{
+            "--haiku-color": styles[0]?.color || "black",
+            "--haiku-bg-color": styles[0]?.bgColor || "lightgrey",
+          } as any,
           background: `radial-gradient(circle at 50% ${haiku?.layout?.poem?.bottom
             ? 90 - haiku?.layout?.poem?.bottom
             : haiku?.layout?.poem?.top
               ? 10 + haiku?.layout?.poem?.top
               : haiku?.layout?.poem?.up
                 ? 45 - haiku?.layout?.poem?.up / 2
-                : 45}%, white, ${styles[0]?.bgColor || "lightgrey"} 35%, ${styles[0]?.color || "black"} 60%)`,
+                : 45}%, white, var(--haiku-bg-color) 35%, var(--haiku-color) 60%)`,
+          transition: styles[0]?.transition,
           opacity: 0.2,
         }}
       />

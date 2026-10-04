@@ -1,21 +1,21 @@
 import { findHoleInDatecodeSequence, hashCode, normalizeWord, shuffleArray, uuid } from '@desmat/utils';
 import { sortBy } from '@desmat/utils';
-import { put } from '@vercel/blob';
-import chroma from 'chroma-js';
 import * as locale from 'locale-codes'
 import moment from 'moment';
 import * as sharp from 'sharp';
-import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, Season, UserHaiku, UserHaikuOptions } from "@/types/Haiku";
+import { DailyHaiku, FlaggedHaiku, Haiku, HaikuStreamEvent, LikedHaiku, Season, UserHaiku, UserHaikuOptions } from "@/types/Haiku";
 import { HaikuAlbum } from '@/types/Album';
 import { LanguageType, supportedLanguages } from '@/types/Languages';
 import { DailyHaikudle, Haikudle, UserHaikudle } from '@/types/Haikudle';
 import { USAGE_LIMIT } from '@/types/Usage';
 import { User } from '@/types/User';
+import { putBlob } from './blob';
 import { deleteHaikudle, getHaikudle, getUserHaikudle } from './haikudles';
+import { encodePreview, imageColors } from './images';
 import * as openai from './openai';
 import { incUserUsage, userUsage } from './usage';
 import { triggerDailyHaikuSaved, triggerHaikuSaved, triggerHaikuShared } from './webhooks';
-import { createStore } from './stores/redis';
+import { createStore } from './stores';
 import { notFoundHaiku } from './stores/samples';
 import { getFlaggedUserIds } from './users';
 
@@ -248,6 +248,36 @@ export async function getHaikuNumLikes(id: number) {
   return (await store.likedHaikus.ids({ haiku: id })).size;
 }
 
+type OnHaikuEvent = (event: HaikuStreamEvent) => void;
+
+// Partials are shown blurred, so small is enough.
+const partialPreviewSize = 512;
+
+// Partial 0 already has the final composition. Its layout's vision call runs while the rest of
+// the image streams in, instead of after it.
+function imageStreamHandlers(user: any, onEvent?: OnHaikuEvent) {
+  if (!onEvent) return {};
+
+  let earlyLayout: Promise<any> | undefined;
+
+  return {
+    onPartialImage: async ({ index, b64_json }: openai.PartialImage) => {
+      const imageBuffer = Buffer.from(b64_json, 'base64');
+
+      if (index == 0) {
+        earlyLayout = imageLayout(user, imageBuffer)
+          .catch((error) => {
+            console.warn(">> services.haiku.imageStreamHandlers: layout from partial image failed", { error });
+            return undefined;
+          });
+      }
+
+      onEvent({ type: "partial", index, ...await encodePreview(imageBuffer, partialPreviewSize) });
+    },
+    earlyLayout: () => earlyLayout,
+  };
+}
+
 export async function createHaiku(user: User, {
   title,
   theme,
@@ -292,20 +322,13 @@ export async function createHaiku(user: User, {
     throw 'neither imageBuffer or imageUrl provided';
   }
 
-  const debug = process.env.OPENAI_API_KEY == "DEBUG";
-  debug && console.warn(`>> services.haiku.createHaiku: DEBUG mode: not uploading to blob store`);
-
   if (!imageBuffer && imageUrl) {
     const imageRet = await fetch(imageUrl);
     // console.log("services.haiku.createHaiku", { imageRet });
     imageBuffer = Buffer.from(await imageRet.arrayBuffer());
   }
 
-  const getColors = require('get-image-colors');
-  const colors = await getColors(imageBuffer, imageType || 'image/png');
-  // console.log("services.haiku.createHaiku", { colors });
-  // sort by darkness and pick darkest for foreground, lightest for background
-  const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
+  const colors = await imageColors(imageBuffer as Buffer, imageType || 'image/png');
 
   const sizeOf = require('buffer-image-size');
   const dimensions = sizeOf(imageBuffer);
@@ -313,10 +336,10 @@ export async function createHaiku(user: User, {
 
   const haikuId = uuid();
 
-  if (/* !debug && */ imageBuffer) {
+  if (imageBuffer) {
     const filename = `haiku-${haikuId}-${theme?.replaceAll(/\W/g, "_").toLowerCase()}.png`;
     // @ts-ignore
-    const blob = /* !debug && */ await put(filename, imageBuffer, {
+    const blob = await putBlob(filename, imageBuffer, {
       access: 'public',
       addRandomSuffix: false,
     });
@@ -341,9 +364,7 @@ export async function createHaiku(user: User, {
     languageModel,
     imagePrompt,
     imageModel,
-    color: sortedColors[0].darken(0.5).hex(),
-    bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
-    colorPalette: sortedColors.map((c: any) => c.hex()),
+    ...colors,
     lang,
     sharedVersioned: true, // be sure to keep in sync with triggerHaikuShared below
     layout,
@@ -361,7 +382,9 @@ export async function createHaiku(user: User, {
     create = await addToAlbum(user, create, create.season);
   }
 
-  create = await updateLayout(user, create, imageBuffer);
+  if (!layout) {
+    create = await updateLayout(user, create, imageBuffer);
+  }
 
   let created = await store.haikus.create(create);
 
@@ -483,37 +506,32 @@ export async function completeHaikuPoem(user: any, haiku: Haiku, albumId?: strin
   });
 }
 
-export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: string, albumId?: string): Promise<Haiku> {
+export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: string, albumId?: string, {
+  onEvent,
+}: {
+  onEvent?: OnHaikuEvent,
+} = {}): Promise<Haiku> {
   console.log("services.haiku.regenerateHaikuImage", { user, haiku });
-  const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
-  debugOpenai && console.warn(`>> services.haiku.regenerateHaikuImage: DEBUG mode: not uploading to blob store`);
 
   const album = albumId && await store.haikuAlbums.get(albumId);
   const customImagePrompt = album && album.imagePrompt;
   const customArtStyles = album && album.artStyles || undefined;
+  const { onPartialImage, earlyLayout } = imageStreamHandlers(user, onEvent);
 
   const {
     data: imageData,
     prompt: imagePrompt,
     artStyle: selectedArtStyle,
     model: imageModel,
-  } = await openai.generateBackgroundImage(user.id, haiku.subject || haiku.theme || haiku.title, haiku.mood, artStyle, customImagePrompt, customArtStyles);
+  } = await openai.generateBackgroundImage(user.id, haiku.subject || haiku.theme || haiku.title, haiku.mood, artStyle, customImagePrompt, customArtStyles, { onPartialImage });
 
   const imageBuffer = Buffer.from(imageData.b64_json, 'base64');
-  // console.log("services.haiku.generateHaiku", { imageBuffer });
-
-  const getColors = require('get-image-colors')
-
-  const colors = await getColors(imageBuffer, 'image/png');
-  // console.log("services.haiku.generateHaiku", { colors });
-
-  // sort by darkness and pick darkest for foreground, lightest for background
-  const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
+  const colors = await imageColors(imageBuffer, 'image/png');
 
   const haikuId = uuid();
   const filename = `haiku-${haikuId}-${haiku.theme?.replaceAll(/\W/g, "_").toLowerCase()}-${(haiku.version || 0) + 1}.png`;
   // @ts-ignore
-  const blob = !debugOpenai && await put(filename, imageBuffer, {
+  const blob = await putBlob(filename, imageBuffer, {
     access: 'public',
     addRandomSuffix: false,
   });
@@ -525,10 +543,8 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
     imagePrompt,
     imageModel,
     // @ts-ignore
-    bgImage: debugOpenai ? openaiUrl : blob.url,
-    color: sortedColors[0].darken(0.5).hex(),
-    bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
-    colorPalette: sortedColors.map((c: any) => c.hex()),
+    bgImage: blob.url,
+    ...colors,
     sharedVersioned: true, // be sure to keep in sync with triggerHaikuShared below
   } as Haiku;
 
@@ -537,7 +553,10 @@ export async function regenerateHaikuImage(user: any, haiku: Haiku, artStyle?: s
     incUserUsage(user, "haikusRegenerated");
   }
 
-  updatedHaiku = await updateLayout(user, updatedHaiku, imageBuffer);
+  const layout = await earlyLayout?.();
+  updatedHaiku = layout
+    ? { ...updatedHaiku, layout }
+    : await updateLayout(user, updatedHaiku, imageBuffer);
 
   const savedHaiku = await saveHaiku(user, updatedHaiku);
 
@@ -558,6 +577,10 @@ export async function updateLayout(user: any, haiku: Haiku, imageBuffer?: any) {
   }
   // console.log("services.haiku.updateLayout", { imageBuffer });
 
+  return { ...haiku, layout: await imageLayout(user, imageBuffer) };
+}
+
+async function imageLayout(user: any, imageBuffer: Buffer) {
   const size = 256;
   // @ts-ignore
   const resized = await sharp(imageBuffer).resize(size, size).toBuffer();
@@ -578,7 +601,7 @@ export async function updateLayout(user: any, haiku: Haiku, imageBuffer?: any) {
       negativeSpace: imageNegativeSpace,
     }
   } = await openai.analyzeImage(user.id, base64);
-  console.log("services.haiku.updateLayout", { imageAnalysisColors, imagePointOfInterest, imagePersonOrAnimalOfInterest, imageNegativeSpace, imageAnalysisAlignment });
+  console.log("services.haiku.imageLayout", { imageAnalysisColors, imagePointOfInterest, imagePersonOrAnimalOfInterest, imageNegativeSpace, imageAnalysisAlignment });
 
   const Alignments = {
     "top": { top: 15 },
@@ -592,24 +615,19 @@ export async function updateLayout(user: any, haiku: Haiku, imageBuffer?: any) {
 
   // @ts-ignore
   const alignment = Alignments[`${imageAnalysisAlignment}`];
-  if (!alignment) console.warn("services.haiku.updateLayout WARNING: invalid alignment", { imageAnalysisAlignment });
+  if (!alignment) console.warn("services.haiku.imageLayout WARNING: invalid alignment", { imageAnalysisAlignment });
   const layout = alignment
     ? { poem: alignment }
     : undefined;
-  console.log("services.haiku.updateLayout", { layout, alignment });
+  console.log("services.haiku.imageLayout", { layout, alignment });
 
-  return { ...haiku, layout };
+  return layout;
 }
 
 export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, type: string = "image/png"): Promise<Haiku> {
   console.log("services.haiku.updateHaikuImage", { user, haiku, buffer, type });
 
-  const getColors = require('get-image-colors');
-  const colors = await getColors(buffer, type);
-  // console.log("services.haiku.updateHaikuImage", { colors });
-
-  // sort by darkness and pick darkest for foreground, lightest for background
-  const sortedColors = colors.sort((a: any, b: any) => chroma.deltaE(a.hex(), "#000000") - chroma.deltaE(b.hex(), "#000000"));
+  const colors = await imageColors(buffer, type);
 
   const sizeOf = require('buffer-image-size');
   const dimensions = sizeOf(buffer);
@@ -618,7 +636,7 @@ export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, 
   const haikuId = uuid();
   const filename = `haiku-${haikuId}-custom-${moment().format("YYYYMMDD_HHmmss")}-${(haiku.version || 0) + 1}.png`;
   // @ts-ignore
-  const blob = await put(filename, buffer, {
+  const blob = await putBlob(filename, buffer, {
     access: 'public',
     addRandomSuffix: false,
   });
@@ -632,9 +650,7 @@ export async function updateHaikuImage(user: any, haiku: Haiku, buffer: Buffer, 
     // @ts-ignore
     bgImage: blob.url,
     bgImageDimensions: dimensions,
-    color: sortedColors[0].darken(0.5).hex(),
-    bgColor: sortedColors[sortedColors.length - 1].brighten(0.5).hex(),
-    colorPalette: sortedColors.map((c: any) => c.hex()),
+    ...colors,
     sharedVersioned: true, // be sure to keep in sync with triggerHaikuShared below
   } as Haiku;
 
@@ -662,6 +678,7 @@ export async function generateHaiku(user: User, {
   poem,
   // image,
   albumId,
+  onEvent,
 }: {
   lang?: LanguageType,
   subject?: string,
@@ -671,11 +688,10 @@ export async function generateHaiku(user: User, {
   poem?: string[],
   // image?: Buffer,
   albumId?: string,
+  onEvent?: OnHaikuEvent,
 }): Promise<Haiku> {
   console.log("services.haiku.generateHaiku", { lang, subject, mood, poem, user });
   const language = supportedLanguages[lang || "en"].name;
-  const debugOpenai = process.env.OPENAI_API_KEY == "DEBUG";
-  debugOpenai && console.warn(`>> services.haiku.generateHaiku: DEBUG mode: not uploading to blob store`);
 
   const album = albumId && await store.haikuAlbums.get(albumId);
   const customPoemPrompt = album && album.poemPrompt;
@@ -699,16 +715,19 @@ export async function generateHaiku(user: User, {
   // console.log("services.haiku.generateHaiku", { ret });
   console.log("services.haiku.generateHaiku", { generatedSubject, generatedMood, generatedSeason, poemPrompt });
 
+  const { onPartialImage, earlyLayout } = imageStreamHandlers(user, onEvent);
+
   const {
     data: imageData,
     prompt: imagePrompt,
     artStyle: selectedArtStyle,
     model: imageModel,
-  } = await openai.generateBackgroundImage(user.id, subject || generatedSubject, mood || generatedMood, artStyle, customImagePrompt, customArtStyles);
+  } = await openai.generateBackgroundImage(user.id, subject || generatedSubject, mood || generatedMood, artStyle, customImagePrompt, customArtStyles, { onPartialImage });
   // console.log("services.haiku.generateHaiku", { imageUrl });
 
   const imageBuffer = Buffer.from(imageData.b64_json, 'base64');
   // console.log("services.haiku.generateHaiku", { imageBuffer });
+  const layout = await earlyLayout?.();
 
   return createHaiku(
     user,
@@ -730,6 +749,7 @@ export async function generateHaiku(user: User, {
       imageBuffer,
       poem: poem || generatedPoem || [],
       albumId,
+      layout,
     },
     //   imageBuffer
     // )
