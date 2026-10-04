@@ -155,7 +155,7 @@ export const haikudleOnboardingSteps = [
     message: `
       <div style="display: flex; flex-direction: column; gap: 0.4rem;">
         <div>The poem's words have been moved around and the art blurred. Different styling indicates which word is in the correct place.</div>
-        <div>Drag-and-drop or swap (tap/click on one then another) words to their correct places and the art work will be revealed.</div>
+        <div>Drag-and-drop words to their correct places and the art work will be revealed.</div>
         <div>Daily puzzles only last for the day: solve and share before time runs out!</div>
       </div>
     `,
