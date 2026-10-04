@@ -6,6 +6,7 @@ import { userUsage } from '@/services/usage';
 import { userSession } from '@/services/users';
 import { LanguageType } from '@/types/Languages';
 import { USAGE_LIMIT } from '@/types/Usage';
+import { acceptsNdjson, ndjsonResponse } from '@/utils/ndjson';
 
 export const maxDuration = 300;
 // export const dynamic = 'force-dynamic';
@@ -200,6 +201,12 @@ export async function POST(request: NextRequest) {
 
     // @ts-ignore
     haiku = await createHaiku(user, { title, poem, imageBuffer, imageType, albumId: album });
+  } else if (acceptsNdjson(request)) {
+    return ndjsonResponse(async (send) => ({
+      type: "haiku",
+      haiku: await generateHaiku(user, { lang, subject, mood, artStyle, poem, albumId: album, onEvent: send }),
+      reachedUsageLimit,
+    }));
   } else {
     // console.log('app.api.haiku.POST generating new haiku', { lang, subject, mood, artStyle });    
     haiku = await generateHaiku(user, { lang, subject, mood, artStyle, poem, albumId: album })

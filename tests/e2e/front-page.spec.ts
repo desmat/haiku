@@ -1,4 +1,4 @@
-import { expect, Page, test } from '@playwright/test';
+import { expect, Page, Request, Response, test } from '@playwright/test';
 import { readFile } from 'fs/promises';
 
 const webServerLogPath = 'test-results/webserver.log';
@@ -131,7 +131,58 @@ async function currentHaikuId(page: Page) {
   return new URL(page.url()).pathname.split('/').filter(Boolean).pop();
 }
 
-async function generateHaiku(page: Page) {
+// Mid-transition, Chrome reports `-webkit-cross-fade(<from>, <to>, <progress>)`.
+async function backgroundImage(page: Page) {
+  return page.locator('.bgImage-container').first().evaluate((element) => getComputedStyle(element).backgroundImage);
+}
+
+async function streamedEvents(response: Response) {
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toContain('application/x-ndjson');
+  return (await response.text()).split('\n').filter(Boolean).map((line) => JSON.parse(line));
+}
+
+function eventNames(events: any[]) {
+  return events.map((event) => event.type == 'partial' ? `partial ${event.index}` : event.type);
+}
+
+const isPost = (pathname: string) => (request: Request) =>
+  request.method() === 'POST' && new URL(request.url()).pathname === pathname;
+
+// Response events fire on headers, at the start of a stream. requestfinished fires at its end.
+function streamFinished(page: Page, pathname: string) {
+  let finished = false;
+  page.waitForEvent('requestfinished', isPost(pathname)).then(() => finished = true, () => {});
+  return () => finished;
+}
+
+// The swap eases this element's blur and image. A new element would jump straight to the end.
+async function markBackground(page: Page) {
+  await page.locator('.bgImage-container').first().evaluate((element) => element.setAttribute('data-e2e-kept', ''));
+}
+
+async function expectBackgroundKept(page: Page) {
+  await expect(page.locator('.bgImage-container[data-e2e-kept]')).toHaveCount(1);
+}
+
+// The preview streams in before the haiku is saved: a blob: background, then the saved data: one.
+async function expectPreviewThenSaved(page: Page, { saved, poemDuringPreview }: {
+  saved: () => boolean,
+  poemDuringPreview: boolean,
+}) {
+  await expect.poll(() => backgroundImage(page), { timeout: 30_000 }).toContain('blob:');
+  const poemLines = page.locator('.poem-line-input');
+  if (poemDuringPreview) {
+    await expect(poemLines.first()).toContainText('Mock haiku about');
+  } else {
+    expect(await poemLines.count(), 'poem showed before the haiku was saved').toBe(0);
+  }
+  expect(saved(), 'preview showed after the haiku was saved').toBe(false);
+
+  await expect.poll(() => backgroundImage(page), { timeout: 30_000 }).toMatch(/^url\("data:image\/png;base64,/);
+}
+
+async function loadHaikuPage(page: Page) {
   // Generating before the initial haiku arrives lets that late response replace the
   // generated haiku.
   const initialHaiku = page.waitForResponse((response) =>
@@ -140,22 +191,39 @@ async function generateHaiku(page: Page) {
   await page.goto('/?mode=haiku&noOnboarding=true');
   await initialHaiku;
   await expectPoemLines(page);
-  const initialId = await currentHaikuId(page);
-
-  // Generate takes the subject from the input; the window.prompt path is only a fallback.
-  page.on('dialog', (dialog) => dialog.accept('test subject'));
-
-  await page.locator('.GenerateInput textarea').fill('test subject');
-  await page.getByTitle('Create a new haiku', { exact: true }).click();
-
-  await expect.poll(() => currentHaikuId(page), { timeout: 30_000 }).not.toBe(initialId);
-  // The URL changes before the new haiku renders.
-  await expect(page.locator('.poem-line-input').first()).toContainText('Mock haiku about', { timeout: 30_000 });
-  await expectBackgroundImage(page);
-  await expectPoemLines(page);
 }
 
-test('generating a haiku renders a new haiku with a background image', async ({ page }) => {
+async function clickGenerate(page: Page, subject: string) {
+  // Generate takes the subject from the input; the window.prompt path is only a fallback.
+  page.on('dialog', (dialog) => dialog.accept(subject));
+  await page.locator('.GenerateInput textarea').fill(subject);
+  await page.getByTitle('Create a new haiku', { exact: true }).click();
+}
+
+async function generateHaiku(page: Page) {
+  await loadHaikuPage(page);
+  const initialId = await currentHaikuId(page);
+  await markBackground(page);
+
+  const generated = page.waitForResponse((response) => isPost('/api/haikus')(response.request()));
+  const saved = streamFinished(page, '/api/haikus');
+  await clickGenerate(page, 'test subject');
+
+  // The poem comes with the saved haiku, not before.
+  await expectPreviewThenSaved(page, { saved, poemDuringPreview: false });
+  await expectPoemLines(page);
+  await expectBackgroundKept(page);
+
+  const events = await streamedEvents(await generated);
+  expect(eventNames(events)).toEqual(['partial 0', 'haiku']);
+
+  const { haiku } = events[events.length - 1];
+  await expect.poll(() => currentHaikuId(page)).not.toBe(initialId);
+  expect(await currentHaikuId(page)).toBe(haiku.id);
+  return haiku;
+}
+
+test('generating a haiku streams a preview, then renders the saved haiku', async ({ page }) => {
   const expectNoPageIssues = trackPageIssues(page);
 
   await generateHaiku(page);
@@ -164,29 +232,63 @@ test('generating a haiku renders a new haiku with a background image', async ({ 
   await expectNoPageIssues();
 });
 
-test('regenerating the image of a generated haiku returns the updated haiku', async ({ page }) => {
+test('regenerating the image of a generated haiku streams a preview, then renders the updated haiku', async ({ page }) => {
   const expectNoPageIssues = trackPageIssues(page);
 
-  const generated = page.waitForResponse((response) =>
-    response.request().method() === 'POST' && new URL(response.url()).pathname === '/api/haikus'
-  );
-  await generateHaiku(page);
-  const generateResponse = await generated;
-  const { haiku } = await generateResponse.json();
-  const authorization = generateResponse.request().headers()['authorization'];
+  const haiku = await generateHaiku(page);
   expect(haiku.version ?? 0).toBe(0);
 
-  // The creator in the browser can differ from the user that generated (two anonymous users
-  // race at first load), so the UI control isn't reliable. Call the API as the generator.
-  const regenerated = await page.request.post(`/api/haikus/${haiku.id}/regenerate`, {
-    headers: { authorization },
-    data: { haiku, part: 'image' },
-  });
-  expect(regenerated.status()).toBe(200);
-  const body = await regenerated.json();
-  expect(body.haiku.id).toBe(haiku.id);
-  expect(body.haiku.bgImage).toMatch(/^data:image\/png;base64,/);
+  const pathname = `/api/haikus/${haiku.id}/regenerate`;
+  const regenerated = page.waitForResponse((response) => isPost(pathname)(response.request()));
+  const saved = streamFinished(page, pathname);
+
+  // The click handler is on the icon, not its titled wrapper.
+  await page.getByTitle("Regenerate this haiku's art with the same theme", { exact: true }).locator('svg').click();
+
+  // The poem stays up over the new image.
+  await expectPreviewThenSaved(page, { saved, poemDuringPreview: true });
+  await expectPoemLines(page);
+  await expectBackgroundKept(page);
+
+  const events = await streamedEvents(await regenerated);
+  expect(eventNames(events)).toEqual(['partial 0', 'haiku']);
+  const { haiku: updated } = events[events.length - 1];
+  expect(updated.id).toBe(haiku.id);
+  expect(updated.version).toBe(1);
 
   await pauseAtEnd(page);
   await expectNoPageIssues();
+});
+
+test('generating in haikudle mode streams the image but keeps the poem hidden until saved', async ({ page }) => {
+  const expectNoPageIssues = trackPageIssues(page);
+
+  await page.goto('/?mode=haikudle&noOnboarding=true');
+  await expect(page.getByTestId('haikudle-puzzle')).toBeVisible({ timeout: 30_000 });
+
+  const generated = page.waitForResponse((response) => isPost('/api/haikus')(response.request()));
+  const saved = streamFinished(page, '/api/haikus');
+  await clickGenerate(page, 'test subject');
+
+  await expectPreviewThenSaved(page, { saved, poemDuringPreview: false });
+  expect(eventNames(await streamedEvents(await generated))).toEqual(['partial 0', 'haiku']);
+
+  await pauseAtEnd(page);
+  await expectNoPageIssues();
+});
+
+test('generating without asking for a stream returns plain JSON', async ({ page }) => {
+  await loadHaikuPage(page);
+  const token = await page.evaluate(() => localStorage.getItem('session'));
+
+  const response = await page.request.post('/api/haikus', {
+    headers: { authorization: `Bearer ${token}` },
+    data: { request: { subject: 'json subject' } },
+  });
+
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toContain('application/json');
+  const { haiku } = await response.json();
+  expect(haiku.poem).toEqual(['Mock haiku about', 'json subject', 'written by no one.']);
+  expect(haiku.bgImage).toMatch(/^data:image\/png;base64,/);
 });
