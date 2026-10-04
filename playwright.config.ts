@@ -18,6 +18,9 @@ export default defineConfig({
       ...process.env,
       EXPERIENCE_MODE: 'haiku',
       NO_ONBOARDING: 'true',
+      STORE_TYPE: 'memory',
+      AI_MOCK: 'true',
+      BLOB_MOCK: 'true',
     },
   },
   projects: [

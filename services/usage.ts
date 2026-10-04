@@ -2,7 +2,7 @@ import moment from 'moment';
 import { User } from '@/types/User';
 import { Haiku } from '@/types/Haiku';
 import { getHaikus } from '@/services/haikus';
-import { createStore } from './stores/redis';
+import { createStore } from './stores';
 
 const store = createStore({
   // debug: true,

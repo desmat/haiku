@@ -126,3 +126,67 @@ test('front page loads a Haikudle puzzle with a background image in haikudle mod
   await pauseAtEnd(page);
   await expectNoPageIssues();
 });
+
+async function currentHaikuId(page: Page) {
+  return new URL(page.url()).pathname.split('/').filter(Boolean).pop();
+}
+
+async function generateHaiku(page: Page) {
+  // Generating before the initial haiku arrives lets that late response replace the
+  // generated haiku.
+  const initialHaiku = page.waitForResponse((response) =>
+    response.request().method() === 'GET' && /\/api\/haikus\/[^/]+$/.test(new URL(response.url()).pathname)
+  );
+  await page.goto('/?mode=haiku&noOnboarding=true');
+  await initialHaiku;
+  await expectPoemLines(page);
+  const initialId = await currentHaikuId(page);
+
+  // Generate takes the subject from the input; the window.prompt path is only a fallback.
+  page.on('dialog', (dialog) => dialog.accept('test subject'));
+
+  await page.locator('.GenerateInput textarea').fill('test subject');
+  await page.getByTitle('Create a new haiku', { exact: true }).click();
+
+  await expect.poll(() => currentHaikuId(page), { timeout: 30_000 }).not.toBe(initialId);
+  // The URL changes before the new haiku renders.
+  await expect(page.locator('.poem-line-input').first()).toContainText('Mock haiku about', { timeout: 30_000 });
+  await expectBackgroundImage(page);
+  await expectPoemLines(page);
+}
+
+test('generating a haiku renders a new haiku with a background image', async ({ page }) => {
+  const expectNoPageIssues = trackPageIssues(page);
+
+  await generateHaiku(page);
+
+  await pauseAtEnd(page);
+  await expectNoPageIssues();
+});
+
+test('regenerating the image of a generated haiku returns the updated haiku', async ({ page }) => {
+  const expectNoPageIssues = trackPageIssues(page);
+
+  const generated = page.waitForResponse((response) =>
+    response.request().method() === 'POST' && new URL(response.url()).pathname === '/api/haikus'
+  );
+  await generateHaiku(page);
+  const generateResponse = await generated;
+  const { haiku } = await generateResponse.json();
+  const authorization = generateResponse.request().headers()['authorization'];
+  expect(haiku.version ?? 0).toBe(0);
+
+  // The creator in the browser can differ from the user that generated (two anonymous users
+  // race at first load), so the UI control isn't reliable. Call the API as the generator.
+  const regenerated = await page.request.post(`/api/haikus/${haiku.id}/regenerate`, {
+    headers: { authorization },
+    data: { haiku, part: 'image' },
+  });
+  expect(regenerated.status()).toBe(200);
+  const body = await regenerated.json();
+  expect(body.haiku.id).toBe(haiku.id);
+  expect(body.haiku.bgImage).toMatch(/^data:image\/png;base64,/);
+
+  await pauseAtEnd(page);
+  await expectNoPageIssues();
+});

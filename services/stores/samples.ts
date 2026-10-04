@@ -284,3 +284,16 @@ export const haikus = {
     ],
   },
 };
+
+// Haikus for the memory store (STORE_TYPE=memory). The `haikus` samples above lack the
+// fields a persisted haiku carries.
+export function memorySeedHaikus(): Haiku[] {
+  return Object.values(haikus).map((haiku: any, i: number) => ({
+    createdBy: "(seed)",
+    createdAt: 1700000000000 + i * 1000,
+    status: "created",
+    lang: "en",
+    colorPalette: [haiku.color, haiku.bgColor],
+    ...haiku,
+  }));
+}
