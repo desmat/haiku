@@ -233,6 +233,25 @@ ul {
   }
 }
 
+/* Registered so they transition: the gradients built from them follow the palette. */
+@property --haiku-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: black;
+}
+
+@property --haiku-bg-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: lightgrey;
+}
+
+@keyframes haiku-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
 /* fallbacks for safari browsers (dvh doesn't seem to work well) */
 .bgImage-container {
   top: 50vh;

@@ -12,8 +12,8 @@ export const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
       : title
         ? `${title}`
         : undefined,
-    `${mode == "haikudle" ? "haikudle.ai" : "haikugenius.ai"}/${haiku?.id}`
-  ];
+    haiku?.id && `${mode == "haikudle" ? "haikudle.ai" : "haikugenius.ai"}/${haiku.id}`
+  ].filter(Boolean);
 }
 
 export default function HaikuTitle({
@@ -52,6 +52,7 @@ export default function HaikuTitle({
         }
         style={{
           fontSize,
+          top: showcaseMode && haiku?.layout?.poem?.bottom ? "1rem" : undefined,
         }}
       >
         <div

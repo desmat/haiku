@@ -1,20 +1,15 @@
-import { delay, mapToList } from '@desmat/utils';
 import OpenAI from 'openai';
-import * as samples from "@/services/stores/samples";
+import { isAiMock } from '@/utils/mocks';
 import trackEvent from '@/utils/trackEventServer';
+import { mockAnalyzeHaiku, mockAnalyzeImage, mockCompleteHaiku, mockGenerateBackgroundImage, mockGenerateHaiku } from './openai.mock';
 
-const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
+const openai = !isAiMock() && new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const languageModel = "gpt-5-mini";
-// const smallLanguageModel = "gpt-4o-mini"
-// const languageModel = "gpt-4";
-// const languageModel = "gpt-3.5-turbo";
+const languageModel = "gpt-6-luna";
 
-const imageModel = "gpt-image-2";
-// const imageModel = "dall-e-3";
-// const imageModel = "dall-e-2";
+const imageModel = "gpt-image-2.5-flare";
 
 function parseJson(input: string) {
   // response from openai api sometimes returns ```json\n ... ```
@@ -26,7 +21,14 @@ function parseJson(input: string) {
   return undefined;
 }
 
-export async function generateBackgroundImage(userId: string, subject?: string, mood?: string, artStyle?: string, customPrompt?: string, customArtStyles?: string[]): Promise<any> {
+export type PartialImage = { index: number, b64_json: string };
+
+export async function generateBackgroundImage(userId: string, subject?: string, mood?: string, artStyle?: string, customPrompt?: string, customArtStyles?: string[], {
+  onPartialImage,
+}: {
+  // Streams the image. Partials cost extra output tokens, so only stream when someone is watching.
+  onPartialImage?: (partial: PartialImage) => Promise<void>,
+} = {}): Promise<any> {
   console.log(`services.openai.generateBackgroundImage`, { subject, mood, artStyle, customPrompt, customArtStyles });
   const imageTypes = customArtStyles || [
     // "charcoal drawing", 
@@ -96,40 +98,22 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
   `;
   console.log(`services.openai.generateBackgroundImage`, { prompt });
 
-  // for testing
-  if (process.env.OPENAI_API_KEY == "DEBUG") {
-    console.warn(`>> services.openai.generateBackgroundImage: DEBUG mode: returning dummy response`);
-    const sampleHaikus = mapToList(samples.haikus)
-    const res = {
-      "created": 1705515146,
-      "data": [
-        {
-          "revised_prompt": "Create an image that uses extremely muted, almost monochromatic colors. Make the style similar to traditional Japanese artwork, with the subject matter focused on various aspects of nature. Ensure the colors used are slightly varied but maintain a consistent, subdued aesthetic.",
-          // "url": "https://haiku.desmat.ca/backgrounds/DALL%C2%B7E%202024-01-15%2017.55.09%20-%20An%20extremely%20muted,%20almost%20monochromatic%20painting%20in%20the%20Japanese%20style,%20featuring%20a%20winter%20snow%20scene.%20The%20artwork%20captures%20the%20quiet%20beauty%20of%20a%20sno.png"
-          url: `http://localhost:3000${encodeURI(sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].bgImage)}`,
-          // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/haiku-f98a2e55-nature.png",
-          // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/45e37365-nmjxiOoeO9WKMUAkgv5tJvxdKGFNkt.png"
-        }
-      ]
-    }
-
-    return {
-      artStyle: selectedArtStyle,
-      prompt: res.data[0]["revised_prompt"],
-      url: res.data[0].url,
-      model: "debug",
-    };
+  if (isAiMock()) {
+    console.warn(`>> services.openai.generateBackgroundImage: AI_MOCK mode: returning mock response`);
+    return mockGenerateBackgroundImage({ prompt, artStyle: selectedArtStyle, subject, onPartialImage, partialImages });
   }
 
   try {
-    // @ts-ignore
-    const response = await openai.images.generate({
-      model: imageModel,
-      prompt,
-      n: 1,
-      size: "1024x1024",
-      quality: 'high'
-    });
+    const response = onPartialImage
+      ? await generateStreamingImage(prompt, onPartialImage)
+      // @ts-ignore
+      : await openai.images.generate({
+        model: imageModel,
+        prompt,
+        n: 1,
+        size: "1024x1024",
+        quality: 'high'
+      });
 
     try {
       console.log("services.openai.generateBackgroundImage RESULTS FROM API", { response });
@@ -158,30 +142,42 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
   }
 }
 
+// One is enough. Measured with 1–3: the first arrives at ~6–7s whatever the count, with the same
+// composition as the final. Each partial adds ~77 output tokens (4%).
+const partialImages = 1;
+
+// Same shape as the non-streaming response.
+async function generateStreamingImage(prompt: string, onPartialImage: (partial: PartialImage) => Promise<void>) {
+  // @ts-ignore
+  const stream = await openai.images.generate({
+    model: imageModel,
+    prompt,
+    n: 1,
+    size: "1024x1024",
+    quality: 'high',
+    stream: true,
+    partial_images: partialImages,
+  });
+
+  for await (const event of stream) {
+    if (event.type == "image_generation.partial_image") {
+      await onPartialImage({ index: event.partial_image_index, b64_json: event.b64_json });
+    } else if (event.type == "image_generation.completed") {
+      return { data: [{ b64_json: event.b64_json }] };
+    }
+  }
+
+  throw new Error("image stream ended without a completed event");
+}
+
 export async function generateHaiku(userId: string, language?: string, subject?: string, mood?: string, customPrompt?: string): Promise<any> {
   const prompt = `Topic: ${subject || "any"}${mood ? ` Mood: ${mood}` : ""}`;
 
   console.log(`services.openai.generateHaiku`, { language, subject, mood, prompt });
 
-  if (process.env.OPENAI_API_KEY == "DEBUG") {
-    // for testing
-    console.warn(`>> services.openai.generateHaiku: DEBUG mode: returning dummy response`);
-    // await delay(3000);
-    const sampleHaikus = mapToList(samples.haikus);
-    return {
-      response: {
-        prompt,
-        haiku: subject?.includes("DEBUG")
-          ? [
-            "line one,",
-            "line two,",
-            "line three.",
-          ] : sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].poem,
-        subject: subject || "test subject",
-        mood: mood || "test mood",
-        model: "debug",
-      }
-    };
+  if (isAiMock()) {
+    console.warn(`>> services.openai.generateHaiku: AI_MOCK mode: returning mock response`);
+    return mockGenerateHaiku({ prompt, subject, mood });
   }
 
   // ... generate a haiku in ${language || "English"} and respond ...
@@ -265,6 +261,7 @@ export async function generateHaiku(userId: string, language?: string, subject?:
     // @ts-ignore
     const completion = await openai.chat.completions.create({
       model: languageModel,
+      reasoning_effort: "none",
       messages: [
         {
           role: 'system',
@@ -312,19 +309,9 @@ export async function completeHaiku(userId: string, poem: string[], language?: s
 
   console.log(`services.openai.completeHaiku`, { language, subject, mood, prompt });
 
-  if (process.env.OPENAI_API_KEY == "DEBUG") {
-    // for testing
-    console.warn(`>> services.openai.completeHaiku: DEBUG mode: returning dummy response`);
-    // await delay(3000);
-    return {
-      response: {
-        prompt,
-        haiku: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "_") : line),
-        subject: subject || "test subject",
-        mood: mood || "test mood",
-        model: "debug",
-      }
-    };
+  if (isAiMock()) {
+    console.warn(`>> services.openai.completeHaiku: AI_MOCK mode: returning mock response`);
+    return mockCompleteHaiku({ prompt, poem, subject, mood });
   }
 
   try {
@@ -388,25 +375,9 @@ export async function analyzeHaiku(userId: string, poem: string[]): Promise<any>
   const mood = undefined;
   console.log(`services.openai.analyzeHaiku`, { language, subject, mood });
 
-  if (process.env.OPENAI_API_KEY == "DEBUG") {
-    // for testing
-    console.warn(`>> services.openai.analyzeHaiku: DEBUG mode: returning dummy response`);
-    // await delay(3000);
-    const sampleHaikus = mapToList(samples.haikus);
-    return {
-      response: {
-        prompt: "<system prompt>" + "\n" + poem.join("\n"),
-        haiku: true //subject?.includes("DEBUG")
-          ? [
-            "line one,",
-            "line two,",
-            "line three.",
-          ] : sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].poem,
-        subject: subject || "test subject",
-        mood: mood || "test mood",
-        model: "debug",
-      }
-    };
+  if (isAiMock()) {
+    console.warn(`>> services.openai.analyzeHaiku: AI_MOCK mode: returning mock response`);
+    return mockAnalyzeHaiku({ prompt: "<system prompt>\n" + poem.join("\n"), poem });
   }
 
   // ... generate a haiku in ${language || "English"} and respond ...
@@ -466,17 +437,9 @@ export async function analyzeHaiku(userId: string, poem: string[]): Promise<any>
 export async function analyzeImage(userId: string, imageBase64: string): Promise<any> {
   console.log(`services.openai.analyzeImage`, { userId });
 
-  if (process.env.OPENAI_API_KEY == "DEBUG") {
-    // for testing
-    console.warn(`>> services.openai.analyzeImage: DEBUG mode: returning dummy response`);
-    // await delay(3000);
-    return {
-      response: {
-        prompt: "<system prompt>",
-        // TODO somethingsomethingsomething
-        model: "debug",
-      }
-    };
+  if (isAiMock()) {
+    console.warn(`>> services.openai.analyzeImage: AI_MOCK mode: returning mock response`);
+    return mockAnalyzeImage({ prompt: "<system prompt>" });
   }
 
   // ... generate a haiku in ${language || "English"} and respond ...
@@ -513,8 +476,6 @@ export async function analyzeImage(userId: string, imageBase64: string): Promise
     Choose the position in the area of negative space, if any, and away from the point of interest, if any.
     If the moon or sun are features it's often nice to position the poem to touch it.
     If a person, persons, animal or animals are prominently featured make sure the position will ABOSOLUTELY NOT be covering it their face and so prefer to position below their face, even if this is in the negative space.
-    IMPORTANT: IF PERSON, PEOPLE, ANIMAL OR ANIMALS ARE IN THE CENTER CHOOSE \`bottom\`.
-    IMPORTANT: IF PERSON, PEOPLE, ANIMAL OR ANIMALS ARE IN THE BOTTOM CHOOSE THE POSITION OF THE NEGATIVE SPACE, EITHER \`top\` or \`center\`.
     If there is no obvious place in the image please choose center.
     Generally favor center or top position.
     Please specify on which position will work best to overlay the poem:

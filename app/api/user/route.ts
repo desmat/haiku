@@ -88,13 +88,18 @@ export async function POST(
 ) {
   console.log('app.api.user.POST', {});
 
-  const [
-    // { user: userFromSession },
-    { user: userFromRequest },
-  ] = await Promise.all([
-    // userSession(request),
-    request.json(),
-  ]);
+  let userFromRequest: any = {};
+
+  try {
+    const data = await request.json();
+    userFromRequest = data?.user || {};
+  } catch (error: any) {
+    if (error instanceof SyntaxError) {
+      console.warn('>> app.api.user.POST: empty or invalid request body; creating anonymous session');
+    } else {
+      throw error;
+    }
+  }
 
   console.log('app.api.user.POST', { userFromRequest });
 
@@ -124,7 +129,7 @@ export async function POST(
     isAdmin: ((process.env.ADMIN_USER_IDS || "").split(",").includes(userId)),
     preferences: {},
     host: request.headers.get("host"),
-    referer: userFromRequest.referer,
+    referer: userFromRequest?.referer,
     createdAt: moment().valueOf(),
   };
 
