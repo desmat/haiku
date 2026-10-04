@@ -137,6 +137,32 @@ async function anyTileMovedWithin(page: Page, ms: number) {
   }, { selector: tiles, ms });
 }
 
+test('a new puzzle starts with only its first word in place', async ({ page }) => {
+  const expectNoPageIssues = trackPageIssues(page);
+  const puzzle = await loadPuzzle(page);
+
+  const board = await readBoard(page);
+  expect(board.filter((slot) => isCorrect(puzzle, slot))).toEqual([{ id: board[0].id, line: 0, index: 0 }]);
+
+  // The memory store seeds haikus 1 to 8. Several repeat a word.
+  const token = await page.evaluate(() => localStorage.getItem('session'));
+  for (const haikuId of ['1', '2', '3', '4', '5', '6', '7', '8']) {
+    const response = await page.request.get(`/api/haikudles/${haikuId}`, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    expect(response.status()).toBe(200);
+    const { haikudle } = await response.json();
+
+    const inPlace = haikudle.inProgress.flatMap((line: any[], lineNumber: number) => line
+      .filter((word: any, wordNumber: number) => hashCode(normalizeWord(word.word)) == haikudle.haiku.poem[lineNumber][wordNumber])
+      .map((word: any) => word.word));
+    expect(inPlace, `haiku ${haikuId}`).toEqual([haikudle.inProgress[0][0].word]);
+  }
+
+  await pauseAtEnd(page);
+  await expectNoPageIssues();
+});
+
 test('dragging a word onto another swaps them and saves the move', async ({ page }) => {
   const expectNoPageIssues = trackPageIssues(page);
   const puzzle = await loadPuzzle(page);
