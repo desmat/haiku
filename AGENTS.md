@@ -33,12 +33,7 @@ The dev server defaults to `http://localhost:3000`.
 ## Local Development Notes
 
 - Environment variables are expected in `.env.local`; do not commit secrets or paste secret values into logs, docs, or PR text.
-- Three switches run the app with no Redis, OpenAI or Vercel Blob. All three are ignored when `NODE_ENV === "production"`.
-  - `STORE_TYPE=memory`: `services/stores/index.ts` returns in-memory stores seeded from `services/stores/samples.ts`. Data resets on restart.
-  - `AI_MOCK=true`: `services/openai.ts` returns canned responses from `services/openai.mock.ts`. The mock image is a file from `public/backgrounds`, picked from the subject.
-  - `BLOB_MOCK=true`: `services/blob.ts` `putBlob` returns a `data:` URL instead of uploading.
-- Run `STORE_TYPE=memory AI_MOCK=true BLOB_MOCK=true npm run dev -- --port 3001` to generate and regenerate haikus by hand without secrets.
-- `.env.local` can hold production Redis and Blob credentials and a real OpenAI key. Use the switches above rather than editing it.
+- `OPENAI_API_KEY=DEBUG` enables local fake OpenAI responses in `services/openai.ts`.
 - Some flows depend on Redis, Vercel Blob, Twitter/X credentials, OpenAI, or webhook configuration. Prefer debug/sample paths when possible.
 - `EXPERIENCE_MODE` switches behavior between haiku, showcase, and Haikudle modes. Check mode-specific branches before changing routing or UI assumptions.
 - Use `localhost` rather than `127.0.0.1` when manually checking app behavior. The app derives a subdomain from the request host, and `127.0.0.1` can be misread as a subdomain/album.
@@ -61,9 +56,9 @@ For most changes:
 3. Run `npm run test:e2e` for the Playwright smoke test when changing page rendering, routing, or client behavior.
 4. Run `npm run test:e2e:headed` when you need to watch the same smoke test in Chromium with slow motion and a short pause at the end.
 
-The Playwright config starts Next on port `3017` in `haiku` mode with `STORE_TYPE=memory`, `AI_MOCK=true` and `BLOB_MOCK=true`, so tests are deterministic and reach no external service. It binds the server to `127.0.0.1` but navigates to `http://localhost:3017` so host-derived app behavior matches normal local usage.
+The Playwright config starts Next on port `3017` in `haiku` mode. It binds the server to `127.0.0.1` but navigates to `http://localhost:3017` so host-derived app behavior matches normal local usage.
 
-The e2e tests also generate a haiku through the UI and regenerate its image through the API. The smoke test checks that the front page loads a haiku with three visible lines, has a CSS background image, and emits no browser console warnings/errors or uncaught page errors.
+The smoke test checks that the front page loads a haiku with three visible lines, has a CSS background image, and emits no browser console warnings/errors or uncaught page errors.
 
 If a command cannot run because required local services, secrets, browser permissions, or sandbox network/listen permissions are missing, note that clearly in the final response.
 

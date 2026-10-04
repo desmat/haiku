@@ -20,7 +20,6 @@ import { Haikudle } from '@/types/Haikudle';
 import { LanguageType } from '@/types/Languages';
 import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboardingSteps, haikuPromptSteps, haikudleGotoHaikuGenius, haikudleOnboardingSteps, notShowcase_notOnboardedFirstTime_onboardedShowcase, showcase_notOnboardedFirstTime, showcase_onboardedFirstTime, showcase_onboardedFirstTime_admin } from '@/types/Onboarding';
 import { User } from '@/types/User';
-import { isAiMock } from '@/utils/mocks';
 import trackEvent from '@/utils/trackEvent';
 import HaikudlePage from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
@@ -395,7 +394,7 @@ export default function MainPage({
     // });
 
     const subject = typeof (theme) == "undefined"
-      ? prompt(`Haiku's theme or subject? ${isAiMock() ? "(AI mock mode)" : "(For example 'nature', 'cherry blossoms', or leave blank)"}`)
+      ? prompt(`Haiku's theme or subject? ${process.env.OPENAI_API_KEY == "DEBUG" ? "(Use 'DEBUG' for simple test poem)" : "(For example 'nature', 'cherry blossoms', or leave blank)"}`)
       : theme;
 
     if (typeof (subject) == "string") {

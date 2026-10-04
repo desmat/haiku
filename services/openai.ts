@@ -1,9 +1,9 @@
+import { delay, mapToList } from '@desmat/utils';
 import OpenAI from 'openai';
-import { isAiMock } from '@/utils/mocks';
+import * as samples from "@/services/stores/samples";
 import trackEvent from '@/utils/trackEventServer';
-import { mockAnalyzeHaiku, mockAnalyzeImage, mockCompleteHaiku, mockGenerateBackgroundImage, mockGenerateHaiku } from './openai.mock';
 
-const openai = !isAiMock() && new OpenAI({
+const openai = process.env.OPENAI_API_KEY != "DEBUG" && new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -91,9 +91,29 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
   `;
   console.log(`services.openai.generateBackgroundImage`, { prompt });
 
-  if (isAiMock()) {
-    console.warn(`>> services.openai.generateBackgroundImage: AI_MOCK mode: returning mock response`);
-    return mockGenerateBackgroundImage({ prompt, artStyle: selectedArtStyle, subject });
+  // for testing
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    console.warn(`>> services.openai.generateBackgroundImage: DEBUG mode: returning dummy response`);
+    const sampleHaikus = mapToList(samples.haikus)
+    const res = {
+      "created": 1705515146,
+      "data": [
+        {
+          "revised_prompt": "Create an image that uses extremely muted, almost monochromatic colors. Make the style similar to traditional Japanese artwork, with the subject matter focused on various aspects of nature. Ensure the colors used are slightly varied but maintain a consistent, subdued aesthetic.",
+          // "url": "https://haiku.desmat.ca/backgrounds/DALL%C2%B7E%202024-01-15%2017.55.09%20-%20An%20extremely%20muted,%20almost%20monochromatic%20painting%20in%20the%20Japanese%20style,%20featuring%20a%20winter%20snow%20scene.%20The%20artwork%20captures%20the%20quiet%20beauty%20of%20a%20sno.png"
+          url: `http://localhost:3000${encodeURI(sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].bgImage)}`,
+          // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/haiku-f98a2e55-nature.png",
+          // url: "https://v7atwtvflvdzlnnl.public.blob.vercel-storage.com/45e37365-nmjxiOoeO9WKMUAkgv5tJvxdKGFNkt.png"
+        }
+      ]
+    }
+
+    return {
+      artStyle: selectedArtStyle,
+      prompt: res.data[0]["revised_prompt"],
+      url: res.data[0].url,
+      model: "debug",
+    };
   }
 
   try {
@@ -138,9 +158,25 @@ export async function generateHaiku(userId: string, language?: string, subject?:
 
   console.log(`services.openai.generateHaiku`, { language, subject, mood, prompt });
 
-  if (isAiMock()) {
-    console.warn(`>> services.openai.generateHaiku: AI_MOCK mode: returning mock response`);
-    return mockGenerateHaiku({ prompt, subject, mood });
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
+    console.warn(`>> services.openai.generateHaiku: DEBUG mode: returning dummy response`);
+    // await delay(3000);
+    const sampleHaikus = mapToList(samples.haikus);
+    return {
+      response: {
+        prompt,
+        haiku: subject?.includes("DEBUG")
+          ? [
+            "line one,",
+            "line two,",
+            "line three.",
+          ] : sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].poem,
+        subject: subject || "test subject",
+        mood: mood || "test mood",
+        model: "debug",
+      }
+    };
   }
 
   // ... generate a haiku in ${language || "English"} and respond ...
@@ -272,9 +308,19 @@ export async function completeHaiku(userId: string, poem: string[], language?: s
 
   console.log(`services.openai.completeHaiku`, { language, subject, mood, prompt });
 
-  if (isAiMock()) {
-    console.warn(`>> services.openai.completeHaiku: AI_MOCK mode: returning mock response`);
-    return mockCompleteHaiku({ prompt, poem, subject, mood });
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
+    console.warn(`>> services.openai.completeHaiku: DEBUG mode: returning dummy response`);
+    // await delay(3000);
+    return {
+      response: {
+        prompt,
+        haiku: poem.map((line: string) => !line || line.includes("...") ? line.replaceAll("...", "_") : line),
+        subject: subject || "test subject",
+        mood: mood || "test mood",
+        model: "debug",
+      }
+    };
   }
 
   try {
@@ -338,9 +384,25 @@ export async function analyzeHaiku(userId: string, poem: string[]): Promise<any>
   const mood = undefined;
   console.log(`services.openai.analyzeHaiku`, { language, subject, mood });
 
-  if (isAiMock()) {
-    console.warn(`>> services.openai.analyzeHaiku: AI_MOCK mode: returning mock response`);
-    return mockAnalyzeHaiku({ prompt: "<system prompt>\n" + poem.join("\n"), poem });
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
+    console.warn(`>> services.openai.analyzeHaiku: DEBUG mode: returning dummy response`);
+    // await delay(3000);
+    const sampleHaikus = mapToList(samples.haikus);
+    return {
+      response: {
+        prompt: "<system prompt>" + "\n" + poem.join("\n"),
+        haiku: true //subject?.includes("DEBUG")
+          ? [
+            "line one,",
+            "line two,",
+            "line three.",
+          ] : sampleHaikus[Math.floor(Math.random() * sampleHaikus.length)].poem,
+        subject: subject || "test subject",
+        mood: mood || "test mood",
+        model: "debug",
+      }
+    };
   }
 
   // ... generate a haiku in ${language || "English"} and respond ...
@@ -400,9 +462,17 @@ export async function analyzeHaiku(userId: string, poem: string[]): Promise<any>
 export async function analyzeImage(userId: string, imageBase64: string): Promise<any> {
   console.log(`services.openai.analyzeImage`, { userId });
 
-  if (isAiMock()) {
-    console.warn(`>> services.openai.analyzeImage: AI_MOCK mode: returning mock response`);
-    return mockAnalyzeImage({ prompt: "<system prompt>" });
+  if (process.env.OPENAI_API_KEY == "DEBUG") {
+    // for testing
+    console.warn(`>> services.openai.analyzeImage: DEBUG mode: returning dummy response`);
+    // await delay(3000);
+    return {
+      response: {
+        prompt: "<system prompt>",
+        // TODO somethingsomethingsomething
+        model: "debug",
+      }
+    };
   }
 
   // ... generate a haiku in ${language || "English"} and respond ...

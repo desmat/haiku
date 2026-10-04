@@ -2,7 +2,7 @@ import { searchParamsToMap } from '@desmat/utils';
 import moment from 'moment';
 import { User } from '@/types/User';
 import { decodeJWT, encodeJWT } from "@/utils/jwt";
-import { createStore } from './stores';
+import { createStore } from './stores/redis';
 
 const store = createStore({
   // debug: true,

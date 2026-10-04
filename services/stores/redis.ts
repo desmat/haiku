@@ -1,10 +1,9 @@
 import RedisStore from "@desmat/redis-store";
 import { HaikuAlbum } from "@/types/Album";
-import { DailyHaiku, FlaggedHaiku, Haiku, LikedHaiku, UserHaiku } from "@/types/Haiku";
-import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
+import { DailyHaiku, DailyHaikuOptions, FlaggedHaiku, FlaggedHaikuOptions, Haiku, HaikuOptions, LikedHaiku, LikedHaikuOptions, UserHaiku, UserHaikuOptions } from "@/types/Haiku";
+import { DailyHaikudle, DailyHaikudleOptions, Haikudle, HaikudleOptions, UserHaikudle, UserHaikudleOptions } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
-import { FlaggedUser, User } from "@/types/User";
-import { storeConfigs } from "./config";
+import { FlaggedUser, FlaggedUserOptions, User, UserOptions } from "@/types/User";
 
 export function createStore({
   debug
@@ -14,17 +13,17 @@ export function createStore({
   debug && console.log(`services.stores.redis.create`);
 
   return {
-    haikus: new RedisStore<Haiku>({ ...storeConfigs.haikus, debug }),
-    dailyHaikus: new RedisStore<DailyHaiku>({ ...storeConfigs.dailyHaikus, debug }),
-    haikuAlbums: new RedisStore<HaikuAlbum>({ ...storeConfigs.haikuAlbums, debug }),
-    haikudles: new RedisStore<Haikudle>({ ...storeConfigs.haikudles, debug }),
-    dailyHaikudles: new RedisStore<DailyHaikudle>({ ...storeConfigs.dailyHaikudles, debug }),
-    userHaikudles: new RedisStore<UserHaikudle>({ ...storeConfigs.userHaikudles, debug }),
-    userHaikus: new RedisStore<UserHaiku>({ ...storeConfigs.userHaikus, debug }),
-    likedHaikus: new RedisStore<LikedHaiku>({ ...storeConfigs.likedHaikus, debug }),
-    flaggedHaikus: new RedisStore<FlaggedHaiku>({ ...storeConfigs.flaggedHaikus, debug }),
-    userUsage: new RedisStore<UserUsage>({ ...storeConfigs.userUsage, debug }),
-    user: new RedisStore<User>({ ...storeConfigs.user, debug }),
-    flaggedUsers: new RedisStore<FlaggedUser>({ ...storeConfigs.flaggedUsers, debug }),
+    haikus: new RedisStore<Haiku>({ key: "haiku", options: HaikuOptions, debug }),
+    dailyHaikus: new RedisStore<DailyHaiku>({ key: "dailyhaiku", options: DailyHaikuOptions, debug }),
+    haikuAlbums: new RedisStore<HaikuAlbum>({ key: "haikualbum", debug }),
+    haikudles: new RedisStore<Haikudle>({ key: "haikudle", options: HaikudleOptions, debug }),
+    dailyHaikudles: new RedisStore<DailyHaikudle>({ key: "dailyhaikudle", options: DailyHaikudleOptions, debug }),
+    userHaikudles: new RedisStore<UserHaikudle>({ key: "userhaikudle", options: UserHaikudleOptions, debug }),
+    userHaikus: new RedisStore<UserHaiku>({ key: "userhaiku", options: UserHaikuOptions, debug }),
+    likedHaikus: new RedisStore<LikedHaiku>({ key: "likedhaiku", options: LikedHaikuOptions, debug }),
+    flaggedHaikus: new RedisStore<FlaggedHaiku>({ key: "flaggedhaiku", options: FlaggedHaikuOptions, debug }),
+    userUsage: new RedisStore<UserUsage>({ key: "haikuuserusage", debug }),
+    user: new RedisStore<User>({ key: "haikuuser", options: UserOptions, debug }),
+    flaggedUsers: new RedisStore<FlaggedUser>({ key: "flaggedhaikuuser", options: FlaggedUserOptions, debug }),
   }
 }

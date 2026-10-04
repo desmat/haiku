@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { userSession } from '@/services/users';
-import { putBlob } from '@/services/blob';
+import { put } from '@vercel/blob';
 
 export async function PUT(
   request: NextRequest,
@@ -31,7 +31,7 @@ export async function PUT(
   console.log("app.api.images.[[slug]].PUT", { parts });
 
   const filename = params.slug.join("/")
-  const blob = await putBlob(filename, parts[0], {
+  const blob = await put(filename, parts[0], {
     access: 'public',
     addRandomSuffix: false,
   });
