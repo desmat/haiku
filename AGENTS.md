@@ -69,6 +69,8 @@ The Playwright config starts Next on port `3017` in `haiku` mode with `STORE_TYP
 
 The e2e tests also generate a haiku (in haiku and Haikudle modes) and regenerate its image through the UI. They check that a streamed preview (a `blob:` background) shows before the saved haiku, that the poem stays hidden until then (regenerate keeps the existing poem up), that the background element survives the swap so its transition carries over, and the order of the streamed events. Another test checks the plain JSON path. `tests/e2e/puzzle.spec.ts` drives the Haikudle puzzle with the mouse: swapping, the hover preview, drops that return, presses that don't drag, locked correct words, solving it end to end, progress carrying over to a new visit, and the idle drag hint. It reads the hashed solution from the haikudle API response to know where each word belongs. `AI_MOCK_IMAGE_MS=3000` leaves time to see the preview. The smoke test checks that the front page loads a haiku with three visible lines, has a CSS background image, and emits no browser console warnings/errors or uncaught page errors.
 
+`.github/workflows/e2e.yml` runs `npm run test:e2e` on every pull request and on pushes to `main`. It needs no secrets: it generates a throwaway `AUTH_PRIVATE_KEY`/`AUTH_PUBLIC_KEY` pair for session tokens. With `CI` set, failed tests retry once to record a trace, and `test-results/` is uploaded as an artifact.
+
 If a command cannot run because required local services, secrets, browser permissions, or sandbox network/listen permissions are missing, note that clearly in the final response.
 
 ## Safety
