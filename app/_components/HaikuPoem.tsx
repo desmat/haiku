@@ -27,8 +27,8 @@ const formatHaikuTitleAndAuthor = (haiku: Haiku, mode?: string) => {
       : title
         ? `${title}`
         : undefined,
-    `${mode == "haikudle" ? "haikudle.ai" : "haikugenius.ai"}/${haiku?.id}`
-  ];
+    haiku?.id && `${mode == "haikudle" ? "haikudle.ai" : "haikugenius.ai"}/${haiku.id}`
+  ].filter(Boolean);
 }
 
 export const formatHaikuText = (haiku: Haiku, mode?: string) => {

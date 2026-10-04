@@ -16,6 +16,21 @@ export type Haiku = {
   credits?: string,
 } & RedisStoreRecord | any;
 
+export type HaikuPreviewImage = {
+  image: string, // base64
+  contentType: string,
+  color: string,
+  bgColor: string,
+  colorPalette: string[],
+};
+
+// Newline-delimited JSON from the generate and regenerate-image routes, requested with
+// `Accept: application/x-ndjson`. `haiku` or `error` ends the stream.
+export type HaikuStreamEvent =
+  | { type: "partial", index: number } & HaikuPreviewImage
+  | { type: "haiku", haiku: Haiku, reachedUsageLimit?: boolean }
+  | { type: "error", status: number, message: string };
+
 export const HaikuOptions = {
   lookups: {
     lang: "lang",
