@@ -3,12 +3,12 @@
 import { mapToSearchParams } from '@desmat/utils';
 import { upperCaseFirstLetter } from '@desmat/utils/format';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { Haiku, HaikuStreamEvent, haikuStyles } from "@/types/Haiku";
 import { NavOverlay } from '@/app/_components/nav/NavOverlay';
 import Loading from "@/app/_components/Loading";
-import HaikuPage, { bgImagePreviewMs, bgImageRevealMs } from '@/app/_components/HaikuPage';
+import HaikuPage, { bgImagePreviewMs, bgImageRevealMs, haikuLeaveMs } from '@/app/_components/HaikuPage';
 import useAlert from '@/app/_hooks/alert';
 import useHaikus from "@/app/_hooks/haikus";
 import useHaikudle from '@/app/_hooks/haikudle';
@@ -39,6 +39,13 @@ function withColorTransition(styles: any[], ms: number) {
   const transition = ["color", "filter", "-webkit-text-stroke-color", "--haiku-color", "--haiku-bg-color"]
     .map((p) => `${p} ${ms}ms ease-out`).join(", ");
   return styles.map((style) => ({ ...style, transition }));
+}
+
+function isImageCached(src?: string) {
+  if (!src) return true;
+  const image = new Image();
+  image.src = src;
+  return image.complete;
 }
 
 // Swapping in an image that isn't decoded paints without it for a moment.
@@ -94,7 +101,13 @@ export default function MainPage({
   // Overrides on the current haiku while a generation streams in.
   const [preview, setPreview] = useState<any>();
   // One-shot: the saved haiku eases in from the loading page or preview it replaces.
-  const [revealing, setRevealing] = useState(false);
+  const [revealing, setRevealing] = useState<"haiku" | "image" | undefined>();
+  // Loading another haiku: the current one fades out until the next one is ready.
+  const [leaving, setLeaving] = useState(false);
+  const [imagePending, setImagePending] = useState(() => !isImageCached(_haiku?.bgImage));
+  // Only the latest load gets to swap its haiku in.
+  const loadSeq = useRef(0);
+  const onLeft = useRef<() => void>();
   const REFRESH_DELAY = 12 * 60 * 60 * 1000; // twice a day
   const [_refreshDelay, setRefreshDelay] = useState(refreshDelay || REFRESH_DELAY);
   const [refreshTimeout, setRefreshTimeout] = useState<any>();
@@ -453,10 +466,42 @@ export default function MainPage({
   };
 
   // Same render as the swap: the transition has to be in place when the image and blur change.
-  const reveal = () => {
-    setRevealing(true);
-    setTimeout(() => setRevealing(false), bgImageRevealMs + 500);
+  const reveal = (what: "haiku" | "image" = "haiku") => {
+    setRevealing(what);
+    setTimeout(() => setRevealing(undefined), bgImageRevealMs + 500);
   };
+
+  // Resolves once the poem has faded out. Background tabs don't run animations: the timer covers them.
+  const startLeaving = () => new Promise<void>((resolve) => {
+    if (!haiku?.poem || haiku.poemHashed) return resolve();
+    onLeft.current = resolve;
+    setTimeout(resolve, haikuLeaveMs + 500);
+  });
+
+  // Swaps in a loaded haiku once its image is decoded and the current one has faded out.
+  // False if a newer load took over.
+  const arrive = async (seq: number, left: Promise<void>, loadedHaiku?: Haiku) => {
+    await Promise.all([preloadImage(loadedHaiku?.bgImage), left]);
+    if (seq != loadSeq.current) return false;
+
+    reveal();
+    setLeaving(false);
+    setImagePending(false);
+    setHaiku(loadedHaiku);
+    setHaikuId(loadedHaiku?.id);
+    setLoadingUI(false);
+    return true;
+  };
+
+  useEffect(() => {
+    if (!imagePending) return;
+    const seq = loadSeq.current;
+    preloadImage(haiku?.bgImage).then(() => {
+      if (seq != loadSeq.current) return;
+      reveal("image");
+      setImagePending(false);
+    });
+  }, []);
 
   const startGenerateHaiku = async (theme?: string) => {
     // console.log('app.page.startGenerateHaiku()', { theme });
@@ -584,11 +629,17 @@ export default function MainPage({
     }
 
     // resetAlert();
+    const seq = ++loadSeq.current;
+    const left = startLeaving();
     setLoading(true);
     setLoadingUI(true);
     setGenerating(undefined);
     setHaikuId(undefined);
-    setHaiku({ ...haiku, poem: undefined }); // keep parts of the old one around to smooth out style transition
+    if (haikudleMode) {
+      setHaiku({ ...haiku, poem: undefined }); // keep parts of the old one around to smooth out style transition
+    } else {
+      setLeaving(true);
+    }
     setHaikudle(undefined);
 
     haikudleMode
@@ -615,20 +666,25 @@ export default function MainPage({
       }, mode).then((haikus: Haiku | Haiku[]) => {
         // console.log('app.MainPage.loadPage loadRandom.then', { haikus });
         const loadedHaiku = haikus[0] || haikus;
-        window.history.replaceState(null, '', url(loadedHaiku?.id));
-        setHaiku(loadedHaiku);
-        setHaikuId(loadedHaiku?.id);
-        setLoadingUI(false);
+        return arrive(seq, left, loadedHaiku).then((arrived) => {
+          arrived && window.history.replaceState(null, '', url(loadedHaiku?.id));
+        });
       });
   }
 
   const loadHaiku = (haikuId?: string) => {
     // console.log('app.page.loadHaiku()', { mode, haikuId });
     resetAlert();
+    const seq = ++loadSeq.current;
+    const left = startLeaving();
     setLoadingUI(true);
     setGenerating(undefined);
     setHaikuId(undefined);
-    setHaiku({ ...haiku, poem: undefined }); // keep parts of the old one around to smooth out style transition
+    if (haikudleMode) {
+      setHaiku({ ...haiku, poem: undefined }); // keep parts of the old one around to smooth out style transition
+    } else {
+      setLeaving(true);
+    }
     setHaikudle(undefined);
 
     haikudleMode
@@ -651,10 +707,9 @@ export default function MainPage({
       }, mode).then((haikus: Haiku | Haiku[]) => {
         // console.log('app.MainPage.loadHaiku loadHaikus.then', { haikus });
         const loadedHaiku = haikus[0] || haikus;
-        setHaiku(loadedHaiku);
-        setHaikuId(loadedHaiku?.id);
-        setLoadingUI(false);
-        window.history.replaceState(null, '', url(haikuId));
+        return arrive(seq, left, loadedHaiku).then((arrived) => {
+          arrived && window.history.replaceState(null, '', url(haikuId));
+        });
       });
   }
 
@@ -1076,6 +1131,9 @@ export default function MainPage({
           loading={true}
           haiku={previewHaiku || haiku}
           preview={preview}
+          leaving={leaving}
+          onLeft={() => onLeft.current?.()}
+          imagePending={imagePending}
           styles={textStyles}
           altStyles={altTextStyles}
           aligning={aligning}
@@ -1158,6 +1216,7 @@ export default function MainPage({
           mode={mode}
           haiku={haikudleSolved ? { ...solvedHaikudleHaiku, layout: undefined } : haiku}
           revealing={revealing}
+          imagePending={imagePending}
           styles={textStyles}
           altStyles={altTextStyles}
           fontSize={fontSize}

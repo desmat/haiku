@@ -255,6 +255,12 @@ ul {
   }
 }
 
+@keyframes haiku-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
 /* fallbacks for safari browsers (dvh doesn't seem to work well) */
 .bgImage-container {
   top: 50vh;
