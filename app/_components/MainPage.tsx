@@ -57,7 +57,7 @@ export default function MainPage({
   haikudle: _haikudle,
   album,
   userId,
-  mode,
+  mode: _mode,
   lang,
   version,
   refreshDelay,
@@ -81,6 +81,8 @@ export default function MainPage({
   const subdomain = split && split.length >= 3 && split[0] || split && split.length >= 2 && split[1] == "localhost" && split[0];
   // console.log('app.MainPage.render()', { subdomain });
 
+  // Haiku and showcase swap in place so the chrome can animate between them.
+  const [mode, setMode] = useState<ExperienceMode>(_mode);
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
   const showcaseMode = mode == "showcase";
@@ -672,6 +674,13 @@ export default function MainPage({
 
     const _url = url(newHaikuId, { ..._newMode && { mode: _newMode } });
 
+    const nextMode = (_newMode || process.env.EXPERIENCE_MODE || "haiku") as ExperienceMode;
+    if (["haiku", "showcase"].includes(mode) && ["haiku", "showcase"].includes(nextMode)) {
+      window.history.replaceState(null, '', _url);
+      setMode(nextMode);
+      return;
+    }
+
     setLoadingUI(true);
     setGenerating(undefined);
     window.history.replaceState(null, '', _url);
@@ -974,9 +983,9 @@ export default function MainPage({
   useEffect(() => {
     // console.log('app.page useEffect [haiku?.id, loadingUI, isShowcaseMode, _refreshDelay]', { haiku_id: haiku?.id, loadingUI, isShowcaseMode, _refreshDelay });
 
-    if (showcaseMode && !loadingUI && _refreshDelay) {
-      setRefreshTimeout(setTimeout(loadHaiku, _refreshDelay));
-    }
+    // Cleanup's refreshTimeout is stale: clear this one directly.
+    const timeout = showcaseMode && !loadingUI && _refreshDelay && setTimeout(loadHaiku, _refreshDelay);
+    timeout && setRefreshTimeout(timeout);
 
     // in case we're in showcase mode and refresh didn't work:
     // refresh after loading for 10 seconds
@@ -989,6 +998,7 @@ export default function MainPage({
 
     return () => {
       retryInterval && clearInterval(retryInterval);
+      timeout && clearTimeout(timeout);
 
       if (refreshTimeout) {
         clearTimeout(refreshTimeout);

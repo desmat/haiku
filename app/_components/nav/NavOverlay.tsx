@@ -77,6 +77,10 @@ export function NavOverlay({
 }) {
   const [user] = useUser((state: any) => [state.user]);
   const onboarding = !!(onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement));
+  // Showcase keeps the chrome mounted, off-screen, so switching modes slides it in and out.
+  const showcaseMode = mode == "showcase";
+  // Hidden chrome keeps its haiku-mode contents while it fades out.
+  const chromeMode = showcaseMode ? "haiku" : mode;
   // console.log("app._component.Nav.render", { mode, haikuId: haiku?.id });
 
   const handleKeyDown = async (e: any) => {
@@ -108,7 +112,7 @@ export function NavOverlay({
 
   return (
     <div className="_bg-pink-200 nav-overlay relative h-full w-full z-1">
-      {["haikudle", "haiku"].includes(mode) &&
+      {["haikudle", "haiku", "showcase"].includes(mode) &&
         <GenerateInput
           user={user}
           color={haiku?.color || "#000000"}
@@ -118,17 +122,19 @@ export function NavOverlay({
           generate={!loading && onClickGenerate}
           onboardingElement={onboardingElement}
           generatingTheme={generatingTheme}
+          hidden={showcaseMode}
         />
       }
 
-      {["haikudle", "haiku"].includes(mode) &&
+      {["haikudle", "haiku", "showcase"].includes(mode) &&
         <div
           className={`${font.architects_daughter.className} overlayed-control absolute top-[-0.1rem] left-2.5 md:left-3.5 
             ${onboardingElement && ["logo", "logo-and-generate"].includes(onboardingElement || "") ? "z-50" : "z-20"} 
             ${loading ? "" : "overlayed-control"}
+            ${showcaseMode ? "pointer-events-none" : ""}
           `}
         >
-          <div className="onboarding-container">
+          <div className={`onboarding-container mode-transition ${showcaseMode ? "mode-hidden" : ""}`}>
             {onboardingElement && ["logo", "_logo-and-generate"].includes(onboardingElement || "") &&
               <div className="onboarding-focus" />
             }
@@ -141,7 +147,7 @@ export function NavOverlay({
                 iconOnly={true}
                 styles={styles}
                 altStyles={altStyles}
-                mode={mode}
+                mode={chromeMode}
                 href={`/${mode != process.env.EXPERIENCE_MODE ? `?mode=${mode}` : ""}`}
                 onClick={() => {
                   trackEvent("clicked-logo", {
@@ -195,15 +201,16 @@ export function NavOverlay({
         }}
       />
 
-      {["haiku", "haikudle"].includes(mode) &&
+      {["haiku", "haikudle", "showcase"].includes(mode) &&
         <div
           className={`
             fixed bottom-2 left-1/2 transform -translate-x-1/2 flex-grow items-end justify-center 
             ${onboardingElement && onboardingElement.startsWith("bottom-links") ? "z-50" : "z-20"} 
             ${onboardingElement && ["bottom-links", "side-panel-and-bottom-links"].includes(onboardingElement) ? "" : "overlayed-control"}
+            ${showcaseMode ? "pointer-events-none" : ""}
           `}
         >
-          <div className="onboarding-container">
+          <div className={`onboarding-container mode-transition ${showcaseMode ? "mode-hidden" : ""}`}>
             {onboardingElement && ["bottom-links", "_side-panel-and-bottom-links"].includes(onboardingElement) &&
               <div className="onboarding-focus" />
             }
@@ -223,7 +230,7 @@ export function NavOverlay({
                 disabled={onboardingElement == "bottom-links-share"}
               >
                 <BottomLinks
-                  mode={mode}
+                  mode={chromeMode}
                   lang={lang}
                   haiku={haiku}
                   styles={styles}
@@ -277,7 +284,7 @@ export function NavOverlay({
         </>
       }
 
-      {["haiku", "haikudle"].includes(mode) &&
+      {["haiku", "haikudle", "showcase"].includes(mode) &&
         <SidePanel
           user={user}
           album={album}

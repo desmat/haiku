@@ -21,12 +21,14 @@ import { Logo } from './Logo';
 
 function OpenCloseButton({
   className,
+  innerClassName,
   styles,
   title,
   onboardingElement,
   onClick,
 }: {
   className?: string,
+  innerClassName?: string,
   styles: any,
   title?: string,
   onboardingElement?: string,
@@ -43,11 +45,13 @@ function OpenCloseButton({
       onClick={onClick}
       title={title}
     >
-      <StyledLayers styles={styles}>
-        <PopOnClick active={!!onboarding} >
-          <IoMenu className="h-7 w-7 md:h-8 md:w-8" />
-        </PopOnClick>
-      </StyledLayers>
+      <div className={innerClassName}>
+        <StyledLayers styles={styles}>
+          <PopOnClick active={!!onboarding} >
+            <IoMenu className="h-7 w-7 md:h-8 md:w-8" />
+          </PopOnClick>
+        </StyledLayers>
+      </div>
     </div>
   )
 }
@@ -84,6 +88,7 @@ export default function SidePanel({
   type FilterType = "generated" | "liked" | "viewed"
   const [filter, setFilter] = useState<FilterType | undefined>();
   const onboarding = !!(onboardingElement && ["side-panel", "side-panel-and-bottom-links"].includes(onboardingElement));
+  const showcaseMode = mode == "showcase";
 
   const [
     userHaikus,
@@ -228,7 +233,8 @@ export default function SidePanel({
       {/* button to open side panel */}
       {true && //(!panelOpened && !panelAnimating) &&
         <OpenCloseButton
-          className={`${onboarding ? "" : "overlayed-control"}`}
+          className={`${onboarding ? "" : "overlayed-control"} ${showcaseMode ? "pointer-events-none" : ""}`}
+          innerClassName={`mode-transition ${showcaseMode ? "mode-hidden" : ""}`}
           styles={styles}
           title="Open side panel"
           onboardingElement={onboardingElement}
@@ -241,7 +247,7 @@ export default function SidePanel({
         className="_bg-red-400 open-side-panel-hoverspot group absolute top-[4rem] right-[0rem] w-[1rem] mr-[0rem] h-[calc(100vh-4rem)] _z-50"
         style={{
           zIndex: 99,
-          display: panelOpened ? "none" : "block",
+          display: panelOpened || showcaseMode ? "none" : "block",
         }}
         onMouseEnter={() => !panelOpened && !panelAnimating && toggleMenuOpened()}
         onClick={() => panelOpened && toggleMenuOpened()}

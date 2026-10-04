@@ -98,6 +98,7 @@ export default function GenerateInput({
   generate,
   generatingTheme,
   onboardingElement,
+  hidden,
 }: {
   user: User,
   color?: any,
@@ -107,6 +108,7 @@ export default function GenerateInput({
   generate?: any,
   generatingTheme?: string,
   onboardingElement?: string | undefined,
+  hidden?: boolean,
 }) {
   const [active, setActive] = useState(false);
   const [focus, setFocus] = useState(false);
@@ -215,10 +217,11 @@ export default function GenerateInput({
         top-[0.8rem] md:top-[0.8rem] right-[3.2rem] md:right-[3.8rem] md:left-1/2 lg:transform md:-translate-x-1/2
         w-[calc(100vw-6.5rem)] md:w-[600px] transition-opacity
         ${generate ? "overlayed-control" : "disabled"}
+        ${hidden ? "pointer-events-none" : ""}
       `}
       style={{ zIndex: onboarding ? "50" : "20" }}
     >
-      <div className="onboarding-container" style={{ width: "auto" }}>
+      <div className={`onboarding-container mode-transition ${hidden ? "mode-hidden" : ""}`} style={{ width: "auto" }}>
         {onboarding &&
           <div className="onboarding-focus double" />
         }
