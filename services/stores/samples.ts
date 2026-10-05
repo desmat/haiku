@@ -1,4 +1,6 @@
+import moment from "moment";
 import { Haiku } from "@/types/Haiku";
+import { DailyHaikudle } from "@/types/Haikudle";
 
 export const notFoundHaiku = {
   error: "Haiku not found",
@@ -296,4 +298,19 @@ export function memorySeedHaikus(): Haiku[] {
     colorPalette: [haiku.color, haiku.bgColor],
     ...haiku,
   }));
+}
+
+// Previous daily haikudles: yesterday's and the day before's. Today's is created on first read.
+export function memorySeedDailyHaikudles(): DailyHaikudle[] {
+  return ["7", "8"].map((haikuId: string, i: number) => {
+    const day = moment().subtract(i + 1, "days");
+    return {
+      id: day.format("YYYYMMDD"),
+      createdBy: "(seed)",
+      createdAt: day.valueOf(),
+      haikuId,
+      haikudleId: haikuId,
+      theme: (haikus as any)[haikuId]?.theme,
+    } as DailyHaikudle;
+  });
 }

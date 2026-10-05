@@ -1,7 +1,7 @@
 import { expect, Page } from '@playwright/test';
 import { readFile } from 'fs/promises';
 
-const webServerLogPath = 'test-results/webserver.log';
+const webServerLogPaths = ['test-results/webserver.log', 'test-results/webserver-haikudle.log'];
 
 export function trackPageIssues(page: Page) {
   const consoleIssues: string[] = [];
@@ -36,7 +36,7 @@ export function trackPageIssues(page: Page) {
     expect(consoleIssues, 'unexpected browser console warnings or errors').toEqual([]);
     expect(serverIssues, 'unexpected failed requests or server errors').toEqual([]);
 
-    const webServerLog = await readFile(webServerLogPath, 'utf8').catch(() => '');
+    const webServerLog = (await Promise.all(webServerLogPaths.map((path) => readFile(path, 'utf8').catch(() => '')))).join('\n');
     const serverErrorLines = webServerLog
       .split('\n')
       .filter((line) => line.includes('⨯'));

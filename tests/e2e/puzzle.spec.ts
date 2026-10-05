@@ -1,141 +1,26 @@
-import { expect, Page, test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { hashCode, normalizeWord } from '@desmat/utils';
 import { pauseAtEnd, trackPageIssues } from './helpers';
-
-type Puzzle = {
-  id: string,
-  // Hashed per word, as the app checks it.
-  solution: number[][],
-  words: { [id: string]: string },
-};
-
-type Slot = { id: string, line: number, index: number };
-
-const tiles = '[data-word-id] > div';
-const dragPreview = '[class*="z-[9999]"]';
-
-async function loadPuzzle(page: Page): Promise<Puzzle> {
-  const loaded = page.waitForResponse((response) =>
-    response.request().method() === 'GET' && new URL(response.url()).pathname.startsWith('/api/haikudles')
-  );
-  await page.goto('/?mode=haikudle&noOnboarding=true');
-  const data = await (await loaded).json();
-  const haikudle = data.haikudle ?? data.haikudles[0];
-
-  await expect(page.getByTestId('haikudle-puzzle').locator('[data-word-id]').first()).toBeVisible({ timeout: 30_000 });
-  await waitForSettled(page);
-
-  return {
-    id: haikudle.id,
-    solution: haikudle.haiku.poem,
-    words: Object.fromEntries(haikudle.inProgress.flat().map((word: any) => [word.id, word.word])),
-  };
-}
-
-async function readBoard(page: Page): Promise<Slot[]> {
-  return page.getByTestId('haikudle-puzzle').locator('[data-word-id]').evaluateAll((elements) =>
-    elements.map((element) => {
-      const { wordId, lineNumber, wordNumber } = (element as HTMLElement).dataset;
-      return { id: wordId!, line: Number(lineNumber), index: Number(wordNumber) };
-    })
-  );
-}
-
-function wordHash(puzzle: Puzzle, id: string) {
-  return hashCode(normalizeWord(puzzle.words[id]));
-}
-
-function isCorrect(puzzle: Puzzle, slot: Slot) {
-  return wordHash(puzzle, slot.id) == puzzle.solution[slot.line][slot.index];
-}
-
-async function wrongSlots(page: Page, puzzle: Puzzle) {
-  return (await readBoard(page)).filter((slot) => !isCorrect(puzzle, slot));
-}
-
-// Tiles only carry a transform while a drag, swap or hint animates.
-async function waitForSettled(page: Page) {
-  await expect.poll(() => page.locator(tiles).evaluateAll((elements) =>
-    elements.filter((element) => getComputedStyle(element).transform !== 'none').length
-  )).toBe(0);
-  await expect(page.locator(dragPreview)).toHaveCount(0);
-}
-
-async function center(page: Page, wordId: string) {
-  const box = await page.locator(`[data-word-id="${wordId}"]`).boundingBox();
-  expect(box, `word ${wordId} has no box`).toBeTruthy();
-  return { x: box!.x + box!.width / 2, y: box!.y + box!.height / 2 };
-}
-
-// Left of the puzzle, level with the word: no word under the pointer.
-async function besidePuzzle(page: Page, wordId: string) {
-  const puzzleBox = await page.getByTestId('haikudle-puzzle').boundingBox();
-  const { y } = await center(page, wordId);
-  return { x: puzzleBox!.x - 30, y };
-}
-
-async function startDrag(page: Page, wordId: string) {
-  const from = await center(page, wordId);
-  await page.mouse.move(from.x, from.y);
-  await page.mouse.down();
-  return from;
-}
-
-async function drag(page: Page, fromId: string, to: { x: number, y: number }) {
-  await startDrag(page, fromId);
-  await page.mouse.move(to.x, to.y, { steps: 10 });
-  await page.mouse.up();
-}
-
-function trackSaves(page: Page, puzzle: Puzzle) {
-  const saves: any[] = [];
-  page.on('request', (request) => {
-    if (request.method() === 'PUT' && new URL(request.url()).pathname === `/api/haikudles/${puzzle.id}`) {
-      saves.push(request.postDataJSON().haikudle);
-    }
-  });
-  return saves;
-}
-
-async function swapWords(page: Page, puzzle: Puzzle, fromId: string, toId: string) {
-  const saved = page.waitForResponse((response) =>
-    response.request().method() === 'PUT' && new URL(response.url()).pathname === `/api/haikudles/${puzzle.id}`
-  );
-  await drag(page, fromId, await center(page, toId));
-  const response = await saved;
-  expect(response.status()).toBe(200);
-  await waitForSettled(page);
-  return response.request().postDataJSON().haikudle;
-}
-
-async function backgroundBlur(page: Page) {
-  const filter = await page.locator('.bgImage-container').first().evaluate((element) => (element as HTMLElement).style.filter);
-  return Number(filter.match(/blur\(([\d.]+)px\)/)?.[1]);
-}
-
-async function titleOpacity(page: Page) {
-  return page.getByTestId('haikudle-puzzle').locator('.poem-title').evaluate((element) =>
-    getComputedStyle(element.closest('.transition-opacity')!).opacity
-  );
-}
-
-async function tileOpacity(page: Page, wordId: string) {
-  return page.locator(`[data-word-id="${wordId}"] > div`).evaluate((element) => getComputedStyle(element).opacity);
-}
-
-// Samples every frame: a hint lasts under a second.
-async function anyTileMovedWithin(page: Page, ms: number) {
-  return page.evaluate(async ({ selector, ms }) => {
-    const end = performance.now() + ms;
-    while (performance.now() < end) {
-      const moved = Array.from(document.querySelectorAll(selector))
-        .some((element) => getComputedStyle(element).transform !== 'none');
-      if (moved) return true;
-      await new Promise((resolve) => requestAnimationFrame(resolve));
-    }
-    return false;
-  }, { selector: tiles, ms });
-}
+import {
+  tiles,
+  dragPreview,
+  loadPuzzle,
+  readBoard,
+  wordHash,
+  isCorrect,
+  wrongSlots,
+  waitForSettled,
+  center,
+  besidePuzzle,
+  startDrag,
+  drag,
+  trackSaves,
+  swapWords,
+  backgroundBlur,
+  titleOpacity,
+  tileOpacity,
+  anyTileMovedWithin,
+} from './puzzle-helpers';
 
 test('a new puzzle starts with only its first word in place', async ({ page }) => {
   const expectNoPageIssues = trackPageIssues(page);
@@ -145,8 +30,9 @@ test('a new puzzle starts with only its first word in place', async ({ page }) =
   expect(board.filter((slot) => isCorrect(puzzle, slot))).toEqual([{ id: board[0].id, line: 0, index: 0 }]);
 
   // The memory store seeds haikus 1 to 8. Several repeat a word.
+  // 7 and 8 are previous dailies: shown solved, their poem unhashed.
   const token = await page.evaluate(() => localStorage.getItem('session'));
-  for (const haikuId of ['1', '2', '3', '4', '5', '6', '7', '8']) {
+  for (const haikuId of ['1', '2', '3', '4', '5', '6']) {
     const response = await page.request.get(`/api/haikudles/${haikuId}`, {
       headers: { authorization: `Bearer ${token}` },
     });
@@ -158,6 +44,47 @@ test('a new puzzle starts with only its first word in place', async ({ page }) =
       .map((word: any) => word.word));
     expect(inPlace, `haiku ${haikuId}`).toEqual([haikudle.inProgress[0][0].word]);
   }
+
+  await pauseAtEnd(page);
+  await expectNoPageIssues();
+});
+
+test('the background carries over from the loading page and covers the screen', async ({ page }) => {
+  const expectNoPageIssues = trackPageIssues(page);
+  await page.addInitScript(() => {
+    const w = window as any;
+    w.__backgrounds = [];
+    let count = 0;
+    const tick = () => {
+      const background = document.querySelector('.bgImage-container') as any;
+      if (background) {
+        background.__id ??= ++count;
+        const rect = background.getBoundingClientRect();
+        w.__backgrounds.push({
+          id: background.__id,
+          blur: parseFloat(getComputedStyle(background).filter.match(/blur\(([\d.]+)px\)/)?.[1] || '0'),
+          covers: rect.top <= 0 && rect.left <= 0 && rect.bottom >= innerHeight && rect.right >= innerWidth,
+          puzzle: !!document.querySelector('[data-word-id]'),
+        });
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  await loadPuzzle(page);
+  await page.waitForTimeout(1000);
+
+  const samples: { id: number, blur: number, covers: boolean, puzzle: boolean }[] =
+    await page.evaluate(() => (window as any).__backgrounds);
+  const blurs = samples.map((sample) => sample.blur);
+  const puzzleBlur = blurs.at(-1)!;
+  const easing = blurs.filter((blur) => blur < 40 && blur > puzzleBlur);
+
+  expect(samples.some((sample) => !sample.puzzle), 'should start on the loading page').toBe(true);
+  expect(new Set(samples.map((sample) => sample.id)).size, 'background element should carry over').toBe(1);
+  expect(puzzleBlur).toBeGreaterThan(0);
+  expect(easing.length, 'blur should ease from the loading page to the puzzle').toBeGreaterThanOrEqual(3);
+  expect(samples.filter((sample) => !sample.covers), 'background should cover the screen').toEqual([]);
 
   await pauseAtEnd(page);
   await expectNoPageIssues();
@@ -282,6 +209,10 @@ test('solving the puzzle locks every word, clears the blur and reveals the title
 
   expect(await backgroundBlur(page)).toBeGreaterThan(0);
   expect(await titleOpacity(page)).toBe('0');
+  // Solving saves the haiku to the user's. Ending mid-request logs a server error for the next test.
+  const savedToUser = page.waitForResponse((response) =>
+    response.request().method() === 'POST' && /^\/api\/user\/[^/]+\/haikus$/.test(new URL(response.url()).pathname)
+  );
 
   let moves = 0;
   let blur = await backgroundBlur(page);
@@ -307,6 +238,7 @@ test('solving the puzzle locks every word, clears the blur and reveals the title
   await expect(page.locator(`${tiles}.cursor-grab`)).toHaveCount(0);
   await expect.poll(() => titleOpacity(page)).toBe('1');
   await expect(page.getByText(`Solved in ${moves} move${moves > 1 ? 's' : ''}!`)).toBeVisible();
+  await savedToUser;
 
   await pauseAtEnd(page);
   await expectNoPageIssues();
