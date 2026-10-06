@@ -18,7 +18,7 @@
   --color-scheme-light-2: #edb08a;
   --color-scheme-light-3: #EE6C4D;
   /* haiku <-> showcase */
-  --mode-ms: 600ms;
+  --mode-ms: 400ms;
   --mode-ease: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
