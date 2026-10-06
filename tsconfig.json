@@ -23,6 +23,8 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  // Next adds each build directory's types on start. The e2e ones (playwright.config.ts) are
+  // listed so test runs leave this file alone, and excluded: their types aren't checked.
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next-test/haiku/types/**/*.ts", ".next-test/haikudle/types/**/*.ts"],
+  "exclude": ["node_modules", ".next-test"]
 }

@@ -24,6 +24,7 @@ export default function HaikuTitle({
   onClick,
   cursor,
   title,
+  fadeIn,
   children,
 }: {
   haiku: Haiku,
@@ -33,6 +34,7 @@ export default function HaikuTitle({
   onClick?: any,
   cursor?: string,
   title?: string,
+  fadeIn?: boolean,
   children?: React.ReactNode,
 }) {
   const showcaseMode = mode == "showcase";
@@ -53,6 +55,7 @@ export default function HaikuTitle({
         style={{
           fontSize,
           top: showcaseMode && haiku?.layout?.poem?.bottom ? "1rem" : undefined,
+          animation: fadeIn ? "haiku-fade-in var(--mode-ms) var(--mode-ease)" : undefined,
         }}
       >
         <div

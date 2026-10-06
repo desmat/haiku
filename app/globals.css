@@ -17,6 +17,9 @@
   --color-scheme-light-1: #edc78a;
   --color-scheme-light-2: #edb08a;
   --color-scheme-light-3: #EE6C4D;
+  /* haiku <-> showcase */
+  --mode-ms: 300ms;
+  --mode-ease: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /* TODO: figure out a clean dark mode style */
@@ -252,10 +255,38 @@ ul {
   }
 }
 
+@keyframes haiku-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
 /* fallbacks for safari browsers (dvh doesn't seem to work well) */
 .bgImage-container {
   top: 50vh;
   width: 100%;
+}
+
+/* haiku <-> showcase */
+.mode-transition {
+  transition: opacity var(--mode-ms) var(--mode-ease);
+}
+
+.mode-transition-position {
+  transition: bottom var(--mode-ms) var(--mode-ease);
+}
+
+.mode-transition-size {
+  transition: font-size var(--mode-ms) var(--mode-ease);
+}
+
+.mode-transition-spacing {
+  transition: margin var(--mode-ms) var(--mode-ease), line-height var(--mode-ms) var(--mode-ease);
+}
+
+.mode-hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .overlayed-control {

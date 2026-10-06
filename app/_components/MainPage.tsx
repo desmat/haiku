@@ -3,12 +3,12 @@
 import { mapToSearchParams } from '@desmat/utils';
 import { upperCaseFirstLetter } from '@desmat/utils/format';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { Haiku, HaikuStreamEvent, haikuStyles } from "@/types/Haiku";
 import { NavOverlay } from '@/app/_components/nav/NavOverlay';
 import Loading from "@/app/_components/Loading";
-import HaikuPage, { bgImagePreviewMs, bgImageRevealMs } from '@/app/_components/HaikuPage';
+import HaikuPage, { bgImagePreviewMs, bgImageRevealMs, haikuLeaveMs } from '@/app/_components/HaikuPage';
 import useAlert from '@/app/_hooks/alert';
 import useHaikus from "@/app/_hooks/haikus";
 import useHaikudle from '@/app/_hooks/haikudle';
@@ -22,7 +22,7 @@ import { haikuGeneratedOnboardingSteps, haikuMultiLanguageSteps, haikuOnboarding
 import { User } from '@/types/User';
 import { isAiMock } from '@/utils/mocks';
 import trackEvent from '@/utils/trackEvent';
-import HaikudlePage from './HaikudlePage';
+import HaikudlePage, { usePuzzleFilter } from './HaikudlePage';
 import { formatHaikuText } from './HaikuPoem';
 
 // Partials sharpen as they arrive. The final image is sharp.
@@ -41,6 +41,13 @@ function withColorTransition(styles: any[], ms: number) {
   return styles.map((style) => ({ ...style, transition }));
 }
 
+function isImageCached(src?: string) {
+  if (!src) return true;
+  const image = new Image();
+  image.src = src;
+  return image.complete;
+}
+
 // Swapping in an image that isn't decoded paints without it for a moment.
 function preloadImage(src?: string, timeoutMs = 5000) {
   return new Promise<void>((resolve) => {
@@ -57,7 +64,7 @@ export default function MainPage({
   haikudle: _haikudle,
   album,
   userId,
-  mode,
+  mode: _mode,
   lang,
   version,
   refreshDelay,
@@ -81,6 +88,8 @@ export default function MainPage({
   const subdomain = split && split.length >= 3 && split[0] || split && split.length >= 2 && split[1] == "localhost" && split[0];
   // console.log('app.MainPage.render()', { subdomain });
 
+  // Haiku and showcase swap in place so the chrome can animate between them.
+  const [mode, setMode] = useState<ExperienceMode>(_mode);
   const haikuMode = mode == "haiku";
   const haikudleMode = mode == "haikudle";
   const showcaseMode = mode == "showcase";
@@ -92,7 +101,13 @@ export default function MainPage({
   // Overrides on the current haiku while a generation streams in.
   const [preview, setPreview] = useState<any>();
   // One-shot: the saved haiku eases in from the loading page or preview it replaces.
-  const [revealing, setRevealing] = useState(false);
+  const [revealing, setRevealing] = useState<"haiku" | "image" | undefined>();
+  // Loading another haiku: the current one fades out until the next one is ready.
+  const [leaving, setLeaving] = useState(false);
+  const [imagePending, setImagePending] = useState(() => !isImageCached(_haiku?.bgImage));
+  // Only the latest load gets to swap its haiku in.
+  const loadSeq = useRef(0);
+  const onLeft = useRef<() => void>();
   const REFRESH_DELAY = 12 * 60 * 60 * 1000; // twice a day
   const [_refreshDelay, setRefreshDelay] = useState(refreshDelay || REFRESH_DELAY);
   const [refreshTimeout, setRefreshTimeout] = useState<any>();
@@ -225,7 +240,7 @@ export default function MainPage({
   // the puzzle page handles the completed state itself (no component swap on
   // solve); HaikuPage only shows for previous dailies and non-haikudle modes
   const showPuzzlePage = haikudleMode && !previousDailyHaikudleId;
-  const showHaikuPage = !showPuzzlePage;
+  const puzzleFilter = usePuzzleFilter(haiku);
 
   const previewHaiku = preview && { ...haiku, ...preview };
   const colorTransitionMs = preview?.bgImage ? bgImagePreviewMs : revealing ? bgImageRevealMs : 0;
@@ -453,10 +468,43 @@ export default function MainPage({
   };
 
   // Same render as the swap: the transition has to be in place when the image and blur change.
-  const reveal = () => {
-    setRevealing(true);
-    setTimeout(() => setRevealing(false), bgImageRevealMs + 500);
+  const reveal = (what: "haiku" | "image" = "haiku") => {
+    setRevealing(what);
+    setTimeout(() => setRevealing(undefined), bgImageRevealMs + 500);
   };
+
+  // Resolves once the poem has faded out. Background tabs don't run animations: the timer covers them.
+  const startLeaving = () => new Promise<void>((resolve) => {
+    if (!haiku?.poem || haiku.poemHashed) return resolve();
+    onLeft.current = resolve;
+    setTimeout(resolve, haikuLeaveMs + 500);
+  });
+
+  // Swaps in a loaded haiku once its image is decoded and the current one has faded out.
+  // False if a newer load took over.
+  const arrive = async (seq: number, left: Promise<void>, loadedHaiku?: Haiku, loadedHaikudle?: Haikudle) => {
+    await Promise.all([preloadImage(loadedHaiku?.bgImage), left]);
+    if (seq != loadSeq.current) return false;
+
+    reveal();
+    setLeaving(false);
+    setImagePending(false);
+    setHaiku(loadedHaiku);
+    setHaikuId(loadedHaiku?.id);
+    loadedHaikudle && setHaikudle(loadedHaikudle);
+    setLoadingUI(false);
+    return true;
+  };
+
+  useEffect(() => {
+    if (!imagePending) return;
+    const seq = loadSeq.current;
+    preloadImage(haiku?.bgImage).then(() => {
+      if (seq != loadSeq.current) return;
+      reveal("image");
+      setImagePending(false);
+    });
+  }, []);
 
   const startGenerateHaiku = async (theme?: string) => {
     // console.log('app.page.startGenerateHaiku()', { theme });
@@ -584,11 +632,18 @@ export default function MainPage({
     }
 
     // resetAlert();
+    const seq = ++loadSeq.current;
+    // Puzzles have no poem showing to fade out.
+    const left = haikudleMode ? Promise.resolve() : startLeaving();
     setLoading(true);
     setLoadingUI(true);
     setGenerating(undefined);
     setHaikuId(undefined);
-    setHaiku({ ...haiku, poem: undefined }); // keep parts of the old one around to smooth out style transition
+    if (haikudleMode) {
+      setHaiku({ ...haiku, poem: undefined }); // keep parts of the old one around to smooth out style transition
+    } else {
+      setLeaving(true);
+    }
     setHaikudle(undefined);
 
     haikudleMode
@@ -600,10 +655,7 @@ export default function MainPage({
       }).then((haikudles: Haikudle | Haikudle[]) => {
         // console.log('app.MainPage.loadPage loadRandom.then', { haikudles });
         const loadedHaikudle = haikudles[0] || haikudles;
-        setHaiku(loadedHaikudle?.haiku);
-        setHaikuId(loadedHaikudle?.haiku?.id);
-        setHaikudle(loadedHaikudle);
-        setLoadingUI(false);
+        return arrive(seq, left, loadedHaikudle?.haiku, loadedHaikudle);
       })
       : loadHaikus({
         random: true,
@@ -615,20 +667,26 @@ export default function MainPage({
       }, mode).then((haikus: Haiku | Haiku[]) => {
         // console.log('app.MainPage.loadPage loadRandom.then', { haikus });
         const loadedHaiku = haikus[0] || haikus;
-        window.history.replaceState(null, '', url(loadedHaiku?.id));
-        setHaiku(loadedHaiku);
-        setHaikuId(loadedHaiku?.id);
-        setLoadingUI(false);
+        return arrive(seq, left, loadedHaiku).then((arrived) => {
+          arrived && window.history.replaceState(null, '', url(loadedHaiku?.id));
+        });
       });
   }
 
   const loadHaiku = (haikuId?: string) => {
     // console.log('app.page.loadHaiku()', { mode, haikuId });
     resetAlert();
+    const seq = ++loadSeq.current;
+    // Puzzles have no poem showing to fade out.
+    const left = haikudleMode ? Promise.resolve() : startLeaving();
     setLoadingUI(true);
     setGenerating(undefined);
     setHaikuId(undefined);
-    setHaiku({ ...haiku, poem: undefined }); // keep parts of the old one around to smooth out style transition
+    if (haikudleMode) {
+      setHaiku({ ...haiku, poem: undefined }); // keep parts of the old one around to smooth out style transition
+    } else {
+      setLeaving(true);
+    }
     setHaikudle(undefined);
 
     haikudleMode
@@ -638,11 +696,9 @@ export default function MainPage({
       }).then((haikudles: any) => {
         // console.log('app.MainPage.loadHaiku loadHaikudle.then', { haikudles });
         const loadedHaikudle = haikudles[0] || haikudles;
-        setHaiku(loadedHaikudle?.haiku);
-        setHaikuId(loadedHaikudle?.haiku?.id);
-        setHaikudle(loadedHaikudle);
-        setLoadingUI(false);
-        window.history.replaceState(null, '', url(haikuId));
+        return arrive(seq, left, loadedHaikudle?.haiku, loadedHaikudle).then((arrived) => {
+          arrived && window.history.replaceState(null, '', url(haikuId));
+        });
       })
       : loadHaikus(haikuId || {
         ...lang && { lang },
@@ -651,10 +707,9 @@ export default function MainPage({
       }, mode).then((haikus: Haiku | Haiku[]) => {
         // console.log('app.MainPage.loadHaiku loadHaikus.then', { haikus });
         const loadedHaiku = haikus[0] || haikus;
-        setHaiku(loadedHaiku);
-        setHaikuId(loadedHaiku?.id);
-        setLoadingUI(false);
-        window.history.replaceState(null, '', url(haikuId));
+        return arrive(seq, left, loadedHaiku).then((arrived) => {
+          arrived && window.history.replaceState(null, '', url(haikuId));
+        });
       });
   }
 
@@ -673,6 +728,13 @@ export default function MainPage({
       : haikuId;
 
     const _url = url(newHaikuId, { ..._newMode && { mode: _newMode } });
+
+    const nextMode = (_newMode || process.env.EXPERIENCE_MODE || "haiku") as ExperienceMode;
+    if (["haiku", "showcase"].includes(mode) && ["haiku", "showcase"].includes(nextMode)) {
+      window.history.replaceState(null, '', _url);
+      setMode(nextMode);
+      return;
+    }
 
     setLoadingUI(true);
     setGenerating(undefined);
@@ -976,9 +1038,9 @@ export default function MainPage({
   useEffect(() => {
     // console.log('app.page useEffect [haiku?.id, loadingUI, isShowcaseMode, _refreshDelay]', { haiku_id: haiku?.id, loadingUI, isShowcaseMode, _refreshDelay });
 
-    if (showcaseMode && !loadingUI && _refreshDelay) {
-      setRefreshTimeout(setTimeout(loadHaiku, _refreshDelay));
-    }
+    // Cleanup's refreshTimeout is stale: clear this one directly.
+    const timeout = showcaseMode && !loadingUI && _refreshDelay && setTimeout(loadHaiku, _refreshDelay);
+    timeout && setRefreshTimeout(timeout);
 
     // in case we're in showcase mode and refresh didn't work:
     // refresh after loading for 10 seconds
@@ -991,6 +1053,7 @@ export default function MainPage({
 
     return () => {
       retryInterval && clearInterval(retryInterval);
+      timeout && clearTimeout(timeout);
 
       if (refreshTimeout) {
         clearTimeout(refreshTimeout);
@@ -1068,6 +1131,9 @@ export default function MainPage({
           loading={true}
           haiku={previewHaiku || haiku}
           preview={preview}
+          leaving={leaving}
+          onLeft={() => onLeft.current?.()}
+          imagePending={imagePending}
           styles={textStyles}
           altStyles={altTextStyles}
           aligning={aligning}
@@ -1133,40 +1199,41 @@ export default function MainPage({
         updateLayout={updateLayout}
       />
 
-      {showPuzzlePage &&
-        <HaikudlePage
-          mode={mode}
-          haiku={haiku}
-          styles={textStyles}
-          regenerating={regenerating}
-          onboardingElement={onboardingElement}
-        />
-      }
-
-      {showHaikuPage &&
-        <HaikuPage
-          key="haiku-page"
-          user={user}
-          mode={mode}
-          haiku={haikudleSolved ? { ...solvedHaikudleHaiku, layout: undefined } : haiku}
-          revealing={revealing}
-          styles={textStyles}
-          altStyles={altTextStyles}
-          fontSize={fontSize}
-          regenerating={regenerating}
-          onboardingElement={onboardingElement}
-          refresh={!haiku?.error && (user?.isAdmin || album) && (() => loadRandom())}
-          saveHaiku={!haiku?.error && !haikudleMode && doSaveHaiku}
-          updateTitle={!haiku?.error && !haikudleMode && user?.isAdmin && updateHaikuTitle}
-          regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
-          regenerateImage={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
-          copyHaiku={!haiku?.error && copyHaiku}
-          switchMode={!haiku?.error && switchMode}
-          adjustLayout={alignAllowed && adjustLayout}
-          aligning={aligning}
-          setAligning={setAligning}
-        />
-      }
+      {/* Also the puzzle's: the background carries over from the loading page. */}
+      <HaikuPage
+        key="haiku-page"
+        user={user}
+        mode={mode}
+        haiku={!showPuzzlePage && haikudleSolved ? { ...solvedHaikudleHaiku, layout: undefined } : haiku}
+        revealing={revealing}
+        imagePending={imagePending}
+        filter={showPuzzlePage ? puzzleFilter : undefined}
+        styles={textStyles}
+        altStyles={altTextStyles}
+        fontSize={fontSize}
+        regenerating={regenerating}
+        onboardingElement={onboardingElement}
+        refresh={!haiku?.error && (user?.isAdmin || album) && (() => loadRandom())}
+        saveHaiku={!haiku?.error && !haikudleMode && doSaveHaiku}
+        updateTitle={!haiku?.error && !haikudleMode && user?.isAdmin && updateHaikuTitle}
+        regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
+        regenerateImage={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaikuImage && startRegenerateHaikuImage())}
+        copyHaiku={!haiku?.error && copyHaiku}
+        switchMode={!haiku?.error && switchMode}
+        adjustLayout={alignAllowed && adjustLayout}
+        aligning={aligning}
+        setAligning={setAligning}
+      >
+        {showPuzzlePage &&
+          <HaikudlePage
+            mode={mode}
+            haiku={haiku}
+            styles={textStyles}
+            regenerating={regenerating}
+            onboardingElement={onboardingElement}
+          />
+        }
+      </HaikuPage>
     </div>
   )
 }

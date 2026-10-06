@@ -217,6 +217,8 @@ export default function HaikuPoem({
 }) {
   // console.log('app._components.HaikuPoem.render()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
   const showcaseMode = mode == "showcase";
+  // Sizes the signature. Snaps, the signature fades in at its new size.
+  const outerFontSize = fontSize || (showcaseMode ? "110%" : undefined);
   const onboarding = typeof (onboardingElement) == "string"
   const dateCode = moment().format("YYYYMMDD");
 
@@ -231,10 +233,13 @@ export default function HaikuPoem({
   const canSwitchMode = switchModeAllowed && !editing && !saving && process.env.EXPERIENCE_MODE != "haikudle";
   const copyAllowed = !!copyHaiku && !switchModeAllowed;
   const canCopy = copyAllowed && !editing && !saving;
-  const editAllowed = !showcaseMode && saveHaiku && (user?.isAdmin || haiku?.createdBy == user?.id);
+  // Shown in showcase too, faded out, so switching modes fades them.
+  const editShown = saveHaiku && (user?.isAdmin || haiku?.createdBy == user?.id);
+  const alignShown = setAligning && (user?.isAdmin || haiku?.createdBy == user?.id);
+  const editAllowed = !showcaseMode && editShown;
   const canClickEdit = editAllowed && !saving && !onboarding && !aligning;
   const canEdit = editAllowed && user?.isAdmin && !saving && !onboarding && !aligning;
-  const alignAllowed = !showcaseMode && setAligning && (user?.isAdmin || haiku?.createdBy == user?.id);
+  const alignAllowed = !showcaseMode && alignShown;
   const canAlign = alignAllowed && !editing;
   const regeneratePoemAllowed = regeneratePoem && (user?.isAdmin || haiku?.createdBy == user?.id) && regeneratePoem;
   const regenerateImageAllowed = regenerateImage && (user?.isAdmin || haiku?.createdBy == user?.id) && regenerateImage;
@@ -242,6 +247,14 @@ export default function HaikuPoem({
   const canRegenerateImage = regenerateImageAllowed && !editing && !saving && !aligning;
   const canRefresh = !!refresh;
   // console.log('app._components.HaikuPage.HaikuPoem.render()', { editing, showcaseMode, canCopy, canSwitchMode });
+
+  // The signature moves between under the poem and a fixed corner: it remounts there and fades in.
+  const lastMode = useRef(mode);
+  const modeSwitches = useRef(0);
+  if (lastMode.current != mode) {
+    lastMode.current = mode;
+    modeSwitches.current++;
+  }
 
   const handleClickHaiku = (e: any) => {
     // console.log('app._components.HaikuPoem.handleClickHaiku()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
@@ -439,13 +452,18 @@ export default function HaikuPoem({
             className={`_bg-pink-200 px-[1.5rem] ${canEdit ? "group" : ""} ${saving ? "animate-pulse" : ""}`}
             style={{
               cursor: showcaseMode ? "pointer" : "",
-              fontSize,
+              fontSize: outerFontSize,
               maxWidth: "1000px",
               minWidth: "200px",
             }}
           >
             <div
-              className="_bg-purple-200 flex flex-col _transition-all md:text-[26pt] sm:text-[22pt] text-[18pt]"
+              // The only font-size transition: nested ones chase each other and bounce.
+              // Showcase is 110% of 110% of the container's 26pt/22pt/16pt.
+              className={`_bg-purple-200 flex flex-col mode-transition-size ${showcaseMode
+                ? "md:text-[31.46pt] sm:text-[26.62pt] text-[19.36pt]"
+                : "md:text-[26pt] sm:text-[22pt] text-[18pt]"
+                }`}
               onClick={handleClickHaiku}
               title={aligning
                 ? "Click to finish aligning"
@@ -490,7 +508,11 @@ export default function HaikuPoem({
                       onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
                     >
                       {/* set the width while editing */}
-                      <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""} ${showcaseMode ? "md:my-[0.8rem] sm:my-[0.6rem] my-[0.3rem] md:leading-[3.5rem] sm:leading-[2.6rem] leading-[2rem]" : ""}`}>
+                      <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""} mode-transition-spacing ${showcaseMode
+                        ? "md:my-[0.8rem] sm:my-[0.6rem] my-[0.3rem] md:leading-[3.5rem] sm:leading-[2.6rem] leading-[2rem]"
+                        // 1.5x the font size, as lengths: unitless line-heights don't transition to rem.
+                        : "md:leading-[3.25rem] sm:leading-[2.75rem] leading-[2.25rem]"
+                        }`}>
                         <ControlledInput
                           id={i}
                           activeId={editingLine}
@@ -510,10 +532,12 @@ export default function HaikuPoem({
             </div>
 
             <HaikuTitle
+              key={modeSwitches.current}
               haiku={haiku}
               mode={mode}
               styles={styles}
-              fontSize={fontSize}
+              fontSize={outerFontSize}
+              fadeIn={modeSwitches.current > 0}
               onClick={() => !showcaseMode && updateTitle && updateTitle()}
               cursor={updateTitle || canCopy ? "pointer" : ""}
               title={
@@ -524,9 +548,9 @@ export default function HaikuPoem({
                     : ""
               }
             >
-              {!showcaseMode && (copyAllowed || editAllowed || regeneratePoemAllowed) &&
+              {(copyAllowed || editShown || regeneratePoemAllowed) &&
                     <div
-                      className="_bg-blue-200 absolute"
+                      className={`_bg-blue-200 absolute mode-transition ${showcaseMode ? "mode-hidden" : ""}`}
                       style={{
                         top: "50%",
                         right: 0,
@@ -547,7 +571,7 @@ export default function HaikuPoem({
                         {onboardingElement && ["poem-and-poem-actions"].includes(onboardingElement) &&
                           <div className="onboarding-focus double" />
                         }
-                        {editAllowed &&
+                        {editShown &&
                           <Link
                             href="#"
                             className={`${!saving && !aligning ? "cursor-pointer" : "cursor-default"}`}
@@ -580,7 +604,7 @@ export default function HaikuPoem({
                             </StyledLayers>
                           </Link>
                         }
-                        {alignAllowed &&
+                        {alignShown &&
                           <Link
                             href="#"
                             className={canAlign ? "cursor-pointer" : "cursor-default"}

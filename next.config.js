@@ -4,6 +4,8 @@ const nextConfig = {
     //     serverActions: false,
     // },
     reactStrictMode: false,
+    // e2e builds apart from .next: its two dev servers, one per mode, can't share it.
+    distDir: process.env.NEXT_DIST_DIR || ".next",
     env: {
         AUTH_PRIVATE_KEY: process.env.AUTH_PRIVATE_KEY,
         AUTH_PUBLIC_KEY: process.env.AUTH_PUBLIC_KEY,

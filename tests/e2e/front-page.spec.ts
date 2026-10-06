@@ -29,12 +29,20 @@ async function expectVisibleOverlayedControls(page: Page, expected: 'present' | 
     page.locator('.overlayed-control').evaluateAll((elements) =>
       elements.filter((element) => {
         const style = window.getComputedStyle(element);
-        const rect = element.getBoundingClientRect();
+        const onScreen = (el: Element) => {
+          const rect = el.getBoundingClientRect();
+          return rect.width > 0
+            && rect.height > 0
+            && rect.bottom > 0
+            && rect.top < window.innerHeight;
+        };
+        // Showcase keeps the chrome mounted with its content faded out.
+        const content = element.querySelector('.mode-transition');
         return style.visibility !== 'hidden'
           && style.display !== 'none'
           && Number(style.opacity) > 0
-          && rect.width > 0
-          && rect.height > 0;
+          && onScreen(element)
+          && (!content || Number(window.getComputedStyle(content).opacity) > 0);
       }).length
     );
 

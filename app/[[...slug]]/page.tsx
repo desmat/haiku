@@ -1,5 +1,6 @@
 import { headers } from 'next/headers'
 import { Suspense } from 'react';
+import { preload } from 'react-dom';
 import HaikuPage from '@/app/_components/HaikuPage';
 import MainPage from '@/app/_components/MainPage';
 import { NavOverlay } from '@/app/_components/nav/NavOverlay';
@@ -120,6 +121,9 @@ export default async function Page({
     previousDailyHaikudleId: haikudle?.previousDailyHaikudleId,
   };
   const { textStyles, altTextStyles } = haikuStyles(haiku);
+  // The client holds the flat background colour until this decodes: start fetching with the HTML.
+  // @types/react-dom 18.2 predates `as: "image"`. React supports it.
+  haiku.bgImage && preload(haiku.bgImage, { as: "image" as any });
 
   return (
     <Suspense
