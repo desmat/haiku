@@ -1213,8 +1213,9 @@ export default function MainPage({
         fontSize={fontSize}
         regenerating={regenerating}
         onboardingElement={onboardingElement}
-        // The preview deployment shows tomorrow's daily: clicking the poem browses liked haikus.
-        refresh={process.env.DAILY_HAIKU_PREVIEW == "true" && !haiku?.error && (() => loadRandom({ liked: true }))}
+        // Clicking the poem browses liked haikus: for users on the preview deployment (tomorrow's daily),
+        // for admins in showcase elsewhere. Otherwise admins edit, from showcase via haiku mode, and users switch modes.
+        refresh={(process.env.DAILY_HAIKU_PREVIEW == "true" ? !user?.isAdmin : user?.isAdmin && showcaseMode) && !haiku?.error && (() => loadRandom({ liked: true }))}
         saveHaiku={!haiku?.error && !haikudleMode && doSaveHaiku}
         updateTitle={!haiku?.error && !haikudleMode && user?.isAdmin && updateHaikuTitle}
         regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}
