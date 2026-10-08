@@ -1,5 +1,5 @@
 import moment from "moment";
-import { Haiku } from "@/types/Haiku";
+import { Haiku, LikedHaiku } from "@/types/Haiku";
 import { DailyHaikudle } from "@/types/Haikudle";
 
 export const notFoundHaiku = {
@@ -313,4 +313,15 @@ export function memorySeedDailyHaikudles(): DailyHaikudle[] {
       theme: (haikus as any)[haikuId]?.theme,
     } as DailyHaikudle;
   });
+}
+
+// Liked by someone else: random liked picks have something to pick, and the daily haiku prefers them.
+export function memorySeedLikedHaikus(): LikedHaiku[] {
+  return ["1", "3", "5"].map((haikuId: string, i: number) => ({
+    id: `(seed):${haikuId}`,
+    createdBy: "(seed)",
+    createdAt: 1700000100000 + i * 1000,
+    userId: "(seed)",
+    haikuId,
+  }));
 }

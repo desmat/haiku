@@ -5,7 +5,7 @@ import { DailyHaikudle, Haikudle, UserHaikudle } from "@/types/Haikudle";
 import { UserUsage } from "@/types/Usage";
 import { FlaggedUser, User } from "@/types/User";
 import { storeConfigs } from "./config";
-import { memorySeedDailyHaikudles, memorySeedHaikus } from "./samples";
+import { memorySeedDailyHaikudles, memorySeedHaikus, memorySeedLikedHaikus } from "./samples";
 
 // Daily haiku and today's daily haikudle are created on first read from the seeded haikus.
 function buildStore({ debug }: { debug?: boolean }) {
@@ -19,7 +19,7 @@ function buildStore({ debug }: { debug?: boolean }) {
     dailyHaikudles: new MemoryStore<DailyHaikudle>({ ...storeConfigs.dailyHaikudles, debug, seed: memorySeedDailyHaikudles() }),
     userHaikudles: new MemoryStore<UserHaikudle>({ ...storeConfigs.userHaikudles, debug }),
     userHaikus: new MemoryStore<UserHaiku>({ ...storeConfigs.userHaikus, debug }),
-    likedHaikus: new MemoryStore<LikedHaiku>({ ...storeConfigs.likedHaikus, debug }),
+    likedHaikus: new MemoryStore<LikedHaiku>({ ...storeConfigs.likedHaikus, debug, seed: memorySeedLikedHaikus() }),
     flaggedHaikus: new MemoryStore<FlaggedHaiku>({ ...storeConfigs.flaggedHaikus, debug }),
     userUsage: new MemoryStore<UserUsage>({ ...storeConfigs.userUsage, debug }),
     user: new MemoryStore<User>({ ...storeConfigs.user, debug }),
