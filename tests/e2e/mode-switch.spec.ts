@@ -95,6 +95,10 @@ test('switching between haiku and showcase animates in place', async ({ page }) 
 });
 
 // No admin runs here: admins edit, or with DAILY_HAIKU_PREVIEW switch to showcase, and load a random liked haiku from showcase.
+async function poemCursor(page: Page) {
+  return page.locator('.poem-line-input').first().evaluate((element) => getComputedStyle(element).cursor);
+}
+
 function trackRandomLoads(page: Page) {
   const randomLoads: URLSearchParams[] = [];
   page.on('request', (request) => {
@@ -108,9 +112,11 @@ test('a user clicking the poem switches to showcase and back', async ({ page }) 
   const randomLoads = trackRandomLoads(page);
   await page.goto('/1?noOnboarding=true');
   await expect(page.locator('.poem-line-input').first()).toBeVisible();
+  expect(await poemCursor(page)).toBe('zoom-in');
 
   await page.locator('[title="Click to switch to showcase mode"]').click();
   await expect(page).toHaveURL(/mode=showcase/);
+  expect(await poemCursor(page)).toBe('zoom-out');
 
   await page.locator('[title="Click to switch to edit mode"]').click();
   await expect(page).not.toHaveURL(/mode=showcase/);
@@ -132,10 +138,12 @@ test('a user on an album clicking the poem switches to showcase, then loads rand
   const randomLoads = trackRandomLoads(page);
   await page.goto('/1?noOnboarding=true&album=landscapes');
   await expect(page.locator('.poem-line-input').first()).toBeVisible();
+  expect(await poemCursor(page)).toBe('zoom-in');
 
   await page.locator('[title="Click to switch to showcase mode"]').click();
   await expect(page).toHaveURL(/mode=showcase/);
   expect(randomLoads).toEqual([]);
+  expect(await poemCursor(page)).toBe('pointer');
 
   const loaded = page.waitForResponse((response) =>
     new URL(response.url()).pathname == '/api/haikus' && !!new URL(response.url()).searchParams.get('random')

@@ -257,6 +257,15 @@ export default function HaikuPoem({
     modeSwitches.current++;
   }
 
+  // Mirrors handleClickHaiku: zoom in to showcase, zoom out of it.
+  const poemCursor = aligning || canRefresh || canEdit
+    ? "pointer"
+    : canCopy
+      ? "copy"
+      : canSwitchMode
+        ? showcaseMode ? "zoom-out" : "zoom-in"
+        : "";
+
   const handleClickHaiku = (e: any) => {
     // console.log('app._components.HaikuPoem.handleClickHaiku()', { mode, haikuId: haiku?.id, status: haiku?.status, popPoem, haiku });
     if (aligning) {
@@ -452,7 +461,7 @@ export default function HaikuPoem({
           <div
             className={`_bg-pink-200 px-[1.5rem] ${canEdit ? "group" : ""} ${saving ? "animate-pulse" : ""}`}
             style={{
-              cursor: showcaseMode ? "pointer" : "",
+              cursor: poemCursor,
               fontSize: outerFontSize,
               maxWidth: "1000px",
               minWidth: "200px",
@@ -479,7 +488,7 @@ export default function HaikuPoem({
                         : canSwitchMode
                           ? "Click to switch to showcase mode" : ""}
               style={{
-                cursor: showcaseMode ? "pointer" : "",
+                cursor: poemCursor,
                 fontSize,
               }}
             >
@@ -509,7 +518,7 @@ export default function HaikuPoem({
                       onMouseDown={(e: any) => canEdit && startEdit(i, false) /* setTimeout(() => startEdit(i, false), 10) */}
                     >
                       {/* set the width while editing */}
-                      <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 ${showcaseMode || canSwitchMode ? "cursor-pointer" : !canEdit && canCopy ? "cursor-copy" : ""} mode-transition-spacing ${showcaseMode
+                      <div className={`poem-line-input poem-line-${i} _bg-orange-400 _opacity-50 mode-transition-spacing ${showcaseMode
                         ? "md:my-[0.8rem] sm:my-[0.6rem] my-[0.3rem] md:leading-[3.5rem] sm:leading-[2.6rem] leading-[2rem]"
                         // 1.5x the font size, as lengths: unitless line-heights don't transition to rem.
                         : "md:leading-[3.25rem] sm:leading-[2.75rem] leading-[2.25rem]"
