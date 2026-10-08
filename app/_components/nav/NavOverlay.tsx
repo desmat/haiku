@@ -261,8 +261,9 @@ export function NavOverlay({
       {["showcase", "social-img", "haikudle-social-img"].includes(mode) &&
         <>
           {onSwitchMode &&
+            // Behind the poem and its adjust controls (HaikuPage, later at the same z-10): anywhere else exits.
             <div
-              className={`_bg-pink-400 absolute top-0 left-0 ${user?.isAdmin ? "w-[10vw] z-40" : "w-full z-10"} h-full cursor-pointer`}
+              className="_bg-pink-400 absolute top-0 left-0 w-full h-full z-10 cursor-zoom-out"
               title="Exit showcase mode"
               onClick={() => onSwitchMode("haiku")}
             />

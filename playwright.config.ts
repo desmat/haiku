@@ -23,6 +23,8 @@ export default defineConfig({
         EXPERIENCE_MODE: 'haiku',
         NEXT_DIST_DIR: '.next-test/haiku',
         NO_ONBOARDING: 'true',
+        // .env.local can turn it on. It changes the daily haiku and what clicking the poem does.
+        DAILY_HAIKU_PREVIEW: 'false',
         STORE_TYPE: 'memory',
         AI_MOCK: 'true',
         BLOB_MOCK: 'true',
@@ -41,6 +43,8 @@ export default defineConfig({
         EXPERIENCE_MODE: 'haikudle',
         NEXT_DIST_DIR: '.next-test/haikudle',
         NO_ONBOARDING: 'true',
+        // .env.local can turn it on. It changes the daily haiku and what clicking the poem does.
+        DAILY_HAIKU_PREVIEW: 'false',
         STORE_TYPE: 'memory',
         AI_MOCK: 'true',
         BLOB_MOCK: 'true',

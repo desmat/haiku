@@ -445,7 +445,7 @@ export default function BottomLinks({
                 key="random-liked"
                 className={haiku?.id && onRefresh ? "cursor-pointer" : "opacity-40"}
                 onClick={() => haiku?.id && onRefresh && onRefresh({ liked: true })}
-                title="Load random (not liked or flagged)"
+                title="Load random (liked)"
               >
                 <PopOnClick color={haiku?.bgColor} disabled={!haiku?.id || !onRefresh}>
                   <IoHeartSharp className="text-[1.5rem] md:text-[1.75rem] p-[0.1rem]" />

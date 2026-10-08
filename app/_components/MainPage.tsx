@@ -1213,7 +1213,9 @@ export default function MainPage({
         fontSize={fontSize}
         regenerating={regenerating}
         onboardingElement={onboardingElement}
-        refresh={!haiku?.error && (user?.isAdmin || album) && (() => loadRandom())}
+        // In showcase, clicking the poem loads a random haiku: liked for admins, from the album on one.
+        // Otherwise admins edit (HaikuPoem) and users switch modes.
+        refresh={!haiku?.error && showcaseMode && (user?.isAdmin || album) && (() => loadRandom(user?.isAdmin ? { liked: true } : {}))}
         saveHaiku={!haiku?.error && !haikudleMode && doSaveHaiku}
         updateTitle={!haiku?.error && !haikudleMode && user?.isAdmin && updateHaikuTitle}
         regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}

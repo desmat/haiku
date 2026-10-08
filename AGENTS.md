@@ -34,7 +34,7 @@ The dev server defaults to `http://localhost:3000`.
 
 - Environment variables are expected in `.env.local`; do not commit secrets or paste secret values into logs, docs, or PR text.
 - Three switches run the app with no Redis, OpenAI or Vercel Blob. All three are ignored when `NODE_ENV === "production"`.
-  - `STORE_TYPE=memory`: `services/stores/index.ts` returns in-memory stores seeded from `services/stores/samples.ts`: haikus `1` to `8`, with `7` and `8` as yesterday's and the day before's daily haikudles. Data resets on restart.
+  - `STORE_TYPE=memory`: `services/stores/index.ts` returns in-memory stores seeded from `services/stores/samples.ts`: haikus `1` to `8`, with `7` and `8` as yesterday's and the day before's daily haikudles, `1`, `3` and `5` liked by a seed user, and a `landscapes` album of `1`, `4` and `5` (`?album=landscapes` or `landscapes.localhost`). Data resets on restart.
   - `AI_MOCK=true`: `services/openai.ts` returns canned responses from `services/openai.mock.ts`. The mock image is a file from `public/backgrounds`, picked from the subject.
     - `AI_MOCK_IMAGE_MS` sets how long the mock image takes (default `0`). Streamed generations get as many partials as `partialImages` in `services/openai.ts` asks for, at about 30%, 55% and 80% of it: soft and washed out, like real ones.
     - `AI_MOCK_TEXT_MS` delays each mocked chat call: the poem and the layout's image analysis (default `0`).

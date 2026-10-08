@@ -1,5 +1,6 @@
 import moment from "moment";
-import { Haiku } from "@/types/Haiku";
+import { HaikuAlbum } from "@/types/Album";
+import { Haiku, LikedHaiku } from "@/types/Haiku";
 import { DailyHaikudle } from "@/types/Haikudle";
 
 export const notFoundHaiku = {
@@ -296,8 +297,22 @@ export function memorySeedHaikus(): Haiku[] {
     status: "created",
     lang: "en",
     colorPalette: [haiku.color, haiku.bgColor],
+    ...memorySeedAlbum.haikuIds.includes(haiku.id) && { albumId: memorySeedAlbum.id },
     ...haiku,
   }));
+}
+
+// Open with `?album=landscapes` or `landscapes.localhost`. Random loads read haikus' albumId,
+// the album's first load its haikuIds: addToAlbum sets both.
+const memorySeedAlbum = {
+  id: "landscapes",
+  createdBy: "(seed)",
+  createdAt: 1700000200000,
+  haikuIds: ["1", "4", "5"],
+} as HaikuAlbum;
+
+export function memorySeedAlbums(): HaikuAlbum[] {
+  return [memorySeedAlbum];
 }
 
 // Previous daily haikudles: yesterday's and the day before's. Today's is created on first read.
@@ -313,4 +328,15 @@ export function memorySeedDailyHaikudles(): DailyHaikudle[] {
       theme: (haikus as any)[haikuId]?.theme,
     } as DailyHaikudle;
   });
+}
+
+// Liked by someone else: random liked picks have something to pick, and the daily haiku prefers them.
+export function memorySeedLikedHaikus(): LikedHaiku[] {
+  return ["1", "3", "5"].map((haikuId: string, i: number) => ({
+    id: `(seed):${haikuId}`,
+    createdBy: "(seed)",
+    createdAt: 1700000100000 + i * 1000,
+    userId: "(seed)",
+    haikuId,
+  }));
 }

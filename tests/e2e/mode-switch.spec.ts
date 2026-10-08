@@ -93,3 +93,81 @@ test('switching between haiku and showcase animates in place', async ({ page }) 
 
   expect(await page.evaluate(() => (window as any).__samePage)).toBe(true);
 });
+
+// No admin runs here: admins edit, or with DAILY_HAIKU_PREVIEW switch to showcase, and load a random liked haiku from showcase.
+async function poemCursor(page: Page) {
+  return page.locator('.poem-line-input').first().evaluate((element) => getComputedStyle(element).cursor);
+}
+
+function trackRandomLoads(page: Page) {
+  const randomLoads: URLSearchParams[] = [];
+  page.on('request', (request) => {
+    const url = new URL(request.url());
+    url.pathname == '/api/haikus' && url.searchParams.get('random') && randomLoads.push(url.searchParams);
+  });
+  return randomLoads;
+}
+
+test('a user clicking the poem switches to showcase and back', async ({ page }) => {
+  const randomLoads = trackRandomLoads(page);
+  await page.goto('/1?noOnboarding=true');
+  await expect(page.locator('.poem-line-input').first()).toBeVisible();
+  expect(await poemCursor(page)).toBe('zoom-in');
+
+  await page.locator('[title="Click to switch to showcase mode"]').click();
+  await expect(page).toHaveURL(/mode=showcase/);
+  expect(await poemCursor(page)).toBe('zoom-out');
+
+  await page.locator('[title="Click to switch to edit mode"]').click();
+  await expect(page).not.toHaveURL(/mode=showcase/);
+  await expect(page.locator('.poem-line-input').first()).toBeVisible();
+
+  // Anywhere off the poem exits showcase too.
+  await page.locator('[title="Click to switch to showcase mode"]').click();
+  await expect(page).toHaveURL(/mode=showcase/);
+  const viewport = page.viewportSize()!;
+  const offPoem = { x: viewport.width * 0.1, y: viewport.height / 2 };
+  expect(await page.evaluate(({ x, y }) => getComputedStyle(document.elementFromPoint(x, y)!).cursor, offPoem)).toBe('zoom-out');
+  await page.mouse.click(offPoem.x, offPoem.y);
+  await expect(page).not.toHaveURL(/mode=showcase/);
+  expect(randomLoads).toEqual([]);
+});
+
+// The memory store seeds a landscapes album: haikus 1, 4 and 5.
+test('a user on an album clicking the poem switches to showcase, then loads random haikus from the album', async ({ page }) => {
+  const randomLoads = trackRandomLoads(page);
+  await page.goto('/1?noOnboarding=true&album=landscapes');
+  await expect(page.locator('.poem-line-input').first()).toBeVisible();
+  expect(await poemCursor(page)).toBe('zoom-in');
+
+  await page.locator('[title="Click to switch to showcase mode"]').click();
+  await expect(page).toHaveURL(/mode=showcase/);
+  expect(randomLoads).toEqual([]);
+  expect(await poemCursor(page)).toBe('pointer');
+
+  const loaded = page.waitForResponse((response) =>
+    new URL(response.url()).pathname == '/api/haikus' && !!new URL(response.url()).searchParams.get('random')
+  );
+  await page.locator('[title="Load a random haiku"]').click();
+  const { haikus } = await (await loaded).json();
+
+  expect(randomLoads.map((params) => [params.get('album'), params.get('liked')])).toEqual([['landscapes', null]]);
+  expect(['4', '5']).toContain(haikus[0].id);
+  await expect(page).toHaveURL(new RegExp(`/${haikus[0].id}\\?`));
+  await expect(page).toHaveURL(/mode=showcase/);
+});
+
+test('an album keeps its haikus across visits', async ({ browser }) => {
+  // Loading the user's album haikus once emptied the album in the memory store.
+  for (const visit of [1, 2]) {
+    const page = await (await browser.newContext()).newPage();
+    const userAlbumHaikus = page.waitForResponse((response) =>
+      new URL(response.url()).pathname == '/api/user' && response.request().method() == 'GET'
+    );
+    await page.goto('/?album=landscapes&noOnboarding=true');
+    await userAlbumHaikus;
+    await expect(page.locator('.poem-line-input').first(), `visit ${visit}`).toBeVisible();
+    await expect(page.locator('.poem-title'), `visit ${visit}`).toContainText(/haikugenius\.ai\/(1|4|5)$/);
+    await page.context().close();
+  }
+});
