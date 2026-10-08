@@ -239,7 +239,8 @@ export default function HaikuPoem({
   const editAllowed = !showcaseMode && editShown;
   const canClickEdit = editAllowed && !saving && !onboarding && !aligning;
   const canRefresh = !!refresh;
-  const canEdit = editAllowed && user?.isAdmin && !canRefresh && !saving && !onboarding && !aligning;
+  // On the preview deployment (tomorrow's daily) admins click through to showcase instead.
+  const canEdit = editAllowed && user?.isAdmin && process.env.DAILY_HAIKU_PREVIEW != "true" && !canRefresh && !saving && !onboarding && !aligning;
   const alignAllowed = !showcaseMode && alignShown;
   const canAlign = alignAllowed && !editing;
   const regeneratePoemAllowed = regeneratePoem && (user?.isAdmin || haiku?.createdBy == user?.id) && regeneratePoem;
@@ -468,7 +469,7 @@ export default function HaikuPoem({
               title={aligning
                 ? "Click to finish aligning"
                 : canRefresh
-                  ? "Load a random liked haiku"
+                  ? "Load a random haiku"
                   : canEdit
                     ? "Click to edit"
                     : canCopy

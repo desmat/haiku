@@ -94,24 +94,40 @@ test('switching between haiku and showcase animates in place', async ({ page }) 
   expect(await page.evaluate(() => (window as any).__samePage)).toBe(true);
 });
 
-// Admins edit, and DAILY_HAIKU_PREVIEW browses liked haikus: neither runs here.
-for (const album of [undefined, 'test']) {
-  test(`a user clicking the poem switches to showcase and back${album ? ', also on an album' : ''}`, async ({ page }) => {
-    const randomLoads: string[] = [];
-    page.on('request', (request) => {
-      const url = new URL(request.url());
-      url.pathname == '/api/haikus' && url.searchParams.get('random') && randomLoads.push(url.search);
-    });
+// No admin runs here: admins edit, or with DAILY_HAIKU_PREVIEW switch to showcase, and load a random liked haiku from showcase.
+function trackRandomLoads(page: Page) {
+  const randomLoads: URLSearchParams[] = [];
+  page.on('request', (request) => {
+    const url = new URL(request.url());
+    url.pathname == '/api/haikus' && url.searchParams.get('random') && randomLoads.push(url.searchParams);
+  });
+  return randomLoads;
+}
 
-    await page.goto(`/1?noOnboarding=true${album ? `&album=${album}` : ''}`);
+test('a user clicking the poem switches to showcase and back', async ({ page }) => {
+  const randomLoads = trackRandomLoads(page);
+  await page.goto('/1?noOnboarding=true');
+  await expect(page.locator('.poem-line-input').first()).toBeVisible();
+
+  await page.locator('[title="Click to switch to showcase mode"]').click();
+  await expect(page).toHaveURL(/mode=showcase/);
+
+  await page.locator('[title="Click to switch to edit mode"]').click();
+  await expect(page).not.toHaveURL(/mode=showcase/);
+  await expect(page.locator('.poem-line-input').first()).toBeVisible();
+  expect(randomLoads).toEqual([]);
+});
+
+for (const mode of ['haiku', 'showcase']) {
+  test(`a user on an album clicking the poem loads a random haiku from the album, in ${mode} mode`, async ({ page }) => {
+    const randomLoads = trackRandomLoads(page);
+    await page.goto(`/1?noOnboarding=true&album=test${mode == 'showcase' ? '&mode=showcase' : ''}`);
     await expect(page.locator('.poem-line-input').first()).toBeVisible();
 
-    await page.locator('[title="Click to switch to showcase mode"]').click();
-    await expect(page).toHaveURL(/mode=showcase/);
-
-    await page.locator('[title="Click to switch to edit mode"]').click();
-    await expect(page).not.toHaveURL(/mode=showcase/);
-    await expect(page.locator('.poem-line-input').first()).toBeVisible();
-    expect(randomLoads).toEqual([]);
+    await page.locator('[title="Load a random haiku"]').click();
+    await expect.poll(() => randomLoads.length).toBe(1);
+    expect(randomLoads[0].get('album')).toBe('test');
+    expect(randomLoads[0].get('liked')).toBeNull();
+    expect(new URL(page.url()).searchParams.get('mode')).toBe(mode == 'showcase' ? 'showcase' : null);
   });
 }
