@@ -126,24 +126,26 @@ test('a user clicking the poem switches to showcase and back', async ({ page }) 
 });
 
 // The memory store seeds a landscapes album: haikus 1, 4 and 5.
-for (const mode of ['haiku', 'showcase']) {
-  test(`a user on an album clicking the poem loads a random haiku from the album, in ${mode} mode`, async ({ page }) => {
-    const randomLoads = trackRandomLoads(page);
-    await page.goto(`/1?noOnboarding=true&album=landscapes${mode == 'showcase' ? '&mode=showcase' : ''}`);
-    await expect(page.locator('.poem-line-input').first()).toBeVisible();
+test('a user on an album clicking the poem switches to showcase, then loads random haikus from the album', async ({ page }) => {
+  const randomLoads = trackRandomLoads(page);
+  await page.goto('/1?noOnboarding=true&album=landscapes');
+  await expect(page.locator('.poem-line-input').first()).toBeVisible();
 
-    const loaded = page.waitForResponse((response) =>
-      new URL(response.url()).pathname == '/api/haikus' && !!new URL(response.url()).searchParams.get('random')
-    );
-    await page.locator('[title="Load a random haiku"]').click();
-    const { haikus } = await (await loaded).json();
+  await page.locator('[title="Click to switch to showcase mode"]').click();
+  await expect(page).toHaveURL(/mode=showcase/);
+  expect(randomLoads).toEqual([]);
 
-    expect(randomLoads.map((params) => [params.get('album'), params.get('liked')])).toEqual([['landscapes', null]]);
-    expect(['4', '5']).toContain(haikus[0].id);
-    await expect(page).toHaveURL(new RegExp(`/${haikus[0].id}\\?`));
-    expect(new URL(page.url()).searchParams.get('mode')).toBe(mode == 'showcase' ? 'showcase' : null);
-  });
-}
+  const loaded = page.waitForResponse((response) =>
+    new URL(response.url()).pathname == '/api/haikus' && !!new URL(response.url()).searchParams.get('random')
+  );
+  await page.locator('[title="Load a random haiku"]').click();
+  const { haikus } = await (await loaded).json();
+
+  expect(randomLoads.map((params) => [params.get('album'), params.get('liked')])).toEqual([['landscapes', null]]);
+  expect(['4', '5']).toContain(haikus[0].id);
+  await expect(page).toHaveURL(new RegExp(`/${haikus[0].id}\\?`));
+  await expect(page).toHaveURL(/mode=showcase/);
+});
 
 test('an album keeps its haikus across visits', async ({ browser }) => {
   // Loading the user's album haikus once emptied the album in the memory store.
