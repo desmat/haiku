@@ -263,7 +263,7 @@ export function NavOverlay({
           {onSwitchMode &&
             // Behind the poem and its adjust controls (HaikuPage, later at the same z-10): anywhere else exits.
             <div
-              className="_bg-pink-400 absolute top-0 left-0 w-full h-full z-10 cursor-pointer"
+              className="_bg-pink-400 absolute top-0 left-0 w-full h-full z-10 cursor-zoom-out"
               title="Exit showcase mode"
               onClick={() => onSwitchMode("haiku")}
             />

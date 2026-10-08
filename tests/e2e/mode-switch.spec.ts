@@ -120,7 +120,9 @@ test('a user clicking the poem switches to showcase and back', async ({ page }) 
   await page.locator('[title="Click to switch to showcase mode"]').click();
   await expect(page).toHaveURL(/mode=showcase/);
   const viewport = page.viewportSize()!;
-  await page.mouse.click(viewport.width * 0.1, viewport.height / 2);
+  const offPoem = { x: viewport.width * 0.1, y: viewport.height / 2 };
+  expect(await page.evaluate(({ x, y }) => getComputedStyle(document.elementFromPoint(x, y)!).cursor, offPoem)).toBe('zoom-out');
+  await page.mouse.click(offPoem.x, offPoem.y);
   await expect(page).not.toHaveURL(/mode=showcase/);
   expect(randomLoads).toEqual([]);
 });
