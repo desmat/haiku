@@ -80,7 +80,8 @@ export async function getUserHaikus(user: User, {
       userHaikudles
     ] = haikuAlbum
         ? [
-          await store.haikus.find({ id: haikuAlbum.haikuIds.splice(offset || 0, count || haikuAlbum.haikuIds.length) }),
+          // slice, not splice: the memory store hands out the stored album itself.
+          await store.haikus.find({ id: haikuAlbum.haikuIds.slice(offset || 0, (offset || 0) + (count || haikuAlbum.haikuIds.length)) }),
           [],
           []
         ]

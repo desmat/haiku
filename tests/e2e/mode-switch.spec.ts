@@ -144,3 +144,18 @@ for (const mode of ['haiku', 'showcase']) {
     expect(new URL(page.url()).searchParams.get('mode')).toBe(mode == 'showcase' ? 'showcase' : null);
   });
 }
+
+test('an album keeps its haikus across visits', async ({ browser }) => {
+  // Loading the user's album haikus once emptied the album in the memory store.
+  for (const visit of [1, 2]) {
+    const page = await (await browser.newContext()).newPage();
+    const userAlbumHaikus = page.waitForResponse((response) =>
+      new URL(response.url()).pathname == '/api/user' && response.request().method() == 'GET'
+    );
+    await page.goto('/?album=landscapes&noOnboarding=true');
+    await userAlbumHaikus;
+    await expect(page.locator('.poem-line-input').first(), `visit ${visit}`).toBeVisible();
+    await expect(page.locator('.poem-title'), `visit ${visit}`).toContainText(/haikugenius\.ai\/(1|4|5)$/);
+    await page.context().close();
+  }
+});
