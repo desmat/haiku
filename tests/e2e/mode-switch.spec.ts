@@ -115,6 +115,13 @@ test('a user clicking the poem switches to showcase and back', async ({ page }) 
   await page.locator('[title="Click to switch to edit mode"]').click();
   await expect(page).not.toHaveURL(/mode=showcase/);
   await expect(page.locator('.poem-line-input').first()).toBeVisible();
+
+  // Anywhere off the poem exits showcase too.
+  await page.locator('[title="Click to switch to showcase mode"]').click();
+  await expect(page).toHaveURL(/mode=showcase/);
+  const viewport = page.viewportSize()!;
+  await page.mouse.click(viewport.width * 0.1, viewport.height / 2);
+  await expect(page).not.toHaveURL(/mode=showcase/);
   expect(randomLoads).toEqual([]);
 });
 
