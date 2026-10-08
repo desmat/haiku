@@ -1,4 +1,5 @@
 import moment from "moment";
+import { HaikuAlbum } from "@/types/Album";
 import { Haiku, LikedHaiku } from "@/types/Haiku";
 import { DailyHaikudle } from "@/types/Haikudle";
 
@@ -296,8 +297,22 @@ export function memorySeedHaikus(): Haiku[] {
     status: "created",
     lang: "en",
     colorPalette: [haiku.color, haiku.bgColor],
+    ...memorySeedAlbum.haikuIds.includes(haiku.id) && { albumId: memorySeedAlbum.id },
     ...haiku,
   }));
+}
+
+// Open with `?album=landscapes` or `landscapes.localhost`. Random loads read haikus' albumId,
+// the album's first load its haikuIds: addToAlbum sets both.
+const memorySeedAlbum = {
+  id: "landscapes",
+  createdBy: "(seed)",
+  createdAt: 1700000200000,
+  haikuIds: ["1", "4", "5"],
+} as HaikuAlbum;
+
+export function memorySeedAlbums(): HaikuAlbum[] {
+  return [memorySeedAlbum];
 }
 
 // Previous daily haikudles: yesterday's and the day before's. Today's is created on first read.
