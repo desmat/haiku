@@ -1213,7 +1213,8 @@ export default function MainPage({
         fontSize={fontSize}
         regenerating={regenerating}
         onboardingElement={onboardingElement}
-        refresh={!haiku?.error && (user?.isAdmin || album) && (() => loadRandom({ liked: true }))}
+        // The preview deployment shows tomorrow's daily: clicking the poem browses liked haikus.
+        refresh={process.env.DAILY_HAIKU_PREVIEW == "true" && !haiku?.error && (() => loadRandom({ liked: true }))}
         saveHaiku={!haiku?.error && !haikudleMode && doSaveHaiku}
         updateTitle={!haiku?.error && !haikudleMode && user?.isAdmin && updateHaikuTitle}
         regeneratePoem={!haiku?.error && !haikudleMode && (() => ["haiku", "haikudle"].includes(mode) && (user?.isAdmin || haiku?.createdBy == user?.id) && startRegenerateHaiku && startRegenerateHaiku())}

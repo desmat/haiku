@@ -238,14 +238,14 @@ export default function HaikuPoem({
   const alignShown = setAligning && (user?.isAdmin || haiku?.createdBy == user?.id);
   const editAllowed = !showcaseMode && editShown;
   const canClickEdit = editAllowed && !saving && !onboarding && !aligning;
-  const canEdit = editAllowed && user?.isAdmin && !saving && !onboarding && !aligning;
+  const canRefresh = !!refresh;
+  const canEdit = editAllowed && user?.isAdmin && !canRefresh && !saving && !onboarding && !aligning;
   const alignAllowed = !showcaseMode && alignShown;
   const canAlign = alignAllowed && !editing;
   const regeneratePoemAllowed = regeneratePoem && (user?.isAdmin || haiku?.createdBy == user?.id) && regeneratePoem;
   const regenerateImageAllowed = regenerateImage && (user?.isAdmin || haiku?.createdBy == user?.id) && regenerateImage;
   const canRegeneratePoem = regeneratePoemAllowed && !editing && !saving && !aligning;
   const canRegenerateImage = regenerateImageAllowed && !editing && !saving && !aligning;
-  const canRefresh = !!refresh;
   // console.log('app._components.HaikuPage.HaikuPoem.render()', { editing, showcaseMode, canCopy, canSwitchMode });
 
   // The signature moves between under the poem and a fixed corner: it remounts there and fades in.
@@ -262,7 +262,7 @@ export default function HaikuPoem({
       return setAligning && setAligning(false);
     }
 
-    if (showcaseMode && canRefresh) {
+    if (canRefresh) {
       return refresh(e);
     }
 
@@ -467,8 +467,8 @@ export default function HaikuPoem({
               onClick={handleClickHaiku}
               title={aligning
                 ? "Click to finish aligning"
-                : showcaseMode && canRefresh
-                  ? "Refresh"
+                : canRefresh
+                  ? "Load a random liked haiku"
                   : canEdit
                     ? "Click to edit"
                     : canCopy

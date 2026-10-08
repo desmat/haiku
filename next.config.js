@@ -15,6 +15,7 @@ const nextConfig = {
         AI_MOCK: process.env.AI_MOCK,
         HAIKU_ALBUM: process.env.HAIKU_ALBUM,
         NO_ONBOARDING: process.env.NO_ONBOARDING,
+        DAILY_HAIKU_PREVIEW: process.env.DAILY_HAIKU_PREVIEW,
     }
 }
 

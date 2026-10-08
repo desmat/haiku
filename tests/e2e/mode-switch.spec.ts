@@ -93,3 +93,25 @@ test('switching between haiku and showcase animates in place', async ({ page }) 
 
   expect(await page.evaluate(() => (window as any).__samePage)).toBe(true);
 });
+
+// Admins edit, and DAILY_HAIKU_PREVIEW browses liked haikus: neither runs here.
+for (const album of [undefined, 'test']) {
+  test(`a user clicking the poem switches to showcase and back${album ? ', also on an album' : ''}`, async ({ page }) => {
+    const randomLoads: string[] = [];
+    page.on('request', (request) => {
+      const url = new URL(request.url());
+      url.pathname == '/api/haikus' && url.searchParams.get('random') && randomLoads.push(url.search);
+    });
+
+    await page.goto(`/1?noOnboarding=true${album ? `&album=${album}` : ''}`);
+    await expect(page.locator('.poem-line-input').first()).toBeVisible();
+
+    await page.locator('[title="Click to switch to showcase mode"]').click();
+    await expect(page).toHaveURL(/mode=showcase/);
+
+    await page.locator('[title="Click to switch to edit mode"]').click();
+    await expect(page).not.toHaveURL(/mode=showcase/);
+    await expect(page.locator('.poem-line-input').first()).toBeVisible();
+    expect(randomLoads).toEqual([]);
+  });
+}
