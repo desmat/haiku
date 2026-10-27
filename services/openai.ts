@@ -44,6 +44,8 @@ export async function generateBackgroundImage(userId: string, subject?: string, 
     "Expressionist painting",
     "Landscape painting",
 
+    "old movie poster art",
+
     "Chinese-style ink wash painting",
     "Chinese Shan Shui painting",
 
